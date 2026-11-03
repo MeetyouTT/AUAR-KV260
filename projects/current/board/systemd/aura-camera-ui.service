@@ -1,0 +1,22 @@
+[Unit]
+Description=AURA shared USB camera preview and YOLOX person adapter
+After=local-fs.target
+StartLimitIntervalSec=0
+
+[Service]
+Environment="AURA_EXPERIMENT_GIL_MS=1"
+Environment="AURA_PIPELINE_METRICS=1"
+Environment="AURA_DPU_DIAGNOSTICS=1"
+Environment="AURA_THREAD_SCHED_DIAGNOSTICS=switches"
+Type=simple
+ExecStart=/usr/bin/python3 -B /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/runtime_entry.py /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/aura/tools/board_camera_motion.py --config /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/board_camera_ui.json
+WorkingDirectory=/home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/aura
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=10
+KillMode=control-group
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

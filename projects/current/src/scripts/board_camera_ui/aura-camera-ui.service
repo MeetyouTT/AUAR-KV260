@@ -1,0 +1,18 @@
+[Unit]
+Description=AURA shared USB camera preview and YOLOX person adapter
+After=local-fs.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -B /home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/board/vision/ui_camera_service.py
+WorkingDirectory=/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=10
+KillMode=control-group
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

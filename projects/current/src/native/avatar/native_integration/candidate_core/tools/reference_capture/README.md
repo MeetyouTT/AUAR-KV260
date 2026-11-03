@@ -1,0 +1,100 @@
+# 受控原 WebGL 采样
+
+这是开发诊断工具，不是正式播放器依赖。只读使用外部参考项目，不复制或改写其驱动。浏览器和 Node.js 路径由开发者显式提供。playwright 1.56.1 及依赖由 package-lock.json 固定。
+
+```bash
+npm ci --prefix tools/reference_capture
+python3 tools/reference_capture/capture.py --reference-root ../NekoWebShow \
+  --model chocola-date-a --browser /path/to/chrome \
+  --output build/evidence/reference/default
+# 可追加 --variables '{"head_LR":30}' --steps 60 --step-frames 1
+# --trace 导出诊断几何/状态；--isolate-icon 0003 仅保留原驱动某图集区域的绘制
+```
+
+默认 800×1080、scale=1、coord=(0,400)、零固定步进。禁用 RAF，将 SDK hair/parts/bust scale 设为 0 并关闭风，绕过应用反应规则，以全新 player 采样。注意 scale=0 并不停止控制器积分；零步静态基线有效，带步进的物理隔离必须使用下述显式 fixture。保留原驱动渲染纹理及 WebGL 合成方式，包括透明颜色保护的两遍绘制。截图空白、页面错误或 GL 错误会失败；元数据记录源码 hash、默认变量、输入、GPU 和可见像素数。
+
+隔离图集区域只用于基础 UV/alpha 对照；其过滤依据是诊断观测，不认证场景图或网格求值。trace 是验证数据，禁止作为正式原生运行时的顶点/动画数据来源。完整模型验证必须使用未过滤画面。
+
+P3 支持两项额外诊断：`--trace-math` 记录原引擎的 sqrt/sin/cos/tan/atan/atan2/asin/acos/pow 调用；只在显式启用时替换 Math 入口，不能用于性能测量。`--disable-clamp` 在内存生成 PSB v4 测试 fixture，仅把 `/metadata/clampControl/*/enabled` 从 1 改成 0，记录每个字节、原/新 PSB hash。原文件保持只读，此类截图不是未经修改的原模型验收结果。默认命令仍使用原 PSB；最终控制规则必须通过原 PSB 的对照。
+
+--fixture-icon-size tex/0077=213,213 只在内存修改所选 atlas icon 的 float32 宽/高，保持地址表和未选载荷不变；记录修改字段、字节范围与 hash。仅用于网格尺寸边界实验，不能替代原 PSB 的正式验收。外部目录始终只读。
+
+`--trace` 另存 `.state.json`：目标附件、颜色位数、纹理类型/尺寸、blend、scissor、viewport 与 clear。`--trace-mask-pixels` 需同时启用 trace，额外导出 mask green 的直方图与非零像素；是显式 GPU 读回诊断，不用于性能或原生帧输入。
+
+完整静态图像、实际原生几何与拓扑的 30 组验证入口：
+
+```sh
+python3 tools/reference_capture/validate_static.py --reference-root ../NekoWebShow \
+  --importer build/dev/bin/nekomote_import --preview build/dev/bin/nekomote_preview \
+  --evaluator build/dev/bin/nekomote_pose --browser /path/to/chrome \
+  --output build/evidence/static-validation
+```
+
+输出目录必须新建。默认重新导入四型号并采样原 PSB；也可显式指定 `--reuse-reference <既有采样目录>`，此时核对原始素材、驱动、资产与 PNG hash，以及初态、变量和物理配置。工具不覆盖证据，逐组记录全部结果，有任一失败则最终返回非零。当前有已知 FAIL，见 `docs/validation/p4-static-images.json`；阶段/完整播放认证始终保持 false。
+
+P5 时间线诊断支持 `--timeline LABEL`（可重复，按指定顺序播放）、`--timeline-flags N`、`--sample-variables` 和 `--observe-variable LABEL`。逐步记录原始变量与播放状态；额外 observe 用于 CountVariables 未列出的物理绑定。`timelineInfo.reportedLoop/reportedFrames` 仅保留 SDK 查询原值，目前它们与实际播放终点不一致，不能作为时长/循环真值。
+
+`--transitions '{"body_UD":{"value":30,"frames":14,"easing":2.5}}'` 调用原 SDK 的变量过渡入口。`--disable-physics --disable-auto-blink` 在内存 PSB fixture 把相应控制器 enabled/blinkEnabled 从 1 改成 0，每个修改字节及所有共享该标量的字段都有记录。它们用于分别验证时间线与控制器，不能宣称为完整原模型动画验收。源 PSB 始终只读。步进大小和初态必须一致：原 SDK 的半帧步进与整帧步进存在事件/过渡顺序差异。
+
+`--play LABEL FLAGS` 可重复，用于同次采样中逐动作指定标志（与 --timeline 互斥）。资产 diff 标签不替代播放标志：原 SDK 的 1=parallel、2=difference，所以典型主动作用 1、差分用 3。普通 GetVariable 不包含差分；必须以实际几何/画面对照。
+
+该模型的 `blinkEnabled` 和 Eye `enabled` 共享标量地址，因此旧 `--disable-auto-blink` fixture 同时关闭 Eye 控制器，导致立即赋值。不能将其解释为眨眼开关改变过渡。涉及 Eye 轨道时使用仅 `--disable-physics`，或下述显式字段引用实验，独立保留 Eye enabled=1。旧数值和 hash 不重写，实际影响范围见 `docs/validation/p6-fixture-alias-audit.json`。
+
+动画截图矩阵：
+
+```sh
+python3 tools/reference_capture/validate_animation.py --reference-root ../NekoWebShow \
+  --importer build/dev/bin/nekomote_import --preview build/dev/bin/nekomote_preview \
+  --evaluator build/dev/bin/nekomote_pose --browser /path/to/chrome \
+  --output build/evidence/animation-validation
+```
+
+同静态入口要求新目录，可显式复用校验过的参考目录。冻结原 PSB/fixture/驱动/当前资产、截图和 trace hash，验收保留 0.001px 几何与 2/255 图像阈值；任何 FAIL 返回非零，完整播放认证始终 false。
+
+P6 支持 `--physics-scales '{"hair":1,"parts":1,"bust":1}'`，默认仍为全零；这不是 enabled 开关。`--events '[{"step":2,"forces":{"bust":[1,0]}},{"step":3,"forces":{"bust":[0,0]}}]'` 在对应 Update 之前执行显式 SDK 外力请求；force 标签是 `bust`/`hair`/`parts`，不是控制器的日文名称。也可使用 `variables` 在指定步骤立即写变量。逐步 Math trace 包含作者步号。
+
+`--fixture-numbers '{"/metadata/bustControl/0/spring":0.5}'` 和 `--fixture-strings '{"/metadata/bustControl/0/baseLayer":"center_fronthair"}'` 仅在内存改写同长度的 PSB 数字/现有字符串引用。限于明确 metadata/object JSON Pointer，拒绝插入字段、扩大数值宽度或不存在的字符串；地址表和资源保持原样，每次记录字段、字节范围、值和 hash。仅用于隔离语义，不能作为未经修改的完整模型验收。禁止把采样结果或此类修改加入正式播放路径。
+
+`--trace-float-stores --trace-float-stack <已观察到的调用者名称>` 可显式记录完整 Float32 堆视图的数值写入前/后和调用栈，默认最多 5000 条，可用 `--trace-float-limit 1..100000` 显式调整，`--trace-float-step N` 只观察指定作者步；达到上限后 `floatStoresTruncated=true`。通过原生 typed-array 执行实际存储，方法绑定原视图，WebGL 的 subarray 仍为原生视图；不读取核心源码。只有诊断入口代理构造器，默认不改变 Float32Array。用于区分临时 double 和保存 Float32 的舍入顺序；必须对照未启用观测的同输入参数/截图确认无扰动，不能用于性能或作为原生帧输入。调用者过滤需显式指定，未指定时采集全部符合条件的写入。
+
+PSB 字典可能共享标量存储，修改一个路径可能同时改变其它字段。每条 fixture 现记录 `affected_paths`（所有实际别名路径）和 `stored_after`（编码后的实际数值）；同一字节有冲突请求时拒绝，不能让后一次写入静默覆盖。分析或建立数值 fixture 时必须应用完整 affected_paths，而不是只使用 requested path。旧采样需要按原 PSB 地址审计，不能由单字段描述推断其隔离范围。
+
+`--fixture-references '{"/metadata/eyeControl/0/blinkEnabled":"/metadata/eyeControl/0/beginFrame"}'` 将所选字典条目重指向同一字典中的既有数值标量，保持引用宽度，不插入资源或字段。此例使 blinkEnabled 引用已有的整数 0，而 enabled 仍为 1，允许独立核实眨眼与 Eye 过渡。它是显式地址表修改，记录 kind=field_reference、来源路径、原/新地址和改变的条目；不等同普通数值 fixture 的地址表不变承诺，不用于正式原模型验收。
+
+工具自身的无素材回归：`python3 -m unittest discover -s tests/reference_capture -v`。
+
+
+联合会话固定步进对照见 P6 会话记录（已归档）。validate_playback.py 使用独立冻结输入、原始素材与正式 PlaybackInstance/preview，验证 22 个实际物理输出、最终 RenderFrame 和截图；原 SDK GetVariable 的主通道缓存不能代表差分合成结果。几何工具 compare_playback_frame.py 只服务当前单图集 SDK texture 2 的冻结诊断，不是运行时兼容分支。原始四组 scale=1 的完整对照现已通过。用 `--inputs docs/validation/playback-scale-inputs.json --reuse-reference build/evidence/p6-world-scale-reference` 验证冻结八组缩放输入，当前两组差分图片仍 FAIL，命令退出 1。
+
+可追加 `--trace-float-read-index N`（最多 128 个显式无符号索引），只记录这些堆位置的读取，另存 `floatReads` / `floatReadsTruncated`；需要同时启用 stores，与调用者/作者步过滤共享配置，读写各自受记录上限约束。索引只对当前驱动、模型和加载初态有效，不能写入运行时或作为资产语义。用于区分旧状态、初始偏移和新状态；不读取核心源码，原生视图和真实读写值保持不变。参考截图必须与无观察同输入逐位对照。
+
+完整播放冻结矩阵现在使用 `observed_variables` 指定要比较的通道；四个现有输入矩阵已迁移，不读取旧字段。新增可选 `transitions`，由 preview `--transition NAME VALUE FRAMES EASING` 和 PlaybackInstance 直接执行，不输入参考输出。选择器原版矩阵见 `docs/validation/playback-selector-inputs.json`，仍保留所有图片 FAIL。受控采样的 `--events` 可包含 `transitions`，格式同开场请求，发生在指定作者 Update 之前；用于中途改选与重复触发的数值验证。
+
+非线性 Expression 完整矩阵：`validate_playback.py --inputs docs/validation/playback-expression-inputs.json --reuse-reference build/evidence/p5-expression-easing`（其余 importer/preview/evaluator/reference-root/output 参数同上）。参考保持原 PSB、物理全 1；中途过渡的原 SDK 数值 fixture 另存 tests/fixtures/expression_easing_reference.json，不向原生输入源曲线值。快速跨段产生 NaN 的原始捕获保留，原生对应作者步明确失败。
+
+`--trace-random` 只观察公开 Math.random 的原始结果与调用栈，从初始化起有界最多 10000 条，保留 randomTraceTruncated，不设置随机种子或替换输出。`--trace-math-step N` 将 Math 观察限制为单个作者步（需要 --trace-math）；用于避免长轨迹的前 2000 条覆盖眨眼所在步骤。两项都只用于诊断；原生完整矩阵记录评估/渲染失败及 node_path，并继续剩余输入、最终返回失败。Eye 原版矩阵见 docs/validation/playback-eye-inputs.json。
+
+
+自动眨眼的初始化由外部时钟决定。`--fixed-clock-ms 1000` 在驱动加载前固定 `Date.now()`，记录 `fixedClockMs`；完整对照输入同时冻结原生 `random_seed=1`（毫秒向下取整为 Unix 秒）。这是显式初始化输入，不修改 PSB，不属于只读观察器。默认不固定时钟。原生 `AnimationConfig` 默认种子 0，可由会话所有者传入显式种子；reset 重放同一序列。预览和 pose probe 的 `--random-seed`、playback probe JSON 的 `random_seed` 接受 UInt32。
+
+`--trace-clock` 记录真实 Date.now/getTime/performance.now 调用与返回值，上限 10000；`--trace-integer-stores` 观察完整 Int32/Uint32 堆视图的数值索引写入（包含加载），保留真实写入。可用 `--trace-integer-index`（最多 128 项）、`--trace-integer-stack`、`--trace-integer-step` 过滤，上限 `--trace-integer-limit` 为 1..100000，元数据明确记录截断。诊断索引不进入资产或运行时。眨眼的 400 步有/无观察数据与 PNG 完全相同，见 `docs/validation/p5-automatic-blink.json`。
+
+旧隔离动画 PSB 的眨眼字节与 Eye enabled 共用地址。原生 `--animation-diagnostic --disable-eye-controller` 显式重现这一 fixture，不能用于正式 `--playback`；正式矩阵仍以未修改 PSB 和物理幅度全 1 验收。不能将旧 fixture 解释为只关闭自动眨眼。
+
+
+时间线诊断支持 `--timeline-requests '<数组>'`：初始 plays 后按数组顺序执行 SDK 调用。每项有 `kind`/`label`；play 加 flags，stop 无额外字段，fade_in/fade_out 加 frames/easing，blend 加 value/frames/easing/completion（keep 或 stop）。events 项的 timeline_requests 在指定作者步更新前执行。所有额外观察时间线也纳入状态采样；原 SDK `EmotePlayer_GetTimelineBlendRatio` 返回真实比率，不能调用原包装中错误绑定总帧数的 getter。未知请求/非法字段明确失败。
+
+preview `--playback-script <JSON>` 仅允许固定步数截图诊断，执行同样 timeline_requests/events；正式实时应用通过数值/ID API 调用。playback probe 输入接收同样两字段并输出 blend_ratios/playing；诊断脚本、JSON 采样和截图不计入稳态性能。完整矩阵入口使用 `docs/validation/playback-timeline-weight-inputs.json`。证据输出后缀添加到完整名称，带小数点的权重 case 不会覆盖或错误读取另一个 case。
+
+外部参数差分使用 `--differences '{"eye":{"head_LR":{"value":30,"frames":60,"easing":-1}}}'`；模块和变量的 JSON 顺序参与参考语义，诊断工具保留输入顺序。事件可包含同样的 `differences` 字段，公开 SDK 的 `GetVariableDiff` 逐步查询每个已定义绑定。正式运行时用编译后的 `VariableSourceId` 和 `ParamId`，不在帧路径解析字符串或 JSON。`--playback-script` 接收初始差分与事件。完整物理、几何和截图矩阵为 `docs/validation/playback-variable-difference-inputs.json`，当前 8/9 截图通过，失败像素及证据保留在 `docs/validation/p6-variable-differences.json`。
+
+`--trace-float-reads` 显式观察所有数字读取，须配合 caller/step 过滤和有界上限。追加 `--trace-float-unique-reads` 仅记录每个索引首次读取或数值变化；显式 read-index 总是记录。记录读写共有的 `sequence` 可还原被记录事件的先后，不表示完整执行轨迹；过滤/去重/截断会省略事件。调查预变形网格时必须读取缓存点第一次出现的值，不能把后续曲面覆盖后的同一缓冲区误作刚性网格。观察不进入正式运行时；证据必须注明截断状态及与无观察截图的对应关系。
+
+
+## 程序生成求值模型（C18）
+
+`synthetic_model.py --output DIR` 生成独立的几何层级、四色棋盘 PNG、JSON/resx 与未加密 PSB；没有人物素材。`capture.py --psb FILE --trace-geometry` 使用公开 SDK 和最终 WebGL 几何/状态/截图进行观察，禁用 shader 源码和内部执行观察器。`--model` 与 `--psb` 二选一；捕获超时保存 `.failure.json`。
+
+C19 的 `probe_mesh_cc.py` 生成15组固定坐标的 BP/cc 端点对照，可用 `--cc-json` 指定候选、`--generate-only` 只生成输入。它始终标记 `accepted_semantics=false`，捕获失败最终返回非零；当前默认候选有4组NaN，不能称为语义PASS。几何捕获失败时额外保存 `.failure.trace.json`；属性 `nonfinite` 区分已提交值中的 NaN 和 ±Inf。复现与限定结论见 [cc调查](../../docs/mesh-cc-investigation-2026-10-14.md)。
+
+完整51组用 `validate_synthetic.py` 对照实际 importer/GeometryInstance/preview GL 后端。它冻结二进制、来源与输入hash，并检查图元、UV顶点与三角形覆盖；`--case NAME` 可重复，`--reuse-reference DIR` 严格验证捕获输入与文件hash，旧的未带artifact hash记录不能复用。GPU命令用 `flock build/gpu-validation.lock` 串行执行。独立PsBuild工具也可在生成目录把JSON编译为 `model.pure.psb`。公式、大小图集、失败记录和复现命令见 [报告](../../docs/synthetic-semantics-2026-10-14.md)。

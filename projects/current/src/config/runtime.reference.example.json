@@ -1,0 +1,90 @@
+{
+  "schema_version": "aura-project-1",
+  "release_id": "aura-framework-20261008",
+  "environment": "reference",
+  "vision": {
+    "backend": "cpu_yunet",
+    "tracker": "iou_reference",
+    "target_policy": "single_or_manual",
+    "confirm_observations": 2,
+    "lost_ms": 500,
+    "camera_device": "0",
+    "width": 640,
+    "height": 480,
+    "input_size": 192,
+    "score_threshold": 0.9,
+    "model": "models/vision/yunet_2022mar.onnx",
+    "model_sha256": "50ef07f702a31741ca46a4c0d947773b64143b9362780237bf0d427d6c79bab7",
+    "arch_fingerprint": "",
+    "entrypoint": "",
+    "track_threshold": 0.5,
+    "track_buffer": 30,
+    "match_threshold": 0.8,
+    "frame_rate": 30
+  },
+  "freshness": {
+    "policy": "fixed",
+    "fixed_ms": 250,
+    "calibration": {
+      "verified": false,
+      "origin": "illustrative_simulation_only",
+      "u0_px": 2,
+      "delta_v_px_s": 60,
+      "acceleration_px_s2": 100,
+      "allowed_error_px": 20,
+      "cap_ms": 500
+    }
+  },
+  "scheduler": {
+    "policy": "detection_priority",
+    "detection_ms": 20,
+    "identity_ms": 50,
+    "other_ms": 10,
+    "margin_ms": 20,
+    "identity_every_n_detections": 2,
+    "estimate_origin": "illustrative_simulation_only"
+  },
+  "motion": {
+    "backend": "disabled",
+    "physical_actuation": false,
+    "calibration": "config/servo_calibration.json"
+  },
+  "identity": {
+    "backend": "cpu_sface",
+    "database": "data/identities/reference.sqlite3",
+    "model_id": "sface-2021dec-0ba9fbfa01b5",
+    "dimension": 128,
+    "threshold": 0.85,
+    "ambiguity_margin": 0.1,
+    "cache_ttl_ms": 3000,
+    "model": "models/vision/sface_2021dec.onnx",
+    "threshold_origin": "illustrative_not_measured"
+  },
+  "dialogue": {
+    "backend": "mock",
+    "host": "127.0.0.1",
+    "port": 8765,
+    "path": "/",
+    "timeout_ms": 15000,
+    "allowed_emotions": [
+      "neutral",
+      "friendly",
+      "happy",
+      "sad",
+      "curious"
+    ],
+    "allowed_avatar_actions": [
+      "",
+      "ack_nod",
+      "deny_shake",
+      "surprised",
+      "puzzled"
+    ],
+    "speaker_threshold": 0.7,
+    "speaker_margin": 0.15
+  },
+  "logging": {
+    "directory": "metrics/raw",
+    "include_raw_media": false
+  }
+}

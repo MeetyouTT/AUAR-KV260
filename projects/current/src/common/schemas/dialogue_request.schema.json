@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DialogueRequest",
+  "description": "板端 → LAN 对话主机的请求（V1.0 §22.10 数据合同）",
+  "type": "object",
+  "required": ["protocol_version", "request_id", "transcript"],
+  "additionalProperties": false,
+  "properties": {
+    "protocol_version": { "type": "string", "enum": ["1.0"] },
+    "request_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "audio_generation_id": { "type": "integer", "minimum": 0 },
+    "transcript": { "type": "string", "maxLength": 2000 },
+    "scene_state": { "$ref": "#/definitions/scene_state" },
+    "allowed_emotions": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "allowed_avatar_actions": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+  },
+  "definitions": {
+    "scene_state": {
+      "type": "object",
+      "required": [
+        "schema_version", "scene_seq", "captured_at_ms",
+        "valid_until_ms", "camera_state", "people_count"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": { "type": "string" },
+        "scene_seq": { "type": "integer", "minimum": 0 },
+        "captured_at_ms": { "type": "integer", "minimum": 0 },
+        "valid_until_ms": { "type": "integer", "minimum": 0 },
+        "camera_state": { "type": "string", "enum": ["online", "offline", "lost"] },
+        "people_count": { "type": "integer", "minimum": 0 },
+        "current_target": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "track_id": { "type": "integer", "minimum": 0 },
+            "position": { "type": "string", "enum": ["left", "center", "right"] },
+            "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+            "source_frame_id": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "recent_events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "track_id", "age_ms"],
+            "properties": {
+              "type": { "type": "string", "enum": ["person_enter", "person_exit", "target_change"] },
+              "track_id": { "type": "integer" },
+              "age_ms": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "uncertainty": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,101 @@
+"""Generated test runner. The default mode is software simulation."""
+import argparse
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import platform
+import sys
+import time
+
+from driver import CONTRACT, ContractDriver, open_overlay
+
+
+ROOT = Path(__file__).resolve().parent
+
+
+def load_mock(path):
+    spec = importlib.util.spec_from_file_location("user_mock_ip", path)
+    if spec is None or spec.loader is None:
+        raise ValueError("cannot import mock module")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.create_ip(CONTRACT)
+
+
+def validate_vectors(rows):
+    if not isinstance(rows, list) or not rows:
+        raise ValueError("test vectors must be a nonempty list")
+    ids = set()
+    for row in rows:
+        if not isinstance(row, dict) or set(row) != {"id", "inputs", "expected"}:
+            raise ValueError("invalid vector fields")
+        if not isinstance(row["id"], str) or row["id"] in ids:
+            raise ValueError("invalid or duplicate vector id")
+        ids.add(row["id"])
+        for key, names in (("inputs", CONTRACT["inputs"]), ("expected", CONTRACT["outputs"])):
+            if not isinstance(row[key], dict) or set(row[key]) != set(names):
+                raise ValueError("vector names do not match contract")
+            for value in row[key].values():
+                ContractDriver._word(value)
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mode", choices=("mock", "pynq"), default="mock")
+    parser.add_argument("--mock", type=Path, default=ROOT / "mock_ip.py")
+    parser.add_argument("--vectors", type=Path, default=ROOT / "vectors.json")
+    parser.add_argument("--report", type=Path, default=ROOT / "validation_report.json")
+    parser.add_argument("--bit", type=Path)
+    parser.add_argument("--program", action="store_true")
+    parser.add_argument("--accept-incomplete-metadata", action="store_true")
+    args = parser.parse_args(argv)
+    # Fail before any hardware operation if a report would overwrite an input.
+    protected = [Path(__file__), ROOT / "driver.py", ROOT / "contract.json", ROOT / "contract_report.json", args.vectors, args.mock]
+    if args.bit is not None:
+        protected += [args.bit, args.bit.with_suffix(".hwh")]
+    if args.report.resolve() in {p.resolve() for p in protected}:
+        parser.error("report path must not overwrite an input or program")
+    report = {"status": "FAIL", "mode": args.mode, "validation_level": "mock_ip" if args.mode == "mock" else "pynq_ip_test",
+              "hardware_executed": False, "board_verified": False, "cases": [],
+              "python": platform.python_version(), "host_arch": platform.machine(),
+              "timing_scope": "host call including register writes, polling, and output reads; not PL-only latency"}
+    try:
+        raw = args.vectors.read_bytes()
+        rows = json.loads(raw.decode("utf-8"))
+        validate_vectors(rows)
+        report["vectors_sha256"] = hashlib.sha256(raw).hexdigest()
+        if args.mode == "mock":
+            if args.program or args.bit is not None or args.accept_incomplete_metadata:
+                raise ValueError("hardware options are not valid in mock mode")
+            driver = ContractDriver(load_mock(args.mock))
+        else:
+            if args.bit is None:
+                raise ValueError("--bit is required in PYNQ mode")
+            overlay, driver = open_overlay(args.bit, args.program, args.accept_incomplete_metadata)
+            report["hardware_executed"] = True
+            report["bit_sha256"] = hashlib.sha256(args.bit.read_bytes()).hexdigest()
+            report["ip_name"] = CONTRACT["ip_name"]
+            report["ip_address_range"] = int(overlay.ip_dict[CONTRACT["ip_name"]]["addr_range"])
+        for row in rows:
+            item = {"id": row["id"], "inputs": row["inputs"], "expected": row["expected"], "status": "FAIL"}
+            started = time.perf_counter_ns()
+            try:
+                item["actual"] = driver.run(row["inputs"])
+                item["status"] = "PASS" if item["actual"] == row["expected"] else "FAIL"
+            except Exception as exc:
+                item["error"] = type(exc).__name__ + ": " + str(exc)
+            item["host_transaction_ns"] = time.perf_counter_ns() - started
+            report["cases"].append(item)
+        report["status"] = "PASS" if all(r["status"] == "PASS" for r in report["cases"]) else "FAIL"
+        report["board_verified"] = args.mode == "pynq" and report["status"] == "PASS"
+    except Exception as exc:
+        report["error"] = type(exc).__name__ + ": " + str(exc)
+    args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"status": report["status"], "mode": args.mode, "cases": len(report["cases"]), "report": str(args.report), "board_verified": report["board_verified"]}))
+    return 0 if report["status"] == "PASS" else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

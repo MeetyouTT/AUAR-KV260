@@ -1,0 +1,28 @@
+# AURA 依赖（PC 原型 / 演示台 / 语音链）
+#
+# ⚠ 仓库里的 `.venv` **不可移植**：`pyvenv.cfg` 的 `home` 指向本机
+#    `D:\sd-webui-...\ComfyUI_Windows_portable\python_standalone`（**绝对路径**）。
+#    换机请**重建**而不是拷贝：
+#        <基础 Python 3.14.x> -m venv .venv
+#        .venv\Scripts\python.exe -m pip install -r requirements.txt
+#
+# 检验与Qt/导出工具依赖见 requirements-dev.txt，可在独立环境安装。
+
+# 直接依赖
+numpy==2.5.3
+pillow==12.3.0
+sherpa-onnx==1.13.8
+sherpa-onnx-core==1.13.8
+onnxruntime==1.30.0
+sounddevice==0.5.6
+jsonschema>=4,<5
+
+# 传递依赖（显式钉版本，保证可复现）
+cffi==2.1.1
+pycparser==3.0
+flatbuffers==25.12.19
+protobuf==7.36.2
+packaging==26.3
+
+# 完整回归：安装 requirements-dev.txt 后执行 python -m pytest tests -q。
+# Qt入口：python tools/demo_qt.py；板端资源：python scripts/board_export.py --force。

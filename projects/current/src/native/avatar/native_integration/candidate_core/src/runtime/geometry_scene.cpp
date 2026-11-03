@@ -1,0 +1,1485 @@
+#include <nekomote/runtime/deformation.hpp>
+#include <nekomote/runtime/geometry_scene.hpp>
+
+#include <fast_float/fast_float.h>
+
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <limits>
+#include <map>
+#include <numbers>
+#include <set>
+#include <stdexcept>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+
+namespace nekomote::runtime
+{
+namespace
+{
+struct ResourceTag
+{
+};
+using ResourceId = Id<ResourceTag>;
+enum class ResourceKind
+{
+    None,
+    Sprite,
+    Blank,
+    Motion
+};
+struct Resource
+{
+    std::string name;
+    ResourceKind kind{ResourceKind::None};
+    TextureId texture;
+    model::IconRect rect;
+    const model::Part* motion{nullptr}; // compile-only; cleared before returning the scene
+    bool parameter_driven{false};
+};
+struct Pose
+{
+    Vec2 translation;
+    float angle_degrees{0}, depth{0}, opacity{1}; // source degrees; depth; straight opacity
+    Patch patch{identity_patch()};
+    ResourceId resource;
+    BlendMode blend{BlendMode::Over};
+    bool mesh{false}, active{false}, unsupported{false};
+};
+struct Key
+{
+    float time{0};
+    int type{0};
+    Pose pose;
+};
+struct Binding
+{
+    ParamId variable;
+    float begin{0}, end{0};
+    int division{0}, discretization{0};
+    bool enabled{false};
+};
+struct Node
+{
+    std::string label, source_label;
+    std::uint32_t scope{0};
+    NodeId parent;
+    MaskId mask;
+    int stencil_type{0};
+    std::vector<std::string> mask_sources;
+    ResourceId guard;
+    Binding binding;
+    std::vector<Key> keys;
+    struct CombinatorBinding
+    {
+        ParamId variable;
+        int neutral_index{-1};
+        double begin{0}, end{1};
+        std::vector<model::CombinatorGrid> grids;
+    };
+    std::vector<CombinatorBinding> combinators;
+    int type{0}, division{0}, priority{0}, maximum_division{0}, child_sync{0};
+    float maximum_density{0};
+    bool combine{false}, unsupported{false}, has_sprites{false}, mask_source{false};
+    bool exported_locator{false}, partial_locator_origin{false}, neutral_locator_origin{false};
+    bool inherit_shape{true};
+};
+struct Clamp
+{
+    ParamId x, y;
+    float begin{0}, end{0};
+    int type{0};
+    bool enabled{true};
+};
+struct CompiledMask
+{
+    NodeId node;
+    std::vector<NodeId> members;
+    bool resolved{true};
+};
+struct CompiledData
+{
+    bool presentation_mirror{false};
+    std::vector<VariableSymbol> variables;
+    std::vector<ParamId> mirrored_parameters;
+    std::vector<TextureBinding> textures;
+    std::vector<Resource> resources{1};
+    std::vector<Node> nodes{1};
+    std::vector<Clamp> clamps;
+    std::vector<CompiledMask> masks;
+    std::vector<GeometryLocator> locators;
+    std::size_t mask_command_capacity{0};
+    std::vector<std::string> diagnostics;
+    std::size_t vertex_capacity{0}, index_capacity{0};
+};
+template <typename T>
+T field_or(const model::Field<T>& field, T fallback)
+{
+    return field.has_value() ? field.data : fallback;
+}
+void require(bool condition, const std::string& path, const char* message)
+{
+    if (!condition)
+        throw std::runtime_error(path + ": " + message);
+}
+bool sample_combinators(std::span<const Node::CombinatorBinding> controls,
+                        std::span<const double> variables, Patch& patch, bool& effective) noexcept
+{
+    std::array<double, 32> sum{};
+    bool all_neutral = true;
+    for (const auto& control : controls)
+    {
+        const double value = variables[control.variable.value];
+        if (!std::isfinite(value)) return false;
+        const double t = std::clamp((value - control.begin) / (control.end - control.begin), 0.0, 1.0);
+        if (!std::isfinite(t)) return false;
+        const double q = t * static_cast<double>(control.grids.size() - 1);
+        const auto lo = static_cast<std::size_t>(std::floor(q));
+        const auto hi = std::min(lo + 1, control.grids.size() - 1);
+        const double fraction = q - static_cast<double>(lo);
+        all_neutral = all_neutral && control.neutral_index >= 0 &&
+            lo == static_cast<std::size_t>(control.neutral_index) && fraction < 0x1p-23;
+        for (std::size_t i = 0; i < sum.size(); ++i)
+            sum[i] += (1 - fraction) * control.grids[lo][i] + fraction * control.grids[hi][i];
+    }
+    // Combinator ownership remains even at neutral: never fall back to frame bp.
+    // Neutral revocation/additive grids are documented candidate semantics.
+    effective = !all_neutral;
+    patch = identity_patch();
+    for (std::size_t i = 0; i < sum.size(); ++i)
+    {
+        if (!std::isfinite(sum[i]) || std::abs(sum[i]) > std::numeric_limits<float>::max())
+            return false;
+        if (effective)
+        {
+            if ((i & 1) == 0) patch[i / 2].x = static_cast<float>(sum[i]);
+            else patch[i / 2].y = static_cast<float>(sum[i]);
+        }
+    }
+    return true;
+}
+model::IconRect blank_rect(std::string_view text)
+{
+    std::array<float, 4> values{};
+    for (std::size_t i = 0; i < values.size(); ++i)
+    {
+        const auto end = text.find(':');
+        const auto token = text.substr(0, end);
+        const auto parsed =
+            fast_float::from_chars(token.data(), token.data() + token.size(), values[i]);
+        require(parsed.ec == std::errc{} && parsed.ptr == token.data() + token.size() &&
+                    std::isfinite(values[i]),
+                std::string(text), "invalid blank domain");
+        require((i == 3) == (end == std::string_view::npos), std::string(text),
+                "blank domain requires four components");
+        if (end != std::string_view::npos)
+            text.remove_prefix(end + 1);
+    }
+    require(values[0] > 0 && values[1] > 0, std::string(text), "nonpositive blank domain");
+    model::IconRect r;
+    r.width = values[0];
+    r.height = values[1];
+    r.origin_x = values[2];
+    r.origin_y = values[3];
+    return r;
+}
+bool same_domain(const Resource& a, const Resource& b) noexcept
+{
+    return a.rect.width > 0 && b.rect.width > 0 && a.rect.width == b.rect.width &&
+           a.rect.height == b.rect.height && a.rect.origin_x == b.rect.origin_x &&
+           a.rect.origin_y == b.rect.origin_y;
+}
+std::pair<int, int> grid(int division, const model::IconRect& r) noexcept
+{
+    const auto x = static_cast<int>(static_cast<float>(division) * r.width / (r.width + r.height));
+    return {std::max(2, x + 1), std::max(2, division - x + 1)};
+}
+struct Compiler
+{
+    CompiledData& data;
+    std::unordered_map<std::string, ResourceId> resources;
+    std::unordered_map<std::string, ParamId> variables;
+    std::vector<const model::Part*> stack;
+    std::uint32_t next_scope{0};
+    std::size_t combinator_bytes{0}, combinator_controls{0};
+
+    ParamId variable(const std::string& name)
+    {
+        require(!name.empty(), "parameter", "empty variable name");
+        const auto found = variables.find(name);
+        if (found != variables.end())
+            return found->second;
+        const ParamId id{static_cast<std::uint32_t>(data.variables.size() + 1)};
+        variables.emplace(name, id);
+        data.variables.push_back({id, name});
+        return id;
+    }
+    ResourceId resource(const model::FrameContent& content, const std::string& path)
+    {
+        if (!content.src.has_value() || !content.icon.has_value())
+            return {};
+        const auto name = content.src.data + "/" + content.icon.data;
+        const auto found = resources.find(name);
+        if (found != resources.end())
+            return found->second;
+        require(content.src.data == "blank", path, "unresolved resource");
+        Resource r;
+        r.name = name;
+        r.kind = ResourceKind::Blank;
+        r.rect = blank_rect(content.icon.data);
+        const ResourceId id{static_cast<std::uint32_t>(data.resources.size())};
+        data.resources.push_back(std::move(r));
+        resources.emplace(name, id);
+        return id;
+    }
+    Pose pose(const model::LayerFrame& frame, const std::string& path)
+    {
+        Pose p;
+        if (!frame.content.has_value() || frame.type == 0)
+            return p;
+        p.active = true;
+        const auto& c = frame.content.data;
+        const auto coord = field_or(c.coord, std::array<float, 3>{});
+        p.translation = {coord[0], coord[1]};
+        p.depth = coord[2];
+        p.angle_degrees = field_or(c.angle, 0.0f);
+        p.opacity = field_or(c.opa, 255.0f) / 255;
+        p.resource = resource(c, path);
+        // V6 observes bm19 with premultiplied RGB and unchanged destination alpha.
+        // Blank helpers carry the tag without drawing; sprites use their own tag.
+        const int source_blend = field_or(c.bm, 0);
+        p.blend = source_blend == 19 ? BlendMode::Multiply : BlendMode::Over;
+        if (c.mesh.has_value())
+        {
+            require(!c.mesh.data.cc.has_value(), path, "cc deformation is unverified");
+            if (c.mesh.data.bp.has_value())
+            {
+                p.mesh = true;
+                const auto& raw = c.mesh.data.bp.data;
+                for (std::size_t i = 0; i < p.patch.size(); ++i)
+                    p.patch[i] = {raw[i * 2], raw[i * 2 + 1]};
+            }
+        }
+        p.unsupported = frame.type == 1 || c.zx.has_value() || c.zy.has_value() ||
+                        c.ox.has_value() || c.oy.has_value() ||
+                        (source_blend != 0 && source_blend != 19) || field_or(c.flip, 0) != 0 ||
+                        field_or(c.color, std::uint32_t{0x808080ff}) != 0x808080ff ||
+                        (c.motion.has_value() && field_or(c.motion.data.time_offset, 0.0f) != 0 &&
+                         !data.resources[p.resource.value].parameter_driven);
+        require(std::isfinite(p.translation.x) && std::isfinite(p.translation.y) &&
+                    std::isfinite(p.depth) && std::isfinite(p.angle_degrees) &&
+                    std::isfinite(p.opacity),
+                path, "nonfinite pose");
+        for (const auto point : p.patch)
+            require(std::isfinite(point.x) && std::isfinite(point.y), path, "nonfinite patch");
+        return p;
+    }
+    void motion(const model::Part& part, NodeId parent, ResourceId guard, const std::string& path,
+                std::size_t depth = 0)
+    {
+        require(depth < 256, path, "expanded layer nesting too deep");
+        require(stack.size() < 128 && std::find(stack.begin(), stack.end(), &part) == stack.end(),
+                path, "cyclic or too deep motion references");
+        stack.push_back(&part);
+        const auto scope = ++next_scope;
+        for (const auto& layer : part.layers)
+            node(layer, part, parent, guard, path, depth + 1, scope);
+        stack.pop_back();
+    }
+    void node(const model::Layer& layer, const model::Part& part, NodeId parent, ResourceId guard,
+              const std::string& parent_path, std::size_t depth, std::uint32_t scope)
+    {
+        require(depth < 256, parent_path, "expanded layer nesting too deep");
+        require(data.nodes.size() < 100000, parent_path, "expanded scene too large");
+        Node n;
+        n.label = parent_path + "/" + layer.label;
+        n.source_label = layer.label;
+        n.scope = scope;
+        n.stencil_type = layer.stencil_type;
+        n.mask_sources = layer.stencil_composite_mask_layers;
+        require(layer.type != 12 || layer.stencil_type == 5, n.label, "unverified stencil type");
+        n.parent = parent;
+        n.guard = guard;
+        n.type = layer.type;
+        n.exported_locator = layer.type == 1 && layer.export_self == 1;
+        n.neutral_locator_origin =
+            n.exported_locator && layer.children.empty() &&
+            std::all_of(layer.frame_list.begin(), layer.frame_list.end(),
+                        [](const auto& frame)
+                        {
+                            if (!frame.content.has_value())
+                                return true;
+                            const auto& c = frame.content.data;
+                            return field_or(c.coord, std::array<float, 3>{}) ==
+                                       std::array<float, 3>{} &&
+                                   field_or(c.angle, 0.0f) == 0 && !c.mesh.has_value() &&
+                                   !c.src.has_value() && !c.icon.has_value() && !c.zx.has_value() &&
+                                   !c.zy.has_value() && !c.ox.has_value() && !c.oy.has_value();
+                        });
+        require(n.type == 0 || n.type == 1 || n.type == 2 || n.type == 3 || n.type == 12, n.label,
+                "unsupported layer type");
+        n.division = layer.mesh_division;
+        n.priority = layer.obj_tri_priority;
+        n.maximum_division = n.division;
+        require(n.division >= 0 && n.division <= 256, n.label, "unsupported division capacity");
+        n.combine = layer.mesh_combine == 1;
+        n.child_sync = layer.mesh_sync_child_mask;
+        n.inherit_shape = (layer.inherit_mask & 0x2000000) != 0;
+        const bool unsupported_common =
+            layer.coordinate != 0 || (layer.mesh_transform != 0 && layer.mesh_transform != 1) ||
+            (layer.mesh_combine != 0 && layer.mesh_combine != 1) ||
+            (layer.mesh_sync_child_mask != 0 && layer.mesh_sync_child_mask != 1 &&
+             layer.mesh_sync_child_mask != 8) ||
+            (!layer.transform_order.empty() &&
+             layer.transform_order != std::vector<int>{0, 3, 2, 1});
+        n.partial_locator_origin =
+            !unsupported_common && n.exported_locator && layer.inherit_mask == 0x200020c;
+        // Shape exclusions follow the resolved child origin, preserving its own
+        // curves; nested boundaries are verified by procedural source fixtures.
+        // See docs/synthetic-semantics-2026-10-14.md.
+        n.unsupported =
+            unsupported_common || (layer.inherit_mask != 0x20007fc && layer.inherit_mask != 0x7fc &&
+                                   !(layer.type == 12 && layer.inherit_mask == 0x24007fc));
+        const auto binding =
+            layer.parameterize.has_value() ? layer.parameterize : part.parameterize;
+        const auto& parameters = layer.parameter.empty() ? part.parameter : layer.parameter;
+        if (binding.has_value())
+        {
+            require(binding.data >= 0 && static_cast<std::size_t>(binding.data) < parameters.size(),
+                    n.label, "invalid parameter binding");
+            const auto& b = parameters[static_cast<std::size_t>(binding.data)];
+            n.binding = {variable(b.id), b.range_begin,    b.range_end,
+                         b.division,     b.discretization, b.enabled};
+            require(std::isfinite(b.range_begin) && std::isfinite(b.range_end) &&
+                        b.range_begin <= b.range_end && b.division >= 0,
+                    n.label, "invalid parameter range");
+        }
+        if (layer.mesh_combinator.has_value())
+        {
+            const auto& controls = layer.mesh_combinator.data.controls;
+            require(!controls.empty() && controls.size() <= model::kCombinatorMaxControls,
+                    n.label, "invalid meshCombinator control count");
+            require(combinator_controls <= model::kCombinatorMaxControls - controls.size(),
+                    n.label, "meshCombinator asset control budget exceeded");
+            combinator_controls += controls.size();
+            n.combinators.reserve(controls.size());
+            for (const auto& control : controls)
+            {
+                const auto source = n.label + "/" + control.source_path;
+                require(control.mesh_type == 1 && !control.variable.empty(), source,
+                        "unsupported meshCombinator type/variable");
+                require(std::isfinite(control.range_begin) && std::isfinite(control.range_end) &&
+                            control.range_begin != control.range_end,
+                        source, "invalid meshCombinator variable range");
+                require(!control.grids.empty() && control.grids.size() <=
+                            model::kCombinatorMaxControlBytes / (32 * sizeof(float)),
+                        source, "invalid meshCombinator grid count");
+                require(control.neutral_index >= -1 &&
+                            (control.neutral_index < 0 ||
+                             std::size_t(control.neutral_index) < control.grids.size()),
+                        source, "invalid meshCombinator neutral index");
+                const auto bytes = control.grids.size() * 32 * sizeof(float);
+                require(combinator_bytes <= model::kCombinatorMaxAssetBytes - bytes,
+                        source, "meshCombinator asset byte budget exceeded");
+                combinator_bytes += bytes;
+                for (const auto& grid : control.grids)
+                    for (float value : grid)
+                        require(std::isfinite(value), source, "nonfinite meshCombinator grid");
+                n.combinators.push_back({variable(control.variable), control.neutral_index,
+                    control.range_begin, control.range_end, control.grids});
+            }
+        }
+        std::set<ResourceId> motions;
+        float previous = -std::numeric_limits<float>::infinity();
+        for (const auto& f : layer.frame_list)
+        {
+            require(std::isfinite(f.time) && f.time >= previous && f.type >= 0 && f.type <= 3,
+                    n.label, "unsupported frame type/time");
+            previous = f.time;
+            auto p = pose(f, n.label);
+            const auto& r = data.resources[p.resource.value];
+            if (r.kind == ResourceKind::Sprite && layer.type == 0)
+            {
+                n.has_sprites = true;
+            }
+            if (r.kind == ResourceKind::Motion)
+                motions.insert(p.resource);
+            n.keys.push_back({f.time, f.type, std::move(p)});
+        }
+        const NodeId id{static_cast<std::uint32_t>(data.nodes.size())};
+        data.nodes.push_back(std::move(n));
+        const auto path = data.nodes[id.value].label;
+        // Recursive expansion can reallocate nodes/resources. Borrow no element.
+        for (const auto resource_id : motions)
+        {
+            const auto* nested = data.resources[resource_id.value].motion;
+            motion(*nested, id, resource_id, path + "/" + nested->group + "/" + nested->name,
+                   depth + 1);
+        }
+        for (const auto& child : layer.children)
+            node(child, part, id, {}, path, depth + 1, scope);
+    }
+};
+struct RigidTransform
+{
+    float a{1}, b{0}, c{0}, d{1};
+    Vec2 translation{};
+    Vec2 apply(double x, double y) const noexcept
+    {
+        return {static_cast<float>(static_cast<double>(a) * x + static_cast<double>(c) * y +
+                                   static_cast<double>(translation.x)),
+                static_cast<float>(static_cast<double>(b) * x + static_cast<double>(d) * y +
+                                   static_cast<double>(translation.y))};
+    }
+};
+RigidTransform compose(const RigidTransform& parent, const RigidTransform& local) noexcept
+{
+    const auto product = [](float a, float b, float c, float d) noexcept
+    {
+        return static_cast<float>(static_cast<double>(a) * static_cast<double>(b) +
+                                  static_cast<double>(c) * static_cast<double>(d));
+    };
+    return {product(parent.a, local.a, parent.c, local.b),
+            product(parent.b, local.a, parent.d, local.b),
+            product(parent.a, local.c, parent.c, local.d),
+            product(parent.b, local.c, parent.d, local.d),
+            parent.apply(local.translation.x, local.translation.y)};
+}
+struct State
+{
+    Pose pose;
+    Pose transform;
+    NodeId transform_parent, curve_parent, excluded_curve;
+    int child_sync{0};
+    RigidTransform world;
+    Patch world_patch{};
+    Vec2 domain_corner{}, attachment_offset{};
+    std::array<float, 4> domain_inverse{};
+    float depth{0}, opacity{0};
+    bool mesh_path{false}, inherited_mesh_path{false};
+    bool branch_selected{false};
+    float density{0};
+};
+Pose interpolate(const Key& a, const Key& b, double time) noexcept
+{
+    Pose p = a.pose;
+    if (a.type != 3 || !b.pose.active || b.time <= a.time)
+        return p;
+    // SDK store observations preserve double left/right weighted sums until
+    // one Float32 save; subtracting the keys first loses verified corner bits.
+    // Evidence: tests/fixtures/scene_blend_reference.json and full jump frames.
+    const double t = (static_cast<double>(time) - static_cast<double>(a.time)) /
+                     (static_cast<double>(b.time) - static_cast<double>(a.time));
+    const auto blend = [t](float left, float right) noexcept
+    {
+        return static_cast<float>(static_cast<double>(left) * (1.0 - t) +
+                                  static_cast<double>(right) * t);
+    };
+    p.translation = {blend(a.pose.translation.x, b.pose.translation.x),
+                     blend(a.pose.translation.y, b.pose.translation.y)};
+    p.angle_degrees = blend(a.pose.angle_degrees, b.pose.angle_degrees);
+    p.depth = blend(a.pose.depth, b.pose.depth);
+    p.opacity = blend(a.pose.opacity, b.pose.opacity);
+    for (std::size_t i = 0; i < p.patch.size(); ++i)
+        p.patch[i] = {blend(a.pose.patch[i].x, b.pose.patch[i].x),
+                      blend(a.pose.patch[i].y, b.pose.patch[i].y)};
+    p.mesh = p.mesh || (t > 0 && b.pose.mesh);
+    p.unsupported = p.unsupported || (t > 0 && b.pose.unsupported);
+    return p;
+}
+} // namespace
+struct GeometryScene::Impl : CompiledData
+{
+};
+GeometryScene::GeometryScene(std::unique_ptr<Impl> impl) : impl_(std::move(impl))
+{
+}
+GeometryScene::~GeometryScene() = default;
+std::span<const VariableSymbol> GeometryScene::variables() const noexcept
+{
+    return impl_->variables;
+}
+std::span<const GeometryLocator> GeometryScene::locators() const noexcept
+{
+    return impl_->locators;
+}
+std::span<const TextureBinding> GeometryScene::textures() const noexcept
+{
+    return impl_->textures;
+}
+std::span<const std::string> GeometryScene::diagnostics() const noexcept
+{
+    return impl_->diagnostics;
+}
+ParamId GeometryScene::find_variable(std::string_view name) const noexcept
+{
+    for (const auto& v : impl_->variables)
+        if (v.name == name)
+            return v.id;
+    return {};
+}
+std::size_t GeometryScene::node_count() const noexcept
+{
+    return impl_->nodes.size() - 1;
+}
+std::string_view GeometryScene::node_label(NodeId id) const noexcept
+{
+    return id.valid() && id.value < impl_->nodes.size() ? impl_->nodes[id.value].label
+                                                        : std::string_view{};
+}
+GeometryCapacity GeometryScene::frame_capacity() const noexcept
+{
+    return {impl_->vertex_capacity, impl_->index_capacity, impl_->nodes.size(),
+            impl_->mask_command_capacity, impl_->masks.size()};
+}
+GeometryCompileResult compile_geometry_scene(const model::ModelAsset& asset)
+{
+    GeometryCompileResult result;
+    try
+    {
+        auto data = std::make_unique<GeometryScene::Impl>();
+        data->presentation_mirror = asset.mirror;
+        Compiler compiler{*data, {}, {}, {}};
+        std::unordered_set<std::string> declared_labels, declared_parameters;
+        model::visit_parameter_names(asset,
+                                     [&](const auto& name) { declared_parameters.insert(name); });
+        const auto collect_layer = [&](const auto& self, const model::Layer& layer) -> void
+        {
+            declared_labels.insert(layer.label);
+            for (const auto& child : layer.children)
+                self(self, child);
+        };
+        for (const auto& part : asset.parts)
+        {
+            for (const auto& layer : part.layers)
+                collect_layer(collect_layer, layer);
+        }
+        std::unordered_map<std::string, TextureId> textures;
+        for (const auto& t : asset.textures)
+        {
+            const TextureId id{static_cast<std::uint32_t>(data->textures.size() + 1)};
+            data->textures.push_back({id, t.name, t.path, t.width, t.height});
+            require(t.width > 0 && t.height > 0, t.name, "invalid texture dimensions");
+            require(textures.emplace(t.name, id).second, t.name, "duplicate texture");
+        }
+        std::vector<std::string> names;
+        names.reserve(asset.icons.size());
+        for (const auto& [name, rect] : asset.icons)
+        {
+            static_cast<void>(rect);
+            names.push_back(name);
+        }
+        std::sort(names.begin(), names.end());
+        for (const auto& name : names)
+        {
+            const auto& r = asset.icons.at(name);
+            require(r.width > 0 && r.height > 0 && std::isfinite(r.width) &&
+                        std::isfinite(r.height) && textures.contains(r.texture),
+                    name, "invalid sprite rectangle");
+            const ResourceId id{static_cast<std::uint32_t>(data->resources.size())};
+            data->resources.push_back(
+                {name, ResourceKind::Sprite, textures.at(r.texture), r, nullptr});
+            compiler.resources.emplace(name, id);
+        }
+        for (const auto& m : asset.parts)
+        {
+            const auto name = m.group + "/" + m.name;
+            const ResourceId id{static_cast<std::uint32_t>(data->resources.size())};
+            require(compiler.resources.emplace(name, id).second, name, "duplicate resource");
+            const bool parameter_driven =
+                !m.layers.empty() &&
+                std::all_of(m.layers.begin(), m.layers.end(),
+                            [&](const auto& layer)
+                            {
+                                const auto binding = layer.parameterize.has_value()
+                                                         ? layer.parameterize
+                                                         : m.parameterize;
+                                const auto& parameters =
+                                    layer.parameter.empty() ? m.parameter : layer.parameter;
+                                return binding.has_value() && binding.data >= 0 &&
+                                       static_cast<std::size_t>(binding.data) < parameters.size() &&
+                                       parameters[static_cast<std::size_t>(binding.data)].enabled;
+                            });
+            // A parameterized motion root owns its sample time; the reference's
+            // authored offset must not overwrite it. Fraise pupil offsets 20/40
+            // are inert in controlled source captures. Free clocks stay rejected.
+            data->resources.push_back({name, ResourceKind::Motion, {}, {}, &m, parameter_driven});
+        }
+        for (const auto& v : asset.variables)
+            compiler.variable(v.label);
+        for (const auto& control : asset.variable_controls)
+        {
+            compiler.variable(control.variable);
+            if (!control.talk_variable.empty())
+                compiler.variable(control.talk_variable);
+            for (const auto& option : control.options)
+                compiler.variable(option.variable);
+        }
+        for (const auto& timeline : asset.timelines)
+            for (const auto& track : timeline.tracks)
+                compiler.variable(track.label);
+        for (const auto& c : asset.paired_clamps)
+            data->clamps.push_back({compiler.variable(c.variable_x),
+                                    compiler.variable(c.variable_y), c.range_begin, c.range_end,
+                                    c.type, c.enabled});
+        for (const auto& control : asset.spring_controls)
+        {
+            compiler.variable(control.binding.variable_x);
+            compiler.variable(control.binding.variable_y);
+        }
+        for (const auto& control : asset.chain_controls)
+        {
+            compiler.variable(control.binding.variable_x);
+            compiler.variable(control.binding.variable_y);
+            compiler.variable(control.variable_middle);
+        }
+        const auto base = compiler.resources.find(asset.base_group + "/" + asset.base_motion);
+        require(base != compiler.resources.end(), "base", "missing base motion");
+        require(data->resources[base->second.value].kind == ResourceKind::Motion, "base",
+                "not a motion");
+        compiler.motion(*data->resources[base->second.value].motion, {}, {},
+                        asset.base_group + "/" + asset.base_motion);
+        for (const auto& name : asset.mirrored_parameters)
+        {
+            require(asset.mirror && !name.empty(), "mirrored_parameters", "invalid direction");
+            require(compiler.variables.contains(name) || declared_parameters.contains(name), name,
+                    "undeclared mirrored parameter");
+            const auto id = compiler.variable(name);
+            require(std::find(data->mirrored_parameters.begin(), data->mirrored_parameters.end(),
+                              id) == data->mirrored_parameters.end(),
+                    name, "duplicate mirrored parameter");
+            data->mirrored_parameters.push_back(id);
+        }
+        // Resolve labels within each expanded motion scope, not across instances.
+        for (std::size_t i = 1; i < data->nodes.size(); ++i)
+        {
+            auto& node = data->nodes[i];
+            node.mask = data->nodes[node.parent.value].mask;
+            if (node.type != 12)
+                continue;
+            node.mask = MaskId{static_cast<std::uint32_t>(data->masks.size() + 1)};
+            CompiledMask mask{NodeId{static_cast<std::uint32_t>(i)}, {}};
+            std::vector<NodeId> roots;
+            for (const auto& name : node.mask_sources)
+            {
+                NodeId root;
+                for (std::size_t j = 1; j < data->nodes.size(); ++j)
+                    if (data->nodes[j].scope == node.scope && data->nodes[j].source_label == name)
+                    {
+                        require(!root.valid(), node.label, "ambiguous stencil source label");
+                        root = NodeId{static_cast<std::uint32_t>(j)};
+                    }
+                if (!root.valid())
+                {
+                    // Missing optional template labels contribute no coverage.
+                    // A label existing in another expanded scope remains unverified.
+                    const bool exists_elsewhere = declared_labels.contains(name);
+                    if (exists_elsewhere)
+                    {
+                        mask.resolved = false;
+                        data->diagnostics.push_back(
+                            node.label + "/" + name +
+                            ": mask source outside scope; reject if selected");
+                    }
+                }
+                else
+                    roots.push_back(root);
+            }
+            require(!node.mask_sources.empty(), node.label, "empty stencil source list");
+            // Empty unions have not been verified against the source player.
+            mask.resolved = mask.resolved && !roots.empty();
+            if (roots.empty())
+                data->diagnostics.push_back(node.label + ": empty mask union; reject if selected");
+            for (std::size_t j = 1; j < data->nodes.size(); ++j)
+            {
+                auto ancestor = NodeId{static_cast<std::uint32_t>(j)};
+                while (ancestor.valid() &&
+                       std::find(roots.begin(), roots.end(), ancestor) == roots.end())
+                    ancestor = data->nodes[ancestor.value].parent;
+                if (ancestor.valid())
+                {
+                    // A source label names its own draw resource, not every
+                    // authored child attached to that layer. Referenced motion
+                    // expansion has a new scope; explicit children retain the
+                    // source's scope and are separate draws. Including those
+                    // children makes a stencil content its own coverage source.
+                    // Original-engine PSB fixtures: motion_self, sprite_self,
+                    // ordinary_child and other_stencil (Yuki validation).
+                    auto branch = NodeId{static_cast<std::uint32_t>(j)};
+                    while (branch != ancestor && data->nodes[branch.value].parent != ancestor)
+                        branch = data->nodes[branch.value].parent;
+                    if (branch != ancestor && data->nodes[branch.value].scope ==
+                                                  data->nodes[ancestor.value].scope)
+                        continue;
+                    mask.members.push_back(NodeId{static_cast<std::uint32_t>(j)});
+                    data->nodes[j].mask_source = true;
+                }
+            }
+            data->mask_command_capacity += mask.members.size();
+            require(data->mask_command_capacity <= 1000000, node.label, "mask capacity exceeded");
+            data->masks.push_back(std::move(mask));
+        }
+        // A referenced motion is clipped as a group, even when its sprites
+        // sort around another motion's draws. Distinct motions using the same
+        // stencil keep separate clips (Chocola pupil/highlight); sprites within
+        // one motion share it (Fraise pupil/small highlight). Keep that boundary
+        // in mask IDs without exporting author motion fields to the renderer.
+        std::map<std::pair<std::uint32_t, std::uint32_t>, MaskId> mask_groups;
+        std::vector<CompiledMask> grouped_masks;
+        data->mask_command_capacity = 0;
+        for (auto& node : data->nodes)
+        {
+            if (!node.mask.valid())
+                continue;
+            const auto key = std::pair{node.mask.value, node.scope};
+            const auto [group, inserted] = mask_groups.try_emplace(
+                key, MaskId{static_cast<std::uint32_t>(grouped_masks.size() + 1)});
+            if (inserted)
+            {
+                const auto& source = data->masks[node.mask.value - 1];
+                data->mask_command_capacity += source.members.size();
+                require(data->mask_command_capacity <= 1000000, node.label,
+                        "mask capacity exceeded");
+                grouped_masks.push_back(source);
+            }
+            node.mask = group->second;
+        }
+        data->masks = std::move(grouped_masks);
+        for (std::size_t i = data->nodes.size() - 1; i > 0; --i)
+        {
+            const auto& n = data->nodes[i];
+            if (n.has_sprites)
+                data->nodes[n.parent.value].has_sprites = true;
+        }
+        for (std::size_t i = 1; i < data->nodes.size(); ++i)
+        {
+            auto& n = data->nodes[i];
+            n.maximum_density = data->nodes[n.parent.value].maximum_density;
+            for (const auto& key : n.keys)
+            {
+                const auto& r = data->resources[key.pose.resource.value];
+                if ((key.pose.mesh || !n.combinators.empty()) && r.rect.width > 0 && n.division > 0)
+                    n.maximum_density =
+                        std::max(n.maximum_density,
+                                 static_cast<float>(n.division) / (r.rect.width + r.rect.height));
+            }
+            if (!n.has_sprites || n.type != 0)
+                continue;
+            if (n.division == 0 && n.priority == 2)
+                for (const auto& key : n.keys)
+                {
+                    const auto& r = data->resources[key.pose.resource.value];
+                    if (r.kind == ResourceKind::Sprite)
+                        n.maximum_division =
+                            std::max(n.maximum_division,
+                                     std::max(2, static_cast<int>((r.rect.width + r.rect.height) *
+                                                                  n.maximum_density)));
+                }
+            require(n.maximum_division <= 256, n.label, "automatic division capacity exceeded");
+            // One sprite is selected per node. Bound every possible resource's
+            // aspect-ratio grid, rather than a square of the total division.
+            // Both axes are monotonic in division; +1 includes grid endpoints.
+            // The minimum 2x2 curved grid also covers rigid 1x1 quads.
+            std::size_t vertices = 0, indices = 0;
+            for (const auto& key : n.keys)
+            {
+                const auto& resource = data->resources[key.pose.resource.value];
+                if (resource.kind != ResourceKind::Sprite)
+                    continue;
+                const auto [nx, ny] = grid(n.maximum_division, resource.rect);
+                vertices = std::max(vertices, static_cast<std::size_t>(nx + 1) *
+                                                  static_cast<std::size_t>(ny + 1));
+                indices = std::max(indices,
+                                   static_cast<std::size_t>(nx) * static_cast<std::size_t>(ny) * 6);
+            }
+            data->vertex_capacity += vertices;
+            data->index_capacity += indices;
+        }
+        require(data->vertex_capacity <= 1000000 && data->index_capacity <= 6000000, "scene",
+                "geometry capacity exceeded");
+        for (auto& r : data->resources)
+            r.motion = nullptr;
+        for (std::size_t i = 1; i < data->nodes.size(); ++i)
+            if (data->nodes[i].exported_locator)
+                data->locators.push_back(
+                    {NodeId{static_cast<std::uint32_t>(i)}, data->nodes[i].source_label});
+        result.scene = std::unique_ptr<const GeometryScene>(new GeometryScene(std::move(data)));
+    }
+    catch (const std::runtime_error& e)
+    {
+        result.errors.push_back(e.what());
+    }
+    return result;
+}
+struct GeometryInstance::Impl
+{
+    const GeometryScene& owner;
+    const CompiledData& scene;
+    std::vector<float> input;
+    std::vector<double> parameters;
+    std::vector<State> states;
+    std::vector<GeometryPrimitive> primitives;
+    std::vector<RenderVertex> vertices;
+    std::vector<std::uint32_t> indices;
+    struct FrameGrid
+    {
+        std::pair<int, int> dimensions;
+        const model::IconRect* rect;
+        TextureId texture;
+    };
+    // Index topology and atlas UVs survive pose-only changes. Rects belong to scene.
+    std::vector<FrameGrid> frame_grids;
+    std::vector<DrawCommand> commands, mask_commands;
+    std::vector<MaskDefinition> masks;
+    std::vector<DrawCommand> node_commands;
+    std::vector<bool> used_masks, needed_mask_sources;
+    bool evaluated{false}, frame_ready{false};
+    Vec2 origin{};
+    float scale{1};
+    Impl(const GeometryScene& scene_owner, const CompiledData& data)
+        : owner(scene_owner), scene(data), input(data.variables.size() + 1),
+          parameters(input.size()), states(data.nodes.size()), node_commands(data.nodes.size()),
+          used_masks(data.masks.size()), needed_mask_sources(data.nodes.size())
+    {
+        primitives.reserve(data.nodes.size());
+        vertices.reserve(data.vertex_capacity);
+        indices.reserve(data.index_capacity);
+        frame_grids.reserve(data.nodes.size());
+        commands.reserve(data.nodes.size());
+        mask_commands.reserve(data.mask_command_capacity);
+        masks.resize(data.masks.size());
+    }
+    Vec2 transform(NodeId id, double x, double y) const noexcept
+    {
+        return deform(id, states[id.value].world.apply(x, y));
+    }
+    Vec2 deform_curves(NodeId id, Vec2 p) const noexcept
+    {
+        while (id.valid())
+        {
+            const auto& s = states[id.value];
+            if (s.transform.mesh)
+                p = warp(s, p);
+            id = s.curve_parent;
+        }
+        return p;
+    }
+    Vec2 deform(NodeId start, Vec2 p) const noexcept
+    {
+        p = deform_curves(start, p);
+        if (start.valid() && states[start.value].excluded_curve.valid())
+            p = p + states[start.value].attachment_offset;
+        return p;
+    }
+    Vec2 deform_attachment(NodeId start, Vec2 p) const noexcept
+    {
+        // Each exclusion ends one vertex-curve chain. For an attachment,
+        // evaluate the remaining chains at this resolved origin, rather than
+        // borrowing an ancestor's displacement cached at its own origin.
+        while (start.valid())
+        {
+            p = deform_curves(start, p);
+            start = states[start.value].excluded_curve;
+        }
+        return p;
+    }
+    static Vec2 warp(const State& s, Vec2 p) noexcept
+    {
+        const double x = static_cast<double>(p.x) - static_cast<double>(s.domain_corner.x);
+        const double y = static_cast<double>(p.y) - static_cast<double>(s.domain_corner.y);
+        const Vec2 uv{static_cast<float>(x * static_cast<double>(s.domain_inverse[0]) +
+                                         y * static_cast<double>(s.domain_inverse[2])),
+                      static_cast<float>(x * static_cast<double>(s.domain_inverse[1]) +
+                                         y * static_cast<double>(s.domain_inverse[3]))};
+        return evaluate_patch(s.world_patch, uv);
+    }
+};
+GeometryInstance::GeometryInstance(const GeometryScene& scene)
+    : impl_(std::make_unique<Impl>(scene, *scene.impl_))
+{
+}
+GeometryInstance::~GeometryInstance() = default;
+const GeometryScene& GeometryInstance::scene() const noexcept
+{
+    return impl_->owner;
+}
+GeometryStatus GeometryInstance::set_parameter(ParamId id, float value) noexcept
+{
+    if (!id.valid() || id.value >= impl_->input.size())
+        return {GeometryError::InvalidParameter, {}, id};
+    if (!std::isfinite(value))
+        return {GeometryError::NonfiniteParameter, {}, id};
+    impl_->input[id.value] = value;
+    impl_->evaluated = false;
+    impl_->frame_ready = false;
+    return {};
+}
+GeometryStatus GeometryInstance::set_origin(Vec2 origin) noexcept
+{
+    if (!std::isfinite(origin.x) || !std::isfinite(origin.y))
+        return {GeometryError::NonfiniteParameter, {}, {}};
+    impl_->origin = origin;
+    // Placement keeps its presented direction; the frame itself is mirrored by
+    // the GPU later. Pre-invert X so that presentation does not reverse placement.
+    if (impl_->scene.presentation_mirror)
+        impl_->origin.x = -impl_->origin.x;
+    impl_->evaluated = false;
+    impl_->frame_ready = false;
+    return {};
+}
+GeometryStatus GeometryInstance::set_scale(float scale) noexcept
+{
+    const float inverse = 1.0f / scale;
+    if (!std::isfinite(scale) || scale <= 0 || !std::isfinite(inverse) || inverse <= 0)
+        return {GeometryError::InvalidScale, {}, {}};
+    impl_->scale = scale;
+    impl_->evaluated = false;
+    impl_->frame_ready = false;
+    return {};
+}
+float GeometryInstance::scale() const noexcept
+{
+    return impl_->scale;
+}
+GeometryStatus GeometryInstance::evaluate() noexcept
+{
+    auto& instance = *impl_;
+    instance.primitives.clear();
+    instance.commands.clear();
+    instance.mask_commands.clear();
+    std::fill(instance.masks.begin(), instance.masks.end(), MaskDefinition{});
+    std::fill(instance.node_commands.begin(), instance.node_commands.end(), DrawCommand{});
+    std::fill(instance.used_masks.begin(), instance.used_masks.end(), false);
+    instance.evaluated = false;
+    instance.frame_ready = false;
+    std::copy(instance.input.begin(), instance.input.end(), instance.parameters.begin());
+    const auto& scene = instance.scene;
+    for (const auto id : scene.mirrored_parameters)
+        instance.parameters[id.value] = -instance.parameters[id.value];
+    instance.states[0] = {};
+    instance.states[0].world.translation = instance.origin;
+    instance.states[0].world.a = instance.scale;
+    instance.states[0].world.d = instance.scale;
+    for (const auto& c : scene.clamps)
+    {
+        if (!c.enabled)
+            continue;
+        const ParameterPair input{instance.parameters[c.x.value], instance.parameters[c.y.value]};
+        if (input.x == 0 && input.y == 0)
+            continue;
+        if ((c.type != 0 && c.type != 1) || c.begin != -c.end || c.end <= 0)
+            return {GeometryError::UnsupportedClamp, {}, c.x};
+        const auto output = c.type == 0 ? clamp_pair(input, c.end) : clamp_circle(input, c.end);
+        instance.parameters[c.x.value] = output.x;
+        instance.parameters[c.y.value] = output.y;
+    }
+    for (std::size_t i = 1; i < scene.nodes.size(); ++i)
+    {
+        const NodeId id{static_cast<std::uint32_t>(i)};
+        const auto& n = scene.nodes[i];
+        auto& state = instance.states[i];
+        state = {};
+        const auto& parent = instance.states[n.parent.value];
+        if (n.parent.valid() &&
+            (!parent.pose.active || (n.guard.valid() && n.guard != parent.pose.resource)))
+            continue;
+        state.branch_selected = true;
+        float time = 0;
+        if (n.binding.variable.valid() && n.binding.enabled)
+        {
+            double value = instance.parameters[n.binding.variable.value];
+            if (n.binding.discretization != 0 && n.binding.discretization != 1)
+                return {GeometryError::UnsupportedDiscretization, id, n.binding.variable};
+            // Mode one truncates the authored variable before range clipping,
+            // including negative values and fractional range endpoints.
+            // See docs/synthetic-semantics-2026-10-14.md.
+            if (n.binding.discretization == 1)
+                value = std::trunc(value);
+            if (n.binding.end > n.binding.begin)
+                time = static_cast<float>(
+                    (static_cast<double>(std::clamp(value, static_cast<double>(n.binding.begin),
+                                                    static_cast<double>(n.binding.end))) -
+                     static_cast<double>(n.binding.begin)) *
+                    static_cast<double>(n.binding.division) /
+                    (static_cast<double>(n.binding.end) - static_cast<double>(n.binding.begin)));
+        }
+        const auto key =
+            std::upper_bound(n.keys.begin(), n.keys.end(), time, [](double t, const Key& k)
+                             { return t < static_cast<double>(k.time); });
+        if (key == n.keys.begin())
+            continue;
+        const auto& left = *(key - 1);
+        state.pose = key == n.keys.end() ? left.pose : interpolate(left, *key, time);
+        if (!state.pose.active)
+            continue;
+        if (!n.combinators.empty() &&
+            !sample_combinators(n.combinators, instance.parameters, state.pose.patch, state.pose.mesh))
+            return {GeometryError::InvalidCombinator, id, {}};
+        if (n.has_sprites)
+            for (NodeId ancestor = id; ancestor.valid();
+                 ancestor = scene.nodes[ancestor.value].parent)
+                if (scene.nodes[ancestor.value].unsupported ||
+                    (ancestor == id ? state.pose.unsupported
+                                    : instance.states[ancestor.value].pose.unsupported))
+                    return {GeometryError::UnsupportedTransform, ancestor, {}};
+        state.transform = state.pose;
+        state.child_sync = n.child_sync;
+        state.transform_parent = n.parent;
+        state.depth = state.pose.depth + parent.depth;
+        state.opacity = state.pose.opacity * (n.parent.valid() ? parent.opacity : 1);
+        const auto& r = scene.resources[state.pose.resource.value];
+        if (r.kind == ResourceKind::Sprite && r.rect.attr != 0 && r.rect.attr != 1 &&
+            r.rect.attr != 2)
+            return {GeometryError::UnsupportedTransform, id, {}};
+        state.density = parent.density;
+        if (state.pose.mesh && r.rect.width > 0 && n.division > 0)
+            state.density = std::max(state.density, static_cast<float>(n.division) /
+                                                        (r.rect.width + r.rect.height));
+        const auto& parent_domain = scene.resources[parent.transform.resource.value];
+        bool combined = false;
+        if (n.combine && n.parent.valid() && same_domain(r, parent_domain))
+        {
+            if (state.pose.translation != Vec2{} || state.pose.angle_degrees != 0)
+                return {GeometryError::UnsupportedCombination, id, {}};
+            // A position-synchronized parent has already changed the helper's
+            // rigid origin. Its patch must not also be added to the helper.
+            // Source captures: docs/validation/p6-child-synchronization.json.
+            if (parent.transform.mesh && parent.child_sync != 1)
+            {
+                state.transform = parent.transform;
+                state.child_sync = parent.child_sync;
+                // The source saves each sum from the current helper toward
+                // its nearest parent, rather than reusing the parent aggregate.
+                // Different Float32 addition order changes physical anchors.
+                // See docs/validation/p6-transform-precision.json.
+                state.transform.patch = state.pose.patch;
+                for (NodeId ancestor = n.parent; ancestor != parent.transform_parent;
+                     ancestor = scene.nodes[ancestor.value].parent)
+                    add_patch_displacement(state.transform.patch,
+                                           instance.states[ancestor.value].pose.patch);
+                state.transform.mesh = state.transform.mesh || state.pose.mesh;
+                state.transform_parent = parent.transform_parent;
+                combined = true;
+            }
+        }
+        // Rigid parents accumulate before any curve. Curves are evaluated in
+        // placed world coordinates, with saved control points and saved UVs.
+        // Local deformation followed by Float32 translations changes physics
+        // anchors. See docs/validation/p6-world-deformation.json.
+        // Interpolate degrees first; the source saves negative-angle wrapping
+        // before double trigonometry and the final Float32 matrix coefficients.
+        RigidTransform local;
+        if (state.transform.angle_degrees == 0.0f)
+        {
+            const float sine = state.transform.angle_degrees; // Preserve signed zero.
+            local = {1.0f, sine, -sine, 1.0f, state.transform.translation};
+        }
+        else
+        {
+            float degrees = std::fmod(state.transform.angle_degrees, 360.0f);
+            if (degrees < 0)
+                degrees += 360.0f;
+            const double radians = static_cast<double>(degrees) * (std::numbers::pi / 180.0);
+            const float cosine = static_cast<float>(std::cos(radians));
+            const float sine = static_cast<float>(std::sin(radians));
+            local = {cosine, sine, -sine, cosine, state.transform.translation};
+        }
+        const auto& transform_parent = instance.states[state.transform_parent.value];
+        // Position synchronization consumes this parent's own curve at the
+        // child origin; it does not introduce a vertex curve or subdivision.
+        // Curves already inherited from earlier ancestors still propagate.
+        state.inherited_mesh_path =
+            transform_parent.inherited_mesh_path ||
+            (transform_parent.child_sync == 8 && transform_parent.transform.mesh);
+        state.mesh_path = state.transform.mesh || state.inherited_mesh_path;
+        state.world = compose(transform_parent.world, local);
+        // A combined helper replaces its parent's surface and resolves its
+        // own inheritance against the parent's transform ancestor. A rigid
+        // parent without a surface cannot be combined away.
+        state.excluded_curve = combined ? transform_parent.excluded_curve : parent.excluded_curve;
+        const auto inherited_curve = transform_parent.child_sync == 8
+                                         ? state.transform_parent
+                                         : transform_parent.curve_parent;
+        if (!n.inherit_shape)
+        {
+            // If no new vertex chain reaches this boundary, the earlier
+            // excluded attachment chain still applies (adjacent sync 0/1).
+            if (inherited_curve.valid())
+                state.excluded_curve = inherited_curve;
+            state.curve_parent = NodeId{};
+        }
+        else
+        {
+            state.curve_parent = inherited_curve;
+        }
+        // Mask one bends the direct child origin, leaving its geometry rigid.
+        // Mask eight retains the curve in the descendant vertex chain.
+        if (transform_parent.child_sync == 1 && transform_parent.transform.mesh)
+            state.world.translation = Impl::warp(transform_parent, state.world.translation);
+        if (state.transform.mesh)
+        {
+            const auto& domain = scene.resources[state.transform.resource.value].rect;
+            const double a = static_cast<double>(state.world.a) * static_cast<double>(domain.width);
+            const double b = static_cast<double>(state.world.b) * static_cast<double>(domain.width);
+            const double c =
+                static_cast<double>(state.world.c) * static_cast<double>(domain.height);
+            const double d =
+                static_cast<double>(state.world.d) * static_cast<double>(domain.height);
+            const double determinant = a * d - b * c;
+            state.domain_inverse = {
+                static_cast<float>(d / determinant), static_cast<float>(-b / determinant),
+                static_cast<float>(-c / determinant), static_cast<float>(a / determinant)};
+            const auto world_point = [&](double x, double y) noexcept
+            {
+                return Vec2{static_cast<float>(static_cast<double>(state.world.a) * x +
+                                               static_cast<double>(state.world.c) * y +
+                                               static_cast<double>(state.world.translation.x)),
+                            static_cast<float>(static_cast<double>(state.world.b) * x +
+                                               static_cast<double>(state.world.d) * y +
+                                               static_cast<double>(state.world.translation.y))};
+            };
+            state.domain_corner = world_point(-static_cast<double>(domain.origin_x),
+                                              -static_cast<double>(domain.origin_y));
+            const double offset_x =
+                -static_cast<double>(state.world.a) * static_cast<double>(domain.origin_x) -
+                static_cast<double>(state.world.c) * static_cast<double>(domain.origin_y) +
+                static_cast<double>(state.world.translation.x);
+            const double offset_y =
+                -static_cast<double>(state.world.b) * static_cast<double>(domain.origin_x) -
+                static_cast<double>(state.world.d) * static_cast<double>(domain.origin_y) +
+                static_cast<double>(state.world.translation.y);
+            // The domain matrix is saved before transforming controls, while
+            // its corner translation retains the transient double value.
+            const double saved_a = static_cast<float>(a), saved_b = static_cast<float>(b);
+            const double saved_c = static_cast<float>(c), saved_d = static_cast<float>(d);
+            for (std::size_t j = 0; j < state.world_patch.size(); ++j)
+                state.world_patch[j] = {
+                    static_cast<float>(saved_a * static_cast<double>(state.transform.patch[j].x) +
+                                       saved_c * static_cast<double>(state.transform.patch[j].y) +
+                                       offset_x),
+                    static_cast<float>(saved_b * static_cast<double>(state.transform.patch[j].x) +
+                                       saved_d * static_cast<double>(state.transform.patch[j].y) +
+                                       offset_y)};
+        }
+        if (state.excluded_curve.valid())
+        {
+            // Retain the child's own curves, then move its resolved origin along
+            // the excluded parent surface. All its vertices share this displacement;
+            // warping the group origin before resolving the child loses local offsets.
+            // Cache per evaluation, after controls are ready, to avoid extra per-vertex
+            // traversals. Parameter/output changes rebuild this state each evaluation.
+            const auto anchor = instance.deform_curves(id, state.world.translation);
+            state.attachment_offset =
+                instance.deform_attachment(state.excluded_curve, anchor) - anchor;
+        }
+        int division = n.division;
+        if (division == 0 && n.priority == 2 && r.kind == ResourceKind::Sprite)
+            // Priority-two automatic density is the maximum active ancestor
+            // division/domain-perimeter, scaled to the sprite perimeter. Each grid axis
+            // has at least two cells, even when the requested division truncates to zero.
+            // Verified with original PSB size boundaries and different parent domains.
+            division = state.density > 0
+                           ? static_cast<int>((r.rect.width + r.rect.height) * state.density)
+                           : 0;
+        if (n.type == 0 && r.kind == ResourceKind::Sprite && (state.opacity > 0 || n.mask_source))
+            instance.primitives.push_back({id,
+                                           r.texture,
+                                           n.label,
+                                           r.name,
+                                           &r.rect,
+                                           state.opacity,
+                                           state.depth,
+                                           division,
+                                           {}});
+    }
+    // Transparent helpers can supply visible stencil alpha; retain only those
+    // needed by a currently visible masked draw. No colour command is emitted.
+    std::fill(instance.needed_mask_sources.begin(), instance.needed_mask_sources.end(), false);
+    for (const auto& primitive : instance.primitives)
+    {
+        const auto mask = scene.nodes[primitive.node.value].mask;
+        if (primitive.opacity > 0 && mask.valid())
+            instance.used_masks[mask.value - 1] = true;
+    }
+    for (std::size_t i = 0; i < scene.masks.size(); ++i)
+        if (instance.used_masks[i])
+            for (const auto source : scene.masks[i].members)
+                instance.needed_mask_sources[source.value] = true;
+    std::erase_if(
+        instance.primitives, [&](const auto& primitive)
+        { return primitive.opacity <= 0 && !instance.needed_mask_sources[primitive.node.value]; });
+    std::sort(instance.primitives.begin(), instance.primitives.end(),
+              [](const auto& a, const auto& b)
+              { return a.depth == b.depth ? a.node < b.node : a.depth < b.depth; });
+    instance.evaluated = true;
+    return {};
+}
+std::span<const GeometryPrimitive> GeometryInstance::primitives() const noexcept
+{
+    if (!impl_->evaluated)
+        return {};
+    return impl_->primitives;
+}
+Vec2 GeometryInstance::sample_atlas_point(NodeId node, Vec2 atlas_pixel) const noexcept
+{
+    assert(impl_->evaluated && node.valid() && node.value < impl_->states.size());
+    const auto& state = impl_->states[node.value];
+    const auto& r = impl_->scene.resources[state.pose.resource.value];
+    assert(state.pose.active && r.kind == ResourceKind::Sprite);
+    return impl_->transform(node,
+                            static_cast<double>(atlas_pixel.x) - static_cast<double>(r.rect.left) -
+                                static_cast<double>(r.rect.origin_x),
+                            static_cast<double>(atlas_pixel.y) - static_cast<double>(r.rect.top) -
+                                static_cast<double>(r.rect.origin_y));
+}
+LocatorSample GeometryInstance::sample_locator(NodeId node) const noexcept
+{
+    const auto& instance = *impl_;
+    if (!node.valid() || node.value >= instance.scene.nodes.size() ||
+        !instance.scene.nodes[node.value].exported_locator)
+        return {{GeometryError::InvalidLocator, node, {}}};
+    if (!instance.evaluated)
+        return {{GeometryError::UnsupportedTransform, node, {}}};
+    const auto& state = instance.states[node.value];
+    if (!state.branch_selected)
+        return {};
+    // A zero-origin exported marker remains a locator when its own display
+    // frame is empty. Resource-branch selection is a separate condition.
+    const bool empty_origin =
+        !state.pose.active && instance.scene.nodes[node.value].neutral_locator_origin;
+    if (!state.pose.active && !empty_origin)
+        return {{GeometryError::UnsupportedTransform, node, {}}};
+    for (NodeId ancestor = node; ancestor.valid();
+         ancestor = instance.scene.nodes[ancestor.value].parent)
+    {
+        const auto& n = instance.scene.nodes[ancestor.value];
+        const auto& pose = instance.states[ancestor.value].pose;
+        const bool known_partial_origin = ancestor == node && n.partial_locator_origin &&
+                                          pose.translation == Vec2{} && pose.angle_degrees == 0 &&
+                                          !pose.mesh;
+        if ((n.unsupported && !known_partial_origin) || pose.unsupported)
+            return {{GeometryError::UnsupportedTransform, ancestor, {}}};
+    }
+    return {
+        {},
+        LocatorState::Active,
+        instance.transform(empty_origin ? instance.scene.nodes[node.value].parent : node, 0, 0)};
+}
+std::optional<GeometryNodeObservation> GeometryInstance::observe_node(NodeId id) const noexcept
+{
+    const auto& instance = *impl_;
+    if (!instance.evaluated || !id.valid() || id.value >= instance.states.size())
+        return std::nullopt;
+    const auto& s = instance.states[id.value];
+    GeometryNodeObservation result;
+    result.parent = instance.scene.nodes[id.value].parent;
+    result.transform_parent = s.transform_parent;
+    result.curve_parent = s.curve_parent;
+    result.active = s.pose.active;
+    result.mesh = s.transform.mesh;
+    result.world = {
+        s.world.a, s.world.b, s.world.c, s.world.d, s.world.translation.x, s.world.translation.y};
+    result.domain_corner = s.domain_corner;
+    result.domain_inverse = s.domain_inverse;
+    result.unit_patch = s.transform.patch;
+    result.world_patch = s.world_patch;
+    result.combinator_owned = !instance.scene.nodes[id.value].combinators.empty();
+    result.combinator_effective = result.combinator_owned && s.pose.mesh;
+    result.combinator_control_count = instance.scene.nodes[id.value].combinators.size();
+    result.combinator_patch = s.pose.patch;
+    if (s.transform.resource.valid())
+    {
+        const auto& r = instance.scene.resources[s.transform.resource.value].rect;
+        result.domain_size = {r.width, r.height};
+        result.domain_origin = {r.origin_x, r.origin_y};
+    }
+    return result;
+}
+GeometryStatus GeometryInstance::build_frame() noexcept
+{
+    auto& instance = *impl_;
+    instance.frame_ready = false;
+    instance.commands.clear();
+    instance.mask_commands.clear();
+    std::fill(instance.masks.begin(), instance.masks.end(), MaskDefinition{});
+    std::fill(instance.node_commands.begin(), instance.node_commands.end(), DrawCommand{});
+    std::fill(instance.used_masks.begin(), instance.used_masks.end(), false);
+    if (!instance.evaluated)
+        return {GeometryError::UnsupportedTransform, {}, {}};
+    for (const auto& p : instance.primitives)
+        if (p.mesh_division == 0 && instance.states[p.node.value].mesh_path &&
+            instance.scene.nodes[p.node.value].priority != 2)
+            return {GeometryError::UnsupportedTessellation, p.node, {}};
+    bool rebuild_indices = instance.frame_grids.size() != instance.primitives.size();
+    std::size_t vertex_count = 0;
+    for (std::size_t i = 0; i < instance.primitives.size(); ++i)
+    {
+        const auto& p = instance.primitives[i];
+        const auto dimensions = instance.states[p.node.value].mesh_path
+                                    ? grid(p.mesh_division, *p.rect)
+                                    : std::pair<int, int>{1, 1};
+        vertex_count += static_cast<std::size_t>(dimensions.first + 1) *
+                        static_cast<std::size_t>(dimensions.second + 1);
+        if (!rebuild_indices)
+            rebuild_indices = instance.frame_grids[i].dimensions != dimensions;
+    }
+    if (rebuild_indices)
+    {
+        instance.indices.clear();
+        instance.frame_grids.clear();
+    }
+    instance.vertices.resize(vertex_count);
+    std::uint32_t first_index = 0, base = 0;
+    std::size_t primitive_index = 0;
+    for (auto& p : instance.primitives)
+    {
+        const auto& r = *p.rect;
+        const auto [nx, ny] = instance.states[p.node.value].mesh_path ? grid(p.mesh_division, r)
+                                                                      : std::pair<int, int>{1, 1};
+        const bool reuse_uv = !rebuild_indices &&
+                              instance.frame_grids[primitive_index].rect == p.rect &&
+                              instance.frame_grids[primitive_index].texture == p.texture;
+        const Impl::FrameGrid frame_grid{{nx, ny}, p.rect, p.texture};
+        if (rebuild_indices)
+            instance.frame_grids.push_back(frame_grid);
+        else
+            instance.frame_grids[primitive_index] = frame_grid;
+        ++primitive_index;
+        const auto first = first_index;
+        const auto index_count = static_cast<std::uint32_t>(nx * ny * 6);
+        first_index += index_count;
+        const auto& texture = instance.scene.textures[p.texture.value - 1];
+        const float inv_tex_w = 1.0f / static_cast<float>(texture.width);
+        const float inv_tex_h = 1.0f / static_cast<float>(texture.height);
+        const auto& world = instance.states[p.node.value].world;
+        const double left = -static_cast<double>(r.origin_x);
+        const double top = -static_cast<double>(r.origin_y);
+        // Author tessellation saves the four rigid world corners first, then
+        // interpolates their rows in double and saves each point before curves.
+        // Directly transforming local grid points loses this Float32 boundary.
+        const auto corner = [&](double x, double y) noexcept
+        {
+            const auto saved = world.apply(x, y);
+            return std::array<double, 2>{saved.x, saved.y};
+        };
+        const auto top_left = corner(left, top);
+        const auto top_right = corner(left + static_cast<double>(r.width), top);
+        const auto bottom_left = corner(left, top + static_cast<double>(r.height));
+        const auto bottom_right =
+            corner(left + static_cast<double>(r.width), top + static_cast<double>(r.height));
+        for (int y = 0; y <= ny; ++y)
+        {
+            const double row = static_cast<double>(y) / ny;
+            const double row_left_x = (1 - row) * top_left[0] + row * bottom_left[0];
+            const double row_left_y = (1 - row) * top_left[1] + row * bottom_left[1];
+            const double row_right_x = (1 - row) * top_right[0] + row * bottom_right[0];
+            const double row_right_y = (1 - row) * top_right[1] + row * bottom_right[1];
+            for (int x = 0; x <= nx; ++x)
+            {
+                // Atlas packing affects UV only. Adding a large atlas offset and
+                // subtracting it before deformation loses local subpixel precision.
+                const double column = static_cast<double>(x) / nx;
+                const Vec2 rigid_point{
+                    static_cast<float>((1 - column) * row_left_x + column * row_right_x),
+                    static_cast<float>((1 - column) * row_left_y + column * row_right_y)};
+                const auto point = instance.deform(p.node, rigid_point);
+                auto& vertex =
+                    instance.vertices[base + static_cast<std::uint32_t>(y * (nx + 1) + x)];
+                vertex.x = point.x;
+                vertex.y = point.y;
+                vertex.color = {1, 1, 1, p.opacity};
+                if (!reuse_uv)
+                {
+                    // Atlas coordinates use the original local grid ratios in
+                    // double, independently of the saved rigid corner interpolation.
+                    // UV packing has its own Float32 boundary.
+                    const double local_x =
+                        static_cast<double>(x) / nx * static_cast<double>(r.width);
+                    const double local_y =
+                        static_cast<double>(y) / ny * static_cast<double>(r.height);
+                    const float u = static_cast<float>(static_cast<double>(r.left) + local_x);
+                    // Source atlas V is saved from the lower edge before converting
+                    // to our top-origin UV. Reversing the save order changes the
+                    // texture sample along translucent edges.
+                    const float bottom_v = static_cast<float>(static_cast<double>(texture.height) -
+                                                              static_cast<double>(r.top) - local_y);
+                    const float v = static_cast<float>(texture.height) - bottom_v;
+                    vertex.u = u * inv_tex_w;
+                    vertex.v = v * inv_tex_h;
+                }
+            }
+        }
+        if (rebuild_indices)
+            for (int y = 0; y < ny; ++y)
+                for (int x = 0; x < nx; ++x)
+                {
+                    const auto a = base + static_cast<std::uint32_t>(y * (nx + 1) + x);
+                    const auto b = a + 1, c = a + static_cast<std::uint32_t>(nx + 1), d = c + 1;
+                    for (const auto index : {a, b, c, b, d, c})
+                        instance.indices.push_back(index);
+                }
+        base += static_cast<std::uint32_t>((nx + 1) * (ny + 1));
+        const auto mask = instance.scene.nodes[p.node.value].mask;
+        if (mask.valid() && p.opacity > 0)
+            instance.used_masks[mask.value - 1] = true;
+        const DrawCommand command{p.texture,
+                                  first,
+                                  index_count,
+                                  instance.states[p.node.value].pose.blend,
+                                  r.attr == 1 && instance.states[p.node.value].pose.blend ==
+                                                     BlendMode::Over
+                                      ? ColorProtection::PreserveTranslucent
+                                      : ColorProtection::None,
+                                  mask};
+        p.draw = command;
+        instance.node_commands[p.node.value] = command;
+        if (p.opacity > 0)
+            instance.commands.push_back(command);
+    }
+    for (std::size_t i = 0; i < instance.scene.masks.size(); ++i)
+    {
+        if (!instance.used_masks[i])
+            continue;
+        const auto& source = instance.scene.masks[i];
+        if (!source.resolved)
+        {
+            instance.commands.clear();
+            return {GeometryError::UnsupportedMask, source.node, {}};
+        }
+        auto& definition = instance.masks[i];
+        definition.first_command = static_cast<std::uint32_t>(instance.mask_commands.size());
+        for (const auto node : source.members)
+        {
+            auto command = instance.node_commands[node.value];
+            // Blank helpers contribute no sampled alpha. A resolved source
+            // with no sprite commands remains an empty, cleared mask, as in
+            // Fraise's special Eye poses; it is not an unresolved source.
+            if (command.index_count == 0)
+                continue;
+            if (command.mask.valid())
+            {
+                instance.commands.clear();
+                return {GeometryError::UnsupportedMask, node, {}};
+            }
+            command.protection = ColorProtection::None;
+            command.blend =
+                BlendMode::Over; // Masks sample coverage, independent of color blending.
+            instance.mask_commands.push_back(command);
+        }
+        definition.command_count =
+            static_cast<std::uint32_t>(instance.mask_commands.size()) - definition.first_command;
+    }
+    instance.frame_ready = true;
+    return {};
+}
+RenderFrame GeometryInstance::frame() const noexcept
+{
+    if (!impl_->frame_ready)
+        return {};
+    return {impl_->vertices,      impl_->indices,
+            impl_->commands,      ColorComposition::ProtectedStraight,
+            impl_->mask_commands, impl_->masks};
+}
+} // namespace nekomote::runtime

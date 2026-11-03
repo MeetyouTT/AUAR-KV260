@@ -1,0 +1,186 @@
+"""Optional local SFace inference under the camera's existing DPU owner.
+
+There is deliberately no per-vector FP32 fallback: those vectors belong to a
+different template space. Rollback selects the preserved Windows config/store.
+"""
+from contextlib import contextmanager
+import hashlib
+from pathlib import Path
+import time
+
+from board.identity.deferred import DeferredIdentity
+from board.identity.model_store import MODEL_ID, MODEL_SHA256
+from board.vision.dpu_vision_runtime import PinnedRunner, encode, sface_feature, AdmissionCancelled
+
+
+class DpuSFace:
+    kind = 'DPU_SFACE_INT8'
+    model_id = MODEL_ID
+
+    def __init__(self, config, schedule, owner, clock):
+        if schedule is None or owner is None or not callable(clock):
+            raise ValueError('DPU SFace requires the camera DPU owner and scheduler')
+        backend = config['feature_backend']
+        if config['model_id'] != MODEL_ID or backend['model_sha256'] != MODEL_SHA256:
+            raise ValueError('DPU SFace model version mismatch')
+        for key in ('model', 'manifest'):
+            if hashlib.sha256(Path(backend[key]).read_bytes()).hexdigest() != backend[key + '_sha256']:
+                raise ValueError('Pinned SFace artifact mismatch: ' + key)
+        self.schedule, self.clock = schedule, clock
+        self.source_ttl = backend['max_source_age_ms']
+        self.requests = self.execution_attempts = self.completed = self.features_returned = 0
+        self.deferred = self.slot_denials = self.expired_after_admission = 0
+        for name,value in getattr(schedule,'inherited_sface_counters',{}).items():
+            setattr(self,name,value)
+        self._closed = False
+        if getattr(schedule,'native_critical',False):
+            from board.vision.native_runtime import NativePinnedRunner
+            self.runner = NativePinnedRunner(backend['model'],backend['manifest'],owner,task='sface',
+                model_sha256=backend['model_sha256'],manifest_sha256=backend['manifest_sha256'])
+            self.native_critical = True
+        else:
+            self.runner = PinnedRunner(backend['model'], backend['manifest'], owner)
+        if (self.runner.input_fix != 7 or list(self.runner.inputs[0].dims) != [1, 112, 112, 3]
+                or len(self.runner.outputs) != 1 or list(self.runner.outputs[0].dims) != [1, 128]
+                or self.runner.outputs[0].get_attr('fix_point') != 5):
+            self.runner.close()
+            raise ValueError('Unexpected SFace INT8 tensor contract')
+
+    def _fresh(self, stamp):
+        return type(stamp) is int and 0 <= self.clock() - stamp < self.source_ttl
+
+    @contextmanager
+    def _slot(self, stamp):
+        wait_ms=getattr(self.schedule,'sface_slot_wait_ms',0)
+        until=time.monotonic()+wait_ms/1000.
+        while True:
+            with self.schedule.optional('sface') as acquired:
+                fresh=self._fresh(stamp)
+                if acquired:
+                    if not fresh:self.expired_after_admission+=1
+                    else:self.execution_attempts+=1
+                    yield fresh
+                    if fresh:
+                        marker=getattr(self.schedule,'native_completed',None)
+                        if marker is not None:marker('sface',usable=self._fresh(stamp))
+                    return
+                self.slot_denials+=1
+            # No slot or state lock is held while waiting for the same owner.
+            if (not wait_ms or not fresh or self.schedule.disabled('sface')
+                    or time.monotonic()>=until
+                    or not self.schedule.wait_for_optional('sface',until)):
+                yield False
+                return
+
+    def _defer(self, message, *, retryable=False):
+        self.deferred += 1
+        raise DeferredIdentity(message,retryable=retryable)
+
+    def feature(self, crop, *, source_mono_ms):
+        self.requests += 1
+        probe=getattr(self.schedule,'recovery_probe_allowed',lambda kind:False)
+        if (not self._fresh(source_mono_ms) or
+                (not self.availability()['ready'] and not probe('sface'))):
+            self._defer('SFace source expired or optional task disabled')
+
+        attempts_before=self.execution_attempts
+        def scheduled(normalized):
+            source = encode(normalized, self.runner.input_fix)
+            if not self._fresh(source_mono_ms):
+                return None
+            if getattr(self,'native_critical',False):
+                return self._native_encoded(source,source_mono_ms)
+            # Encoding and runner output allocation/dequantization are outside
+            # the scheduling lock. Only execute_async/wait hold the DPU slot.
+            def before_native():
+                if not self._fresh(source_mono_ms):
+                    raise AdmissionCancelled('SFace source expired before native submission')
+                starting=getattr(self.schedule,'native_starting',None)
+                if starting is not None and not starting('sface'):
+                    raise AdmissionCancelled('SFace recovery admission withdrawn')
+            try:
+                result = self.runner.execute_encoded(source, slot=self._slot(source_mono_ms),
+                    pre_execute=before_native)
+            except AdmissionCancelled:
+                self._defer('SFace source or recovery admission expired before submission')
+            if result is not None:
+                self.completed += 1
+            return result
+
+        result = sface_feature(crop, self.runner, execute=scheduled)
+        if not self.availability()['ready']:
+            self._defer('SFace protection or recovery probation; identity result withheld')
+        if result is None or not self._fresh(source_mono_ms):
+            self._defer('SFace optional slot unavailable or result expired',
+                retryable=self.execution_attempts==attempts_before and self._fresh(source_mono_ms)
+                    and not self.schedule.disabled('sface'))
+        self.features_returned += 1
+        return result
+
+    def _native_encoded(self, source, stamp):
+        """No Python optional lease; native wait/admission/ACK own protection."""
+        until = min(time.monotonic()+self.schedule.sface_slot_wait_ms/1000.,
+                    (stamp+self.source_ttl)/1000.)
+        expires = (stamp+self.source_ttl)*1_000_000
+        while self._fresh(stamp):
+            def before_native():
+                if not self._fresh(stamp):
+                    raise AdmissionCancelled('SFace source expired before native submission')
+            try:
+                values = self.runner.execute_encoded(source,source_expires_ns=expires,pre_execute=before_native)
+            except AdmissionCancelled:
+                self._defer('SFace source expired before native submission')
+            except Exception:
+                report=self.runner.last_report
+                if report is not None:
+                    self.execution_attempts += int(bool(report['submitted'] or (report['outcome']==5 and report['start_ns'])))
+                    self.completed += int(report['completed'])
+                raise
+            report = self.runner.last_report
+            if report is None:raise RuntimeError('Native SFace omitted its execution report')
+            attempted = bool(report['submitted'] or (report['outcome']==5 and report['start_ns']))
+            self.execution_attempts += int(attempted)
+            self.completed += int(report['completed'])
+            if report['completed']:
+                # NativePinnedRunner already performs the post-GIL fresh ACK.
+                # A completed probation probe remains counted even while its
+                # raw output is withheld from identity matching/publication.
+                return values
+            self.slot_denials += 1
+            if (not self.schedule.sface_slot_wait_ms or time.monotonic()>=until or
+                    self.schedule.disabled('sface') and not self.schedule.recovery_probe_allowed('sface') or
+                    not self.schedule.wait_for_optional('sface',until)):
+                return None
+        self.expired_after_admission += 1
+        return None
+
+    def availability(self):
+        """Persistent protection is unavailable; ordinary slot contention is not."""
+        status=getattr(self.schedule,'optional_status',lambda kind:{})('sface')
+        recovery=status.get('recovery')
+        recovering=recovery is not None and recovery['phase'] in ('COOLDOWN','PROBATION')
+        reason = ('DPU_SFACE_CLOSED' if self._closed else
+                  'DPU_SFACE_RECOVERING' if recovering else
+                  'DPU_SFACE_OPTIONAL_DISABLED' if self.schedule.disabled('sface') else None)
+        return {'ready': reason is None, 'unavailable_reason': reason,
+                'detail': ('人脸识别服务正在受限恢复，请稍候' if recovering else
+                           '人脸识别服务暂不可用，请恢复服务后重试' if reason else ''),
+                'recovery_required': reason in ('DPU_SFACE_OPTIONAL_DISABLED','DPU_SFACE_RECOVERING'),
+                'recovery': recovery}
+
+    def health(self):
+        return {'kind': self.kind, 'model_id': self.model_id,
+                **self.availability(),
+                'requests': self.requests, 'execution_attempts': self.execution_attempts,
+                'completed': self.completed, 'features_returned': self.features_returned,
+                'deferred': self.deferred, 'slot_denials': self.slot_denials,
+                'expired_after_admission': self.expired_after_admission,
+                'last_dpu_wait_ms': self.runner.last_ms,
+                'scheduler_calls_mean_admissions': True,
+                'native_critical':getattr(self,'native_critical',False),
+                'execution_attempts_scope':('inherited predecessor attempts plus native submit/unknown-attempt reports'
+                    if getattr(self,'native_critical',False) else 'legacy fresh optional admission attempts')}
+
+    def close(self):
+        self._closed = True
+        self.runner.close()

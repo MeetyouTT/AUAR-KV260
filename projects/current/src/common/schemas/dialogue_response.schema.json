@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DialogueResponse",
+  "description": "LAN 对话主机 → 板端 的响应（V1.0 §22.10 数据合同）；板端必须经过三层 Validator",
+  "type": "object",
+  "required": ["protocol_version", "request_id", "reply_text"],
+  "additionalProperties": false,
+  "properties": {
+    "protocol_version": { "type": "string", "enum": ["1.0"] },
+    "request_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "scene_seq_used": { "type": "integer", "minimum": 0 },
+    "reply_text": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "emotion": { "type": "string", "maxLength": 32 },
+    "avatar_action": { "type": "string", "maxLength": 32 },
+    "visual_claims": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["fact"],
+        "additionalProperties": false,
+        "properties": {
+          "fact": { "type": "string", "maxLength": 64 },
+          "source_track_id": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "control_requests": {
+      "description": "主机不得请求直接控制 FPGA/camera/audio 等硬件；本字段必须为空数组或缺失",
+      "type": "array",
+      "maxItems": 0
+    }
+  }
+}

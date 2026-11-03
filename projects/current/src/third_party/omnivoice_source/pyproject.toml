@@ -1,0 +1,16 @@
+# Migration wrapper around preserved installed source; not upstream packaging.
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "omnivoice"
+version = "0.2.1"
+description = "Preserved source-host OmniVoice package for migration"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["omnivoice*"]
+
+[tool.setuptools.package-data]
+omnivoice = ["**/*"]
