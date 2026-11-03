@@ -1,0 +1,93 @@
+--- before/board/runtime/board_business.py
++++ after/board/runtime/board_business.py
+@@ -19,7 +19,7 @@
+ from board.runtime.board_dialogue import BoardDialogueController, BoardReply, StaleGeneration, DIALOGUE_ROUTE
+ from board.runtime.board_dialogue_client import InferenceHttpClient, ModelRequestError
+ from board.runtime.board_memory_policy import BoardContextBuilder, BoardMemoryCommands, BoardSummaryClient
+-from common.board_memory import BoardMemoryStore, BoardMemoryWorker
++from common.board_memory import BoardMemoryStore, BoardMemoryWorker, MemoryBusy
+ from common.board_memory_backoff import BoardMemoryBackoffWorker
+ from common.board_timeline_clock import StableTimelineClock, ClockUnavailable
+ from common.profile_access import ProfileAccess, identifier
+@@ -484,15 +484,35 @@
+         if not re.fullmatch(r'[0-9a-f]{32}', cid):
+             return None
+         def evidence(value):
+-            if not is_current() or cancel_event.is_set() or value.get('status') != 'COMPLETE':
++            if (not is_current() or cancel_event.is_set() or self.clock() >= job.deadline
++                    or value.get('status') != 'COMPLETE'):
+                 return
+-            # Candidate IDs/vectors remain in the private speaker stores/RAM.
+-            # The shared timeline carries only the fact that this capture has
+-            # descriptive evidence, without inventing a confirmed speaker.
+-            self.store.append_event(job.scope, 'speaker:' + job.meta['request_id'], 'device_event',
+-                '本轮语音已形成归属线索，说话者身份仍未确认。', topic='语音归属',
+-                metadata=dict(source_id=source, evidence='device_confirmed', speaker_known=False,
+-                              claims=[dict(field='attribution', value='unconfirmed')]))
++            # Keep the event identity, occurrence time and payload across retries.
++            event_id = 'speaker:' + job.meta['request_id']
++            metadata = dict(source_id=source, evidence='device_confirmed', speaker_known=False,
++                occurred_utc=self.timeline.event_time(),
++                claims=[dict(field='attribution', value='unconfirmed')])
++            def check_current():
++                if not is_current() or cancel_event.is_set() or self.clock() >= job.deadline:
++                    raise StaleGeneration('Speaker evidence no longer owns its capture')
++            # The existing speaker worker owns this bounded, cancellable retry.
++            # Candidate IDs/vectors remain outside the shared timeline.
++            for attempt in range(3):
++                try:
++                    check_current()
++                    self.store.append_event(job.scope, event_id, 'device_event',
++                        '本轮语音已形成归属线索，说话者身份仍未确认。', topic='语音归属',
++                        metadata=metadata, guard=check_current)
++                    return
++                except StaleGeneration:
++                    return
++                except MemoryBusy:
++                    if attempt == 2:
++                        raise
++                    delay = .025 * (attempt + 1)
++                    if (not is_current() or cancel_event.is_set()
++                            or self.clock() + delay >= job.deadline or cancel_event.wait(delay)):
++                        return
+         try:
+             result = self.speaker_business.submit_analysis(job.meta, job.pcm, cid,
+                 visual=self.identity_handler._visual(job), is_current=is_current,
+--- before/board/runtime/board_speaker_business.py
++++ after/board/runtime/board_speaker_business.py
+@@ -561,7 +561,8 @@
+                 except Exception as exc:
+                     name = type(exc).__name__
+                     error = (name if name in ('PermissionError','TimeoutError','ValueError','TypeError',
+-                        'RuntimeError','OSError','ClockUnavailable') else
++                        'RuntimeError','OSError','ClockUnavailable','MemoryBusy','ScopeDenied',
++                        'IdempotencyConflict') else
+                         'SQLiteError' if isinstance(exc,sqlite3.Error) else 'OtherError')
+                     with self.lock:
+                         self.counts['evidence_errors'] += 1
+--- before/common/board_memory.py
++++ after/common/board_memory.py
+@@ -759,7 +759,10 @@
+             self._turn_grants.clear()
+             return {"recovered_turns": len(rows)}
+ 
+-    def append_event(self, scope, event_id, source, text, *, closed=True, topic="", metadata=None):
++    def append_event(self, scope, event_id, source, text, *, closed=True, topic="", metadata=None, guard=None):
++        # An optional pure validity check raises to roll back a stale append.
++        if guard is not None and not callable(guard):
++            raise ValueError("Event guard must be callable or None")
+         _identifier(event_id, "event id"); _text(text); _topic(topic)
+         if source not in SOURCES - {"assistant_reply", "assistant_played"} or type(closed) is not bool:
+             raise ValueError("Assistant playback must use the turn receipt API")
+@@ -769,7 +772,11 @@
+                 raise ValueError("Camera events must remain observations")
+             meta["evidence"] = "visual_observation"
+         with self._scope(scope) as owner, self._db(True) as db:
++            if guard is not None:
++                guard()  # BEGIN IMMEDIATE may have waited for another writer.
+             row = self._insert_event(db, owner, event_id, source, text, topic, meta, self._now(), closed=closed)
++            if guard is not None:
++                guard()  # The existing transaction rolls back on invalidation.
+             return {"event_id": row["event_id"], "revision": row["revision"], "state": row["state"]}
+ 
+     def close_event(self, scope, event_id):

@@ -1,0 +1,101 @@
+{
+  "schema": "aura.production-frontend-capacity-candidate.v1",
+  "saved_utc": "2026-10-31T05:30:29.983847+00:00",
+  "status": "SOURCE_ONLY_ROOT_SERIAL_ACTUAL_THREAD_SCOPE_CHECK_REQUIRED",
+  "files": [
+    {
+      "target": "aura/board/runtime/audio/board_capture_priority.py",
+      "source": "deliverables/2026-10-30_board_owner/integration/production_frontend_capacity_candidate/after/aura/board/runtime/audio/board_capture_priority.py",
+      "sha256": "f98aeb83285df389417cd3da98d7c95920417ca342926718a31b88926afe1931",
+      "bytes": 5491
+    },
+    {
+      "target": "aura/board/runtime/audio/board_gtcrn_reuse.py",
+      "source": "deliverables/2026-10-30_board_owner/integration/production_frontend_capacity_candidate/after/aura/board/runtime/audio/board_gtcrn_reuse.py",
+      "sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9",
+      "bytes": 9757
+    },
+    {
+      "target": "aura/tools/production_board_business_gui.py",
+      "source": "deliverables/2026-10-30_board_owner/integration/production_frontend_capacity_candidate/after/aura/tools/production_board_business_gui.py",
+      "sha256": "1d4cdb9dd9179476e34fd8b9574b497615f597dbbd082d873d3fdedb619e391d",
+      "bytes": 9680
+    },
+    {
+      "target": "aura/tools/production_frontend_selection.py",
+      "source": "deliverables/2026-10-30_board_owner/integration/production_frontend_capacity_candidate/after/aura/tools/production_frontend_selection.py",
+      "sha256": "c9d095bb722a8dd0096ffdb373910ae364e0e4cd12dcb4d0fdc20ac55bf627a2",
+      "bytes": 1893
+    }
+  ],
+  "input_pins": {
+    "factory_source": "deliverables\\2026-10-30_board_owner\\integration\\production_business_overlay\\candidate\\aura\\tools\\production_board_business_gui.py",
+    "factory_sha256": "29fa2d5b664db3e1b92583a93fcdad6283d8dae2a6b28b90ef8a141e15fd0a25",
+    "same_weight_reuse_sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9"
+  },
+  "first_selection": {
+    "frontend_optimization": "baseline",
+    "capture_priority_nice": -10,
+    "frontend_threads": 1
+  },
+  "optional_combined": {
+    "frontend_optimization": "combined",
+    "capture_priority_nice": 0,
+    "frontend_threads": 1,
+    "not_enabled_by_first_selection": true,
+    "source_sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9"
+  },
+  "defaults": {
+    "frontend_optimization": "baseline",
+    "capture_priority_nice": 0
+  },
+  "synthetic_tests": {
+    "passed": 47,
+    "failed": 0,
+    "seconds": 0.45,
+    "command": "python -B -m pytest -p no:cacheprovider deliverables/2026-10-30_board_owner/integration/production_frontend_capacity_candidate/test_capacity_selection.py deliverables/2026-10-30_board_owner/integration/resume_frontend_optimization/tests/test_candidate.py --basetemp=deliverables/2026-10-30_board_owner/integration/production_frontend_capacity_candidate/test-final -q",
+    "scope": "31 original numerical tests plus 16 scheduler/MCP cleanup/factory-selection cases, all fake/no hardware/model"
+  },
+  "unchanged": [
+    "eight-frame input queue and fail-whole-capture overflow",
+    "original GTCRN/Silero/Paraformer weights and thresholds",
+    "FFT/hop/window/PCM grid/endpoint",
+    "single BoardFrontendPool and original acquire/reset leases",
+    "capture lock/process cleanup and playback ACK/clock ownership",
+    "camera/display/firmware/movement",
+    "production defaults/main sources/private data"
+  ],
+  "priority": {
+    "scope": "Only get/setpriority current threading.get_native_id inside _read_pcm; fixed -10, no arbitrary priority/FIFO/RT",
+    "pump_inherits": true,
+    "arecord_launch_before_priority": true,
+    "restore_in_finally": true,
+    "unsupported_permission_restoration_failure": "explicit ERROR/no successful capture; original Mcp._read finally stops owned process and releases device owner",
+    "setup_failure_also_closes_original_endpoint_and_barge_echo": true,
+    "snapshot_key": "capture_priority",
+    "snapshot_fields": [
+      "requested_nice",
+      "original_nice",
+      "effective_nice",
+      "restored_nice",
+      "applied",
+      "restored",
+      "restoration_confirmed",
+      "error_code",
+      "native_tid",
+      "pump_native_tid",
+      "scope",
+      "status"
+    ],
+    "inheritance_limit": "Linux any newly created child thread inherits caller nice. Existing GTK/render/camera/arecord threads unchanged. Original speech timeout Timer and lazily created barge-confirm worker may also inherit -10; do not claim every future helper thread stays nice0."
+  },
+  "evidence": {
+    "old_nice0_public_success": "resume_yuki_pipe_capacity/actual_round2_run.json + actual_round2_run_repeat.json use unchanged b538 baseline gate; only safety_snapshot replaced; queue peaks2/3",
+    "combined_previous_success": "resume_performance/20261031T000800-combined.json + 001046 combined use camera200/nice-10; 001532 combined uses restored100/nice-10",
+    "limitation": "Public paced source success is not actual microphone/in-process scheduling capacity; no unconditional real-time guarantee"
+  },
+  "hardware_or_services_started": false,
+  "actual_priority_changed": false,
+  "actual_device_or_models_opened": false,
+  "production_deployed": false
+}

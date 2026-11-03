@@ -1,0 +1,115 @@
+--- live/board_dialogue.py
++++ candidate/board_dialogue.py
+@@ -7,6 +7,8 @@
+ from __future__ import annotations
+ 
+ from dataclasses import dataclass, field
++from copy import copy
++from pathlib import Path
+ import hashlib
+ import json
+ import re
+@@ -18,6 +20,32 @@
+     MAX_BUDGET_MS, MAX_PCM, Owner, decode_audio, validate_request, validate_response,
+ )
+ from common.reply_quality import possible_question_echo
++
++
++# /run is volatile: enabling this test never changes the saved default.
++THINKING_TEST_PATH = Path('/run/aura-dialogue-thinking-test.json')
++
++
++def dialogue_thinking_test_options(board_boot_id):
++    """Read one bounded, boot-bound local test selection; default stays off."""
++    try:
++        if THINKING_TEST_PATH.is_symlink():
++            return {}
++        with THINKING_TEST_PATH.open('rb') as stream:
++            raw = stream.read(1025)
++        if len(raw) > 1024:
++            return {}
++        value = json.loads(raw)
++        if (not isinstance(value, dict)
++                or set(value) != {'version', 'enabled', 'board_boot_id', 'num_predict'}
++                or type(value['version']) is not int or value['version'] != 1
++                or value['enabled'] is not True
++                or value['board_boot_id'] != board_boot_id
++                or type(value['num_predict']) is not int or value['num_predict'] != 192):
++            return {}
++        return {'think': True, 'num_predict': 192}
++    except (OSError, ValueError):
++        return {}
+ 
+ 
+ class StaleGeneration(InterruptedError):
+@@ -133,6 +161,7 @@
+     summary_ids: set = field(default_factory=set)
+     provenance_complete: bool = False
+     context_source_id: object = None
++    llm_options: dict = field(default_factory=dict)
+     address_name: object = None
+ 
+ 
+@@ -498,7 +527,41 @@
+             turn.source_event_ids.update(fact.get('source_event_ids', []))
+         context=self._address_context(context,turn)
+         if self.context_builder is not None:
+-            return self.context_builder(context, text, history)
++            builder = self.context_builder
++            metrics_target = builder
++            if not turn.llm_options.get('think'):
++                return builder(context, text, history)
++            if turn.llm_options.get('think'):
++                # Reserve thinking tokens before selecting whole memory items.
++                # A per-turn copy leaves the normal context/summary budget intact.
++                from board.runtime.board_memory_policy import BoardContextBuilder, ContextLimitError
++                if isinstance(builder, BoardContextBuilder):
++                    builder = copy(builder)
++                    builder.reserve = max(builder.reserve, turn.llm_options['num_predict'])
++                else:
++                    # Retain the selected character's ready check and speech policy.
++                    from tools.yuki_business_candidate import PairedContextBuilder
++                    if (not isinstance(builder, PairedContextBuilder)
++                            or not isinstance(builder.original, BoardContextBuilder)):
++                        raise RuntimeError('Thinking test requires the bounded context builder')
++                    metrics_target = builder.original
++                    bounded = copy(builder.original)
++                    bounded.reserve = max(bounded.reserve, turn.llm_options['num_predict'])
++                    builder = PairedContextBuilder(bounded, builder.pair)
++            try:
++                messages = builder(context, text, history)
++            except ContextLimitError:
++                # Longer current input keeps the original accepted reserve.
++                # Keep the whole input, persona and recognition note intact.
++                turn.llm_options['num_predict'] = 120
++                if isinstance(builder, BoardContextBuilder):
++                    builder.reserve = 120
++                else:
++                    builder.original.reserve = 120
++                messages = builder(context, text, history)
++            if turn.llm_options.get('think'):
++                metrics_target.metrics = dict(builder.metrics)
++            return messages
+         messages = [dict(role='system', content=self.system_prompt)]
+         # Facts are small explicit board-authorized values. Long-term history is
+         # injected only when the board intent router supplies history_query.
+@@ -602,10 +665,18 @@
+                     turn.provenance_complete = reply.provenance_complete
+             if reply is None:
+                 context_started = self.clock()
++                turn.llm_options = dialogue_thinking_test_options(self.board_boot_id)
++                metrics['thinking_test_enabled'] = bool(turn.llm_options.get('think'))
+                 messages = self._messages(turn, text, history_query)
++                metrics['llm_num_predict'] = turn.llm_options.get('num_predict', 120)
+                 metrics['context_ms'] = (self.clock()-context_started)*1000
+                 for attempt in range(2):
+-                    result, _ = timed_request('llm', task='dialogue', messages=messages)
++                    if turn.llm_options.get('think'):
++                        from board.runtime.board_memory_policy import message_cost
++                        if message_cost(messages, turn.llm_options['num_predict']) > 2048:
++                            raise ReplyRejected('Thinking test exceeds the safe context capacity')
++                    result, _ = timed_request('llm', task='dialogue', messages=messages,
++                                              options=dict(turn.llm_options))
+                     try:
+                         reply = self.reply_validator(result['text'], text)
+                         reply = address_reply(reply, turn.address_name)

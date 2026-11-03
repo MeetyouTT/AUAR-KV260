@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.851" timestamp="2026-10-31T19:32:37.566216-07:00" hostname="zhenghang"><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.dialogue_repair.performance_review_newboot.identity_cooperation_review.test_independent_counterexamples" name="test_foreign_packet_cannot_revoke_existing_derived_links_or_poison_gallery_version[request_id-foreign-public-request]" time="0.186"><failure message="AssertionError: assert ((('f4a953b7e...1202b945')),)) == ((('f4a953b7e...c14f9789')),))&#10;  &#10;  At index 0 diff: (('f4a953b7e783419f9b2faacc02d82d32', 'INVALIDATED'),) != (('f4a953b7e783419f9b2faacc02d82d32', 'ACTIVE'),)&#10;  Use -v to get more diff">tmp_path = WindowsPath('C:/Users/35870/AppData/Local/Temp/pytest-of-35870/pytest-97/test_foreign_packet_cannot_rev0')
+field = 'request_id', value = 'foreign-public-request'
+
+    @pytest.mark.parametrize('field,value', [
+        ('request_id', 'foreign-public-request'),
+        ('capture_id', 'foreign-public-capture'),
+        ('board_boot_id', 'foreign-public-boot'),
+        ('generation', 999),
+    ])
+    def test_foreign_packet_cannot_revoke_existing_derived_links_or_poison_gallery_version(tmp_path, field, value):
+        harness = Harness(tmp_path)
+        try:
+            before = derived_state(harness)
+            original = harness.scene.read
+    
+            def foreign_inventory(meta, snapshot):
+                packet = original(meta, snapshot)
+                packet['context'] = dict(meta, **{field: value})
+                packet['gallery']['revision'] += 100
+                packet['current'] = None
+                packet['inventory'] = []
+                return packet
+    
+            harness.scene.read = foreign_inventory
+            _, result = harness.say('用于独立审查的公开普通对话')
+            assert result['status'] == 'COMPLETE'
+            assert 'face' not in result['identity']['modalities']
+            assert not harness.bundle.access.grants
+&gt;           assert derived_state(harness) == before
+E           AssertionError: assert ((('f4a953b7e...1202b945')),)) == ((('f4a953b7e...c14f9789')),))
+E             
+E             At index 0 diff: (('f4a953b7e783419f9b2faacc02d82d32', 'INVALIDATED'),) != (('f4a953b7e783419f9b2faacc02d82d32', 'ACTIVE'),)
+E             Use -v to get more diff
+
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\performance_review_newboot\identity_cooperation_review\test_independent_counterexamples.py:51: AssertionError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.dialogue_repair.performance_review_newboot.identity_cooperation_review.test_independent_counterexamples" name="test_foreign_packet_cannot_revoke_existing_derived_links_or_poison_gallery_version[capture_id-foreign-public-capture]" time="0.129"><failure message="AssertionError: assert ((('fe6e4f0aa...1202b945')),)) == ((('fe6e4f0aa...c14f9789')),))&#10;  &#10;  At index 0 diff: (('fe6e4f0aad4f4f2caa78a8189ac42130', 'INVALIDATED'),) != (('fe6e4f0aad4f4f2caa78a8189ac42130', 'ACTIVE'),)&#10;  Use -v to get more diff">tmp_path = WindowsPath('C:/Users/35870/AppData/Local/Temp/pytest-of-35870/pytest-97/test_foreign_packet_cannot_rev1')
+field = 'capture_id', value = 'foreign-public-capture'
+
+    @pytest.mark.parametrize('field,value', [
+        ('request_id', 'foreign-public-request'),
+        ('capture_id', 'foreign-public-capture'),
+        ('board_boot_id', 'foreign-public-boot'),
+        ('generation', 999),
+    ])
+    def test_foreign_packet_cannot_revoke_existing_derived_links_or_poison_gallery_version(tmp_path, field, value):
+        harness = Harness(tmp_path)
+        try:
+            before = derived_state(harness)
+            original = harness.scene.read
+    
+            def foreign_inventory(meta, snapshot):
+                packet = original(meta, snapshot)
+                packet['context'] = dict(meta, **{field: value})
+                packet['gallery']['revision'] += 100
+                packet['current'] = None
+                packet['inventory'] = []
+                return packet
+    
+            harness.scene.read = foreign_inventory
+            _, result = harness.say('用于独立审查的公开普通对话')
+            assert result['status'] == 'COMPLETE'
+            assert 'face' not in result['identity']['modalities']
+            assert not harness.bundle.access.grants
+&gt;           assert derived_state(harness) == before
+E           AssertionError: assert ((('fe6e4f0aa...1202b945')),)) == ((('fe6e4f0aa...c14f9789')),))
+E             
+E             At index 0 diff: (('fe6e4f0aad4f4f2caa78a8189ac42130', 'INVALIDATED'),) != (('fe6e4f0aad4f4f2caa78a8189ac42130', 'ACTIVE'),)
+E             Use -v to get more diff
+
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\performance_review_newboot\identity_cooperation_review\test_independent_counterexamples.py:51: AssertionError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.dialogue_repair.performance_review_newboot.identity_cooperation_review.test_independent_counterexamples" name="test_foreign_packet_cannot_revoke_existing_derived_links_or_poison_gallery_version[board_boot_id-foreign-public-boot]" time="0.130"><failure message="AssertionError: assert ((('3775f60c1...1202b945')),)) == ((('3775f60c1...c14f9789')),))&#10;  &#10;  At index 0 diff: (('3775f60c175440a4b1153f85d8c611c8', 'INVALIDATED'),) != (('3775f60c175440a4b1153f85d8c611c8', 'ACTIVE'),)&#10;  Use -v to get more diff">tmp_path = WindowsPath('C:/Users/35870/AppData/Local/Temp/pytest-of-35870/pytest-97/test_foreign_packet_cannot_rev2')
+field = 'board_boot_id', value = 'foreign-public-boot'
+
+    @pytest.mark.parametrize('field,value', [
+        ('request_id', 'foreign-public-request'),
+        ('capture_id', 'foreign-public-capture'),
+        ('board_boot_id', 'foreign-public-boot'),
+        ('generation', 999),
+    ])
+    def test_foreign_packet_cannot_revoke_existing_derived_links_or_poison_gallery_version(tmp_path, field, value):
+        harness = Harness(tmp_path)
+        try:
+            before = derived_state(harness)
+            original = harness.scene.read
+    
+            def foreign_inventory(meta, snapshot):
+                packet = original(meta, snapshot)
+                packet['context'] = dict(meta, **{field: value})
+                packet['gallery']['revision'] += 100
+                packet['current'] = None
+                packet['inventory'] = []
+                return packet
+    
+            harness.scene.read = foreign_inventory
+            _, result = harness.say('用于独立审查的公开普通对话')
+            assert result['status'] == 'COMPLETE'
+            assert 'face' not in result['identity']['modalities']
+            assert not harness.bundle.access.grants
+&gt;           assert derived_state(harness) == before
+E           AssertionError: assert ((('3775f60c1...1202b945')),)) == ((('3775f60c1...c14f9789')),))
+E             
+E             At index 0 diff: (('3775f60c175440a4b1153f85d8c611c8', 'INVALIDATED'),) != (('3775f60c175440a4b1153f85d8c611c8', 'ACTIVE'),)
+E             Use -v to get more diff
+
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\performance_review_newboot\identity_cooperation_review\test_independent_counterexamples.py:51: AssertionError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.dialogue_repair.performance_review_newboot.identity_cooperation_review.test_independent_counterexamples" name="test_foreign_packet_cannot_revoke_existing_derived_links_or_poison_gallery_version[generation-999]" time="0.146"><failure message="AssertionError: assert ((('99ec39243...1202b945')),)) == ((('99ec39243...c14f9789')),))&#10;  &#10;  At index 0 diff: (('99ec39243b804d3f99c1fbcab5f23b50', 'INVALIDATED'),) != (('99ec39243b804d3f99c1fbcab5f23b50', 'ACTIVE'),)&#10;  Use -v to get more diff">tmp_path = WindowsPath('C:/Users/35870/AppData/Local/Temp/pytest-of-35870/pytest-97/test_foreign_packet_cannot_rev3')
+field = 'generation', value = 999
+
+    @pytest.mark.parametrize('field,value', [
+        ('request_id', 'foreign-public-request'),
+        ('capture_id', 'foreign-public-capture'),
+        ('board_boot_id', 'foreign-public-boot'),
+        ('generation', 999),
+    ])
+    def test_foreign_packet_cannot_revoke_existing_derived_links_or_poison_gallery_version(tmp_path, field, value):
+        harness = Harness(tmp_path)
+        try:
+            before = derived_state(harness)
+            original = harness.scene.read
+    
+            def foreign_inventory(meta, snapshot):
+                packet = original(meta, snapshot)
+                packet['context'] = dict(meta, **{field: value})
+                packet['gallery']['revision'] += 100
+                packet['current'] = None
+                packet['inventory'] = []
+                return packet
+    
+            harness.scene.read = foreign_inventory
+            _, result = harness.say('用于独立审查的公开普通对话')
+            assert result['status'] == 'COMPLETE'
+            assert 'face' not in result['identity']['modalities']
+            assert not harness.bundle.access.grants
+&gt;           assert derived_state(harness) == before
+E           AssertionError: assert ((('99ec39243...1202b945')),)) == ((('99ec39243...c14f9789')),))
+E             
+E             At index 0 diff: (('99ec39243b804d3f99c1fbcab5f23b50', 'INVALIDATED'),) != (('99ec39243b804d3f99c1fbcab5f23b50', 'ACTIVE'),)
+E             Use -v to get more diff
+
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\performance_review_newboot\identity_cooperation_review\test_independent_counterexamples.py:51: AssertionError</failure></testcase></testsuite></testsuites>

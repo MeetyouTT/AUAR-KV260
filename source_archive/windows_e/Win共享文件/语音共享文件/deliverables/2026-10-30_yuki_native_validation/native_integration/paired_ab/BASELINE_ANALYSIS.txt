@@ -1,0 +1,40 @@
+精确旧renderer A端调查（2026-10-30，只读fresh r3源码，尚未跑负载）
+
+更新后的决定性实板事实（以下旧“待核实”项已由此覆盖）：
+现役实际是remote16fps，native_avatar=true、native_pixel_threads=3、stable_avatar_fps=16、cache_sequences=12、native_ui_tick_ms=200、portrait_offload.enabled=true/fps16，瞬时实际15.606fps。主比较固定A=该remote16完整显示管线，B=新形象板端16同公共controller/worker框架；不能以本地8fps fallback作主baseline。
+旧Windows服务器源码hash与fresh component_pins一致，但它只允许一条active stream：同一个renderer有全局current/last_sequence/core，stream Lock由一条TCP连接全程持有。第二session会被拒，且可能在现役重连空隙抢占，绝不能向8796发送测试render。
+已提供isolated_portrait_server.py：新进程、新renderer、同snapshot/revision/423x438/background；绑定192.168.50.1端口0由OS选空闲端口，仅接192.168.50.2，记录PID/实际端口与hash，不改现役config/selected、防火墙或服务。此脚本尚未启动。
+A/B均使用屏内mapped、非透明、non-focus的独立423x438窗口，默认x590/y80，1024x600显示模式不变，结束destroy。不得用opacity0/offscreen作降耗主比较。
+旧native_pixels.cpp pin=953d553e57ee42589caaae9c720ff4f57b1734d81e6648990f9784d299ffc798。NativeVideo原生统计保留240个identity-handoff时间点/239个间隔，p95/p99采用sorted[min(n-1,size_t(n*.95/.99))]；B应以尾240个swap完成时间同定义比较。两者均非physical scanout。A保留原库，不加每帧Python observer。
+JPEG功能差异遵主代理决定明确单列：主结果称“整条替换pipeline成本差异”，不能从总差额推断纯renderer效率提升。相机、ACK、OS/GPU遥测和ABBA执行归父代理，本代理不触碰。
+
+依据必须是 native_integration/board_source/manifest.json 的实板快照：
+runtime=/home/root/aura-board-vision-20261030/06391079cfddb734-r3-ubuntu/runtime
+UI入口 aura/tools/board_avatar_pan.py；Gtk SHA874f0075741b0794a6bed4ba8aab33dfd0280e57a899d63a38ffa70f76b3cda9；worker SHA3eff9cbda4705e18c799b0d0ace3a944f29dcf118ae8a8dfa0a24bb458d2e25e。
+不能使用Windows工作树同名Gtk替代。
+
+已确定的执行链：
+1. board_avatar_pan.main 包装 BoardAvatarStage，安装 face_pan_controls.stage_type / FacePanProcess。它不只是调用裸Gtk；实际pan配置及当前是否启用须从实板startup配置核实。测试不得触发机械/云台操作，双方均禁实际机械输出，保留相同业务采样负载或明确排除。
+2. Gtk create_runtime_core(create_demo_core)，恢复可能被归档资产helper改写的sys.path；character/default资产、camera框与contain_rect都来自同一实板runtime。默认输入464x480 contain到实际窗口区域；测试必须固定最后实际423x438，不只比较模型源尺寸。
+3. native_avatar=true时，NativePixels(tools/libaura_pixels.so, 背景, 输出size, native_pixel_threads默认2).configure(core)，NativeVideo(同库,size)负责显示；否则是configure_board_rendering(core)软件支路。要记录实际startup配置，不能在A端任意选择更慢的PIL支路。
+4. native路径还预热IDLE/PRESENT/LISTENING/THINKING/ACK_NOD/DENY_SHAKE/AWAKE/PUZZLED的sequence和sop，cache_sequences取实际配置。冷启动包括这些初始化与预热；warm期不能把A还在加载资产、B已预热的阶段混比。
+5. Realtime/StreamingController + RecordingController封装拥有业务/FSM/音频时钟。AvatarRenderWorker是唯一render-owner，按visual_period调core.tick，未到render槽时仍保留controller.tick的业务维护。fresh实值stable_avatar_fps=16、remote16；local8是瞬态回退，不替代主基线。
+6. AvatarRenderWorker输出meta后：若_portrait_rgb则直接远程RGB；普通meta则做RGB/alpha合成、board_avatar_affine.resize_rgb。NativePixels可能改变meta image类型，具体内存/resize短路行为待fresh helper核验。
+7. native_video存在时总会构造PreviewEncoder：latest-only，至少0.2秒间隔（约5Hz），JPEG quality85后台线程；即使当前没有web消费者仍有生成成本。新_native_yuki分支现不产rgb/jpeg，因此不能把这一功能删除的差额记作纯renderer效率提升。
+8. FramePresenter独立线程，最多一张待发帧，按visual_slot加min(85ms,period*0.85)释放本地图像；持有原有generation/talk_gen/portrait session校验与过期检查，再调用NativeVideo.push。不能用A端GLib临时重写的提交循环代替此路径。
+9. Gtk只attach旧NativeVideo XID与读取其handoff统计；worker public快照约10Hz，性能记录和JPEG线程都属于现有板端进程家族开销。
+10. portrait_offload.enabled可能改变实际支路为远程RGB。必须核对当前startup配置和连接状态：正常remote、断线本地fallback、显式关闭remote为三种不同基线，不能把其中一个假称为另一个。此次测试不得为基线调用电脑模型服务或依赖生产远程画面；若实际启用了remote，应单列“本地fallback匹配实验”，主代理确认比较口径。
+
+同条件必须项：
+- A/B都使用真实fresh controller/worker业务层，或都明确同等裁掉该层。既有Yuki validate_gtk_clock的SimpleNamespace core+portrait_frame探针，不能直接与A全业务worker作降耗比较。
+- 同公开PCM、同GstAudioEngine实际同步fakesink时钟、同pause/cancel/重启/表情与idle日程。禁止打开物理音频、麦克风或调用ASR/TTS/模型服务。
+- 同输出像素尺寸、16fps目标、窗口visual/可见性/合成器状态、CPU优先级、线程数策略、冷/暖定义、相机业务背景负载。OS/相机采样及ABBA调度归父代理；本harness不调系统服务、不打开摄像头。
+- 日志/性能采样、网页诊断JPEG、状态/public采样若只一边启用，必须单列差异。建议同时报告“真实产品路径总成本”和“功能匹配的renderer+display成本”，不可偷换。
+- 旧显示链CPU RGB合成/拷贝/Gst视频提交与新GPU原位绘制，是后端架构本身的差别，可以比较整个renderer+display路径；旧JPEG预览丢失、点头/摇头动作能力减少等则是功能差异，需要标注而非算作同功能降耗。
+- 帧质量统计必须注明观测层级：A取真实NativeVideo的identity回调入口时间，B取EGL swap完成，二者均未测物理scanout。目标16不等于实际16，drop与P95/P99都须保留。
+- 冷启动区分新进程冷启动与OS page-cache冷启动；不允许为测试自行drop_caches、重启现役服务或清旧缓存。ABBA顺序与warm边界由父代理统一。
+
+当前计划的隔离A端harness：
+从manifest指定runtime导入实际tools模块并逐项校验hash；创建公开PCM同步fakesink Output适配器和不联网的预制Job；真实create_demo_core/NativePixels.configure/预热/RealtimeController/AvatarRenderWorker；Gtk独立native XID attach真实NativeVideo。默认保留PreviewEncoder与FramePresenter，任何裁剪通过显式实验flag记录。所有证据只写paired_ab输出目录；不创建完整业务UI、不启动ASR/TTS/身份/相机/机械进程、不改现役config。相同业务UI额外负载须由父代理在A/B两侧统一提供，不能只A创建完整BoardAvatarStage。
+
+fresh helper/source已核验并用于统一paired_renderer_harness.py：NativePixels真实hook与C ABI、NativeVideo初始化/attach/clock/push/read/close、demo_core与公共PCM/envelope、16fps/threads3均按真实配置装配。PSS/GPU采样及板端执行由父代理承担。本文件不是性能结论或已运行证明。

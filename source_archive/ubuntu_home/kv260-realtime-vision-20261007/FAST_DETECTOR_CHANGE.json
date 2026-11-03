@@ -1,0 +1,214 @@
+{
+  "scope": "BOARD_VERIFIED_FAST_INFERENCE_FRESHNESS_PASSED_DIRECTION_TEST_SHORTENED_BY_FACE_QUALITY",
+  "backend_sha256": "ee34109e23423d99a4ea3ff75c2bf9d113329b1c8162cd02f30e7dfcfb6bfeaf",
+  "input_size": 192,
+  "capture_size": [
+    640,
+    480
+  ],
+  "source": "https://github.com/opencv/opencv/blob/4.6.0/modules/objdetect/src/face_detect.cpp",
+  "source_model_hash_unchanged": true,
+  "score_threshold": 0.9,
+  "guard_ms": 250,
+  "speed_changed": false,
+  "staging": "/home/root/aura-adaptation-20261006/detector-fast-7de5799a0afd4071/",
+  "realtime_old_sha256": "9c82891b7ab023e1947d1bee329c30b2c0921e78aaf3b7ca2adcf85735f96b90",
+  "realtime_new_sha256": "fd7aab4cc5ac31287c97b150c5263f27ba8fd6e95b63323df1a1f90da7efd316",
+  "edits": [
+    [
+      "BACKEND_SHA = '020668a71c2f08c2e671e0514790a00c241e25b1ce940f6e66be9ad6bc415443'",
+      "BACKEND_SHA = 'ee34109e23423d99a4ea3ff75c2bf9d113329b1c8162cd02f30e7dfcfb6bfeaf'"
+    ],
+    [
+      "    backend = model_root/'face_compat.py'",
+      "    backend = Path(__file__).with_name('face_compat_fast.py')"
+    ],
+    [
+      "    sys.path.insert(0, str(model_root))\n    from face_compat import YuNetCompat\n    cv2.setNumThreads(1)\n    return YuNetCompat(model_root/'models/yunet_2022mar.onnx')",
+      "    sys.path.insert(0, str(backend.parent))\n    from face_compat_fast import YuNetCompat\n    cv2.setNumThreads(2)\n    return YuNetCompat(model_root/'models/yunet_2022mar.onnx', input_size=192)"
+    ],
+    [
+      "                      device='/dev/video0', capture_size=[640,480], capture_format='YUY2',\n",
+      "                      device='/dev/video0', capture_size=[640,480], capture_format='YUY2',\n                      detector_input_size=[192,192], detector_cpu_threads=2,\n"
+    ]
+  ],
+  "fixed_validation": {
+    "evidence": "/home/ghmd/kv260-adaptation-check-20261006/evidence/20261008T145358.311392Z-fast_detector_start",
+    "rc": 0,
+    "output_sha256": "eca25943d326f2f8174c2d4010400ff0aa8a675e0bc7be9796c0f28c89424514",
+    "source_sha256": "442c298f3609a99225d46a8eaa49067fed0c8f513fed350ddedf06332c916c61",
+    "console_echo_restored": true
+  },
+  "deployment": {
+    "evidence": "/home/ghmd/kv260-adaptation-check-20261006/evidence/20261008T145535.489482Z-timing_fast_camera_start",
+    "rc": 0,
+    "output_sha256": "219749b6a198401a85a2a86e74c637cc570fb99656edd2118df1b00c22b5dbd0",
+    "source_sha256": "00e893ac84cce1599e0a8cbd141e1e6aa73fe33eb2245d678b0fffc4012a6fbd",
+    "console_echo_restored": true
+  },
+  "freshness": {
+    "evidence": "/home/ghmd/kv260-adaptation-check-20261006/evidence/20261008T145623.194004Z-visual_freshness_probe",
+    "rc": 0,
+    "output_sha256": "256ed3e4c5d3f8ac109100a7697f1440e726238313a79091e2aff069760d2a8e",
+    "source_sha256": "f55bc5c56639f39dc9584dad5ae84d90800f3226856abe4b06f1220b71218d16",
+    "console_echo_restored": true
+  },
+  "freshness_result": {
+    "scope": "READ_ONLY_20S_FRESHNESS_QUALIFICATION",
+    "pid": 22707,
+    "epoch": "a62d5c1018964b46ace243e3165e108a",
+    "source_age": {
+      "n": 3422,
+      "median_ms": 100.04405999825394,
+      "p95_ms": 132.62257700262126,
+      "max_ms": 194.07642100122757
+    },
+    "age_at_publication": {
+      "n": 401,
+      "median_ms": 72.4591939979291,
+      "p95_ms": 93.39401399847702,
+      "max_ms": 118.37731400009943
+    },
+    "capture_to_inference": {
+      "n": 401,
+      "median_ms": 24.423064998700283,
+      "p95_ms": 43.58021599909989,
+      "max_ms": 48.83808799786493
+    },
+    "inference": {
+      "n": 401,
+      "median_ms": 48.15598200002569,
+      "p95_ms": 51.40617399956682,
+      "max_ms": 91.43879499970353
+    },
+    "publication_gap": {
+      "n": 400,
+      "median_ms": 50.157091000073706,
+      "p95_ms": 53.57826600084081,
+      "max_ms": 88.43316400088952
+    },
+    "over230": 0,
+    "over250": 0,
+    "passed": true,
+    "before_frames": 818,
+    "after_frames": 1200,
+    "last_error": null
+  },
+  "finite_direction_test": {
+    "evidence": "/home/ghmd/kv260-adaptation-check-20261006/evidence/20261008T145728.382694Z-timing_visual_direction_start",
+    "rc": 0,
+    "output_sha256": "4bc62607720ed4d6c31242bf664b467424acd441e6058777ed3db462204bacbd",
+    "source_sha256": "3d006955c3200aa2a0510817e45e0061da772a91d714da8e340a847e73f4e988",
+    "console_echo_restored": true
+  },
+  "finite_direction_result": {
+    "scope": "FINITE_VISUAL_DIRECTION_BENCH_NOT_FORMAL_TRACKING",
+    "continuous_control_passed": false,
+    "command_transport_passed": true,
+    "stop_verified": true,
+    "stop_reason": "FACE_QUALITY",
+    "error": null,
+    "commands": 12,
+    "attempts": 12,
+    "duration_s": 1.1525112169983913,
+    "preview_ok": true,
+    "requested_left": "COUNTERCLOCKWISE",
+    "requested_right": "CLOCKWISE",
+    "user_reported_pulse_increase": "COUNTERCLOCKWISE",
+    "polarity": -1,
+    "test_reference_us": 1500,
+    "range_us": [
+      1480,
+      1520
+    ],
+    "mapping_is_measured_pointing": false,
+    "source": "MIRRORED_FACE_CENTER_RELATIVE_TO_BLUE_LINE",
+    "speed_tuning_performed": false,
+    "physical_reference_calibrated": false,
+    "formal_tracking_started": false,
+    "boot_id": "f7a3ff07-fc20-4804-af12-c314a7a1847a",
+    "camera_epoch": "a62d5c1018964b46ace243e3165e108a",
+    "preview_pid": 22707,
+    "final_stop": {
+      "flags": 0,
+      "width_us": 1505,
+      "lease_left_ms": 0,
+      "session": 1993792982,
+      "epoch": 2787990544,
+      "reference_us": 1500,
+      "target_us": 1505,
+      "ack_seq": 12,
+      "active": false,
+      "armed": false,
+      "referenced": false,
+      "bound": false,
+      "reason": 0
+    },
+    "directions_commanded": [
+      "CENTER",
+      "COUNTERCLOCKWISE"
+    ],
+    "target_range_us": [
+      1500,
+      1506
+    ],
+    "effective_width_range_us": [
+      1500,
+      1506
+    ],
+    "source_age_at_submit_ms": {
+      "median": 100.83573350129882,
+      "max": 124.34483300239663,
+      "min": 69.37374399785767
+    },
+    "source_age_at_ack_ms": {
+      "median": 103.53704550107068,
+      "max": 126.99544000133756,
+      "min": 71.99720999778947
+    },
+    "submission_ms": {
+      "median": 3.0278510002972325,
+      "max": 3.502495001157513,
+      "min": 2.864539001166122
+    },
+    "lease_requested_ms": {
+      "median": 128.5,
+      "max": 160,
+      "min": 105
+    },
+    "last_event": {
+      "kind": "COMMAND",
+      "target_us": 1505,
+      "source_time": 25054.32867093,
+      "frame_id": 2686,
+      "center_x": 278.81060791015625,
+      "goal_us": 1505.1486740112305,
+      "desired_direction": "COUNTERCLOCKWISE",
+      "accepted": {
+        "flags": 15,
+        "width_us": 1506,
+        "lease_left_ms": 146,
+        "session": 1993792982,
+        "epoch": 2787990544,
+        "reference_us": 1500,
+        "target_us": 1505,
+        "ack_seq": 12,
+        "active": true,
+        "armed": true,
+        "referenced": true,
+        "bound": true,
+        "reason": 0
+      },
+      "seq": 12,
+      "elapsed_s": 1.0777067790004367,
+      "publication_time": 25054.400301887,
+      "source_age_at_submit_ms": 81.75770799789461,
+      "source_age_at_ack_ms": 84.36604400048964,
+      "lease_requested_ms": 148,
+      "submission_ms": 2.9753600028925575
+    },
+    "evidence": "/home/root/aura-adaptation-20261006/visual-direction-timing-36f1afd8f51a423f8c85b297f93de21b",
+    "mechanical_following_confirmation": "AWAITING_USER"
+  },
+  "updated_utc": "2026-10-08T15:02:27.794405+00:00"
+}

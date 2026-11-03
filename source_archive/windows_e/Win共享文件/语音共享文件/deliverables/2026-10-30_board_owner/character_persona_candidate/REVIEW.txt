@@ -1,0 +1,20 @@
+这是板端独立候选，尚未选中或部署；现有汐蓝、真实记忆和身份权限均未改动。
+
+人物称呼用“雪妃”，正式名“御笠雪妃 / YUKI MIKASA”。原作信息仅采用根代理转交的官方核对结论：内向、想改变自己而努力。温和、简短、认真接话是本项目的互动适配，不作为额外原作设定；没有核实的口头禅、经历或用户关系不补写。正式来源页及素材计划由根代理统一附入。
+
+实际完整中文提示词见 system_prompt.candidate.txt；可读配置见 persona.xuefei.candidate.json；11个手写语气样例见 reply_samples.json。样例不是模型实测输出，也不会写入记忆。
+
+性格表现：慢热但不冷淡，稍有拘谨也努力把意思说清；开心时自然回应，遇到困难先认真听；不堆叠道歉或羞怯表演，不假设与用户已有私人关系。情绪协议仍只有 neutral/friendly/happy/sad，动作仍为空字符串，不增加 shy 等协议值。
+
+预算：完整prompt978B，原prompt1032B。原SPEECH_INPUT_HINT252B和MODEL_HINT364B逐字保留。BoardContextBuilder仍按2048 UTF8保守预算、120输出保留计算；预留192B当前输入时，两消息剩余438B，加入实际摘要资料包装后可容301B连续性摘要，原为247B。近期轮次、事实、历史状态仍共同占此预算，不能把这个数字当作额外保证的记忆长度。
+
+调用接口（仅示意，不能直接作为上线命令）：
+load_candidate(explicit_config_path, expected_config_sha256=<审过的配置SHA>, expected_profile_version=<同一形象方案版本>, accepted_system_prompt=<板端当前接受的完整prompt>)
+require_active_pair(candidate, profile_version=<实际选中版本>, render_profile_id=<实际资源profile>, render_source_profile_sha256=<实际资源SHA>, render_ready=<实际已就绪布尔值>)
+返回文本才可注入板端BoardContextBuilder/BoardDialogueController。候选loader不导入Windows模型主机，不接触设备或数据库。require_active_pair只验证本地状态元数据，不能替代GPU画面/负载验收。
+
+合并硬门：形象和人格使用同一profile_version，配置SHA与source_profile SHA一起入选中/回退清单；仅在空闲或取消代次边界切换。渲染失败或回退旧形象时，必须一并恢复旧人格与称呼，并取消旧请求/音频/画面所有权。独立候选未实现整个owner切换事务，根代理负责整合。
+
+此外当前静态CHARACTER_NAME、GREETING/DEMO_LINES、ASR称呼alias、唤醒词、声纹登记前缀、记忆命令前缀及fresh GTK文案仍指向汐蓝。最终切换须按同一profile注入，不能只换prompt；不能全局替换历史原话、既有录音参考、用户姓名、个人档案key或权限。既有“欸/哎”唤醒选项不能顺带删除，也不猜新同音alias。
+
+现有真实validator硬上限是500个字符，48是提示词风格目标。候选保留这两个层次，未收紧或放宽。12项本地检查通过，包含原validator、TTS分段、预算、原权限拒绝、历史边界提示、字面用户姓名保留和persona/render不匹配拒绝。未运行模型、开麦、播放、GUI、板卡或真实数据库；生成一致性、听感和唤醒仍待受控验收。

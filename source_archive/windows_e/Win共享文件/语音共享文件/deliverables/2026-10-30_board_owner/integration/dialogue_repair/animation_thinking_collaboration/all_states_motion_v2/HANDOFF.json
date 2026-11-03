@@ -1,0 +1,50 @@
+{
+  "schema": "aura.all-state-motion-handoff.v2",
+  "status": "FROZEN_NATIVE_BUILD_AND_DYNAMIC_PREVIEW_REQUIRED",
+  "base_startup_sha256": "0cbc191b4bf9029b15a65ef15797e43e15459e06b88381025d28a2c9b573dd2a",
+  "base_source_manifest_sha256": "38a267a4f8d504803587c8be353452b146f1e232e926ac4e061a5e2832b33620",
+  "source_manifest_sha256": "4722f33304164c9b6f34f2019fe2a5feb667cf0d5f0cadf8a3c58ccfc3b58718",
+  "resource_audit_sha256": "8a9468de0381f2f2e433ae8677678f3cb1d66688029643b66f57ea2df62a516c",
+  "files": {
+    "native/gentle_motion.hpp": {
+      "before_sha256": null,
+      "after_sha256": "e835713dccb171d2d6455230745230b50c9d5b1ca6eef00962b1ec6b55bc94e0",
+      "bytes": 2262
+    },
+    "native/yuki_host.cpp": {
+      "before_sha256": "ac91dc8a56024459a033163c198557f65effb32f6b4b3e68068425b518460c0e",
+      "after_sha256": "2b2065354025d2b0cdf2e0d4d3035ceb348354b986ab2d69ccf7d4048938805d",
+      "bytes": 11142
+    },
+    "native/yuki_host.h": {
+      "before_sha256": "4d6fd772dfbfedf9673069e65842a567b607a1befb9a6959cfa8b48a5b6b224c",
+      "after_sha256": "47054ae676480d182bbc59dc5f22767d7decc01183b7831ee97dc02b5aae617e",
+      "bytes": 1463
+    }
+  },
+  "archive": {
+    "path": "native_motion_source.zip",
+    "sha256": "17a8bfb1e2e6da5404d6263d3664128df268848a4bb3ca362ad374a631c2d1e7",
+    "bytes": 19208
+  },
+  "existing_eye_gate_unchanged": true,
+  "features_routes_unchanged": true,
+  "mandatory_native_tests": [
+    "Existing eye/mouth/owner/TTL regression",
+    "12000 real C++ policy author ticks with rapid mood/voice changes and bounded deltas",
+    "960 real native frames across idle/listening/thinking/answer/pause/cancel and both poses",
+    "Six head/body channels vary in every state; multiple existing hair/parts outputs move; no extra author tick"
+  ],
+  "native_build_command": "Same root-owned build_native_isolated.py CLI; package is new and must not overwrite the eye-gating stage",
+  "paired_overlay_script": "seal_motion_overlay.py",
+  "preview_required": "Single-owner pure-character sequences at two or more times in each state, not a single still; verify non-rigid head/torso/hair/parts lag",
+  "device_actions_this_window": false,
+  "production_modified": false,
+  "model_inference": false,
+  "native_test_executed": false,
+  "visual_preview_passed": false,
+  "baseline_v17_routes_must_survive_merge": true,
+  "do_not_restore_v16_startup": true,
+  "new_ui_config_binding": "config/board_avatar_gtk.json character_pair.selection_sha256 and its startup component pin after reseal",
+  "rollback": "Revert only new native lib/pair selection and formal pair constant against current production; keep feature v3 and user PAUSED"
+}

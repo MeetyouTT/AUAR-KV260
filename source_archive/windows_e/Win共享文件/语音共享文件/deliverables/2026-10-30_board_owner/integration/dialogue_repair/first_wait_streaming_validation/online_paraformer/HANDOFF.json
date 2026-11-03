@@ -1,0 +1,41 @@
+{
+  "status": "SOURCE_ONLY_OFFLINE_CHECKS_PASSED_NOT_DEPLOYED",
+  "files": {
+    "public_online_paraformer_worker.py": "95806f1cd3a2f0552b3621775167cab1b9c5d1448ccb1c24555874283bbe7069",
+    "test_public_online_paraformer_worker.py": "206c9b20dfa9f031d55eb7f2278e84a81e23f767e8d372de994a2a30852f9ce5",
+    "official_files.json": "9bd33069dd52d3280735fdbbe8425a0798ccee9b01ae1c0f221164c5b45e2141"
+  },
+  "helper_sha256": "293b23f5dd350e5f4d1cce1489120a44b2c4d743c1534080da496f3f58407176",
+  "public_fixture_manifest": "/home/root/aura-public-streaming-validation-20261031/synthetic-8a9983b6bb9f42c6/manifest.json",
+  "public_fixture_manifest_sha256": "7109ee213126f098a3a3da08bbc521beb0db54a21e0911be02e04f2010b9a869",
+  "first_invocation": "python3 -B public_online_paraformer_worker.py --mode quality --quality-helper ABSOLUTE_FROZEN_HELPER --model-dir ABSOLUTE_ISOLATED_3_FILE_DIRECTORY --manifest /home/root/aura-public-streaming-validation-20261031/synthetic-8a9983b6bb9f42c6/manifest.json --manifest-sha256 7109ee213126f098a3a3da08bbc521beb0db54a21e0911be02e04f2010b9a869 --external-deadline-managed --max-seconds 110",
+  "asr_threads": 1,
+  "soft_deadline_seconds": 110,
+  "root_external_hard_deadline_seconds": 120,
+  "duration_guaranteed": false,
+  "incomplete_or_timeout_is_not_quality_pass": true,
+  "tests": {
+    "passed": 2,
+    "failed": 0,
+    "command": "python -B -m unittest -v test_public_online_paraformer_worker.py",
+    "timing_function_AST_identical_to_frozen_transducer": true,
+    "scope": "Only frozen source/public-corpus pins and fake quality/20ms/160ms pacing, zero tail order and accumulation; no actual recognizer or hardware"
+  },
+  "policy": {
+    "next_step_only_quality": true,
+    "quality_failure_stop": true,
+    "no_automatic_realtime_or_integration": true,
+    "endpoint": "PUBLIC_WAV_END",
+    "tail_zero_samples": 10560,
+    "tail_wait_ms": 0,
+    "input_finished": true,
+    "set_option_is_final": false
+  },
+  "api_note": "sherpa v1.13.8 OnlineParaformer has 61-frame chunks/60-frame normal advance; set_option(is_final,1) is a separate short-final-block option. InputFinished only finalizes features. Probe uses the same official 0.66-second zero-tail policy as prior quality probes; it does not switch finalization semantics or delete tail.",
+  "source_relation": "Same Paraformer family and token SHA as current offline Paraformer, distinct streaming encoder/decoder graphs. Conversion configuration names the large-online model; old sherpa guide links a legacy no-large model name. Pin these actual exported resources rather than infer weight equivalence.",
+  "evidence_limit": "No published aggregate CER for this exact int8 export located; one official fp32/int8 public example has matching output. No KV260 A53 speed/accuracy guarantee; native deadline may terminate a long model call.",
+  "runtime_modified": false,
+  "model_downloaded_by_this_agent": false,
+  "board_accessed": false,
+  "private_audio_or_store_accessed": false
+}

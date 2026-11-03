@@ -1,0 +1,68 @@
+{
+  "status": "REVIEWED_FROZEN_READY_FOR_SOLE_OWNER_ISOLATED_TEST",
+  "created_utc": "2026-10-31T13:00:09.325Z",
+  "cooperating_thread": "01a191ec-d0c3-77d0-904f-86e6cc9b2cb3",
+  "sole_board_operator_thread": "01a18bcd-1167-71a0-ba0b-d809148d39d9",
+  "worker_handoff": "probe/HANDOFF.json",
+  "worker_handoff_sha256": "d03283ce96f3f3f441f204c7b78aaf6484535c5fb4c6eeec1b7ac944dde13b7b",
+  "worker_sha256": "04f8373cc5cfc084c2f04ccb2035c240d37dc778eb4faf70f8e0cc53e319d7e6",
+  "helper_sha256": "293b23f5dd350e5f4d1cce1489120a44b2c4d743c1534080da496f3f58407176",
+  "local_checks": {
+    "path": "probe/LOCAL_CHECKS.json",
+    "sha256": "2ce17f387b7622eb48f3a6b699821dfce6c14d0d0917fac8998f31bfe171905c",
+    "tests": 12,
+    "result": "PASS_FAKE_RUNTIME_ONLY"
+  },
+  "review": {
+    "worker_read_in_full": true,
+    "frozen_hashes_verified": true,
+    "real_native_factory_not_locally_executed": true,
+    "no_hardware_access_by_cooperating_thread": true
+  },
+  "model_handoff": "MODEL_HANDOFF.json",
+  "staged_model_directory": "/home/root/aura-public-streaming-validation-20261031/sensevoice-2365baeacb507f82",
+  "baseline_model_directory": "/home/root/aura-board-owner-candidate-20261030/asr-1.13.8/models/paraformer",
+  "baseline_source_sha256": "4edb865881c887d6a290a02e078e14386bd95d017b79820b143b5a1e329997c3",
+  "manifest_path": "/home/root/aura-public-streaming-validation-20261031/synthetic-8a9983b6bb9f42c6/manifest.json",
+  "manifest_sha256": "7109ee213126f098a3a3da08bbc521beb0db54a21e0911be02e04f2010b9a869",
+  "configuration": {
+    "threads": 3,
+    "rounds_per_process": 2,
+    "max_seconds": 170,
+    "external_child_timeout_seconds": 180,
+    "provider": "cpu",
+    "language": "zh",
+    "use_itn": false,
+    "nice": 0,
+    "affinity_change": false
+  },
+  "sequence": {
+    "initial": [
+      "paraformer",
+      "sensevoice"
+    ],
+    "repeat_scope": "Each engine recognizes the same eight fixtures twice in one process, allowing first and repeated decode to be distinguished. No extra reverse-order processes in this initial screen.",
+    "order_limit": "Fixed engine order and any background activity change must be reported; this screen is not a strictly controlled A/B speed claim.",
+    "parallel_model_children": false
+  },
+  "parent_runner_requirements": [
+    "Current boot/startup/config/source identity and current GUI/camera process births must pass owner's existing guards before any action.",
+    "Pause microphone only while dialogue and generation are idle; preserve current production processes, identity policy, queue sizes, camera, display and memory behavior.",
+    "Validate staged model, worker, helper and public fixture hashes before child execution.",
+    "Use existing board Python and sherpa-onnx 1.13.8 dependencies; run only one additional recognizer process at a time.",
+    "Actually enforce the external 180-second child timeout, terminate and reap only the owned child on timeout; passing --external-deadline-managed alone is insufficient.",
+    "Keep total paused-listening test window bounded to 600 seconds; abort remaining slots if budget or runtime guards fail.",
+    "Record per-slot before/after process CPU, memory and background state without collecting private text or audio; no claimed controlled speed gain if background changes materially.",
+    "Restore original automatic listening in finally, verify mic=true and WAITING_SPEECH, and save a restore observation even when inference fails.",
+    "No production model replacement, reboot, dependency install, priority or affinity change, live microphone replay, playback, Store action or private database export."
+  ],
+  "report_requirements": [
+    "Save a RESULT_HANDOFF.json with exact result paths and hashes, finished/failed/skipped slots, child exit status, measured background changes and restore evidence.",
+    "Separate resource validation/import/load from per-utterance decode wall and CPU; do not add model loading to steady-state ASR latency.",
+    "Report first model decode and later cases separately; peak RSS is the whole isolated child, not model-only memory.",
+    "Compare each model against the same eight public WAV hashes. References are authored synthesis intents, not human-gold transcripts.",
+    "Review names, numerals, negation, correction, remember and forget wording in paired hypotheses; literal edit distance is descriptive and does not establish semantic failure for numeric normalization.",
+    "Treat public offline test results as screening evidence only; full production dialogue latency, continuous capture stability and real speech accuracy remain unverified."
+  ],
+  "deployment_authorized_by_this_handoff": false
+}

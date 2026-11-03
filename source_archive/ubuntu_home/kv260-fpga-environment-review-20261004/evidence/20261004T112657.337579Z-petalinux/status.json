@@ -1,0 +1,37 @@
+{
+  "phase": "petalinux",
+  "evidence": "/home/ghmd/kv260-fpga-environment-review-20261004/evidence/20261004T112657.337579Z-petalinux",
+  "started_utc": "20261004T112657.337579Z",
+  "complete": false,
+  "commands": [
+    {
+      "id": "petalinux-environment",
+      "argv": [
+        "/bin/bash",
+        "--noprofile",
+        "--norc",
+        "-c",
+        "aura_env_entry=$1; shift; aura_env_command=( \"$@\" ); set --; source \"$aura_env_entry\" || exit $?; exec \"${aura_env_command[@]}\"",
+        "aura-fpga-environment",
+        "/home/ghmd/petalinux/2022.2/settings.sh",
+        "python3",
+        "-c",
+        "import os,shutil,json; print(json.dumps({\"version\":os.environ.get(\"PETALINUX_BASE_VER\"),\"petalinux_build\":shutil.which(\"petalinux-build\"),\"petalinux_config\":shutil.which(\"petalinux-config\")}))"
+      ],
+      "rc": 0,
+      "timeout": false,
+      "elapsed_seconds": 1.2672736780077685,
+      "stdout_sha256": "1076b2dc7d315072fca41221a85031c906d91fce70dfdb40192daa1d37b18f31",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "checks": {
+    "petalinux-environment_rc": true,
+    "petalinux_2022_2_loaded": false
+  },
+  "controller_sha256": "f290bf01edf69fe21e3ae0404289e51fcd9718557e6c8f3e942b739f80b1bd4b",
+  "board_accessed": false,
+  "existing_project_modified": false,
+  "error": "RuntimeError: Check failed: petalinux_2022_2_loaded",
+  "finished_utc": "2026-10-04T11:26:58.606050+00:00"
+}

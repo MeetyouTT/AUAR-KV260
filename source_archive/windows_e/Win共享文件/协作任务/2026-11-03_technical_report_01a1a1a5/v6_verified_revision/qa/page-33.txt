@@ -1,0 +1,34 @@
+32
+8 从零复现说明
+8.1 硬件 软件与版本清单
+复现以方案 A 工程唯一根 auar_xuefei 为入口。9a4f06da… 锁定正式业务原件，独立
+相机和运动运行根使用各自清单。板端当前运行配置另有 SHA，不能因模块名相同就视为与源
+码包完全一致。表 8-1 区分构建条件和现场条件。[S03]
+表 8-1 构建与现场环境
+位置 必要条件 说明
+Ubuntu 开发机 Ubuntu 20.04 Vivado/Vitis 2022.2 本次 XSim 实际使用该环境
+模型工具环境 Vitis AI 3.0 目标编译链 模型与 DPU fingerprint 配套
+KV260 PetaLinux 2022.2 Python 3.9.9 当前实读 内核为 5.15.36-xilinx-v2022.2
+Windows 推理
+已有 GPU 模型服务 端口 8797 27B 和 OmniVoice16 权重依授权取得
+机
+外设 相机 MCP01 触屏 单轴与驱动 接线 供电 行程按实物确认
+表 8-2 指南八个入口与本包位置
+指南入口 本包位置 内容与范围
+README.md 根README.md 简介与复现入口
+src/ src/fpga board host native等 按原运行相对位置保留源码
+sim/ sim/rtl src/tests skill内tests 硬件测试与软件测试分别定位
+构建脚本与本轮摘要 原生报告摘要另
+build/ build/ 及report/evidence
+见附录G
+board/ board/ 离线部署定义及上板流程
+投稿指标 src/data是运行数据 互不
+data/ data/metrics.csv
+替代
+skill/ skill/pynq-contract-testgen 28件原包及README
+report/ report/及独立PDF 取数回执与本技术报告分别提供
+该结构为指南推荐，非强制；本包按原运行根组织，并在表中定位软件测试、投稿指标与
+运行数据。[R6]
+8.2 获取工程与准备输入
+工程根 README、checksums.sha256、build/env.json、board/deploy.json、模型输入锁
+和依赖表共同定义输入。先核对校验清单，再准备工具和包外材料。27B 权重、整张 SD 镜像、

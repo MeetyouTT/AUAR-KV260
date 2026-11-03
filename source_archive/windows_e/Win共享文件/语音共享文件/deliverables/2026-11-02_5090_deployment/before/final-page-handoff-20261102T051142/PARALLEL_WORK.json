@@ -1,0 +1,38 @@
+{
+  "updated_utc": "2026-11-02T02:11:39.9203958Z",
+  "requested_by_user": true,
+  "main_owner": "/root",
+  "main_responsibility": "coordination, board mutations, physical conditions, final acceptance and shared handoff",
+  "tasks": [
+    {
+      "agent": "/root/model_deployment",
+      "objective": "Original Windows model download, verified runtime binding, calibration and loopback READY",
+      "write_scope": "download/deployment/calibration files, D AIModels/AURARuntimes and required model configs",
+      "gate": "Original weight SHA, new runtime/GPU measurements and real loopback LLM/TTS HTTP",
+      "status": "active"
+    },
+    {
+      "agent": "/root/board_platform_plan",
+      "objective": "Read-only board wide-platform preflight and concrete recovery/persistence plan",
+      "write_scope": "parallel_platform only",
+      "gate": "No board writes, service or firmware changes, audio, motion or private databases",
+      "status": "active"
+    },
+    {
+      "agent": "/root/lan_integration",
+      "objective": "Prepare tested LAN promotion, firewall, public board HTTP validation and rollback",
+      "write_scope": "parallel_lan and configure_model_firewall.ps1 only",
+      "gate": "Wait for loopback READY and explicit root coordination before switching",
+      "status": "active"
+    }
+  ],
+  "execution_order": [
+    "Independent preparation in parallel",
+    "Model loopback READY",
+    "Root review and controlled LAN promotion",
+    "Public board LLM/PCM HTTP validation without playback",
+    "Review platform restoration plan and establish current physical conditions"
+  ],
+  "ubuntu_remote_connection": "SSH and Codex app project/chat access accepted by dedicated user-owned chat",
+  "board_motion_authorized": false
+}

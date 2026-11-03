@@ -1,0 +1,103 @@
+{
+  "status": "REVISION2_ARM_BUILD_AND_POLICIES_PASS_NOT_INSTALLED",
+  "library_sha256": "0c73b9389c11def8e93aab540f73f2c011abdf93f47d2a16f9a0bbadabf9f199",
+  "steps": [
+    {
+      "label": "candidate_geometry_pivot_policy_test_compile",
+      "args": [
+        "nice",
+        "-n",
+        "15",
+        "/usr/bin/c++",
+        "-std=gnu++20",
+        "-O2",
+        "-DNDEBUG",
+        "-I/home/root/aura-avatar-animation-20261102/6de51f598326fa22/revision2b/native",
+        "-I/home/root/aura-yuki-validation-20261030/native_integration/host",
+        "-I/home/root/aura-yuki-validation-20261030/native_integration/candidate_core/include",
+        "-isystem",
+        "/home/root/aura-yuki-validation-20261030/deps/json",
+        "-isystem",
+        "/usr/include/libpng16",
+        "-DOPTIMIZED",
+        "/home/root/aura-avatar-animation-20261102/6de51f598326fa22/tests/native_physics_audit.cpp",
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/libyuki_core.a",
+        "-o",
+        "/home/root/aura-avatar-animation-20261102/6de51f598326fa22/revision2b/policy_test"
+      ],
+      "seconds": 57.961092830999405,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "label": "candidate_original_policy_and_six_scenes",
+      "args": [
+        "/home/root/aura-avatar-animation-20261102/6de51f598326fa22/revision2b/policy_test",
+        "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki/model.runtime.json",
+        "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki/yuk_0.ems.resx.json",
+        "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki"
+      ],
+      "seconds": 4.102485401002923,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "label": "host_compile",
+      "args": [
+        "nice",
+        "-n",
+        "15",
+        "/usr/bin/c++",
+        "-std=gnu++20",
+        "-O2",
+        "-DNDEBUG",
+        "-I/home/root/aura-avatar-animation-20261102/6de51f598326fa22/revision2b/native",
+        "-I/home/root/aura-yuki-validation-20261030/native_integration/host",
+        "-I/home/root/aura-yuki-validation-20261030/native_integration/candidate_core/include",
+        "-isystem",
+        "/home/root/aura-yuki-validation-20261030/deps/json",
+        "-isystem",
+        "/usr/include/libpng16",
+        "-fPIC",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/root/aura-avatar-animation-20261102/6de51f598326fa22/revision2b/native/yuki_host.cpp",
+        "-o",
+        "/home/root/aura-avatar-animation-20261102/6de51f598326fa22/revision2b/yuki_host.cpp.o"
+      ],
+      "seconds": 43.573855955997715,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "label": "link",
+      "args": [
+        "nice",
+        "-n",
+        "15",
+        "/usr/bin/c++",
+        "-shared",
+        "-Wl,-soname,libaura_yuki.so",
+        "-o",
+        "/home/root/aura-avatar-animation-20261102/6de51f598326fa22/revision2b/libaura_yuki.so",
+        "/home/root/aura-avatar-animation-20261102/6de51f598326fa22/revision2b/yuki_host.cpp.o",
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/CMakeFiles/aura_yuki.dir/gles2_renderer.cpp.o",
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/CMakeFiles/aura_yuki.dir/diagnostic_api.cpp.o",
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/libyuki_core.a",
+        "/usr/lib/libGLESv2.so",
+        "/usr/lib/libpng16.so",
+        "/usr/lib/libz.so"
+      ],
+      "seconds": 0.594484545996238,
+      "exit_code": 0,
+      "stderr": ""
+    }
+  ],
+  "source_files": {
+    "yuki_host.h": "4d6fd772dfbfedf9673069e65842a567b607a1befb9a6959cfa8b48a5b6b224c",
+    "yuki_host.cpp": "6de51f598326fa221cc4a3bed0e0072f977bbe387b5c5b4981217909adf1a734",
+    "secondary_motion.hpp": "1c718270eee14c18bc2bafe592091bfbb00ee9b1fbd93bc3583c8ac61339880d"
+  },
+  "production_changed": false
+}

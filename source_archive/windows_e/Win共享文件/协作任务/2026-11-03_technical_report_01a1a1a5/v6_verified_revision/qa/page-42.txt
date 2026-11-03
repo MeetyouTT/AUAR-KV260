@@ -1,0 +1,37 @@
+41
+编号 报告包内依据 主要支持内容
+evidence/source_archive/final_archive_verificat
+E30 1687文件的最终RAR及解包复跑
+ion.json
+新综合实现 资源 时钟 时序与固
+E31 evidence/rebuild_022422d9/hardware_results.json
+件
+E32 evidence/rebuild_022422d9/model_build.json 新YuNet/SFace量化与编译候选
+E33 evidence/rebuild_022422d9/native_build.json 8个新SO及历史SHA对照
+E34 sources/reproduction 与附录 H 外置输入 部署参数及来源
+E35 evidence/ai_dialogue_three_rounds.json 三轮真实DPU审查与纠错记录
+无人脸全零向量 期望输出及四组
+E36 evidence/public_vectors
+SHA
+模型计时和旧指标的值与 sources/previous_metrics.csv 对应。本次指标另存
+data/metrics_current.csv，历史与当前字段包含不同 scope，不直接合并为同条件优化比较。
+ICMP 原始汇总与逐次输出均保留，最大值精度差异在正文说明。
+附录 D AI 原始摘录与案例附件
+除原工作范围调整摘录外，本版从已有会话回收了 DPU 调度审查的三轮完整可见往返，
+按时间顺序保存于 evidence/ai_dialogue_three_rounds.json。原用户提示与可见回答保留
+原文，选定的工具核验输出单独登记，不含内部推理；下列为阅读摘录，完整提示、回答和轮
+次 ID 见附件。[E35]
+第一轮用户原话：那已经自动恢复意味着这个是不是正常现象，属于工程误差
+第一轮 AI 回答原文摘录：可以按“工程上可能接受的偶发时延抖动”评估。自动恢复说
+明容错有效；是否正常，要看它有没有影响业务。
+第二轮人工提供独立审查与新故障材料后，AI 对照源码核验，并将早期判断收窄。AI 原
+文摘录：更重要的是，新回传证据出现了第三次 82.93ms 超限，并越过 guard。这次没有自动
+恢复，YuNet 已锁定在 CPU 保护模式。因此，我之前“可能是可接受的小抖动”的评价只适用
+于前两次，不能覆盖当前故障。
+第二轮工具回执记录 5 份源码 SHA、3 条故障时间线和 4 类本地反例检查，
+production_changes 为 0。该轮纠正了返回侧采样顺序、输出数组分配区间及 deadline 与
+周期休眠的关系，保留了不确定的长尾根因。
+第三轮用户给出修订版后，AI 原文摘录：修订版的事实分析基本可用，但补丁示例仍不
+能直接上板。其核验指出 release_mono 仍早于实际释放，线程退出后的 finally 标志也可
+能误报存活；本地核验输出为 local_checks_passed=true、python_AST_passed=true、
+production_changes=0。

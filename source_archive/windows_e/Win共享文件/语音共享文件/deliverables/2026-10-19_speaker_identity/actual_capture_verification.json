@@ -1,0 +1,43 @@
+{
+  "scope": "EXPERIMENTAL_WITHIN_SESSION_ONLY_NOT_FIELD_CALIBRATION",
+  "field_calibrated": false,
+  "production_deployed": false,
+  "session_id": "bdf33e6d18794d87be0b72aee7e64235",
+  "database": "D:\\AIModels\\speaker-identity\\runtime\\speaker-test-bdf33e6d18794d87be0b72aee7e64235.sqlite3",
+  "thresholds": {
+    "threshold": 0.7,
+    "ambiguity_margin": 0.1,
+    "enrollment_consistency": 0.65
+  },
+  "clips": {
+    "1": {
+      "wav_sha256": "30c6217a4947ba1a2533e275d53d37f016b346c5077f7a4d5eb00bb5112f2dfa",
+      "role": "enrollment"
+    },
+    "2": {
+      "wav_sha256": "f8455ea96e32267d6004f77b47af4caad22a6ccb9b5310685c3a6d0ca212914e",
+      "role": "enrollment"
+    },
+    "3": {
+      "wav_sha256": "e85fac662d89bae305b727bdeb8c3bac951011a5bd51d4c837460a9e89aa59f1",
+      "role": "enrollment"
+    },
+    "4": {
+      "wav_sha256": "dea5d2cbb2567453c7ac21a3b68f89e9c078da7bb65b499d4fc3b73762cd20dc",
+      "role": "independent_within_session_query"
+    }
+  },
+  "status": "FAIL_ENROLL",
+  "enroll": {
+    "exit_code": 1,
+    "wall_ms": 3736.53,
+    "error_tail": "ing. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.\n  stats = torch.load(path, map_location=device)\nTraceback (most recent call last):\n  File \"E:\\Win共享文件\\语音共享文件\\aura\\tools\\speaker_identity.py\", line 66, in <module>\n    main()\n  File \"E:\\Win共享文件\\语音共享文件\\aura\\tools\\speaker_identity.py\", line 51, in main\n    vector = enrollment_vector(vectors, encoder.dimension, args.consistency)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\aura\\common\\speaker_identity.py\", line 125, in enrollment_vector\n    raise ValueError('Enrollment recordings disagree; do not commit')\nValueError: Enrollment recordings disagree; do not commit\n"
+  },
+  "limitations": [
+    "Only one actual speaker, one recording session and one independent query.",
+    "No actual-microphone stranger negatives or cross-session/cross-day acceptance.",
+    "Thresholds are experimental and not deployed to production."
+  ],
+  "user_feedback": "User confirmed other sound sources during capture; pause and retest after silencing them.",
+  "attribution": "No conclusion that these are all the same live speaker; no identity committed."
+}

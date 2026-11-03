@@ -1,0 +1,102 @@
+{
+  "schema": "aura.frontend-allocation-public-decision.v1",
+  "status": "DO_NOT_DEPLOY_ABBA_INCOMPLETE_AFTER_OVERFLOW",
+  "created_utc": "2026-10-31T13:45:53.769534+00:00",
+  "worker_sha256": "c7988d2439fbb0d7d4c9d9b9783f3d1ce228cb61ccfd01d54a6ce05762ca9a3b",
+  "probe_handoff_sha256": "4e101eb523a5ed5bc4989be798f0acf9671da567ea734cf0a31ff36957c6e68c",
+  "intended_order": [
+    "A1",
+    "B1",
+    "B2",
+    "A2"
+  ],
+  "executed_order": [
+    "A1",
+    "B1"
+  ],
+  "not_executed": [
+    "B2",
+    "A2"
+  ],
+  "stop_reason": "Root stopped the sequence after the failed B1; no replacement/retry slot or larger queue.",
+  "records": [
+    {
+      "slot": "A1",
+      "arm": "before",
+      "evidence": "actual_A1_1793454167363909500.json",
+      "evidence_sha256": "100c0e2c67d5cdc3bf6f5e4075f43b72b6c3c23e92e0a4d622a03176a2dc1a2e",
+      "status": "PASS_PUBLIC_PUMP_ENDPOINT_ONLY",
+      "error_code": "NONE",
+      "exit_code": 0,
+      "consumed_frames": 287,
+      "frames_read": 288,
+      "frames_delivered": 287,
+      "queue_capacity_frames": 8,
+      "queue_peak_frames": 2,
+      "queue_max_ms": 32.08,
+      "reader_alive_after": false,
+      "frontend_wall_mean_ms": 18.4325,
+      "frontend_thread_cpu_mean_ms": 17.1502,
+      "priority_restoration_confirmed": true,
+      "owners_unchanged": true,
+      "manual_pause_preserved": true,
+      "background_activity_changed": true,
+      "root_hard_timeout": false
+    },
+    {
+      "slot": "B1",
+      "arm": "after",
+      "evidence": "actual_B1_1793454205340792900.json",
+      "evidence_sha256": "4239319cb6d45cddb39c5aff6279c06a52c466513db602dee2fbaa77986dc22a",
+      "status": "FAILED",
+      "error_code": "pcm_input_queue_overflow",
+      "exit_code": 2,
+      "consumed_frames": 272,
+      "frames_read": 281,
+      "frames_delivered": 272,
+      "queue_capacity_frames": 8,
+      "queue_peak_frames": 8,
+      "queue_max_ms": 156.918,
+      "reader_alive_after": false,
+      "frontend_wall_mean_ms": 19.6084,
+      "frontend_thread_cpu_mean_ms": 18.5433,
+      "priority_restoration_confirmed": true,
+      "owners_unchanged": true,
+      "manual_pause_preserved": true,
+      "background_activity_changed": false,
+      "root_hard_timeout": false
+    }
+  ],
+  "conclusion": [
+    "A1 completed the public raw8 pump/endpoint test; B1 failed capacity admission with the same8frame queue. Candidate was not installed.",
+    "Only one slot per arm ran, counts differ287 versus272, and A1 has background activity changes. No causal performance gain or regression can be attributed to these two allocation changes.",
+    "B1 did not complete an endpoint. Full-flow ARM numerical/PCM/VAD parity is not established; different partial-output hashes over different lengths are not proof of numerical divergence.",
+    "Successful offline12case code review and7fake probe cases remain valid within their stated limits; they do not override actual B1 overflow.",
+    "No queue/model/VAD/identity/priority/render changes or automatic extra testing are authorized by this decision."
+  ],
+  "cleanup": {
+    "normal_process_exits": true,
+    "priority_restoration_confirmed_both": true,
+    "raw_readers_stopped_both": true,
+    "owners_unchanged_both": true,
+    "user_manual_pause_preserved_both": true,
+    "physical_microphone_or_player_opened": false,
+    "asr_executed": false,
+    "production_database_opened": false
+  },
+  "production": {
+    "phase": "v16 already published by root before this test",
+    "candidate_installed": false,
+    "source_changed_by_experiment": false,
+    "policy": "Keep current production/frontend and preserve user PAUSED. Root proceeds separately with formal Small public complete-chain validation."
+  },
+  "claims": {
+    "abba_complete": false,
+    "hardware_candidate_accepted": false,
+    "measured_speedup": false,
+    "causal_regression": false,
+    "full_arm_numerical_parity": false,
+    "physical_capture_or_dialogue_acceptance": false
+  },
+  "follow_up": "No new retry or implementation prepared here; any future capacity test requires a new explicitly controlled comparable window and retains these failure receipts."
+}

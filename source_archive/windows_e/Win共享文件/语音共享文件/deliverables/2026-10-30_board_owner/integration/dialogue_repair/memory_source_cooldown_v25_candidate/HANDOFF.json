@@ -1,0 +1,149 @@
+{
+  "status": "OFFLINE_CANDIDATE_NOT_DEPLOYED",
+  "frozen": true,
+  "selected_for_deployment": false,
+  "root_retains_actual_v24": true,
+  "root_reason": "The deployed v24 backlog completed during observation. Root requested preservation of the tested v24 runtime and offline-only sealing of this candidate.",
+  "source_manifest_sha256": "998fee4e283bd5381666d69be502ea139b744711b7cf43bb1dd43aa8807f744c",
+  "actual_v24_spec_sha256": "9015c45aa735035e2185b998ae68f97ddeb7bcbf5252301143a235dce2f3ffe1",
+  "actual_v24_mapping_sha256": "6fb9899571078207b7460ae71d6da52ccd211c150b7d39f54f4003e672ec21c9",
+  "product_sources": 2,
+  "expected_component_count": 380,
+  "other_components_unchanged": 378,
+  "sources": {
+    "common/board_memory.py": {
+      "before_sha256": "8905770197f114cc063addb2dd40bc745d9af942f674140f43e597ff3a6b1905",
+      "local_before": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\memory_source_cooldown_v25_candidate\\before\\common\\board_memory.py",
+      "local_source": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\memory_source_cooldown_v25_candidate\\after\\common\\board_memory.py",
+      "after_sha256": "6dd4fbc5b97dae171b3db9a876efccdd425df7fdb222aea654fcb68500afd819",
+      "bytes": 106068,
+      "changed_ast": [
+        "BoardMemoryStore.prepare_compaction",
+        "BoardMemoryWorker._fail_task",
+        "BoardMemoryWorker._prepare_compaction (new)",
+        "BoardMemoryWorker.step (one call replacement)"
+      ]
+    },
+    "common/board_memory_backoff.py": {
+      "before_sha256": "9710c079fc589eae8f2eb26fba7f0dd80038b66736b3e45e000a98904716ce82",
+      "local_before": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\memory_source_cooldown_v25_candidate\\before\\common\\board_memory_backoff.py",
+      "local_source": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\memory_source_cooldown_v25_candidate\\after\\common\\board_memory_backoff.py",
+      "after_sha256": "799d46908f83c336489b4781dc45af490ae4f6161729848ceb3826c39b4c6665",
+      "bytes": 6927,
+      "changed_ast": [
+        "BoardMemoryBackoffWorker.__init__",
+        "BoardMemoryBackoffWorker._prepare_compaction (new)",
+        "BoardMemoryBackoffWorker._record_source_failure (new)",
+        "BoardMemoryBackoffWorker._fail_task",
+        "BoardMemoryBackoffWorker.step",
+        "BoardMemoryBackoffWorker.health"
+      ]
+    }
+  },
+  "source_ast_boundary_proof_sha256": "ff077ed5aa28cf27b214c0a88856e0a5c5fe8d587e1ed82c2272d39024c1c5a1",
+  "author_public_tests_passed": 14,
+  "independent_public_tests_passed": 13,
+  "combined_distinct_public_tests_passed": 27,
+  "independent_review": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\performance_review_newboot\\v25_cooldown_independent_review\\PUBLIC_REVIEW_RESULT.json",
+    "sha256": "edb8c89c23751c8eee085332206b1c2f76812311471c7784f83152ba9d9d9734"
+  },
+  "author_test_result_sha256": "0a4e7cf60ef5ccd1d30167b3b0234d825425908467aab6c9594fbf968b150252",
+  "loaded_dependency_count": 6,
+  "dependency_mismatches": [],
+  "leaked_threads": [],
+  "behavior": {
+    "semantic_rejection_cooldown_seconds": 600,
+    "maximum_cached_batches": 64,
+    "maximum_source_versions_per_batch": 64,
+    "maximum_source_version_entries": 4096,
+    "source_identity_only_in_ram": true,
+    "body_or_body_hash_cached": false,
+    "unrelated_success_keeps_batch_cooldown": true,
+    "revision_or_revocation_unlocks_whole_batch": true,
+    "all_turn_sources_excluded_before_selection_and_lease": true,
+    "expired_entries_pruned_before_prepare": true,
+    "oldest_entry_evicted_if_capacity_exceeded": true,
+    "new_worker_starts_without_cooldown": true,
+    "global_backend_backoff_seconds": [
+      3,
+      6,
+      12,
+      24,
+      48,
+      60
+    ],
+    "actual_failed_release_required_for_both_penalties": true,
+    "cancellation_preemption_unsafe_clock_do_not_add_penalty": true,
+    "existing_validator_schema_commit_cleanup_permissions_and_model_request_parameters_preserved": true,
+    "health_fields": [
+      "source_cooldown.cached_batches",
+      "source_cooldown.retry_in_seconds",
+      "source_cooldown.delay_seconds",
+      "source_cooldown.capacity_batches"
+    ]
+  },
+  "health_scope": "cached_batches counts unexpired RAM entries. A stale batch may remain counted until its deadline although the Store already ignores its exclusion. Health reads RAM only and exports no source IDs, revisions, bodies, or hashes.",
+  "timeliness_tradeoff": {
+    "detail_window_seconds": 300,
+    "next_attempt_delay_after_semantic_failure_seconds": 600,
+    "failed_source_body_retained_until_validated_summary_commit": true,
+    "example": "A source first rejected just after its five-minute eligibility threshold would normally be retried around fifteen minutes after closure. Revision changes, worker replacement or bounded-cache eviction can allow an earlier attempt.",
+    "future_evaluation_required": "Measure sustained workload, retry/model occupancy and successful-summary timeliness before deciding whether this delay is appropriate."
+  },
+  "race_fix": "The original worker failure path preserves its False return and error handling, while recording a private boolean only for a confirmed Store released=True result. A preemption that wins before failure release prevents both semantic caching and new global backoff. Legacy None results do not count as release proof.",
+  "production_modified": false,
+  "devices_accessed": false,
+  "model_accessed": false,
+  "private_database_accessed": false,
+  "files": {
+    "after/common/board_memory.py": {
+      "sha256": "6dd4fbc5b97dae171b3db9a876efccdd425df7fdb222aea654fcb68500afd819",
+      "bytes": 106068
+    },
+    "after/common/board_memory_backoff.py": {
+      "sha256": "799d46908f83c336489b4781dc45af490ae4f6161729848ceb3826c39b4c6665",
+      "bytes": 6927
+    },
+    "AST_BOUNDARY_PROOF.json": {
+      "sha256": "ff077ed5aa28cf27b214c0a88856e0a5c5fe8d587e1ed82c2272d39024c1c5a1",
+      "bytes": 1530
+    },
+    "before/common/board_memory.py": {
+      "sha256": "8905770197f114cc063addb2dd40bc745d9af942f674140f43e597ff3a6b1905",
+      "bytes": 103682
+    },
+    "before/common/board_memory_backoff.py": {
+      "sha256": "9710c079fc589eae8f2eb26fba7f0dd80038b66736b3e45e000a98904716ce82",
+      "bytes": 4479
+    },
+    "board_memory.diff": {
+      "sha256": "b0335aae0a797d0686a29e1efd2d890869290dd65d6ee1defbe0d0b25d47bcf5",
+      "bytes": 5358
+    },
+    "board_memory_backoff.diff": {
+      "sha256": "004cd59a99b8e58f04483c6a606606bfd6fe3ecaf1579d27c8e7663bf5c92e1e",
+      "bytes": 5750
+    },
+    "PUBLIC_TEST_ATTEMPT_01.json": {
+      "sha256": "3eb9216577d1cd1e711d6f57ec60c86d6c482d75c2977c92fdeda056e76b3415",
+      "bytes": 368
+    },
+    "PUBLIC_TEST_OUTPUT.txt": {
+      "sha256": "d12288cbb9676a683dac2d7045aa46274fca3af7b0ce5387632674808b4ce956",
+      "bytes": 2608
+    },
+    "PUBLIC_TEST_RESULT.json": {
+      "sha256": "0a4e7cf60ef5ccd1d30167b3b0234d825425908467aab6c9594fbf968b150252",
+      "bytes": 1228
+    },
+    "SOURCE_MANIFEST.json": {
+      "sha256": "998fee4e283bd5381666d69be502ea139b744711b7cf43bb1dd43aa8807f744c",
+      "bytes": 2820
+    },
+    "test_source_cooldown.py": {
+      "sha256": "b88875cda8e043dc660f72e03da59b73f7c20965116b39bf766dbbf42af0d750",
+      "bytes": 17555
+    }
+  }
+}

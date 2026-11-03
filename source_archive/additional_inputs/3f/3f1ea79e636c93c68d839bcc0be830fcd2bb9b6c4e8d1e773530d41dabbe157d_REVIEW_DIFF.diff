@@ -1,0 +1,413 @@
+--- v20/stability_common.py
++++ v21/stability_common.py
+@@ -12,21 +12,22 @@
+ 
+ HERE = Path(__file__).resolve().parent
+ REPAIR = HERE.parent
+-PREVIOUS = REPAIR / 'release_v19_stability_candidate'
+-BASE_SPEC_SHA = '49ffbc82a4b9543d92234f055fce8af055de29764ca6f688ae0a36fe7a35a904'
+-BASE_MAPPING_SHA = 'ef8db220fde3b70a62ff1ff7cf2e9471a199a6d43b9234a18f8701eff58448f7'
+-BASE_READY_SHA = 'c0a129d24ef48f670d2f2ade4ac6fe3804566b16edd55d9dd36ef28026de0bab'
+-BASE_STARTUP_SHA = 'de7772b898378d2263b0809d18c095a60585a672690371d2f072b2e04c2f574f'
+-BASE_MANIFEST_SHA = 'e1e5947f6f054760650f36fb51726305478dbd394cb89096a0338aeb92989c41'
++PREVIOUS = REPAIR / 'release_v20_identity_history_candidate'
++BASE_SPEC_SHA = 'cd67e77691b415d8133015911806c98aaf328feed44945e492c8b0cd421099c7'
++BASE_MAPPING_SHA = 'a7141992428e47d49ef80828ce9a0b33df6bffe32b613343ba01f937f68fdafc'
++BASE_READY_SHA = 'a28a82dd116d8140c930c48f50aa94d978d1a31c780a0ac60a29aa51a5fdfe7f'
++BASE_STARTUP_SHA = 'd24b0d0007e2aa2b417f459891c7f39f168502a58374334ceab69e31af5881dd'
++BASE_MANIFEST_SHA = '1c69136240694d708b7edfc486b68fcb62cd58e8b3759f630aafc6604cd0a22b'
+ BASE_CONFIG_SHA = '5518b6705083eb9e2fae7e19a47c003182995fe8660cbc6031860c9905da9786'
+ PUBLISHER_SHA = 'af19ae0b99cde0307a58bae5c543ec8c67e9bda782e6294abae8dd492c228683'
+-MINOR_REVISION = 'identity-history-v20-cooperation-and-delete'
+-ALLOWED_PATHS = {'board/runtime/board_business.py', 'board/runtime/board_speaker_business.py',
+-    'tools/provisional_voice.py', 'board/runtime/history_delete.py', 'tools/production_memory_presentation.py',
+-    'common/board_memory.py'}
+-NEW_PATHS = {'board/runtime/history_delete.py'}
++MINOR_REVISION = 'asr2-display-v21-configuration'
++CONFIG_RELATIVE = 'config/board_avatar_gtk.json'
++NEW_CONFIG_SHA = '228abe8f642254c68ad500a15f8d637189343a97753d1c359663744dc2bd06a2'
++PREPARED_CONFIG_PATH = '/home/root/aura-board-business-20261030/control-production-v1/' + MINOR_REVISION + '/prepared-gui.json'
++ALLOWED_PATHS = {'tools/board_avatar_gtk.py', CONFIG_RELATIVE}
++NEW_PATHS = set()
+ # Exact author manifests and source bytes reviewed before this closure was sealed.
+-APPROVED_PAYLOAD_SHA = 'a5292563af466470c9a501bd0b35e7314c9f15653da78fd452be724a31e6a430'
++APPROVED_PAYLOAD_SHA = '046ef522cb25a7ccb50d57822b25776330c7bd2ac3c422b5b10757d3803dd3e5'
+ PAYLOAD_FINALIZED = True
+ PREFERENCE_SHA = '304af4e4aa4022797931111df47d0b4a8f5c8754a99b5076c50d95b77a684c69'
+ 
+@@ -58,20 +59,20 @@
+ 
+ def baseline():
+     if BASE_MAPPING_SHA is None or BASE_READY_SHA is None:
+-        raise ValueError('v19_final_evidence_binding_required')
+-    spec=json.loads(pinned(PREVIOUS/'stability_evidence/spec.json',BASE_SPEC_SHA))
+-    mapping=json.loads(pinned(PREVIOUS/'stability_evidence/source_mapping.json',BASE_MAPPING_SHA))
+-    ready=json.loads(pinned(PREVIOUS/'stability_evidence/ready.json',BASE_READY_SHA))
++        raise ValueError('v20_final_evidence_binding_required')
++    spec=json.loads(pinned(PREVIOUS/'identity_history_evidence/spec.json',BASE_SPEC_SHA))
++    mapping=json.loads(pinned(PREVIOUS/'identity_history_evidence/source_mapping.json',BASE_MAPPING_SHA))
++    ready=json.loads(pinned(PREVIOUS/'identity_history_evidence/ready.json',BASE_READY_SHA))
+     if (spec['startup_sha256']!=BASE_STARTUP_SHA or spec['source_manifest_sha256']!=BASE_MANIFEST_SHA
+-            or spec['configuration_sha256']!=BASE_CONFIG_SHA or spec['component_pins']!=379
+-            or mapping['component_pins']!=spec['component_sha256'] or len(spec['component_sha256'])!=379):
+-        raise ValueError('current_sealed_379_baseline_required')
++            or spec['configuration_sha256']!=BASE_CONFIG_SHA or spec['component_pins']!=380
++            or mapping['component_pins']!=spec['component_sha256'] or len(spec['component_sha256'])!=380):
++        raise ValueError('current_sealed_380_baseline_required')
+     if (mapping.get('startup_sha256')!=BASE_STARTUP_SHA or mapping.get('source_manifest_sha256')!=BASE_MANIFEST_SHA
+             or mapping.get('current_publication_committed') is not True
+             or ready.get('status')!='PRODUCTION_BOARD_BUSINESS_READY' or ready.get('guard_removed') is not True
+             or ready.get('listening_enabled') is not False or ready.get('listening_state')!='PAUSED'
+             or ready.get('physical_microphone_opened') is not False or ready.get('root')!=spec['target']):
+-        raise ValueError('committed_v19_ready_and_saved_pause_required')
++        raise ValueError('committed_v20_ready_and_saved_pause_required')
+     choice=json.loads(pinned(HERE/'FROZEN_LISTENING_PREFERENCE.json',PREFERENCE_SHA))
+     if (choice.get('preference')!={'version':1,'enabled':False} or choice.get('enabled') is not False
+             or choice.get('state')!='PAUSED' or choice.get('microphone_open') is not False):
+@@ -97,22 +98,44 @@
+         raw=pinned(row['local_source'],row['sha256'])
+         if not 0<len(raw)<2097152:
+             raise ValueError('bounded_reviewed_python_source_required')
+-        ast.parse(raw,feature_version=(3,9))
++        if rel==CONFIG_RELATIVE:
++            configuration_pair()
++        else:
++            ast.parse(raw,feature_version=(3,9))
+     return sources
++
++
++def configuration_pair():
++    before=json.loads(pinned(HERE/'before'/CONFIG_RELATIVE,BASE_CONFIG_SHA))
++    after=json.loads(pinned(HERE/'payload'/CONFIG_RELATIVE,NEW_CONFIG_SHA))
++    expected=copy.deepcopy(before)
++    if expected['board_business']['asr_threads']!=3:
++        raise ValueError('original_asr_three_threads_required')
++    expected['board_business']['asr_threads']=2
++    if expected!=after:
++        raise ValueError('only_asr_threads_3_to_2_configuration_change_allowed')
++    return before,after
++
++
++def startup_for(spec):
++    startup=previous_publisher().inputs()[1]
++    startup['component_sha256']=spec['component_sha256']
++    return json.loads(encoded(startup))
+ 
+ 
+ def proposed():
+     spec=baseline();sources=approved_sources()
+     spec.update(minor_state='PROPOSED',minor_overrides=sources,
+-        minor_previous_startup_sha256=BASE_STARTUP_SHA,minor_previous_manifest_sha256=BASE_MANIFEST_SHA)
++        minor_previous_startup_sha256=BASE_STARTUP_SHA,minor_previous_manifest_sha256=BASE_MANIFEST_SHA,
++        minor_previous_configuration_sha256=BASE_CONFIG_SHA,minor_prepared_configuration_path=PREPARED_CONFIG_PATH,
++        configuration_sha256=NEW_CONFIG_SHA)
+     for rel,row in sources.items():
+         spec['component_sha256'][rel]=row['sha256']
+         spec['release_sources'][rel]=row['sha256']
+     spec['component_pins']=len(spec['component_sha256'])
+     if spec['component_pins']!=380:
+         raise ValueError('exact_380_component_proposal_required')
+-    startup=previous_publisher().inputs()[1]
+-    startup['component_sha256']=spec['component_sha256']
++    startup=startup_for(spec)
+     spec['startup_sha256']=sha(encoded(startup));spec['source_manifest_sha256']='0'*64
+     return json.loads(encoded(spec))
+ 
+@@ -148,8 +171,31 @@
+     return source.replace(old,new)
+ 
+ 
++def replace_literal(source,name,value):
++    tree=ast.parse(source)
++    assignments=[node for node in tree.body if isinstance(node,ast.Assign)
++        and len(node.targets)==1 and isinstance(node.targets[0],ast.Name) and node.targets[0].id==name]
++    if len(assignments)!=1:
++        raise ValueError('unique_frozen_literal_required')
++    node=assignments[0];lines=source.splitlines(keepends=True)
++    lines[node.lineno-1:node.end_lineno]=[name+'='+repr(value)+'\n']
++    return ''.join(lines)
++
++
+ def publisher_remote(spec):
+     source=previous_publisher().build_remote(spec)
++    before,after=configuration_pair()
++    if spec['configuration_sha256'] not in (BASE_CONFIG_SHA,NEW_CONFIG_SHA):
++        raise ValueError('reviewed_gui_configuration_required')
++    source=replace_literal(source,'EXPECTED_GUI',before if spec['configuration_sha256']==BASE_CONFIG_SHA else after)
++    source=replace_literal(source,'EXPECTED_STARTUP',startup_for(spec))
++    source=replace_once(source,
++        " need(manifest['component_pins']==startup['component_sha256'],'manifest_source_closure_changed')",
++        " need(manifest['component_pins']==startup['component_sha256'],'manifest_source_closure_changed')\n"
++        " need(manifest['configuration_sha256']==SPEC['configuration_sha256'],'manifest_configuration_sha_changed')\n"
++        " if SPEC.get('minor_prepared_configuration_path'):\n"
++        "  need(manifest['configuration_path']==SPEC['minor_prepared_configuration_path'],'prepared_configuration_path_changed')\n"
++        " c.read(manifest['configuration_path'],SPEC['configuration_sha256'])")
+     source=replace_once(source,"assert ACTION in ('guard-failed','guard','window-inspect','normal-close','start','ready')",
+         "assert ACTION in ('guard','window-inspect','normal-close','start','ready')")
+     tree=ast.parse(source)
+--- v20/apply_stability_closed.py
++++ v21/apply_stability_closed.py
+@@ -1,7 +1,7 @@
+-"""Apply the exact six-source identity/history closure after WM_DELETE.
++"""Apply one GTK source and one reviewed GUI configuration after WM_DELETE.
+ 
+-The original GUI configuration, source guards and private bootstrap are checked
+-under the original ownership leases. Backups precede every source installation.
++Both GUI copies and their source records share the exact reviewed bytes.
++Original configuration provenance is backed up before the current pointers move.
+ """
+ import argparse
+ import ast
+@@ -15,19 +15,6 @@
+ APPLY_REMOTE = r'''
+ import ast,base64,contextlib
+ 
+-def require_added_components_absent(root):
+- need(set(NEW_SOURCE_PATHS)=={'board/runtime/history_delete.py'},'exact_new_component_allowlist_required')
+- for rel in NEW_SOURCE_PATHS:
+-  path=root/'runtime/aura'/c.relative(rel)
+-  need(path.parent.resolve(strict=True)==path.parent and path.parent.is_dir()
+-       and not path.exists() and not path.is_symlink(),'new_component_path_must_be_absent')
+-
+-def install_added_component(path,raw):
+- c.create(path,raw)
+- fd=os.open(str(path.parent),os.O_DIRECTORY|os.O_RDONLY)
+- try:os.fsync(fd)
+- finally:os.close(fd)
+-
+ def apply_minor_closed():
+  boot();j=journal();inactive(j)
+  need(j.get('phase')=='NORMAL_CLOSED' and j.get('boot_id')==SPEC['boot_id']
+@@ -38,30 +25,44 @@
+  need(old_startup==BASE_STARTUP_OBJECT and old_startup['component_sha256']==BASE_PINS,'exact_current_startup_required')
+  for rel,pin in BASE_PINS.items():c.read(root/'runtime/aura'/c.relative(rel),pin)
+  gui_raw=c.read(root/'runtime/aura/config/board_avatar_gtk.json',BASE_CONFIG_SHA)
+- need(c.parse(gui_raw)==EXPECTED_GUI,'current_gui_configuration_changed')
++ need(c.parse(gui_raw)==BASE_GUI_OBJECT,'current_gui_configuration_changed')
+  old_manifest_raw=c.read(root/'production_source_manifest.json',BASE_MANIFEST_SHA)
+  manifest=c.parse(old_manifest_raw)
+  need(manifest['component_pins']==BASE_PINS and manifest['configuration_sha256']==BASE_CONFIG_SHA,'current_manifest_closure_changed')
+- c.read(manifest['configuration_path'],BASE_CONFIG_SHA)
++ old_configuration_path=Path(manifest['configuration_path'])
++ need(old_configuration_path!=root/'runtime/aura'/CONFIG_RELATIVE
++      and old_configuration_path!=Path(PREPARED_CONFIG_PATH),'separate_original_configuration_provenance_required')
++ old_external_gui=c.read(old_configuration_path,BASE_CONFIG_SHA)
++ need(old_external_gui==gui_raw,'original_configuration_bytes_disagree')
+  reviewed_face()
+  need(set(PAYLOAD)==set(FROZEN_SOURCES)==set(SPEC['minor_overrides']),'exact_frozen_minor_payload_required')
+- require_added_components_absent(root)
+  new_files={}
+  for rel,item in PAYLOAD.items():
+   row=FROZEN_SOURCES[rel]
+-  need(SPEC['minor_overrides'][rel]==row and item['before_sha256']==row['before_sha256']==BASE_PINS.get(rel)
+-       and (rel not in BASE_PINS)==(rel in NEW_SOURCE_PATHS),'minor_source_baseline_changed')
++  need(SPEC['minor_overrides'][rel]==row and item['before_sha256']==row['before_sha256']==BASE_PINS[rel],
++       'minor_source_baseline_changed')
+   raw=base64.b64decode(item['base64'],validate=True)
+   need(c.sha(raw)==item['sha256']==row['sha256'] and 0<len(raw)<2097152,'bounded_frozen_source_required')
+-  ast.parse(raw,feature_version=(3,9));new_files[rel]=raw
++  if rel==CONFIG_RELATIVE:
++   need(c.sha(raw)==NEW_CONFIG_SHA and c.parse(raw)==EXPECTED_GUI,'reviewed_new_gui_required')
++  else:ast.parse(raw,feature_version=(3,9))
++  new_files[rel]=raw
++ new_gui_raw=new_files[CONFIG_RELATIVE]
++ need(SPEC['configuration_sha256']==NEW_CONFIG_SHA
++      and SPEC['component_sha256'][CONFIG_RELATIVE]==NEW_CONFIG_SHA
++      and SPEC['minor_prepared_configuration_path']==PREPARED_CONFIG_PATH,'complete_new_configuration_spec_required')
+  new_startup_raw=c.encoded(EXPECTED_STARTUP)
+  need(c.sha(new_startup_raw)==SPEC['startup_sha256'],'proposed_startup_bytes_changed')
+  manifest['component_pins']=SPEC['component_sha256']
++ manifest['configuration_sha256']=NEW_CONFIG_SHA
++ manifest['configuration_path']=PREPARED_CONFIG_PATH
+  for rel,raw in new_files.items():manifest['files']['runtime/aura/'+rel]=dict(sha256=c.sha(raw),bytes=len(raw))
+  manifest['files']['startup/config.json']=dict(sha256=c.sha(new_startup_raw),bytes=len(new_startup_raw))
+  manifest['minor_revision']=dict(name=MINOR_REVISION,previous_startup_sha256=BASE_STARTUP_SHA,
+    previous_manifest_sha256=BASE_MANIFEST_SHA,sources={rel:c.sha(raw) for rel,raw in new_files.items()},
+-   new_source_paths=NEW_SOURCE_PATHS,gui_configuration_sha256=BASE_CONFIG_SHA,private_data_replayed=False)
++   gui_configuration_sha256=NEW_CONFIG_SHA,previous_gui_configuration_sha256=BASE_CONFIG_SHA,
++   prepared_configuration_path=PREPARED_CONFIG_PATH,previous_configuration_path=str(old_configuration_path),
++   private_data_replayed=False)
+  manifest_raw=c.encoded(manifest)
+  completed_spec=dict(SPEC,minor_state='APPLIED',source_manifest_sha256=c.sha(manifest_raw))
+  private=Path('/home/root/.local/share/aura-board-business')
+@@ -71,7 +72,8 @@
+    fd=os.open(str(path),os.O_RDWR|os.O_NOFOLLOW)
+    stream=stack.enter_context(os.fdopen(fd,'r+b'))
+    fcntl.flock(stream,fcntl.LOCK_EX|fcntl.LOCK_NB)
+-  ownerless(c.show());guarded(j);reviewed_face();require_added_components_absent(root)
++  ownerless(c.show());guarded(j);reviewed_face()
++  need(c.read(old_configuration_path,BASE_CONFIG_SHA)==old_external_gui,'original_configuration_changed_before_backup')
+   sys.path.insert(0,str(root/'runtime/aura'))
+   from common.board_production_bootstrap import verify_production_bootstrap
+   cfg=EXPECTED_GUI['board_business']
+@@ -82,30 +84,38 @@
+   for name,raw in [('startup-config.json',old_startup_raw),('gui-config.json',gui_raw),
+                    ('production-source-manifest.json',old_manifest_raw),('publication-state.json',c.read(STATE))]:
+    c.create(backup/name,raw)
+-  c.create(backup/'absent-components.json',c.encoded(dict(absent=NEW_SOURCE_PATHS)))
++  c.create(backup/'external-gui-config.json',old_external_gui)
++  c.create(backup/'configuration-paths.json',c.encoded(dict(previous=str(old_configuration_path),
++    previous_sha256=BASE_CONFIG_SHA,prepared=PREPARED_CONFIG_PATH,prepared_sha256=NEW_CONFIG_SHA)))
+   for rel,raw in new_files.items():
+-   if rel not in NEW_SOURCE_PATHS:
+-    original=c.read(root/'runtime/aura'/rel,BASE_PINS[rel]);destination=backup/rel
+-    destination.parent.mkdir(mode=0o700,parents=True,exist_ok=True);c.create(destination,original)
++   original=c.read(root/'runtime/aura'/rel,BASE_PINS[rel]);destination=backup/rel
++   destination.parent.mkdir(mode=0o700,parents=True,exist_ok=True);c.create(destination,original)
+    destination=stage/'after'/rel;destination.parent.mkdir(mode=0o700,parents=True,exist_ok=True);c.create(destination,raw)
+   c.create(stage/'applied-spec.json',c.encoded(completed_spec))
++  need(stage/'prepared-gui.json'==Path(PREPARED_CONFIG_PATH),'exact_prepared_configuration_path_required')
++  c.create(stage/'prepared-gui.json',new_gui_raw)
+   c.create(stage/'prepared-startup.json',new_startup_raw);c.create(stage/'prepared-manifest.json',manifest_raw)
++  stage_fd=os.open(str(stage),os.O_DIRECTORY|os.O_RDONLY)
++  try:os.fsync(stage_fd)
++  finally:os.close(stage_fd)
+   j.update(phase='MINOR_SOURCE_INSTALL_INTENT',minor_stage=str(stage),target_startup_sha256=SPEC['startup_sha256'])
+   save(j)
+-  for rel,raw in new_files.items():
+-   destination=root/'runtime/aura'/rel
+-   if rel in NEW_SOURCE_PATHS:install_added_component(destination,raw)
+-   else:atomic(destination,raw)
++  for rel,raw in new_files.items():atomic(root/'runtime/aura'/rel,raw)
+   atomic(root/'startup/config.json',new_startup_raw);atomic(root/'production_source_manifest.json',manifest_raw)
+   SPEC.update(minor_state='APPLIED',source_manifest_sha256=completed_spec['source_manifest_sha256'])
+   source();ownerless(c.show());guarded(j)
+-  need(c.read(root/'runtime/aura/config/board_avatar_gtk.json',BASE_CONFIG_SHA)==gui_raw,'gui_configuration_changed_during_apply')
++  need(c.read(root/'runtime/aura'/CONFIG_RELATIVE,NEW_CONFIG_SHA)==new_gui_raw
++       and c.read(PREPARED_CONFIG_PATH,NEW_CONFIG_SHA)==new_gui_raw,'installed_configuration_copies_disagree')
++  need(c.read(old_configuration_path,BASE_CONFIG_SHA)==old_external_gui,'original_configuration_provenance_modified')
+   j.update(phase='NORMAL_CLOSED',target_startup_sha256=SPEC['startup_sha256'],target_pins=SPEC['component_pins'])
+   save(j)
+  return dict(status='MINOR_SOURCES_APPLIED_UI_STOPPED',spec=completed_spec,
+-   source_files={rel:c.sha(raw) for rel,raw in new_files.items()},new_source_paths=NEW_SOURCE_PATHS,backup_directory=str(backup),
++   source_files={rel:c.sha(raw) for rel,raw in new_files.items()},new_source_paths=[],backup_directory=str(backup),
+    production_bootstrap_verified=True,profiles_migration_verified=True,
+-   gui_configuration_bytes_unchanged=True,private_data_replayed=False,ui_started=False,service_stop_or_kill=False)
++   gui_configuration_bytes_unchanged=False,gui_configuration_changed=True,
++   configuration_sha256=NEW_CONFIG_SHA,configuration_path=PREPARED_CONFIG_PATH,
++   previous_configuration_path=str(old_configuration_path),previous_configuration_preserved=True,
++   private_data_replayed=False,ui_started=False,service_stop_or_kill=False)
+ 
+ with open('/run/aura-production-publisher.lock','a') as lock:
+  fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+@@ -121,12 +131,13 @@
+         raise ValueError('unique_publisher_dispatch_anchor_required')
+     remote=remote.split(anchor,1)[0]
+     before=common.baseline()
+-    startup=common.previous_publisher().inputs()[1]
+-    startup['component_sha256']=before['component_sha256']
++    startup=common.startup_for(before)
+     values=dict(BASE_PINS=before['component_sha256'],BASE_STARTUP_OBJECT=startup,
+         BASE_STARTUP_SHA=common.BASE_STARTUP_SHA,BASE_CONFIG_SHA=common.BASE_CONFIG_SHA,
+         BASE_MANIFEST_SHA=common.BASE_MANIFEST_SHA,MINOR_REVISION=common.MINOR_REVISION,
+-        FROZEN_SOURCES=common.approved_sources(),NEW_SOURCE_PATHS=sorted(common.NEW_PATHS))
++        FROZEN_SOURCES=common.approved_sources(),CONFIG_RELATIVE=common.CONFIG_RELATIVE,
++        NEW_CONFIG_SHA=common.NEW_CONFIG_SHA,PREPARED_CONFIG_PATH=common.PREPARED_CONFIG_PATH,
++        BASE_GUI_OBJECT=common.configuration_pair()[0])
+     remote='\n'.join(key+'='+repr(value) for key,value in values.items())+'\n'+remote+'\n'+APPLY_REMOTE
+     ast.parse(remote,feature_version=(3,9))
+     return remote
+--- v20/seal_stability.py
++++ v21/seal_stability.py
+@@ -1,4 +1,4 @@
+-"""Verify actual v20 receipts and live sources before advancing local pointers.
++"""Verify actual v21 configuration/source receipts before advancing pointers.
+ 
+ Default mode validates local receipts and generated source only. Device access
+ and canonical updates require --execute-root-only.
+@@ -15,20 +15,24 @@
+ 
+ HERE = Path(__file__).resolve().parent
+ CANONICAL = common.REPAIR.parent / 'production_business_acceptance'
+-EVIDENCE = HERE / 'identity_history_evidence'
++EVIDENCE = HERE / 'asr2_display_evidence'
+ 
+ 
+ def validate_inputs(spec, ready, installed):
+     common.validate_spec(spec)
+     if (spec['startup_sha256'] != common.proposed()['startup_sha256']
+             or spec['expected_final_listening_enabled'] is not False or spec['component_pins'] != 380):
+-        raise ValueError('actual_v20_saved_pause_spec_required')
++        raise ValueError('actual_v21_saved_pause_spec_required')
+     products = {name: item['sha256'] for name, item in common.approved_sources().items()}
+     if (installed.get('status') != 'MINOR_SOURCES_APPLIED_UI_STOPPED'
+             or installed.get('spec') != spec or installed.get('source_files') != products
+             or installed.get('production_bootstrap_verified') is not True
+             or installed.get('profiles_migration_verified') is not True
+-            or installed.get('gui_configuration_bytes_unchanged') is not True
++            or installed.get('gui_configuration_bytes_unchanged') is not False
++            or installed.get('gui_configuration_changed') is not True
++            or installed.get('previous_configuration_preserved') is not True
++            or installed.get('configuration_sha256') != common.NEW_CONFIG_SHA
++            or installed.get('configuration_path') != common.PREPARED_CONFIG_PATH
+             or installed.get('private_data_replayed') is not False
+             or installed.get('new_source_paths') != sorted(common.NEW_PATHS)):
+         raise ValueError('matching_actual_frozen_source_install_receipt_required')
+@@ -59,8 +63,10 @@
+ manifest_raw=(root/'production_source_manifest.json').read_bytes();assert sha(manifest_raw)==SPEC['source_manifest_sha256']
+ manifest=json.loads(manifest_raw)
+ assert manifest['component_pins']==pins and manifest['configuration_sha256']==SPEC['configuration_sha256']
++assert manifest['configuration_path']==SPEC['minor_prepared_configuration_path']
+ assert sha(pathlib.Path(manifest['configuration_path']).read_bytes())==SPEC['configuration_sha256']
+ assert sha((root/'runtime/aura/config/board_avatar_gtk.json').read_bytes())==SPEC['configuration_sha256']
++assert json.loads((root/'runtime/aura/config/board_avatar_gtk.json').read_bytes())['board_business']['asr_threads']==2
+ assert sha(pathlib.Path(SPEC['face_readback']['path']).read_bytes())==SPEC['face_readback']['sha256']
+ unit=dict(line.split('=',1) for line in subprocess.check_output(['systemctl','show','aura-avatar-ui.service','-p','MainPID','-p','ActiveState','-p','SubState','-p','ExecMainStatus','-p','NRestarts','-p','DropInPaths'],text=True).splitlines())
+ assert unit['MainPID']==str(READY['main_pid']) and unit['ActiveState']=='active' and unit['SubState']=='running'
+@@ -97,9 +103,10 @@
+ assert listening.get('enabled') is False and listening.get('state')=='PAUSED' and listening.get('microphone_open') is False
+ assert ui.get('phase')=='IDLE' and ui.get('playing') is False
+ assert display.get('kind')=='native_yuki_egl' and display.get('visible') is True and display.get('frames',0)>0
+-print(json.dumps({'status':'IDENTITY_HISTORY_SOURCE_AND_SERVICE_VERIFIED','observed_mono':time.monotonic(),
++print(json.dumps({'status':'ASR2_DISPLAY_SOURCE_AND_SERVICE_VERIFIED','observed_mono':time.monotonic(),
+  'boot_id':SPEC['boot_id'],'root':str(root),'startup_sha256':SPEC['startup_sha256'],
+  'source_manifest_sha256':SPEC['source_manifest_sha256'],'configuration_sha256':SPEC['configuration_sha256'],
++ 'configuration_path':manifest['configuration_path'],'asr_threads':2,
+  'component_pins':pins,'source_files':PRODUCTS,'unit':unit,'supervisor':identity(READY['main_pid']),'gtk':identity(READY['gtk_pid']),
+  'camera':camera,'private_data_exported':False,'current_publication_committed':True,
+  'saved_listening_preference':preference,'listening':{'enabled':False,'state':'PAUSED','microphone_open':False},
+@@ -109,12 +116,14 @@
+ 
+ def validate_mapping(mapping, spec, ready, products):
+     keys = ('startup_sha256', 'source_manifest_sha256', 'configuration_sha256')
+-    if (mapping.get('status') != 'IDENTITY_HISTORY_SOURCE_AND_SERVICE_VERIFIED'
++    if (mapping.get('status') != 'ASR2_DISPLAY_SOURCE_AND_SERVICE_VERIFIED'
+             or any(mapping.get(key) != spec[key] for key in keys)
+             or mapping.get('boot_id') != spec['boot_id']
+             or mapping.get('root') != spec['target']
+             or mapping.get('component_pins') != spec['component_sha256']
+             or len(mapping['component_pins']) != 380 or mapping.get('source_files') != products
++            or mapping.get('configuration_path') != common.PREPARED_CONFIG_PATH
++            or type(mapping.get('asr_threads')) is not int or mapping['asr_threads'] != 2
+             or mapping.get('supervisor', {}).get('pid') != ready['main_pid']
+             or mapping.get('gtk', {}).get('pid') != ready['gtk_pid']
+             or mapping.get('camera', {}).get('pid') != spec['camera_owner']['camera_pid']
+@@ -144,7 +153,7 @@
+ 
+ 
+ def atomic_file(path, raw):
+-    temporary = path.with_name(path.name + '.v20-seal-tmp')
++    temporary = path.with_name(path.name + '.v21-seal-tmp')
+     exact_file(temporary, raw)
+     os.replace(temporary, path)
+ 
+@@ -154,8 +163,8 @@
+     products = validate_inputs(spec, ready, installed)
+     validate_mapping(mapping, spec, ready, products)
+     desired = {'spec.json': raws['spec.json'], 'actual_ready.json': raws['ready.json']}
+-    old = {'spec.json': common.pinned(common.PREVIOUS / 'stability_evidence/spec.json', common.BASE_SPEC_SHA),
+-           'actual_ready.json': common.pinned(common.PREVIOUS / 'stability_evidence/ready.json', common.BASE_READY_SHA)}
++    old = {'spec.json': common.pinned(common.PREVIOUS / 'identity_history_evidence/spec.json', common.BASE_SPEC_SHA),
++           'actual_ready.json': common.pinned(common.PREVIOUS / 'identity_history_evidence/ready.json', common.BASE_READY_SHA)}
+     for name in desired:
+         path = canonical / name
+         if path.is_symlink() or path.read_bytes() not in (old[name], desired[name]):
+@@ -188,7 +197,7 @@
+             atomic_file(canonical / name, desired[name])
+     transaction['phase'] = 'COMMITTED'
+     atomic_file(state_path, common.encoded(transaction))
+-    return {'status': 'IDENTITY_HISTORY_EVIDENCE_SEALED_CANONICAL_COMMITTED', 'evidence': str(evidence),
++    return {'status': 'ASR2_DISPLAY_EVIDENCE_SEALED_CANONICAL_COMMITTED', 'evidence': str(evidence),
+             'startup_sha256': spec['startup_sha256'], 'source_manifest_sha256': spec['source_manifest_sha256'],
+             'listening_enabled': False, 'current_verification_mono': mapping['observed_mono']}
+ 

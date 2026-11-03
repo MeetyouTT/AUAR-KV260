@@ -1,0 +1,38 @@
+原板端 wide 恢复操作复核（只读；root 唯一执行）
+
+用户要求维持板端原控制器/驱动/固件，只在原链路恢复后优化。本报告没有创建新控制器或事务执行框架。现场已确认安装未动、可观察且空间/线缆余量充足、转轴动力断开。相机和板卡仍通电。本代理没有请求服务停止/启动、PL切换、client调用、MMIO或运动。
+
+精确原 client
+- SHA a37d8449c3362a509d459f9e57aa3711314602369354f7d98ca60c3e51607ad7
+- unload argv: ['/usr/bin/dfx-mgr-client', '-remove', '0']
+- load argv: ['/usr/bin/dfx-mgr-client', '-load', 'aura-visual-servo-b4096-wide-v1']
+- 完整成功stdout应分别严格等于 b'remove from slot 0 returns: 0 (Ok)\n' 和 b'aura-visual-servo-b4096-wide-v1: loaded to slot 0\n'。不得接受子串0或单看returncode0。stderr另保存原字节；异常或多余回复需审阅。原CLI实际只打印daemon回复，负结果仍可RC0。
+- daemon SHA369c7fb0ddd023a7cf7af14896a7fda6036219a36f4980c73640889720c95dfd；保持原daemon进程/ZOCL修复，不重启替换它。daemon本身卸载低层错误也可能返回0，故回复成功还必须实际卸载/加载读回。
+
+已取得的真实卸载态依据
+overlay_zocl_readonly_01.json / zocl_driver_readonly_01.json / base_fdt_vs_overlay_readonly_01.json 是本轮新增只读结果，当前唯一configfs overlay是kv260-benchmark-b4096_image_1、status applied、path kv260-benchmark-b4096.dtbo。
+benchmark原DTBO SHA36338937904e5ec988566d7341f6504edba34c01bd7e2e3f2025ab0069337e35和wide原DTBO都在fragment@7向amba添加zyxclmm_drm。动态/proc/device-tree/axi/zyxclmm_drm当前兼容xlnx,zocl、status okay。实际设备/sys/devices/platform/axi/axi:zyxclmm_drm绑定/sys/bus/platform/drivers/zocl-drm/axi:zyxclmm_drm；派生card1和renderD128。不要检查不存在的drivers/zocl而误判卸净。
+本内核基底/sys/firmware/fdt的反编译没有zyxclmm_drm或xlnx,zocl；基底fpga-full没有firmware-name。动态树当前已有这些内容，说明该flat blob并不代表已合并运行overlay。其新鲜SHA可绑定本次context，但不应要求切换后SHA变化，也不能把它单独当wide证明。
+
+卸载通过条件（在真实同一client已确认完成/完整成功回复后）
+1. 原相机和GUI都已正常停稳，无Job，无旧owner；完整maps+fd无DPU或MMIO用户且无不可读活进程。正常相机shutdown真实final checkpoint已通过原完整读验证、全部累计下界/归档链验证并原字节封存；原文件指针和消费marker不改。
+2. configfs overlays根存在，原唯一overlay目录已消失，且无其它应用overlay。
+3. 动态DT新增/axi/zyxclmm_drm节点消失；fpga-full/firmware-name消失。原DTBO创建的afi0、clocking0/1若要纳入完整overlay回退证明，应与本内核基底树逐项比对而不臆定根节点消失。
+4. 原axi:zyxclmm_drm platform设备、zocl-drm中同名设备绑定、其card1/renderD128派生节点消失；显示card0不受这个判据要求。zocl-drm驱动目录、zocl模块和fpga_region/region0可继续存在，不等于卸载失败。
+5. listapps无活动slot作附加证据。fpga manager可能仍operating、VART可能保留旧路径；不能要求这两个清空，也不能把它们当实际卸载证明。
+6. 任一点失败/未读/瞬态不一致都保持HOLD/PENDING，不自动重发、不杀client/daemon、不手工unbind或清overlay。
+以上是来源支持的允许下一步判据，尚无本轮实际卸载结果。
+
+wide加载通过条件
+同一client真实完成、完整成功slot0回复，唯一configfs应用overlay status applied且path对应已核wide DTBO；动态fpga-full/firmware-name精确aura-visual-servo-b4096-wide-v1.bit.bin；fpga-manager operating；动态ZOCL节点/同名platform设备/实际zocl-drm绑定及派生render重新出现；listapps期望wide活动slot0；/etc/vart.conf原字节精确为firmware: /lib/firmware/xilinx/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.xclbin\n。4FW/3driver及manifest原SHA必须再核。configfs目录后缀由loader分配，不硬编码image_1；绑定实际唯一应用overlay身份。未通过则不打开MMIO、不启动相机，不靠写VART或换旧FDT让断言通过。
+
+现有systemd-run单次托管
+本机板端systemd249.7+，已读help和binary append:支持。可为每一步用唯一unit和独占动作目录，先O_EXCL/fsync持久intent、空stdout/stderr文件，再通过原systemd-run启动原client一次：
+systemd-run --unit=<unique> --no-block --service-type=oneshot --remain-after-exit -p Restart=no -p TimeoutStartSec=infinity -p TimeoutStopSec=infinity -p SendSIGKILL=no -p KillMode=process -p StandardOutput=append:<action-dir>/stdout -p StandardError=append:<action-dir>/stderr /usr/bin/dfx-mgr-client <exact-args>
+不要scope/pty/pipe/wait/collect，不重设任何原服务。OS托管隔离SSH寿命；RemainAfterExit保留正常完成unit。提交结果不明时仅按同一unit/intent只读reconcile；不再发起另一个动作。
+观察InvocationID、ExecStart完整argv/PID/单调起止时间/code/status、ControlPID/MainPID、Result、ActiveState/SubState/Job；运行中若可观察到真实PID，再核/proc birth/exe/cmdline。极快进程可能在首poll前退出，OS工具不保证事先获得/proc birth；保留OS记录，birth标未观察，不填0也不宣称完整proc身份已核。不要把systemd-run自身RC/创建成功当原client完成。该方案为现有OS工具使用草案，没有创建unit/执行client。
+
+原ID_STOP_ONLY
+/usr/bin/python3 -B /home/root/aura-pan-wide-20261028/release-6a4b645a5bbfd35c/bench_identity_stop.py --execute --confirmation ID_STOP_ONLY --manifest /home/root/aura-pan-wide-20261028/release-6a4b645a5bbfd35c/candidate-manifest.json --manifest-sha256 6a4b645a5bbfd35c9107976edf27886cf8e0c91e40f48be6f052a95e1172c1cf --context <fresh-dir>/wide-context.json --output <fresh-dir>/id-stop.json
+原bench SHAc9e91f74336c1e73d7c60408739abc8537b80066eb666a1a79e32b81d7d267aa。context实际三字段boot_id/fdt_sha256/firmware_name。输出open(x)在设备访问前预留。原NativeRegisters取排他锁并核库/boot/payload，driver构造只读ID/ABI/build，第一项写为STOP；关闭再次STOP。要求identity_stop_passed true、after_stop flags0 lease_left_ms0、ARM/COMMIT/BIND/REFERENCE全false。ID0x56535256、ABI2、build0x10282601。不把1500寄存器当物理回中，不新增物理reference。
+此入口须在原相机仍停止且无其它MMIO owner时执行，晚于实际wide读回，早于相机恢复。它不自动启动相机。只有原相机入口消费本次真实final、audit精确seed相同、独占新owner和真实源推进后，才更新业务readback。后续动力重新接通、实体参考/方向/短测仍未在本boot完成。

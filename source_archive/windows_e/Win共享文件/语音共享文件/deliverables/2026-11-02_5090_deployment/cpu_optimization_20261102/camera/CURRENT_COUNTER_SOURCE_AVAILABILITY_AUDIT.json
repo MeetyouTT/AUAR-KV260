@@ -1,0 +1,137 @@
+{
+  "schema": "aura-current-counter-source-availability-audit-1",
+  "verdict": "REQUIRED_KEYS_PROVEN_IN_ARCHIVED_NATIVE_PUBLIC_HEALTH_NOT_A_FRESH_LIVE_OWNER_PASS",
+  "summary": "The five required optional counters and recovery fields are explicitly present with correct numeric/bool types in all15 preserved health samples across three original observer receipts. Collector source/prefix SHA reconstruction matches each receipt. These are numeric-preserving filtered copies of actual GET /health results, not values inferred from a final checkpoint, synthetic fixture, last_native_report or default0. The internal NativeDpuSchedule implementation body remains unavailable in the inspected local source corpus.",
+  "normal_stop_contract": {
+    "path": "camera/normal_stop_current_owner.py",
+    "sha256": "4a5e374eacc825e16a22664dc6ef1137f5e0950be3dc8b3e477f791faf5e2e91",
+    "lines": [136, 139, 142, 143, 144, 145, 146, 147, 148, 163],
+    "required_optional_each": ["calls", "native_completed", "native_failures", "not_submitted", "overruns"],
+    "required_recovery_integer_each": ["faults", "attempts", "recoveries", "probe_successes"],
+    "required_recovery_boolean_each": ["history_opaque"],
+    "behavior": "The existing dry-run already checks each counter by explicit indexing/type/nonnegative value and preserves actual optional objects into the stop intent. No new Native or C read implementation is required for these keys."
+  },
+  "source_projection": [
+    {
+      "stage": "Native scheduler installed into camera state",
+      "source": "camera/baseline/4a729a29c6e4__native_startup.py",
+      "sha256": "4a729a29c6e4c5d8e89c084867f8c7b972e38e4cf1a74177250cbb31a0396fcf",
+      "lines": [111, 112, 113, 114, 115, 116],
+      "projection": "Original attach constructs NativeDpuSchedule(context, inherited_optional=aux.get('inherited_optional'), inherited_sface_counters=aux['sface_counters'], ...). ui_camera_service.run installs the returned schedule into state.dpu_schedule. This establishes the Native schedule branch rather than the fallback scheduler."
+    },
+    {
+      "stage": "Public camera health field and route",
+      "source": "camera/baseline/9d714b9bd00e__ui_camera_service.py",
+      "sha256": "9d714b9bd00ea1da12088fa1e22100d7bdb689d0cac10332c3933b31e4f4d2df",
+      "lines": [207, 208, 227, 233, 237, 239, 244, 247, 399, 400],
+      "projection": "GET /health responds with state.health(). The dpu_schedule field is exactly self.dpu_schedule.health() if configured. Handler JSON-serializes that object with Cache-Control:no-store. No optional counter is manufactured in CameraState.health or the route."
+    },
+    {
+      "stage": "Internal schedule health/optional counter generation",
+      "board_source": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura/board/vision/native_schedule.py",
+      "expected_sha256": "dd42f2110cab499130706759bd2155dae0a161abb05d7b5563d319f29e956abf",
+      "pin_source": "camera/SOURCE_DISCOVERY.json",
+      "pin_source_sha256": "6f4ef9dc25355a141d95c307a6219c54d38b09b8f1e0f6340aa51a735c29d129",
+      "pin_line": 777,
+      "body_status": "NOT_FOUND_IN_INSPECTED_LOCAL_SOURCE_FILES_OR_SELECTED_SOURCE_ARCHIVES",
+      "remaining_source_gap": "No exact body/line numbers for NativeDpuSchedule.health or optional_status; cannot complete source-level proof of their internal accumulator/update/native-array mapping. A manifest SHA is not a substitute for that body. Actual archived HTTP exposure is nevertheless independently established by the preserved responses below."
+    },
+    {
+      "stage": "Original passive observer preserves response numbers without defaults",
+      "source": "../performance_check_20261102/collect_board_performance.py",
+      "sha256": "078d83ef4d747ea5fef04dcf4139b28fc275c706a63efad415613d95d0156e57",
+      "lines": [18, 19, 22, 23, 24, 25, 26, 37, 38, 41, 43, 44, 45, 47, 51, 54, 56, 57, 60, 180, 187],
+      "projection": "get(8790,'/health') obtains the JSON object. health() passes its dpu_schedule directly through numbers(schedule). numbers iterates only existing dictionary items and copies each int/float/bool/None unchanged; it does not add missing keys, sum reports, rename native_completed or supply0. Non-numeric phase strings are filtered out, but the required recovery integers/bool are preserved.",
+      "receipt_code_hash_check": "Reconstructed exact host prefix EXPECTED = repr({camera_pid,gui_pid,gtk_pid}) plus the LF-normalized saved collector text; SHA matches all three stored collector_sha256_lf values. No collector or HTTP function was executed during this audit."
+    }
+  ],
+  "preserved_public_response_evidence": [
+    {
+      "path": "../performance_check_20261102/BOARD_PERFORMANCE_091612.json",
+      "sha256": "ec5b61c0f3ea23654efd45a3c08952e64f92ab90650f0b20bbbd419c76c70af3",
+      "host_finished_utc": "2026-11-02T09:16:12.566131+00:00",
+      "historical_only": true,
+      "samples": 5,
+      "pointer_pattern": "/board_result/health_samples/{0..4}/camera/dpu_schedule/optional/{yunet|sface}",
+      "native_critical_all": true,
+      "native_abi_all": 2,
+      "all_required_keys_explicit_correct_type_nonnegative": true,
+      "collector_sha256_lf_reconstructed_and_matching": "42a206173afa91f9787676e6dfb049040bd91c7017476a0907cf4d0fccd68ffb",
+      "first_last": {
+        "yunet": {"calls": [305607, 305982], "native_completed": [305597, 305972], "native_failures": [0, 0], "not_submitted": [10, 10], "overruns": [0, 0]},
+        "sface": {"calls": [8172, 8229], "native_completed": [8171, 8228], "native_failures": [0, 0], "not_submitted": [1, 1], "overruns": [0, 0]}
+      }
+    },
+    {
+      "path": "RESOURCE_before.json",
+      "sha256": "eb64b52392593563ae05a813f1bd78db544213b919b50e6099bf1c8b7111fe38",
+      "host_utc": "2026-11-02T09:47:08.950918+00:00",
+      "historical_only": true,
+      "samples": 5,
+      "pointer_pattern": "/board_result/health_samples/{0..4}/camera/dpu_schedule/optional/{yunet|sface}",
+      "native_critical_all": true,
+      "native_abi_all": 2,
+      "all_required_keys_explicit_correct_type_nonnegative": true,
+      "collector_sha256_lf_reconstructed_and_matching": "42a206173afa91f9787676e6dfb049040bd91c7017476a0907cf4d0fccd68ffb",
+      "first_last": {
+        "yunet": {"calls": [323809, 324191], "native_completed": [323799, 324181], "native_failures": [0, 0], "not_submitted": [10, 10], "overruns": [0, 0]},
+        "sface": {"calls": [9668, 9716], "native_completed": [9666, 9714], "native_failures": [0, 0], "not_submitted": [2, 2], "overruns": [0, 0]}
+      }
+    },
+    {
+      "path": "RESOURCE_a6d4_benchmark_before.json",
+      "sha256": "4e47e262362984c7c8764939d0e9ec05d269fc68dcb7261cf1eeb412a0617175",
+      "host_utc": "2026-11-02T12:34:48.128100+00:00",
+      "historical_only": true,
+      "samples": 5,
+      "pointer_pattern": "/board_result/health_samples/{0..4}/camera/dpu_schedule/optional/{yunet|sface}",
+      "native_critical_all": true,
+      "native_abi_all": 2,
+      "all_required_keys_explicit_correct_type_nonnegative": true,
+      "collector_sha256_lf_reconstructed_and_matching": "d70ba4ad99c2feda3abd56ba015ec7a0023825a8276a057a45c4d4cbd6344da4",
+      "first_last": {
+        "yunet": {"calls": [53988, 54380], "native_completed": [53987, 54379], "native_failures": [0, 0], "not_submitted": [1, 1], "overruns": [0, 0]},
+        "sface": {"calls": [6109, 6109], "native_completed": [6109, 6109], "native_failures": [0, 0], "not_submitted": [0, 0], "overruns": [0, 0]}
+      }
+    }
+  ],
+  "recovery_evidence": {
+    "all15_samples_both_tasks": "faults/attempts/recoveries/probe_successes explicitly present, type int, nonnegative; history_opaque explicitly present, type bool",
+    "observed_values": {"faults": 0, "attempts": 0, "recoveries": 0, "probe_successes": 0, "history_opaque": false},
+    "why_zero_is_not_a_missing_default": "The collector iterates existing keys and copies raw values; the audit checked membership before checking type/value. These zeros came from the recorded API response. They are not new lower bounds for any future run.",
+    "single_operation_report_separation": "Every examined task object separately has last_native_report. Its submitted/completed values in first samples are1/1, while top-level calls/native_completed are thousands and can advance across samples. The audit uses the top-level keys only and never reconstructs cumulative values from last_native_report."
+  },
+  "direct_reusable_readonly_entry": {
+    "entry": "Existing loopback GET /health on camera port8790, through the original HTTP handler and CameraState.health",
+    "existing_client": "camera/normal_stop_current_owner.py:get(path)",
+    "existing_client_sha256": "4a5e374eacc825e16a22664dc6ef1137f5e0950be3dc8b3e477f791faf5e2e91",
+    "client_lines": [105, 106, 108, 109, 110, 111, 112, 113],
+    "future_use": "Reuse the already reviewed normal-stop default dry-run or its bounded metadata GET under the authorized future owner window. Read actual optional and feature counters from this response; do not instantiate NativeContext, call a new C reader, or execute the entire40s observer just to obtain one snapshot.",
+    "no_new_implementation_created": true,
+    "not_invoked_this_audit": true
+  },
+  "remaining_gates": [
+    "Fresh actual boot/PID/birth/cmd, full current source/config closure and Native ABI remain mandatory in the later default dry-run.",
+    "Require the keys/types again in that real response; missing/changed source -> HOLD before stop. Archived values must never populate fresh expected or prestop lower bounds.",
+    "The internal native_schedule.py body at the exact dd42 SHA is still needed if the caller requires a complete source-level proof of accumulator semantics or exact mapping to Native seed arrays. This audit proves public exposure from preserved responses and route/collector source, not that unavailable implementation body.",
+    "Existing normal-stop/final/history/marker/ownership gates remain unchanged; this audit is not a live maintenance pass or device handoff."
+  ],
+  "local_search_scope": {
+    "plain_sources": "Read-only search of current deployment source archives plus shared aura/project source trees found no NativeDpuSchedule or optional_status body.",
+    "selected_zip_central_directories": [
+      "2026-10-30_board_owner/integration/dialogue_repair/jpeg_demand_camera_trial_v21/camera_aba_public_code.zip",
+      "2026-10-30_yuki_native_validation/evidence/native_integration/board-source-current.zip",
+      "2026-10-30_yuki_native_validation/evidence/native_integration/board-source.zip",
+      "2026-10-30_yuki_native_validation/evidence/native_integration/paired_ab/fresh-native-source.zip"
+    ],
+    "zip_result": "No native_schedule.py or dpu_vision_schedule.py member in those source archives. No media/DB/key archive member was opened or extracted."
+  },
+  "boundaries": {
+    "only_new_file": "camera/CURRENT_COUNTER_SOURCE_AVAILABILITY_AUDIT.json",
+    "ssh_or_board_HTTP_or_device_access": false,
+    "original_runtime_or_observer_or_Native_functions_executed": false,
+    "source_candidate_or_production_modified": false,
+    "real_DB_media_or_identity_values_read": false,
+    "current_owner_or_live_validation_claimed": false
+  }
+}

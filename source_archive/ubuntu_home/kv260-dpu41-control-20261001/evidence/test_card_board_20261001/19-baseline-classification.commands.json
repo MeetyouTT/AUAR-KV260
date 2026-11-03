@@ -1,0 +1,17 @@
+[
+  {
+    "id": "test_inputs",
+    "command": "python3 -B -c 'import hashlib; from pathlib import Path; files={\"/home/root/kv260-test-20261001/pytorch-resnet-dog.jpg\":\"f3f87bb8ab3c26c7ecfd3ac60421d7f32b0503d1d6c5baf8bac42ed93d86351a\",\"/usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel\":\"4d4d669c84b6d5aa6f731b389ebcf0f51fb1449752cf5fa4a4beddd496c3c0ef\",\"/home/root/Vitis-AI/examples/vai_library/samples/classification/test_jpeg_classification\":\"322dd07736f409cba02416782475c0dc2b5951435ddbb6d0671d3cda8fac0c0e\",\"/home/root/Vitis-AI/examples/vai_library/samples/classification/test_performance_classification\":\"b9f52e4fd21d6526a8ac1e73b6e839b28308368451c4bb30e845a9f96343f1b4\"}; results=[(p,hashlib.sha256(Path(p).read_bytes()).hexdigest(),h) for p,h in files.items()]; [print(actual,p,\"MATCH\" if actual==expected else \"MISMATCH\") for p,actual,expected in results]; raise SystemExit(0 if all(a==e for p,a,e in results) else 1)' && sha256sum /usr/share/vitis_ai_library/models/resnet18/resnet18.prototxt /home/root/kv260-test-20261001/samoyed.list && cat /home/root/kv260-test-20261001/samoyed.list",
+    "timeout": 30
+  },
+  {
+    "id": "performance_options",
+    "command": "grep -n -E 'getopt|optarg|warm|alarm|sleep|seconds|case|duration|FPS' /usr/include/vitis/ai/benchmark.hpp; for f in /sys/class/hwmon/hwmon*/temp*_input /sys/bus/iio/devices/iio:device*/in_temp*; do if test -f \"$f\"; then echo NODE=$f; cat \"$f\"; fi; done",
+    "timeout": 30
+  },
+  {
+    "id": "dpu_query",
+    "command": "env XLNX_VART_FIRMWARE=/lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.xclbin xdputil query",
+    "timeout": 35
+  }
+]

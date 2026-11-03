@@ -1,0 +1,31 @@
+现行 board-owned 对话延迟字段语义（静态只读审查；未发模型请求或开始观测）
+
+依据：joint_dialogue_trial_20261101/dialogue_review/current_source_receipt.json；当前startup3fd124…的380项清单中16份关键源码已实读/核SHA。核心为actual缓存board/runtime/audio/board_dialogue_jobs.py与board/runtime/board_dialogue.py，不采用Windows较旧副本。
+
+主要路径：/api/state -> board_business.dialogue.latency。
+local_transcription.service.latency是同一jobs的另一份投影，不是另一轮；可能处于不同缓存时点。
+
+latency.asr_ms：板端asr.transcribe调用墙钟毫秒。起点在worker取到完整clip之后，不包括录音、尾静音和麦克风清理。
+latency.admission_ms：ASR后文本准入。
+latency.route_ms：本地意图/特殊handler路由。
+latency.analysis_enqueue_ms：归属分析提交耗时，不是后台声纹分析完成耗时。
+latency.prepare.context_ms：构建当前上下文/历史请求。
+latency.prepare.local_reply_ms：板端本地命令回复准备。
+latency.prepare.llm_rpc_ms / llm_calls：完整LLM RPC累计墙钟/调用数，含传输、排队和服务等待，非TTFT。原question_echo拒绝路径可有第二次LLM调用。
+latency.prepare.tts_rpc_ms / tts_calls / tts_max_rpc_ms：各句完整TTS RPC总和/次数/最大值；非单纯GPU推理时间。
+latency.prepare.first_tts_ready_ms：从_prepare开始至首句TTS PCM返回并解码就绪。
+latency.prepare.first_chunk_emitted_ms：从_prepare开始至首个AudioChunk的chunk_sink回调完成。该回调会把首句PCM分包入队，可能包含队列回压；不是首包瞬时。
+latency.first_audio_queued_ms：从job worker开始至首audio事件放入进度队列；含ASR与后续准备，不含录音/端点收尾，也不是扬声器首声。
+latency.prepare.prepare_total_ms：整个_prepare耗时。
+latency.worker_total_ms：整个job worker处理耗时，含有界进度队列回压/清理，不等于播放完毕。
+latency.complete/error_class：生成与channel事件完成情况。prepare字段在_prepare finally后才投影；缺失不填0。
+speaker_first_audio_measured保持false：这些软件计时均未声学测量扬声器首声。
+
+ACK：board_business.dialogue.last_playback_ack。只在板端RAM确认request_id与本轮local_transcription.request_id一致且committed=true；不导出这些ID/token。local_transcription.state=ANSWERED表示完整播放器completion hook已调用并排队ACK，不保证异步Store ACK已提交。应等新ACK+committed再记该轮完整结束。
+
+采集：local_recording.result.started_mono_ms/ended_mono_ms/duration_seconds/sample_count及观察到的RECORDING->TRANSCRIBING时刻。现有缓存不能把clip起止直接解释为真人首末字的声学时刻；frontend_auto在原麦克风cleanup完成前继续显示RECORDING。没有独立、已确认的“真人末字到cleanup完成”精确标量；可报告状态边界间隔及采样分辨率。
+stream_diagnostics.max_drain_gap_ms/channel_event_total_ms/channel_event_max_ms为进度事件消费间隔/处理耗时，不是采集收尾。
+board_business.dialogue.diagnostics.progress_wait_ms/progress_wait_peak_ms是producer等待进度队列腾出空间的累计/单次峰值，可解释worker_total和首句chunk回调被回压拖长。
+当前streaming路径的local_transcription.recognition_ms可能为null，应使用latency.asr_ms。连接页interaction.timings_ms的旧ASR/VLM/TTS显示不能代替当前board-owned指标。
+
+两轮关联：latency自身不带request_id；每轮开始会重置该dict。仅由root在板端RAM用本轮request/capture标识与新ACK关联，分别保存两轮数值。不同起点的first_*、worker_total、ASR/LLM/TTS不能直接相加当作真人说完到首声。音量、听音/口型真人反馈另记布尔，不导出对话正文、音频、身份或模板。

@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="35" skipped="0" tests="81" time="0.912" timestamp="2026-11-02T00:21:03.806588-08:00" hostname="REVO1"><testcase classname="tests.framework.test_board_dialogue" name="test_order_receipt_and_complete_ack" time="0.002" /><testcase classname="tests.framework.test_board_dialogue" name="test_partial_or_foreign_ack_cannot_become_heard[change0]" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_partial_or_foreign_ack_cannot_become_heard[change1]" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_partial_or_foreign_ack_cannot_become_heard[change2]" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_partial_or_foreign_ack_cannot_become_heard[change3]" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_cancel_and_new_generation_reject_late_playback" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_explicit_incomplete_ack_closes_without_heard" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_deadline_is_not_renewed_between_llm_and_tts" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_stale_response_owner_is_rejected_before_tts" time="0.000" /><testcase classname="tests.framework.test_board_dialogue" name="test_model_failure_preserves_user_and_never_emits_ack" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_history_only_on_explicit_board_query" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_profile_candidate_does_not_grant_scope" time="0.000" /><testcase classname="tests.framework.test_board_dialogue" name="test_asr_receives_original_deadline_then_only_text_crosses_wire" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_cancellation_during_model_request_discards_result" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_question_echo_correction_has_one_attempt_and_same_deadline" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_unvalidated_model_fields_never_become_speech[\u601d\u8003\u8fc7\u7a0b]" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_unvalidated_model_fields_never_become_speech[{&quot;reply_text&quot;:&quot;\u4f60\u597d&quot;}]" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_unvalidated_model_fields_never_become_speech[{&quot;reply_text&quot;:&quot;\u4f60\u597d&quot;,&quot;emotion&quot;:&quot;friendly&quot;,&quot;avatar_action&quot;:&quot;move_servo&quot;}]" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_unvalidated_model_fields_never_become_speech[{&quot;reply_text&quot;:&quot;&lt;think&gt;\u79d8\u5bc6&lt;/think&gt;&quot;,&quot;emotion&quot;:&quot;neutral&quot;,&quot;avatar_action&quot;:&quot;&quot;}]" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_segmentation_preserves_order_and_wire_bound" time="0.000" /><testcase classname="tests.framework.test_board_dialogue" name="test_memory_control_hook_stays_board_local" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_visual_event_uses_only_injected_sink" time="0.000" /><testcase classname="tests.framework.test_board_dialogue" name="test_actual_candidate_store_uses_verified_playback_only" time="0.008"><failure message="ModuleNotFoundError: No module named 'common.board_memory'">tmp_path = WindowsPath('C:/Users/REVO1/AppData/Local/Temp/pytest-of-REVO1/pytest-0/test_actual_candidate_store_us0')
+
+    def test_actual_candidate_store_uses_verified_playback_only(tmp_path):
+&gt;       from common.board_memory import BoardMemoryStore
+E       ModuleNotFoundError: No module named 'common.board_memory'
+
+tests\framework\test_board_dialogue.py:245: ModuleNotFoundError</failure></testcase><testcase classname="tests.framework.test_board_dialogue" name="test_preempt_storage_failure_leaves_no_active_controller" time="0.001" /><testcase classname="tests.framework.test_board_dialogue" name="test_transport_failure_has_bounded_best_effort_remote_cancel" time="0.001" /><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_existing_stream_contract_and_verified_local_ack" time="0.006"><failure message="assert (False)&#10; +  where False = &lt;common.voice_channel.ChannelState object at 0x0000022CCAB09D20&gt;.ended">def test_existing_stream_contract_and_verified_local_ack():
+        job, controller, asr, clock, invalidated = setup()
+        meta, values = prepare(job)
+        state = ChannelState(meta)
+        for value in values:
+            if 'channel_event' in value: state.accept(value['channel_event'], value['pcm'])
+&gt;       assert state.ended and state.samples == 2400
+E       assert (False)
+E        +  where False = &lt;common.voice_channel.ChannelState object at 0x0000022CCAB09D20&gt;.ended
+
+tests\framework\test_board_dialogue_jobs.py:110: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_receipt_tampering_cannot_write_played[sample_count-1]" time="0.003"><failure message="StopIteration">field = 'sample_count', value = 1
+
+    @pytest.mark.parametrize('field,value', [('sample_count', 1), ('pcm_sha256', '0' * 64), ('playback_token', 'wrong')])
+    def test_receipt_tampering_cannot_write_played(field, value):
+        job, controller, *_ = setup(); meta, values = prepare(job)
+&gt;       result = dict(completion(values)); result[field] = value
+
+tests\framework\test_board_dialogue_jobs.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+values = [{'error': 'CharacterProfileError', 'context': {'protocol': 'aura-asr-1', 'board_boot_id': 'synthetic-boot', 'session_id': 'e8e5cbe3fa414fba89b49465037d3930', 'request_id': 'cda9f148dba447dc9980970ef8732706', ...}}]
+
+    def completion(values):
+&gt;       return next(v['network_complete'] for v in values if 'network_complete' in v)
+E       StopIteration
+
+tests\framework\test_board_dialogue_jobs.py:101: StopIteration</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_receipt_tampering_cannot_write_played[pcm_sha256-0000000000000000000000000000000000000000000000000000000000000000]" time="0.003"><failure message="StopIteration">field = 'pcm_sha256'
+value = '0000000000000000000000000000000000000000000000000000000000000000'
+
+    @pytest.mark.parametrize('field,value', [('sample_count', 1), ('pcm_sha256', '0' * 64), ('playback_token', 'wrong')])
+    def test_receipt_tampering_cannot_write_played(field, value):
+        job, controller, *_ = setup(); meta, values = prepare(job)
+&gt;       result = dict(completion(values)); result[field] = value
+
+tests\framework\test_board_dialogue_jobs.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+values = [{'error': 'CharacterProfileError', 'context': {'protocol': 'aura-asr-1', 'board_boot_id': 'synthetic-boot', 'session_id': 'ff1bccc767584dcd85b85786862ca745', 'request_id': 'fc9bb43c4bd74d44a1460a87e9f217e4', ...}}]
+
+    def completion(values):
+&gt;       return next(v['network_complete'] for v in values if 'network_complete' in v)
+E       StopIteration
+
+tests\framework\test_board_dialogue_jobs.py:101: StopIteration</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_receipt_tampering_cannot_write_played[playback_token-wrong]" time="0.004"><failure message="StopIteration">field = 'playback_token', value = 'wrong'
+
+    @pytest.mark.parametrize('field,value', [('sample_count', 1), ('pcm_sha256', '0' * 64), ('playback_token', 'wrong')])
+    def test_receipt_tampering_cannot_write_played(field, value):
+        job, controller, *_ = setup(); meta, values = prepare(job)
+&gt;       result = dict(completion(values)); result[field] = value
+
+tests\framework\test_board_dialogue_jobs.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+values = [{'error': 'CharacterProfileError', 'context': {'protocol': 'aura-asr-1', 'board_boot_id': 'synthetic-boot', 'session_id': 'aca3457d8174412787422de1d1d56758', 'request_id': '0fdb2f30d5994103b020b086484b2a58', ...}}]
+
+    def completion(values):
+&gt;       return next(v['network_complete'] for v in values if 'network_complete' in v)
+E       StopIteration
+
+tests\framework\test_board_dialogue_jobs.py:101: StopIteration</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_cancel_new_generation_and_queued_ack_are_invalidated" time="0.002"><failure message="StopIteration">def test_cancel_new_generation_and_queued_ack_are_invalidated():
+        job, controller, *_ = setup(); old, values = prepare(job)
+&gt;       result = completion(values); job.acknowledge(old, result)
+
+tests\framework\test_board_dialogue_jobs.py:135: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+values = [{'error': 'CharacterProfileError', 'context': {'protocol': 'aura-asr-1', 'board_boot_id': 'synthetic-boot', 'session_id': 'a4ded6ebfb18439ba0216ee273a099fa', 'request_id': '3255caf93d194095973ec1afc4a4b279', ...}}]
+
+    def completion(values):
+&gt;       return next(v['network_complete'] for v in values if 'network_complete' in v)
+E       StopIteration
+
+tests\framework\test_board_dialogue_jobs.py:101: StopIteration</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_only_latest_waiting_capture_is_recognized" time="0.002"><failure message="IndexError: list index out of range">def test_only_latest_waiting_capture_is_recognized():
+        job, controller, asr, *_ = setup()
+        old = job.submit(clip('old-capture')); new = job.submit(clip('new-capture'))
+        assert new['generation'] &gt; old['generation'] and job.run_next()
+&gt;       assert len(asr.calls) == 1 and controller.calls[0][1]['turn_id'] == new['request_id']
+E       IndexError: list index out of range
+
+tests\framework\test_board_dialogue_jobs.py:149: IndexError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_new_board_job_preempts_summary_before_asr_and_holds_idle_until_ack" time="0.002"><failure message="StopIteration">def test_new_board_job_preempts_summary_before_asr_and_holds_idle_until_ack():
+        job, controller, asr, *_ = setup()
+        assert job.idle
+        def during_asr():
+            assert controller.preemptions == 1 and not job.idle
+        asr.hook = during_asr
+        meta = job.submit(clip()); assert not job.idle
+        job.run_next(); values = collect(job); assert not job.idle
+&gt;       job.acknowledge(meta, completion(values)); assert not job.idle
+
+tests\framework\test_board_dialogue_jobs.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+values = [{'error': 'CharacterProfileError', 'context': {'protocol': 'aura-asr-1', 'board_boot_id': 'synthetic-boot', 'session_id': '27c0101f288849569830e18ac5a11377', 'request_id': '1fc0a83e48c948219029fddfc2db6740', ...}}]
+
+    def completion(values):
+&gt;       return next(v['network_complete'] for v in values if 'network_complete' in v)
+E       StopIteration
+
+tests\framework\test_board_dialogue_jobs.py:101: StopIteration</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_cancel_during_asr_drops_text_before_model" time="0.001" /><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_original_deadline_includes_board_asr_and_queueing" time="0.000" /><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_non24k_plan_fails_closed_and_keeps_native_receipt" time="0.002"><failure message="AssertionError: assert 'CharacterProfileError' == 'board_handle...ayback_bridge'&#10;  &#10;  - board_handler_not_ready:native_rate_playback_bridge&#10;  + CharacterProfileError">def test_non24k_plan_fails_closed_and_keeps_native_receipt():
+        job, controller, *_ = setup(rate=48000)
+        meta, values = prepare(job)
+&gt;       assert values[-1]['error'] == 'board_handler_not_ready:native_rate_playback_bridge'
+E       AssertionError: assert 'CharacterProfileError' == 'board_handle...ayback_bridge'
+E         
+E         - board_handler_not_ready:native_rate_playback_bridge
+E         + CharacterProfileError
+
+tests\framework\test_board_dialogue_jobs.py:183: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_explicit_rate_bridge_has_distinct_played_and_native_receipts" time="0.002"><failure message="StopIteration">def test_explicit_rate_bridge_has_distinct_played_and_native_receipts():
+        def converter(plan):
+            assert plan.sample_rate == 48000
+            return PlaybackPayload(b'\x01\x00' * (plan.samples // 2), converter_id='reviewed-synthetic-half-rate')
+        job, controller, *_ = setup(rate=48000, audio_converter=converter)
+&gt;       meta, values = prepare(job); result = completion(values)
+
+tests\framework\test_board_dialogue_jobs.py:195: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+values = [{'error': 'CharacterProfileError', 'context': {'protocol': 'aura-asr-1', 'board_boot_id': 'synthetic-boot', 'session_id': '0d7a85b762fb48e19a34a74de06ac506', 'request_id': '1b159fd61b7c4adda1a97afeeb4f3471', ...}}]
+
+    def completion(values):
+&gt;       return next(v['network_complete'] for v in values if 'network_complete' in v)
+E       StopIteration
+
+tests\framework\test_board_dialogue_jobs.py:101: StopIteration</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_lip_clock_is_sink_seconds_times_24000_and_owner_bound" time="0.003"><failure message="StopIteration">def test_lip_clock_is_sink_seconds_times_24000_and_owner_bound():
+&gt;       job, *_ = setup(); meta, values = prepare(job); result = completion(values)
+
+tests\framework\test_board_dialogue_jobs.py:204: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+values = [{'error': 'CharacterProfileError', 'context': {'protocol': 'aura-asr-1', 'board_boot_id': 'synthetic-boot', 'session_id': 'beb5ebb6022f4fc6bfe68ef3a9dad446', 'request_id': '72443ce009314559bbef03ccfe210c22', ...}}]
+
+    def completion(values):
+&gt;       return next(v['network_complete'] for v in values if 'network_complete' in v)
+E       StopIteration
+
+tests\framework\test_board_dialogue_jobs.py:101: StopIteration</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_missing_sensitive_board_handlers_never_fall_back_to_model[\u5e2e\u6211\u767b\u8bb0\u8eab\u4efd-identity_enrollment]" time="0.003"><failure message="AssertionError: assert 'CharacterProfileError' == 'board_handle...ty_enrollment'&#10;  &#10;  - board_handler_not_ready:identity_enrollment&#10;  + CharacterProfileError">text = '帮我登记身份', expected = 'identity_enrollment'
+
+    @pytest.mark.parametrize('text,expected', [
+        ('帮我登记身份', 'identity_enrollment'), ('西蓝，记住我', 'identity_enrollment'),
+        ('你还认识我吗', 'identity_query'), ('确认登记', 'identity_enrollment'),
+        ('帮我登记声纹', 'speaker_identity'), ('删除昨天的记录', 'history_delete_preview'),
+        ('确认删除', 'history_delete_preview'), ('你看到了什么', 'structured_visual_query'),
+        ('帮我计算58乘3', 'reasoning_dialogue'),
+    ])
+    def test_missing_sensitive_board_handlers_never_fall_back_to_model(text, expected):
+        job, controller, *_ = setup(text=text)
+        _, values = prepare(job)
+&gt;       assert values[-1]['error'] == 'board_handler_not_ready:' + expected
+E       AssertionError: assert 'CharacterProfileError' == 'board_handle...ty_enrollment'
+E         
+E         - board_handler_not_ready:identity_enrollment
+E         + CharacterProfileError
+
+tests\framework\test_board_dialogue_jobs.py:223: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_missing_sensitive_board_handlers_never_fall_back_to_model[\u897f\u84dd\uff0c\u8bb0\u4f4f\u6211-identity_enrollment]" time="0.003"><failure message="AssertionError: assert 'CharacterProfileError' == 'board_handle...ty_enrollment'&#10;  &#10;  - board_handler_not_ready:identity_enrollment&#10;  + CharacterProfileError">text = '西蓝，记住我', expected = 'identity_enrollment'
+
+    @pytest.mark.parametrize('text,expected', [
+        ('帮我登记身份', 'identity_enrollment'), ('西蓝，记住我', 'identity_enrollment'),
+        ('你还认识我吗', 'identity_query'), ('确认登记', 'identity_enrollment'),
+        ('帮我登记声纹', 'speaker_identity'), ('删除昨天的记录', 'history_delete_preview'),
+        ('确认删除', 'history_delete_preview'), ('你看到了什么', 'structured_visual_query'),
+        ('帮我计算58乘3', 'reasoning_dialogue'),
+    ])
+    def test_missing_sensitive_board_handlers_never_fall_back_to_model(text, expected):
+        job, controller, *_ = setup(text=text)
+        _, values = prepare(job)
+&gt;       assert values[-1]['error'] == 'board_handler_not_ready:' + expected
+E       AssertionError: assert 'CharacterProfileError' == 'board_handle...ty_enrollment'
+E         
+E         - board_handler_not_ready:identity_enrollment
+E         + CharacterProfileError
+
+tests\framework\test_board_dialogue_jobs.py:223: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_missing_sensitive_board_handlers_never_fall_back_to_model[\u4f60\u8fd8\u8ba4\u8bc6\u6211\u5417-identity_query]" time="0.003"><failure message="AssertionError: assert 'CharacterProfileError' == 'board_handle...dentity_query'&#10;  &#10;  - board_handler_not_ready:identity_query&#10;  + CharacterProfileError">text = '你还认识我吗', expected = 'identity_query'
+
+    @pytest.mark.parametrize('text,expected', [
+        ('帮我登记身份', 'identity_enrollment'), ('西蓝，记住我', 'identity_enrollment'),
+        ('你还认识我吗', 'identity_query'), ('确认登记', 'identity_enrollment'),
+        ('帮我登记声纹', 'speaker_identity'), ('删除昨天的记录', 'history_delete_preview'),
+        ('确认删除', 'history_delete_preview'), ('你看到了什么', 'structured_visual_query'),
+        ('帮我计算58乘3', 'reasoning_dialogue'),
+    ])
+    def test_missing_sensitive_board_handlers_never_fall_back_to_model(text, expected):
+        job, controller, *_ = setup(text=text)
+        _, values = prepare(job)
+&gt;       assert values[-1]['error'] == 'board_handler_not_ready:' + expected
+E       AssertionError: assert 'CharacterProfileError' == 'board_handle...dentity_query'
+E         
+E         - board_handler_not_ready:identity_query
+E         + CharacterProfileError
+
+tests\framework\test_board_dialogue_jobs.py:223: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_missing_sensitive_board_handlers_never_fall_back_to_model[\u786e\u8ba4\u767b\u8bb0-identity_enrollment]" time="0.003"><failure message="AssertionError: assert 'CharacterProfileError' == 'board_handle...ty_enrollment'&#10;  &#10;  - board_handler_not_ready:identity_enrollment&#10;  + CharacterProfileError">text = '确认登记', expected = 'identity_enrollment'
+
+    @pytest.mark.parametrize('text,expected', [
+        ('帮我登记身份', 'identity_enrollment'), ('西蓝，记住我', 'identity_enrollment'),
+        ('你还认识我吗', 'identity_query'), ('确认登记', 'identity_enrollment'),
+        ('帮我登记声纹', 'speaker_identity'), ('删除昨天的记录', 'history_delete_preview'),
+        ('确认删除', 'history_delete_preview'), ('你看到了什么', 'structured_visual_query'),
+        ('帮我计算58乘3', 'reasoning_dialogue'),
+    ])
+    def test_missing_sensitive_board_handlers_never_fall_back_to_model(text, expected):
+        job, controller, *_ = setup(text=text)
+        _, values = prepare(job)
+&gt;       assert values[-1]['error'] == 'board_handler_not_ready:' + expected
+E       AssertionError: assert 'CharacterProfileError' == 'board_handle...ty_enrollment'
+E         
+E         - board_handler_not_ready:identity_enrollment
+E         + CharacterProfileError
+
+tests\framework\test_board_dialogue_jobs.py:223: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_missing_sensitive_board_handlers_never_fall_back_to_model[\u5e2e\u6211\u767b\u8bb0\u58f0\u7eb9-speaker_identity]" time="0.003"><failure message="AssertionError: assert 'CharacterProfileError' == 'board_handle...aker_identity'&#10;  &#10;  - board_handler_not_ready:speaker_identity&#10;  + CharacterProfileError">text = '帮我登记声纹', expected = 'speaker_identity'
+
+    @pytest.mark.parametrize('text,expected', [
+        ('帮我登记身份', 'identity_enrollment'), ('西蓝，记住我', 'identity_enrollment'),
+        ('你还认识我吗', 'identity_query'), ('确认登记', 'identity_enrollment'),
+        ('帮我登记声纹', 'speaker_identity'), ('删除昨天的记录', 'history_delete_preview'),
+        ('确认删除', 'history_delete_preview'), ('你看到了什么', 'structured_visual_query'),
+        ('帮我计算58乘3', 'reasoning_dialogue'),
+    ])
+    def test_missing_sensitive_board_handlers_never_fall_back_to_model(text, expected):
+        job, controller, *_ = setup(text=text)
+        _, values = prepare(job)
+&gt;       assert values[-1]['error'] == 'board_handler_not_ready:' + expected
+E       AssertionError: assert 'CharacterProfileError' == 'board_handle...aker_identity'
+E         
+E         - board_handler_not_ready:speaker_identity
+E         + CharacterProfileError
+
+tests\framework\test_board_dialogue_jobs.py:223: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_missing_sensitive_board_handlers_never_fall_back_to_model[\u5220\u9664\u6628\u5929\u7684\u8bb0\u5f55-history_delete_preview]" time="0.002"><failure message="AssertionError: assert 'CharacterProfileError' == 'board_handle...elete_preview'&#10;  &#10;  - board_handler_not_ready:history_delete_preview&#10;  + CharacterProfileError">text = '删除昨天的记录', expected = 'history_delete_preview'
+
+    @pytest.mark.parametrize('text,expected', [
+        ('帮我登记身份', 'identity_enrollment'), ('西蓝，记住我', 'identity_enrollment'),
+        ('你还认识我吗', 'identity_query'), ('确认登记', 'identity_enrollment'),
+        ('帮我登记声纹', 'speaker_identity'), ('删除昨天的记录', 'history_delete_preview'),
+        ('确认删除', 'history_delete_preview'), ('你看到了什么', 'structured_visual_query'),
+        ('帮我计算58乘3', 'reasoning_dialogue'),
+    ])
+    def test_missing_sensitive_board_handlers_never_fall_back_to_model(text, expected):
+        job, controller, *_ = setup(text=text)
+        _, values = prepare(job)
+&gt;       assert values[-1]['error'] == 'board_handler_not_ready:' + expected
+E       AssertionError: assert 'CharacterProfileError' == 'board_handle...elete_preview'
+E         
+E         - board_handler_not_ready:history_delete_preview
+E         + CharacterProfileError
+
+tests\framework\test_board_dialogue_jobs.py:223: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_missing_sensitive_board_handlers_never_fall_back_to_model[\u786e\u8ba4\u5220\u9664-history_delete_preview]" time="0.002"><failure message="AssertionError: assert 'CharacterProfileError' == 'board_handle...elete_preview'&#10;  &#10;  - board_handler_not_ready:history_delete_preview&#10;  + CharacterProfileError">text = '确认删除', expected = 'history_delete_preview'
+
+    @pytest.mark.parametrize('text,expected', [
+        ('帮我登记身份', 'identity_enrollment'), ('西蓝，记住我', 'identity_enrollment'),
+        ('你还认识我吗', 'identity_query'), ('确认登记', 'identity_enrollment'),
+        ('帮我登记声纹', 'speaker_identity'), ('删除昨天的记录', 'history_delete_preview'),
+        ('确认删除', 'history_delete_preview'), ('你看到了什么', 'structured_visual_query'),
+        ('帮我计算58乘3', 'reasoning_dialogue'),
+    ])
+    def test_missing_sensitive_board_handlers_never_fall_back_to_model(text, expected):
+        job, controller, *_ = setup(text=text)
+        _, values = prepare(job)
+&gt;       assert values[-1]['error'] == 'board_handler_not_ready:' + expected
+E       AssertionError: assert 'CharacterProfileError' == 'board_handle...elete_preview'
+E         
+E         - board_handler_not_ready:history_delete_preview
+E         + CharacterProfileError
+
+tests\framework\test_board_dialogue_jobs.py:223: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_missing_sensitive_board_handlers_never_fall_back_to_model[\u4f60\u770b\u5230\u4e86\u4ec0\u4e48-structured_visual_query]" time="0.003"><failure message="AssertionError: assert 'CharacterProfileError' == 'board_handle..._visual_query'&#10;  &#10;  - board_handler_not_ready:structured_visual_query&#10;  + CharacterProfileError">text = '你看到了什么', expected = 'structured_visual_query'
+
+    @pytest.mark.parametrize('text,expected', [
+        ('帮我登记身份', 'identity_enrollment'), ('西蓝，记住我', 'identity_enrollment'),
+        ('你还认识我吗', 'identity_query'), ('确认登记', 'identity_enrollment'),
+        ('帮我登记声纹', 'speaker_identity'), ('删除昨天的记录', 'history_delete_preview'),
+        ('确认删除', 'history_delete_preview'), ('你看到了什么', 'structured_visual_query'),
+        ('帮我计算58乘3', 'reasoning_dialogue'),
+    ])
+    def test_missing_sensitive_board_handlers_never_fall_back_to_model(text, expected):
+        job, controller, *_ = setup(text=text)
+        _, values = prepare(job)
+&gt;       assert values[-1]['error'] == 'board_handler_not_ready:' + expected
+E       AssertionError: assert 'CharacterProfileError' == 'board_handle..._visual_query'
+E         
+E         - board_handler_not_ready:structured_visual_query
+E         + CharacterProfileError
+
+tests\framework\test_board_dialogue_jobs.py:223: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_missing_sensitive_board_handlers_never_fall_back_to_model[\u5e2e\u6211\u8ba1\u7b9758\u4e583-reasoning_dialogue]" time="0.003"><failure message="AssertionError: assert 'CharacterProfileError' == 'board_handle...ning_dialogue'&#10;  &#10;  - board_handler_not_ready:reasoning_dialogue&#10;  + CharacterProfileError">text = '帮我计算58乘3', expected = 'reasoning_dialogue'
+
+    @pytest.mark.parametrize('text,expected', [
+        ('帮我登记身份', 'identity_enrollment'), ('西蓝，记住我', 'identity_enrollment'),
+        ('你还认识我吗', 'identity_query'), ('确认登记', 'identity_enrollment'),
+        ('帮我登记声纹', 'speaker_identity'), ('删除昨天的记录', 'history_delete_preview'),
+        ('确认删除', 'history_delete_preview'), ('你看到了什么', 'structured_visual_query'),
+        ('帮我计算58乘3', 'reasoning_dialogue'),
+    ])
+    def test_missing_sensitive_board_handlers_never_fall_back_to_model(text, expected):
+        job, controller, *_ = setup(text=text)
+        _, values = prepare(job)
+&gt;       assert values[-1]['error'] == 'board_handler_not_ready:' + expected
+E       AssertionError: assert 'CharacterProfileError' == 'board_handle...ning_dialogue'
+E         
+E         - board_handler_not_ready:reasoning_dialogue
+E         + CharacterProfileError
+
+tests\framework\test_board_dialogue_jobs.py:223: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_explicit_memory_precedes_reasoning_and_retains_raw_alias" time="0.002"><failure message="IndexError: list index out of range">def test_explicit_memory_precedes_reasoning_and_retains_raw_alias():
+        text = '西蓝，记住：价格是50+20'
+        job, controller, *_ = setup(text=text)
+        prepare(job)
+&gt;       assert controller.calls[0][0] == text
+E       IndexError: list index out of range
+
+tests\framework\test_board_dialogue_jobs.py:231: IndexError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_history_only_when_explicit_and_current_chat_stays_small" time="0.002"><failure message="IndexError: list index out of range">def test_history_only_when_explicit_and_current_chat_stays_small():
+        job, controller, *_ = setup(); prepare(job)
+&gt;       assert controller.calls[0][1]['history_query'] is None
+E       IndexError: list index out of range
+
+tests\framework\test_board_dialogue_jobs.py:237: IndexError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_explicit_historical_subject_is_sent_to_search_not_exact_topic" time="0.002"><failure message="IndexError: list index out of range">def test_explicit_historical_subject_is_sent_to_search_not_exact_topic():
+        job, controller, *_ = setup(text='回忆昨天我们聊过海风项目什么')
+        prepare(job)
+&gt;       selected = controller.calls[-1][1]['history_query']
+E       IndexError: list index out of range
+
+tests\framework\test_board_dialogue_jobs.py:249: IndexError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_wake_alias_and_wake_only_follow_existing_audio_gate" time="0.003"><failure message="AssertionError: assert [{'error': 'C...7fa2d', ...}}] == [{'wake_detec...7fa2d', ...}}]&#10;  &#10;  At index 0 diff: {'error': 'CharacterProfileError', 'context': {'protocol': 'aura-asr-1', 'board_boot_id': 'synthetic-boot', 'session_id': '7a76054e2e73484b953bbcb0eb22d514', 'request_id': '3c694831806346c48c5b0474fe27fa2d', 'generation': 1, 'capture_id': 'synthetic-capture', 'sample_count': 3200, 'pcm_sha256': '873e4d4acacea1f77e3490c4e5253519ab6fb1531366ea88fcb6ecb8c6ed8e95', 'budget_ms': 30000}} != {'wake_detected': True, 'wake_only': True, 'context': {'protocol': 'aura-asr-1', 'board_boot_id': 'synthetic-boot', 'session_id': '7a76054e2e73484b953bbcb0eb22d514', 'requ...&#10;  &#10;  ...Full output truncated (2 lines hidden), use '-vv' to show">def test_wake_alias_and_wake_only_follow_existing_audio_gate():
+        job, controller, *_ = setup(text='西蓝')
+        job.mark_wake_entry('synthetic-capture'); meta, values = prepare(job)
+&gt;       assert values == [dict(wake_detected=True, wake_only=True, context=meta)]
+E       AssertionError: assert [{'error': 'C...7fa2d', ...}}] == [{'wake_detec...7fa2d', ...}}]
+E         
+E         At index 0 diff: {'error': 'CharacterProfileError', 'context': {'protocol': 'aura-asr-1', 'board_boot_id': 'synthetic-boot', 'session_id': '7a76054e2e73484b953bbcb0eb22d514', 'request_id': '3c694831806346c48c5b0474fe27fa2d', 'generation': 1, 'capture_id': 'synthetic-capture', 'sample_count': 3200, 'pcm_sha256': '873e4d4acacea1f77e3490c4e5253519ab6fb1531366ea88fcb6ecb8c6ed8e95', 'budget_ms': 30000}} != {'wake_detected': True, 'wake_only': True, 'context': {'protocol': 'aura-asr-1', 'board_boot_id': 'synthetic-boot', 'session_id': '7a76054e2e73484b953bbcb0eb22d514', 'requ...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests\framework\test_board_dialogue_jobs.py:256: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_wake_requires_audio_and_rejects_unrelated_words" time="0.002"><failure message="KeyError: 'entry_rejected'">def test_wake_requires_audio_and_rejects_unrelated_words():
+        job, controller, *_ = setup(text='今天有点累')
+        job.mark_wake_entry('synthetic-capture'); _, values = prepare(job)
+&gt;       assert values[-1]['entry_rejected'] and not controller.calls
+E       KeyError: 'entry_rejected'
+
+tests\framework\test_board_dialogue_jobs.py:267: KeyError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_visual_entry_and_profile_selection_are_explicitly_unavailable_without_local_grants" time="0.002"><failure message="AssertionError: assert 'CharacterProfileError' == 'board_handle...authorization'&#10;  &#10;  - board_handler_not_ready:visual_entry_authorization&#10;  + CharacterProfileError">def test_visual_entry_and_profile_selection_are_explicitly_unavailable_without_local_grants():
+        job, controller, *_ = setup()
+        job.mark_visual_entry('synthetic-capture'); _, values = prepare(job)
+&gt;       assert values[-1]['error'] == 'board_handler_not_ready:visual_entry_authorization'
+E       AssertionError: assert 'CharacterProfileError' == 'board_handle...authorization'
+E         
+E         - board_handler_not_ready:visual_entry_authorization
+E         + CharacterProfileError
+
+tests\framework\test_board_dialogue_jobs.py:276: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_configuration_and_close_never_start_capture_or_legacy_business_transport" time="0.001" /><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_live_profile_grants_remain_only_in_board_scope" time="0.002"><failure message="IndexError: list index out of range">def test_live_profile_grants_remain_only_in_board_scope():
+        released = []
+        grant = object()
+        def resolver(value, boot):
+            return dict(scope=dict(kind='profile', id='b' * 32, grant=grant),
+                        session_id='profile-session', conversation_id='c' * 32)
+        job, controller, *_ = setup(profile_resolver=resolver, profile_release=released.append)
+        job.select_profile({'mode': 'explicit-board-local'}); meta, values = prepare(job)
+&gt;       assert controller.calls[0][1]['scope']['grant'] is grant
+E       IndexError: list index out of range
+
+tests\framework\test_board_dialogue_jobs.py:301: IndexError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_personal_new_conversation_changes_only_local_recent_context_partition" time="0.003"><failure message="IndexError: list index out of range">def test_personal_new_conversation_changes_only_local_recent_context_partition():
+        def resolver(value, boot):
+            return dict(scope=dict(kind='profile',id='b'*32,grant=object()),
+                        session_id='profile-session',conversation_id='c'*32)
+        job, *_ = setup(profile_resolver=resolver,profile_release=lambda value:None)
+        job.select_profile({'mode':'explicit-board-local'})
+        grant = job.profile_selection['scope']['grant']
+        cid = job.select_conversation(resume=False)
+        assert cid != 'c'*32 and len(cid) == 32
+        assert job.select_conversation(resume=True) == cid
+        assert job.profile_selection['scope']['grant'] is grant
+        _, _ = prepare(job)
+&gt;       assert job.controller.calls[-1][1]['metadata']['source_id'] == 'conversation:' + cid
+E       IndexError: list index out of range
+
+tests\framework\test_board_dialogue_jobs.py:319: IndexError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_history_without_injected_trusted_clock_fails_closed" time="0.003"><failure message="AssertionError: assert 'CharacterProfileError' == 'board_handle...history_clock'&#10;  &#10;  - board_handler_not_ready:trusted_history_clock&#10;  + CharacterProfileError">def test_history_without_injected_trusted_clock_fails_closed():
+        job, controller, *_ = setup(text='回忆昨天我们聊了什么')
+        job.wall_clock = None
+        _, values = prepare(job)
+&gt;       assert values[-1]['error'] == 'board_handler_not_ready:trusted_history_clock'
+E       AssertionError: assert 'CharacterProfileError' == 'board_handle...history_clock'
+E         
+E         - board_handler_not_ready:trusted_history_clock
+E         + CharacterProfileError
+
+tests\framework\test_board_dialogue_jobs.py:327: AssertionError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_real_board_store_memory_and_history_flow_without_legacy_services" time="0.003"><failure message="ModuleNotFoundError: No module named 'common.board_memory'">tmp_path = WindowsPath('C:/Users/REVO1/AppData/Local/Temp/pytest-of-REVO1/pytest-0/test_real_board_store_memory_a0')
+
+    def test_real_board_store_memory_and_history_flow_without_legacy_services(tmp_path):
+        import json
+&gt;       from common.board_memory import BoardMemoryStore
+E       ModuleNotFoundError: No module named 'common.board_memory'
+
+tests\framework\test_board_dialogue_jobs.py:333: ModuleNotFoundError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_cancel_between_job_check_and_controller_registration_cannot_start_model" time="0.003"><failure message="ModuleNotFoundError: No module named 'common.board_memory'">tmp_path = WindowsPath('C:/Users/REVO1/AppData/Local/Temp/pytest-of-REVO1/pytest-0/test_cancel_between_job_check_0')
+
+    def test_cancel_between_job_check_and_controller_registration_cannot_start_model(tmp_path):
+&gt;       from common.board_memory import BoardMemoryStore
+E       ModuleNotFoundError: No module named 'common.board_memory'
+
+tests\framework\test_board_dialogue_jobs.py:377: ModuleNotFoundError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_external_cancel_while_transport_blocked_still_cancels_remote_owner" time="0.003"><failure message="ModuleNotFoundError: No module named 'common.board_memory'">tmp_path = WindowsPath('C:/Users/REVO1/AppData/Local/Temp/pytest-of-REVO1/pytest-0/test_external_cancel_while_tra0')
+
+    def test_external_cancel_while_transport_blocked_still_cancels_remote_owner(tmp_path):
+&gt;       from common.board_memory import BoardMemoryStore
+E       ModuleNotFoundError: No module named 'common.board_memory'
+
+tests\framework\test_board_dialogue_jobs.py:406: ModuleNotFoundError</failure></testcase><testcase classname="tests.framework.test_board_dialogue_jobs" name="test_controller_failure_shared_event_still_delivers_current_error_frame" time="0.003"><failure message="ModuleNotFoundError: No module named 'common.board_memory'">tmp_path = WindowsPath('C:/Users/REVO1/AppData/Local/Temp/pytest-of-REVO1/pytest-0/test_controller_failure_shared0')
+
+    def test_controller_failure_shared_event_still_delivers_current_error_frame(tmp_path):
+&gt;       from common.board_memory import BoardMemoryStore
+E       ModuleNotFoundError: No module named 'common.board_memory'
+
+tests\framework\test_board_dialogue_jobs.py:432: ModuleNotFoundError</failure></testcase><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_actual_current_result_metrics_are_published_under_host_relative_names" time="0.003" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_multiple_llm_calls_keep_only_last_result_without_stale_optional_keys" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_empty_last_metrics_drop_first_attempt_values" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_multiple_tts_chunks_do_not_overwrite_llm_or_unbound_metadata_size" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[True]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[False]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[nan]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[inf]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[-inf]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[-1.0]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[1000000000000000.0]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[synthetic text]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_unknown_private_strings_are_rejected_by_unchanged_wire_contract" time="0.000" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_local_reply_next_generation_has_no_previous_llm_observations" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_failed_next_prepare_clears_previous_observations[failure0]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_failed_next_prepare_clears_previous_observations[failure1]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_failed_next_prepare_clears_previous_observations[failure2]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_tts_failure_clears_this_prepare_backend_observation" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_permission_rejection_clears_stale_observation_before_any_model_request" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_jobs_public_filters_numeric_values_and_retains_existing_flags" time="0.003"><failure message="KeyError: 'prepare'">def test_jobs_public_filters_numeric_values_and_retains_existing_flags():
+        job, controller, _, _, _ = jobs_fixture.setup()
+        def hook():
+            controller.last_prepare_metrics = {
+                'metadata_only': True, 'complete': True, 'llm_rpc_ms': 120.,
+                'llm_backend_metrics_calls': 1, 'llm_last_backend_first_content_ms': 2.5,
+                'llm_last_backend_backend_done_ms': 4., 'llm_last_backend_eval_count': 12,
+                'llm_last_backend_first_packet_ms': True,
+                'llm_last_backend_prompt_eval_duration_ms': float('nan'),
+                'llm_last_backend_eval_duration_ms': float('inf'),
+                'llm_last_backend_total_duration_ms': -1,
+                'llm_last_backend_thinking_characters': 'synthetic text',
+                'llm_last_backend_private_id': 'synthetic id',
+            }
+        controller.hook = hook
+        meta, events = jobs_fixture.prepare(job)
+&gt;       value = job.public()['latency']['prepare']
+E       KeyError: 'prepare'
+
+tests\framework\test_numeric_llm_metrics.py:215: KeyError</failure></testcase><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_jobs_next_failed_or_local_prepare_does_not_copy_previous_metrics" time="0.002"><failure message="StopIteration">def test_jobs_next_failed_or_local_prepare_does_not_copy_previous_metrics():
+        job, controller, _, _, _ = jobs_fixture.setup()
+        controller.hook = lambda: setattr(controller, 'last_prepare_metrics', {'llm_last_backend_eval_count': 11})
+        meta, events = jobs_fixture.prepare(job)
+&gt;       job.acknowledge(meta, jobs_fixture.completion(events)); job.drain_actions()
+
+tests\framework\test_numeric_llm_metrics.py:234: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+values = [{'error': 'CharacterProfileError', 'context': {'protocol': 'aura-asr-1', 'board_boot_id': 'synthetic-boot', 'session_id': 'a617a8fe4adc4575b1040935da62830d', 'request_id': '686f905480a248acbd07c144b3912b18', ...}}]
+
+    def completion(values):
+&gt;       return next(v['network_complete'] for v in values if 'network_complete' in v)
+E       StopIteration
+
+tests\framework\test_board_dialogue_jobs.py:101: StopIteration</failure></testcase></testsuite></testsuites>

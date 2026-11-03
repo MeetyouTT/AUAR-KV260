@@ -1,0 +1,56 @@
+AURA KV260 无声源定位版 · 项目对齐落档校验报告
+日期：2026-10-02（第十五轮·对齐轮）    项目根：D:\share、\项目开发\FPGA-amd自主命题赛道
+本机环境：Windows 11 / 无 Python ⇒ 渲染＝Word COM render_docx.ps1；回读＝tools\readback_docx.ps1
+
+一、本轮对象与规模（写入后实测；md 纯 LF、无 BOM、末尾有换行）
+1. AURA_KV260_完整实施方案_无声源定位版_2026-09-30.md（执行入口，用户提供）：157,722 B / 2,159 行 / 34 表
+   SHA256 = CB546FA2FE94D4FC72A2DF2ECB2D76DF210ED4AE4D97FAA42A1540A5BFB75972
+   MD5    = 56051871934508119D6A29FFED35B592
+2. AURA_KV260_完整实施方案_无声源定位版_2026-09-30.docx（本轮新增）：175,131 B / 2,626 段 / 34 表
+   SHA256 = 6FF6CF38FDD935D4AE1917BC004651C6D0A110FF45F093D64F8D2EFE296AC1B0
+3. AURA_KV260_无声源定位版_项目对齐登记_v1_0.md（本轮新增）：14,606 B / 134 行 / 7 表
+   SHA256 = F56215A5C3A51300F3CA9A26AE77CAF9F5E42725BB0986F272993CB67DC8D515
+   MD5    = F99F7C5DCB26B1C149443D4DCB6914CC
+4. AURA_KV260_无声源定位版_项目对齐登记_v1_0.docx（本轮新增）：32,421 B / 376 段 / 7 表
+   SHA256 = 9BA7FEF2D183FC0F5582135087BA4F219DC6F08895B215F455263E214772FD28
+5. README.md（本轮修订）：26,123 B / 129 行 / 5 表
+   SHA256 = 2DE0E53FEC67A651EC9D3129F08BBC984D5A60196808614725340097E089CCE1
+6. README.docx（本轮重渲染）：37,458 B / 316 段 / 5 表
+   SHA256 = FF222DA94D2E958A901FC3EF8EC7DB30890EBFAD274BCAC64012FA79EF6045B4
+7. .cline-handover.md（本轮修订，纯文本交接件，不成对 docx）：37,414 B / 132 行 / 2 表
+   SHA256 = FC1B89DF3A262345A0D1D2DD77FD681CEA3CC5FA484BCD0A998F56E533AC1F3B
+8. tools\readback_docx.ps1（本轮新增脚本）：2,203 B
+   SHA256 = 76C485A58595D8889885FFD8B2CFC4E4D260BB988C0785B4815DE5F7B1792775
+
+二、渲染与回读（使用 render_docx.ps1 → tools\readback_docx.ps1）
+1. 执行入口：渲染统计 headings=193 / tables=34 / codeLines=227 / listItems=527；回读 2,626 段、34 表、逐表列数与单元格数一致，不一致表 0。
+2. 对齐登记：渲染统计 headings=10 / tables=7 / listItems=9；回读 376 段、7 表、不一致表 0；逐表（行×列）＝5×3 / 9×5 / 10×5 / 15×6 / 8×4 / 8×3 / 6×4，分别对应 §1 结论、§2 权威关系 8 条、§3 断链 9 处、§4 落点 14 项、§5 术语 7 项、§6 工具链 7 项、§7 待拍板 5 条。
+3. README：渲染统计 headings=7 / tables=5 / listItems=6；回读 316 段、5 表、不一致表 0；逐表＝8×3（§1 权威关系）、34×3（§3 文件清单）、16×4（§4 待拍板 15 条）、5×3（§5 判据）、4×2（§6 命令）。
+4. 三对 md/docx 的 docx 均新于同名 md（14:37:02→15:46:18；15:37:45→15:39:46；15:45:23→15:45:43），无"docx 旧于 md"。
+
+三、判据④复核（每份 Markdown 有同名 docx）
+Docs 目录：40 份 md / 42 份 docx；md 缺 docx = 0；仅 docx 无 md = 2（000.docx、111.docx，均为已知外部/历史件）。结论：✔（本轮为执行入口与对齐登记各补 1 份 docx）。
+
+四、表格列数一致性（项目纪律①；本轮改用脚本批量校验，规则同 render 段落解析）
+执行入口 34 表 / 0 行异常；对齐登记 7 表 / 0 行异常；README 5 表 / 0 行异常；.cline-handover.md 2 表 / 0 行异常。
+注：执行入口的 md 表块数（34）与渲染器统计（tables=34）一致；README 修订后表块数（5）与渲染器统计（tables=5）一致。
+
+五、本轮发现并已修复的问题
+1. README §4 待拍板表曾被一个空行拆成两块（第 12 行与新增的第 13—15 行之间）⇒ 已删除该空行，合成单表；修复前渲染器会跨空行并表（tables=5），修复后脚本与渲染器计数一致（5）。
+2. 执行入口的"行数"口径统一为 LF 计数：157,722 B / 2,159 行（早前 2,160 行为含末尾空行的另一口径），README、交接件、本报告均已按 2,159 行统一。
+
+六、工具链与环境事实（本轮登记，影响后续所有落档）
+1. 本机无 Python ⇒ 旧 `md_to_docx.py`、`C:\Users\Administrator\...\readback_docx.py` 均不可用；渲染改走 `D:\share、\项目开发\b站评论成分分析工具\cline全局规则配置\scripts\render_docx.ps1`（Word COM），回读改走本仓 `tools\readback_docx.ps1`。
+2. 大文本渲染（157 KB / 34 表）需数分钟且必须分离运行：`Start-Process` + 独立日志（本轮用 `C:\Users\35870\.cline\data\workspaces\chat\start_render.ps1` 启动，日志 `render_plan.log`），否则下一条终端命令会关掉终端并连带杀掉 Word 进程，表现为日志为空、docx 未生成、残留 WINWORD 僵尸进程。
+3. 本轮清理了 4 个 13:35—13:37 遗留的无窗口 WINWORD 僵尸进程（各约 225 MB）；收尾时 WINWORD 计数 0。
+4. 项目根为 `D:\share、\项目开发\FPGA-amd自主命题赛道`；文档/脚本内 F:、E: 旧路径一律失效。
+
+七、本轮未做（待拍板或待执行）
+1. 对齐登记 §4 的 14 项落点：仅执行"入口两项"（README 权威关系/先读顺序、本交接件），其余 13 项待执行；**未改任何冻结文档正文**。
+2. 对齐登记 §3 的 9 处引用断链未处理（重指向 vs 标外部，待拍板）。
+3. 对齐登记 §7 的 5 条待拍板（落点执行顺序、断链处理方式、"参考重建卡在 Clocking Wizard"是否登记为 M2 未通过、§2.3 六类参数冻结点、本登记是否入下一轮交付包）。
+4. 第十四轮"取消听声辩位"的采购规格 §7 落点清单与第十五轮 14 项落点尚未合并成一张执行表。
+
+可重放的校验命令（PowerShell，本机均为只读/可重跑）
+ 渲染：powershell -NoProfile -ExecutionPolicy Bypass -File "D:\share、\项目开发\b站评论成分分析工具\cline全局规则配置\scripts\render_docx.ps1" -Md "<md 绝对路径>"
+ 回读：powershell -NoProfile -ExecutionPolicy Bypass -File "D:\share、\项目开发\FPGA-amd自主命题赛道\tools\readback_docx.ps1" -Docx "<docx 绝对路径>"

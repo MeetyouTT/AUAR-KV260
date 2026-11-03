@@ -1,0 +1,199 @@
+{
+  "actual_evidence": {
+    "metadata": {
+      "boot_match": true,
+      "clock": {
+        "anchored": true,
+        "persistent": true,
+        "safe_for_compaction": true,
+        "same_boot": true,
+        "uncertainty_seconds": 7.8824690613534925,
+        "verified_age_seconds": 601.9238093970016
+      },
+      "clock_refresh": {
+        "error_present": false,
+        "retry_in_seconds": 0.0
+      },
+      "configuration_file_pin_match": true,
+      "no_database_or_model_access": true,
+      "observed_mono": 23034.623206785,
+      "phase": "IDLE",
+      "retry": {
+        "failure_streak": 23,
+        "last_delay_seconds": 60.0,
+        "last_failure_code": "candidate_rejected",
+        "maximum_seconds": 60.0,
+        "retry_in_seconds": 50.66452428000048
+      },
+      "schema": "aura.memory-reason-metadata.v1",
+      "snapshot_atomicity_verified": false,
+      "status": "metadata_read",
+      "summary": {
+        "code": "candidate_rejected",
+        "error_class": "CandidateRejected",
+        "method": "none",
+        "rejection_reasons": [
+          "negation_missing"
+        ],
+        "stage": "full_source_validation",
+        "state": "failed"
+      },
+      "unknown_counts": {
+        "invalid_numeric_values": 0,
+        "missing_fields": 0,
+        "unknown_enum_values": 0,
+        "unknown_rejection_reasons": 0
+      },
+      "worker": {
+        "completed": 2,
+        "discarded": 39,
+        "error_is_presentation_redaction": true,
+        "error_present": true,
+        "running": true
+      }
+    },
+    "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\memory_reason_candidate\\actual_v21_current_20261031.json",
+    "sha256": "81953844a3c0e7013663a6175c7b5d68350c55057c22c793541020908a25a0c6"
+  },
+  "chain": [
+    {
+      "finding": "Worker error is coarse fixed reason. CandidateRejected also carries filtered detailed rejection_reasons.",
+      "lines": [
+        68,
+        79,
+        1584,
+        1594,
+        1627,
+        1629
+      ],
+      "source": "common/board_memory.py"
+    },
+    {
+      "finding": "BoardSummaryClient records only fixed state/stage/code/error_class and filtered rejection_reasons in failure_metadata.",
+      "lines": [
+        244,
+        246,
+        496,
+        520
+      ],
+      "source": "board/runtime/board_memory_policy.py"
+    },
+    {
+      "finding": "Actual default Backoff worker exports retry_backoff.last_failure_code and summary_diagnostics through health.",
+      "lines": [
+        21,
+        29,
+        91,
+        100
+      ],
+      "source": "common/board_memory_backoff.py"
+    },
+    {
+      "finding": "Default worker_factory is BoardMemoryBackoffWorker and public.memory calls its health.",
+      "lines": [
+        375,
+        377,
+        625,
+        637
+      ],
+      "source": "board/runtime/board_business.py"
+    },
+    {
+      "finding": "Runtime.public is assigned to board_business before bridge.publish.",
+      "lines": [
+        1707,
+        1721
+      ],
+      "source": "tools/board_avatar_gtk.py"
+    },
+    {
+      "finding": "Bridge publication cleans recursively. Nonempty error/detail becomes fixed operation_failed. Fixed reason fields have other keys and survive.",
+      "lines": [
+        22,
+        36,
+        320,
+        331
+      ],
+      "source": "tools/production_memory_presentation.py"
+    }
+  ],
+  "database_or_raw_log_access": false,
+  "device_or_model_access_by_reviewer": false,
+  "existing_safe_entry": {
+    "function": "extract_memory_reason",
+    "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\memory_reason_candidate\\probe_memory_reason.py",
+    "recommended_execution": "Reuse pure extractor inside root current full-source/owner guarded localhost GET. Its standalone historical CLI itself checks boot/startup but does not provide the stronger current380/owner proof.",
+    "sha256": "ec85d0565992f7a5527441ae66d4f47c1cf973fdc13e4a6f8efce533575ac57c"
+  },
+  "historical_error_lengths_do_not_identify_causes": true,
+  "limits": [
+    "Actual metadata establishes the latest reported rejection reason, not which private source wording or model paraphrase caused it.",
+    "Cumulative discarded/failure counters do not prove repeated failure of the same source group.",
+    "snapshot_atomicity_verified is false. Sample fields should not be forced into one transaction or request identity."
+  ],
+  "previous_length_only_inference_rejected": true,
+  "product_change_required": false,
+  "source_mapping_sha256": "bff1b76381914cfa070c617e21ce091e8b97a8b7062f408c842cbcf03bc5dee2",
+  "source_pins": {
+    "board/runtime/board_business.py": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\voice_visual_timeline_review_v90\\after\\board\\runtime\\board_business.py",
+      "sha256": "b08209eca7979825e26845080bca5e1d64e065d3cabd1178df763a93540573f2"
+    },
+    "board/runtime/board_memory_policy.py": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\candidate_m03_v90_stage\\public_runtime_v90\\board\\runtime\\board_memory_policy.py",
+      "sha256": "410e5b3eaf7986be6baa68d148469eb33443654ed0db597004518877732533c5"
+    },
+    "common/board_memory.py": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\voice_visual_timeline_review_v90\\after\\common\\board_memory.py",
+      "sha256": "05095d249caf3598802d5951910b412affe167b508933c7e831e3ffacc4fc0d0"
+    },
+    "common/board_memory_backoff.py": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\candidate_m03_v90_stage\\public_runtime_v90\\common\\board_memory_backoff.py",
+      "sha256": "9710c079fc589eae8f2eb26fba7f0dd80038b66736b3e45e000a98904716ce82"
+    },
+    "tools/board_avatar_gtk.py": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\release_v21_asr2_display_candidate\\payload\\tools\\board_avatar_gtk.py",
+      "sha256": "5e5c492832fc1273d45fa25d0ec692b47c9ffa4b6c6d46e42f176e842b50d70c"
+    },
+    "tools/production_memory_presentation.py": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\release_v20_identity_history_candidate\\payload\\tools\\production_memory_presentation.py",
+      "sha256": "414ed67c68ad5f6ad3e0f89608e4f7ccef71d7b8765dfffc4f071eb806cc081a"
+    }
+  },
+  "startup_sha256": "94f665cf69e861d4f3d625dd627116218120cdbbef2244aa4cf2b63c39b9f1c7",
+  "status": "CURRENT_SOURCE_CHAIN_VERIFIED_ACTUAL_FIXED_ENUM_CONFIRMS_NEGATION_MISSING",
+  "synthetic_checks": [
+    {
+      "case": "redaction_and_fixed_metadata_model_failed",
+      "passed": true
+    },
+    {
+      "case": "redaction_and_fixed_metadata_candidate_rejected",
+      "passed": true
+    },
+    {
+      "case": "redaction_and_fixed_metadata_cancelled",
+      "passed": true
+    },
+    {
+      "case": "redaction_and_fixed_metadata_deadline_exceeded",
+      "passed": true
+    },
+    {
+      "case": "redaction_and_fixed_metadata_database_busy",
+      "passed": true
+    },
+    {
+      "case": "redaction_and_fixed_metadata_compaction_failed",
+      "passed": true
+    },
+    {
+      "case": "redaction_and_fixed_metadata_clock_unverified",
+      "passed": true
+    },
+    {
+      "case": "body_and_detail_remain_redacted",
+      "passed": true
+    }
+  ]
+}

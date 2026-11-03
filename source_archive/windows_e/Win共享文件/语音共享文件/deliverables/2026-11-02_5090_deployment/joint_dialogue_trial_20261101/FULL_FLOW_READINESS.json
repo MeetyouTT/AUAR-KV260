@@ -1,0 +1,111 @@
+{
+  "schema": "aura-five-component-dialogue-readiness-1",
+  "updated_utc": "2026-11-02T05:30:19.903423+00:00",
+  "board_boot_id": "903cfade-b93c-48fa-804e-379be1967313",
+  "startup_sha256": "3fd124287463650f48232cb387c78d01399bad7ddcda483db725163298de4591",
+  "full_five_component_trial_ready": false,
+  "basic_guest_dialogue_trial_conditions_present": true,
+  "actual_trial_executed": false,
+  "human_audio_or_images_archived": false,
+  "board_configuration_or_firmware_changed": false,
+  "components": {
+    "vision": {
+      "software_ready": true,
+      "observation": "confirmed body target in3/3 samples; valid face target in1/3",
+      "body_target_confirmed_samples": 3,
+      "valid_face_samples": 1
+    },
+    "doll_avatar": {
+      "software_ready": true,
+      "main_page": true,
+      "visible_native_frames_advancing": true,
+      "audio_output_software_ready": true,
+      "runtime_faults": 0,
+      "current_trial_acoustic_playback_and_mouth_sync_accepted": false
+    },
+    "dialogue": {
+      "model_backend_ready": true,
+      "entry_mode": "voice_first",
+      "asr_variant": "paraformer_small",
+      "listening_currently_paused": true,
+      "voice_first_guest_single_turn_can_be_tried": true,
+      "current_human_end_to_end_turn_accepted": false,
+      "source_of_business_and_persistence": "board"
+    },
+    "identity": {
+      "model_chain_ready": true,
+      "fresh_known_samples": 0,
+      "fresh_unknown_samples": 1,
+      "no_face_target_samples": 2,
+      "current_known_person_recognition_demonstrated": false,
+      "same_capture_visual_context_is_bound_to_dialogue_job": true,
+      "production_identity_query_and_enrollment_handlers_present": true,
+      "face_match_is_private_profile_permission": false,
+      "private_profile_permission_policy": "existing operator authorization and live boot/session-bound grant",
+      "policy": {
+        "threshold": 0.5,
+        "ambiguity_margin": 0.1,
+        "result_ttl_ms": 3000
+      },
+      "policy_matches_latest_user_choice": true,
+      "policy_authorization_source": "deliverables/2026-10-19_threshold_050/README.md",
+      "gallery_empty_inferred": false
+    },
+    "axis": {
+      "ready": false,
+      "firmware": "kv260-benchmark-b4096.bit.bin",
+      "state": "FAULT",
+      "readback_available": false,
+      "following": false,
+      "wide_candidate_installed_manifest_verified": true,
+      "reviewed_real_platform_switch_backend_ready": false,
+      "current_boot_position_direction_and_short_motion_accepted": false
+    }
+  },
+  "blocking_full_acceptance": [
+    "axis platform remains benchmark with FAULT and no readback",
+    "current observation has no demonstrated known-person recognition",
+    "new-host human capture-to-complete-playback-and-mouth-sync turn not yet accepted"
+  ],
+  "next_sequence": [
+    "complete and review the real wide-platform recovery transaction without losing Native counters",
+    "restore current-boot platform and owner bindings, validate ID/STOP and physical reference/direction",
+    "verify fresh known-person recognition with an already registered person in view",
+    "run one human turn while visual/identity context, avatar/audio and separately enabled face-follow are observed",
+    "accept full playback receipt and user observations, then pause listening and stop following"
+  ],
+  "evidence": [
+    {
+      "path": "platform_live_01.json",
+      "sha256": "f07f6b12afe1a9515a0d269c0b93f1a17a277ef455e0e2903a95d31e9f8e093c"
+    },
+    {
+      "path": "model_health_current.json",
+      "sha256": "df59a1b4fe9a3c89a9e956ad5d14a642449a9adc73167489ef09b2573ef3de66"
+    },
+    {
+      "path": "perception_review/PERCEPTION_VERDICT.json",
+      "sha256": "79a53b68b1b0df52d257ad1d623a3ed36d22b5fa934b700f07a7746b1305a6a0"
+    },
+    {
+      "path": "perception_review/perception_current_02.json",
+      "sha256": "ddee310a70008d675fd12c31918d264489671490889643ba29d82d378c7d71cb"
+    },
+    {
+      "path": "perception_review/identity_policy_provenance_01.json",
+      "sha256": "07ddd6fed2b805b88d190d685b34e7c2976c02e5bf3ae796f81b066dceeba03a"
+    },
+    {
+      "path": "perception_review/PROVENANCE_NOTE.txt",
+      "sha256": "93f43c7512e198681209278d7c05315fde2a9f268b4115a8616b75f1cbac3366"
+    },
+    {
+      "path": "dialogue_review/current_source_receipt.json",
+      "sha256": "5ea9636cf5109359f5211824e0f210a8b3a93ada8280b34c57774645963fff89"
+    },
+    {
+      "path": "dialogue_review/source_index.json",
+      "sha256": "80b939437c7c47a73ccc2e654a7317a9ec0cc399292015b186fb6313887b6517"
+    }
+  ]
+}

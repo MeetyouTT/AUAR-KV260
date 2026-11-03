@@ -1,0 +1,271 @@
+{
+  "verified_records": [
+    {
+      "phase": "04-connection",
+      "id": "identity",
+      "command": "id; uname -a; cat /etc/os-release; uptime; date -u; cat /proc/sys/kernel/random/boot_id; cat /proc/uptime",
+      "started_utc": "2026-10-01T04:29:57.739884+00:00",
+      "finished_utc": "2026-10-01T04:29:58.861528+00:00",
+      "sha256": "7c9be30c2617d773334a444807c605d34ba2eab7ab174350ccbcd8edd8e0d0c5",
+      "bytes": 484,
+      "file": "04-connection.identity.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "05-boot-storage",
+      "id": "live_dt_identity",
+      "command": "for f in /sys/firmware/devicetree/base/model /sys/firmware/devicetree/base/compatible /sys/firmware/devicetree/base/chosen/bootargs /sys/firmware/devicetree/base/chosen/stdout-path; do printf \"\\n%s\\n\" \"$f\"; tr \"\\000\" \"\\n\" < \"$f\"; done; cat /proc/cmdline",
+      "started_utc": "2026-10-01T04:30:24.972349+00:00",
+      "finished_utc": "2026-10-01T04:30:26.173088+00:00",
+      "sha256": "a85eaf3218a4a9f10a7b70da663b76aec1783d61e00f5acfa797f29944a4d819",
+      "bytes": 488,
+      "file": "05-boot-storage.live_dt_identity.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "05-boot-storage",
+      "id": "storage",
+      "command": "lsblk -o NAME,MAJ:MIN,SIZE,TYPE,FSTYPE,LABEL,UUID,MOUNTPOINT; cat /proc/partitions; cat /proc/mtd; cat /proc/mounts; df -h; fdisk -l /dev/mmcblk1",
+      "started_utc": "2026-10-01T04:30:26.173266+00:00",
+      "finished_utc": "2026-10-01T04:30:35.035201+00:00",
+      "sha256": "f329bfdb49c27894a5cc6bdad16f8769d993d85a29a6b194d9159c4213f30371",
+      "bytes": 6960,
+      "file": "05-boot-storage.storage.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "05-boot-storage",
+      "id": "tool_sources",
+      "command": "command -v xmutil xlnx-bootfw xlnx_platformstats xbutil xdputil xclbinutil dtc python3 rpm opkg dnf lsusb v4l2-ctl media-ctl arecord aplay i2cdetect; cat /usr/bin/xmutil; head -n 100 /usr/bin/xdputil",
+      "started_utc": "2026-10-01T04:30:35.035561+00:00",
+      "finished_utc": "2026-10-01T04:30:44.313895+00:00",
+      "sha256": "6f701843ed4c22de3dd324a0317ba6d5444881a2953eb8affcd091f0884efe2d",
+      "bytes": 5865,
+      "file": "05-boot-storage.tool_sources.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "06-logs-services",
+      "id": "boot_files",
+      "command": "ls -la /boot; find /boot -maxdepth 3 -type f; ls -l /sys/firmware/zynqmp /sys/devices/platform/firmware:zynqmp-firmware",
+      "started_utc": "2026-10-01T04:31:01.528445+00:00",
+      "finished_utc": "2026-10-01T04:31:03.002215+00:00",
+      "sha256": "7b58e0ddc8ce92a397ac282b1ae1c446f7107d7b762bb554b235eb33277fe7ae",
+      "bytes": 8003,
+      "file": "06-logs-services.boot_files.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "06-logs-services",
+      "id": "kernel_log",
+      "command": "dmesg",
+      "started_utc": "2026-10-01T04:31:03.002514+00:00",
+      "finished_utc": "2026-10-01T04:31:15.864098+00:00",
+      "sha256": "e99cb11c6d8b7c544946f79fc076c69c2cd90ec8b9c4f608e8aa559bc54e3b7b",
+      "bytes": 43794,
+      "file": "06-logs-services.kernel_log.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "07-services-network",
+      "id": "services",
+      "command": "systemctl --failed --no-pager -l; systemctl list-units --type=service --all --no-pager -l; ps -eo pid,comm",
+      "started_utc": "2026-10-01T04:32:06.081154+00:00",
+      "finished_utc": "2026-10-01T04:32:08.945881+00:00",
+      "sha256": "31dfb7b55f3ebc43ab1be2391897da021fea023936025c3778a7c19135b9f3ac",
+      "bytes": 12039,
+      "file": "07-services-network.services.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "07-services-network",
+      "id": "network",
+      "command": "ip -br address; ip route; ip -6 route; cat /sys/class/net/eth0/carrier; networkctl status eth0 --no-pager -l; cat /lib/systemd/network/80-wired.network; cat /proc/net/tcp /proc/net/tcp6; journalctl -b -u systemd-networkd -u kria-dashboard.service --no-pager -n 80",
+      "started_utc": "2026-10-01T04:32:08.946213+00:00",
+      "finished_utc": "2026-10-01T04:32:18.480666+00:00",
+      "sha256": "e829df4635648a60c3010fa7d53b7175ab361a3336221bbab4fa20e33acce280",
+      "bytes": 4928,
+      "file": "07-services-network.network.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "08-board-packages",
+      "id": "board_qspi",
+      "command": "xmutil boardid; xmutil bootfw_status",
+      "started_utc": "2026-10-01T04:33:17.705780+00:00",
+      "finished_utc": "2026-10-01T04:33:20.490902+00:00",
+      "sha256": "ff2920687e3150c363d3012e7d32defb0b37ad55d040a33e1ec47d48406febb9",
+      "bytes": 1650,
+      "file": "08-board-packages.board_qspi.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "08-board-packages",
+      "id": "packages_sources",
+      "command": "python3 --version; rpm -qa --qf \"%{NAME}\\t%{VERSION}-%{RELEASE}\\t%{ARCH}\\t%{VENDOR}\\n\" | grep -Ei \"vitis|vart|xir|xrt|dpu|zocl|xlnx|dfx|kria|bootfw|xmutil|image-update|fru|kernel|gstreamer|opencv\"; find /usr/lib -maxdepth 6 -path \"*/xdputil*\" -type f; ls -l /usr/lib/libvart* /usr/lib/libxir* /usr/lib/libvitis* /usr/lib/libxrt* /usr/lib/libvaip*",
+      "started_utc": "2026-10-01T04:33:20.491194+00:00",
+      "finished_utc": "2026-10-01T04:33:38.745502+00:00",
+      "sha256": "a336c9902f14f3f99048987f699b142c114549cceba159700a2cdb138fce42c2",
+      "bytes": 75820,
+      "file": "08-board-packages.packages_sources.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "09-live-fpga",
+      "id": "live_device_tree",
+      "command": "dtc -I fs -O dts /sys/firmware/devicetree/base",
+      "started_utc": "2026-10-01T04:33:59.393410+00:00",
+      "finished_utc": "2026-10-01T04:34:06.450860+00:00",
+      "sha256": "91ff9eab111c64f9d1584d4306c372c493a2c6bc80eb8e0b75dc7e36086bcead",
+      "bytes": 82055,
+      "file": "09-live-fpga.live_device_tree.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "09-live-fpga",
+      "id": "fpga_runtime",
+      "command": "xmutil listapps; xbutil examine; for d in /sys/class/fpga_manager/*; do printf \"\\n%s\\n\" \"$d\"; for f in name state status firmware flags; do if test -f \"$d/$f\"; then printf \"%s: \" \"$f\"; cat \"$d/$f\"; fi; done; done; find /sys/kernel/config/device-tree /configfs/device-tree -maxdepth 3 -type f; ls -l /dev/dri /dev/uio*; ls -l /sys/bus/platform/drivers/zocl /sys/bus/platform/drivers/dpu*; cat /proc/iomem",
+      "started_utc": "2026-10-01T04:34:06.452080+00:00",
+      "finished_utc": "2026-10-01T04:34:18.032353+00:00",
+      "sha256": "d7c051a63007a955bcd6b670e55a4e985ac09b7fd093521cf00b773ae8e79bce",
+      "bytes": 5715,
+      "file": "09-live-fpga.fpga_runtime.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "10-overlay-driver",
+      "id": "overlay_zocl_metadata",
+      "command": "for d in /sys/kernel/config/device-tree/overlays/*; do printf \"\\n%s\\n\" \"$d\"; ls -l \"$d\"; cat \"$d/status\" \"$d/path\"; done; ls -la /sys/bus/platform/devices/axi:zyxclmm_drm /sys/bus/platform/devices/CU.*; for d in /sys/bus/platform/devices/axi:zyxclmm_drm; do for f in xclbinuuid kds_custat kds_stat scheduler_stat memstat; do if test -r \"$d/$f\"; then printf \"\\n%s\\n\" \"$d/$f\"; cat \"$d/$f\"; fi; done; done; for d in /sys/class/uio/uio*; do printf \"\\n%s\\n\" \"$d\"; cat \"$d/name\"; for m in \"$d\"/maps/map*; do printf \"%s \" \"$m\"; cat \"$m/name\" \"$m/addr\" \"$m/size\"; done; done; lsmod; cat /sys/module/zocl/version; modinfo zocl; find /usr/lib /usr/share -maxdepth 5 -iname \"*xdputil*\"; ls -l /usr/bin/xdputil /usr/bin/xdputil* /usr/bin/xdpu*",
+      "started_utc": "2026-10-01T04:36:29.932542+00:00",
+      "finished_utc": "2026-10-01T04:36:42.605151+00:00",
+      "sha256": "77961652a0594d615ed186bd0581f946dd756c855b995a518fb53d419c6b693f",
+      "bytes": 3328,
+      "file": "10-overlay-driver.overlay_zocl_metadata.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "11-peripherals",
+      "id": "peripheral_nodes",
+      "command": "lsusb; lsusb -t; ls -l /dev/video* /dev/media* /dev/v4l-subdev* /dev/snd /dev/fb* /dev/dri /dev/i2c-* /dev/spidev* /dev/gpiochip* /dev/pwm*; cat /proc/asound/cards /proc/asound/pcm; arecord -l; aplay -l; v4l2-ctl --list-devices; for d in /sys/class/drm/card*-*; do printf \"\\n%s\\n\" \"$d\"; cat \"$d/status\" \"$d/enabled\" \"$d/modes\"; done; for d in /sys/class/pwm/pwmchip*; do printf \"\\n%s\\n\" \"$d\"; readlink -f \"$d/device\"; cat \"$d/npwm\"; ls \"$d\"; done; ls -l /sys/bus/i2c/devices",
+      "started_utc": "2026-10-01T04:37:03.074379+00:00",
+      "finished_utc": "2026-10-01T04:37:04.963016+00:00",
+      "sha256": "c37ba74a0aba2532d4b07a8c22ff3e143d0ce8be2712ed1e50a4451b70807259",
+      "bytes": 3505,
+      "file": "11-peripherals.peripheral_nodes.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "12-tool-sources",
+      "id": "query_autoconfig_sources",
+      "command": "cat /usr/lib/python3.9/site-packages/xdputil_component/query.py /usr/lib/python3.9/site-packages/xdputil.py; systemctl cat dpu-auto-config.service dfx-mgr.service; cat /etc/vart.conf /etc/xrt.ini /etc/fstab; printenv XLNX_VART_FIRMWARE XILINX_XRT XCL_EMULATION_MODE; ls -l /usr/bin/*dpu* /usr/share/vitis_ai_library /usr/share/vart /home/root /root /opt; find /lib/firmware/xilinx -maxdepth 3 -type f; find /usr/lib -maxdepth 4 -iname \"*dpu*\" -o -iname \"*xrt*\"",
+      "started_utc": "2026-10-01T04:37:18.748266+00:00",
+      "finished_utc": "2026-10-01T04:37:21.389008+00:00",
+      "sha256": "b5ef8f9ad00cfb9a6b838444e7e9ff39a68814309bf1d54fd444fc8dee491424",
+      "bytes": 6927,
+      "file": "12-tool-sources.query_autoconfig_sources.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "13-health",
+      "id": "sensors_health",
+      "command": "for d in /sys/class/thermal/thermal_zone*; do printf \"\\n%s\\n\" \"$d\"; cat \"$d/type\" \"$d/temp\"; done; for d in /sys/class/hwmon/hwmon*; do printf \"\\n%s\\n\" \"$d\"; readlink -f \"$d/device\"; for f in \"$d\"/name \"$d\"/temp*_input \"$d\"/temp*_crit \"$d\"/temp*_max \"$d\"/temp*_label \"$d\"/in*_input \"$d\"/in*_label \"$d\"/curr*_input \"$d\"/curr*_label \"$d\"/power*_input \"$d\"/power*_label \"$d\"/fan*_input; do if test -r \"$f\"; then printf \"%s: \" \"$f\"; cat \"$f\"; fi; done; done; cat /sys/devices/platform/firmware:zynqmp-firmware/last_reset_reason; journalctl -b -p warning --no-pager -n 100",
+      "started_utc": "2026-10-01T04:37:33.084046+00:00",
+      "finished_utc": "2026-10-01T04:37:35.741857+00:00",
+      "sha256": "2dc1a021fd1f93bda316173c52477718310e6bc9ecc13956cc96502b4d462015",
+      "bytes": 12930,
+      "file": "13-health.sensors_health.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "14-boot-hashes",
+      "id": "boot_firmware_hashes",
+      "command": "sha256sum /boot/boot.scr /boot/Image /boot/ramdisk.cpio.gz.u-boot /boot/system.dtb /boot/system-zynqmp-sck-kv-g-revB.dtb /lib/firmware/xilinx/kv260-benchmark-b4096/*; cat /etc/init.d/dpu-auto-config /usr/bin/dpu_auto_config* /lib/firmware/xilinx/kv260-benchmark-b4096/shell.json; journalctl -b -u dpu-auto-config.service -u dfx-mgr.service --no-pager -n 60; xclbinutil --info --input /lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.xclbin",
+      "started_utc": "2026-10-01T04:39:54.231430+00:00",
+      "finished_utc": "2026-10-01T04:40:00.488495+00:00",
+      "sha256": "3fdca11da5a93348718c8dfced26d406e4d46023261b11e47268a45b4096016e",
+      "bytes": 10698,
+      "file": "14-boot-hashes.boot_firmware_hashes.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "15-runtime-check",
+      "id": "runtime_file_integrity",
+      "command": "rpm -V vart xir vitis-ai-library xrt zocl xmutil image-update; rpm -qf /usr/bin/xdputil /usr/lib/python3.9/site-packages/xdputil_component/query.py /lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.bit.bin /lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.xclbin /usr/share/vitis_ai_library/models; cat /usr/lib/pkgconfig/xrt.pc; cat /sys/bus/platform/devices/axi:zyxclmm_drm/uevent; ls -la /sys/bus/platform/devices/axi:zyxclmm_drm; xbutil examine --help",
+      "started_utc": "2026-10-01T04:40:55.419384+00:00",
+      "finished_utc": "2026-10-01T04:41:06.204658+00:00",
+      "sha256": "2812a3ecbd8c22cd4f9161c9c90d283d3f755e8fbe1d0f58ef68a310e0b98259",
+      "bytes": 39132,
+      "file": "15-runtime-check.runtime_file_integrity.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "16-model-inventory",
+      "id": "models_apps_inventory",
+      "command": "python3 -B -c 'import os,json; roots=[\"/usr/share/vitis_ai_library/models\",\"/home/root\",\"/usr/share/vitis_ai_library/samples\",\"/usr/share/vitis_ai_library/test\"]; entries=[];\nfor root in roots:\n for folder,ds,fs in os.walk(root):\n  ds[:]=[d for d in ds if d!=\".git\"]\n  for name in fs:\n   p=os.path.join(folder,name); s=os.stat(p); entries.append({\"path\":p,\"bytes\":s.st_size,\"mtime\":s.st_mtime,\"symlink\":os.path.islink(p)})\nprint(json.dumps(entries,sort_keys=True))'",
+      "started_utc": "2026-10-01T04:43:12.529839+00:00",
+      "finished_utc": "2026-10-01T04:43:26.950297+00:00",
+      "sha256": "0cfebe8def7d50fb97543019449dc3a96b5716a314c088718a4cb537a683be58",
+      "bytes": 344259,
+      "file": "16-model-inventory.models_apps_inventory.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "17-autoload-metadata",
+      "id": "scripts_kernel_metadata",
+      "command": "cat /home/root/dpu_sw_optimize/zynqmp/zynqmp_dpu_optimize.sh; ls -l /home/root/dpu_sw_optimize/zynqmp/functions; cat /etc/init.d/dfx-mgr* /usr/bin/xlnx-firmware-detect; cat /sys/bus/platform/devices/axi:zyxclmm_drm/xclbinid /sys/bus/platform/devices/axi:zyxclmm_drm/kds_custat /sys/bus/platform/devices/axi:zyxclmm_drm/kds_cu_stat; cat /sys/bus/platform/devices/CU.3.auto/name /sys/bus/platform/devices/CU.3.auto/uevent; sha256sum /etc/os-release /etc/vart.conf /etc/fstab /etc/init.d/dpu-auto-config; cat /proc/sys/kernel/random/boot_id",
+      "started_utc": "2026-10-01T04:43:29.334156+00:00",
+      "finished_utc": "2026-10-01T04:43:41.430977+00:00",
+      "sha256": "32383b715c3176067cf718526449c67c105969e1180b522b47e82ffbf670f795",
+      "bytes": 4800,
+      "file": "17-autoload-metadata.scripts_kernel_metadata.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "18-model-metadata",
+      "id": "model_metadata_provenance",
+      "command": "python3 -B -c 'import xir,json; paths=[\"/usr/share/vitis_ai_library/models/densebox_320_320/densebox_320_320.xmodel\",\"/usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel\",\"/usr/share/vitis_ai_library/models/yolox_nano_pt/yolox_nano_pt.xmodel\"]; rows=[];\nfor p in paths:\n g=xir.Graph.deserialize(p); root=g.get_root_subgraph(); children=root.toposort_child_subgraph() if not root.is_leaf else [root]; row={\"path\":p,\"graph_name\":g.get_name(),\"graph_attrs\":{k:g.get_attr(k) for k in [\"origin\",\"framework\",\"tool_version\",\"compiler_version\"] if g.has_attr(k)},\"subgraphs\":[]};\n for sg in children:\n  row[\"subgraphs\"].append({\"name\":sg.get_name(),\"attrs\":{k:sg.get_attr(k) for k in [\"device\",\"fingerprint\",\"dpu_fingerprint\",\"dpu_name\",\"runner\",\"arch\"] if sg.has_attr(k)}})\n rows.append(row)\nprint(json.dumps(rows,default=str))'; sha256sum /usr/share/vitis_ai_library/models/densebox_320_320/densebox_320_320.xmodel /usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel /usr/share/vitis_ai_library/models/yolox_nano_pt/yolox_nano_pt.xmodel /home/root/Vitis-AI/examples/vai_runtime/resnet50/resnet50 /home/root/Vitis-AI/examples/vai_runtime/resnet50/src/main.cc; rpm -q vai-model kv260-benchmark-b4096 vitis-ai-library vart xir xrt zocl; rpm -qf /usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel /home/root/Vitis-AI/examples/vai_runtime/resnet50/resnet50; cat /etc/dfx-mgrd/daemon.conf; ls -la /sys/bus/platform/devices/axi:zyxclmm_drm/; cat /proc/sys/kernel/random/boot_id",
+      "started_utc": "2026-10-01T04:46:35.114070+00:00",
+      "finished_utc": "2026-10-01T04:46:39.946703+00:00",
+      "sha256": "167b585e56cabba9fd0c8d7ae0936ab866474b51b6c576afa118e3f1be78e992",
+      "bytes": 5690,
+      "file": "18-model-metadata.model_metadata_provenance.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "19-live-loaded-metadata",
+      "id": "loaded_metadata",
+      "command": "python3 -B -c 'import pathlib,base64,json; p=pathlib.Path(\"/sys/bus/platform/devices/axi:zyxclmm_drm/ip_layout\"); b=p.read_bytes(); print(json.dumps({\"source\":\"live ZOCL sysfs IP_LAYOUT\",\"bytes\":len(b),\"base64\":base64.b64encode(b).decode()}))'; cat /sys/bus/platform/devices/axi:zyxclmm_drm/xclbinid /sys/bus/platform/devices/axi:zyxclmm_drm/dtbo_path /sys/bus/platform/devices/axi:zyxclmm_drm/kds_numcus /sys/bus/platform/devices/axi:zyxclmm_drm/kds_xrt_version; sha256sum /sys/bus/platform/devices/axi:zyxclmm_drm/xclbin_full; cat /etc/dfx-mgrd/default_firmware; cat /proc/sys/kernel/random/boot_id; dmesg | tail -n 18",
+      "started_utc": "2026-10-01T04:48:25.616261+00:00",
+      "finished_utc": "2026-10-01T04:48:27.553815+00:00",
+      "sha256": "fea6645af8957dc849bad8cadd98d79252f80404cda78e97c95a0b32c5f47b34",
+      "bytes": 2126,
+      "file": "19-live-loaded-metadata.loaded_metadata.output",
+      "exit_code": 0
+    },
+    {
+      "phase": "20-final-snapshot",
+      "id": "final_snapshot",
+      "command": "ls -l /dev/dpu /dev/dmaproxy*; cat /etc/vart.conf; if test -n \"$XCL_EMULATION_MODE\"; then printf \"XCL_EMULATION_MODE=%s\\n\" \"$XCL_EMULATION_MODE\"; else printf \"XCL_EMULATION_MODE unset\\n\"; fi; cat /proc/sys/kernel/random/boot_id; cat /sys/bus/platform/devices/axi:zyxclmm_drm/xclbinid; cat /sys/kernel/config/device-tree/overlays/kv260-benchmark-b4096_image_1/status; cat /sys/class/fpga_manager/fpga0/state",
+      "started_utc": "2026-10-01T04:50:07.957378+00:00",
+      "finished_utc": "2026-10-01T04:50:09.302068+00:00",
+      "sha256": "df45d0054ea4ecff0c6a038020767892ae2b187a67ace9dc349bb489b6d0ebe3",
+      "bytes": 315,
+      "file": "20-final-snapshot.final_snapshot.output",
+      "exit_code": 0
+    }
+  ],
+  "incomplete_records": [
+    {
+      "phase": "01a-initial",
+      "id": "identity",
+      "complete": false,
+      "exit_code": null
+    },
+    {
+      "phase": "03-initial",
+      "id": "identity",
+      "complete": false,
+      "exit_code": null
+    }
+  ]
+}

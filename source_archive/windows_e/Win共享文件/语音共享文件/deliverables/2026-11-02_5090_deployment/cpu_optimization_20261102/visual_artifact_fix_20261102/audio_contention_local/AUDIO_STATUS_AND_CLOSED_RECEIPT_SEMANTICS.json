@@ -1,0 +1,64 @@
+{
+  "schema": "aura-remote-audio-cached-status-and-terminal-receipt-semantics-1",
+  "recorded_host_utc": "2026-11-02T20:42:21.484105+00:00",
+  "source": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\visual_artifact_fix_20261102\\PUBLIC_AUDIO_COUNTER_PATHS_1_RESULT.json",
+    "sha256": "f297db878d3b64046e251e08daac8aa6150b97f7bfce4385ee8b8a60db141cd8"
+  },
+  "current_named_field_is_live": false,
+  "current_saved_generation": 45,
+  "proxy_cumulative_capture_failures": 34,
+  "actual_queue_snapshot": {
+    "frame_bytes": 640,
+    "capacity_frames": 8,
+    "capacity_ms": 160,
+    "queued_frames": 0,
+    "peak_frames": 7,
+    "frames_read": 1754,
+    "frames_delivered": 1750,
+    "source_read_mean_ms": 20.365,
+    "source_read_max_ms": 922.261,
+    "queue_mean_ms": 32.084,
+    "queue_max_ms": 132.448,
+    "enabled": true,
+    "eof": false,
+    "closed": true,
+    "cancelled": false,
+    "reader_alive": false
+  },
+  "saved_failure_generation": 44,
+  "per_generation_compute_accounting": {
+    "saved_current_generation45": {
+      "frames": 1750,
+      "mean_endpoint_cpu_ms_per20ms_block": 17.674215090285728,
+      "mean_endpoint_wall_ms_per20ms_block": 19.362680258337473,
+      "nominal_one_core_compute_fraction": 0.8837107545142864,
+      "scope": "Cumulative accounting of this saved capture generation, not a live queue or current throughput measurement."
+    },
+    "saved_failure_generation44": {
+      "frames": 8312,
+      "mean_endpoint_cpu_ms_per20ms_block": 17.708944221968224,
+      "mean_endpoint_wall_ms_per20ms_block": 19.164668281655526,
+      "nominal_one_core_compute_fraction": 0.8854472110984112,
+      "scope": "Cumulative accounting of this saved capture generation, not a live queue or current throughput measurement."
+    }
+  },
+  "semantics": [
+    "RecordingController.public and safe_capture_diagnostics both use bound capture.snapshot; the latter has no separate historical queue cache.",
+    "On the selected remote path snapshot returns the last IPC-polled _status and has no poll timestamp. Avatar/GTK publication introduces another snapshot boundary.",
+    "Remote.snapshot deliberately maps READY awaiting speech-owner dispatch or taking to RECORDING. UI microphone_open is derived from that logical state, not an open-fd assertion.",
+    "last_capture_failure is one retained detached sample per failed generation across cancel/rearm;34 is a proxy lifetime counter, not34 current hardware faults.",
+    "Current closed gate/lease and stopped pump mark the state in that saved generation. queued_frames0 after close/cancel is not spare capacity because queue is cleared."
+  ],
+  "existing_terminal_receipt_workflow": [
+    "Seal the current old generation first if its only visible sample is already closed; original pause then resume can establish a fresh capture without new source or protocol.",
+    "Before any short single-variable trial, require same worker/generation with advancing counters and nonclosed gate/queue/reader alive across two fresh UI publications; identify that generation actual hot TID and birth, not historical442549.",
+    "Record generation, worker lifetime, TID lifetime, initial cumulative failure count and high-water counters, and host/board monotonic start/end brackets.",
+    "At trial end restore the exact original lifetime task mask while it is still alive, then original UI pause. Wait PAUSED/micfalse and advancing UI sequence before collecting the same-generation closed status.",
+    "Child cancel calls original capture.cancel then verifies released owner/thread/pool before acknowledging CANCELLED; peak/max/read/delivered and queue error persist. Fetch diagnostics before restoring listening/new generation.",
+    "Match closed worker/generation to the trial. Match lastfailure generation before attributing it; compare failure counter only in the same proxy/capture cohort. Preserve counters/errors; missing fields remain unknown.",
+    "Terminal cumulative metrics cover the whole capture and cleanup, not an isolated6-second phase. ALSA source-overrun/continuity not exposed by the original fields remains unknown."
+  ],
+  "alternative_trial_boundary": "Root may consider only one-hot-TID single allowed online CPU affinity with nice-10 preserved; code has no affinity contract assertion. This is protocol-feasible, not a closed execution guard or proof of safe audio throughput. Same lifetime, new-thread inheritance and restoration/race conditions apply.",
+  "no_board_calls_or_source_patch_or_priority_or_affinity_write": true
+}

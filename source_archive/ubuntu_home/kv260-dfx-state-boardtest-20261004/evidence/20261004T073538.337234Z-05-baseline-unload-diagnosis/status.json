@@ -1,0 +1,75 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/05-baseline-unload-diagnosis.json",
+  "manifest_sha256": "7552489981cd0325a3f35afec0b605776ebed36b0174778ff157870dfcff2fbb",
+  "started_utc": "2026-10-04T07:35:38.337408+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "unload-original-output",
+      "started_utc": "2026-10-04T07:35:38.838493+00:00",
+      "entry": {
+        "id": "unload-original-output",
+        "command": "python3 -B -c 'import pathlib,json; p=pathlib.Path(\"/home/root/kv260-dfx-state-boardtest-20261004/evidence/start-64247855753408\"); print(json.dumps({x.name:x.read_text() for x in p.iterdir() if x.suffix in (\".stdout\",\".stderr\")},indent=2))'"
+      },
+      "exit_code": 0,
+      "output_sha256": "ae0ebc756fb78564c6a2569bec04c914724d36e1cdc5126a27269e0f892437b6",
+      "bytes": 1121,
+      "finished_utc": "2026-10-04T07:35:40.055448+00:00"
+    },
+    {
+      "id": "current-apps",
+      "started_utc": "2026-10-04T07:35:40.055731+00:00",
+      "entry": {
+        "id": "current-apps",
+        "command": "xmutil listapps"
+      },
+      "exit_code": 0,
+      "output_sha256": "2cccd650389f83394080b66b8a547baab5020b4dd29623176da19310e4aad58d",
+      "bytes": 726,
+      "finished_utc": "2026-10-04T07:35:41.175600+00:00"
+    },
+    {
+      "id": "restore-official",
+      "started_utc": "2026-10-04T07:35:41.175952+00:00",
+      "entry": {
+        "id": "restore-official",
+        "command": "xmutil loadapp kv260-benchmark-b4096",
+        "timeout": 90
+      },
+      "exit_code": 0,
+      "output_sha256": "39e5948771c1cf9f838112a9e21b20177e7b92705e4110d5d667c105471cef84",
+      "bytes": 40,
+      "finished_utc": "2026-10-04T07:35:42.503514+00:00"
+    },
+    {
+      "id": "restored-query",
+      "started_utc": "2026-10-04T07:35:42.503895+00:00",
+      "entry": {
+        "id": "restored-query",
+        "command": "xdputil query",
+        "timeout": 90
+      },
+      "exit_code": 0,
+      "output_sha256": "afb332e9089055520704bd4b2ef7d5a1e1cb07019d03be7018edec6bfbfa14b3",
+      "bytes": 1502,
+      "finished_utc": "2026-10-04T07:35:44.503203+00:00"
+    },
+    {
+      "id": "restored-classification",
+      "started_utc": "2026-10-04T07:35:44.503543+00:00",
+      "entry": {
+        "id": "restored-classification",
+        "command": "/home/root/Vitis-AI/examples/vai_library/samples/classification/test_jpeg_classification /usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel /home/root/kv260-test-20261001/pytorch-resnet-dog.jpg",
+        "timeout": 90
+      },
+      "exit_code": 0,
+      "output_sha256": "ba3d3cd2fae200e4e7a6661ac931bfb1cd2aecf130e96f7142b3f15f73ec9843",
+      "bytes": 730,
+      "finished_utc": "2026-10-04T07:35:45.927316+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T07:35:45.974924+00:00"
+}

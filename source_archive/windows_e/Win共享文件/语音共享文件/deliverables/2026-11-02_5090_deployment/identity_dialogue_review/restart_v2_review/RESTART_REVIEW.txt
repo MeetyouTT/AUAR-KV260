@@ -1,0 +1,18 @@
+身份协同补丁后的正常 GUI 启动审阅（只读本地审阅，未访问板卡）
+
+已核实际应用回执：maintenance_original_axis_20261101/identity_query_applied.json 为 IDENTITY_QUERY_V2_UPDATED_GUI_STILL_STOPPED。GUI停止回执显示 inactive/dead/MainPID0/Job空，未停止相机/未PL变更/未动作。应用后仍需新鲜读取这些条件，旧回执只证明当时完成。
+仅 tools/unified_identity_binding.py 替换为85e415d00daa770d4d94ae58006a23ed9700067651a0448de80c99eb33ed1809；startup为0f2a319abb15d26956857c945c247f6b5fac6421b42692fd173a48104f2e3c4f；380组件实板核验通过。
+独审15方法通过、原22项speaker回归通过。该修复防止SAMPLING_VOICE吃掉整句身份查询，不改变真实识别准确率或私人资料授权，不等同真人身份现场验收。
+
+既有启动脚本中两个历史条件需要新副本更新：startup 3fd→0f2a，GUI failed/failed→inactive/dead。不能重跑旧start_gui_host.py，它绑定先前intent/result、旧脚本SHA以及初次部署交易。
+本目录提供start_gui_after_identity_query_v2.py，保留原380组件、原_verify、selected24pin、当前相机1333/birth2359/cmdSHA、聆听false、空Job及模型健康/原27B/OmniVoice16/时钟门限；另核benchmark FDT d68bc与operating状态，新增两次camera健康GET相隔1.2秒且计数推进。仅有一处原systemctl start --no-block aura-avatar-ui.service，不包含camera stop/start、PL、MMIO、Native构造或动作；本候选只通过AST及静态diff检查，未实板执行。
+
+root如选择先恢复GUI：在独立新维护结果目录以独占创建intent；核本候选SHA/既有SSH helper SHA；经既有严格SSH送python3 -B -只发送一次；写独立start_result。SSH超时或结果未知时先读systemd/launch与intent，不再次启动。
+然后执行只读wait_for_gui_ready_90.py。原wait只有35秒，早于上次46.38秒实际启动而产生过INITIALIZING假未完成；新候选最多90秒，与原GUI超时合同一致。可由root分段观察或yielded exec维持用户进度。若服务failed，提前报告；超时不重启、不杀、不清锁。
+再执行既有identity_dialogue_collaboration/collect_after_identity_query_v2.py（SHA见RESTART_REVIEW.json），保存新输出，判断16项checks全true。它从launch.json取得新supervisor/GTK和birth/cmdSHA，不沿用旧16314/16318。不保存原始状态、文本、照片、模板，也不打开身份库。
+物理显示确认旧页可见只属于旧实例；新实例软件检查不冒称用户已再次看到。保存聆听false/PAUSED/micfalse/noPlaying，不自动开启录音。
+
+适用边界：此启动候选和observer仅适用于当前boot903c、benchmark/FDTd68、相机1333/2359、GUI configfc21及selected24pin4d8。如果root先恢复wide或换相机owner/绑定，必须使用新实际证据审阅新的启动/observer条件，此候选会拒绝。不要把旧PID、旧FDT或寄存器RESET值改成新物理参考。
+当前benchmark的mechanical_guard_keeps_connection_unavailable与无vsrv/devmem映射是16项验证的正确预期；wide恢复后该期望必须按新实际安全阶段调整，不能伪称全流程轴跟随成功。
+
+本子代理只写本目录候选和审阅报告，未访问板卡、修改生产、调用模型、真实身份库或控制服务。

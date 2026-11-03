@@ -1,0 +1,109 @@
+*** Begin Patch
+*** Update File: /home/ghmd/Win共享文件/语音共享文件/aura/scripts/board_ui_startup/launcher.py
+@@
+     if not (0 <= grace <= 30 and 0 <= stable_seconds <= 10 and 0.2 <= off_seconds <= 2):
+         raise ValueError('Invalid display startup wait limits')
+     needs_retrain = display_retrain_needed(config)
+-    recovery = {'attempted': False, 'off_succeeded': False,
+-                'off_wait_completed': False, 'restore_succeeded': False,
+-                'completed': False, 'error': None}
+-    # A marker suppresses another blanking pulse, even after a failed attempt.
+-    # Legacy markers do not prove that output-off actually succeeded.
+-    if config.get('startup_display_retrain', False) and not needs_retrain:
+-        try:
+-            saved = json.loads(Path(config['display_recovery_marker']).read_text())
+-            prior = saved.get('retrain')
+-            if isinstance(prior, dict):
+-                recovery.update(prior)
+-            else:
+-                recovery['legacy_result_unknown'] = True
+-        except (OSError, ValueError):
+-            # Do not reblank if the marker disappears between the two reads.
+-            recovery['legacy_result_unknown'] = True
+-    attempted_here = False
+-
+-    def save_recovery(mode_source, verified=False):
+-        atomic_json(config['display_recovery_marker'], {
+-            'boot_id': display_boot_id(), 'output': config['output'],
+-            'mode': config['mode'], 'edid_sha256': config['edid_sha256'],
+-            'mode_source': mode_source, 'retrain': dict(recovery),
+-            'software_modeset_verified': verified, 'physical_panel_verified': False})
+-
++    retrained = False
+     stable_since = None
+     stable_identity = None
+     last_error = 'X display not ready'
+@@
+                 continue
+             enable = ['xrandr', '--output', config['output'], '--mode', config['mode'],
+                       '--rate', config['rate']]
+-            mode_source = 'previously_verified_timing' if fallback else 'live_edid'
+-            if needs_retrain and not attempted_here:
++            if needs_retrain and not retrained:
+                 # A same-mode request can leave the original scanout untouched.
+                 # Record before disabling: a service crash must not cause a
+                 # series of output-off pulses in the same boot.
+-                recovery['attempted'] = True
+-                save_recovery(mode_source)
+-                attempted_here = True
++                atomic_json(config['display_recovery_marker'], {
++                    'boot_id':display_boot_id(), 'output':config['output'],
++                    'mode':config['mode'], 'edid_sha256':config['edid_sha256'],
++                    'mode_source':'previously_verified_timing' if fallback else 'live_edid',
++                    'software_modeset_verified':False, 'physical_panel_verified':False})
++                retrained = True
+                 try:
+                     run(['xrandr', '--output', config['output'], '--off'], env)
+-                    recovery['off_succeeded'] = True
+-                    recovery['off_wait_completed'] = not STOP.wait(off_seconds) and not STOP.is_set()
+-                except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
+-                    recovery['error'] = 'output-off: '+str(exc)
+-                    raise
++                    STOP.wait(off_seconds)
+                 finally:
+                     # Even cancellation or a failed disable must attempt restore.
+-                    try:
+-                        run(enable, env)
+-                        recovery['restore_succeeded'] = True
+-                    except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
+-                        recovery['error'] = 'output-restore: '+str(exc)
+-                        raise
+-                    finally:
+-                        save_recovery(mode_source)
++                    run(enable, env)
+                 if STOP.is_set():
+                     raise RuntimeError('Display startup cancelled after output restore')
+             else:
+                 run(enable, env)
+-                if attempted_here:
+-                    recovery['restore_succeeded'] = True
+             current = run(['xrandr', '--current'], env)
+             if config['output']+' connected primary '+config['mode']+'+0+0' not in current:
+                 raise RuntimeError('Display mode readback mismatch')
+             run(['xset', 'dpms', 'force', 'on'], env)
+-            if STOP.is_set():
+-                raise RuntimeError('Display startup cancelled after output restore')
+-            if attempted_here:
+-                recovery['completed'] = all(recovery[key] for key in
+-                    ('off_succeeded', 'off_wait_completed', 'restore_succeeded'))
+             setup = {'display':current,'edid_sha256':None if fallback else config['edid_sha256'],
+-                     'mode_source':mode_source, 'edid_missing':fallback,
+-                     'startup_output_retrained':attempted_here and recovery['completed'],
+-                     'startup_retrain_attempted':attempted_here, 'retrain':dict(recovery),
++                     'mode_source':'previously_verified_timing' if fallback else 'live_edid',
++                     'edid_missing':fallback, 'startup_output_retrained':retrained,
+                      'display_wait_elapsed_seconds':round(time.monotonic()-started, 3),
+                      'physical_panel_verified':False}
+             if config.get('startup_display_retrain', False):
+-                save_recovery(mode_source, verified=True)
+-                if attempted_here and not recovery['completed']:
+-                    emit('DISPLAY_RETRAIN_INCOMPLETE', retrain=recovery)
++                atomic_json(config['display_recovery_marker'], {
++                    'boot_id':display_boot_id(), 'output':config['output'],
++                    'mode':config['mode'], 'edid_sha256':config['edid_sha256'],
++                    'mode_source':setup['mode_source'], 'software_modeset_verified':True,
++                    'physical_panel_verified':False})
+             return setup
+         except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
+             last_error = str(exc)
+*** End Patch

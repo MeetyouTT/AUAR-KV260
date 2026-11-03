@@ -1,0 +1,84 @@
+{
+  "runtime": "/home/root/aura-avatar-performance-20261020/candidate-29e4697868be/runtime",
+  "config": "/home/root/aura-avatar-performance-20261020/candidate-29e4697868be/startup/config.json",
+  "ui_unit": "# /etc/systemd/system/aura-avatar-ui.service\n[Unit]\nDescription=AURA cached avatar touchscreen interface\nWants=xserver-nodm.service systemd-modules-load.service\nAfter=local-fs.target xserver-nodm.service systemd-modules-load.service\nRequiresMountsFor=/home/root/aura-avatar-performance-20261020/candidate-29e4697868be/runtime\nStartLimitIntervalSec=300\nStartLimitBurst=5\n\n[Service]\nType=notify\nNotifyAccess=main\nUser=root\nEnvironment=DISPLAY=:0 PYTHONUNBUFFERED=1\nWorkingDirectory=/home/root/aura-avatar-performance-20261020/candidate-29e4697868be/runtime/aura\nExecStart=/usr/bin/python3 -B /home/root/aura-avatar-performance-20261020/candidate-29e4697868be/startup/launcher.py --config /home/root/aura-avatar-performance-20261020/candidate-29e4697868be/startup/config.json\nRestart=on-failure\nRestartSec=5\nTimeoutStartSec=240\nTimeoutStopSec=25\nKillMode=mixed\nStandardOutput=journal\nStandardError=journal\nSyslogIdentifier=aura-avatar-ui\n\n[Install]\nWantedBy=graphical.target\n",
+  "ui_home": "/root",
+  "ui_pid": 137513,
+  "files": {
+    "aura/tools/handsfree_recording.py": "c0dd8027922d03898c8a19d05fa1f18445909d00fe51ddcc9c2a51ba3e076112",
+    "aura/tools/board_avatar_gtk.py": "f11858ba7e6a1e9e4a6f29bfd2b9decf475aabdfd8cf4ec4591f575228c56d7e",
+    "aura/board/runtime/audio/attention_gate.py": "f4766b947a30bf1a7462046538e6a073b1ea702a701720d303fce1ead90ce71e",
+    "aura/common/handsfree_settings.py": "1f590ed538305b7a82041a6b10e8e5fab03f45f6ecf8102a6d0d1eaa3d606811",
+    "aura/tests/framework/test_handsfree_dialogue.py": "41e50e8d73b3617942e75b030f325480f7e45ffe8dd76a79036cc5f6ed13c445"
+  },
+  "preferences": {
+    "/root/.local/share/aura/handsfree_dialogue.json": "{\"version\": 1, \"enabled\": false}",
+    "/home/root/.local/share/aura/handsfree_dialogue.json": "{\"version\": 1, \"enabled\": true}"
+  },
+  "handsfree": {
+    "enabled": false,
+    "state": "PAUSED",
+    "reason": "VISUAL_UNAVAILABLE",
+    "error": "",
+    "visual_bound": false,
+    "conversation_entered": false,
+    "microphone_open": false,
+    "speech_detection": "energy_vad_then_asr",
+    "diagnostics": {
+      "armed": 0,
+      "speech_starts": 0,
+      "submitted": 0,
+      "entry_rejected": 0,
+      "visual_stops": 0
+    },
+    "speaker_binding_verified": false,
+    "voice_barge_in": false
+  },
+  "renderer": {
+    "sequence": 229,
+    "render_ms": 107.5908660004643,
+    "frame_age_ms": 67,
+    "command_results": [],
+    "timings_ms": {
+      "core": 80.04016099948785,
+      "compose_resize": 17.760497001290787,
+      "jpeg": 7.85413899939158,
+      "public": 1.8867090002459008,
+      "total": 107.54150600041612
+    },
+    "profile": {
+      "frames": 222,
+      "window_seconds": 29.999902636000115,
+      "core": {
+        "p50": 97.36242399958428,
+        "p95": 140.6918870015943,
+        "max": 2742.25026699969
+      },
+      "compose_resize": {
+        "p50": 19.876939000823768,
+        "p95": 36.62662600072508,
+        "max": 57.15670199970191
+      },
+      "jpeg": {
+        "p50": 8.460985000056098,
+        "p95": 19.885338999301894,
+        "max": 31.26885200072138
+      },
+      "public": {
+        "p50": 1.8908490001194878,
+        "p95": 5.742107001424301,
+        "max": 18.815538000126253
+      },
+      "total": {
+        "p50": 130.41023400000995,
+        "p95": 183.84883900034765,
+        "max": 2774.442388999887
+      },
+      "interval": {
+        "p50": 130.73852699926647,
+        "p95": 179.61728699992818,
+        "max": 269.6261670007516
+      }
+    }
+  }
+}

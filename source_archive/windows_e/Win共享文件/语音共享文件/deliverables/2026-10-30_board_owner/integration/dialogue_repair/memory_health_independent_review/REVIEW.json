@@ -1,0 +1,61 @@
+{
+  "schema": "aura.memory-health-independent-source-review.v1",
+  "decision": "APPROVED_FOR_ROOT_CONTROLLED_PUBLICATION",
+  "blocking_findings": [],
+  "reviewed_candidate_sha256": {
+    "board/runtime/board_memory_policy.py": "48c7499fe5371c822738f2f42029a6b82fe2aa71c503fc0accd9fa15549188a5",
+    "common/board_memory_backoff.py": "9710c079fc589eae8f2eb26fba7f0dd80038b66736b3e45e000a98904716ce82"
+  },
+  "verified_baseline_sha256": {
+    "board/runtime/board_memory_policy.py": "9af4a5bfc4a039db55d8e46e08ce994e04091a0653919886fb04c23f39f94d54",
+    "common/board_memory_backoff.py": "e0abd91758c9e55d6f60bb7bf0f00a9ceed1fa0c194962b87a1d2412705d1d57",
+    "common/board_memory.py": "6e62b109f429c8b8ebb11b1bcf45258be08f5dd659c778e51bd1d95123ee5735"
+  },
+  "generation": {
+    "actual_implementation": "int(self.clock()*1_000_000), then max(previous+1, ordinal)",
+    "unit": "microseconds, not monotonic_ns",
+    "wire": "Explicit integer 0 <= generation < 2**53; upper bound rejects before the model request",
+    "range": "The microsecond scale reaches the 53-bit limit after approximately 285 years, not 104 days",
+    "production_clock": "Original time.monotonic clock, shared across Linux processes within the same board boot; a fresh board boot has a distinct existing board_boot_id owner key",
+    "restart": "Normal same-boot serialized worker restarts use the current monotonic ordinal instead of rewinding to 1, while the Windows host survives",
+    "host_behavior": "Host rejects generations below its high-water mark; equal generation is allowed for a unique request ID, while an individual candidate instance advances strictly",
+    "concurrency_boundary": "Existing production writer lock and one serial idle worker remain required. This stateful summarizer was not and is not a supported concurrent multi-client scheduler. No new owner slots or relaxed host checks are introduced.",
+    "rollback": "Retain rollback_safe/generation_only.patch while the inference host survives. Reverting to counter-from-1 recreates stale_generation; do not restart models or restore business databases implicitly."
+  },
+  "validated_classification": [
+    "Exact wire version/owner/schema validation happens before reading structured remote error codes",
+    "Validated cancelled/preempted/superseded/foreground_busy become InterruptedError and retain original cancelled/no-new-failure backoff handling",
+    "Validated deadline_exceeded becomes TimeoutError and the original bounded failure retry policy applies",
+    "Unknown code is exported only as other; malformed wire/owner is rejected, never adopted as cancellation",
+    "All semantic JSON, protected values, source coverage, scope and Store commit checks remain in force; failure retains bodies"
+  ],
+  "metadata_review": {
+    "safe": true,
+    "fields": ["fixed state", "fixed stage", "allowlisted structured code or other", "allowlisted exception class or other"],
+    "raw_response_exception_body_profile_or_event_ids_added": false,
+    "nonblocking_interpretation": "summary_diagnostics.state=complete means inference produced a candidate; it is not proof that Store commit/deletion completed. Use worker.completed, durable committed counts and backlog trends for production acceptance."
+  },
+  "structural_checks": [
+    "BoardContextBuilder and BoardMemoryCommands AST exactly unchanged",
+    "Original semantic summary __call__ AST equals new _summarize after removing only stage assignments",
+    "Backoff _record_failure, _fail_task and step AST exactly unchanged",
+    "No Store/schema, cleanup/retention permission, audio guard or ACK modifications in the two reviewed sources"
+  ],
+  "independent_tests": {
+    "passed": 28,
+    "failed": 0,
+    "seconds": 1.64,
+    "candidate_author_tests_rerun_separately": 20,
+    "new_independent_cases": 8,
+    "covers": ["Generation at zero and 105-day uptime", "Near and at the wire upper bound", "Bad-owner cancellation reply rejected", "Malformed cancellation reply rejected", "Unknown private token cannot enter diagnostics", "Exact semantic/permission/backoff AST checks", "Author restart/fake-host and synthetic Store/body retention/classification tests"],
+    "evidence": "results-final.xml",
+    "source": "test_review.py"
+  },
+  "deployment_acceptance_not_claimed": [
+    "The historical 270 commits and current 622 backlog do not establish the exact cause of every recent model_failed",
+    "A successful source review does not prove production backlog drain or bodyless-event provenance classification",
+    "Root remains the only hardware publisher and should observe fixed subcodes plus actual durable commit/backlog changes after publication"
+  ],
+  "candidate_files_modified_by_reviewer": false,
+  "real_database_hardware_or_model_service_accessed": false
+}

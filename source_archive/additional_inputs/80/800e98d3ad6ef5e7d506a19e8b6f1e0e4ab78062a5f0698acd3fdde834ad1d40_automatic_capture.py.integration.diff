@@ -1,0 +1,77 @@
+--- aura/board/runtime/audio/automatic_capture.py
++++ aura/board/runtime/audio/automatic_capture.py
+@@ -13,12 +13,14 @@
+ 
+ 
+ class SpeechEndpoint:
+-    def __init__(self, max_seconds=20):
++    def __init__(self, max_seconds=20, *, frame_classifier=None,pre_roll_ms=200):
+         if not 1 <= max_seconds <= 20: raise ValueError('Speech limit must be 1–20 seconds')
+         self.config = VadConfig(min_silence_ms=700, max_utterance_ms=int(max_seconds*1000)-200)
+-        self.vad = EnergyVad(self.config)
++        self.vad = EnergyVad(self.config, frame_classifier=frame_classifier)
+         self.frame_bytes = self.config.frame_samples*2
+-        self.pre_frames = 200//self.config.frame_ms
++        if type(pre_roll_ms) is not int or not 200<=pre_roll_ms<=1000:raise ValueError('Invalid speech pre-roll')
++        self.frame_classifier=frame_classifier
++        self.pre_frames = pre_roll_ms//self.config.frame_ms
+         self.start_frames = (self.config.min_speech_ms+self.config.frame_ms-1)//self.config.frame_ms
+         self.ring = deque(maxlen=self.pre_frames+self.start_frames)
+         self.pending = bytearray(); self.prefix = b''
+@@ -53,6 +55,28 @@
+ class AutomaticMcp01Capture(Mcp01Capture):
+     buffer_time_us = 160000
+ 
++    def __init__(self,*args,audio_frontend=None,**kwargs):
++        from common.frontend_wire import configuration
++        self.audio_frontend=configuration(audio_frontend)
++        super().__init__(*args,**kwargs)
++
++    def _endpoint(self):
++        from board.runtime.audio.remote_frontend import RemoteSpeechGate
++        enabled=self.audio_frontend['enabled']
++        return SpeechEndpoint(self.max_seconds,
++            frame_classifier=RemoteSpeechGate(self.audio_frontend) if enabled else None,
++            pre_roll_ms=500 if enabled else 200)
++
++    def _close_endpoint(self):
++        classifier=getattr(getattr(self,'endpoint',None),'frame_classifier',None)
++        if classifier is not None and hasattr(classifier,'close'):classifier.close()
++
++    def _finish(self,cancel):
++        # Shut down an in-flight frame before waiting for the capture thread.
++        # A cancelled socket cannot publish a late speech callback.
++        if cancel:self._close_endpoint()
++        return super()._finish(cancel)
++
+     def _command(self):
+         # Continuous only while waiting for one speech turn. Its memory stays
+         # bounded even if the user remains silent for several minutes.
+@@ -60,13 +84,18 @@
+ 
+     def _capture_timer(self):
+         self.input_ready = False
+-        self.endpoint = SpeechEndpoint(self.max_seconds)
++        self._close_endpoint()
++        self.endpoint = self._endpoint()
+         return None
+ 
+     def _captured_start(self, started):
+         return round(started+self.endpoint.start_sample*1000/16000)
+ 
+-    def _read_pcm(self, process):
++    def _read_pcm(self,process):
++        try:return self._read_automatic_pcm(process)
++        finally:self._close_endpoint()
++
++    def _read_automatic_pcm(self, process):
+         while True:
+             raw = process.stdout.read(self.endpoint.frame_bytes)
+             if not raw:
+@@ -95,4 +124,6 @@
+             value.update(automatic=True,speech_active=bool(endpoint and endpoint.active),
+                          input_ready=bool(getattr(self,'input_ready',False)),
+                          listening_seconds=endpoint.total_samples/16000 if endpoint else 0)
++            classifier=getattr(endpoint,'frame_classifier',None)
++            value['audio_frontend']=(classifier.public() if classifier is not None else {'enabled':False})
+             return value

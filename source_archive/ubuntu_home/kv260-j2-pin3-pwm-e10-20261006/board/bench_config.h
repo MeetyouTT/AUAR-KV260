@@ -1,0 +1,6 @@
+#define BENCH_BUILD_ID 0x2a3aca85u
+#define BENCH_RUN_FRAMES 0u
+#define BENCH_PERIOD_TICKS 1999980u
+#define BENCH_PULSE_TICKS 149999u
+#define BENCH_PULSE_US 1500u
+#define BENCH_FIRMWARE_NAME "aura_pin3_pwm.bit.bin"

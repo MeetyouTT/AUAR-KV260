@@ -1,0 +1,14 @@
+两文件空语音修复独立审阅：最终候选通过，无代码阻断点。
+
+board_asr.py final SHA256 c51488ac6bd3563bc3dc42934b321e98e26cb2b58d700318765a60ca4908ef60
+board_dialogue_jobs.py final SHA256 01b27ede0d8889c35fc9ac990e03538a55fecc7c6a604fb6f781bc5d54c09087
+
+独立7场景全过：同错误文本的普通ValueError、同名但不同类的异常、在ASR之后抛出的真正BoardNoSpeech，都保持generic错误与原reset；真正ASR typed空结果才走entry_rejected、保留原授权epoch/owner/expiry并不进入LLM、身份命令、声纹采样或对话提交；直接raw换行、制表和CRLF保持原协议拒绝。测试完全基于RAM合成，未打开设备、网络、模型或真实库。
+
+整模块AST逆向核验通过。ASR只新增BoardNoSpeech(ValueError)，将原空结果raise换成该类型，原PCM约束、解码、锁、取消/期限和正常返回不变。Jobs只新增该类型import、raw空白局部分类、transcribe调用的窄catch；catch再次执行原_check后才转原_entry_error。最终raw空白检查位于原类型/长度及控制字符拒绝之后。其余Jobs模块AST相同，原guard/SQL顺序/锁顺序/faceowner/TTL/ACK/播放语义未改。
+
+作者实际流水线专项XML核实：最终31/31通过，基线23通过/8失败/0error。原70项两版各63通过、相同7失败、0error；作者解释为4个旧称呼别名和3个GUI夹具缺character_pair，保留此边界。中间Jobs2d684只有4个异常反例已过，其控制字符顺序随后收紧；本通过结论仅属于最终01b27。
+
+数据库表述边界：原store.preempt_compaction在ASR之前执行，会维护bm_tasks和bm_meta activity_revision，最终两文件保留了这段既有SQL及顺序。因此可说没有新增对话/身份/声纹保存事务，不能说全流程零SQL写入。未为消除维护SQL而扩大本修复范围。
+
+四文件confirmation_failure_trace候选未审阅、不计通过、不建议随本修复发布。审阅者只写本地independent_review产物，未改作者候选/测试或生产。部署及现场人脸→声纹→ACTIVE验收仍归root。

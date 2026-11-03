@@ -1,0 +1,1 @@
+cmd_fs/nfs_common/built-in.a := echo >/dev/null; rm -f fs/nfs_common/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST fs/nfs_common/built-in.a fs/nfs_common/nfsacl.o fs/nfs_common/grace.o fs/nfs_common/nfs_ssc.o

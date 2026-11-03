@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.460" timestamp="2026-10-31T08:32:09.814955-07:00" hostname="zhenghang"><testcase classname="tests.test_speaker_close_reentrant" name="test_queued_future_cancellation_callback_can_remove_jobs_during_shutdown[1]" time="0.158"><failure message="RuntimeError: dictionary changed size during iteration">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/feature_trigger_collaboration/candidate_speaker_close/baseline_work_02/test_queued_future_cancellatio0')
+queued_count = 1
+
+    @pytest.mark.parametrize('queued_count',[1,2])
+    def test_queued_future_cancellation_callback_can_remove_jobs_during_shutdown(tmp_path,queued_count):
+        service=BoardSpeakerBusiness.create(tmp_path/'public-speaker',encoder_factory=Encoder,
+            board_boot_id=BOOT,quality=quality,expected_model_id=MODEL,anonymous_config={'enabled':True},
+            wall_clock=lambda:1793400000.,data_origin='synthetic')
+        entered=threading.Event();release=threading.Event()
+        def block_sole_worker():
+            entered.set();assert release.wait(3)
+        blocker=service.pool.submit(block_sole_worker)
+        try:
+            assert entered.wait(1)
+            for number in range(queued_count):
+                meta,pcm=capture(number+1)
+                meta['session_id']='public-session-'+str(number)
+                service.submit_analysis(meta,pcm,'b'*32)
+            with service.lock:
+                assert len(service.jobs)==queued_count
+                futures=[job['future'] for job in service.jobs.values()]
+                assert all(not future.running() and not future.done() for future in futures)
+            # cancel() on this queued future synchronously calls finished(), whose
+            # original locked callback removes that same job. No timing race needed.
+&gt;           assert service.close(timeout=.01) is False
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_speaker_close_reentrant.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;board.runtime.board_speaker_business.BoardSpeakerBusiness object at 0x0000020862B66690&gt;
+
+    def close(self,*,timeout=2.):
+        if not self.closing.is_set():
+            self.closing.set()
+            with self.lock:
+&gt;               for job in self.jobs.values():
+                           ^^^^^^^^^^^^^^^^^^
+E               RuntimeError: dictionary changed size during iteration
+
+board_integration_v17\local_runtime_v17\board\runtime\board_speaker_business.py:640: RuntimeError</failure></testcase><testcase classname="tests.test_speaker_close_reentrant" name="test_queued_future_cancellation_callback_can_remove_jobs_during_shutdown[2]" time="0.154"><failure message="RuntimeError: dictionary changed size during iteration">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/feature_trigger_collaboration/candidate_speaker_close/baseline_work_02/test_queued_future_cancellatio1')
+queued_count = 2
+
+    @pytest.mark.parametrize('queued_count',[1,2])
+    def test_queued_future_cancellation_callback_can_remove_jobs_during_shutdown(tmp_path,queued_count):
+        service=BoardSpeakerBusiness.create(tmp_path/'public-speaker',encoder_factory=Encoder,
+            board_boot_id=BOOT,quality=quality,expected_model_id=MODEL,anonymous_config={'enabled':True},
+            wall_clock=lambda:1793400000.,data_origin='synthetic')
+        entered=threading.Event();release=threading.Event()
+        def block_sole_worker():
+            entered.set();assert release.wait(3)
+        blocker=service.pool.submit(block_sole_worker)
+        try:
+            assert entered.wait(1)
+            for number in range(queued_count):
+                meta,pcm=capture(number+1)
+                meta['session_id']='public-session-'+str(number)
+                service.submit_analysis(meta,pcm,'b'*32)
+            with service.lock:
+                assert len(service.jobs)==queued_count
+                futures=[job['future'] for job in service.jobs.values()]
+                assert all(not future.running() and not future.done() for future in futures)
+            # cancel() on this queued future synchronously calls finished(), whose
+            # original locked callback removes that same job. No timing race needed.
+&gt;           assert service.close(timeout=.01) is False
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_speaker_close_reentrant.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;board.runtime.board_speaker_business.BoardSpeakerBusiness object at 0x0000020862BAA0C0&gt;
+
+    def close(self,*,timeout=2.):
+        if not self.closing.is_set():
+            self.closing.set()
+            with self.lock:
+&gt;               for job in self.jobs.values():
+                           ^^^^^^^^^^^^^^^^^^
+E               RuntimeError: dictionary changed size during iteration
+
+board_integration_v17\local_runtime_v17\board\runtime\board_speaker_business.py:640: RuntimeError</failure></testcase></testsuite></testsuites>

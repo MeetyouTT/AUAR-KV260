@@ -1,0 +1,87 @@
+转轴原方案恢复及左偏停点更新（洛杉矶 2026-11-02）
+
+用户已现场确认原人脸跟随“方向正确，能够跟随”。原UI轮次运行109.352秒，386次接收命令、40段、17次视觉居中完成，显式STOP后flags=0、lease=0；这轮目标仍为0.5。
+
+按用户随后要求，当前停止目标设为镜像画面0.45，原白线保持0.5，容差0.03，因此目标带[0.42,0.48]整体位于白线左侧。两侧共用此目标；实际停止受真实帧、容差、跨越和过期保护影响，不宣称机械停点精确20像素。
+
+沿用原控制算法、固件、driver、速度、行程与源时效。仅在原run入口加一个可选target-center-ratio参数（默认仍0.5）并传给原EdgeConfig；另24项字节不变。旧25项目录与旧STOP回执保留。GUI实时读取新配置，没有重启GUI、相机或模型。
+
+纯参数/双向停止检查6组及7个非法值通过；原入口其余AST不变。运行回读确认0.45/0.03，GUI故障0。新停点尚待用户现场确认，不将原方向验收当作新停点验收。
+
+当前主GUI supervisor97308、GTK97312，相机79866，同boot903cfade-b93c-48fa-804e-379be1967313；实际指纹和新startup以DEPLOYMENT_CURRENT.json为准。原相机exact seed c6c8…与18层archive已完整验证。
+
+两轮对话旧实测：ASR1.093/1.395秒，LLM1.940/1.833秒，TTS0.766/0.838秒。主要等待为完整LLM回复，其次ASR；不把软件SPEAKING当声学首声。
+身份查询/声纹登记串扰v2已随现行GUI加载；真人KNOWN、声纹标定及个人私库协同仍待验。
+GUI曾两次被原1秒时钟采样门槛拒绝；独立HTTP观测证实间歇3秒以上长尾，随后原门槛正常启动通过，60次并行health最大236.5ms。没有放宽时钟保护。
+
+以下为各阶段保留记录，当前以DEPLOYMENT_CURRENT.json为准。
+
+当前状态更新（洛杉矶2026-11-01 23:18软件观察）：
+原wide平台及DPU相机已恢复，GUI正常启动一次并通过16项只读检查。相机79866；supervisor82126/GTK82130，完整birth/命令指纹见gui_ready25_observed_01.json。
+startup 3f5e81ab…、UI fc98455a…、新选用readback 9ab2533d…，保留原24pins并追加当前run-config为25pins；380组件核验通过，默认14pin与旧24pin绑定均按历史保留。
+主页面角色READY、原生动画帧和视觉帧持续推进、无运行故障，原业务写者/时钟已恢复，保存聆听false。身份查询/声纹登记干扰修复已由当前GUI加载，真人查询验收仍待做。
+原ID_STOP通过但1500us只是复位寄存器值，不是实体中心。原转轴25文件未改；GUI转轴仍因旧context为FAULT、follow=false，无vsrv或/dev/mem映射、未请求运动。用户确认动力仍断开。
+目前不能宣称3分钟全模块一体协同已验收：仍需本boot实体参考/方向/跟随、KNOWN身份及对应记忆验证、声画现场检查和一次连续排练。
+以下较早维护/READY记录是历史过程，当前以DEPLOYMENT_CURRENT.json与本段指向回执为准。
+
+当前维护状态补充（洛杉矶2026-11-01）：
+GUI已正常停止，身份查询/声纹登记串扰修复已应用，当前startup0f2a319a…；380组件核验通过。
+相机1333已正常退出，新final c6c8baab…原reader及18层archive、全部观察下界通过并按原字节封存。
+板端原client各执行一次remove/load，实际overlay/render/ZOCL及wide固件/VART读回通过；原ID_STOP_ONLY通过，ARM/COMMIT/BIND/REFERENCE均false。
+已唯一请求原相机恢复，正在验证新owner/计数/消费审计；旧1333 GUI readback待按真实新owner重建，暂勿用旧绑定启动GUI。
+用户已确认安装未动、可观察且空间足，转轴动力已单独断开。后续沿原25文件控制器，不写替代跟随算法。
+两轮真人对话均有新完整播放回执：ASR1.093/1.395s，LLM1.940/1.833s，TTS0.766/0.838s；worker到首PCM入队4.328/4.591s。详见dialogue_latency_20261101/LATENCY_REPORT.txt。
+当前真实阶段以DEPLOYMENT_CURRENT.json及maintenance_original_axis_20261101为准，下面先前页面READY是历史通过记录。
+
+五模块协作评估补充（洛杉矶2026-11-01）：
+当前基本guest语音/视觉上下文/角色音画具备试跑条件，尚未执行本次真人整轮；含转轴和已知身份的完整五模块暂不具备验收条件。
+实时轴为benchmark/FAULT/无读回；视觉人体目标有效，但本次没有新鲜KNOWN身份。身份0.50/0.10/3000符合后来明确用户授权，并非本次部署改坏。
+完整结论与操作路线：joint_dialogue_trial_20261101/READINESS.txt、FULL_FLOW_READINESS.json。页面/模型既有通过记录继续有效；本次未开麦、播放或运动。
+
+5090 部署与板端页面接续（洛杉矶 2026-11-01；目录保留原 2026-11-02 名称）
+
+当前入口：DEPLOYMENT_CURRENT.json；本次汇总 UTC 2026-11-02T05:11:42.551828+00:00。
+原模型本机验收、专用网口公开 LLM/TTS、板端 GUI 软件启动均已完成。
+物理页面观察：USER_CONFIRMED_ROLE_MAIN_PAGE。实体听音、转轴及冷启动恢复仍有待办。
+STATUS.json、READY_LOCAL.json、source_manifest_5090.json 是已封存的先前回环验收，保持原字节；它们不是当前 LAN 实例的动态状态。
+
+当前服务与板卡
+- 模型：http://192.168.50.1:8797；session 2f3a707efa62401d81fc20ef22a379cb；主进程 32036，唯一 TTS family root 14608。
+- 模型角色仅推理，推理对端仅 192.168.50.2，本机 GET 健康可读、POST 推理拒绝。旧 Windows8792 业务/记忆写者未恢复。
+- 原 Ollama11435 daemon 31632，精确创建身份见当前 JSON；普通运行保持原 keep_alive=-1、2048 上下文、原27B量化/提示参数及 OmniVoice16/参考音色/seed8701/SDPA/F16。
+- 网口23为物理 Intel I226-V，MAC C8-53-09-B0-89-DA，GUID f14f89e5-18f4-483c-b22b-cd8010578636；192.168.50.1/24、无默认网关。重启前旧索引22已不是该物理网卡。
+- 防火墙 AURA-5090-KV260-8797：Inbound TCP8797，Local192.168.50.1、Remote192.168.50.2，仅固定物理接口、EdgeTraversal Block。真实规则前后读回及其它规则指纹在 parallel_lan/firewall_result.json 和 firewall_history。
+- 板卡192.168.50.2，boot 903cfade-b93c-48fa-804e-379be1967313，严格可信 SSH 与新主机公钥登录已通过。新私钥只在本机用户 .ssh。
+- GUI supervisor 16314、GTK 16318，完整 birth/命令指纹在 gui_start_and_verify.json。
+- 软件主页面 main、原角色 pair READY、native帧与API序列连续推进、故障0；原板端单writer/receipt/时钟锚定就绪。
+- 16项软件检查全部通过；用户已确认角色主页面可见。显示电源On、DPMS启用、原600秒屏保保持。原正常冷启动约46.380秒，最初35秒观察仍在初始化；原90秒GUI/3分钟systemd时限未超。
+- 保持 PAUSED、保存聆听false、microphone_open=false、playing=false/IDLE；原静音 ALSA 输出 pipeline 正常打开准备设备，不代表内容播放。
+- 相机1333/birth2359保持，原 Native222项Python与7项operator、身份模型及私库选择已核验；帧/检测持续推进，无相机错误、无 motion_command_emitted。
+- 当前固件仍 kv260-benchmark-b4096.bit.bin；GUI机械后台连接被原平台guard拒绝，FAULT/UNAVAILABLE、pulse=null、follow=false、无libvsrv或/dev/mem映射。不将页面恢复称为转轴恢复。
+
+本次关键修复和证据
+- 实际GUI明确选择的外部旧绑定使用旧boot/PID；默认14项绑定刷新不足以修复该选择。本次保留旧23项原SHA，追加当前 native-run-903cfade…-1333/config.json，生成独立24项绑定，再改实际GUI spec和startup对应一项pin。
+- 当前startup 3fd124287463650f48232cb387c78d01399bad7ddcda483db725163298de4591；GUI配置 fc21e6f2ef831442b08966957fa7aeb744a9b74124ee8778edc40397285626cd；选用绑定 4d8f0c2bccea1c7a56761fbcb204f40ba3b3c2fc9efad76af778aff535d378ac。380组件闭包及原FaceGalleryReadback._verify通过。旧冻结23项和默认14项文件保持；原字节备份留板端独立恢复目录。
+- 配置事务：gui_selected_binding_applied.json；原正常启动：gui_start_intent.json、gui_start_request.json；过滤软件验收：gui_start_and_verify.json。未导出完整API state、照片、模板、身份ID或真实对话。
+- 启动闭包/准确行号：parallel_platform/gui_startup_review/GUI_STARTUP_REVIEW.txt。原后台机械连接先verify_platform再构造NativeRegisters；无自动跟随、ARM或COMMIT路径。
+- LAN事务 2524d38f24674cdca495ed726f38b41d：原loopback session998…正常关闭、自有TTS关闭、同session受控维护释放原模型，实际空驻留后按原TTS-first启动本LAN实例。正常运行仍无自动卸载。旧失败547d…事务及8份原证据保持失败原貌。
+- 原manage.stop修复了owner退出后使用旧state快照的竞态；同一record/session重新读回后才接受CLOSED。不同owner、FAILED或TTS残留仍拒绝。证据 recovery_manager_stop_race_20261102。
+- 第一次防火墙Apply在规则创建前遇到CP936解析中文网卡名失败，真实规则当时不存在。CLI仅改为ASCII JSON转义，解码后的物理别名逐字保持；规则策略未变。
+- 只读完整规则指纹一次实测117.040秒，含566条其它规则/5类过滤器；Check上限120→600秒且超时禁止SSH/事务推进。独立修复来源 CLI_STDOUT_FIX.json 与 source_manifest_cli_stdout_fix.json；历史PREPARED/清单/原执行来源封存不改。
+- 公开板端网络验收：parallel_lan/transactions/2524d38f24674cdca495ed726f38b41d/board_public_probe.json。随机公开TTS仅RAM PCM校验、公开LLM合约校验，未录音/播放/开库或写板端文件；不冒作真人听音。
+
+本机模型与验证
+- RTX5090 Laptop/24463MiB，UUID GPU-545096ea-2253-8cb8-e6a6-7dd1969e5853；Python3.10.11、torch2.7.0+cu128、sm120与真实CUDA验证通过，104项依赖匹配/pip check通过。
+- 原GGUF D:/AIModels/qwen3.8-27b-abliterated/Huihui-Qwen3.8-27B-abliterated-UD-IQ4_XS.gguf，14403496864字节，完整SHA d83adbbbaace8acdfcfe28004f779326176b9df00b4ec99dc6c24d749723d3b9；hf commit1c69098e9c32db6dc06fc48f1d6cc75ad07da89e。
+- Ollama库 D:/AIModels/Ollama-AURA。大语言模型权重/副本/分段始终在共享目录外，不创建目录联接。原中断分段/失败证据保留。
+- 全局现有Ollama由自动更新变为0.40.13，正式签名/Ollama Inc及实际兼容已复核；项目daemon身份固定，未接管用户其它模型。诊断误启的本轮空11434实例已按确切新owner清理，证据 diagnostic_default_ollama_cleanup.json。
+- 原OmniVoice三大文件SHA、已接受参考、16步和参数保持；真实公开PCM、27B/TTS共存与余量已验收。两种dialogue结构合约均通过。短公开样例耗时不代表真人端到端稳定性能。
+- 模型完整回归106项及5子用例、部署/真实HTTP/断点续传7项通过；LAN隔离25项，PS5.1/PS7×3代码页共6项精确Unicode回归通过；13scope/5错误网卡拒绝保持。部分回归有重叠，不将数字简单相加。
+- 原迁移工作区135927项中125174项验证，10753项权限拒绝，无已读差异/缺失；迁移包534项、外部111项、原OmniVoice三文件SHA通过。不能称全盘全通过，不顺带改变ACL或删除历史。
+
+剩余工作与继续边界
+- 用户已报告转轴通电、可现场观察；本boot实体运动并未授权执行。旧boot STOP、位置、方向、检查点、PID与READY均不重放。
+- wide平台实际执行后端仍EXECUTION_NOT_READY。详见 parallel_platform_review/INDEPENDENT_REVIEW.md 与 parallel_platform/RECOVERY_REVIEW.md。原DFX多层存在返回码假成功；必须真实语义/平台读回、持久intent与未知结果reconcile，以及正常停相机后的新最终Native检查点，才可落实际事务。
+- 实际转轴/跟随、方向与范围、实体听音、长稳、持久NTP及冷启动平台/GUI所有者绑定仍待验收。本boot时钟此前已在业务停止时向前校正，现有业务通过模型health Date锚定；持久NTP仍未同步。
+- 本机安装/下载一次性流程已结束，不要重跑旧loopback部署入口或旧回退事务。需控制模型时先用原管理工具读取当前session/完整owner；LAN回退必须针对本新事务，走原正常stop及显式同owner维护释放，不强杀或清锁。
+- Ubuntu远程协作已由独立用户聊天完成SSH、Codex登录、远程项目/聊天验证；alias aura-ubuntu，详情见共享根协作任务/2026-11-01_5090_Ubuntu接入。当前板端页面通过既有可信SSH及原systemd管理，无需新开协作窗口。

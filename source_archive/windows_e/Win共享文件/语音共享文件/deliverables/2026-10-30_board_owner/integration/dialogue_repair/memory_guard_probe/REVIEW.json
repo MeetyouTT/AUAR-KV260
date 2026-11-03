@@ -1,0 +1,56 @@
+{
+  "schema": "aura.stream-guard-cost-source-review.v1",
+  "status": "SOURCE_AUDITED_ARM_MEASUREMENT_PENDING",
+  "production_modified": false,
+  "actual_private_database_or_devices_accessed": false,
+  "probe": {
+    "path": "probe_prepared_guard.py",
+    "sha256": "86e5de6a47b9a7cab904e0549673d73084472e3ccde1068219c77e0d7e70fd3c",
+    "pinned_Store_sha256": "943bf88c05400c49c76a1aee68a0bb242cb929cee3e213bc21f465ac3ef77d46",
+    "command": "python3 -B probe_prepared_guard.py --aura-root <directory-containing-common-board_memory.py>",
+    "tests": "100 checks with one dependency; 100 checks with eight; if their total wall time is below one second, 25 checks with 32",
+    "safety": "Creates only public synthetic SQLite in its own TemporaryDirectory; closes all connections and removes only that owned temporary directory; emits metadata only"
+  },
+  "cost_per_prepared_check": {
+    "SQLite_connections_opened_and_closed": 2,
+    "PRAGMAs": 4,
+    "read_BEGIN_and_COMMIT_pairs": 2,
+    "SELECT_statements": "6 + N, where N is the assistant durable dependency count",
+    "SELECT_counts_confirmed_by_separate_untimed_trace": {"N1": 7, "N8": 14, "N32": 38},
+    "source": "_turn_authority opens one DB; check_prepared opens another; both _validate_sources loops issue one SELECT per source ID",
+    "profile": "Original ProfileAccess RLock spans the second DB read for profile scope; anonymous scope has no profile lock",
+    "jobs_condition": "Not held while admission_guard performs SQL",
+    "SQLite_timeout_seconds": 0.15,
+    "writes": "No DML in this path; pure read COMMIT does not establish per-packet fsync/fdatasync. Probe verifies DB bytes unchanged."
+  },
+  "production_path": {
+    "packet_samples": 480,
+    "sample_rate": 24000,
+    "packet_ms": 20,
+    "location": "Producer reply_sink -> emit -> Jobs._put(admission_guard) -> check_prepared_turn_current",
+    "also_guarded": ["text", "control", "end", "network_complete"],
+    "backpressure": "Each queue wait of up to 50ms loops back through the full guard again",
+    "steady_state_implication": "At 50 audio packets per second, at least 100 SQLite connections and 50*(6+N) SELECTs per second, plus non-audio events and backpressure retries",
+    "consumer": "This SQL is not inside the audio device callback, but slow production can starve it"
+  },
+  "important_timing_caveat": {
+    "first_chunk_emitted_ms": "Recorded only after the whole first sentence sink returns, not after its first audio packet",
+    "prepare_total_ms": "Includes streaming queue backpressure while the player consumes previous audio",
+    "progress_capacity": 128,
+    "approx_audio_capacity_seconds": 2.5,
+    "effect": "A longer sentence can legitimately wait approximately sentence duration minus available buffered duration before the sink returns; this is not all unexplained SQL/CPU time",
+    "better_comparison": "Jobs first_audio_queued_ms, adjusted for its earlier ASR/job time base, actual first-sentence PCM duration, and measured queue wait wall time"
+  },
+  "optimization_only_if_ARM_measurement_justifies": [
+    "Keep every packet and post-backpressure authority check; do not move to sentence-only checks or a time-based grace period",
+    "Collapse per-ID dependency queries into one indexed joined/NOT EXISTS read covering exact turn generation/status, user and assistant state/scope, required admitted-user dependency, and all recorded sources",
+    "If connection open cost dominates, use a request/worker-owned read connection with a fresh autocommit statement or read transaction per check, explicitly closed by its owner; never retain one read snapshot across packets",
+    "Continue checking the original live ProfileAccess grant per packet, fail closed on SQLite errors, and preserve full final binding and actual player ACK",
+    "Avoid a RAM-only validity cache unless every external writer and permission invalidation is proven observable; the existing independent-Store invalidation regressions must still pass"
+  ],
+  "limitations": [
+    "Local Windows smoke timings cannot establish ARM cost or explain the observed underrun count",
+    "The five-second first-sentence sink span can include normal queue backpressure; root is measuring before any optimization decision",
+    "No code or check-frequency change is proposed as already deployed"
+  ]
+}

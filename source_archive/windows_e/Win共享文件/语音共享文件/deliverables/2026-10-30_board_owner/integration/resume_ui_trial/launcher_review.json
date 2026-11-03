@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "launcher_sha256": "5b15a8cf1813935679e5f4d30eb788e9c8d6ae18826669009d06c92cba152e03",
+  "source_content_sha_match": true,
+  "supervise_popen_calls": 1,
+  "internal_respawn_loop": false,
+  "normal_child_exit": "child.poll()!=None returns; finally stop_child immediately returns when child already exited",
+  "critical": "Do not TERM or systemctl stop supervisor first: stop_child includes child.terminate then child.kill timeout. Outer SendSIGKILL=no does not disable that Python path.",
+  "systemd_restart": "Effective Restart=no prevents unit restart after natural supervisor exit",
+  "required_effective_guards": {
+    "Restart": "no",
+    "SendSIGKILL": "no",
+    "TimeoutStopUSec": "infinity",
+    "MainPID": [
+      "1296",
+      "0"
+    ]
+  },
+  "no_actual_actions_performed": true,
+  "plan_sha256": "eab89f18a59e8f3bf63996ef3d213523d49544a54540c8e5789955108b190fa1"
+}

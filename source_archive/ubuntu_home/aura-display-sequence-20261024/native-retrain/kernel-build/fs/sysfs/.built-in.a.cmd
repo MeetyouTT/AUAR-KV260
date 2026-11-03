@@ -1,0 +1,1 @@
+cmd_fs/sysfs/built-in.a := echo >/dev/null; rm -f fs/sysfs/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST fs/sysfs/built-in.a fs/sysfs/file.o fs/sysfs/dir.o fs/sysfs/symlink.o fs/sysfs/mount.o fs/sysfs/group.o

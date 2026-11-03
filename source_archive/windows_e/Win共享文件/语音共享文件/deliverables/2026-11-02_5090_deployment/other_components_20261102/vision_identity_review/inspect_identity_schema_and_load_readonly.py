@@ -1,0 +1,16 @@
+import datetime,hashlib,http.client,json,subprocess,time
+from pathlib import Path
+root=Path('/home/root/aura-board-business-20261030/production-5259eab11e42af13');startupraw=(root/'startup/config.json').read_bytes();startup=json.loads(startupraw);aura=Path(startup['runtime'])/'aura'
+def get(port,path):
+ c=http.client.HTTPConnection('127.0.0.1',port,timeout=3)
+ try:
+  c.request('GET',path);r=c.getresponse();body=r.read(2097153);assert r.status==200 and len(body)<=2097152;return json.loads(body)
+ finally:c.close()
+def keys(obj):return sorted(obj) if isinstance(obj,dict) else []
+h=get(8790,'/health');g=get(8783,'/api/state');u=get(8790,'/v1/ui/status');speaker=g.get('board_business',{}).get('speaker',{});transcription=g.get('local_transcription',{})
+prop=subprocess.run(['systemctl','show','aura-avatar-ui.service','--property=MainPID,ExecMainStartTimestampMonotonic,ExecMainStartTimestamp'],capture_output=True,text=True,timeout=3);assert prop.returncode==0
+unit=dict(x.split('=',1) for x in prop.stdout.splitlines() if '=' in x)
+launch=json.loads((Path(startup['runtime'])/'launch.json').read_bytes());gtk=int(launch['pid']);birth=int((Path('/proc')/str(gtk)/'stat').read_text().rsplit(')',1)[1].split()[19]);tick=__import__('os').sysconf('SC_CLK_TCK')
+q=aura/'tools/unified_identity_binding.py';source_mtime=q.stat().st_mtime;owner_start_epoch=time.time()-time.monotonic()+birth/tick
+paths={name:{'pin':startup['component_sha256'].get(name),'actual':hashlib.sha256((aura/name).read_bytes()).hexdigest()} for name in ('tools/unified_identity_binding.py','tools/binding_hub_runtime.py','tools/provisional_voice.py','tools/identity_resolution.py','common/profile_access.py','board/runtime/board_speaker_business.py','board/runtime/board_business.py')}
+print(json.dumps({'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'startup_sha256':hashlib.sha256(startupraw).hexdigest(),'source_snapshot_stable':(root/'startup/config.json').read_bytes()==startupraw,'unit':unit,'gtk_pid':gtk,'gtk_birth_ticks':birth,'query_source_mtime_utc':datetime.datetime.fromtimestamp(source_mtime,datetime.timezone.utc).isoformat(),'gtk_start_utc_derived_from_monotonic':datetime.datetime.fromtimestamp(owner_start_epoch,datetime.timezone.utc).isoformat(),'query_source_written_before_current_gtk_start':source_mtime<owner_start_epoch-5,'launch_matches_actual_supervisor':launch['supervisor_pid']==int(unit['MainPID']),'launch_config_path_present_in_args':str(aura/'config/board_avatar_gtk.json') in launch['args'],'source_pins':paths,'camera_identity_keys':keys(h.get('identity')),'camera_recognition_diagnostics_keys':keys(h.get('identity',{}).get('recognition_diagnostics')),'snapshot_identity_keys':keys(u.get('modules',{}).get('identity')),'gui_speaker_keys':keys(speaker),'gui_speaker_nested_keys':{k:keys(v) for k,v in speaker.items() if k in ('identity','anonymous','binding','last_analysis','state','voice','profile') and isinstance(v,dict)},'gui_local_transcription_keys':keys(transcription),'gui_transcription_service_keys':keys(transcription.get('service')),'gui_business_dialogue_keys':keys(g.get('board_business',{}).get('dialogue')),'gui_business_conversation_selection_keys':keys(g.get('board_business',{}).get('conversation_selection')),'raw_private_values_exported':False,'motor_inspected':False,'board_mutations':False}))

@@ -1,0 +1,22 @@
+预览capture v2：窄修脚本，五份已审overlay不变
+
+v1失败已保留，原public_preview_source.zip及ROOT_PREVIEW_RUN_1793457939341490400.json不改。
+原渲染适配器在egl.swap后调用frame_observer，v1在observer里读回；尚无异常类/尺寸证据确认实际原因。
+v2只在独立预览进程给同一个widget的rendered方法装窄shim：消费同mailbox、native.render一次，
+renderer.capture纯423×516角色framebuffer，然后egl.swap，再调用原frame_observer。
+没有第二native实例/帧循环、没有修改配套native库或任何5文件overlay，窗口固定不可调整。
+失败记录固定阶段、白名单异常类、实际宽高、缩放因子与context匹配布尔，不记录异常正文/桌面/私有界面。
+本地用会在swap后失效的假framebuffer验证render→capture→swap顺序，另验错误尺寸诊断。
+这两个本地检查不等于板端GL capture或视觉通过；主窗口需要独占重试。
+
+主窗口将v2 ZIP核SHA解到新stage，不能覆盖原失败stage。
+预检：python3 -B preview_public_states.py --runtime /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura --validate-only
+主窗口正常关闭生产、MainPID=0并持有原恢复guard，使用原DISPLAY/XAUTHORITY及GDK_SCALE=1 GDK_DPI_SCALE=1，owned进程组80s+5s硬限运行：
+python3 -B preview_public_states.py --runtime /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura --evidence ./preview_evidence --owner-unit aura-avatar-ui.service --capture-character
+唯一GTK/EGL owner，24秒公开模拟状态，完全无音频引擎/PCM/相机/网络/私库。
+只取回6张角色PNG和固定数值json；正常销毁预览后由主窗口恢复或发布。
+数字PASS仍需人工看纯角色图，不能当物理16fps或声学验收。
+
+GUI绑定位置是config/board_avatar_gtk.json内character_pair.selection_sha256，
+startup通过该GUI组件pin绑定；原PAIRING_RECEIPT字节不改，不新增startup字段。
+本包仍仅为眼嘴候选，不代表用户新要求的全状态自然头晃/多部件动画已经完成。

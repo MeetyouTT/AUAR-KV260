@@ -1,0 +1,71 @@
+声纹匹配复验与现场阈值标定：本地只读审计
+
+结论
+今天的真人三段声纹登记及最终保存已由root现场证实：voice由0到1，face1/db3，links0，GUI READY且fault0。本审计接受这一现场事实，没有另行访问板卡或真实声纹库。登记成功并不说明匹配准确率或识别阈值已经验收。
+
+原工程具备可复用的分数评估函数和离线CLI；当前板端业务有意禁止把field_calibrated设为true，且没有现成“已登记但未关联声纹直接报称呼”的生产入口。最小下一步应先做原模型、原正式模板、原质量门槛下的受控计算匹配复验，结果仅作为未标定候选；不先改阈值、不建关联、不授予身份或私人记忆权限。实际采集、执行、代码接入和发布均不在本次审计内。
+
+1. 现在原程序如何处理“认声音”
+
+采用今日已发布业务所依据的公开快照，核心SHA见SOURCE_AUDIT.json。
+- board/runtime/board_speaker_business.py:240起：构造显式拒绝field_calibrated非false；threshold不得低于0.8，margin不得低于0.1，consistency不得低于0.6。350起public仍固定speaker_calibrated=false、automatic_profile_access=false。
+- tools/board_business_gui.py:_attach_speaker只接受enabled/model_directory/manifest_sha256/expected_model_id/anonymous_config五项，没有calibration配置入口。模型为本地固定manifest的BoardEcapaOnnxEncoder、单线程、16kHz/192维、原WebRTC门槛。
+- tools/speaker_device.py:analyze在未标定时返回NOT_CALIBRATED并跳过昂贵的编码；turn的识别问句返回“有记录但现场阈值尚未校准，不能确认”。其底层原match不会签发授权。
+- tools/progressive_speaker.py在匿名分析明确启用时可在原worker算一次vector，再交原ProvisionalVoiceMatcher。tools/provisional_voice.py复用原0.8/0.1计算匹配，要求同一model/gallery/identity、30秒内连续三个不同capture和PCM digest，才形成短期PROVISIONAL_NAME_CANDIDATE proof，field_calibrated=false。
+- common/identity_links.py:resolve还要求该voice存在ACTIVE modality link才映射具名linked person。今天links0，计算匹配不会因此自动变成具名身份。没有关联不是声纹模板失效，也不应为测试而自动建立关联。
+- 显式声纹问句走原SpeakerDevice.turn后会留下可复用控制证据，后续analysis通常直接复用；不能假设反复询问“你认识我的声音吗”会产生连续三次provisional编码。
+- common/speaker_turns.py严格禁止field_calibrated=false时用CANDIDATE/CANDIDATE_STABLE声称已标定候选。不能把未标定分数塞入该字段绕过检查。原resolution的identity_verified、personal_memory_allowed、single_speaker_verified均保持false。
+
+因此：底层SpeakerStore.match能给出计算匹配候选；现役自然语言问句和公开身份解析并没有一个可直接复用来展示“未关联独立声纹称呼”的入口。若后续需要诊断展示，必须有明确未标定的固定结果投影，保持现有voice=NOT_CALIBRATED和权限语义，不能直接换个calibrated布尔。
+
+2. 原有离线流程可复用到哪里
+
+以下CLI来自E:/Win共享文件/语音共享文件/aura/tools，属于本地原工程辅助工具，并非声称已经加载到现役380清单。公共common/speaker_identity.py与common/speaker_validation.py和现役依据快照完全同SHA；aura的SpeakerDevice/BoardSpeakerBusiness另有版本差异，所以现场行为以上述发布快照为准。
+
+A. score_speaker_dataset.py
+- 输入manifest.recordings：每条必须有role（enrollment/calibration/held_out）、identity_id、session_id、相对manifest的wav路径；另需thresholds/margins扫描列表。identity_id应为本次测试的伪名标签，不需要真实姓名或跨模态ID。
+- 所有录音PCM全局去重，同一个录音session不得跨role；三个role均须存在。
+- read_pcm要求未压缩16kHz mono PCM16、3至20秒，至少2.5秒能量活动、削波比例不超过1%；voiced_pcm再用WebRTC mode2/30ms要求至少2.5秒语音，并按首尾语音帧裁边。
+- 每个enrollment identity至少三段不同录音，原enrollment_vector检查两两一致性后形成平均归一模板。质量门槛不证明单人、活体或防重放。
+- 使用SpeechBrain EcapaEncoder在CPU抽vector，重建独立测试gallery，再给每个calibration/held_out trial计算相对所有gallery模板的余弦分数。输出不含vector/音频副本，但含伪名标签、session、PCM digest、质量、耗时和分数，仍须作为私有测试资料保管。
+- 输出状态SCORED_NOT_CALIBRATED和field_calibrated=false，不改任何正在运行的阈值。
+
+B. calibrate_speaker_scores.py + common/speaker_validation.py
+- 验证calibration/held_out的session与PCM digest互不重叠；CLI另查二者都不与enrollment重叠，各trial使用同一个gallery键集合。
+- known trial的真实标签必须在gallery中；unknown trial来自没有被登记的人，其真实标签必须不在gallery中。两类都必须有。改变同一个人的音量或语句不能替代不同未登记人。
+- metrics用top1>=threshold，且多模板时top1-top2>=margin决定是否接受，统计known正确/错认/拒绝及unknown误接受比例。
+- calibrate扫描候选点：unknown误接受比例不高于预设目标、known错认0且至少一个known正确才可保留；优先known正确数，再优先更严threshold/margin。
+- 找到也只输出CANDIDATE_ONLY/field_calibrated=false；找不到输出NO_OPERATING_POINT。随后只在未用于选阈值的held_out集测最终候选，计算held_out_meets_false_accept_target，不激活生产。CLI默认误接受目标0.01只是工具默认值，不代表本项目已确认的目标或达到该水平。
+- 扫描函数本身允许低于现役0.8/0.1的数学候选；该结果不能绕过现役构造门槛。本轮不选新值、不放宽0.8/0.1/0.6。
+
+C. speaker_identity.py query / verify_speaker_model.py / benchmark_speaker_lengths.py
+- 离线query能输出原match的计算结果并显式field_calibrated=false，不建跨模态link或profile grant；但SpeakerStore构造会建表/设置application marker/commit，不能当作对现役正在使用正式库的纯只读命令。它还会在输出中给identity_id/name；不能原样发到公共投影或模型。
+- 公共样本verify使用临时gallery和演示阈值，仅验证模型计算机制，源中明确不代表实际麦克风、中文、跨session、多段登记或现场准确率。
+- 时长benchmark重复公共音频只测耗时，不能增加独立测试样本数，不能用来校准准确率。
+- 原board_speaker_sampler是独立全屏点击采样窗口，使用旧8783 owner/phase假设并保存WAV/旁路metadata；它会与当前语音入口争用麦克风。不能为复验直接启动；后续若采样，应由root按现役GUI唯一采集owner协调。
+
+3. 今日正式模板与现成离线打分之间的缺口
+
+当前板端是原权重导出的FP32 ONNX + 固定NumPy frontend，离线score工具却用SpeechBrain前端/推理重建gallery。source_model_id一致或公共样本数值近似，不足以把二者当现场准确率等价。后续证据至少要固定source model、ONNX manifest/graph/frontend SHA、采样/VAD算法版本、gallery revision和模板版本、microphone与距离/噪声条件。
+
+原登记流程不持久化PCM，采样session/hash在保存后清理，正式库只保留模板和版本等。因此不能假设今天三段原音频仍可拿来填写离线manifest，也不能倒造录音provenance。现成score CLI另建测试gallery，不会自动检验今天voice1这条正式模板。
+
+若目标仅检验今天这份正式模板，优先在现有单一CPU owner中做有界quality -> 原ONNX encoder -> 已打开的原store.match计算，正式库不变，不开第二个Store连接或替代controller。结果仅给固定“未标定计算候选/不确定/不足语音”和必要分数，不向LLM提供vector、真实姓名或模板。现有Progressive分析会写匿名聚类库，不能将调用整个Progressive路径称为对所有库严格只读。这里只提出可复用方法边界，未实现、未执行该诊断入口。
+
+4. 建议的最小后续顺序
+
+第一步，登记成功保持原状。在root统一维护/观察条件下，用户若继续授权复验，采几句未用于登记的新自然语音，先验证原质量门槛、同一正式gallery版本下的计算候选稳定性；同时明确仍未现场标定、不授权身份。只有同一人全过属于本人复验，不能得出陌生人误接受率。
+
+第二步，为真正现场标定制定有标签数据计划：登记、calibration、held_out分不同录音session，内容不同、PCM不复用。两组查询都包含已登记本人和未登记的不同参与者，覆盖正常距离、自然音量、现场背景噪声；记录采集失败/不够语音的数量，不只报告通过质量筛选后的比例。所有人的采样都需要清楚的本人参与与保存范围，标签只用本次测试伪名。
+
+第三步，仅在calibration选点，冻结候选后一次评held_out；报告样本数/参与者数/session数、known拒绝与错认、unknown误接受、质量失败、运行耗时。若held_out失败，不反复用同一held_out调参后再称独立验收。代码没有强制足够样本量、置信区间或人群覆盖；少量0错误不是达到低误接受率的证明。
+
+当前gallery只有1个已登记人，margin在只有1个候选时不参与拒绝，不能检验多登记人相互混淆；若以后要支持多人，需在明确登记/删除管理下另做多人gallery评估，不能用今天单人的结果泛化。
+
+最后，是否增加带模型、采集条件、数据版本、held_out证据绑定的受控激活机制，是另一个后续工程任务。原calibration.evidence只检查非空字符串，没有验证报告真实性；当前BoardSpeakerBusiness更强的硬拒绝不能靠填写这几个字段替代审查。本审计不建议直接field_calibrated=true，也不改变人脸/声纹关联与私人记忆授权。
+
+5. 现有测试证据的适用范围
+
+已只读查看test_speaker_identity.py中的calibration leakage/rates、gallery ambiguity、enrollment consistency、audio gate测试；aura/tests/framework/test_board_speaker_business.py中的未标定/无授权/不得放宽floor测试；以及可选公共样本VAD测试。它们是合成向量/PCM或公共样本机制测试。本次没有执行测试、加载模型或处理实际音频，不把旧测试名当作现场准确率证据。
+
+本审计仅写AUDIT.txt、SOURCE_AUDIT.json等报告；没有修改生产、已冻候选、配置、阈值或数据库，没有SSH/GET、服务/GUI/转轴动作、模型调用、真实录音采集或真实模板读取。

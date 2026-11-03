@@ -1,0 +1,179 @@
+{
+  "status": "R3_ARM_BUILD_ORIGINAL_POLICIES_AND_CHANNEL_COMPARE_PASS",
+  "library_sha256": "e8b5df8d24dee572152e8909a98721cafb94528f4e6da51da02a540c3f5a7b7b",
+  "source_files": {
+    "yuki_host.h": "4d6fd772dfbfedf9673069e65842a567b607a1befb9a6959cfa8b48a5b6b224c",
+    "yuki_host.cpp": "6de51f598326fa221cc4a3bed0e0072f977bbe387b5c5b4981217909adf1a734",
+    "secondary_motion.hpp": "95421b33c1d95a1c71495e0266eb156b83c334d32afc015328b296bc08caba32"
+  },
+  "numeric_comparison": {
+    "status": "PASS",
+    "author_ticks": 60000,
+    "unchanged_other_channel_values": 300000,
+    "old_lower_min": -9.23858,
+    "old_lower_max": 9.27713,
+    "new_lower_min": -3.52188,
+    "new_lower_max": 3.5289,
+    "range_ratio": 0.3808,
+    "old_peak_speed_deg_s": 11.1866,
+    "new_peak_speed_deg_s": 3.08717,
+    "device_or_GPU_used": false
+  },
+  "before": {
+    "gui_owner": {
+      "pid": 803839,
+      "birth_ticks": "5568913",
+      "command_sha256": "48a28efa32b2050901e73e85a80a30a90dcfbce0b7249bde5d6d90902740631d"
+    },
+    "camera_owner": {
+      "pid": 362659,
+      "birth_ticks": "2850120",
+      "command_sha256": "acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd"
+    },
+    "monotonic": 58918.700122192
+  },
+  "after": {
+    "gui_owner": {
+      "pid": 803839,
+      "birth_ticks": "5568913",
+      "command_sha256": "48a28efa32b2050901e73e85a80a30a90dcfbce0b7249bde5d6d90902740631d"
+    },
+    "camera_owner": {
+      "pid": 362659,
+      "birth_ticks": "2850120",
+      "command_sha256": "acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd"
+    },
+    "monotonic": 59107.813109477
+  },
+  "production_changed": false,
+  "GPU_or_audio_opened": false,
+  "steps": [
+    {
+      "label": "compile_direct_old_new_motion_compare",
+      "args": [
+        "nice",
+        "-n",
+        "15",
+        "/usr/bin/c++",
+        "-std=gnu++20",
+        "-O2",
+        "-DNDEBUG",
+        "-I/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c/candidate/native",
+        "-I/home/root/aura-yuki-validation-20261030/native_integration/host",
+        "-I/home/root/aura-yuki-validation-20261030/native_integration/candidate_core/include",
+        "-isystem",
+        "/home/root/aura-yuki-validation-20261030/deps/json",
+        "-isystem",
+        "/usr/include/libpng16",
+        "-ffp-contract=off",
+        "/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c/tests/motion_compare.cpp",
+        "-o",
+        "/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c/build/motion_compare"
+      ],
+      "seconds": 13.848030721994292,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "label": "60000_tick_old_new_channel_comparison",
+      "args": [
+        "/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c/build/motion_compare"
+      ],
+      "seconds": 0.3105855860048905,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "label": "compile_original_policy_and_natural_arm_probe",
+      "args": [
+        "nice",
+        "-n",
+        "15",
+        "/usr/bin/c++",
+        "-std=gnu++20",
+        "-O1",
+        "-DNDEBUG",
+        "-I/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c/candidate/native",
+        "-I/home/root/aura-yuki-validation-20261030/native_integration/host",
+        "-I/home/root/aura-yuki-validation-20261030/native_integration/candidate_core/include",
+        "-isystem",
+        "/home/root/aura-yuki-validation-20261030/deps/json",
+        "-isystem",
+        "/usr/include/libpng16",
+        "-DOPTIMIZED",
+        "/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c/tests/native_physics_audit.cpp",
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/libyuki_core.a",
+        "-o",
+        "/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c/build/native_policy"
+      ],
+      "seconds": 75.84121036999568,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "label": "run_original_policy_and_six_scene_probe",
+      "args": [
+        "/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c/build/native_policy",
+        "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki/model.runtime.json",
+        "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki/yuk_0.ems.resx.json",
+        "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki"
+      ],
+      "seconds": 5.136026628999389,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "label": "compile_release_host",
+      "args": [
+        "nice",
+        "-n",
+        "15",
+        "/usr/bin/c++",
+        "-std=gnu++20",
+        "-O2",
+        "-DNDEBUG",
+        "-I/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c/candidate/native",
+        "-I/home/root/aura-yuki-validation-20261030/native_integration/host",
+        "-I/home/root/aura-yuki-validation-20261030/native_integration/candidate_core/include",
+        "-isystem",
+        "/home/root/aura-yuki-validation-20261030/deps/json",
+        "-isystem",
+        "/usr/include/libpng16",
+        "-fPIC",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c/candidate/native/yuki_host.cpp",
+        "-o",
+        "/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c/build/yuki_host.cpp.o"
+      ],
+      "seconds": 92.64256165000552,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "label": "link_release",
+      "args": [
+        "nice",
+        "-n",
+        "15",
+        "/usr/bin/c++",
+        "-shared",
+        "-Wl,-soname,libaura_yuki.so",
+        "-o",
+        "/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c/build/libaura_yuki.so",
+        "/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c/build/yuki_host.cpp.o",
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/CMakeFiles/aura_yuki.dir/gles2_renderer.cpp.o",
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/CMakeFiles/aura_yuki.dir/diagnostic_api.cpp.o",
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/libyuki_core.a",
+        "/usr/lib/libGLESv2.so",
+        "/usr/lib/libpng16.so",
+        "/usr/lib/libz.so"
+      ],
+      "seconds": 1.0720852320009726,
+      "exit_code": 0,
+      "stderr": ""
+    }
+  ],
+  "stage": "/home/root/aura-avatar-animation-20261102/r3-95421b33c1d95a1c"
+}

@@ -1,0 +1,38 @@
+{
+  "schema": "aura.asr-three-thread-handoff.v1",
+  "status": "FROZEN_SOURCE_ONLY_ROOT_ACTUAL_COMPARISON_REQUIRED",
+  "hardware_executed": false,
+  "production_modified": false,
+  "target": "aura/board/runtime/audio/board_asr.py",
+  "source": "after/board/runtime/audio/board_asr.py",
+  "before_sha256": "d8dbe7cc387a290ad0a218e84ae2ef97cd471e50b074743e41f04bc02b454366",
+  "sha256": "4edb865881c887d6a290a02e078e14386bd95d017b79820b143b5a1e329997c3",
+  "manifest_sha256": "d9aff53e9d65f1f6be63fba8879a7ecbca6da7f9f0888cb0f9721e2160ae0219",
+  "changes": [
+    "Maximum accepted num_threads from 2 to 3; original default remains 2",
+    "Associated fixed validation message only; reverse changes restore byte-exact current production source"
+  ],
+  "unchanged": [
+    "Original model/tokens SHA checks and resource paths",
+    "Original sample rate 16000, feature_dim80, greedy_search and CPU provider",
+    "20-second PCM budget, cancellation/deadline/busy checks and recognizer reuse",
+    "All transcribe code, original models/thresholds/frontend/capture/GUI/identity/memory"
+  ],
+  "tests": {
+    "passed": 5,
+    "subtests_passed": 16,
+    "failed": 0,
+    "seconds": 0.24,
+    "evidence": "tests.xml",
+    "scope": "Fake recognizer factory, public tiny temporary files and original hash checks; no ML/device calls",
+    "checks": [
+      "Default2 and exact original factory arguments",
+      "1/2/3 exact integer forwarding",
+      "Reject bool/0/negative/4+/float/None/string before factory",
+      "Reject changed model and tokens SHA before factory at threads3",
+      "Only exact guard/message delta and Python3.9 AST"
+    ]
+  },
+  "admission": "Root invokes the pinned BoardParaformer with num_threads=3 on the same public PCM/closed UI, then selects asr_threads=3 only after material measured benefit and formal GUI readiness; no default configuration change is included.",
+  "actual_speed_improvement_claimed": false
+}

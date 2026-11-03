@@ -1,0 +1,12 @@
+[
+  {
+    "id": "nfs-parse-and-rollback-evidence",
+    "command": "python3 -B -c 'import pathlib,json; P=pathlib.Path; d=P(\"/home/root/kv260-platform-warnings-20261004/nfs/evidence/apply-6934960296531\"); out={p.name:p.read_text() for p in d.glob(\"*parsed-proc-fs-nfsd.mount.stdout\")}; out[\"rollback\"]=json.loads((d/\"rollback.json\").read_text()); out[\"dropin_exists\"]=P(\"/etc/systemd/system/proc-fs-nfsd.mount.d/20-kv260-nfs-capability.conf\").exists(); print(json.dumps(out,indent=2))'",
+    "timeout": 60
+  },
+  {
+    "id": "state-after-nfs-rollback",
+    "command": "systemctl show proc-fs-nfsd.mount nfs-server.service nfs-mountd.service dfx-mgr.service -p Id -p MainPID -p UnitFileState -p ActiveState -p SubState -p ConditionResult -p Conditions -p DropInPaths",
+    "timeout": 60
+  }
+]

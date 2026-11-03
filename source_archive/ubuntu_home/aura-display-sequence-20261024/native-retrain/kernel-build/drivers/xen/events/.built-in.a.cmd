@@ -1,0 +1,1 @@
+cmd_drivers/xen/events/built-in.a := echo >/dev/null; rm -f drivers/xen/events/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/xen/events/built-in.a drivers/xen/events/events_base.o drivers/xen/events/events_2l.o drivers/xen/events/events_fifo.o

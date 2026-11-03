@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UiState",
+  "description": "UI 状态数据合同：由 EventBus 事件 + FSM 状态 + MockBoard 汇总而来，PySide6 与 LVGL 版消费同一结构。",
+  "type": "object",
+  "required": ["schema_version", "runtime_state", "mode", "camera", "npu", "pl", "audio", "network", "privacy"],
+  "properties": {
+    "schema_version": { "type": "string", "enum": ["1.0"] },
+    "runtime_state": {
+      "type": "string",
+      "enum": ["IDLE", "PRESENT", "LISTENING", "THINKING", "SPEAKING",
+               "SPEAKING_LOW", "CAMERA_LOST", "NETWORK_LOST", "CANCELLED", "ERROR"]
+    },
+    "mode": { "type": "string", "enum": ["CORE_LOCAL", "DIALOGUE_LAN"] },
+    "camera": { "$ref": "#/definitions/sub_status" },
+    "npu": { "$ref": "#/definitions/sub_status" },
+    "pl": { "$ref": "#/definitions/sub_status" },
+    "audio": { "$ref": "#/definitions/sub_status" },
+    "network": { "$ref": "#/definitions/sub_status" },
+    "privacy": { "type": "boolean", "description": "隐私遮罩：true 时摄像头画面被遮罩且不再产生新视觉事件" },
+    "scene": {
+      "type": "object",
+      "properties": {
+        "scene_seq": { "type": "integer", "minimum": 0 },
+        "people_count": { "type": "integer", "minimum": 0 },
+        "current_target": {
+          "anyOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "properties": {
+                "track_id": { "type": "integer" },
+                "position": { "type": "string", "enum": ["left", "center", "right"] },
+                "confidence": { "type": "number" },
+                "box": {
+                  "type": "array",
+                  "description": "归一化检测框 [x0,y0,x1,y1] (0..1)",
+                  "items": { "type": "number" },
+                  "minItems": 4,
+                  "maxItems": 4
+                }
+              }
+            }
+          ]
+        },
+        "recent_events": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "dialogue": {
+      "type": "object",
+      "properties": {
+        "last_reply": { "type": "string" },
+        "thinking": { "type": "boolean" }
+      }
+    },
+    "avatar_anim": {
+      "description": "方案C·数据层：上层下发当前玩偶动画名与参数；enabled=false 时渲染端静态",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "params": { "type": "object" },
+        "enabled": { "type": "boolean" }
+      }
+    },
+    "fps": { "type": "number", "minimum": 0 }
+  },
+  "definitions": {
+    "sub_status": {
+      "type": "object",
+      "properties": {
+        "state": { "type": "string", "enum": ["ready", "busy", "idle", "lost", "error", "online", "offline"] },
+        "detail": { "type": "string" }
+      }
+    }
+  }
+}

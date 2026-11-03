@@ -1,0 +1,137 @@
+{
+  "status": "STATIC_PUBLIC_SOURCE_CALLGRAPH_COMPLETE_NO_PRODUCT_CHANGE",
+  "source_sha256": {
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\integration_source_44e\\tools\\board_recording.py": "e70a9f4ca4768b3a1fabfc33145e39edbcb8cf20e0c76f269cc0b032fb54ce26",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\integration_source_44e\\tools\\production_memory_presentation.py": "de04c6cd22e3672ff17c2cfb71f5539f6908c98daf74e8d94d154c8fd280d4c2",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\integration_source_44e\\board\\runtime\\history_delete.py": "647b5cf85ad5595305067bcced2b118f83e89ca79ba45b7ad91090fd9515023f",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\candidate_runtime\\tools\\streaming_controller.py": "4b76e137d49994f01ae43a7a608e0b9feb13b9eff66cc981346823bace576899",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\candidate_runtime\\tools\\realtime_controller.py": "53e13fc026ddbf513090a13b3cdab0aef98eeafb560077fc60e6446ab7ba0e1a",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\candidate_runtime\\tools\\voice_first_recording.py": "54fa17ac97e3fdbeeb2725b6534a86dec9ece60839f2b14ffa77c348e714dafc",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\candidate_runtime\\tools\\handsfree_recording.py": "a7e1a55e797e97fa605725ad7423e80704612c3ed4a703db177345ca4fe6a924",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\candidate_runtime\\tools\\barge_in_recording.py": "59794f4f234ba0e6433e8b26a44ca65dbd5616af513a5111fb2c6d6738530b6d",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\candidate_runtime\\tools\\production_listening.py": "a9ccbc44cefef8d2f3a6dd9695355cbd2156f4e5288237a51c394608bf6d5d09",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\candidate_runtime\\tools\\formal_yuki.py": "c74b5f00d52208d992e8ee82c998250001c781c900d31b1f72a18bdda6f492e9",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\candidate_runtime\\tools\\formal_native_yuki.py": "3e300d9de790637adc7ef18bd804bdc1a00cbbed3759a2ba85954060e5867e29",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\candidate_runtime\\tools\\native_yuki.py": "306dd3efe445111a57930217709c4a70bf3caf885a7d745fd28c4a6a97442c8e",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\candidate_runtime\\board\\runtime\\board_business.py": "bf185a86dfd1f94924759c194b0246b51e64cb0a09654c935e8e1310f7bbea51",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\candidate_runtime\\board\\runtime\\audio\\board_dialogue_jobs.py": "580b2cf796275104cf15f2295afa2de29f82f32eabdd783a4b3aff858840a464",
+    "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_self_match_query_alias_20261102\\candidate_runtime\\board\\runtime\\audio\\capture.py": "0b32186bd1fef871c57ae27b941ad3d112c1e2287e7d1dbeedd7fcdc93a98d3f"
+  },
+  "normal_paths": [
+    {
+      "case": "CAPTURE_ARM",
+      "chain": "VoiceFirst._listen -> HandsFree._listen -> RecordingController._listen -> Jobs.cancel/capture_started",
+      "resets_enrollment": false,
+      "note": "Jobs.cancel invalidates generation and playback; it does not call reset_enrollment"
+    },
+    {
+      "case": "ACTUAL_SPEECH_START",
+      "chain": "AutomaticCapture VAD transition -> HandsFree._speech_started -> Jobs.capture_started",
+      "resets_enrollment": false,
+      "note": "Refreshes capture owner from RAM; invalid source stays unavailable"
+    },
+    {
+      "case": "STREAM_START",
+      "chain": "Presentation.channel_event -> NativeStreaming.channel_event -> Streaming.channel_event(start) -> Realtime.begin_dialogue -> visual.cancel",
+      "resets_enrollment": false,
+      "note": "NativeStreaming/Streaming/Realtime cancel chain belongs to visual controller, not recording controller"
+    },
+    {
+      "case": "NORMAL_NATIVE_INVALIDATE",
+      "chain": "visual.cancel -> portrait_offload.invalidate -> StrictLocalPortrait/LocalPortrait.invalidate",
+      "resets_enrollment": false,
+      "note": "Invalidates old numeric visual generation; does not fail pair or clear ready"
+    },
+    {
+      "case": "FULL_PLAYBACK_COMPLETE",
+      "chain": "Streaming.tick -> completed_streams -> IDLE/stream=None -> Recording.tick -> Jobs.acknowledge",
+      "resets_enrollment": false,
+      "note": "Full receipt goes to original ACK action worker"
+    },
+    {
+      "case": "ACK_SUCCESS_REARM",
+      "chain": "Jobs._perform_action(ack) committedTrue -> Recording._auto_tick -> _listen after0.5s settle",
+      "resets_enrollment": false,
+      "note": "No select_conversation on ordinary same-session rearm"
+    },
+    {
+      "case": "PRESENTATION_RETIRE",
+      "chain": "recording.tick wrapper -> Presentation.retire_consumed",
+      "resets_enrollment": false,
+      "note": "Only retires consumed display/log/utterance references after original idle gates; no cancel or ACK"
+    }
+  ],
+  "reset_paths": [
+    {
+      "case": "EXPLICIT_CANCEL_PAUSE_STOP_OR_CLOSE",
+      "chain": "Recording.cancel -> Jobs.cancel -> Jobs.reset_enrollment -> LIR.reset -> business.reset",
+      "gate": "Explicit recording cancel, event reset/cancel, stop/close or queued external worker cancel"
+    },
+    {
+      "case": "HANDLED_RECORDING_ASR_STREAM_AUDIO_ERROR",
+      "chain": "Recording._auto_tick(error or last_error) -> _auto_fail -> Jobs.reset_enrollment",
+      "gate": "Original recording/transcription ERROR, auto_error or controller.last_error; does not require RuntimeFault"
+    },
+    {
+      "case": "ACK_FAILURE_OR_TIMEOUT",
+      "chain": "Recording._auto_tick -> _auto_fail -> Jobs.reset_enrollment",
+      "gate": "Matching complete ACK committedFalse, or no matching ACK by original7s deadline"
+    },
+    {
+      "case": "VOICEFIRST_SERVICE_ERROR",
+      "chain": "VoiceFirst._monitor_tick -> _finish_session(SERVICE_ERROR) -> HandsFree._finish_session -> Recording.cancel",
+      "gate": "Observed recording/transcription ERROR or auto_error; original5s cooldown"
+    },
+    {
+      "case": "VOICEFIRST_30S_SILENCE",
+      "chain": "VoiceFirst._monitor_tick -> _finish_session(CONVERSATION_SILENCE) -> Recording.cancel",
+      "gate": "monitor_owned/monitor_entered, capture still RECORDING, elapsed listen_started>=30s and speech_activeFalse"
+    },
+    {
+      "case": "AUTOMATIC_NEW_AUDIO_SESSION",
+      "chain": "VoiceFirst._monitor_tick(!monitor_owned) -> _select_listening_conversation -> Jobs.select_conversation -> reset_enrollment",
+      "gate": "After session cooldown with feedback ready and idle; second reset may follow the silence/service cleanup"
+    },
+    {
+      "case": "SERVICE_OR_NATIVE_NOT_READY",
+      "chain": "production_listening.monitor_tick -> _finish_session(SERVICE_NOT_READY) -> Recording.cancel",
+      "gate": "Owned listener and runtime not started/closed or pair.ready_nowFalse"
+    },
+    {
+      "case": "EXPLICIT_CONVERSATION_OR_PROFILE_CHANGE",
+      "chain": "Jobs.select_conversation/select_profile -> reset_enrollment",
+      "gate": "Original idle selection checks; changes actor/session scope"
+    },
+    {
+      "case": "STAGE_RENDER_FAULT_OR_PAIR_FAILURE",
+      "chain": "External worker.cancel -> recording.cancel; pair invalidators may queue worker.cancel",
+      "gate": "Needs actual fault/readiness metadata. Local GTK/worker source may be one of CPU-maintained mismatches; no current fault claimed"
+    }
+  ],
+  "fixed_reply_source_classes": {
+    "ORIGINAL_UNCALIBRATED": "本机有声纹记录，但现场阈值尚未校准，不能确认当前说话者是否已登记。",
+    "PROBE_NO_CANDIDATE": "这段声音还未形成稳定的登记声纹候选。完整现场校准尚未完成，我先不确定称呼。",
+    "PROBE_COLLECTING_PREFIX": "已完成第",
+    "PROBE_CANDIDATE_PREFIX": "声音候选称呼是",
+    "PROBE_CANDIDATE_SUFFIX": "。完整现场校准尚未完成。"
+  },
+  "important_semantics": [
+    "LIR.reset_since_trace is set by external LIR.reset only; internal flow.reset and ordinary entry-mode retirement do not set it",
+    "Probe deliberately leaves enrollment FSM inactive and entry_modeNone; do not fabricate active enrollment to preserve probe state",
+    "business.reset resets probe phase/count toCANCELLED0 even when no enrollment FSM was active",
+    "CONVERSATION_SILENCE/SERVICE_ERROR reason persists through next automatic arm because arm changes state without clearing monitor_reason",
+    "Next _wake_detected overwrites reason with SPEECH_ACCEPTED; fixed reasons in existing watch can locate prior cleanup without a blind retry",
+    "A40point snapshot showingCANCELLED0 does not identify which reset caller happened or prove probe never ran",
+    "The two public calibration-related reply families differ; user paraphrase alone does not distinguish original uncalibrated bypass from probe0/3 or3/3"
+  ],
+  "limitations": [
+    "No live board/API/private store or retained user body was read in this review",
+    "Exact e70a/de04/647b supplied local pin snapshots checked. Core337 live-match provenance is root-reported; no independent SSH refresh",
+    "Root reports2 CPU-maintained GTK files differ. Their exact identities were requested; local GTK/worker fallback paths are conditional until source confirmation",
+    "Identity agent reports true outer-component synthetic normal start/ACK/rearm3/3 pass; this static review does not claim hardware output timing reproduction",
+    "No single historical reset root cause is asserted from static sources alone"
+  ],
+  "board_actions": false,
+  "source_or_candidate_changes": false,
+  "device_or_model_actions": false
+}

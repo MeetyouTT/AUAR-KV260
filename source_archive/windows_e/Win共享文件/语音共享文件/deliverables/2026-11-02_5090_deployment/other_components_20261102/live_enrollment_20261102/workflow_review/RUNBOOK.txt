@@ -1,0 +1,30 @@
+原统一脸/声纹登记流程核对，仅只读，未执行登记（洛杉矶2026-11-02）
+
+已动态读取当前startup941b8fc4814eabecf3063b74a968b17a2b649c9573e4f2d04698a780a8fe7c74和selected9ab2533d2c3000d61095f54de2e8199f53461ac085e2f58230ab36149be6af1f；12份登记链路公开源码pin/字节匹配原审阅来源，4个GUI身份对话框方法AST保持原版。Native face d639c4e5…与sampling29dcd854…均实读匹配当前原manifest。没有读取真实姓名、personID、模板、照片或原语音，没有发命令、录音、操作服务、生产源码、主页面或转轴。
+
+一、真正重录脸与复用旧脸是两个分支
+1. 当前新鲜人脸UNKNOWN且identity_sample_start能力开放时，说“帮我登记身份，我叫〈用户本地原称呼〉”。原simple脸FSM按同名选择replace_person_id，提示“称呼已存在，请确认更新登记，之后自动更新”。此时说“确认更新登记”，原采样→验证→自动保存更新同一条脸，脸数量保持1、revision增加；不删除旧记录。simple模式授权在采样前确认，验证通过后自动提交，不需要第二次脸确认。
+2. 如果当前fresh KNOWN，原Native sample_start和enroll无论是否传replace_person_id都拒绝重采；口头脸FSM也直接already_known。原“记住我，我叫〈称呼〉”联合入口在同名KNOWN时会提示“确认登记”，之后出EXISTING_CONFIRMED复用旧脸，不做新模板。这不能冒充重新录脸。
+3. “重新登记人脸”“重新录入人脸”不在现有窄口令列表，不能预期它们启动原重采。不要改阈值/伪造UNKNOWN/删除旧脸来制造入口。
+
+二、GUI备选原路径
+正常请求{type:service_dialog, action:identity_manage}打开身份管理，选“登记人脸”；或{type:service_dialog, action:identity_enroll}直接开原登记窗口。用户本地键盘填写原称呼，原代码按同名找到既有记录，弹“更新已有身份”对话框，按钮“确认更新登记”，另有“重新采样”。不需要root读取或传出姓名/ID。
+GUI会在同一清晰新鲜UNKNOWN目标且原identity_sample_start能力开放时自动采样；最后验证ready且原identity_enroll能力开放才能点“确认更新登记”。KNOWN仍被同一原保护挡住，可正常等待真实新鲜UNKNOWN状态，不能绕过。
+若联合登记已停在已有脸复用确认，而要切GUI真正重采，先按原“取消登记”正常结束当前未提交关联，保持已有脸不删，再开GUI，避免旧attempt或语音预览占用。
+
+三、采样具体顺序和时限
+原脸策略frontal_medoid_v1：至少15秒视频选择窗口，collect10个合格样本，随后5个更晚的独立正脸验证，公开total_required15；不是旧左右各采满的三姿态。提示可自然缓慢转头，验证阶段回正看镜头。原采样上限90秒，ready窗口60秒，失败/取消不应宣称保存。
+脸更新成功后（若脸已在这次确实重采），再说“记住我，我叫〈同一称呼〉”→原“确认登记”复用这次刚更新的脸进入声纹。统一状态AWAIT_CONFIRMATION→SAMPLING_FACE→SAMPLING_VOICE→READY_TO_LINK→ACTIVE；总attempt默认180秒，不在其中插入长时间排查。
+开始声纹登记的那段入口/脸确认录音只开启会话，不算第1段。之后三次独立新录音，各说不同句子3–10秒，原PCM总长允许3–20秒，VAD有效语音至少2.5秒；3段capture和PCM摘要都须不同，3个向量需通过一致性检查。初始化180秒内收完并确认。每段还必须有与刚保存人脸相同的新鲜capture视觉证据，缺失/换脸/不新鲜则暂停且不吃样本。
+第三段有效后，原提示“人脸已保存，三段声纹准备好，请确认保存身份关联”；说“确认保存身份关联”（等价原桥映射到“确认保存声纹”），原声纹事务提交、签名回执通过后才建立ACTIVE联合关联。最后确认录音不计第四段。部分保存/冲突/超时均不能报整体成功，已提交脸或声纹不会因随后取消被自动删除。
+本轮若face原1、voice原0、links原0，成功预期脸仍1但revision更新，声纹新增1，linked_people新增1、face/voice两个modality链接ACTIVE。登记本身不会自动创建个人记忆授权或把声纹阈值标成已现场校准。
+
+四、root实际可观察字段
+GET8783/api/state -> board_business.dialogue.voice_enrollment : available/active/stage。
+同一jobs的重复投影在local_transcription.service.voice_enrollment，根voice_enrollment本来不存在。
+stage仅脸FSM（idle/name/authorize/sampling/confirm）；active已合并脸或speaker/business active。因此进入声纹后stage可能idle但active=true，这正常，不能当结束。
+GET8790/v1/ui/status -> modules.identity.enrollment_sampling : stage(idle/collect/validate/ready/failed)、counts.collect、counts.validate、total、total_required。不要落盘session_id/bound_target/detail/人名/图片。
+GET8783/api/state -> board_business.speaker : ready/active/submitted/complete/queued_or_active/evidence_errors/profile_grants_issued等；voice_enrollment.speaker只有简化speaker公共投影。speaker_calibrated是固定保守投影，不能当库存人数。
+原GUI没有公开SpeakerDevice.sessions.samples/confirm或vectors数量，也没有registry.attempt状态。内部状态分别在RAM sessions.stage/vectors、私有identity-links.sqlite3的binding_attempts.state；只读验收若需枚举状态应由root用其已授权聚合读取，不输出姓名/ID。不调用Registry.health()/attempt()冒充纯读，因为它们会expire写库。
+
+所有操作入口只供root和用户沿原流程执行，本代理未代发或录音。正式结果以原COMMITTED/EXISTING_CONFIRMED回执及原库存/状态聚合为准，播报文字和ready不能替代保存回执。

@@ -1,0 +1,15 @@
+[Unit]
+Description=Observe AURA original GUI and disabled axis after startup
+Requires=aura-avatar-ui.service aura-camera-ui.service
+After=aura-avatar-ui.service aura-camera-ui.service
+
+[Service]
+Type=oneshot
+# No RemainAfterExit: an explicit later start can re-observe, without restarting GUI.
+Restart=no
+TimeoutStartSec=infinity
+TimeoutStopSec=infinity
+KillMode=process
+SendSIGKILL=no
+UMask=0077
+ExecStart=/usr/bin/python3 -B /usr/local/lib/aura-boot-recovery/v1/boot_recovery.py verify-gui

@@ -1,0 +1,27 @@
+--- r1/common/board_memory.py
++++ r3/common/board_memory.py
+@@ -42,7 +42,8 @@
+            "device_event", "memory_command"}
+ META_KEYS = {"occurred_utc", "time_basis", "names", "numbers", "negated", "status",
+              "evidence", "claims", "fact_keys", "source_id", "speaker_known"}
+-NEGATION = re.compile(r"没有|不要|不能|不会|不是|尚未|未完成|不(?:去|买|做|要|能|会|是)|\b(?:not|never|no)\b|未准备|未能|未校准|未确认|未购买|未执行|无法|并非|并未|从未|未曾|不再", re.I)
++NEGATION = re.compile(r"没有|不要|不能|不会|不是|尚未|未完成|不(?:去|买|做|要|能|会|是)|\b(?:not|never|no)\b|未准备|未能|未校准|未确认|未购买|未执行|无法|并非|并未|从未|未曾|不再|未喝", re.I)
++POLAR_QUESTION = re.compile(r"(?<![不没])(?:去不去|买不买|做不做|要不要|能不能|会不会|是不是|有没有|可不可以)")
+ PLANNED = re.compile(r"计划|打算|准备|约定|将要|\b(?:plan|planned|intends?)\b", re.I)
+ COMPLETED = re.compile(r"已经|已(?:完成|购买|买|去|做)|完成(?:了)?|买了|去了|\b(?:completed|done|finished)\b", re.I)
+ OBSERVED = re.compile(r"相机|观察|看到|视觉|\b(?:observed|camera|visual)\b", re.I)
+@@ -244,7 +245,13 @@
+         for number in numbers:
+             if not re.search(r"(?<![\d.])" + re.escape(number) + r"(?![\d.])", text):
+                 reasons.add('protected_number_missing_or_changed')
+-        if (meta.get("negated") is True or NEGATION.search(source["text"])) and not NEGATION.search(text):
++        has_nonassertive_marker = (re.search(r"询问|提问|想知道|是否|能否|[?？]|无论|不管|不论", text) is not None
++                                  or POLAR_QUESTION.search(text) is not None)
++        source_negation_text = POLAR_QUESTION.sub(" ", source["text"]) if has_nonassertive_marker else source["text"]
++        summary_negation_text = POLAR_QUESTION.sub(" ", text)
++        if ((POLAR_QUESTION.search(source["text"]) and not has_nonassertive_marker)
++                or ((meta.get("negated") is True or NEGATION.search(source_negation_text))
++                    and not NEGATION.search(summary_negation_text))):
+             reasons.add('negation_missing')
+         if meta.get("status") == "planned" and not PLANNED.search(text):
+             reasons.add('planned_status_missing')

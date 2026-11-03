@@ -1,0 +1,22 @@
+[
+  {
+    "id": "sd_identity",
+    "command": "for d in /sys/block/mmcblk*/device; do echo DEVICE=$d; for f in cid name manfid oemid serial date; do printf '%s=' $f; cat $d/$f; done; done; df -h / /boot",
+    "timeout": 25
+  },
+  {
+    "id": "network",
+    "command": "ip -br addr; ip route; for f in /sys/class/net/eth*/carrier /sys/class/net/eth*/operstate; do printf '%s=' $f; cat $f; done; ss -lntp; systemctl is-active ssh sshd dropbear dfx-mgr",
+    "timeout": 25
+  },
+  {
+    "id": "apps",
+    "command": "xmutil listapps; ls -l /lib/firmware/xilinx/kv260-benchmark-b4096/; sha256sum /lib/firmware/xilinx/kv260-benchmark-b4096/*.bit.bin /lib/firmware/xilinx/kv260-benchmark-b4096/*.dtbo /lib/firmware/xilinx/kv260-benchmark-b4096/*.xclbin; lsmod | grep -E 'zocl|xlnx'; xbutil --version",
+    "timeout": 35
+  },
+  {
+    "id": "resnet_files",
+    "command": "sha256sum /usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel /usr/share/vitis_ai_library/models/resnet18/resnet18.prototxt /home/root/Vitis-AI/examples/vai_library/samples/classification/test_jpeg_classification /home/root/Vitis-AI/examples/vai_library/samples/classification/test_performance_classification; find /home/root/Vitis-AI /usr/share/vitis_ai_library -iname '*dog*' -o -iname '*samoy*'; ls -la /home/root/Vitis-AI/examples/vai_library/samples/classification/; cat /home/root/Vitis-AI/examples/vai_library/samples/classification/readme",
+    "timeout": 35
+  }
+]

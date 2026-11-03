@@ -1,0 +1,157 @@
+{
+  "schema": "aura.frontend-allocation-candidate.v1",
+  "status": "FROZEN_ISOLATED_CANDIDATE_12_OFFLINE_TESTS_PASS",
+  "created_utc": "2026-10-31T13:17:24.017833+00:00",
+  "basis": {
+    "startup_sha256": "67d03ca40d709d22d761706bfca51a55e352adf86763ced7fb5eb5a688123a55",
+    "snapshot_scope": "Saved v15 metadata; exact local frontend sources matched captured v13 pins. v14/v15 supplied revision changes do not replace this frontend. No fresh remote verification.",
+    "source_pins": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\SOURCE_PINS.json",
+      "sha256": "06a30f115797985df8db3c10c659ad55240cf97fc7812db7004434feee281ea5",
+      "bytes": 3835
+    }
+  },
+  "changes": [
+    {
+      "component": "board/runtime/audio/automatic_capture.py",
+      "before": {
+        "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\before\\board\\runtime\\audio\\automatic_capture.py",
+        "sha256": "5e7abc5a15840aff51d0471313498a46efc940f16d4bd7ee95fed65f98fdcc0a",
+        "bytes": 8419
+      },
+      "after": {
+        "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\after\\board\\runtime\\audio\\automatic_capture.py",
+        "sha256": "2b293fe265827fc0c47ac798433312f477924779ed921e0bdc40c27b2be965f0",
+        "bytes": 8654
+      }
+    },
+    {
+      "component": "board/runtime/audio/board_gtcrn_reuse.py",
+      "before": {
+        "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\before\\board\\runtime\\audio\\board_gtcrn_reuse.py",
+        "sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9",
+        "bytes": 9757
+      },
+      "after": {
+        "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\after\\board\\runtime\\audio\\board_gtcrn_reuse.py",
+        "sha256": "c5a017ee2b7ec6b9e37b5e66d76fced237234e7a2a36a6c750b29b880903bfd0",
+        "bytes": 10136
+      }
+    }
+  ],
+  "change_scope": [
+    "SpeechEndpoint.feed reuses input only when pending is empty, type is exactly immutable bytes, and length equals both frame_bytes and 640. Fragmented/batched/mutable/subclass input retains original buffering; VAD and remainder handling unchanged.",
+    "ReuseFftGtcrnDenoiser adds a base-equivalent _consume override with only len(chunks)==1 direct return. Current _hop already returns independent output. Zero-hop and multi-hop concatenate policy and pending-copy policy remain unchanged."
+  ],
+  "unchanged_reference_files": [
+    {
+      "component": "board/runtime/audio/board_gtcrn_fft.py",
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\reference\\board\\runtime\\audio\\board_gtcrn_fft.py",
+      "sha256": "47cb8a2ec97ad292981bb42b67e217ed0f672a98d561d4ac8dc9c360cf8f6f06",
+      "bytes": 8185
+    },
+    {
+      "component": "board/runtime/audio/vad.py",
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\reference\\board\\runtime\\audio\\vad.py",
+      "sha256": "7a974702847b5854e5593c8ec12b9616cefefa3d99fb0298a3c8359f7f63388f",
+      "bytes": 6771
+    },
+    {
+      "component": "board/runtime/audio/capture.py",
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\reference\\board\\runtime\\audio\\capture.py",
+      "sha256": "0b32186bd1fef871c57ae27b941ad3d112c1e2287e7d1dbeedd7fcdc93a98d3f",
+      "bytes": 9980
+    },
+    {
+      "component": "board/runtime/audio/board_asr_frontend.py",
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\reference\\board\\runtime\\audio\\board_asr_frontend.py",
+      "sha256": "b3d06b653876469daf5b7bb805458b187662d9862e8ece6da731cbfa3e23a093",
+      "bytes": 4324
+    },
+    {
+      "component": "host/model_service/protocol.py",
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\reference\\host\\model_service\\protocol.py",
+      "sha256": "4906825b391422c23f55c0d73796906253f6279c5d45cdbf04c99a5e244b6e93",
+      "bytes": 12369
+    }
+  ],
+  "base_fft_sha256": "47cb8a2ec97ad292981bb42b67e217ed0f672a98d561d4ac8dc9c360cf8f6f06",
+  "preserved": [
+    "GTCRN model-call sequence and recurrent ping-pong",
+    "FFT size/hop/window/dtypes/OLA",
+    "Original PCM waveform and PCM16 rounding",
+    "Silero/VAD/onset/pre-roll/tail thresholds",
+    "Empty/reset/flush behavior and length",
+    "Existing 8-frame queue",
+    "Priority/threads/diagnostics",
+    "Capture cancellation/READY/AudioRef metadata",
+    "No formal or aura-root source changes"
+  ],
+  "verification": {
+    "command_argv": [
+      "C:\\Users\\35870\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\tests\\test_allocation.py"
+    ],
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "numpy": "2.3.5",
+    "platform": "win32",
+    "unique_tests": 12,
+    "failures": 0,
+    "errors": 0,
+    "duration_seconds": 0.421,
+    "test_source": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\tests\\test_allocation.py",
+      "sha256": "11a7960df059a52854d53e1730801d333c1736de1b2993aec94db4ea5fbe6d53",
+      "bytes": 20179
+    },
+    "test_log": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\OFFLINE_TESTS.log",
+      "sha256": "0864a864774337a3062c6fe2d9a1846c3ceb70000332f2cfad0a14bbfa556cc2",
+      "bytes": 1892
+    },
+    "coverage": [
+      "Exact pinned before/reference source hashes and original external sources unchanged",
+      "AST comparison limits differences to SpeechEndpoint.feed and new _consume branch",
+      "Aligned/odd-byte fragmented/batched/empty inputs; raw PCM byte parity",
+      "Both injected decisions and original energy classifier; false onset/silence/forced limit; 200/500ms pre-roll",
+      "Real capture read/completion with fake process: READY, take, AudioRef, start offset and metadata equality",
+      "Cancellation during a classifier call rejects late READY/audio, with clean subsequent endpoint",
+      "Mutable/memoryview/bytes-subclass and nonempty pending keep copy isolation",
+      "Actual FFT/OLA Python paths with deterministic fake recurrent session, all buffer_reuse/io_binding modes",
+      "First-hop empty latency; single/double/multiple hop order; 320-sample [1,1,1,2] pattern",
+      "Reset/flush/empty and output-length parity; bitwise float and PCM16 equality",
+      "Outputs do not alias pending/OLA/FFT/recurrent buffers, other outputs or later reset; external mutation cannot alter later results"
+    ],
+    "limits": [
+      "Fake model/session results exercise Python framing and recurrent dataflow; no GTCRN/Silero/ASR neural inference was executed.",
+      "Windows numpy2.3.5 offline parity is not board ARM/native model or full GUI/camera performance acceptance.",
+      "Capture tests use in-memory public synthetic PCM and fake process/timer; no actual microphone/process/speaker was opened.",
+      "Ownership, queue and ACK implementation is unchanged; not a new hardware ownership or complete-dialogue acceptance claim."
+    ]
+  },
+  "review_patch": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\review.patch",
+    "sha256": "9833cc617dc5743a7b658dc4de28ec3557fde98f428177b6c542f70f3fb5661d",
+    "bytes": 1779
+  },
+  "root_next_step": "Review only the two after component files. Root alone verifies current remote pins and runs the same isolated public paced stream against baseline under complete GUI/camera, comparing exact outputs/endpoints/model-call order and queue/CPU metadata before any installation.",
+  "do_not_deploy": [
+    "reference/ is unchanged test dependency material, not an overlay",
+    "tests/ and evidence are not runtime components",
+    "Do not edit base board_gtcrn_fft.py or its SHA constants",
+    "Do not change thresholds/queues/model/priority to manufacture a pass"
+  ],
+  "performance": {
+    "model_or_device_calls": 0,
+    "production_source_modified": false,
+    "implemented_candidate": true,
+    "deployed": false,
+    "hardware_validated": false,
+    "measured_speedup": false,
+    "estimated_speedup_percent": null,
+    "claim": "Removes two redundant copies only; no measured gain or resolution of capture overflow claimed."
+  }
+}

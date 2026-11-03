@@ -1,0 +1,257 @@
+{
+  "status": "PASS",
+  "started_utc": "2026-11-03T17:30:46.863512+00:00",
+  "commands": [
+    {
+      "name": "rar_create",
+      "exit_code": 0,
+      "elapsed_seconds": 4.034,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log": "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/rar_create.log",
+      "command": [
+        "/home/ghmd/auar-engineering-delivery-XpV7MC/rar-tool/usr/bin/rar",
+        "a",
+        "-ma5",
+        "-m5",
+        "-r",
+        "-idq",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/archive/auar_xuefei_board_enhanced.rar",
+        "auar_xuefei"
+      ]
+    },
+    {
+      "name": "rar_test",
+      "exit_code": 0,
+      "elapsed_seconds": 0.555,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log": "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/rar_test.log",
+      "command": [
+        "/home/ghmd/auar-engineering-delivery-XpV7MC/rar-tool/usr/bin/rar",
+        "t",
+        "-idq",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/archive/auar_xuefei_board_enhanced.rar"
+      ]
+    },
+    {
+      "name": "rar_extract",
+      "exit_code": 0,
+      "elapsed_seconds": 0.578,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log": "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/rar_extract.log",
+      "command": [
+        "/home/ghmd/auar-engineering-delivery-XpV7MC/rar-tool/usr/bin/rar",
+        "x",
+        "-idq",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/archive/auar_xuefei_board_enhanced.rar",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/expanded/"
+      ]
+    },
+    {
+      "name": "sha256sum",
+      "exit_code": 0,
+      "elapsed_seconds": 0.46,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log": "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/sha256sum.log",
+      "command": [
+        "/usr/bin/sha256sum",
+        "--quiet",
+        "-c",
+        "checksums.sha256"
+      ]
+    },
+    {
+      "name": "evidence_replay",
+      "exit_code": 0,
+      "elapsed_seconds": 0.045,
+      "log_sha256": "c93e5d2419a3293e38e4f776fb5dc0a3aa64ff92a26848db267ecfe28d8af1eb",
+      "log": "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/evidence_replay.log",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/expanded/auar_xuefei/board/verify_evidence.py",
+        "--out",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/evidence"
+      ]
+    },
+    {
+      "name": "evidence_negative",
+      "exit_code": 0,
+      "elapsed_seconds": 0.225,
+      "log_sha256": "d3dbab59475e683ba59a961d300c50ea6aad0822ee042deb3565b3e3cecdd0c9",
+      "log": "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/evidence_negative.log",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "board/tests",
+        "-v"
+      ]
+    },
+    {
+      "name": "runtime_file_comparison",
+      "exit_code": 0,
+      "elapsed_seconds": 0.057,
+      "log_sha256": "2abeea18e0f26cdb156725a4a935194561686e6e754704a6acc799f814f728be",
+      "log": "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/runtime_file_comparison.log",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/expanded/auar_xuefei/board/bringup/check_runtime.py",
+        "--rootfs",
+        "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/final-roundtrip02/staged-board",
+        "--out",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/runtime_files.json"
+      ]
+    },
+    {
+      "name": "yunet_fixture_description",
+      "exit_code": 0,
+      "elapsed_seconds": 0.034,
+      "log_sha256": "5d371ed9801db922d56d1f2e4b6fb978045c429d5e5e41d5fc84108f2beaebdd",
+      "log": "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/yunet_fixture_description.log",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/expanded/auar_xuefei/board/bringup/run_yunet_synthetic.py",
+        "--describe"
+      ]
+    },
+    {
+      "name": "paired_artifact_export",
+      "exit_code": 0,
+      "elapsed_seconds": 0.157,
+      "log_sha256": "7a9233880cf2d76965f7301a7e286123f482f98314e826efdc8dd2dd582d9284",
+      "log": "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/paired_artifact_export.log",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/expanded/auar_xuefei/board/bringup/prepare_artifacts.py",
+        "--hardware-dir",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/expanded/auar_xuefei/board/artifacts_candidate",
+        "--firmware-dir",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/expanded/auar_xuefei/board/artifacts_candidate",
+        "--out",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/paired_artifacts"
+      ]
+    },
+    {
+      "name": "skill_tcl",
+      "exit_code": 0,
+      "elapsed_seconds": 8.085,
+      "log_sha256": "ffe76a61a01f8ff9d630c2735f793c90cf051fd133eb9c79241e06f0da5e7297",
+      "log": "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/skill_tcl.log",
+      "command": [
+        "/home/ghmd/Xilinx_2022.2/Vivado/2022.2/bin/vivado",
+        "-mode",
+        "batch",
+        "-source",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/archive/verify_skill.tcl",
+        "-log",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/skill_tcl.vivado.log",
+        "-journal",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/skill_tcl.jou",
+        "-tclargs",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/skill_tcl"
+      ]
+    },
+    {
+      "name": "rebuild_software",
+      "exit_code": 0,
+      "elapsed_seconds": 0.372,
+      "log_sha256": "cf93c052d3b8bb03d3071fbd7b2a91f376d6a11daaa2a3bf4fa4d759d54d6d90",
+      "log": "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/rebuild_software.log",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/expanded/auar_xuefei/build/reproduce.py",
+        "--out",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/rebuild",
+        "--stage",
+        "software"
+      ]
+    },
+    {
+      "name": "rebuild_rtl",
+      "exit_code": 0,
+      "elapsed_seconds": 58.536,
+      "log_sha256": "09b80030156687403b95b1b826bec7c4ab3964a9dc116a9fc45af7afc168c3fd",
+      "log": "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/rebuild_rtl.log",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/expanded/auar_xuefei/build/reproduce.py",
+        "--out",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/rebuild",
+        "--stage",
+        "rtl",
+        "--vivado",
+        "/home/ghmd/Xilinx_2022.2/Vivado/2022.2/bin/vivado"
+      ]
+    },
+    {
+      "name": "rebuild_prepare",
+      "exit_code": 0,
+      "elapsed_seconds": 151.751,
+      "log_sha256": "069a3396d856528f536fbb775045aa7474389231ebdbcb5654c96a3626d94912",
+      "log": "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/rebuild_prepare.log",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/expanded/auar_xuefei/build/reproduce.py",
+        "--out",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/rebuild",
+        "--stage",
+        "prepare",
+        "--vivado",
+        "/home/ghmd/Xilinx_2022.2/Vivado/2022.2/bin/vivado",
+        "--vitis-root",
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2",
+        "--rtl-results",
+        "/home/ghmd/auar-board-evidence-9a4f-20261103-01a1a08b/verification/final_roundtrip/rebuild/rtl/result.json"
+      ]
+    }
+  ],
+  "board_accessed": false,
+  "new_physical_board_test_performed": false,
+  "active": null,
+  "archive": {
+    "file": "auar_xuefei_board_enhanced.rar",
+    "sha256": "0775eb8810a144210330f8368507d2278ab234ea0e9c52b12f04f1c65160eb98",
+    "bytes": 56970807,
+    "format": "RAR5",
+    "sole_root": "auar_xuefei",
+    "exact_extracted_files_matched": 1748,
+    "expanded_bytes": 82815333,
+    "all_file_bytes_match_source_snapshot": true,
+    "checksum_entries": 1747
+  },
+  "unchanged_cold_implementation_inputs_matched": 20,
+  "preserved_evidence_checks_passed": 147,
+  "evidence_unit_tests_passed": 5,
+  "offline_rootfs_file_checks_passed": 439,
+  "packaged_artifacts_checked": 6,
+  "skill_tcl": {
+    "status": "PASS",
+    "unit_tests": 15,
+    "mock_cases": {
+      "adder": 36,
+      "crc32": 37
+    },
+    "mock_total": 73,
+    "tcl": "8.5.14",
+    "python": "3.8.3",
+    "generator_sha256": "df473c62e9da5a14b26ec995e2be9c7eb5b7588e94d922968894ba55a02a00dc",
+    "board_verified": false
+  },
+  "new_rebuild_stages_passed": [
+    "software",
+    "rtl",
+    "prepare"
+  ],
+  "extracted_tree_unchanged_after_checks": true,
+  "original_source_archive_preserved": true,
+  "completed_utc": "2026-11-03T17:34:32.321090+00:00"
+}

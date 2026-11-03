@@ -1,0 +1,111 @@
+{
+  "schema": "aura.frontend-abba-independent-review.v1",
+  "status": "REJECT_DUAL_NOSPIN_CANDIDATE_DO_NOT_DEPLOY_NO_AUTOMATIC_RERUN",
+  "source": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\performance_review_newboot\\frontend_budget_v20\\ACTUAL_ABBA_1793504105717305600.json",
+  "source_sha256": "f34fc0107be77ead85d5f5086a32e096fb20e0a2c67b1256e0601fe7514bd45d",
+  "startup_sha256": "d24b0d0007e2aa2b417f459891c7f39f168502a58374334ceab69e31af5881dd",
+  "observed_slots": [
+    "A1",
+    "B1",
+    "B2"
+  ],
+  "missing_slots": [
+    "A2"
+  ],
+  "rows": [
+    {
+      "slot": "A1",
+      "status": "PASS_PUBLIC_SLOT",
+      "session_policy": {
+        "mode": "baseline_1",
+        "intra_op_threads": 1,
+        "inter_op_threads": 1,
+        "intra_op_spinning": "default",
+        "sessions_created": 1
+      },
+      "throughput_mean_gate_wall_ms": 18.54175,
+      "observed_throughput_improvement_from_A1_percent": 0.0,
+      "paced_consumed_frames": 287,
+      "paced_frontend_mean_wall_ms": 18.7915,
+      "paced_frontend_mean_consumer_thread_cpu_ms": 18.5262,
+      "paced_mean_wall_minus_consumer_thread_cpu_ms": 0.26529999999999987,
+      "paced_frontend_wall_p95_ms": 30.2501,
+      "paced_frontend_wall_max_ms": 33.9112,
+      "mean_endpoint_feed_wall_ms": 19.30184152278429,
+      "mean_consumer_start_interval_ms": 20.00677415383831,
+      "queue_peak_frames": 1,
+      "queue_max_age_ms": 20.19,
+      "queue_error": "",
+      "producer_supply_lateness_max_ms": 3.7075,
+      "closed_reader_stopped": true
+    },
+    {
+      "slot": "B1",
+      "status": "PASS_PUBLIC_SLOT",
+      "session_policy": {
+        "mode": "dual_nospin",
+        "intra_op_threads": 2,
+        "inter_op_threads": 1,
+        "intra_op_spinning": "0",
+        "sessions_created": 1
+      },
+      "throughput_mean_gate_wall_ms": 17.37725,
+      "observed_throughput_improvement_from_A1_percent": 6.28042121159006,
+      "paced_consumed_frames": 287,
+      "paced_frontend_mean_wall_ms": 18.8464,
+      "paced_frontend_mean_consumer_thread_cpu_ms": 17.4034,
+      "paced_mean_wall_minus_consumer_thread_cpu_ms": 1.4429999999999978,
+      "paced_frontend_wall_p95_ms": 31.6821,
+      "paced_frontend_wall_max_ms": 35.8181,
+      "mean_endpoint_feed_wall_ms": 19.361200592366416,
+      "mean_consumer_start_interval_ms": 20.14635341959172,
+      "queue_peak_frames": 3,
+      "queue_max_age_ms": 59.617,
+      "queue_error": "",
+      "producer_supply_lateness_max_ms": 4.005,
+      "closed_reader_stopped": true
+    },
+    {
+      "slot": "B2",
+      "status": "FAILED",
+      "session_policy": {
+        "mode": "dual_nospin",
+        "intra_op_threads": 2,
+        "inter_op_threads": 1,
+        "intra_op_spinning": "0",
+        "sessions_created": 1
+      },
+      "throughput_mean_gate_wall_ms": 17.4349,
+      "observed_throughput_improvement_from_A1_percent": 5.969501260668498,
+      "paced_consumed_frames": 184,
+      "paced_frontend_mean_wall_ms": 19.866,
+      "paced_frontend_mean_consumer_thread_cpu_ms": 17.6376,
+      "paced_mean_wall_minus_consumer_thread_cpu_ms": 2.2284000000000006,
+      "paced_frontend_wall_p95_ms": 34.2357,
+      "paced_frontend_wall_max_ms": 45.414,
+      "mean_endpoint_feed_wall_ms": 20.335547331500415,
+      "mean_consumer_start_interval_ms": 20.851810136607174,
+      "queue_peak_frames": 8,
+      "queue_max_age_ms": 157.752,
+      "queue_error": "pcm_input_queue_overflow",
+      "producer_supply_lateness_max_ms": 7.4663,
+      "closed_reader_stopped": true
+    }
+  ],
+  "full_throughput_hashes_equal": true,
+  "full_throughput_repetitions": 6,
+  "B2_paced_complete": false,
+  "comparison_valid_as_complete_ABBA": false,
+  "interpretation": [
+    "Offline mean improves only about six percent and remains above the 16ms goal; no realtime stability acceptance.",
+    "B2 frontend mean wall time exceeds its consumer-thread CPU time by 2.2284ms; this is extra elapsed time not spent executing that consumer thread. Scheduling waits, synchronization and native worker activity cannot be separated by this metric alone.",
+    "B2 full endpoint-feed mean is 20.3355ms and consecutive consumer start mean 20.8518ms versus one input frame each20ms; consistent with cumulative backlog and observed raw8 overflow.",
+    "B2 frontend first16 mean19.3225ms versus remaining168 mean19.9177ms; the final34-frame window mean22.2913ms. The observed problem is not confined to initial startup frames.",
+    "All six complete offline output float/PCM/VAD hashes match. B2 paced output is truncated; it has no complete endpoint result and cannot be declared equivalent.",
+    "Candidate changes both intra-op threads1to2 and default spinningto0; this incomplete run does not isolate either setting as the cause.",
+    "No per-event runnable-wait/lock/CPU-frequency evidence establishes the exact scheduling cause. Do not attribute all production overflows, GIL behavior, thermals, display blanking or network to this public-probe failure."
+  ],
+  "recommended_action": "Keep production GTCRN one-thread/raw8 unchanged. Continue the independently supported ASR2 and display keep-awake work through original owner; JPEG implementation remains with assigned agent.",
+  "device_accessed_by_review": false,
+  "production_modified_by_review": false
+}

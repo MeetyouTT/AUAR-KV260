@@ -1,0 +1,107 @@
+{
+  "actual_owners": {
+    "boot_id": "bebd3e7d-e984-4517-8cbb-211df7f1c6dc",
+    "camera": {
+      "birth_ticks": 2344,
+      "command_sha256": "acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd",
+      "pid": 1335
+    },
+    "configuration_sha256": "228abe8f642254c68ad500a15f8d637189343a97753d1c359663744dc2bd06a2",
+    "gtk": {
+      "birth_ticks": 2113108,
+      "command_sha256": "3ce8b68084dfdce47ac8078b5f3ae771551be6ae2e095c317d8f1f29b32a87fc",
+      "pid": 171274
+    },
+    "source_manifest_sha256": "6f3d928489ba163a47d8c844141d23333e348a7bb028c3f997b34f2f86685388",
+    "startup_sha256": "94f665cf69e861d4f3d625dd627116218120cdbbef2244aa4cf2b63c39b9f1c7",
+    "supervisor": {
+      "birth_ticks": 2113000,
+      "command_sha256": "48a28efa32b2050901e73e85a80a30a90dcfbce0b7249bde5d6d90902740631d",
+      "pid": 171266
+    }
+  },
+  "baseline_frozen_r1_files": {
+    "display_restore.py": "b8ddcd3ab3e996de62ce91747d5a21b6fbaed70bf909de6c7c2a685d079a3d70",
+    "run_display_restore.py": "46fce37054e60a635fa75eae492ff95de921320b36a6c1f7ad9ffb72ae9b83b4"
+  },
+  "code_frozen": true,
+  "commands": {
+    "observe_original": "31 samples after root independently restores timeout600/DPMSenabled.",
+    "observe_temporary": "31 samples over 30 seconds with timeout0/DPMSdisabled unchanged.",
+    "preflight": "One passive sample with temporary policy still active."
+  },
+  "device_access_by_preparer": false,
+  "files": {
+    "FROZEN_REMOTE.py": {
+      "bytes": 20183,
+      "sha256": "b1228c3893318688a106077a33932931594413d0c627a2150c51d6f5652b88c4"
+    },
+    "LOCAL_TEST_RESULT.json": {
+      "bytes": 3368,
+      "sha256": "d8a184af566cbb22d5af4c599bf8056b3a2dc802b8d14b5199f99bb19f56a660"
+    },
+    "PROTOCOL_SOURCES.json": {
+      "bytes": 690,
+      "sha256": "603fd75df70e919a36e0ac736ee5b5b67b784fcc5807adf979be4d6b1c42f5e0"
+    },
+    "ROOT_CLI.txt": {
+      "bytes": 1086,
+      "sha256": "693e5266eec2c0714f2291d4991d56f20721ae7db60404023e61e321f22a7178"
+    },
+    "query_display.py": {
+      "bytes": 4143,
+      "sha256": "45dd1797118adf123a52abc37f8c53c27e87a44b14b6ed66448ae64d6c287863"
+    },
+    "read_only_guard.py": {
+      "bytes": 6568,
+      "sha256": "b9d993be6a3318cf5956aabfa073c84d348f93099be244b376b0e9636c9dc630"
+    },
+    "run_query.py": {
+      "bytes": 3122,
+      "sha256": "cc37d141ce36a4eb9ee5e4099af57598d784ca2d4891c91c0908d96ac4952ce9"
+    },
+    "test_query.py": {
+      "bytes": 12032,
+      "sha256": "3f777a630abb8d46763c8263be184163d5e524edf40195a241a21b7be8f3d9d5"
+    },
+    "xcb_screensaver.py": {
+      "bytes": 7995,
+      "sha256": "b8779b899cab45e0668fefda0ecd0a4d0e99b580b5640cb8dc5985e25f546436"
+    }
+  },
+  "models_loaded": false,
+  "policy_modified": false,
+  "production_modified": false,
+  "protocol": {
+    "allowed_opcodes": [
+      0,
+      1
+    ],
+    "extension": "MIT-SCREEN-SAVER",
+    "query_reply_timeout_seconds": 2,
+    "reply_buffers": "libc free on every reply/error branch",
+    "reserved_iovecs": 2,
+    "root_drawable": "XDefaultRootWindow from the same DISPLAY",
+    "xcb_connection": "Separate owned connection, disconnected on completion or refusal"
+  },
+  "r1_modified": false,
+  "read_only_guard": "Exact AST copies from frozen r1, plus full current 380 source/manifest/boot/process validation before and after.",
+  "result_boundaries": [
+    "No libXss or libxcb-screensaver requirement. Actual generic libxcb availability and ARM ABI are pending root preflight.",
+    "QueryInfo gives the core saver state as well as idle milliseconds. Temporary core timeout0 permits state Disabled(3). Original policy observation requires Off(0).",
+    "Observed periodic reset flag requires at least four idle drops of 1000 ms and maximum idle at most7500 ms. Completion alone is not a keepalive pass.",
+    "Physical user input remains a possible idle reset source.",
+    "No policy restoration or fallback mutation is implemented by r2. Root must retain temporary protection until it separately authorizes restoration.",
+    "Neither the 30-second sample window nor mock results prove a full600-second unattended run."
+  ],
+  "schema": "aura.v21-display-query-xcb-r2.v1",
+  "source_components": 380,
+  "startup_sha256": "94f665cf69e861d4f3d625dd627116218120cdbbef2244aa4cf2b63c39b9f1c7",
+  "status": "FROZEN_READONLY_R2_ROOT_PREFLIGHT_PENDING",
+  "tests": {
+    "errors": 0,
+    "failures": 0,
+    "passed": 24,
+    "run": 24
+  }
+}

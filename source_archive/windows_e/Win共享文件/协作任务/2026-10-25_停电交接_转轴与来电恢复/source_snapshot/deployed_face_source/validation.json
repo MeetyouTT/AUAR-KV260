@@ -1,0 +1,55 @@
+{
+  "scope": "host math/synthetic fixed texture only; no UART, board, service, actuator or real human validation",
+  "python": "3.8.10",
+  "command": "/home/ghmd/kv260-adaptation-check-20261006/identity/.venv/bin/python -m unittest discover -s /home/ghmd/aura-pan-follow-shadow-20261024/face_source_v11 -p test_*.py",
+  "tests": 35,
+  "failures": 0,
+  "errors": 0,
+  "reported_duration_s": 0.076,
+  "compilation": "entry.py, face_flow.py, face_observation.py, raw_capture.py compiled successfully",
+  "edge_replay": {
+    "input": "known synthetic fixed texture; 90x90 low-resolution face crop, shift46px toward edge",
+    "left_visible_width_fraction": 0.5555555555555556,
+    "right_visible_width_fraction": 0.5555555555555556,
+    "v10_full_ncc": [
+      "rejected",
+      "rejected"
+    ],
+    "v11_fixed_two_patch_ncc": [
+      "accepted correct known translation",
+      "accepted correct known translation"
+    ],
+    "unchanged_original_template_object": true
+  },
+  "negative_cases": [
+    "visible width below55 percent",
+    "one patch absent",
+    "two patches disagree by5 low-resolution pixels",
+    "random or absent image texture",
+    "new occluder cannot become rolling template"
+  ],
+  "unchanged_contract": {
+    "source_max_age_ms": 250,
+    "real_face_anchor_max_age_ms": 500,
+    "minimum_face_visible_width_fraction": 0.55,
+    "minimum_face_visible_height_fraction": 0.6,
+    "minimum_visible_face_pixels_low_resolution": 24,
+    "ncc_minimum_each_patch": 0.8,
+    "no_body_or_prediction": true,
+    "capture_timestamp": "unchanged actual source timestamp"
+  },
+  "partial_additional_guards": {
+    "full_match_first": true,
+    "horizontal_edges_only": true,
+    "two_nonoverlapping_fixed_anchor_patches": true,
+    "minimum_patch_width_and_height": 10,
+    "minimum_patch_std": 8,
+    "maximum_translation_disagreement_low_resolution_px": 1.5
+  },
+  "not_verified": [
+    "board library/runtime",
+    "live CPU latency",
+    "real person edge detection accuracy",
+    "servo following and mechanical motion"
+  ]
+}

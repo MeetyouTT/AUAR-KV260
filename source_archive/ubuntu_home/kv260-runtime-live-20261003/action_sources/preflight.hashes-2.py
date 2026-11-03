@@ -1,0 +1,6 @@
+import json,hashlib
+from pathlib import Path
+expected={'/home/root/Vitis-AI/examples/vai_library/samples/classification/test_jpeg_classification': '322dd07736f409cba02416782475c0dc2b5951435ddbb6d0671d3cda8fac0c0e', '/home/root/Vitis-AI/examples/vai_library/samples/classification/test_performance_classification': 'b9f52e4fd21d6526a8ac1e73b6e839b28308368451c4bb30e845a9f96343f1b4', '/lib/firmware/xilinx/kv260-benchmark-b4096-m3/kv260-benchmark-b4096-m3.bit.bin': 'a48a25265d280f268300f627e6408ec56707a70d4deebe46e358500cf17b2650', '/lib/firmware/xilinx/kv260-benchmark-b4096-m3/kv260-benchmark-b4096-m3.dtbo': '51ce617967e0c0657bcc2629f1a0a8efa1e4bad3f3bc8f0b1931aacb5bf91937', '/lib/firmware/xilinx/kv260-benchmark-b4096-m3/kv260-benchmark-b4096-m3.xclbin': '875ca912d87b2c993716f4c353265a9cf403b0c9890442610e64291787caafc3', '/lib/firmware/xilinx/kv260-benchmark-b4096-m3/shell.json': '802dbc8b3f118313a5a74df46f56dc550a61b687dfd484fc6a8fd5ac7895c344', '/etc/dfx-mgrd/default_firmware': '7e78c8b095e77ec1fdfa5cdd8b26192d8feb849405b55a50e8fe6562a35f18b2', '/lib/systemd/system/dfx-mgr.service': 'a5ba3c45b4bddf9a818d7aa7b34507cc0321296d90e51288f5d930e2293866b6'}
+actual={p:hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in expected}
+print(json.dumps(actual,indent=2),flush=True)
+assert actual==expected,'Baseline file hash differs'

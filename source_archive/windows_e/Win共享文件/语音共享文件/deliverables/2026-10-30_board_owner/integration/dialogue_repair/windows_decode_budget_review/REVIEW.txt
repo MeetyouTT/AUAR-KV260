@@ -1,0 +1,54 @@
+固定27B GPU驻留与显存预算只读审查（2026-10-31）
+
+结论
+现有partial GPU是给OmniVoice16共存留余量的实际布局，不能把当前约2288MiB空闲全部转给27B。存在同模型、小步增加GPU卸载的候选空间，但没有现成的更高卸载安全校准或同条件延迟A/B；本次不改配置、不重启服务、不调用推理、不压测GPU。首声等待中的ASR与LLM RPC分别约3–7.6秒、5.7秒，改善LLM布局不能消除ASR等待，也不能据此承诺首声提速。
+
+1. 当前控制链与约束
+production_model_host/manage.py的Start/Stop/Restart控制8797模型主机；production_runtime.py复用固定项目11435，仅自身TTS及显式、已证明属于自身的27B可以释放。普通Stop留下27B；Restart显式释放自有27B后按TTS先暖、27B后装载重新启动。它不会重启11435 daemon，因此Restart本身不应用新的fit目标。
+
+project_ollama.py将ollama_runtime.local.json的fit_target_mib=4096传为项目daemon创建环境LLAMA_ARG_FIT_TARGET。单位MiB，作用为自动装载布局的目标余量；不是物理占位分配，也不是OLLAMA_GPU_OVERHEAD。健康的旧daemon不会被ensure改环境；配置不匹配则needs_controlled_restart，不能编辑JSON后把REUSED当生效。当前创建记录绑定Ollama0.40.13、原GPU UUID、可执行文件SHA、配置SHA及PID/创建时间/命令/监听。
+
+原GPU准入继续adaptive/enforcing：reserve768MiB；暖LLM额外512、冷LLM12032；暖TTS额外384、冷TTS5120；最多2个pending，最多等待5秒，内存样本有效期0.75秒。每种phase最多一个活动lease，跨phase额外峰值也计入；不是只看请求自己的预算。GPU门仅控制本项目，不能阻止外部程序随后分配。
+
+原启动先证明冷TTS容量，再在同一300秒总期限内暖唯一TTS、检查同一PID，最后预装载27B并检查两个暖态准入。预装载和正常请求均ctx2048、keep_alive=-1；固定27B/IQ4_XS、single-slot、OmniVoice16不变。num_gpu未被请求强制指定。不能用正数num_gpu绕过自动fit布局，不能缩context、换量化或减少TTS步数来取得本任务的结果。
+
+2. 显存账（MiB为1024^2字节）
+主控本轮只读快照：总16311MiB、已用14023MiB、空闲2288MiB；不是本审查独立实时采样。
+27B /api/ps size_vram 11,579,215,051B = 11042.800MiB；size14,528,848,851B不能直接当作纯GPU权重或精确CPU权重。
+TTS暖态reserved2,057,306,112B = 1962MiB；已测最大新增211,812,352B = 202MiB；暖态预算仍384MiB，不缩小。
+TTS冷reserved峰4,972,347,392B = 4742MiB；冷预算5120MiB，另加reserve768，需5888MiB空闲。当前2288不足以在27B继续驻留时重建冷TTS，正常恢复仍需原有显式自有模型释放/TTS-first流程。
+已用减27B GPU与TTS暖reserved，算术残差约1018.200MiB。它混合整卡/框架统计范围与采样时点，不可精确归因为其他模型，也不再重复加一次已驻留TTS。
+
+以“其他分配完全不变”为假设，当前空闲相对准入线的算术余量：
+  仅暖LLM：2288-(768+512)=1008MiB；
+  仅暖TTS：2288-(768+384)=1136MiB；
+  LLM与暖TTS重叠：2288-(768+512+384)=624MiB。
+这些是瞬间门槛余量，不是可分配承诺，更不能把624/1008设为必然可增加的模型空间。
+
+3. 历史实际证据与边界
+2026-10-29_parallel_interaction/gpu_calibration.json及public_gpu_*：原更高GPU驻留13,874,694,716B（13231.941MiB）时，仅一组公开短输入采样最低空闲210MiB。2GiB中间布局observation_layout_ready.json报告13,594,693,466B驻留、采样峰值已用15742MiB，但只观察0.64秒且标READY_FOR_CALIBRATION_NOT_FINAL，不是可用生产预算。
+
+4096布局驻留11,579,215,051B；公开短/中/长非缓存三组最低空闲1932MiB，最终adaptive三组最低1656MiB，首PCM5.063/4.438/5.235秒。原记录明确非同内容配对延迟A/B、设备采样可能错过峰值、只有有限冷启动观察。因此不能用它证明offload降低了多少速度，或证明任何外部负载下安全。
+
+既有project_ollama_stderr.log最近一次装载元数据（2026-10-30T23:48:59-07:00附近，line60840/61037起）明确4096fit、53/66层GPU，CUDA模型10665.30MiB，Host模型2725.72MiB；GPU KV55.25、CPU KV12.75、GPU RS118.45、compute203.80MiB。此布局的buffer总量与本轮/api/ps GPU数接近；它是已有装载日志证据，并非本次重新读取活动runner。当前runner精确层数仍应由主控在后续维护窗口确认。日志也出现比NVML总16311不同的CUDA可用总16283；跨API不能假定逐MiB完全相同。
+
+回到历史更高驻留将增加约2189.140MiB。套用当前快照只余约98.860MiB，连768基本余量都不满足。套用历史最终最低1656MiB，保持暖LLM1280门仅余376MiB；并发1664门已无增加空间。峰值时剩余低于门不必表示当时请求违规（既有分配已物化），但它表明不能仅凭空闲快照削掉1–2GiB。
+
+4. 最小可回退试验方案（仅供主控，未执行）
+只有主控认为需要时，在业务空闲、停止新会话准入且无生成/播放/后台摘要/活动lease时串行试验。先保存两份配置原字节及SHA、模型主机状态/归属、11435和其他模型归属、GPU基线、相同公开测试输入hash与token计数。真实库/板端入口不切换，不复制权重、不新增第二TTS/runner。
+
+同一历史fit试算还列出53层11042MiB、54层11199MiB，增加一层约157MiB；54层在该次装载的预计余量3973MiB，因不满足4096而退到53。因此最小首档可取3968MiB（4096减128）作为“未校准候选”，目标只观察53→54一层，而非直接3072/2048。这只是基于当次free15172MiB的试验档，不是安全初值或已知收益；新装载时free不同，可能仍53或增加更多，必须据实际日志决定。保持gpu_runtime的768/512/12032/384/5120全部不变，为新布局另给候选校准来源；不以num_gpu=54强制绕过fit。若实际仅多一层，历史最低1656减157约1499MiB，相对暖LLM1280线仅余219MiB，仍需实测。单层时延收益没有现成A/B，可能很小。
+
+应用前必须显式通过正常模型主机Stop -ReleaseOwnedModel，确认自身TTS结束、27B释放、11435无runner，再由主控使用经fresh owner复核的“仅项目daemon”维护方式重新创建11435。现有manage.py没有daemon重启动作；旧apply_layout_probe.py依赖8792和旧PID基线，旧stop_project_daemon.ps1含Stop-Process，不能直接在当前8797生产执行。若没有经本轮审阅的daemon生命周期控制，应停在候选计划，不用批量进程名终止或伪称已应用。
+
+新daemon必须重新证明原exe/GPU/version/唯一11435/新配置创建记录，按现有8797正式Start执行TTS-first，原300秒、唯一实例锁、cold/steady准入均保留。固定LLM/ctx2048/single-slot/think设置/OmniVoice16/reference和其他模型保持。先核实际GPU层/CPU与GPU buffer/size_vram是否改变；未改变时无需重复性能测量。
+
+有布局差异后，仅主控进行小组串行公开同内容A/B：相同消息、上下文长度、输出token预算，冷加载和暖请求分列；至少记录load/prompt_eval/eval计数及耗时、LLM RPC、首个可交付PCM和总耗时、两模型实际峰值/整卡minfree、GPU wait/reject、TTS唯一PID。短/长非缓存TTS及原允许的相邻/重叠路径均应在原准入下通过；峰值/外部波动超过余量、OOM/冷恢复失败、持续busy、内容合同/完整ACK退化立即否决。当前12032MiB冷LLM预算还必须覆盖新布局实测峰值；不能只改目标后让旧冷预算低估。
+
+恢复也只处理本轮证明属于自身的TTS/27B/11435：空闲正常关闭并显式释放新布局，恢复两份原配置字节与SHA，重新创建项目daemon，再原顺序启动8797；确认4096创建记录、原驻留布局/双暖态准入、其他模型原归属、板端重新连接。若ownership发生变化，停止自动步骤、保持已拒绝准入状态由主控重新确认；不卸载其他模型、不恢复数据库快照、不按旧PID行动。
+
+建议优先级
+保留当前4096生产配置。若首句请求路径优化后LLM仍主导，可在维护窗口审阅上述小步试验；它可能因CPU/GPU混合减少而有收益，也可能被offload步长、启动时free差异、WDDM统计或其他负载抵消。本报告不提供可直接运行的重启/调参脚本，也不把LLM整段RPC等同于实际扬声器首音。
+
+证据索引
+本目录budget.json记录上述算术与主控输入归属；source_manifest.json列只读来源绝对路径/SHA/长度。未导出请求正文、环境秘密、PCM、身份或数据库，也未复制任何模型文件。

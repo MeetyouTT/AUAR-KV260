@@ -1,0 +1,1 @@
+cmd_net/netfilter/xt_conntrack.ko := /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ld -r  -EL  -maarch64elf  --build-id=sha1  -T scripts/module.lds -o net/netfilter/xt_conntrack.ko net/netfilter/xt_conntrack.o net/netfilter/xt_conntrack.mod.o;  true

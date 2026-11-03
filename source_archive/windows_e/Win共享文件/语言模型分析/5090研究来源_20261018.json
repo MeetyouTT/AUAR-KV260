@@ -1,0 +1,201 @@
+{
+  "study_date": "2026-10-18",
+  "hardware": {
+    "target": "RTX 5090 Laptop 24GB",
+    "os": "Windows",
+    "target_benchmark_performed": false
+  },
+  "voice_preference": "允许更换引擎，优先接近现有汐蓝声线",
+  "status": "研究完成；候选待实测",
+  "sources": [
+    {
+      "id": "S1",
+      "title": "NVIDIA RTX 5090 Laptop / desktop specifications",
+      "url": "https://www.nvidia.com/en-us/geforce/laptops/50-series/",
+      "source_type": "官方规格",
+      "finding": "Laptop 24GB；桌面32GB另见关联资料",
+      "limitation": "实际功耗、散热与系统负载未知",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S2",
+      "title": "DFlash official repository",
+      "url": "https://github.com/z-lab/dflash",
+      "source_type": "作者仓库",
+      "finding": "公开Qwen3.8-27B DFlash2草稿",
+      "limitation": "Huihui目标兼容与接受率待测",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S3",
+      "title": "DFlash paper",
+      "url": "https://arxiv.org/abs/2602.06036",
+      "source_type": "论文",
+      "finding": "草稿与目标验证机制",
+      "limitation": "论文加速比不可外推整机语音",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S4",
+      "title": "llama.cpp DFlash2 support PR",
+      "url": "https://github.com/ggml-org/llama.cpp/pull/27342",
+      "source_type": "上游实现",
+      "finding": "DFlash2支持合并记录",
+      "limitation": "需固定版本并验证Windows构建",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S5",
+      "title": "Qwen3.8-27B desktop 5090 experiment",
+      "url": "https://github.com/LukasParke/qwen38-27b-5090",
+      "source_type": "社区实验",
+      "finding": "开放文本114–127 token/s是作者报告",
+      "limitation": "桌面、不同权重、非语音、非目标机实测",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S6",
+      "title": "CosyVoice",
+      "url": "https://github.com/QwenAudio/CosyVoice",
+      "source_type": "官方仓库",
+      "finding": "中文声线、风格与双流候选",
+      "limitation": "所选API组合需要逐项复现",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S7",
+      "title": "CosyVoice.cpp",
+      "url": "https://github.com/Lourdle/cosyvoice.cpp",
+      "source_type": "社区实现",
+      "finding": "Windows/CUDA和音频流输出",
+      "limitation": "Blackwell未见该文档测试；预编译CUDA噪声问题",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S8",
+      "title": "CosyVoice.cpp tooling",
+      "url": "https://github.com/Lourdle/cosyvoice.cpp/blob/main/docs/TOOLS.md",
+      "source_type": "社区接口文档",
+      "finding": "完整input字符串与音频分块HTTP",
+      "limitation": "连续文字流入支持未确认",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S9",
+      "title": "Qwen3-TTS",
+      "url": "https://github.com/QwenLM/Qwen3-TTS",
+      "source_type": "官方仓库",
+      "finding": "Base声线克隆；型号间指令能力不同",
+      "limitation": "97ms不是整条交互延迟",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S10",
+      "title": "omnivoice-fast",
+      "url": "https://github.com/pavanyellow/omnivoice-fast",
+      "source_type": "社区实验",
+      "finding": "同系列OmniVoice流式加速候选",
+      "limitation": "114ms来自H100 80GB实验，未测用户设备",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S11",
+      "title": "MiniCPM-o 4.5 deployment",
+      "url": "https://github.com/OpenBMB/MiniCPM-V/blob/main/docs/minicpm_o4dot5_en.md",
+      "source_type": "官方仓库",
+      "finding": "中文参考声线；Python与C++路径不同",
+      "limitation": "Python演示至少28GB要求，24GB选量化C++评估",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S12",
+      "title": "MiniCPM-o 4.5 paper",
+      "url": "https://arxiv.org/abs/2604.27393",
+      "source_type": "论文",
+      "finding": "1秒块与量化C++作者实验",
+      "limitation": "RTF不是说完话到有效开口延迟",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S13",
+      "title": "sherpa-onnx",
+      "url": "https://github.com/k2-fsa/sherpa-onnx",
+      "source_type": "官方仓库",
+      "finding": "本地流式中文识别与多平台",
+      "limitation": "KV260实时性和中文尾字质量待测",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S14",
+      "title": "TEN VAD",
+      "url": "https://github.com/TEN-framework/ten-vad",
+      "source_type": "作者仓库",
+      "finding": "声学VAD候选",
+      "limitation": "静音不等同语义结束",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S15",
+      "title": "TEN Turn Detection",
+      "url": "https://github.com/TEN-framework/ten-turn-detection",
+      "source_type": "作者仓库",
+      "finding": "语义结束判断候选",
+      "limitation": "中文项目录音的准确率及成本待测",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S16",
+      "title": "LiveKit turn detector",
+      "url": "https://docs.livekit.io/agents/logic/turns/turn-detector/",
+      "source_type": "官方文档",
+      "finding": "中文和结束等待的配置参照",
+      "limitation": "默认等待不可视为零延迟",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S17",
+      "title": "PersonaPlex official model card",
+      "url": "https://huggingface.co/nvidia/personaplex-7b-v1",
+      "source_type": "官方模型卡",
+      "finding": "英语全双工语音模型",
+      "limitation": "非中文适配证明；公开测试硬件A100 80GB",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S18",
+      "title": "Context-Spanning",
+      "url": "https://github.com/mindlogic-ai/Context-Spanning",
+      "source_type": "作者仓库及论文",
+      "finding": "语音前台加异步推理后台",
+      "limitation": "两卡实验；快速开口不代表任务结果已得到",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S19",
+      "title": "Freeze-Omni",
+      "url": "https://github.com/VITA-MLLM/Freeze-Omni",
+      "source_type": "作者仓库及论文",
+      "finding": "冻结LLM加语音模块",
+      "limitation": "不是任意27B GGUF直接插拔",
+      "checked_date": "2026-10-18"
+    },
+    {
+      "id": "S20",
+      "title": "WebRTC audio processing",
+      "url": "https://webrtc.googlesource.com/src/+/refs/heads/main/modules/audio_processing/",
+      "source_type": "官方源码",
+      "finding": "AEC实现入口",
+      "limitation": "具体MCP01录放路径和回声时延待测",
+      "checked_date": "2026-10-18"
+    }
+  ],
+  "related_primary_urls": [
+    "https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5090/",
+    "https://github.com/OpenBMB/llama.cpp-omni",
+    "https://github.com/QwenAudio/CosyVoice/blob/main/example.py",
+    "https://github.com/NVIDIA/personaplex",
+    "https://arxiv.org/abs/2602.06053",
+    "https://arxiv.org/abs/2609.33443",
+    "https://arxiv.org/abs/2411.00774"
+  ]
+}

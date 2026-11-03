@@ -1,0 +1,58 @@
+
+import hashlib,importlib.util,json,subprocess
+from pathlib import Path
+def digest(raw):return hashlib.sha256(raw).hexdigest()
+def owner(pid):
+ p=Path('/proc')/str(pid);fields=p.joinpath('stat').read_text().rsplit(')',1)[1].split();raw=p.joinpath('cmdline').read_bytes()
+ assert fields[0]!='Z' and raw and raw.endswith(bytes([0]))
+ return dict(pid=pid,birth=fields[19],cmdline_sha256=digest(raw),argv=[v.decode() for v in raw.split(bytes([0])) if v])
+unit='aura-avatar-ui.service'
+properties=dict(row.split('=',1) for row in subprocess.check_output(['systemctl','show',unit,'--no-pager',
+ '--property=MainPID,ActiveState,SubState,Job,Restart,SendSIGKILL,TimeoutStopUSec,KillMode,KillSignal,ExecStart,FragmentPath,DropInPaths'],text=True).splitlines() if '=' in row)
+assert properties['MainPID']=='487238' and properties['ActiveState']=='active' and not properties.get('Job')
+boot=Path('/proc/sys/kernel/random/boot_id').read_text().strip();assert boot==EXPECTED['boot_id']
+supervisor=owner(487238);assert supervisor['argv']==EXPECTED['old_supervisor']['argv']
+launch=json.loads(Path(EXPECTED['runtime']+'/launch.json').read_text());child=owner(launch['pid'])
+assert child['argv']==launch['args'] and child['argv'][2]==EXPECTED['runtime']+'/aura/tools/board_avatar_pan.py'
+camera=owner(260102);assert camera['birth']=='784437'
+assert digest(Path(EXPECTED['startup']).read_bytes())==EXPECTED['startup_sha256']
+changed=[];alias_changed=[]
+for relative,expected in EXPECTED['pins'].items():
+ path=Path(EXPECTED['runtime']+'/aura/'+relative);raw=path.read_bytes()
+ if digest(raw)!=expected:changed.append(relative)
+ row=EXPECTED['source_aliases'].get(str(path))
+ if row:
+  target=Path(row['resolved'])
+  if str(path.resolve(strict=True))!=row['resolved'] or str(target.resolve(strict=True))!=row['resolved'] or digest(target.read_bytes())!=expected:
+   alias_changed.append(relative)
+assert not changed and not alias_changed
+assert digest(Path(EXPECTED['launcher']).read_bytes())==EXPECTED['launcher_sha256']
+probe=Path(EXPECTED['safety_probe']);assert digest(probe.read_bytes())==EXPECTED['safety_probe_sha256']
+spec=importlib.util.spec_from_file_location('_round2_whitelisted_safety',str(probe));m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+safety=m.safety_snapshot();assert safety['ui_pid']==487238 and safety['camera_pid']==260102 and safety['pan_state']=='FAULT' and safety['pulse_us'] is None
+target=Path(EXPECTED['target']);manifest=json.loads(target.joinpath('assembly_manifest.json').read_text())
+assert manifest['inspection_sha256']==EXPECTED['inspection_sha256'] and len(manifest['candidate_files'])==356
+candidate_changed=[]
+for relative,row in manifest['candidate_files'].items():
+ path=target/relative
+ if not path.is_file() or path.stat().st_size!=row['bytes'] or digest(path.read_bytes())!=row['sha256']:
+  candidate_changed.append(relative)
+unit_paths=[properties['FragmentPath']]+properties['DropInPaths'].split()
+unit_pins={path:digest(Path(path).read_bytes()) for path in unit_paths}
+descriptor=json.loads(target.joinpath('launch.json').read_text())
+assert digest(json.dumps(descriptor,sort_keys=True,separators=(',',':')).encode())==EXPECTED['launch_canonical_sha256']
+result=dict(status='READ_ONLY_ROUND2_METADATA',boot_id=boot,properties=properties,supervisor=supervisor,child=child,
+ camera={k:camera[k] for k in ('pid','birth','cmdline_sha256')},safety=safety,original_pins=286,
+ original_component_changes=changed,original_alias_changes=alias_changed,unit_source_sha256=unit_pins,
+ candidate_files_checked=356,candidate_file_changes=candidate_changed,candidate_reusable=not candidate_changed,
+ candidate_inspection_sha256=manifest['inspection_sha256'],candidate_launch_canonical_sha256=EXPECTED['launch_canonical_sha256'],
+ launcher_sha256=EXPECTED['launcher_sha256'],model_requests=0,mutations=0,private_database_reads=0,
+ identity_or_image_or_dialogue_payload_transferred=False)
+env={}
+for raw in (Path('/proc')/str(supervisor['pid'])/'environ').read_bytes().split(bytes([0])):
+ if b'=' in raw:
+  k,v=raw.split(b'=',1)
+  if k.decode() in ('DISPLAY','XAUTHORITY','XDG_RUNTIME_DIR','DBUS_SESSION_BUS_ADDRESS'):env[k.decode()]=v.decode()
+result['display_environment']=env
+result['startup_keys']=list(json.loads(Path(EXPECTED['startup']).read_bytes()))
+print(json.dumps(result))

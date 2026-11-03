@@ -1,0 +1,43 @@
+{
+  "utc": "2026-10-02T15:52:09.351864+00:00",
+  "commands": [
+    {
+      "argv": [
+        "lsusb"
+      ],
+      "returncode": 0,
+      "output": "Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub\nBus 003 Device 007: ID 1c4f:0048 SiGma Micro Usb Mouse\nBus 003 Device 002: ID 27c6:5f91 Shenzhen Goodix Technology Co.,Ltd. Goodix FingerPrint Device\nBus 003 Device 004: ID 8087:0033 Intel Corp. \nBus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub\nBus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub\nBus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub\n"
+    },
+    {
+      "argv": [
+        "ip",
+        "-4",
+        "-j",
+        "address"
+      ],
+      "returncode": 0,
+      "output": "[{\"ifindex\":1,\"ifname\":\"lo\",\"flags\":[\"LOOPBACK\",\"UP\",\"LOWER_UP\"],\"mtu\":65536,\"qdisc\":\"noqueue\",\"operstate\":\"UNKNOWN\",\"group\":\"default\",\"txqlen\":1000,\"addr_info\":[{\"family\":\"inet\",\"local\":\"127.0.0.1\",\"prefixlen\":8,\"scope\":\"host\",\"label\":\"lo\",\"valid_life_time\":4294967295,\"preferred_life_time\":4294967295}]},{\"ifindex\":2,\"ifname\":\"wlp0s20f3\",\"flags\":[\"BROADCAST\",\"MULTICAST\",\"UP\",\"LOWER_UP\"],\"mtu\":1500,\"qdisc\":\"noqueue\",\"operstate\":\"UP\",\"group\":\"default\",\"txqlen\":1000,\"addr_info\":[{\"family\":\"inet\",\"local\":\"10.218.211.209\",\"prefixlen\":24,\"broadcast\":\"10.218.211.255\",\"scope\":\"global\",\"dynamic\":true,\"noprefixroute\":true,\"label\":\"wlp0s20f3\",\"valid_life_time\":3544,\"preferred_life_time\":3544}]},{\"ifindex\":3,\"ifname\":\"docker0\",\"flags\":[\"NO-CARRIER\",\"BROADCAST\",\"MULTICAST\",\"UP\"],\"mtu\":1500,\"qdisc\":\"noqueue\",\"operstate\":\"DOWN\",\"group\":\"default\",\"addr_info\":[{\"family\":\"inet\",\"local\":\"172.17.0.1\",\"prefixlen\":16,\"broadcast\":\"172.17.255.255\",\"scope\":\"global\",\"label\":\"docker0\",\"valid_life_time\":4294967295,\"preferred_life_time\":4294967295}]}]\n"
+    },
+    {
+      "argv": [
+        "ip",
+        "-4",
+        "route"
+      ],
+      "returncode": 0,
+      "output": "default via 10.218.211.147 dev wlp0s20f3 proto dhcp metric 600 \n10.218.211.0/24 dev wlp0s20f3 proto kernel scope link src 10.218.211.209 metric 600 \n169.254.0.0/16 dev wlp0s20f3 scope link metric 1000 \n172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown \n"
+    },
+    {
+      "argv": [
+        "ip",
+        "-4",
+        "route",
+        "get",
+        "192.168.50.2"
+      ],
+      "returncode": 0,
+      "output": "192.168.50.2 via 10.218.211.147 dev wlp0s20f3 src 10.218.211.209 uid 1000 \n    cache \n"
+    }
+  ],
+  "serial_ports": []
+}

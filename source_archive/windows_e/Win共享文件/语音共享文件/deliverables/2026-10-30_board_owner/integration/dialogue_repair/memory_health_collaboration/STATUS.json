@@ -1,0 +1,132 @@
+{
+  "status": "V14_STRUCTURED_CAMERA_NET_BACKLOG_REDUCTION_VERIFIED_PARTIAL_HEALTH_ONLY",
+  "updated_date_local": "2026-10-31",
+  "scope": "Read local source and metadata; synthetic tests only; root conversation remains sole hardware publisher",
+  "baseline_startup_sha256": "1129a2a7af2b401537710d1a67651c79961c1b10198f5625ae6802e7ac99fd77",
+  "v10_worker_observation": {
+    "completed": 0,
+    "discarded": 36,
+    "failure_streak": 32,
+    "last_delay_seconds": 60.0,
+    "evidence": "../balance_current.json",
+    "conclusion": "FAIL: this worker observation does not establish healthy processing; counts are process-local, not lifetime totals"
+  },
+  "latest_actual_evidence": "../first_wait_integration/actual_memory_v14_followup.json",
+  "latest_startup_sha256": "39b102a4a505db491cf06b90e3a5232bfb656c79cb0a3c221551d76d414a9a0a",
+  "observed_memory": {
+    "worker": {
+      "running": true,
+      "error_code": "",
+      "completed": 27,
+      "discarded": 0
+    },
+    "retry": {
+      "last_failure_code": "",
+      "failure_streak": 0,
+      "retry_in_seconds": 0.0,
+      "last_delay_seconds": 0.0
+    },
+    "summary_diagnostics": {
+      "state": "complete",
+      "stage": "complete",
+      "code": "none",
+      "error_class": "none",
+      "method": "structured_camera_counts"
+    },
+    "durable_committed_tasks": 298,
+    "valid_summaries": 298,
+    "backlog_events": 858,
+    "backlog_source_counts": [
+      {
+        "source": "assistant_played",
+        "count": 68
+      },
+      {
+        "source": "camera_observed",
+        "count": 607
+      },
+      {
+        "source": "device_event",
+        "count": 63
+      },
+      {
+        "source": "user_said",
+        "count": 120
+      }
+    ],
+    "non_camera_backlog_events": 251,
+    "oldest_backlog_age_seconds": 181566.79709887505,
+    "last_commit_age_seconds": 15.781260967254639,
+    "latest_16_task_counts": [
+      {
+        "state": "committed",
+        "error_code": "none",
+        "count": 16
+      }
+    ],
+    "active_bodies": 888,
+    "compacted_bodies_remaining": 0,
+    "unexplained_missing_bodies": 0,
+    "expected_migrated_command_markers": 1,
+    "overall": "PASS: structured camera summaries are committing and net backlog declines. NOT_VERIFIED: ordinary dialogue/free-form summaries and whole-library health. NOT_CLEARED: 858 pending."
+  },
+  "confirmed_issues": [
+    "Unchanged worker-wide cooldown can postpone healthy partitions after a true failure",
+    "Unchanged atomic segment selection can retain healthy companion data with a poison source; attempts=4 is not a retry cap"
+  ],
+  "work_in_progress": [
+    "Report-only update complete: matched v14 followup proves net structured-camera backlog reduction of 11 over 187.16 seconds",
+    "Ordinary dialogue/free-form production summarization not established by this window; non-camera backlog remains251",
+    "All pending work not cleared:858; no whole-library health or long-term throughput claim",
+    "Candidate source files remain frozen; no hardware, real database or model operation from this conversation"
+  ],
+  "readonly_script": "v14_validation_candidate/board_readonly_metadata_v14.py",
+  "candidates": [
+    "v14_validation_candidate/after/common/board_memory.py",
+    "v14_validation_candidate/after/board/runtime/board_memory_policy.py"
+  ],
+  "handoff": "v14_validation_candidate/HANDOFF.json",
+  "synthetic_tests": {
+    "targeted_passed": 34,
+    "regression_passed": 270,
+    "regression_skipped_posix": 1,
+    "stale_character_fixtures_deselected": 3,
+    "stale_fixtures_also_fail_unmodified_baseline": true
+  },
+  "production_touched": false,
+  "real_database_opened": false,
+  "model_calls": 0,
+  "report": "v14_validation_candidate/核查与候选说明.txt",
+  "candidate_frozen": true,
+  "rollback_note": "Rollback code modules as a matched set to v13 if necessary; retain same-boot generation fix, do not mix the new policy constant import with the old Store, and never restore business data.",
+  "historical_confirmed_issues": [
+    "CRITICAL synthetic reproduction: BoardSummaryClient resets generation to 1 with constant (same boot,memory-worker) owner, while persistent Windows InferenceHost retains prior generation. After >=2 previous calls, runtime restart receives stale_generation; old code collapses it to model_failed. Candidate uses same-boot monotonic generation without adding owner slots or weakening host checks.",
+    "Synthetic reproduction: validated model replies preempted/foreground_busy/superseded/cancelled become model_failed and wrongly increment retry failure streak when local cancellation predicate is false",
+    "Synthetic reproduction: validated remote deadline_exceeded becomes model_failed instead of deadline_exceeded",
+    "Presentation scrub replaces error with operation_failed; existing public probe drops non-numeric last_failure_code. New readonly script preserves only allowlisted structured codes."
+  ],
+  "actual_assessment": "v14_validation_candidate/ACTUAL_PROGRESS_ASSESSMENT.json",
+  "controlled_followup": {
+    "initial": "../first_wait_integration/actual_memory_v14_initial.json",
+    "followup": "../first_wait_integration/actual_memory_v14_followup.json",
+    "same_startup_and_all_reported_sources": true,
+    "seconds": 187.16511020299367,
+    "durable_summaries_before": 287,
+    "durable_summaries_after": 298,
+    "completed_before": 16,
+    "completed_after": 27,
+    "backlog_before": 869,
+    "backlog_after": 858,
+    "camera_before": 618,
+    "camera_after": 607,
+    "non_camera_before": 251,
+    "non_camera_after": 251,
+    "discarded_before": 0,
+    "discarded_after": 0,
+    "active_bodies_before": 871,
+    "active_bodies_after": 888,
+    "conclusion": "Structured-camera net consumption verified; active bodies also include new recent voice events and are not the overdue backlog count."
+  },
+  "report_update_complete": true,
+  "all_memory_acceptance_complete": false
+}

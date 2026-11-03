@@ -1,0 +1,90 @@
+{
+  "boot_id": "c006a771-c3e4-4d4f-97d7-ade3dd774619",
+  "camera": {
+    "unit": {
+      "Restart": "no",
+      "TimeoutStopUSec": "infinity",
+      "MainPID": "1333",
+      "Result": "success",
+      "ExecMainStatus": "0",
+      "KillMode": "process",
+      "SendSIGKILL": "no",
+      "ActiveState": "active",
+      "FragmentPath": "/etc/systemd/system/aura-camera-ui.service"
+    },
+    "pid": 1333,
+    "birth": 2352,
+    "config": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/board_camera_ui.proposed.json",
+    "config_sha256": "e137bbb7894ecebcaadc8e57abc4bd8794c80dc3b9c1f87f09389a53ef88af20",
+    "unit_sha256": "29786434df9bb9b94a8e640a7a48db47019c224d3876037ce27d3467bb2f5512",
+    "entry": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/face-source-v17/entry.py",
+    "entry_sha256": "f26be22cb640bf44a1bd81b66bb3fa014f5b847b13320781836bf3f173387623"
+  },
+  "gui": {
+    "unit": {
+      "Restart": "no",
+      "TimeoutStopUSec": "25s",
+      "MainPID": "15092",
+      "Result": "success",
+      "ExecMainStatus": "0",
+      "KillMode": "mixed",
+      "SendSIGKILL": "yes",
+      "ActiveState": "active",
+      "FragmentPath": "/etc/systemd/system/aura-avatar-ui.service"
+    },
+    "pid": 15092,
+    "birth": 107356,
+    "config": "/home/root/aura-device-skills-20261028/0cd7c3445a84475098b938d5b97175e0/startup/config.json",
+    "config_sha256": "69fa9b565e9e37cbe7d8cb5a6f2aaa071ee2fb2842845c2d7b6e1cd232f2e444",
+    "unit_sha256": "e2012104d6db817609d00f1c0a53091741fd99fbb46f6b97dd74d33851df17a3",
+    "entry": "/home/root/aura-device-skills-20261028/0cd7c3445a84475098b938d5b97175e0/startup/launcher.py",
+    "entry_sha256": "cd1680220b60f6120db1bc847ca59cfd445796ff37e48a3ba93efca65eddfd98"
+  },
+  "camera_health": {
+    "pid": 1333,
+    "capture_frames": 36116,
+    "capture_hz": 12.48,
+    "detection_hz": 9.91,
+    "camera_error": "",
+    "detector_error": ""
+  },
+  "schedule": {
+    "native_critical": true,
+    "owner_fenced": false,
+    "primary_calls": 28677,
+    "primary_period_overruns": 1
+  },
+  "optional": {
+    "yunet": {
+      "calls": 28505,
+      "overruns": 0,
+      "disabled": false
+    },
+    "sface": {
+      "calls": 2445,
+      "overruns": 0,
+      "disabled": false
+    }
+  },
+  "ui": {
+    "phase": "IDLE",
+    "audio_output_state": "IDLE_READY",
+    "playing": false,
+    "pending_job": null,
+    "ui_page": "vision"
+  },
+  "pan": {
+    "state": "FAULT",
+    "automatic_following": false,
+    "pulse_us": null
+  },
+  "handsfree": {
+    "enabled": false,
+    "microphone_open": false
+  },
+  "recording_state": "CANCELLED",
+  "transcription_pending": false,
+  "checkpoint_output": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/state/native-protection-checkpoint.json",
+  "operation_lock_exists": true,
+  "camera_entry_source": "\"\"\"Pinned v14 lazy fixed-anchor current-pixel ingress over the protected native entry.\"\"\"\nimport hashlib\nimport importlib.util\nimport json\nimport runpy\nimport sys\nfrom pathlib import Path\n\nOPS = Path('/home/root/aura-native-live-20261024/ops/be72669aa53de735')\nF = OPS/'pan-face-edge-v5'\nROOT = F/'face-source-v17'\nmanifest = json.loads((ROOT/'deployment-manifest.json').read_text())\nassert all(hashlib.sha256(Path(p).read_bytes()).hexdigest() == h for p, h in manifest['pins'].items())\nmeta = json.loads((OPS/'meta.json').read_text())\nsys.path.insert(0, str(Path(meta['candidate_root'])/'aura'))\n\n\ndef load(name, path):\n    spec = importlib.util.spec_from_file_location(name, path)\n    module = importlib.util.module_from_spec(spec)\n    sys.modules[name] = module\n    spec.loader.exec_module(module)\n    return module\n\n\nload('face_lock_v14', ROOT/'face_lock.py').install()\nload('face_timing_v14', ROOT/'face_timing.py').install()\nstages=load('stage_timing_v17', ROOT/'stage_timing.py');stages.install()\nfrom board.vision.dpu_yunet import DpuYuNet\nfrom board.vision.dpu_vision_runtime import yunet_outputs\nload('fast_yunet_input', ROOT/'fast_yunet_input.py')\nfrom board.vision.reference_faces import YuNetCompat,bgr_image\nload('direct_yunet_input', ROOT/'direct_yunet_input.py').install(\n    DpuYuNet,yunet_outputs,stages.measured,YuNetCompat,bgr_image)\nload('face_flow', ROOT/'face_flow.py')\nsource = load('face_source', F/'face_source.py')\nsource.observation = load('face_observation_v14', ROOT/'face_observation.py').observation\nload('raw_capture_v14', ROOT/'raw_capture.py').install(source)\nentry = F/'native-operator-v1/native_entry_operator.py'\nsys.argv = [str(entry)]\nrunpy.run_path(str(entry), run_name='__main__')\n"
+}

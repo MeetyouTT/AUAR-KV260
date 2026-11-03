@@ -1,0 +1,68 @@
+Ordinary dialogue TTS sentence delivery candidate
+
+Exact baseline: startup ac9be342ffbf933a7e044e99f74ce6ddc45b947970f04741e3534744644bc1f7,
+374 production pins. Only board_dialogue.py and audio/board_dialogue_jobs.py are
+overridden here; the separately reviewed read-only Store guard is mandatory.
+No capture worker, PCM input queue, model parameter, avatar, identity, grant,
+summary/retention or schema/state-machine change is made by this overlay.
+
+Confirmed previous wait: ordinary Jobs ASR -> routing/analysis enqueue -> complete
+LLM JSON -> sequential TTS of every sentence -> complete plan -> audio packets.
+Normal wake capture is recognized once in Jobs; prepare_text does not repeat ASR.
+The historical voice-first submitted counter is not incremented in its override;
+submitted=0 cannot establish that ASR never ran. This overlay leaves that separate
+counter unchanged and adds an actual per-job asr_calls/asr_completed observation.
+
+New interface: prepare_text(..., chunk_sink=None). None retains the original
+buffered audio path and native-rate support. Ordinary Jobs passes its existing
+reply_sink when no explicit audio_converter is configured. A declared converter
+retains the original buffered bridge path. No implicit resampling is introduced.
+
+Before any streamed sound: validate complete LLM JSON/reply, enforce original
+player whole-text <=240 characters, preflight ALL sentence boundaries, require
+the new check_prepared_turn_current API, and call Store.generated as before.
+One token is then used for each chunk and for the final complete PlaybackPlan.
+Every sentence is checked before TTS and after TTS/before sink. Every ordinary
+stream event/packet admission rechecks durable authority, including after a
+128-event queue backpressure wait. SQL checks run outside the jobs condition.
+The local FSM cue generating path is not switched to awaiting-playback checks.
+
+Streaming requires native 24kHz mono PCM16 and the existing <=720000 samples
+player limit; model rates changing mid-turn or non24k fail before such a chunk
+is delivered. Complete SHA/sample/token receipt is bound only after all chunks;
+partial failure clears queued events and cannot commit assistant_played. A
+queued network end is not a playback ACK. Already emitted/physically played
+audio cannot be retracted after an independent forget/correction/revocation.
+
+Metadata only: board_business.dialogue.latency reports job-worker-origin ASR,
+admission, route and speaker-analysis ENQUEUE time, plus preparation context,
+LLM RPC, TTS RPC/call counts, first queued PCM and whole worker duration.
+speaker_first_audio_measured=false explicitly distinguishes these observations
+from a real speaker/sink first-audio measurement. No speech, IDs, PCM, prompt or
+source identifiers are copied into timing diagnostics. Failed preparation timing
+may remain only in controller.last_prepare_metrics if prepare_text raises before
+Jobs collects it; this is an observation limitation, not a playback bypass.
+
+Scope and performance limits: full validated LLM output is still awaited. TTS
+requests remain serial; this overlaps playback of sentence1 with later synthesis.
+One-sentence responses have little remaining synthesis to overlap. Identity/local
+sequence DIALOGUE_ROUTE fallback remains its original buffered path. No real
+latency/ASR/speaker/listening/long-run acceptance is claimed by this agent.
+
+Verification: 57 focused checks passed (14 controller/jobs fake inference,
+25 independent synthetic SQLite streaming contracts,18 prepared Store API).
+Contracts include forget/correct/clear/revoke, between same-sentence packets,
+backpressure waits, full receipt ACK, second-TTS failure and default no-sink mode.
+The separate legacy controller/jobs suite had 70 passes and four stale old-name
+fixtures failing; the same four cases were reproduced on the unmodified main
+baseline. Those historical diagnostics are not labelled as a passing full suite.
+
+Run from anywhere using the existing pytest interpreter; tests set their own
+project dependency path (no externally pre-set PYTHONPATH required):
+C:/Users/35870/.codex/visualizations/2026/10/09/01a12110-3ba4-7651-b3d7-2e6560916eb6/omnivoice-runtime-py310/Scripts/python.exe
+-B -m pytest -q -p no:cacheprovider
+<project>/deliverables/2026-10-30_board_owner/integration/response_latency/streaming_candidate/tests
+<project>/deliverables/2026-10-30_board_owner/integration/response_latency/memory_candidate/tests/test_prepared_turn.py
+
+Deploy all THREE pinned modules together: these two plus memory_candidate's
+common/board_memory.py. Root is the only publisher and actual TTS/device runner.

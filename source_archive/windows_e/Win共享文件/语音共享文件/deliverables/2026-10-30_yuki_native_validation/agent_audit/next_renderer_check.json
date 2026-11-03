@@ -1,0 +1,167 @@
+{
+  "task": "Read-only next-renderer source comparison after NekoMote mask failure",
+  "date": "2026-10-30",
+  "scope": {
+    "no_engine_download": true,
+    "no_build": true,
+    "no_board_connection": true,
+    "no_source_modification": true,
+    "no_render_claim": true
+  },
+  "summary_zh": "artemis-compat更值得做下一轮组合变形审计：它实际解析combinatorList/rawMeshList并按变量求值4×4网格，KrkrSDL3插件没有这三类字段的消费者。遮罩方面，artemis对容器来源仍收集全部后代可绘制层，随后采样未遮罩alpha，未证明避开NekoMote的自包含来源问题；Krkr只调用标签节点自身draw，不递归容器来源，复合遮罩更弱。artemis还缺hair/bust物理，不能视为完整替换。",
+  "krkrsdl3": {
+    "commit": "766d2010c811c6bdafa9085623fcd7893216247e",
+    "mesh_combinator": {
+      "implemented": false,
+      "inspected_sources": [
+        {
+          "key": "kemfile",
+          "chars": 10307,
+          "source_symbols": []
+        },
+        {
+          "key": "kfilecpp",
+          "chars": 91647,
+          "source_symbols": []
+        },
+        {
+          "key": "plugins/emoteplayer/emoteframeselect.h",
+          "chars": 1525,
+          "source_symbols": []
+        },
+        {
+          "key": "plugins/emoteplayer/emotegeometry.h",
+          "chars": 14095,
+          "source_symbols": []
+        },
+        {
+          "key": "kemphys",
+          "chars": 14529,
+          "source_symbols": []
+        },
+        {
+          "key": "kemplayer",
+          "chars": 7997,
+          "source_symbols": []
+        },
+        {
+          "key": "kemclass",
+          "chars": 51889,
+          "source_symbols": []
+        },
+        {
+          "key": "plugins/emoteplayer/emoteplayerclass.h",
+          "chars": 12478,
+          "source_symbols": []
+        },
+        {
+          "key": "kemrunner",
+          "chars": 50790,
+          "source_symbols": []
+        },
+        {
+          "key": "plugins/emoteplayer/emoterunner.h",
+          "chars": 7683,
+          "source_symbols": []
+        }
+      ],
+      "judgment": "No meshCombinator/combinatorList/rawMeshList consumer exists in the 10 examined E-mote plugin source/header files. Frame bp and separate meshCombine fields are present; these are not equivalent to the missing resource-backed combinator programs.",
+      "evidence": [
+        {
+          "url": "https://github.com/krkrsdl3/krkrsdl3/blob/766d2010c811c6bdafa9085623fcd7893216247e/plugins/emoteplayer/emotefile.cpp#L535",
+          "fact": "Frame parser reads bp."
+        },
+        {
+          "url": "https://github.com/krkrsdl3/krkrsdl3/blob/766d2010c811c6bdafa9085623fcd7893216247e/plugins/emoteplayer/emotefile.cpp#L600",
+          "fact": "Node parser reads meshCombine separately."
+        }
+      ]
+    },
+    "stencil_sources": {
+      "entire_descendant_closure": false,
+      "collection": "stencilCompositeMaskLayerList resolves each label through currentNode->_rootmotion->getNodeByName and refMtn->getNodeRef; only those named refs are stored.",
+      "render": "For each named ref, invokes maskLayer->draw(renderer,maskTarget,lim,nullptr). This is not emotemotionref::draw's recursive motion traversal.",
+      "limitations": "emotenoderef::draw immediately rejects !isIcon. Type3 motion/container sources are not thereby expanded into all their drawable descendants. The code comments explicitly exclude composite masks. There is no basis to claim this fixes Yuki's type3 source semantics.",
+      "evidence": [
+        {
+          "url": "https://github.com/krkrsdl3/krkrsdl3/blob/766d2010c811c6bdafa9085623fcd7893216247e/plugins/emoteplayer/emoterunner.cpp#L485",
+          "fact": "Named-source lookup, not descendant membership scan."
+        },
+        {
+          "url": "https://github.com/krkrsdl3/krkrsdl3/blob/766d2010c811c6bdafa9085623fcd7893216247e/plugins/emoteplayer/emoterunner.cpp#L637",
+          "fact": "Own-node draw requires isIcon; mask pass invokes the same draw with null maskTarget."
+        },
+        {
+          "url": "https://github.com/krkrsdl3/krkrsdl3/blob/766d2010c811c6bdafa9085623fcd7893216247e/plugins/emoteplayer/emoterunner.cpp#L831",
+          "fact": "Separate whole-motion draw recursively expands nested motions; the mask-source call does not call this function."
+        }
+      ]
+    }
+  },
+  "artemis_compat": {
+    "commit": "647135edebcc1b745231d6b95a1de6ae55c003a9",
+    "mesh_combinator": {
+      "implemented": true,
+      "parsing": "Parses field.combinatorList. rawMeshList is a normal or extra PSB resource; byte length must equal meshCount*128. Decodes float32LE interleaved XY 4x4 grids.",
+      "evaluation": "Maps each variable to a clamped adjacent-mesh interpolation and sums grid samples. Cached combinators are actually consumed by EmoteScene evaluation, with priority over frame bp.",
+      "supported": "meshType=1; entryType absent/default0; valid finite nondegenerate ranges, meshCount/neutralIndex and resource bounds; budgets entry8MiB, cumulative64MiB, <=4096 entries.",
+      "limits": "Same-domain ancestor meshCombine only in proven contexts; low meshSync channels/cc/unproven combine are recorded or degraded rather than equivalent full support.",
+      "evidence": [
+        {
+          "url": "https://github.com/Weiss-UltimateSavior/artemis-compat/blob/647135edebcc1b745231d6b95a1de6ae55c003a9/src/render/emote_combinator.cpp#L33",
+          "fact": "Preflight and raw-resource format checks."
+        },
+        {
+          "url": "https://github.com/Weiss-UltimateSavior/artemis-compat/blob/647135edebcc1b745231d6b95a1de6ae55c003a9/src/render/emote_combinator.cpp#L134",
+          "fact": "Actual rawMeshList decoding."
+        },
+        {
+          "url": "https://github.com/Weiss-UltimateSavior/artemis-compat/blob/647135edebcc1b745231d6b95a1de6ae55c003a9/src/render/emote_combinator.cpp#L193",
+          "fact": "Variable interpolation/sum evaluator."
+        },
+        {
+          "url": "https://github.com/Weiss-UltimateSavior/artemis-compat/blob/647135edebcc1b745231d6b95a1de6ae55c003a9/src/render/emote_scene.cpp#L602",
+          "fact": "Scene invokes evaluator and installs combinator patch."
+        },
+        {
+          "url": "https://github.com/Weiss-UltimateSavior/artemis-compat/blob/647135edebcc1b745231d6b95a1de6ae55c003a9/src/render/emote_scene.cpp#L1316",
+          "fact": "Explicit unsupported/degraded combine paths."
+        }
+      ]
+    },
+    "stencil_sources": {
+      "entire_descendant_closure_for_containers": true,
+      "collection": "Drawable label: picks nearest visible source by center distance. Container label with no drawable own content: collects every drawable l2 whose hierarchical key starts with container_key+'.'. It does not stop at nested stencil boundaries in this loop.",
+      "render": "Compositor::RenderStageMask renders raw source texture alpha with transformed/warped geometry, ignoring source effects/stage masks; comment explicitly avoids self-target sampling.",
+      "judgment": "Does not have NekoMote's same UnsupportedMask assertion, but source-plus-content self-inclusion can persist as a visual semantic error. Loading/rendering success must not be interpreted as correct source traversal.",
+      "fallback": "Unresolved source sets or sources that produce no mask return zero and can leave the content unmasked; this needs explicit verification rather than a PASS label.",
+      "evidence": [
+        {
+          "url": "https://github.com/Weiss-UltimateSavior/artemis-compat/blob/647135edebcc1b745231d6b95a1de6ae55c003a9/src/render/emote_scene.cpp#L1622",
+          "fact": "Nearest-source and container fallback source collection."
+        },
+        {
+          "url": "https://github.com/Weiss-UltimateSavior/artemis-compat/blob/647135edebcc1b745231d6b95a1de6ae55c003a9/src/render/emote_scene.cpp#L1640",
+          "fact": "Hierarchical-prefix descendant collection."
+        },
+        {
+          "url": "https://github.com/Weiss-UltimateSavior/artemis-compat/blob/647135edebcc1b745231d6b95a1de6ae55c003a9/src/render/compositor.cpp#L2218",
+          "fact": "Stage-alpha mask pass."
+        },
+        {
+          "url": "https://github.com/Weiss-UltimateSavior/artemis-compat/blob/647135edebcc1b745231d6b95a1de6ae55c003a9/src/render/compositor.cpp#L2273",
+          "fact": "Raw source alpha, no source-effect evaluation."
+        }
+      ]
+    },
+    "remaining_fundamental_gap": {
+      "hair_bust_physics": "not simulated",
+      "evidence": "https://github.com/Weiss-UltimateSavior/artemis-compat/blob/647135edebcc1b745231d6b95a1de6ae55c003a9/src/render/emote_player.cpp#L636"
+    }
+  },
+  "recommendation": {
+    "next_candidate_for_resource_backed_deformation": "artemis-compat",
+    "claim_boundary": "More promising for the 43 resource-backed meshCombinator fields, not an already compatible Yuki renderer. Mask source/content semantics and missing physics remain.",
+    "no_current_verification": "Neither project was built or run on Yuki or KV260 in this check; no runtime/GPU compatibility claim."
+  }
+}

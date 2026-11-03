@@ -1,0 +1,93 @@
+{
+  "boot_id": "215c4292-ce84-4828-9827-83c32ba66564",
+  "board_model": "ZynqMP SMK-K26 Rev1/B/A\u0000",
+  "root_compatible": "xlnx,zynqmp-sk-kv260-rev1\u0000xlnx,zynqmp-sk-kv260-revB\u0000xlnx,zynqmp-sk-kv260\u0000xlnx,zynqmp\u0000",
+  "i2c_adapters": {
+    "rc": 0,
+    "text": "i2c-1\ti2c       \tCadence I2C at ff030000         \tI2C adapter\ni2c-2\ti2c       \tZynqMP DP AUX                   \tI2C adapter\n"
+  },
+  "i2c_clients": [
+    {
+      "device": "1-002d",
+      "name": "usb5744",
+      "modalias": "i2c:usb5744",
+      "compatible": null,
+      "driver": "/sys/bus/i2c/drivers/usb5744"
+    },
+    {
+      "device": "1-0032",
+      "name": "da9130",
+      "modalias": "of:NpmicT(null)Cdlg,da9130",
+      "compatible": "dlg,da9130\u0000",
+      "driver": null
+    },
+    {
+      "device": "1-0033",
+      "name": "da9131",
+      "modalias": "of:NpmicT(null)Cdlg,da9131",
+      "compatible": "dlg,da9131\u0000",
+      "driver": null
+    },
+    {
+      "device": "1-0040",
+      "name": "ina260",
+      "modalias": "of:Nina260T(null)Cti,ina260",
+      "compatible": "ti,ina260\u0000",
+      "driver": "/sys/bus/i2c/drivers/ina260-adc"
+    },
+    {
+      "device": "1-0050",
+      "name": "24c64",
+      "modalias": "of:NeepromT(null)Cst,24c64Catmel,24c64",
+      "compatible": "st,24c64\u0000atmel,24c64\u0000",
+      "driver": "/sys/bus/i2c/drivers/at24"
+    },
+    {
+      "device": "1-0051",
+      "name": "24c64",
+      "modalias": "of:NeepromT(null)Cst,24c64Catmel,24c64",
+      "compatible": "st,24c64\u0000atmel,24c64\u0000",
+      "driver": "/sys/bus/i2c/drivers/at24"
+    }
+  ],
+  "device_tree_i2c_nodes": [
+    {
+      "node": "/proc/device-tree/axi/i2c@ff020000",
+      "compatible": "cdns,i2c-r1p14\u0000",
+      "status": "disabled\u0000",
+      "children": []
+    },
+    {
+      "node": "/proc/device-tree/axi/i2c@ff030000",
+      "compatible": "cdns,i2c-r1p14\u0000",
+      "status": "okay\u0000",
+      "children": [
+        "pmic@32",
+        "eeprom@50",
+        "pmic@33",
+        "eeprom@51",
+        "ina260@40"
+      ]
+    }
+  ],
+  "gpio_chips": [
+    {
+      "device": "gpiochip0",
+      "label": null,
+      "base": null,
+      "ngpio": null
+    },
+    {
+      "device": "gpiochip1",
+      "label": null,
+      "base": null,
+      "ngpio": null
+    }
+  ],
+  "gpioinfo": {
+    "unavailable": true
+  },
+  "commands_that_scan_or_write": 0,
+  "i2c_transactions_to_splitter": 0,
+  "gpio_writes": 0
+}

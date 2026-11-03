@@ -1,0 +1,128 @@
+{
+  "status": "INDEPENDENT_REVIEW_COMPLETE_NO_LATENCY_ADVANTAGE_DEMONSTRATED",
+  "reviewed_utc": "2026-10-31T13:09:40.300Z",
+  "reviewer_thread": "01a191ec-d0c3-77d0-904f-86e6cc9b2cb3",
+  "sole_board_operator_thread": "01a18bcd-1167-71a0-ba0b-d809148d39d9",
+  "recommendation": "KEEP_FORMAL_PARAFORMER; DO_NOT_REPLACE_WITH_SENSEVOICE_FOR_LATENCY_ON_THIS_EVIDENCE",
+  "scope": "Eight identical public synthetic WAVs, 2.28–3.72 seconds each; two rounds per model, three CPU threads, one extra isolated model process at a time, existing camera/GUI/memory workers retained, microphone paused.",
+  "evidence": [
+    {
+      "path": "actual_public_paraformer_1793451872678824600.json",
+      "sha256": "d0a4aced8bd2647c74cddbe1389d8b9f7139cf8e0810264ea98719753d1f89c7"
+    },
+    {
+      "path": "actual_public_sensevoice_1793451996860192500.json",
+      "sha256": "2a9158679c2752aaa20f9b75683c5c813841675e8c99826585de551028fabbca"
+    }
+  ],
+  "validated": {
+    "frozen_worker_matches": true,
+    "manifest_matches": true,
+    "model_hashes_match": true,
+    "pair_wav_hashes_match": true,
+    "original_model_unchanged": true
+  },
+  "metrics": [
+    {
+      "engine": "paraformer",
+      "utterances": 16,
+      "unique_audio_files": 8,
+      "rounds": 2,
+      "threads": 3,
+      "mean_decode_wall_ms": 6240.7266875,
+      "first_decode_wall_ms": 4710.512,
+      "second_round_mean_wall_ms": 6499.17375,
+      "total_decode_cpu_ms": 154284.382,
+      "recognizer_factory_wall_ms": 14572.611,
+      "isolated_process_peak_rss_mib": 414.88671875,
+      "literal_intent_edits": 6,
+      "literal_intent_characters": 214,
+      "background_activity_changed": true,
+      "worker_exit_code": 0,
+      "owners_unchanged": true
+    },
+    {
+      "engine": "sensevoice",
+      "utterances": 16,
+      "unique_audio_files": 8,
+      "rounds": 2,
+      "threads": 3,
+      "mean_decode_wall_ms": 6573.228,
+      "first_decode_wall_ms": 5541.04,
+      "second_round_mean_wall_ms": 6561.2015,
+      "total_decode_cpu_ms": 157435.686,
+      "recognizer_factory_wall_ms": 13731.38,
+      "isolated_process_peak_rss_mib": 522.2421875,
+      "literal_intent_edits": 4,
+      "literal_intent_characters": 214,
+      "background_activity_changed": true,
+      "worker_exit_code": 0,
+      "owners_unchanged": true
+    }
+  ],
+  "observed_comparison": {
+    "candidate_mean_decode_change_percent": 5.327926203946598,
+    "candidate_total_cpu_change_percent": 2.0425294894722335,
+    "candidate_process_peak_rss_change_percent": 25.875850900565855,
+    "interpretation": "No observed latency or CPU saving. Fixed order and changing background work prevent claiming these percentages are a stable causal model difference.",
+    "factory_load_excluded_from_decode": true,
+    "real_speech_end_to_end_latency_not_measured": true
+  },
+  "paired_text_review": [
+    {
+      "case": "S01",
+      "finding": "Both retain the request to introduce oneself in two sentences."
+    },
+    {
+      "case": "S02",
+      "finding": "Both write 林月 rather than intended 林悦. Baseline retains 喜悦的悦 with a repeated 喜; SenseVoice writes 喜悦的月, losing the character explanation. Candidate is not established as better for name memory."
+    },
+    {
+      "case": "S03",
+      "finding": "Both retain 三本书 and 二百五十毫升. Candidate omits baseline's extra 唉. Authored synthesis intent is not a human-gold transcript, so this is an observed textual difference rather than proven acoustic hallucination."
+    },
+    {
+      "case": "S04",
+      "finding": "Both retain both negations: 没有关灯 / 没有锁门."
+    },
+    {
+      "case": "S05",
+      "finding": "Both retain 更正 / 下午四点 / 不是三点."
+    },
+    {
+      "case": "S06-S08",
+      "finding": "Both retain remember, forget, blue key, shelf second level and location query semantics in these public fixtures; no command was routed to Store."
+    }
+  ],
+  "quality_limit": "107 normalized authored-intent characters repeated twice, not 214 independent human-gold characters. Small public synthetic set; no general accuracy pass, real voice, dialect, background speech or false-trigger acceptance.",
+  "restoration": {
+    "evidence": "../sensevoice_restored_followup.json",
+    "sha256": "8f63cb0afae06577e617722b2fd16cbc61c364df38260a33a18ec725effacb87",
+    "observed_mono": 54333.947815129,
+    "phase": "IDLE",
+    "listening": {
+      "enabled": true,
+      "state": "WAITING_SPEECH",
+      "conversation_entered": true,
+      "entry_mode": "direct_speech",
+      "wake_word_required": false,
+      "microphone_open": true,
+      "conversation_mode": "half_duplex",
+      "voice_barge_in": false
+    },
+    "runtime_faults": {
+      "count": 0,
+      "last": null
+    },
+    "capture_failures": 3,
+    "interpretation": "Later owner observation confirms WAITING_SPEECH and microphone open. Earlier immediate post-resume WAITING_SERVICE is preserved in PAIR evidence. Capture failures remain 3; this snapshot does not establish long-run stability."
+  },
+  "production_model_changed": false,
+  "privacy": {
+    "real_microphone_recorded": false,
+    "store_mutated": false,
+    "private_conversation_exported": false
+  },
+  "board_access_by_reviewer": false,
+  "followup": "Return evidence to the original optimization owner. Further priority, frontend scheduling, streaming ASR integration, or real speech trials require their own measured comparison; this result does not justify a production model switch."
+}

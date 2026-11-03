@@ -1,0 +1,556 @@
+--- baseline/board/identity/face_freshness_metrics.py
++++ candidate/board/identity/face_freshness_metrics.py
+@@ -0,0 +1,187 @@
++"""Bounded count/source-age recorder. Per-attempt wall/CPU durations are omitted."""
++import threading
++from collections import deque
++
++SCHEMA = 'aura-face-freshness-light-2'
++LIMIT = (1 << 63) - 1
++COUNTERS = ('offers', 'offers_accepted', 'offers_closed', 'latest_replaced', 'attempts',
++    'attempts_finished', 'active_attempts', 'slot_unavailable', 'input_ttl_discarded',
++    'publish_ttl_discarded', 'closed_after_detect_discarded', 'published',
++    'published_positive', 'published_negative', 'published_multiface', 'process_errors',
++    'callback_errors', 'consecutive_slot_rejections', 'maximum_consecutive_slot_rejections',
++    'invalid_source_ages', 'source_clock_pairs_rejected', 'definite_clipped_gap_intervals',
++    'observed_gap_intervals', 'post_commit_at_or_over_ttl', 'events_evicted', 'counter_saturation',
++    'cancelled', 'cancelled_closed', 'cancelled_expired', 'cancelled_deadline',
++    'cancelled_disabled', 'cancelled_busy', 'cancelled_other')
++EVENT_CODES = {'slot_unavailable': 1, 'input_ttl': 2, 'publish_ttl': 3,
++    'closed_after_detect': 4, 'gap': 5, 'invalid_source': 6, 'process_error': 7, 'closed': 8,
++    'cancelled': 9}
++CANCEL_REASON_CODES = {'other':0, 'closed':1, 'expired':2, 'deadline':3, 'disabled':4, 'busy':5}
++
++
++def integer(value):
++    return type(value) is int and 0 <= value <= LIMIT
++
++
++class FaceFreshnessMetrics:
++    def __init__(self, *, ttl_ms, event_capacity=16):
++        if not integer(ttl_ms) or not 1 <= ttl_ms <= 60000:
++            raise ValueError('Invalid TTL')
++        if type(event_capacity) is not int or not 1 <= event_capacity <= 64:
++            raise ValueError('Invalid event capacity')
++        self.ttl_ms, self.capacity = ttl_ms, event_capacity
++        self.lock = threading.Lock()
++        self.counters = dict.fromkeys(COUNTERS, 0)
++        self.closed = False
++        self.previous = None
++        self.events = deque(maxlen=event_capacity)
++        self.summaries = {name: {'count': 0, 'total_ms': 0, 'min_ms': None, 'max_ms': None, 'last_ms': None}
++            for name in ('input_source_age_ms', 'pre_commit_source_age_ms',
++                         'post_commit_source_age_ms', 'post_commit_interval_ms',
++                         'clipped_gap_lower_bound_ms', 'clipped_gap_upper_bound_ms')}
++
++    def inc(self, name, amount=1):
++        total = self.counters[name] + amount
++        if total > LIMIT:
++            total = LIMIT
++            if name != 'counter_saturation':
++                self.counters['counter_saturation'] = min(LIMIT, self.counters['counter_saturation'] + 1)
++        self.counters[name] = total
++
++    def event(self, kind, now=None, **values):
++        if len(self.events) == self.capacity:
++            self.inc('events_evicted')
++        self.events.append(dict(event_code=EVENT_CODES[kind], source_observed_ms=now, **values))
++
++    def summary(self, name, value):
++        if not integer(value):
++            self.inc('invalid_source_ages')
++            return
++        row = self.summaries[name]
++        if row['count'] == LIMIT or row['total_ms'] > LIMIT - value:
++            self.inc('counter_saturation')
++            return
++        row['count'] += 1
++        row['total_ms'] += value
++        row['min_ms'] = value if row['min_ms'] is None else min(row['min_ms'], value)
++        row['max_ms'] = value if row['max_ms'] is None else max(row['max_ms'], value)
++        row['last_ms'] = value
++
++    def mark(self):
++        # The existing service hook calls mark; no clock or lock is needed.
++        return None
++
++    def offer(self, *, accepted, replaced):
++        with self.lock:
++            if self.closed:
++                return
++            self.inc('offers')
++            self.inc('offers_accepted' if accepted else 'offers_closed')
++            if accepted and replaced:
++                self.inc('latest_replaced')
++
++    def begin(self, stamp_ms):
++        with self.lock:
++            if self.closed:
++                return None
++            self.inc('attempts')
++            self.inc('active_attempts')
++        return {'stamp_ms': stamp_ms, 'input_now_ms': None, 'pre_commit_check_now_ms': None,
++                'outcome_code': 0, 'finished': False, 'publication_observed': False,
++                'callback_started': False, 'callback_completed': False}
++
++    def publish(self, token, source_now_ms, face_count):
++        if type(token) is not dict or type(face_count) is not int or not 0 <= face_count <= 16:
++            raise ValueError('Invalid numeric observation')
++        with self.lock:
++            if self.closed or token['publication_observed']:
++                return
++            token['publication_observed'] = True
++            self.inc('published_positive' if face_count else 'published_negative')
++            if face_count > 1:
++                self.inc('published_multiface')
++            stamp, checked = token.get('stamp_ms'), token.get('pre_commit_check_now_ms')
++            if not (integer(stamp) and integer(checked) and integer(source_now_ms)
++                    and stamp <= checked <= source_now_ms):
++                self.inc('invalid_source_ages')
++                self.event('invalid_source')
++                self.previous = None
++                return
++            self.summary('pre_commit_source_age_ms', checked - stamp)
++            self.summary('post_commit_source_age_ms', source_now_ms - stamp)
++            if source_now_ms - stamp >= self.ttl_ms:
++                self.inc('post_commit_at_or_over_ttl')
++            previous = self.previous
++            if previous is not None:
++                old_stamp, old_observed = previous
++                if old_observed <= checked <= source_now_ms and old_stamp <= stamp:
++                    self.summary('post_commit_interval_ms', source_now_ms - old_observed)
++                    anchor = max(old_stamp + self.ttl_ms, old_observed)
++                    lower, upper = max(0, checked - anchor), max(0, source_now_ms - anchor)
++                    self.summary('clipped_gap_lower_bound_ms', lower)
++                    self.summary('clipped_gap_upper_bound_ms', upper)
++                    if lower:
++                        self.inc('definite_clipped_gap_intervals')
++                    if upper:
++                        self.inc('observed_gap_intervals')
++                        self.event('gap', source_now_ms, lower_ms=lower, upper_ms=upper)
++                else:
++                    self.inc('source_clock_pairs_rejected')
++            self.previous = (stamp, source_now_ms)
++
++    def finish(self, token):
++        if type(token) is not dict:
++            return
++        with self.lock:
++            if self.closed or token['finished']:
++                return
++            token['finished'] = True
++            self.inc('attempts_finished')
++            self.counters['active_attempts'] = max(0, self.counters['active_attempts'] - 1)
++            now, stamp = token.get('input_now_ms'), token.get('stamp_ms')
++            if integer(now) and integer(stamp) and now >= stamp:
++                self.summary('input_source_age_ms', now - stamp)
++            else:
++                self.inc('invalid_source_ages')
++            code = token.get('outcome_code')
++            reason = {1: ('input_ttl_discarded', 'input_ttl'), 2: ('slot_unavailable', 'slot_unavailable'),
++                3: ('publish_ttl_discarded', 'publish_ttl'), 4: ('closed_after_detect_discarded', 'closed_after_detect'),
++                5: ('published', None), 6: ('cancelled', 'cancelled')}.get(code, ('process_errors', 'process_error'))
++            self.inc(reason[0])
++            if code == 6:
++                cancellation = token.get('cancel_reason_code', 0)
++                name = next((name for name,value in CANCEL_REASON_CODES.items()
++                    if type(cancellation) is int and value == cancellation), 'other')
++                self.inc('cancelled_'+name)
++                self.event('cancelled', now if integer(now) else None, cancel_reason_code=CANCEL_REASON_CODES[name])
++            elif reason[1]:
++                self.event(reason[1], now if integer(now) else None)
++            if token.get('callback_started') and not token.get('callback_completed'):
++                self.inc('callback_errors')
++            if code == 2:
++                self.inc('consecutive_slot_rejections')
++                self.counters['maximum_consecutive_slot_rejections'] = max(
++                    self.counters['maximum_consecutive_slot_rejections'], self.counters['consecutive_slot_rejections'])
++            else:
++                self.counters['consecutive_slot_rejections'] = 0
++
++    def close(self):
++        with self.lock:
++            if not self.closed:
++                self.closed = True
++                self.event('closed')
++
++    def snapshot(self):
++        with self.lock:
++            summaries = {name: dict(row, mean_ms=row['total_ms']/row['count'] if row['count'] else None)
++                for name, row in self.summaries.items()}
++            return {'schema_version': SCHEMA, 'enabled': True, 'collecting': not self.closed,
++                'closed': self.closed, 'mode': 'COUNTS_AND_SOURCE_AGE_ONLY', 'ttl_ms': self.ttl_ms,
++                'per_attempt_wall_or_thread_cpu_collected': False,
++                'clock_scope': 'existing service source clock; assumes monotonic service millis; no independent clock comparison',
++                'gap_scope': 'pre-check/post-commit bounds clipped after previous post-commit observation; no head/tail extrapolation',
++                'post_commit_ttl_scope': 'observation age reaching TTL is not proof of accepting stale input at the original gate',
++                'snapshot_scope': 'recorder only; enclosing health caller may hold the shared service RLock',
++                'event_capacity': self.capacity, 'event_codes': dict(EVENT_CODES),
++                'cancel_reason_codes': dict(CANCEL_REASON_CODES),
++                'events': [dict(row) for row in self.events], 'counters': dict(self.counters), 'summaries': summaries}
+--- baseline/board/identity/face_targets.py
++++ candidate/board/identity/face_targets.py
+@@ -9,7 +9,9 @@
+ 
+ class FaceTargetService:
+     def __init__(self, factory, on_face, camera_epoch, *, lock=None, clock=millis,
+-                 interval_ms=200, ttl_ms=1000, minimum_score=.9, minimum_pixels=48):
++                 interval_ms=200, ttl_ms=1000, minimum_score=.9, minimum_pixels=48,
++                 freshness_metrics=False, slot_retry=False, retry_clock=time.monotonic):
++        if type(slot_retry) is not bool:raise ValueError('slot_retry must be an explicit bool')
+         self.factory,self.on_face,self.camera_epoch=factory,on_face,camera_epoch
+         self.lock=lock or threading.RLock();self.condition=threading.Condition(self.lock)
+         self.clock,self.interval,self.ttl=clock,interval_ms,ttl_ms
+@@ -22,6 +24,28 @@
+         self.continuity_key=None;self.continuity_stamp=None
+         self.attention=None
+         self.backend='CPU_YUNET'
++        self.slot_retry=slot_retry;self.retry_clock=retry_clock
++        self.retry_stats={'enabled':slot_retry,'rounds':0,'retries':0,'denied':0,
++            'exhausted':0,'deadline':0,'closed':0,'expired':0,'disabled':0,'busy':0,'withdrawn_after_slot':0,
++            'maximum_round_ms':0.,'maximum_deadline_overrun_ms':0.}
++        if type(freshness_metrics) is not bool:raise ValueError('freshness_metrics must be boolean')
++        self._freshness_enabled=freshness_metrics;self._freshness=None
++        self._freshness_failures=0;self._freshness_failure_lock=threading.Lock() if freshness_metrics else None
++        if freshness_metrics:
++            try:
++                from board.identity.face_freshness_metrics import FaceFreshnessMetrics
++                self._freshness=FaceFreshnessMetrics(ttl_ms=ttl_ms)
++            except Exception:self._freshness_failed()
++
++    def _freshness_failed(self):
++        with self._freshness_failure_lock:self._freshness_failures=min((1<<63)-1,self._freshness_failures+1)
++
++    def _freshness_call(self, method, *args, **kwargs):
++        # Mutation hooks run outside this method's state.lock/condition.
++        # A health caller may already hold an outer shared RLock; the recorder
++        # never acquires it. Diagnostic errors cannot replace business errors.
++        try:return getattr(self._freshness,method)(*args,**kwargs)
++        except Exception:self._freshness_failed();return None
+ 
+     def start(self):
+         with self.condition:
+@@ -29,9 +53,15 @@
+             self.thread=threading.Thread(target=self.work,name='camera-face-targets',daemon=True);self.thread.start()
+ 
+     def offer(self,image,fid,stamp):
++        observer=self._freshness
+         with self.condition:
+-            if self.closed:return
+-            self.pending=(image,fid,stamp);self.condition.notify()
++            if self.closed:
++                if observer is None:return
++                accepted=False;replaced=False
++            else:
++                accepted=True;replaced=self.pending is not None if observer is not None else False
++                self.pending=(image,fid,stamp);self.condition.notify()
++        if observer is not None:self._freshness_call('offer',accepted=accepted,replaced=replaced)
+ 
+     def current_target(self):
+         with self.lock:
+@@ -46,25 +76,70 @@
+                 'face_attention':copy.deepcopy(self.attention) if fresh and self.key else None}
+ 
+     def health(self):
+-        with self.lock:return {'ready':self.ready and not self.error,'error':self.error,
++        with self.lock:value={'ready':self.ready and not self.error,'error':self.error,
+             'backend':self.backend,
+             'processed':self.processed,'discarded':self.discarded,'last_inference_ms':self.last_ms,
+             'source_age_ms':None if self.stamp is None else self.clock()-self.stamp}
+-
+-    def process(self, packet, detector):
++        if self._freshness_enabled:
++            observed=self._freshness_call('snapshot') if self._freshness is not None else None
++            if type(observed) is not dict:
++                observed={'schema_version':'aura-face-freshness-light-2','enabled':True,
++                          'collecting':False,'observer_unavailable':True}
++            with self._freshness_failure_lock:observed['observer_failures']=self._freshness_failures
++            value['freshness_metrics']=observed
++        if self.slot_retry:value['slot_retry']=self.retry_health()
++        return value
++
++    def process(self, packet, detector, *, admission_check=None):
++        if self._freshness is None:return self._process(packet,detector,admission_check=admission_check)
++        attempt=self._freshness_call('begin',None)
++        if attempt is not None and type(attempt) is not dict:
++            self._freshness_failed();attempt=None
++        try:return self._process(packet,detector,attempt,admission_check=admission_check)
++        finally:
++            if attempt is not None:self._freshness_call('finish',attempt)
++
++    def _process(self, packet, detector, attempt=None, *, admission_check=None):
+         image,fid,stamp=packet
+-        if not 0<=self.clock()-stamp<self.ttl:
++        if attempt is not None:attempt['stamp_ms']=stamp
++        input_now=self.clock()
++        if attempt is not None:attempt['input_now_ms']=input_now
++        if not 0<=input_now-stamp<self.ttl:
+             with self.lock:self.discarded+=1
++            if attempt is not None:attempt['outcome_code']=1
+             return
+         started=time.monotonic()
+-        from board.vision.dpu_vision_runtime import SlotUnavailable
++        from board.vision.dpu_vision_runtime import (SlotUnavailable,
++            SlotAdmissionDenied, AdmissionCancelled, OptionalJobDisabled)
++        if attempt is not None:attempt['detect_start']=self._freshness_call('mark')
+         try:
+-            raw=detector.detect(image)
+-        except SlotUnavailable:
++            if admission_check is not None:
++                admission_check()
++                guarded=getattr(detector,'detect_with_admission_guard',None)
++                raw=guarded(image,admission_check) if guarded else detector.detect(image)
++            else:
++                raw=detector.detect(image)
++        except SlotUnavailable as exc:
+             # A missed DPU slot is not a negative face observation. Preserve
+             # the existing TTL and let the latest frame replace this packet.
+             with self.lock:self.discarded+=1
++            if attempt is not None:attempt['outcome_code']=2
++            if admission_check is not None and type(exc) is SlotAdmissionDenied:
++                return exc
+             return
++        except (AdmissionCancelled,OptionalJobDisabled) as exc:
++            if admission_check is None:raise
++            reason=exc.reason if isinstance(exc,AdmissionCancelled) else 'disabled'
++            with self.lock:
++                self.discarded+=1
++                self.retry_stats[reason]+=1
++                if getattr(exc,'native_not_submitted',False):self.retry_stats['withdrawn_after_slot']+=1
++            if attempt is not None:
++                attempt['outcome_code']=6
++                attempt['cancel_reason_code']={'closed':1,'expired':2,'deadline':3,'disabled':4,'busy':5}.get(reason,0)
++            return
++        finally:
++            if attempt is not None:attempt['detect_end']=self._freshness_call('mark')
+         faces=[]
+         if len(raw)<=16:
+             for row in raw:
+@@ -74,7 +149,14 @@
+         with self.lock:
+             self.last_ms=round((time.monotonic()-started)*1000,2)
+             self.backend=getattr(detector,'kind','CPU_YUNET')
+-            if self.closed or not 0<=self.clock()-stamp<self.ttl:
++            if self.closed:
++                self.discarded+=1
++                if attempt is not None:attempt['outcome_code']=4
++                return
++            checked_now=self.clock()
++            if attempt is not None:attempt['pre_commit_check_now_ms']=checked_now
++            if not 0<=checked_now-stamp<self.ttl:
++                if attempt is not None:attempt['outcome_code']=3
+                 self.discarded+=1;return
+             # Bound prediction only in this face tracker. A rapid head movement
+             # followed by a stop must not project its old velocity across a face.
+@@ -127,7 +209,79 @@
+                         'captured_mono_ms':stamp,'ttl_ms':self.ttl,
+                         'yaw_ratio':pose['yaw'],'roll_degrees':pose['roll'],
+                         'frontal':abs(pose['yaw'])<=.22 and abs(pose['roll'])<=15.}
++            if attempt is not None:attempt['outcome_code']=5
++        if attempt is not None:
++            try:publication_now=self.clock()
++            except Exception:self._freshness_failed();publication_now=None
++            self._freshness_call('publish',attempt,publication_now,len(faces))
++            attempt['callback_started']=True
+         self.on_face(image,selected_face,fid,stamp,key)
++        if attempt is not None:attempt['callback_completed']=True
++
++    def retry_health(self):
++        """Numeric opt-in experiment counters; no images or identity fields."""
++        with self.lock:return dict(self.retry_stats)
++
++
++    def _process_with_retry(self, packet, detector):
++        from board.vision.dpu_vision_runtime import SlotAdmissionDenied,AdmissionCancelled
++        began=self.retry_clock();deadline=None;retries=0
++        with self.lock:self.retry_stats['rounds']+=1
++        try:
++            while True:
++                stamp=packet[2]
++                def check():
++                    # This callback also runs inside the DPU slot. Never wait
++                    # for the camera-shared lock while owning that slot.
++                    if not self.lock.acquire(False):raise AdmissionCancelled('busy')
++                    try:
++                        if self.closed:raise AdmissionCancelled('closed')
++                        if not 0<=self.clock()-stamp<self.ttl:raise AdmissionCancelled('expired')
++                        if deadline is not None and self.retry_clock()>=deadline:
++                            raise AdmissionCancelled('deadline')
++                    finally:self.lock.release()
++                rejected=self.process(packet,detector,admission_check=check)
++                if type(rejected) is not SlotAdmissionDenied:return
++                with self.lock:self.retry_stats['denied']+=1
++                if deadline is None:deadline=rejected.rejected_at+.200
++                if retries>=2:
++                    with self.lock:self.retry_stats['exhausted']+=1
++                    return
++                # Deadline is conservative admission-start +200ms. Backoff is
++                # separately anchored after the rejection bookkeeping returns.
++                not_before=self.retry_clock()+.025
++                with self.condition:
++                    while True:
++                        now=self.retry_clock()
++                        if self.closed:
++                            self.retry_stats['closed']+=1;return
++                        if now>=deadline:
++                            self.retry_stats['deadline']+=1;return
++                        if self.pending is not None and now>=not_before:
++                            latest,self.pending=self.pending,None
++                            # Re-offering an old frame cannot spend another
++                            # CPU preparation. Keep only a new, live packet.
++                            if (latest[1]<=packet[1] or latest[2]<packet[2]
++                                    or not 0<=self.clock()-latest[2]<self.ttl):
++                                self.discarded+=1
++                                continue
++                            packet=latest;retries+=1;self.retry_stats['retries']+=1
++                            break
++                        delay=deadline-now
++                        if self.pending is not None and now<not_before:
++                            delay=min(delay,not_before-now)
++                        # Condition.wait releases the camera-shared lock.
++                        # No DPU slot is owned here; no image copy or polling.
++                        self.condition.wait(delay)
++        finally:
++            ended=self.retry_clock()
++            with self.lock:
++                self.retry_stats['maximum_round_ms']=max(
++                    self.retry_stats['maximum_round_ms'],(ended-began)*1000.)
++                if deadline is not None:
++                    self.retry_stats['maximum_deadline_overrun_ms']=max(
++                        self.retry_stats['maximum_deadline_overrun_ms'],max(0.,ended-deadline)*1000.)
++
+ 
+     def work(self):
+         detector=None
+@@ -142,7 +296,9 @@
+                     delay=next_at-time.monotonic()
+                     if delay>0:self.condition.wait(delay);continue
+                     packet,self.pending=self.pending,None
+-                self.process(packet,detector);next_at=time.monotonic()+self.interval/1000
++                if self.slot_retry:self._process_with_retry(packet,detector)
++                else:self.process(packet,detector)
++                next_at=time.monotonic()+self.interval/1000
+         except Exception as exc:
+             with self.lock:self.error='人脸目标检测失败：'+str(exc)[:100];self.key=None;self.pending=None
+         finally:
+@@ -150,6 +306,9 @@
+ 
+     def close(self):
+         with self.condition:self.closed=True;self.pending=None;self.key=None;self.condition.notify_all()
+-        if self.thread:
+-            self.thread.join(5)
+-            if self.thread.is_alive():raise RuntimeError('Face target worker did not stop')
++        try:
++            if self.thread:
++                self.thread.join(5)
++                if self.thread.is_alive():raise RuntimeError('Face target worker did not stop')
++        finally:
++            if self._freshness is not None:self._freshness_call('close')
+--- baseline/board/vision/dpu_vision_runtime.py
++++ candidate/board/vision/dpu_vision_runtime.py
+@@ -77,7 +77,7 @@
+             try:diagnostics.native_mark(self.stage_kind,phase,status)
+             except Exception:diagnostics.error()
+ 
+-    def execute_encoded(self, source, *, slot=None):
++    def execute_encoded(self, source, *, slot=None, pre_execute=None):
+         if self.runner is None:
+             raise RuntimeError('DPU runner is closed')
+         self.owner.ownership.fileno()
+@@ -96,6 +96,14 @@
+             started = time.monotonic()
+             self._diagnostic_mark('execute_start')
+             try:
++                # After all preparation/admission/diagnostic overhead, directly
++                # before VART. Raising releases the original slot and submits
++                # no native job. The default path has no guard invocation.
++                if pre_execute is not None:
++                    try:pre_execute()
++                    except AdmissionCancelled as exc:
++                        exc.native_not_submitted=True
++                        raise
+                 job = self.runner.execute_async([source], outputs)
+                 self._diagnostic_mark('execute_return')
+                 self._diagnostic_mark('wait_start')
+@@ -156,6 +164,28 @@
+     pass
+ 
+ 
++class SlotAdmissionDenied(SlotUnavailable):
++    """Enabled optional admission denied; rejected_at precedes its bookkeeping.
++
++    The timestamp is the conservative admission-attempt start, not the exact
++    scheduler decision. Only this exact exception is eligible for retry.
++    """
++    def __init__(self, rejected_at):
++        super().__init__('YuNet optional slot admission denied')
++        self.rejected_at = rejected_at
++
++
++class AdmissionCancelled(RuntimeError):
++    """The caller closed, its source expired, or its retry round expired."""
++    def __init__(self, reason):
++        super().__init__('YuNet admission cancelled: ' + reason)
++        self.reason = reason
++
++
++class OptionalJobDisabled(RuntimeError):
++    """Overrun protection disabled this job; it is never a retry signal."""
++
++
+ def make_yunet(reference_model, runner, *, threshold=.9, execute=None):
+     from board.vision.reference_faces import YuNetCompat
+     result = YuNetCompat(reference_model, score_threshold=threshold, input_size=320)
+--- baseline/board/vision/dpu_yunet.py
++++ candidate/board/vision/dpu_yunet.py
+@@ -1,7 +1,10 @@
+ """YuNet DPU adapter with YOLO priority and explicit CPU fallback on overrun."""
+-from board.vision.dpu_vision_runtime import PinnedRunner, encode, make_yunet
++from board.vision.dpu_vision_runtime import (PinnedRunner, encode, make_yunet,
++    SlotAdmissionDenied, OptionalJobDisabled)
++from contextlib import contextmanager
+ import hashlib
+ from pathlib import Path
++import time
+ 
+ 
+ class DpuYuNet:
+@@ -27,7 +30,38 @@
+     def scheduled(self, normalized):
+         # CPU input conversion is outside the DPU critical section.
+         source = encode(normalized, self.runner.input_fix)
++        check = getattr(self, '_admission_check', None)
++        if check is not None:
++            # An expired round must not seek another slot after preparation.
++            check()
++            return self.runner.execute_encoded(source,
++                slot=self._guarded_slot(), pre_execute=check)
+         return self.runner.execute_encoded(source, slot=self.schedule.optional('yunet'))
++
++    @contextmanager
++    def _guarded_slot(self):
++        # Start the denial window BEFORE scheduler/diagnostic bookkeeping.
++        # This is a conservative admission-attempt time, not an exact sample
++        # of the scheduler's decision. Slow diagnostics cannot extend it.
++        admission_started_at = time.monotonic()
++        with self.schedule.optional('yunet') as acquired:
++            if not acquired:
++                if self.schedule.disabled('yunet'):
++                    raise OptionalJobDisabled('YuNet disabled by original DPU protection')
++                raise SlotAdmissionDenied(admission_started_at)
++            yield True
++
++    def detect_with_admission_guard(self, image, check):
++        # FaceTargetService has one worker. Reject accidental nested use;
++        # this is not an API for sharing a runner across threads.
++        if getattr(self, '_admission_check', None) is not None:
++            raise RuntimeError('YuNet admission guard is already active')
++        check()
++        self._admission_check = check
++        try:
++            return self.detect(image)
++        finally:
++            self._admission_check = None
+ 
+     def detect(self, image):
+         if self.schedule.disabled('yunet'):

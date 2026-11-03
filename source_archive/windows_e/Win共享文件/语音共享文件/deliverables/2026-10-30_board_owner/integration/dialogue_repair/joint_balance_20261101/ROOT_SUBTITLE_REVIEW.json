@@ -1,0 +1,37 @@
+{
+  "schema": "aura-root-local-subtitle-source-review-1",
+  "decision": "ACCEPT_FROZEN_SINGLE_SOURCE_FOR_OPERATOR_ARM_CHECK_AND_PUBLICATION",
+  "before_sha256": "984d3ca24067bf5129e9ce3b0054f32cced717b6b8824eab347476bef2f9e502",
+  "after_sha256": "de04c6cd22e3672ff17c2cfb71f5539f6908c98daf74e8d94d154c8fd280d4c2",
+  "base_manifest_sha256": "e35ec0e32bb5b4d5c17ce11396753bcb36ad13eb651c9d1c3f57d1d745786020",
+  "base_component_count": 380,
+  "pinned_support_sources_verified": 5,
+  "changed_functions": [
+    "PresentationLifecycle.__init__",
+    "PresentationLifecycle.channel",
+    "PresentationLifecycle.invalidate",
+    "bind_presentation"
+  ],
+  "unchanged_hot_paths": [
+    "_clean",
+    "PresentationLifecycle._projection",
+    "PresentationLifecycle.project",
+    "PresentationLifecycle._purge_public_copies",
+    "PresentationLifecycle.repaint",
+    "attach_presentation",
+    "project_presentation",
+    "save_production_evidence"
+  ],
+  "public_regressions": 18,
+  "public_test_result_sha256": "6d5f5b39b7f6e7065cf5c7e8fabe81dc63bacec71da77ea85689e12c0ad7fcf6",
+  "manual_review": [
+    "Submit retains jobs.condition RLock across original call and permit registration.",
+    "Only matching current waiting owner receives one owner/epoch permit after exactly one invalidation.",
+    "Concurrent additional invalidation prevents permit; later invalidation clears it.",
+    "Channel still derives hard deadline from original requested_at, never receipt time.",
+    "Original submit exceptions and returned object propagate; public metadata projection is unchanged."
+  ],
+  "scope": "Current pinned concrete 380-component production; not arbitrary replacement jobs implementations.",
+  "device_model_private_data_access": false,
+  "arm_tests_or_live_subtitles_accepted_here": false
+}

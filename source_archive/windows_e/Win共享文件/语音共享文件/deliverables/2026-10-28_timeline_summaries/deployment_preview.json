@@ -1,0 +1,70 @@
+{
+  "status": "READY_OFFLINE_USER_HOLD",
+  "applied": false,
+  "user_hold_board": true,
+  "reason": "User confirmed another board test is in progress; retain its state and do not switch production services.",
+  "expected_production_revision": "voice-timeline-20261028-r1",
+  "expected_production_fingerprint": "28e7ae517e9559ed00d2eb4aebade6b08342db3b1a6b4428b89a90c7904e8d45",
+  "candidate_revision": "voice-timeline-20261028-r2",
+  "candidate_fingerprint": "bc9b8aaddea9b9d3e4a588d57c4b52b49bd8a61f59fac06c6f856477baf0baae",
+  "hub_before": "device-timeline-v1",
+  "hub_candidate": "device-timeline-v2",
+  "files": {
+    "common/timeline.py": {
+      "before": "4bb929e61d8d311dc2adbf5e342943c3e4b66088d7dbecaccd4255aa6b2cd08a",
+      "candidate": "44f5b05e5fe9e00d28e226c34f2e8d8a15d30ce86a2982f25104c4fec847eafc",
+      "bytes": 8775
+    },
+    "common/timeline_conversations.py": {
+      "before": "dd1990944aaf286276b9cd07a97748bf14158c52314ae303dca52c34eab2a568",
+      "candidate": "3e99752ef353fdd1a87db4e6b6620d508da037e71ae6ee226f68367ab9240ac5",
+      "bytes": 9621
+    },
+    "common/timeline_observations.py": {
+      "before": "1bb0d955a56493d6af3dc046281b81747329a56584b99802dd430dad921e5df5",
+      "candidate": "b9363eb87f1cc3b30cae8f6cf0b5849689057fc8896bf5e1a58bd41e259f8e6c",
+      "bytes": 11196
+    },
+    "common/timeline_summaries.py": {
+      "before": null,
+      "candidate": "093fa5839ea70eeb79d248c5a7cb0c4ef29223193fa3891fa2c4477cf6c9298f",
+      "bytes": 14480
+    },
+    "common/voice_service_capabilities.py": {
+      "before": "b0b490ef5138b266419c69e9fb206a18a11f3d8b09f09e5eb51ab057a2af9c6c",
+      "candidate": "6f61706cc006a30a943e530ae5d02d231ab5ae7e0128e2c8dead00a301d64fff",
+      "bytes": 2954
+    },
+    "tools/board_model_host.py": {
+      "before": "c9737a149ac25f4b166ca97f963f1aa478d32b6b9f7ad90fdbc24e4b3b2f2525",
+      "candidate": "69bdbfe541606680ce8a10d6136ebb160b2b5f8dde459c4562dc81489af62ac3",
+      "bytes": 31666
+    },
+    "tools/device_hub.py": {
+      "before": "ea048ab9f8126a7e0c2bcd5c01ddf833bb838148083538a822d62729920b9dd5",
+      "candidate": "0ea0c43f39112f45ae63881bbb51dd305539044fb47c3727da346ee5b091a963",
+      "bytes": 10714
+    },
+    "tools/memory_timeline_host.py": {
+      "before": "b3b39cfb748f18cd3c16bd563be0cb2f9106538ec119d59818a2401c258ce224",
+      "candidate": "17e49e5338c2980547e4427c562fb169e731b440980bf20bcc7558e0df129b13",
+      "bytes": 5060
+    }
+  },
+  "device_startup": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-28_device_skills\\start_devices.py",
+    "before": "29f541427debb6a089c95e0fcfa890a3a71b1e44e0914f6cd51ae4210f90e5c0",
+    "candidate": "6e195d8e2f7e5ec664b9eb24b3193a8cd05be974d11a588f27f77a3a0f5c8b54"
+  },
+  "board_files_to_replace": [],
+  "future_checks": [
+    "Wait for the user to say the parallel board test has finished.",
+    "Re-read actual board boot, systemd entry, source/config pins and no-motion/listening/IDLE_READY state; do not start its UI just to pass this check.",
+    "Confirm the exact loaded Windows r1 fingerprint and unchanged candidate baselines.",
+    "Take consistent production-view SQLite snapshots using an independent WMI helper, not the packaged tool AppData view.",
+    "Run pending ARM core tests in isolation after the board testing window is released.",
+    "Only then restart this project voice and CPU device services with the candidate; preserve other model owners and D-drive storage.",
+    "Validate background worker health, digest source visibility, deletion/ACK barriers, actual speech and UI state.",
+    "Rollback code only on failed acceptance; retain the latest authoritative databases and built-in SQLite invalidation triggers."
+  ]
+}

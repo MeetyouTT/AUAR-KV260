@@ -1,0 +1,124 @@
+{
+  "schema": "aura.frontend-allocation-independent-review.v1",
+  "status": "NO_BLOCKER_FOR_ROOT_ISOLATED_PUBLIC_STREAM_TEST",
+  "reviewer": "runtime_completion",
+  "reviewed_at_utc": "2026-10-31T13:24:16.706333+00:00",
+  "basis_startup_sha256": "67d03ca40d709d22d761706bfca51a55e352adf86763ced7fb5eb5a688123a55",
+  "scope": "Two frozen component diffs and12 offline tests only; public_probe under development was not read or reviewed.",
+  "candidate_handoff_sha256": "d6e139500bec478c3b71c71cbb7a24207b241686fed341287230d133f33e189a",
+  "source_pins_manifest_sha256": "06a30f115797985df8db3c10c659ad55240cf97fc7812db7004434feee281ea5",
+  "reviewed_changes": [
+    {
+      "component": "board/runtime/audio/automatic_capture.py",
+      "before_sha256": "5e7abc5a15840aff51d0471313498a46efc940f16d4bd7ee95fed65f98fdcc0a",
+      "after_sha256": "2b293fe265827fc0c47ac798433312f477924779ed921e0bdc40c27b2be965f0"
+    },
+    {
+      "component": "board/runtime/audio/board_gtcrn_reuse.py",
+      "before_sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9",
+      "after_sha256": "c5a017ee2b7ec6b9e37b5e66d76fced237234e7a2a36a6c750b29b880903bfd0"
+    }
+  ],
+  "unchanged_reference_pins": [
+    {
+      "component": "board/runtime/audio/board_gtcrn_fft.py",
+      "sha256": "47cb8a2ec97ad292981bb42b67e217ed0f672a98d561d4ac8dc9c360cf8f6f06"
+    },
+    {
+      "component": "board/runtime/audio/vad.py",
+      "sha256": "7a974702847b5854e5593c8ec12b9616cefefa3d99fb0298a3c8359f7f63388f"
+    },
+    {
+      "component": "board/runtime/audio/capture.py",
+      "sha256": "0b32186bd1fef871c57ae27b941ad3d112c1e2287e7d1dbeedd7fcdc93a98d3f"
+    },
+    {
+      "component": "board/runtime/audio/board_asr_frontend.py",
+      "sha256": "b3d06b653876469daf5b7bb805458b187662d9862e8ece6da731cbfa3e23a093"
+    },
+    {
+      "component": "host/model_service/protocol.py",
+      "sha256": "4906825b391422c23f55c0d73796906253f6279c5d45cdbf04c99a5e244b6e93"
+    }
+  ],
+  "findings": [],
+  "reasoning": [
+    {
+      "topic": "endpoint_aligned_branch",
+      "conclusion": "Only exact immutable bytes640 with empty pending bypass the bytearray copy. The same raw frame enters unchanged sample/ring/normalization/VAD/onset/end/tail logic. Mutable input, memoryview, subclass, fragmented pending, empty and batch inputs retain the original path."
+    },
+    {
+      "topic": "arbitrary_partition_reasoning",
+      "conclusion": "For any partition, either original buffering executes verbatim or the original buffer would contain exactly the immutable640-byte argument. One identical frame is processed and pending stays empty in both. No extra iteration. Done checks and batched remainder on speech_end are unchanged. Test partitions are representative, not exhaustive enumeration."
+    },
+    {
+      "topic": "raw_pcm_ownership",
+      "conclusion": "Raw reuse is safe because bytes is immutable; float32 normalization still creates the original independent samples. Mutable paths still copy before ring retention. Prefix/event/result byte checks preserve raw PCM and offsets."
+    },
+    {
+      "topic": "single_hop_array_ownership",
+      "conclusion": "Unchanged _hop returns first-hop np.empty(0,float32) or self.ola[:256].copy(). Both are independent. Returning the sole result cannot alias OLA/analysis/pending/FFT/enhanced/recurrent buffers; multiple-hop concatenate and pending.copy remain unchanged."
+    },
+    {
+      "topic": "model_call_and_flush",
+      "conclusion": "Only the single-chunk final copy is removed. Hop ordering, recurrent ping-pong, empty latency, __call__/flush validation and counters are unchanged. After removing the new direct-return branch, the override matches the pinned base _consume AST."
+    },
+    {
+      "topic": "cancel_lifecycle",
+      "conclusion": "All non-feed automatic-capture AST, read/finish/close/diagnostics paths remain unchanged. The test drives real _read cleanup/take/AudioRef using fake process/timer and synchronous cancellation in classification. It does not prove concurrent worker/IPC or physical microphone ownership."
+    },
+    {
+      "topic": "base_pins",
+      "conclusion": "BASELINE_SHA256 remains47cb8a2ec97ad292981bb42b67e217ed0f672a98d561d4ac8dc9c360cf8f6f06; FRONTEND_SHA256 remainsb3d06b653876469daf5b7bb805458b187662d9862e8ece6da731cbfa3e23a093. Weights, thresholds, queue8, priority, worker protocol, Store and ACK code are unchanged."
+    }
+  ],
+  "independent_test_replay": {
+    "command_argv": [
+      "C:\\Users\\35870\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\tests\\test_allocation.py"
+    ],
+    "exit_code": 0,
+    "tests": 12,
+    "reported_seconds": 0.069,
+    "log": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\review\\independent_tests.log",
+    "log_sha256": "0b565c566101d72ae53c66953ce9e33ace0330b87feac152530d31de6bfd1090",
+    "test_source_sha256": "11a7960df059a52854d53e1730801d333c1736de1b2993aec94db4ea5fbe6d53",
+    "environment": "Existing Windows CPython3.12/NumPy2.3.5; fake model/IO only",
+    "models_or_devices_opened": false
+  },
+  "test_coverage": [
+    "Real SpeechEndpoint/EnergyVad, aligned/odd-byte fragments/batches/empty,200/500ms pre-roll, onset/silence/max-duration and exact raw PCM/result/state traces.",
+    "Mutable/memoryview/bytes-subclass isolation and nonempty-pending compatibility.",
+    "Real Mcp01Capture._read with fake process/timer: same AudioRef/capture metadata/start offset, READY/take, synchronous cancellation rejects late result.",
+    "Real NumPy FFT/OLA with deterministic fake recurrent session over all buffer_reuse/io_binding combinations; float bytes/PCM16/hop sequence/reset/flush/empty match.",
+    "Output no-alias across internal buffers, subsequent results/calls/reset; mutation cannot change future output.",
+    "Source-boundary AST and exact reference/external hashes."
+  ],
+  "limits": [
+    "Not every segmentation enumerated; general branch-equivalence reasoning complements representative tests.",
+    "No GTCRN/Silero/ASR neural inference. Fake recurrent shapes/bindings do not prove native ARM behavior.",
+    "Windows NumPy2.3.5 is not board NumPy1.21.2/native stack.",
+    "Cancellation fixture is synchronous, not a new cross-thread worker/IPC,queue-overflow or physical ownership test. Those mechanisms are unchanged.",
+    "No CPU speedup, queue long-stability, microphone or complete-dialogue/ACK acceptance claim."
+  ],
+  "public_test_conditions": [
+    "Root fresh-verifies remote before pins and stages only two after sources into isolated test root. Reference files are not an overlay.",
+    "Choose canonical before/after imports before board_capture is imported: it caches SpeechEndpoint and AutomaticMcp01Capture aliases. Prove MRO/endpoint/reuse source SHA. Never post-import mutate the live GUI.",
+    "Keep same public raw PCM, actual combined GTCRN/Silero weights, thresholds, threads/priority,8-frame paced queue, full GUI/camera. No tuning queue or thresholds for a pass.",
+    "Compare exact numerical output/PCM16, VAD/onset/endpoints, model-call order, sample bytes/offsets/length; error/cancel cleanup and wall/threadCPU/queue peak measured separately.",
+    "Disclose extra resident test frontend when production frontend remains resident. Public-file pass is not actual microphone or production whole-dialogue acceptance.",
+    "No measured gain yet; these small copy removals may be too small to solve near-saturated frame budget."
+  ],
+  "decision": {
+    "allowed_next_step": "ROOT_OWNED_ISOLATED_PUBLIC_PACED_STREAM_TEST",
+    "production_deployment_approved": false,
+    "performance_gain_claimed": false,
+    "blockers": []
+  },
+  "frozen_source_modified": false,
+  "hardware_accessed": false,
+  "private_data_accessed": false
+}

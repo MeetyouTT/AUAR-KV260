@@ -1,0 +1,19 @@
+仅root在复核当前入口和持久暂停选择后执行。省略--execute-root-only时只进行本地验证。
+
+发布脚本 E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v19_stability_candidate\publish_stability.py
+应用脚本 E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v19_stability_candidate\apply_stability_closed.py
+基线spec E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v19_stability_candidate\baseline_spec.json
+基线SHA ef5b07e6b3f74bf984ab1bb6011f6d030c2f1a7c03079d950d7a7b3c4d7cc240
+提案spec E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v19_stability_candidate\proposed_spec.json
+提案SHA 1b1fa0155eff20f08e7f1bf48d196d2f803aeb9e1a496ad2f493c0e7f9491404
+
+1. publish_stability.py guard，使用基线spec和SHA。
+2. publish_stability.py window-inspect，使用相同基线，保存返回的完整窗口回执。
+3. publish_stability.py normal-close，使用基线并传--window-proof指向该回执。
+4. apply_stability_closed.py，使用提案spec及SHA。正常关闭且三把锁、完整bootstrap、379组件核验通过后才应用。
+5. apply返回实际applied_spec与SHA。publish_stability.py start和ready均使用这个实际spec，保留返回文件。
+6. root核对实际source mapping后才推进canonical和现役文档。
+
+统一必需参数为--spec <完整文件路径> --spec-sha256 <对应SHA>。设备动作另加--execute-root-only。
+本包预期enabled=false，保存的PAUSED偏好由原生产读取路径恢复。READY验证类型为bool、实际偏好一致、麦克风关闭。
+端口等待只在无实际listener且EADDRINUSE时最多70秒，出现新进程/新boot/实际listener立即失败。

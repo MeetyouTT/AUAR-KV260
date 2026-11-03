@@ -1,0 +1,7 @@
+[
+  {
+    "id": "overlay_zocl_metadata",
+    "command": "for d in /sys/kernel/config/device-tree/overlays/*; do printf \"\\n%s\\n\" \"$d\"; ls -l \"$d\"; cat \"$d/status\" \"$d/path\"; done; ls -la /sys/bus/platform/devices/axi:zyxclmm_drm /sys/bus/platform/devices/CU.*; for d in /sys/bus/platform/devices/axi:zyxclmm_drm; do for f in xclbinuuid kds_custat kds_stat scheduler_stat memstat; do if test -r \"$d/$f\"; then printf \"\\n%s\\n\" \"$d/$f\"; cat \"$d/$f\"; fi; done; done; for d in /sys/class/uio/uio*; do printf \"\\n%s\\n\" \"$d\"; cat \"$d/name\"; for m in \"$d\"/maps/map*; do printf \"%s \" \"$m\"; cat \"$m/name\" \"$m/addr\" \"$m/size\"; done; done; lsmod; cat /sys/module/zocl/version; modinfo zocl; find /usr/lib /usr/share -maxdepth 5 -iname \"*xdputil*\"; ls -l /usr/bin/xdputil /usr/bin/xdputil* /usr/bin/xdpu*",
+    "timeout": 45
+  }
+]

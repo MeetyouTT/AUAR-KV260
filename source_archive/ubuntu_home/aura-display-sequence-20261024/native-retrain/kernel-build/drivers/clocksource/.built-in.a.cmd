@@ -1,0 +1,1 @@
+cmd_drivers/clocksource/built-in.a := echo >/dev/null; rm -f drivers/clocksource/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/clocksource/built-in.a drivers/clocksource/timer-of.o drivers/clocksource/timer-probe.o drivers/clocksource/arm_arch_timer.o drivers/clocksource/dummy_timer.o

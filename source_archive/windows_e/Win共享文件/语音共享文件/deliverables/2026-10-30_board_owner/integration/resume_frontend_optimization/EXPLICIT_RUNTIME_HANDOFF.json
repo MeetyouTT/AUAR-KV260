@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "status": "EXPLICIT_RUNTIME_DIAGNOSTIC_COPY_LOCAL_GUARDS_PASS_ARM_EXECUTION_PARENT_OWNED",
+  "diagnostic_copy": {
+    "path": "board_audio_runtime_probe.py",
+    "sha256": "ac0af16c9f783b5590ab0e1562ece179b8cc50ade3912c8b08e8b8592778e093",
+    "reviewed_parent_path": "../resume_inference/board_audio_pipeline_probe.py",
+    "reviewed_parent_sha256": "b53803cab734bb69cd8a62698c92d630ed98d9d0b2cee7ecc9232bcb4a4323a3",
+    "builder": "build_runtime_probe.py",
+    "builder_sha256": "79db189116cb4891a6052efae15333dea8f22f6cebbfffa2eb02c1ef65486183",
+    "allowed_differences": [
+      "Replace exactly the original ORT1.17.3/origin guard with an explicit selected-runtime guard",
+      "Add four required runtime CLI options",
+      "Add selected_runtime proof to the original final JSON output"
+    ],
+    "whole_original_source_recovery_equal": true,
+    "parent_source_modified": false,
+    "parent_ESRCH_fixes_preserved": true
+  },
+  "helper": {
+    "path": "../resume_ort_candidate/isolated_cpu_runtime.py",
+    "sha256": "fee9f599854a7443e33ebc3afb69021f31a3688787d22bb1479fda0732e0a711",
+    "required_mode": "run: fresh -B -S CPython3.9 ARM child; chosen NumPy/ORT preloaded before the adapter",
+    "helper_source_modified": false
+  },
+  "paired_cases": {
+    "private_root": "/home/root/aura-board-owner-candidate-20261030/perf-fa0bc04a6f8c15a9",
+    "retained_ort_root": "/home/root/aura-board-owner-candidate-20261030/fft-ee19b936d17aa451/deps",
+    "retained_ort_version": "1.17.3",
+    "candidate_ort_root": "/home/root/aura-board-owner-candidate-20261030/perf-fa0bc04a6f8c15a9/onnxruntime-1.19.2",
+    "candidate_ort_version": "1.19.2",
+    "shared_numpy_root": "/home/root/aura-board-owner-candidate-20261030/perf-fa0bc04a6f8c15a9/numpy-1.26.4",
+    "shared_numpy_version": "1.26.4",
+    "sherpa_version_and_original_root_unchanged": "1.13.8, resources_root/asr-1.13.8/deps"
+  },
+  "new_required_probe_arguments": [
+    "--runtime-private-root <paired private_root>",
+    "--runtime-ort-root <selected retained_ort_root or candidate_ort_root>",
+    "--runtime-ort-version <selected exact 1.17.3 or 1.19.2>",
+    "--runtime-numpy-root <same shared_numpy_root>"
+  ],
+  "adapter_chain": [
+    "helper run --ort-root <case root> --ort-version <case exact version> --numpy-root <same numpy1.26.4 root> --numpy-version 1.26.4",
+    "Pass the existing explicit common dependency/code/native library paths to the helper; preserve the original comparison settings",
+    "helper --probe <staged run_candidate_probe.py> --probe-sha256 1e3aaf64a87e76873275c0441203c25adfdc5fbba9362f38bacb7b3575a99b63",
+    "After helper -- pass: --candidate-mode baseline|combined --probe-file <staged board_audio_runtime_probe.py> --candidate-file <staged candidate/board_gtcrn_reuse.py> --code-root <same pinned aura root> --resources-root <original resources root>",
+    "Append the four required runtime arguments and unchanged --mode frontend-profile --runs 2 --num-threads 1 --process-nice <same paired priority>",
+    "Each ORT and allocation case must use a separate fresh helper subprocess; later pipeline mode retains the original eight-frame default"
+  ],
+  "runtime_assertions": [
+    "CPython3.9 POSIX -S with the originally preloaded exact NumPy/ORT objects retained; no sys.modules replacement or version rewriting",
+    "NumPy1.26.4 is mandatory for both cases and must come from private_root/numpy-1.26.4",
+    "ORT1.17.3 is permitted only in the original fft/deps; ORT1.19.2 only in private_root/onnxruntime-1.19.2",
+    "Actual loaded ORT pybind and NumPy core/FFT origins must match those selected roots",
+    "Candidate wheel manifests must match the official wheel SHAs; candidate native binaries are hashed against official_assets.json pins",
+    "Old ORT binding origin remains restricted to its original verified deps and its SHA is reported; no new official-wheel claim is made for this retained package",
+    "Original sherpa version/origin, pinned public WAV, model/source/threshold checks, available headroom, endpoint, queue overflow, timeouts, priority restoration and production safety checks remain intact"
+  ],
+  "evidence": {
+    "stderr": "EXPLICIT_RUNTIME_PROOF, plus the helper ORT_PRELOAD_PROOF and ORT_ISOLATION_PROOF",
+    "stdout": "Original final diagnostic JSON with selected_runtime and frontend_candidate tags",
+    "tests": "tests/test_runtime_probe.py",
+    "tests_sha256": "443212dd52a011e8aee5af0d9ed22775f3b4bd1a53451932c642c50c032f870b",
+    "junit": "explicit_runtime_tests.xml",
+    "junit_sha256": "087fcc9b91cdd41b58dc1cbcb27e316ce120e628e053411252248901a0d9c3aa",
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 10.476,
+    "coverage": "Exact reversible original-source preservation, official asset pins, exact old/new paired cases, preload/no-site/version/root/native-origin mismatches, altered native image and substituted manifest rejection"
+  },
+  "not_performed_by_this_subtask": [
+    "Board/Ubuntu SSH, ARM execution, microphone or playback",
+    "Production source/default/runtime/dependency installation or service changes",
+    "Production database reads or cleanup",
+    "Any performance, numerical parity or realtime acceptance claim for the new ORT"
+  ]
+}

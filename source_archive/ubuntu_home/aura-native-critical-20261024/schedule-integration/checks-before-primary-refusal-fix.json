@@ -1,0 +1,282 @@
+{
+  "scope": "LOCAL_ONLY_FAKE_CALLBACKS_FAKE_VART_NO_BOARD_OR_MODEL_JOBS",
+  "started_utc": "2026-10-24T03:27:59.448795+00:00",
+  "source_sha256": {
+    "native_bridge.cpp": "ed0611f6c8ae23d37a26b92e2703f529315493bef66e21355ab35fddc364c106",
+    "native_bridge.h": "d909177ae843046d511ff124c2d6a0b61502333700aab25c9dd3b0014db79eff",
+    "native_lease_v2.hpp": "072e03989750fa48d47e613fd8bd5846081e3e70c8ae2395c45e57c31311c660",
+    "native_recovery.hpp": "a9e82c7f06b585036465d28993273f88fb4d7cbf4c509d4610d006e82d1cd1cd",
+    "tensor_layout.hpp": "b6bf838240eeb8ab07074baca950edeea8982c866047d78332d0b2ad10cc4733",
+    "test_recovery_integration.cpp": "640d543cd22a0cdd03227dfd839320a1e093effeca924d0b5658eb5bf15434a9",
+    "test_bridge_v2.cpp": "82562911d87943fa73b839ff01ed91f3bb5311e30663a122f59db4866b27a8ee",
+    "test_legacy_v2.cpp": "c4fbd86b81a63f0e0655b7f0a489c88268e2201bf6dc6ac3c86bed52fe77b0f8",
+    "test_abi_sizes.cpp": "d9742e034e02bff1cc2b6aaeab3d30ba6d9969ba7df77b1cc66befb7a241d5d9"
+  },
+  "checks": {
+    "gate_compile": {
+      "argv": [
+        "nice",
+        "-n",
+        "10",
+        "g++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-pthread",
+        "-O2",
+        "test_recovery_integration.cpp",
+        "-o",
+        "test_gate_final"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    "gate_run": {
+      "argv": [
+        "./test_gate_final"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "result": {
+        "passed": true,
+        "groups": 16,
+        "scope": "native recovery/seed/ACK integration fake callbacks, no VART/device"
+      }
+    },
+    "legacy_compile": {
+      "argv": [
+        "nice",
+        "-n",
+        "10",
+        "g++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-pthread",
+        "-O2",
+        "test_legacy_v2.cpp",
+        "-o",
+        "test_legacy_final"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    "legacy_run": {
+      "argv": [
+        "./test_legacy_final"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "result": {
+        "passed": true,
+        "tests": 8,
+        "scope": "native gate isolation; fake callbacks, no DPU jobs"
+      }
+    },
+    "bridge_compile": {
+      "argv": [
+        "nice",
+        "-n",
+        "10",
+        "g++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-pthread",
+        "-O2",
+        "-Ifake-include",
+        "test_bridge_v2.cpp",
+        "-ldl",
+        "-o",
+        "test_bridge_final"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    "bridge_run": {
+      "argv": [
+        "./test_bridge_final"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "result": {
+        "passed": true,
+        "groups": 5,
+        "scope": "exact C ABI v2 with fake VART/XIR/YOLO and injected registry, real device/model calls0"
+      }
+    },
+    "gate_san_compile": {
+      "argv": [
+        "nice",
+        "-n",
+        "10",
+        "g++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-pthread",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "test_recovery_integration.cpp",
+        "-o",
+        "test_gate_san_final"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    "gate_san_run": {
+      "argv": [
+        "./test_gate_san_final"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "result": {
+        "passed": true,
+        "groups": 16,
+        "scope": "native recovery/seed/ACK integration fake callbacks, no VART/device"
+      }
+    },
+    "bridge_san_compile": {
+      "argv": [
+        "nice",
+        "-n",
+        "10",
+        "g++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-pthread",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-Ifake-include",
+        "test_bridge_v2.cpp",
+        "-ldl",
+        "-o",
+        "test_bridge_san_final"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    "bridge_san_run": {
+      "argv": [
+        "./test_bridge_san_final"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "result": {
+        "passed": true,
+        "groups": 5,
+        "scope": "exact C ABI v2 with fake VART/XIR/YOLO and injected registry, real device/model calls0"
+      }
+    },
+    "sizes_compile": {
+      "argv": [
+        "nice",
+        "-n",
+        "10",
+        "g++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-pthread",
+        "test_abi_sizes.cpp",
+        "-o",
+        "test_abi_sizes_final"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    "sizes": {
+      "argv": [
+        "./test_abi_sizes_final"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "result": {
+        "abi": 2,
+        "Report": 88,
+        "Ack": 32,
+        "Recovery": 104,
+        "State": 432,
+        "Seed": 520,
+        "result_token_offset": 80,
+        "recovery_offset": 224
+      }
+    },
+    "matched_target_headers_syntax": {
+      "argv": [
+        "nice",
+        "-n",
+        "10",
+        "g++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-pthread",
+        "-fsyntax-only",
+        "-isystem",
+        "../matched-include",
+        "native_bridge.cpp"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    "aarch64_compiler_version": {
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-g++",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "aarch64-xilinx-linux-g++.real (GCC) 11.2.0\nCopyright (C) 2021 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
+    },
+    "aarch64_object": {
+      "argv": [
+        "nice",
+        "-n",
+        "10",
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-pthread",
+        "-fPIC",
+        "-isystem",
+        "../matched-include",
+        "-c",
+        "native_bridge.cpp",
+        "-o",
+        "native_bridge.v2.aarch64.o"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    }
+  },
+  "physical_board_contact": false,
+  "real_dpu_jobs": 0,
+  "aarch64_object_sha256": "0f9b422883741051054804bb6fd9e99687d384d3905c82a6e5ee5df8bc2e00ee",
+  "sources_unchanged": true,
+  "passed": true,
+  "finished_utc": "2026-10-24T03:28:30.559269+00:00"
+}

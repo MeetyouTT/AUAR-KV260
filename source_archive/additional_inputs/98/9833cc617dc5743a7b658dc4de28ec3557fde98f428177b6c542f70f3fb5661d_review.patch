@@ -1,0 +1,37 @@
+--- a/board/runtime/audio/automatic_capture.py
++++ b/board/runtime/audio/automatic_capture.py
+@@ -31,9 +31,14 @@
+     def feed(self, pcm):
+         import numpy as np
+         if self.done: raise ValueError('Speech turn already completed')
+-        self.pending.extend(pcm)
+-        while len(self.pending) >= self.frame_bytes:
+-            raw = bytes(self.pending[:self.frame_bytes]); del self.pending[:self.frame_bytes]
++        aligned = (not self.pending and type(pcm) is bytes
++                   and len(pcm) == self.frame_bytes == 640)
++        if not aligned: self.pending.extend(pcm)
++        while aligned or len(self.pending) >= self.frame_bytes:
++            if aligned:
++                raw = pcm; aligned = False
++            else:
++                raw = bytes(self.pending[:self.frame_bytes]); del self.pending[:self.frame_bytes]
+             self.total_samples += self.config.frame_samples
+             self.ring.append(raw)
+             if self.active: self.speech_samples += self.config.frame_samples
+--- a/board/runtime/audio/board_gtcrn_reuse.py
++++ b/board/runtime/audio/board_gtcrn_reuse.py
+@@ -60,6 +60,14 @@
+                                         shape=value.shape,buffer_ptr=value.ctypes.data)
+                 self._bindings.append(binding)
+             self._io_index = 0
++
++    def _consume(self):
++        chunks=[];offset=0
++        while len(self.pending)-offset>=256:
++            chunks.append(self._hop(self.pending[offset:offset+256]));offset+=256
++        if offset:self.pending=self.pending[offset:].copy()
++        if len(chunks)==1:return chunks[0]
++        return self.np.concatenate(chunks) if chunks else self.np.empty(0,dtype=self.np.float32)
+ 
+     def _hop(self,samples):
+         np = self.np

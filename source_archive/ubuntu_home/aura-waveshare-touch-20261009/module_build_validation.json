@@ -1,0 +1,85 @@
+{
+  "started_utc": "2026-10-09T14:06:24.744810+00:00",
+  "complete": true,
+  "board_loaded": false,
+  "inputs": {
+    "/home/ghmd/kv260-runtime-reproduce-20261003c/build/kernel/.config": "3e4da163cd12d3be4c76ac458b55aad47f3c5c47269b53aac4305d9b3a643d2b",
+    "/home/ghmd/kv260-runtime-reproduce-20261003c/build/kernel/Module.symvers": "6e582b60f2a379055924117f930e5ca0fac44c98d56f3b374dc3ce278da7b8ed",
+    "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/linux/drivers/hid/hid-multitouch.c": "7e083f7bbd5a4ba8be1c0f18b4826a5264c11dc8cc89b14c1801c87ba3f8507a",
+    "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/linux/drivers/hid/hid-ids.h": "b9e87a0f2e539dcdc4c4eb888915229c036473543a20c5d5c14f24a153f0948e"
+  },
+  "kernel_commit": "19984dd147fa7fbb7cb14b17400263ad0925c189",
+  "configuration_differences": [
+    "CONFIG_CC_VERSION_TEXT"
+  ],
+  "commands": [
+    {
+      "name": "make",
+      "argv": [
+        "make",
+        "-C",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/linux",
+        "O=/home/ghmd/aura-waveshare-touch-20261009/module-build/kernel",
+        "ARCH=arm64",
+        "CROSS_COMPILE=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-",
+        "M=/home/ghmd/aura-waveshare-touch-20261009/module-build/driver",
+        "-j2",
+        "modules"
+      ],
+      "exit_code": 0,
+      "log": "/home/ghmd/aura-waveshare-touch-20261009/module-build/logs/make.log",
+      "sha256": "3e0ab7010fb6ed73076a546234cc06bc600bba464dcf4420749728e3718a937e"
+    },
+    {
+      "name": "strip",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-strip",
+        "--strip-debug",
+        "/home/ghmd/aura-waveshare-touch-20261009/module-build/driver/hid-multitouch.ko"
+      ],
+      "exit_code": 0,
+      "log": "/home/ghmd/aura-waveshare-touch-20261009/module-build/logs/strip.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "modinfo",
+      "argv": [
+        "modinfo",
+        "/home/ghmd/aura-waveshare-touch-20261009/module-build/driver/hid-multitouch.ko"
+      ],
+      "exit_code": 0,
+      "log": "/home/ghmd/aura-waveshare-touch-20261009/module-build/logs/modinfo.log",
+      "sha256": "c86a4688ebb0baa58acb3f5d7453e295a62c1811ce3987b50e81624a9a5dd35d"
+    },
+    {
+      "name": "readelf",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "-h",
+        "/home/ghmd/aura-waveshare-touch-20261009/module-build/driver/hid-multitouch.ko"
+      ],
+      "exit_code": 0,
+      "log": "/home/ghmd/aura-waveshare-touch-20261009/module-build/logs/readelf.log",
+      "sha256": "888a14398aa9ce14f04ff5fda3eb80a209b6124348a9d88e83d1e421d7974c67"
+    },
+    {
+      "name": "undefined",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-nm",
+        "-u",
+        "/home/ghmd/aura-waveshare-touch-20261009/module-build/driver/hid-multitouch.ko"
+      ],
+      "exit_code": 0,
+      "log": "/home/ghmd/aura-waveshare-touch-20261009/module-build/logs/undefined.log",
+      "sha256": "d78bc1c4339a879060aa9d7273ef2f928bbe5374eace30fa1a68805f217af012"
+    }
+  ],
+  "module": "/home/ghmd/aura-waveshare-touch-20261009/module-build/driver/hid-multitouch.ko",
+  "bytes": 34944,
+  "sha256": "fce568b070bbc0e9210bc6417b39e1c57637d9d24d9fdebc4cb913603505417b",
+  "vermagic": "5.15.36-xilinx-v2022.2 SMP mod_unload aarch64",
+  "undefined_symbols": 38,
+  "all_symbols_in_prepared_kernel": true,
+  "original_inputs_unchanged": true,
+  "finished_utc": "2026-10-09T14:06:26.595481+00:00"
+}

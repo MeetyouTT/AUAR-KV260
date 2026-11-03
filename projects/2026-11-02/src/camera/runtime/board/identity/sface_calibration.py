@@ -1,0 +1,488 @@
+"""Explicit RAM-only SFace field calibration. No I/O, identity, or store API.
+
+This is an operator-labelled experiment, not identity recognition. Only scalar
+statistics can leave this module. Validation never contributes to a candidate.
+"""
+from dataclasses import dataclass
+import copy
+import math
+from numbers import Real
+import re
+import secrets
+import threading
+
+MODEL_ID = 'sface-int8-12b2ff5c7de15713'
+CALIBRATION = frozenset(('calibration_gallery', 'calibration_probe', 'calibration_unknown'))
+VALIDATION = frozenset(('validation_known', 'validation_unknown'))
+PURPOSES = CALIBRATION | VALIDATION
+HEX64 = re.compile(r'[0-9a-f]{64}\Z')
+HEX32 = re.compile(r'[0-9a-f]{32}\Z')
+PERSON = re.compile(r'P_[A-Z0-9]{1,12}\Z')
+CAPTURE = re.compile(r'C_[A-Z0-9_]{1,24}\Z')
+POSE_FIELDS = ('yaw', 'roll', 'pixels', 'eye_distance', 'blur')
+GALLERY_POLICY = 'frontal_medoid_v1_observed_top5_operator_labelled_capture'
+QUALITY_SOURCE = 'yunet_five_landmark_geometry_and_aligned_crop_laplacian_variance'
+
+
+def calibration_configuration(config):
+    value = config.get('dpu_sface_calibration')
+    if value is None:
+        return None
+    if not isinstance(value, dict) or type(value.get('enabled')) is not bool:
+        raise ValueError('Invalid calibration configuration')
+    if not value['enabled']:
+        if set(value) != {'enabled'}:
+            raise ValueError('Disabled calibration accepts only enabled=false')
+        return None
+    shadow = config.get('dpu_sface_shadow') or {}
+    if (set(value) != {'enabled', 'mode', 'control_token'}
+            or value['mode'] != 'CALIBRATION_ONLY'
+            or not isinstance(value['control_token'], str)
+            or not HEX64.fullmatch(value['control_token'])
+            or shadow.get('enabled') is not True or shadow.get('compare_cosine') is not False):
+        raise ValueError('Explicit CALIBRATION_ONLY capability and independent shadow required')
+    return dict(value)
+
+
+def target_tuple(value):
+    if (not isinstance(value, dict)
+            or set(value) != {'camera_epoch', 'track_id', 'track_generation'}
+            or not isinstance(value['camera_epoch'], str)
+            or not re.fullmatch(r'[A-Za-z0-9_-]{1,64}', value['camera_epoch'])
+            or any(type(value[k]) is not int or not 1 <= value[k] <= 2**31-1
+                   for k in ('track_id', 'track_generation'))):
+        raise ValueError('Explicit current target with generation required')
+    return value['camera_epoch'], value['track_id'], value['track_generation']
+
+
+def normalized(values):
+    values = tuple(values)
+    if (len(values) != 128 or any(not isinstance(v, Real) or isinstance(v, bool) or not math.isfinite(v)
+                                  for v in values)):
+        raise ValueError('Invalid calibration embedding')
+    # VART postprocessing returns numpy.float32 scalars, not Python floats.
+    # Convert to standard scalars without importing numpy in this pure module.
+    values = tuple(float(v) for v in values)
+    norm = math.sqrt(sum(v*v for v in values))
+    if not math.isfinite(norm) or norm <= 1e-12:
+        raise ValueError('Zero calibration embedding')
+    return tuple(v/norm for v in values)
+
+
+def summary(values):
+    values = list(values)
+    return {'count': len(values), 'mean': sum(values)/len(values) if values else None,
+            'min': min(values) if values else None, 'max': max(values) if values else None}
+
+
+def frontal_pose(value):
+    if (not isinstance(value, dict) or set(value) != set(POSE_FIELDS)
+            or any(not isinstance(v, Real) or isinstance(v, bool) or not math.isfinite(v)
+                   for v in value.values())):
+        raise ValueError('Camera-derived quality metadata required')
+    if (abs(value['yaw']) > .22 or abs(value['roll']) > 15.
+            or not 72 <= value['pixels'] <= 8192 or not 18 <= value['eye_distance'] <= 8192
+            or value['blur'] < 40):
+        raise ValueError('Qualified frontal observation required')
+    return tuple(float(value[k]) for k in POSE_FIELDS)
+
+
+@dataclass(frozen=True, repr=False)
+class Ticket:
+    """Process-private, never serialized. Captures the session at offer time."""
+    token: str
+    generation: int
+    serial: int
+    target: tuple
+    fid: int
+    stamp: int
+    pose: tuple
+
+
+@dataclass(frozen=True, repr=False)
+class Sample:
+    feature: tuple
+    pose: tuple
+    quality: float
+
+
+class CalibrationSession:
+    MAX_PEOPLE = 8
+    MAX_SESSIONS = 32
+    MAX_SAMPLES = 12
+    MIN_SAMPLES = 3
+    MIN_INTERVAL_MS = 500
+    MAX_SESSION_MS = 120000
+    MAX_MUTATIONS = 128
+
+    def __init__(self, clock, max_source_age_ms, *, token_factory=None):
+        if not callable(clock) or type(max_source_age_ms) is not int or not 100 <= max_source_age_ms <= 1500:
+            raise ValueError('Explicit clock and bounded source lifetime required')
+        self.clock, self.ttl = clock, max_source_age_ms
+        self.lock = threading.RLock()
+        self.analysis_lock = threading.Lock()
+        self.token_factory = token_factory or (lambda: secrets.token_hex(32))
+        self.sessions = []
+        self.active = None
+        self.generation = self.serial = self.last_consumed = 0
+        self.tokens, self.request_ids = set(), set()
+        self.frozen = None
+        self.accepted = self.rejected = self.observer_errors = 0
+        self.quality_rejected = 0
+        self.closed = False
+
+    def _new_token(self):
+        for _ in range(8):
+            value = self.token_factory()
+            if isinstance(value, str) and HEX64.fullmatch(value) and value not in self.tokens:
+                self.tokens.add(value)
+                return value
+        raise ValueError('Unable to create a unique session token')
+
+    def _end(self, reason):
+        if self.active is not None:
+            self.active['end_reason'] = reason
+            self.active = None
+            self.generation += 1
+
+    def _expiry(self):
+        if self.active and not 0 <= self.clock()-self.active['started'] < self.MAX_SESSION_MS:
+            self._end('SESSION_EXPIRED')
+
+    def observe_target(self, current):
+        with self.lock:
+            self._expiry()
+            if self.active:
+                try: same = target_tuple(current) == self.active['target']
+                except ValueError: same = False
+                if not same:
+                    self._end('TARGET_CHANGED')
+
+    def begin(self, purpose, person, capture_session, target, current_target):
+        with self.lock:
+            self._expiry()
+            if self.closed or self.active is not None:
+                raise ValueError('Calibration is closed or already collecting')
+            if (purpose not in PURPOSES or not isinstance(person, str) or not PERSON.fullmatch(person)
+                    or not isinstance(capture_session, str) or not CAPTURE.fullmatch(capture_session)):
+                raise ValueError('Strict anonymous person and independent capture session required')
+            key = target_tuple(target)
+            if key != target_tuple(current_target):
+                raise ValueError('Target changed before session start')
+            if len(self.sessions) >= self.MAX_SESSIONS or any(s['capture'] == capture_session for s in self.sessions):
+                raise ValueError('Capture session reused or capacity exhausted')
+            if len({s['person'] for s in self.sessions} | {person}) > self.MAX_PEOPLE:
+                raise ValueError('Anonymous person capacity exhausted')
+            if bool(self.frozen) != (purpose in VALIDATION):
+                raise ValueError('Calibration only before freeze; validation only after freeze')
+            known = {s['person'] for s in self.sessions if s['purpose'] == 'calibration_gallery'}
+            unknown = {s['person'] for s in self.sessions if s['purpose'] in ('calibration_unknown', 'validation_unknown')}
+            if purpose == 'calibration_gallery' and person in unknown:
+                raise ValueError('Unknown-labelled person cannot become gallery in this experiment')
+            if purpose == 'calibration_gallery' and any(s['person'] == person
+                    and s['purpose'] == purpose and s['end_reason'] == 'OPERATOR_ENDED'
+                    and len(s['samples']) >= self.MIN_SAMPLES for s in self.sessions):
+                raise ValueError('One completed gallery capture per person; reset to recollect')
+            if purpose in ('calibration_probe', 'validation_known') and person not in known:
+                raise ValueError('Known probe requires an explicit prior gallery group')
+            if purpose in ('calibration_unknown', 'validation_unknown') and person in known:
+                raise ValueError('Unknown probe cannot use a gallery person')
+            token = self._new_token()
+            self.generation += 1
+            item = {'purpose': purpose, 'person': person, 'capture': capture_session,
+                    'target': key, 'started': self.clock(), 'samples': [], 'last_fid': 0,
+                    'last_stamp': None, 'end_reason': None, 'token': token}
+            self.sessions.append(item)
+            self.active = item
+            return {'mode': 'CALIBRATION_ONLY', 'session_token': token,
+                    'capture_session': capture_session, 'purpose': purpose, 'samples': 0}
+
+    def end(self, token, *, discard=False):
+        with self.lock:
+            self._expiry()
+            if (not self.active or not isinstance(token, str)
+                    or not secrets.compare_digest(token, self.active['token'])):
+                raise ValueError('Active session token required; replay refused')
+            count = len(self.active['samples'])
+            if discard:
+                self.active['samples'].clear()
+            self._end('DISCARDED' if discard else 'OPERATOR_ENDED')
+            return {'ended': True, 'samples_retained': 0 if discard else count}
+
+    def ticket(self, fid, stamp, target, current_target=None, *, quality=None):
+        # Called by the primary extractor: a control request must never make
+        # that producer wait for calibration state. Busy simply drops capture.
+        if not self.lock.acquire(blocking=False):
+            return None
+        try:
+            self._expiry()
+            if current_target is not None:
+                self.observe_target(current_target)
+            item = self.active
+            if (not item or self.closed or type(fid) is not int or fid < 1 or type(stamp) is not int
+                    or not 0 <= self.clock()-stamp < self.ttl):
+                return None
+            try: key = target_tuple(target)
+            except ValueError: return None
+            if key != item['target'] or len(item['samples']) >= self.MAX_SAMPLES:
+                return None
+            try: pose = frontal_pose(quality)
+            except (ValueError, TypeError, OverflowError):
+                self.quality_rejected += 1
+                return None
+            self.serial += 1
+            return Ticket(item['token'], self.generation, self.serial, key, fid, stamp, pose)
+        finally:
+            self.lock.release()
+
+    def accept(self, ticket, feature, current_target):
+        with self.lock:
+            self.observe_target(current_target)
+            item = self.active
+            if (not isinstance(ticket, Ticket) or not item or self.closed
+                    or not secrets.compare_digest(ticket.token, item['token'])
+                    or ticket.generation != self.generation or ticket.serial <= self.last_consumed
+                    or ticket.serial > self.serial or ticket.target != item['target']
+                    or not 0 <= self.clock()-ticket.stamp < self.ttl):
+                self.rejected += 1
+                return False
+            self.last_consumed = ticket.serial
+            if (ticket.fid <= item['last_fid'] or len(item['samples']) >= self.MAX_SAMPLES
+                    or item['last_stamp'] is not None and ticket.stamp-item['last_stamp'] < self.MIN_INTERVAL_MS):
+                self.rejected += 1
+                return False
+            try: vector = normalized(feature)
+            except (ValueError, TypeError, OverflowError):
+                self.rejected += 1
+                return False
+            item['samples'].append(Sample(vector,ticket.pose,min(ticket.pose[4],400.)+min(ticket.pose[2],240.)))
+            item['last_stamp'], item['last_fid'] = ticket.stamp, ticket.fid
+            self.accepted += 1
+            return True
+
+    def _snapshot(self):
+        with self.lock:
+            self._expiry()
+            # Only RAM copy; never return vectors to caller or HTTP route.
+            data = [{'purpose': s['purpose'], 'person': s['person'], 'capture': s['capture'],
+                     'samples': tuple(s['samples']), 'ended': s['end_reason'] == 'OPERATOR_ENDED'}
+                    for s in self.sessions]
+            return data, copy.deepcopy(self.frozen), self.active is not None
+
+    @staticmethod
+    def _gallery(data):
+        groups = {}
+        for item in data:
+            if (item['purpose'] == 'calibration_gallery' and item['ended']
+                    and len(item['samples']) >= CalibrationSession.MIN_SAMPLES):
+                groups.setdefault(item['person'], []).extend(item['samples'])
+        result = {}
+        for person, rows in groups.items():
+            # Same selection core as EnrollmentSampling._choose_front: top five
+            # most frontal observations, then observed medoid/quality tie-break.
+            front = sorted(rows,key=lambda row:(abs(row.pose[0]),abs(row.pose[1]),-row.quality))[:5]
+            if len(front) < CalibrationSession.MIN_SAMPLES: continue
+            def representative(row):
+                return (sum(sum(a*b for a,b in zip(row.feature,other.feature)) for other in front),row.quality)
+            result[person] = max(front,key=representative).feature
+        return result
+
+    @classmethod
+    def _coverage(cls, data, validation=False):
+        galleries = {s['person'] for s in data if s['purpose'] == 'calibration_gallery'
+                     and s['ended'] and len(s['samples']) >= cls.MIN_SAMPLES}
+        known_purpose = 'validation_known' if validation else 'calibration_probe'
+        unknown_purpose = 'validation_unknown' if validation else 'calibration_unknown'
+        known = {s['person'] for s in data if s['purpose'] == known_purpose
+                 and s['ended'] and len(s['samples']) >= cls.MIN_SAMPLES}
+        unknown = {s['person'] for s in data if s['purpose'] == unknown_purpose
+                   and s['ended'] and len(s['samples']) >= cls.MIN_SAMPLES}
+        missing = []
+        if len(galleries) < 2: missing.append('AT_LEAST_TWO_GALLERY_PEOPLE')
+        if not galleries <= known: missing.append('INDEPENDENT_KNOWN_PROBE_PER_GALLERY_PERSON')
+        if not unknown: missing.append('INDEPENDENT_UNKNOWN_PERSON')
+        return {'sufficient': not missing, 'gallery_people': len(galleries),
+                'known_probe_people': len(known & galleries), 'unknown_probe_people': len(unknown),
+                'missing': missing, 'minimum_samples_per_capture': cls.MIN_SAMPLES,
+                'general_accuracy_proven': False, 'labels_operator_asserted': True}
+
+    @classmethod
+    def _probes(cls, data, validation=False):
+        gallery = cls._gallery(data)
+        purposes = VALIDATION if validation else {'calibration_probe', 'calibration_unknown'}
+        rows = []
+        for item in data:
+            if item['purpose'] not in purposes or not item['ended'] or len(item['samples']) < cls.MIN_SAMPLES:
+                continue
+            for sample in item['samples']:
+                feature = sample.feature
+                # Same normalized, one-template-per-person semantics as store.match.
+                scores = sorted(((sum(a*b for a,b in zip(feature, template)), person)
+                                 for person, template in gallery.items()), reverse=True)
+                if len(scores) >= 2:
+                    rows.append((item['purpose'].endswith('unknown'), item['person'],
+                                 scores[0][1], scores[0][0], scores[0][0]-scores[1][0]))
+        return rows
+
+    @staticmethod
+    def _metrics(rows, threshold, margin):
+        value = {key: 0 for key in ('known_samples', 'unknown_samples', 'correct_accept',
+                    'false_reject', 'known_ambiguous', 'misidentification', 'unknown_reject',
+                    'unknown_ambiguous', 'false_accept')}
+        for unknown, expected, predicted, best, gap in rows:
+            value['unknown_samples' if unknown else 'known_samples'] += 1
+            if best < threshold: result = 'unknown_reject' if unknown else 'false_reject'
+            elif gap < margin: result = 'unknown_ambiguous' if unknown else 'known_ambiguous'
+            elif unknown: result = 'false_accept'
+            else: result = 'correct_accept' if expected == predicted else 'misidentification'
+            value[result] += 1
+        value['false_accept_fraction'] = value['false_accept']/value['unknown_samples'] if value['unknown_samples'] else None
+        value['correct_accept_fraction'] = value['correct_accept']/value['known_samples'] if value['known_samples'] else None
+        return value
+
+    def report(self, *, validation=False):
+        data, frozen, active = self._snapshot()
+        coverage = self._coverage(data, validation)
+        rows = self._probes(data, validation)
+        pairs_same, pairs_different = [], []
+        if not validation:
+            # Cross-capture only; a continuous capture never compares with itself.
+            eligible = [s for s in data if s['purpose'] in CALIBRATION and s['ended']
+                        and len(s['samples']) >= self.MIN_SAMPLES]
+            for i, a in enumerate(eligible):
+                for b in eligible[i+1:]:
+                    if a['capture'] == b['capture']: continue
+                    target = pairs_same if a['person'] == b['person'] else pairs_different
+                    for va in a['samples']:
+                        for vb in b['samples']:
+                            target.append(sum(x*y for x,y in zip(va.feature,vb.feature)))
+        result = {'mode': 'CALIBRATION_ONLY', 'model_id': MODEL_ID,
+                  'gallery_policy': GALLERY_POLICY, 'quality_source': QUALITY_SOURCE,
+                  'deployment_threshold_validated': False,
+                  'split': 'VALIDATION' if validation else 'CALIBRATION',
+                  'coverage': coverage, 'active_session': active,
+                  'independent_capture_sessions': len(data),
+                  'candidate': frozen, 'identity_decisions_published': 0,
+                  'templates_written': 0, 'images_saved': 0, 'features_saved': 0}
+        if not validation:
+            result['cross_capture_scores'] = {'same_person': summary(pairs_same), 'different_person': summary(pairs_different)}
+        else:
+            calibration_people = {s['person'] for s in data if s['purpose'] in CALIBRATION}
+            unknown_people = {s['person'] for s in data if s['purpose'] == 'validation_unknown' and s['ended']}
+            result['validation_unknown_people_seen_in_calibration'] = len(unknown_people & calibration_people)
+            result['independent_subjects_required_or_proven'] = False
+        if frozen:
+            result['metrics'] = self._metrics(rows, frozen['threshold'], frozen['ambiguity_margin'])
+        result['status'] = ('COVERAGE_INSUFFICIENT' if not coverage['sufficient'] else
+                            'OPERATOR_LABELLED_SMALL_SAMPLE_ONLY')
+        return result
+
+    def suggest(self):
+        data, frozen, active = self._snapshot()
+        coverage = self._coverage(data)
+        if frozen or active or not coverage['sufficient']:
+            return {'status': 'COVERAGE_INSUFFICIENT' if not coverage['sufficient'] else 'NOT_SELECTABLE',
+                    'coverage': coverage, 'candidate': None}
+        rows = self._probes(data)
+        # Deterministic finite search on CALIBRATION only. Bound to 21x21 grid;
+        # explicit operator freeze remains mandatory, no config is written.
+        thresholds = [i/20. for i in range(21)]
+        margins = [i/40. for i in range(21)]
+        candidates = []
+        for threshold in thresholds:
+            for margin in margins:
+                metrics = self._metrics(rows, threshold, margin)
+                if not metrics['false_accept'] and not metrics['misidentification']:
+                    rank = (metrics['correct_accept'], metrics['unknown_reject'],
+                            -metrics['known_ambiguous'], threshold, margin)
+                    candidates.append((rank, threshold, margin, metrics))
+        if not candidates:
+            return {'status': 'NO_ZERO_OBSERVED_ERROR_CANDIDATE', 'coverage': coverage, 'candidate': None}
+        _, threshold, margin, metrics = max(candidates)
+        if not metrics['correct_accept']:
+            return {'status': 'NO_USEFUL_ACCEPTANCE_CANDIDATE', 'coverage': coverage, 'candidate': None}
+        return {'status': 'SUGGESTION_REQUIRES_OPERATOR_FREEZE', 'coverage': coverage,
+                'candidate': {'threshold': threshold, 'ambiguity_margin': margin},
+                'calibration_metrics': metrics, 'validation_used': False,
+                'general_accuracy_proven': False}
+
+    def freeze(self, threshold, margin):
+        if (type(threshold) not in (int, float) or not math.isfinite(threshold) or not 0 <= threshold <= 1
+                or type(margin) not in (int, float) or not math.isfinite(margin) or not 0 <= margin <= 1):
+            raise ValueError('Explicit finite candidate threshold/margin required')
+        with self.lock:
+            data, old, active = self._snapshot()
+            if old or active or not self._coverage(data)['sufficient']:
+                raise ValueError('Complete independent calibration coverage before freeze')
+            if len(self._gallery(data)) < 2:
+                raise ValueError('Qualified observed gallery templates required')
+            self.frozen = {'model_id': MODEL_ID, 'threshold': float(threshold),
+                           'ambiguity_margin': float(margin), 'frozen': True,
+                           'validation_used_for_selection': False,
+                           'field_threshold_validated': False,
+                           'deployment_threshold_validated': False,
+                           'gallery_policy': GALLERY_POLICY,
+                           'general_accuracy_proven': False,
+                           'scope': 'OPERATOR_LABELLED_FIELD_CANDIDATE_ONLY'}
+            return copy.deepcopy(self.frozen)
+
+    def health(self):
+        with self.lock:
+            self._expiry()
+            return {'enabled': True, 'mode': 'CALIBRATION_ONLY', 'model_id': MODEL_ID,
+                    'gallery_policy': GALLERY_POLICY, 'deployment_threshold_validated': False,
+                    'closed': self.closed, 'active_session': self.active is not None,
+                    'sessions': len(self.sessions), 'samples_in_ram': sum(len(s['samples']) for s in self.sessions),
+                    'max_sessions': self.MAX_SESSIONS, 'max_samples_per_session': self.MAX_SAMPLES,
+                    'max_embedding_scalar_values': self.MAX_SESSIONS*self.MAX_SAMPLES*128,
+                    'accepted': self.accepted, 'rejected': self.rejected,
+                    'quality_rejected': self.quality_rejected,
+                    'candidate_frozen': self.frozen is not None,
+                    'last_session_end_reason': self.sessions[-1]['end_reason'] if self.sessions else None,
+                    'mutation_slots_remaining': self.MAX_MUTATIONS-len(self.request_ids),
+                    'identity_decisions_published': 0, 'templates_written': 0,
+                    'images_saved': 0, 'features_saved': 0}
+
+    def dispatch(self, action, params, *, current_target=None):
+        """Narrow scalar-only control surface; no embedding input/output endpoint."""
+        if not isinstance(params, dict): raise ValueError('Object params required')
+        read = {'health', 'report', 'suggest', 'validation_report'}
+        if action in read:
+            if params: raise ValueError('Read controls accept no params')
+            if action == 'health': return self.health()
+            if not self.analysis_lock.acquire(blocking=False):
+                raise ValueError('Analytical report already running')
+            try:
+                if action == 'suggest': return self.suggest()
+                return self.report(validation=action == 'validation_report')
+            finally:
+                self.analysis_lock.release()
+        with self.lock:
+            if self.closed: raise ValueError('Calibration closed')
+            request = params.get('request_id')
+            if (not isinstance(request, str) or not HEX32.fullmatch(request)
+                    or request in self.request_ids or len(self.request_ids) >= self.MAX_MUTATIONS):
+                raise ValueError('Unique request_id required; replay/capacity refused')
+            self.request_ids.add(request)  # Failed operations are consumed too.
+            fields = set(params) - {'request_id'}
+            if action == 'start' and fields == {'purpose', 'person', 'capture_session', 'target'}:
+                return self.begin(params['purpose'], params['person'], params['capture_session'],
+                                  params['target'], current_target)
+            if action in ('end', 'discard') and fields == {'session_token'}:
+                return self.end(params['session_token'], discard=action == 'discard')
+            if action == 'freeze' and fields == {'threshold', 'ambiguity_margin'}:
+                return self.freeze(params['threshold'], params['ambiguity_margin'])
+            if action == 'reset' and not fields:
+                self._end('RESET')
+                self.sessions.clear()
+                self.frozen = None
+                # Retain used-token and request ledgers: reset cannot enable replay.
+                return {'reset': True, 'samples_in_ram': 0, 'candidate_frozen': False}
+            raise ValueError('Unknown action or invalid exact params')
+
+    def close(self):
+        with self.lock:
+            self._end('CLOSED')
+            self.sessions.clear()
+            self.frozen = None
+            self.closed = True

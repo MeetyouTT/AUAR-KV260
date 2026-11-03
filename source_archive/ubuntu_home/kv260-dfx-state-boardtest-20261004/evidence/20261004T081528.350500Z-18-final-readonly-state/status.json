@@ -1,0 +1,61 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/18-final-readonly-state.json",
+  "manifest_sha256": "62dc2bbb20d0264c184fe6a6a6be6cd433881e89f9b23e01648cb8ea9c28ca4e",
+  "started_utc": "2026-10-04T08:15:28.350651+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "enabled",
+      "started_utc": "2026-10-04T08:15:28.870800+00:00",
+      "entry": {
+        "id": "enabled",
+        "command": "systemctl is-enabled dfx-mgr.service"
+      },
+      "exit_code": 0,
+      "output_sha256": "e056a35db086947e2f5969d747f0a7517bff00c7ffff1f9e7b47b72bfac9d948",
+      "bytes": 8,
+      "finished_utc": "2026-10-04T08:15:29.688081+00:00"
+    },
+    {
+      "id": "final-properties",
+      "started_utc": "2026-10-04T08:15:29.688342+00:00",
+      "entry": {
+        "id": "final-properties",
+        "command": "systemctl show dfx-mgr.service -p MainPID -p UnitFileState -p ActiveState -p SubState -p Result -p ExecMainStatus -p ExecStart -p DropInPaths -p After -p Requires"
+      },
+      "exit_code": 0,
+      "output_sha256": "8033b6dc88aef1506097948ba672c6ef29b89579e3ee02dcd7d0fa19c1963ceb",
+      "bytes": 671,
+      "finished_utc": "2026-10-04T08:15:30.663745+00:00"
+    },
+    {
+      "id": "final-packages",
+      "started_utc": "2026-10-04T08:15:30.664183+00:00",
+      "entry": {
+        "id": "final-packages",
+        "command": "xmutil listapps"
+      },
+      "exit_code": 0,
+      "output_sha256": "d3361c5de7ab7b1949e089fbe4b68f5b745b7139fce21406305e118632c04f4d",
+      "bytes": 726,
+      "finished_utc": "2026-10-04T08:15:31.783732+00:00"
+    },
+    {
+      "id": "final-live-state",
+      "started_utc": "2026-10-04T08:15:31.784166+00:00",
+      "entry": {
+        "id": "final-live-state",
+        "command": "python3 -B -c 'import sys,json,pathlib; sys.path.insert(0,\"/home/root/kv260-dfx-state-boardtest-20261004/board\"); import validate_v5 as v; e=v.Evidence(\"final-running\"); v.guard(e); pid=v.manager(e,v.NEW); e.check(\"persistent_config_exact\",v.PERSIST.read_text()==v.PERSIST_CONTENT and not v.TEMP.exists()); e.check(\"candidate_hash_exact\",v.sha(v.NEW)==v.NEW_SHA); state=v.watch_state(pid); e.check(\"watch_baseline_five\",state[\"watch_count\"]==5); v.stock(e); v.save(e.out/\"live-state.json\",state); print(\"LIVE \"+json.dumps({\"boot_id\":v.read(\"/proc/sys/kernel/random/boot_id\"),\"manager_sha256\":v.sha(v.NEW),\"manager_bytes\":v.NEW.stat().st_size,\"persistent_dropin_sha256\":v.sha(v.PERSIST),\"zocl_srcversion\":v.read(\"/sys/module/zocl/srcversion\"),\"state\":state})); e.finish()'",
+        "timeout": 120
+      },
+      "exit_code": 0,
+      "output_sha256": "9e709c35077f5a6e89538022c6369bfea76c7fb0dde2812fc5e60f1a0c2dabc4",
+      "bytes": 3232,
+      "finished_utc": "2026-10-04T08:15:34.471948+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T08:15:34.519573+00:00"
+}

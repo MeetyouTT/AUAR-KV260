@@ -1,0 +1,91 @@
+{
+  "schema": "aura-live-enrollment-current-status-2",
+  "current_user_requirement": "Separate face enrollment and voiceprint enrollment commands; first save each independently, link later in a separate task.",
+  "face": {
+    "user_physically_accepted_visual_identity": true,
+    "formal_current_model_identity_count": 1,
+    "formal_current_model_template_count": 1,
+    "camera_db_version": 3,
+    "observed_current_identity_state": "KNOWN",
+    "last_original_identity_enroll_operation": "COMMITTED",
+    "must_preserve_registered_face": true
+  },
+  "voice_and_links": {
+    "last_verified_formal_voice_identity_count": 0,
+    "last_verified_formal_voice_template_count": 0,
+    "last_verified_linked_people_count": 0,
+    "voice_enrollment_complete": false,
+    "automatic_cross_modal_linking_requested": false,
+    "linking_deferred_by_user": true,
+    "standalone_voice_final_confirmation": "确认保存声纹"
+  },
+  "deployed_fixes": {
+    "face_start_cache_sync_source_sha256": "a9113ba40efc49828ee158554b2dae70485858396680918458f6f96bba16bacb",
+    "existing_identity_query_router_sha256": "85e415d00daa770d4d94ae58006a23ed9700067651a0448de80c99eb33ed1809",
+    "no_speech_asr_source_sha256": "c51488ac6bd3563bc3dc42934b321e98e26cb2b58d700318765a60ca4908ef60",
+    "no_speech_jobs_source_sha256": "01b27ede0d8889c35fc9ac990e03538a55fecc7c6a604fb6f781bc5d54c09087",
+    "no_speech_production_applied_and_gui_restarted": true,
+    "no_speech_specific_tests_passed": 31,
+    "no_speech_independent_counterexamples_passed": 7,
+    "no_speech_original_regressions": "Both versions 63 pass / same 7 legacy fixture failures / 0 errors",
+    "subsequent_live_service_error_events_still_observed": true,
+    "all_historical_confirmation_failures_uniquely_explained": false
+  },
+  "offline_only": {
+    "four_file_confirmation_trace_candidate": "confirmation_failure_trace_20261102",
+    "trace_candidate_production_deployed": false,
+    "numeric_timing_candidate_production_deployed": false,
+    "split_commands_candidate": "split_commands_20261102",
+    "split_commands_production_deployed": false,
+    "split_commands_planned_files": [
+      "common/binding_intent.py",
+      "board/runtime/board_business.py",
+      "board/runtime/audio/board_dialogue_jobs.py"
+    ],
+    "split_commands_required_properties": [
+      "Face-only uses the original face FSM and sampling/save quality checks; no voice enrollment or links.",
+      "Voice-only uses original SpeakerDevice three distinct captures and final confirmation; no visual prerequisite or links.",
+      "An active registration rejects switching modality before explicit cancel, instead of consuming the other command as a sample.",
+      "Bare voice command may wait at most 120 seconds for a valid name in the same actor/session; it creates no sample or new consent FSM.",
+      "Ordinary name hints without an explicit registration request do not start enrollment.",
+      "Existing explicit remember-self combined workflow stays compatible; new link aliases are outside this release."
+    ]
+  },
+  "last_fresh_before_cpu_maintenance": {
+    "host_utc": "2026-11-02T12:31:01.593846+00:00",
+    "boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e",
+    "startup_sha256": "f507bfa6cb5ea5de807dd36601ac4ff2e4af9bba5aa75f6fd5a2b3a5fd54e3eb",
+    "all_380_components_verified": true,
+    "supervisor": {"pid": 60231, "birth_ticks": "420313", "cmd_sha256": "48a28efa32b2050901e73e85a80a30a90dcfbce0b7249bde5d6d90902740631d"},
+    "gtk": {"pid": 60256, "birth_ticks": "423054", "cmd_sha256": "65a15ef78e58f4bf8f86ffe8635172c115e70fb32ef73bb0959e80d99aa345be"},
+    "camera": {"pid": 1332, "birth_ticks": "2236", "cmd_sha256": "acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd"},
+    "selected_binding_path": "/home/root/aura-5090-recovery-20261102-a6d4a069/gui-selected-1332-26pins-v1/face_gallery_readback.local.json",
+    "selected_binding_sha256": "99c53c5992355a2a4dfdedceb3cc90d813981328456b987e503459fe6d0691b5",
+    "selected_binding_source_count": 26,
+    "ready_main_visible": true,
+    "paused_and_microphone_closed": true,
+    "playing_or_pending_job": false,
+    "face_or_speaker_enrollment_active": false,
+    "stored_binding_attempts_active": 0,
+    "camera_sampling_stage": "idle",
+    "runtime_fault_count": 0,
+    "not_a_claim_about_owners_after_cpu_changes": true
+  },
+  "maintenance_ownership": {
+    "gui_camera_listening_writer": "CPU chat 01a19b1a-6a07-7781-8af9-aacacb1c8ca4",
+    "handoff_file": "cpu_optimization_20261102/IDENTITY_SPLIT_IDLE_HANDOFF.json",
+    "this_chat_and_all_subagents_board_access_frozen": true,
+    "window_target_minutes": 10,
+    "return_requires_explicit_handback": true,
+    "elapsed_time_is_not_handback": true,
+    "return_required": "Fresh boot, exact supervisor/GTK/camera owners, startup and all pins, selected binding real count and original verifier, READY/paused/no playback/no capture/no save, with original camera protection chain retained.",
+    "axis_work_outside_this_chat": true
+  },
+  "time_and_privacy": {
+    "client_timezone": "America/Los_Angeles",
+    "board_os_clock_is_not_trusted_for_user_dates": true,
+    "business_http_date_monotonic_anchor_verified": true,
+    "no_user_names_identity_ids_templates_embeddings_audio_images_or_transcripts_exported": true,
+    "real_databases_accessed_only_by_original_workflow_or_aggregate_readonly_queries": true
+  }
+}

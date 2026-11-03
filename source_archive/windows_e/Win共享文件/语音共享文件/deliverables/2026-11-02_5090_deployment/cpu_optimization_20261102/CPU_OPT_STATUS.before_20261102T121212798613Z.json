@@ -1,0 +1,103 @@
+{
+  "schema": "aura-camera-gtk-cpu-optimization-work-in-progress-1",
+  "updated_utc": "2026-11-02T11:29:45.338152+00:00",
+  "objective": "Optimize original camera and GTK CPU overhead without losing features; deploy reviewed candidates and measure real dialogue with original axis follow",
+  "complete": false,
+  "phase": "CANDIDATES_REVIEWED_WAIT_IDENTITY_ENROLLMENT_NEW_BOOT",
+  "user_authorized_parallel_agents": true,
+  "cross_chat_coordination_authorized": [
+    "01a19b64-8194-70e3-806b-03fa9a283918",
+    "01a19ad7-5865-7c60-82fa-605d17aea70f"
+  ],
+  "device_authority": {
+    "gui_listening_and_recovery": "01a19ad7-5865-7c60-82fa-605d17aea70f",
+    "axis": "01a19b64-8194-70e3-806b-03fa9a283918",
+    "cpu_root_board_actions_frozen": true,
+    "reason": "User in identity chat requested interface recovery followed by voice-only enrollment; wait for explicit idle/no-save-transaction handoff before maintenance",
+    "fresh_boot_and_owners_required": true,
+    "last_known_boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e",
+    "last_known_startup_sha256": "9a9a709a7b2e898879bac595758f9b7ece6f2ff2e75a4c9f42ed9c38e043072a",
+    "last_known_camera": {
+      "pid": 1332,
+      "birth_ticks": "2236"
+    },
+    "last_known_gui": {
+      "supervisor": 2142,
+      "gtk": 2151,
+      "ready": true,
+      "listening_enabled_by_identity_chat": true
+    },
+    "source": "authorized identity-chat coordination; root makes no concurrent device calls"
+  },
+  "baseline": {
+    "receipt": "RESOURCE_before.json",
+    "summary": "SUMMARY_RESOURCE_before.json",
+    "duration_seconds": 40.001155763995484,
+    "scene": "vision page, microphone closed, no playback, follow off, boundary editor running",
+    "cpu_busy_percent_of_four_core_board": 82.43579121789561,
+    "capture_fps": 18.917361997778233,
+    "detection_fps": 9.80900251736649,
+    "new_native_period_overruns": 0,
+    "startup_at_baseline": "1177df3831407bc819c1f1e3b89090f8c6b97661c8e74c2866b281be93b0a9c8",
+    "scope": "HISTORICAL_PREVIOUS_BOOT_ONLY; reacquire controlled before on new boot"
+  },
+  "gtk": {
+    "rejected_candidate": "022098636a41b35bc17929da1cbef0f05e5c257640f9b64a8504c1b4a13e7127",
+    "rejection_evidence": "GTK_SYNTHETIC_RESULT_REJECTED.json",
+    "rejection_reason": "587x440 synthetic visible-color differences; strict gate failed; no deployment",
+    "current_candidate": "gtk/v2/candidate",
+    "design": "Preview-only locked snapshot projection; original GStreamer pipeline retained",
+    "new_ui_services_sha256": "e4dedf9b3d56d22d9eb93de1e96ad1a69870d553ea50f7dd5082b21e19f381c9",
+    "new_preview_worker_sha256": "67d6c0f2b24ea97e20fdcc7b3383b6444269a6e26f5deb566f2b88746b7daf9b",
+    "local_tests_passed": 11,
+    "independent_review_pending": false,
+    "real_board_cpu_improvement_measured": false,
+    "independent_review": "validation/GTK_PROJECTION_INDEPENDENT_REVIEW.txt",
+    "transaction_template": "gtk/v2/transaction_preview_projection.py"
+  },
+  "camera": {
+    "design": "On-request JPEG encoding/cache of the same owned painted BGR frame; raw transport unchanged",
+    "v2_rejected": true,
+    "v2_rejected_sha256": "0bf23f511f6f85512603277b1496c704fcd792a4f1a0fc97854ead03441920bf",
+    "v3_revision_and_review_pending": false,
+    "native_source_unit": "7cf7eaeecd70e62301d3e12e95d5df6a23bd3e5847ed854200c712598b703c32",
+    "native_unit_definition": "Original immutable six-file ABI2 C/C++/object manifest, independently verified; Python UI is outside that unit",
+    "fresh_final_checkpoint_required_before_restart": true,
+    "never_reuse_consumed_c6_checkpoint": true,
+    "real_board_cpu_improvement_measured": false,
+    "v3_sha256": "7d4773b8ff527773eefc90aa2443dd4bfae801f07c6fcde672af65dd22ff8f66",
+    "local_tests_passed": 31,
+    "independent_targeted_regressions_passed": 5,
+    "independent_review": "validation/CAMERA_V3_INDEPENDENT_REVIEW.json",
+    "transaction_payload_builder": "camera/prepare_transaction_payload.py"
+  },
+  "last_gui_restore_attempt": {
+    "request": "CURRENT_GUI_RESTORE_REQUEST.json",
+    "observation": "CURRENT_GUI_RESTORED_READY.json",
+    "actual_status": "GUI_FAILED",
+    "start_sent_once_utc": "2026-11-02T10:30:21.344990+00:00",
+    "startup_then": "680fd752c74e75bfbbcd73a296f21f4f39134ce4863a6bc30643c7e77feae1c0",
+    "source_changes_by_cpu_task": false,
+    "preserve_voice_enrollment_sha256": "a9113ba40efc49828ee158554b2dae70485858396680918458f6f96bba16bacb",
+    "classification": "Original clock sample_rtt_exceeded; identity chat now owns recovery; do not weaken policy"
+  },
+  "cpu_task_device_mutations_so_far": {
+    "ui_page_to_vision_once": true,
+    "gui_stop_sent": false,
+    "gui_restore_start_sent_once": true,
+    "camera_restart": false,
+    "cpu_sources_deployed": false,
+    "axis_commands": false,
+    "native_checkpoint_or_history_modified": false
+  },
+  "next": [
+    "Finish local camera v3 and independent camera/GTK review",
+    "Prepare root-reviewed fresh-owner transactions, rollback and manifest dependency closure",
+    "Wait for identity chat recovery/enrollment completion and idle handoff; reverify boot and all owners",
+    "Run public synthetic projection/cv2 probes serially; preserve original guards",
+    "Deploy with normal GUI/camera lifecycle and exact fresh Native checkpoint history preservation",
+    "Rebind current camera source evidence and restore GUI with all existing identity/axis changes",
+    "Measure same-page resources and real two-turn dialogue plus bounded original axis follow; verify playback ACK and STOP",
+    "Report actual CPU/latency/throughput changes and remaining limits"
+  ]
+}

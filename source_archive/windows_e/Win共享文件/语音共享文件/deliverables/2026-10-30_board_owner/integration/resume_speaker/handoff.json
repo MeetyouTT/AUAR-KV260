@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "status": "LOCAL_SPEAKER_BUSINESS_CANDIDATE_VERIFIED_NOT_DEPLOYED",
+  "saved_utc": "2026-10-30T22:51:39.726560+00:00",
+  "files": [
+    {
+      "path": "aura/board/runtime/board_speaker_business.py",
+      "bytes": 40845,
+      "sha256": "0b90dca4c32969293808aa878515810fc97b35a2e0674fb80c8ed461dd505026"
+    },
+    {
+      "path": "aura/tools/speaker_device.py",
+      "bytes": 8443,
+      "sha256": "73648e960ab28e16cce1e0676bd7981b5fc35c70bce9868b864e5c8881af4e00"
+    },
+    {
+      "path": "aura/tools/binding_hub_runtime.py",
+      "bytes": 19963,
+      "sha256": "80b20963160242eb06fca69dd0fd5774251d1da626f5de718cefa276bd58b375"
+    },
+    {
+      "path": "aura/tests/framework/test_board_speaker_business.py",
+      "bytes": 15938,
+      "sha256": "4abd5705dc9e45ea3eb0db26a373d9a034150511809c3d691477ba2d5b58d9f3"
+    },
+    {
+      "path": "deliverables/2026-10-30_board_owner/integration/resume_speaker/build_webrtcvad_isolated.py",
+      "bytes": 4911,
+      "sha256": "373c80ff703516a3cc23a486f796b0cddb2e1ace76e1b95e61f5f3345ffdd56e"
+    }
+  ],
+  "validation": {
+    "passed": 101,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 10.481,
+    "evidence": "regression.xml",
+    "evidence_sha256": "147297802be655a46cf8e49d0dbb16742438de70dfaab8280df0d7b261233f16",
+    "new_business_tests": 16,
+    "real_models_or_private_databases_accessed": false,
+    "actual_board_or_GPU_used": false
+  },
+  "import_probe": {
+    "database_connect_patched_to_refuse": true,
+    "database_open_attempts": 0,
+    "new_threads": 0,
+    "torch_imported": false,
+    "speechbrain_imported": false,
+    "numpy_imported": false
+  },
+  "source_dependencies": "source_dependencies.json",
+  "required_existing_factory_module": "aura/board/runtime/audio/board_speaker_onnx.py",
+  "interfaces": {
+    "construction": "BoardSpeakerBusiness.create(private_root,encoder_factory=lambda:existing_BoardEcapaOnnxEncoder,board_boot_id=fresh,quality=common.speaker_identity.voiced_pcm,expected_model_id=pinned_original,anonymous_config=explicit_existing_config,wall_clock=timeline.event_time,clock=monotonic,data_origin=board)",
+    "ordinary_analysis": "submit_analysis(meta,pcm,conversation_id,visual=None,is_current,cancel_event,deadline,on_evidence)->original PENDING/UNAVAILABLE descriptor; analysis_result(meta,cid),cancel_analysis(meta,cid); one CPU worker, two job slots, no PCM in results",
+    "controlled_route": "route(meta,text,pcm,visual=None,gallery_packet=None,is_current,cancel_event,deadline)->original binding.response; ordinary route then turn(meta,text,pcm,...) uses original SpeakerDevice",
+    "face_exchange": "begin_face_exchange(meta,pcm,routed,bridge,capture_snapshot,text,is_current,cancel_event,deadline)->handle; wrap original face handle+guide with handle.scope(); transform(original_result,final=True)->spoken string; finally cancel clears PCM reference; original48hex token/scoped capability, original actual commit receipts only",
+    "lifecycle": "public/reset/health/close; no automatic personal-memory grants; close retains exclusive lease until an active native call returns"
+  },
+  "preserved_policy": {
+    "speaker_calibrated": false,
+    "named_threshold_floor": 0.8,
+    "ambiguity_margin_floor": 0.1,
+    "enrollment_consistency_floor": 0.6,
+    "three_distinct_samples": true,
+    "explicit_final_confirmation": true,
+    "new_identity_never_overwrites_existing_by_name": true,
+    "anonymous_alias_is_not_identity": true,
+    "personal_memory_allowed": false,
+    "same_original_request_context": true,
+    "templates_remain_local": true,
+    "no_Windows_Hub_or_HTTP_service": true,
+    "cancelled_native_sample_keeps_gallery": true
+  },
+  "migration": {
+    "entry": "migrate_speaker_snapshots(source_root,target_root,expected_sha256={all4files},expected_model_id,single_writer_stopped=True,data_origin=board)",
+    "files": [
+      "speakers.sqlite3",
+      "anonymous-voices.sqlite3",
+      "identity-links.sqlite3",
+      "identity-link-receipt.key"
+    ],
+    "guards": [
+      "explicit stopped single writer",
+      "all source files exact SHA and no SQLite sidecars",
+      "known application marker/user_version/table/column/PK schema",
+      "same model/dimension",
+      "destination exclusive writer and empty or exact idempotent import",
+      "final source/target SHA before publication marker"
+    ],
+    "preserves": [
+      "original receipt key",
+      "anonymous registry epoch",
+      "active voice gallery namespace derived from verified source modality_links",
+      "templates and original revisions as exact private bytes"
+    ],
+    "does_not_read_or_copy_actual_Windows_databases": true,
+    "does_not_migrate_observations_or_conversation_DB": true,
+    "no_namespace_ID_or_key_in_returned_report": true
+  },
+  "dependency_plan": "webrtcvad_source_plan.json",
+  "remaining_actual_gates": [
+    "Original WebRTC dependency absent in prior ARM probe: verified official source cached and offline isolated build script prepared, no build/install run here",
+    "Actual ARM loaded encoder/VAD parity and combined capture responsiveness",
+    "Fresh source/pin assembly and factory-level real model/player acceptance",
+    "Real coherent private snapshots and single-writer business cutover; no production stores migrated by this subtask"
+  ],
+  "legacy_collection_limit": {
+    "file": "deliverables/2026-10-28_device_skills/test_devices.py",
+    "reason": "Retired tools.visual_voice_host missing after visual LLM removal; whole historical file cannot collect; relevant original speaker/binding suites passed instead"
+  },
+  "dependency_build_owner_update": "Parent root now owns build_webrtcvad_isolated.py and actual ARM build/parity evidence; the source-script SHA in this component handoff is historical before parent egg_info metadata fix. Speaker code/test SHAs remain frozen."
+}

@@ -1,0 +1,82 @@
+--- before/common/board_memory.py
++++ after/common/board_memory.py
+@@ -840,10 +840,10 @@
+                     "summaries": [self._public_summary(db, r) for r in summaries],
+                     "facts": [{"key": r["fact_key"], "revision": r["revision"], "value": r["value"]} for r in facts]}
+ 
+-    def history(self, scope, *, start=None, end=None, topic=None, search=None, limit=20):
+-        return self._history_query(scope, start=start, end=end, topic=topic, search=search, limit=limit)["items"]
+-
+-    def history_with_status(self, scope, *, start=None, end=None, topic=None, search=None, limit=20):
++    def history(self, scope, *, start=None, end=None, topic=None, search=None, limit=20, exclude_event_ids=()):
++        return self._history_query(scope, start=start, end=end, topic=topic, search=search, limit=limit, exclude_event_ids=exclude_event_ids)["items"]
++
++    def history_with_status(self, scope, *, start=None, end=None, topic=None, search=None, limit=20, exclude_event_ids=()):
+         """Return scoped items and recall limits from one authorized snapshot.
+ 
+         An indivisible summary crossing a requested time boundary is excluded
+@@ -851,9 +851,9 @@
+         source identifiers. Neither zero matches nor zero overlaps proves that
+         an event did not happen; deleted summary details cannot be recovered.
+         """
+-        return self._history_query(scope, start=start, end=end, topic=topic, search=search, limit=limit)
+-
+-    def _history_query(self, scope, *, start=None, end=None, topic=None, search=None, limit=20):
++        return self._history_query(scope, start=start, end=end, topic=topic, search=search, limit=limit, exclude_event_ids=exclude_event_ids)
++
++    def _history_query(self, scope, *, start=None, end=None, topic=None, search=None, limit=20, exclude_event_ids=()):
+         """Scoped history, with exact partition and free-text search separated.
+ 
+         Search reuses timeline's bounded lexical terms. Both transcript text and
+@@ -862,6 +862,15 @@
+         """
+         if type(limit) is not int or not 1 <= limit <= 100:
+             raise ValueError("Invalid history limit")
++        if not isinstance(exclude_event_ids, (tuple, list)) or len(exclude_event_ids) > 16:
++            raise ValueError("Invalid internal history exclusions")
++        excluded = tuple(sorted({_identifier(value, "excluded event id") for value in exclude_event_ids}))
++        # Current query sources are filtered before SQL LIMIT and match counts.
++        # A summary referring to an excluded source is excluded as one unit.
++        marks = ",".join("?" for _ in excluded)
++        detail_exclusion = " AND e.event_id NOT IN (" + marks + ")" if excluded else ""
++        summary_exclusion = (" AND NOT EXISTS (SELECT 1 FROM bm_summary_sources excluded WHERE "
++            "excluded.summary_id=s.summary_id AND excluded.event_id IN ("+marks+"))") if excluded else ""
+         start = 0 if start is None else _time(start)
+         end = self._now() if end is None else _time(end)
+         if start > end:
+@@ -892,27 +901,27 @@
+                       "summary_details_recoverable": False, "absence_proven": False}
+             if search and not wanted:
+                 return {"items": [], "status": status}  # Punctuation must not widen recall.
+-            args = owner + (start, end) + ((topic,) if topic is not None else ()) + tuple(summary_values) + (limit,)
++            args = owner + (start, end) + ((topic,) if topic is not None else ()) + tuple(summary_values) + excluded + (limit,)
+             # A summary is indivisible. Do not leak out-of-range hours through an
+             # overlapping block; callers may explicitly broaden their query.
+             blocks = db.execute("SELECT s.* FROM bm_summaries s WHERE s.scope_kind=? AND s.scope_id=? AND s.state='valid' "
+                                 "AND s.start_utc>=? AND s.end_utc<=?" + (" AND s.topic=?" if topic is not None else "") +
+-                                summary_search + " ORDER BY s.end_utc DESC LIMIT ?", args).fetchall()
+-            detail_args = owner + (start, end) + ((topic,) if topic is not None else ()) + tuple(detail_values) + (limit,)
++                                summary_search + summary_exclusion + " ORDER BY s.end_utc DESC LIMIT ?", args).fetchall()
++            detail_args = owner + (start, end) + ((topic,) if topic is not None else ()) + tuple(detail_values) + excluded + (limit,)
+             detail = db.execute("SELECT e.*,b.text FROM bm_events e JOIN bm_bodies b USING(event_id) WHERE scope_kind=? AND scope_id=? "
+                                 "AND state='valid' AND recorded_utc>=? AND recorded_utc<=? AND source!='assistant_reply'" +
+-                                (" AND e.topic=?" if topic is not None else "") + detail_search +
++                                (" AND e.topic=?" if topic is not None else "") + detail_search + detail_exclusion +
+                                 " ORDER BY e.recorded_utc DESC LIMIT ?", detail_args).fetchall()
+             summary_count = db.execute("SELECT count(*) FROM bm_summaries s WHERE s.scope_kind=? AND s.scope_id=? AND s.state='valid' "
+                                       "AND s.start_utc>=? AND s.end_utc<=?" + (" AND s.topic=?" if topic is not None else "") +
+-                                      summary_search, args[:-1]).fetchone()[0]
++                                      summary_search + summary_exclusion, args[:-1]).fetchone()[0]
+             detail_count = db.execute("SELECT count(*) FROM bm_events e JOIN bm_bodies b USING(event_id) WHERE scope_kind=? AND scope_id=? "
+                                      "AND state='valid' AND recorded_utc>=? AND recorded_utc<=? AND source!='assistant_reply'" +
+-                                     (" AND e.topic=?" if topic is not None else "") + detail_search, detail_args[:-1]).fetchone()[0]
+-            overlap_args = owner + (start, end, start, end) + ((topic,) if topic is not None else ()) + tuple(summary_values)
++                                     (" AND e.topic=?" if topic is not None else "") + detail_search + detail_exclusion, detail_args[:-1]).fetchone()[0]
++            overlap_args = owner + (start, end, start, end) + ((topic,) if topic is not None else ()) + tuple(summary_values) + excluded
+             overlaps = db.execute("SELECT count(*) FROM bm_summaries s WHERE s.scope_kind=? AND s.scope_id=? AND s.state='valid' "
+                                   "AND s.end_utc>=? AND s.start_utc<=? AND (s.start_utc<? OR s.end_utc>?)" +
+-                                  (" AND s.topic=?" if topic is not None else "") + summary_search, overlap_args).fetchone()[0]
++                                  (" AND s.topic=?" if topic is not None else "") + summary_search + summary_exclusion, overlap_args).fetchone()[0]
+             result = [self._public_summary(db, r) for r in blocks] + [self._public_event(r) for r in detail]
+             def rank(row):
+                 score = 0

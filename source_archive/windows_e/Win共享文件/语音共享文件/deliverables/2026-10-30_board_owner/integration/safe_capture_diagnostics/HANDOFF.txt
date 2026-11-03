@@ -1,0 +1,73 @@
+Source-only safe capture diagnostics, not deployed by this agent.
+
+Priority projection revision: baselinec7a1c7b6e6259c1fb74be831d7272704fb20119c86345b50b79234d5f3adf973
+is preserved under before_priority/production_business_ui.py. This revision
+only adds typed capture_priority metadata and fixed production listening reasons.
+
+Merge only after/aura/tools/production_business_ui.py. Baseline is the actual
+listening_entry_fix/source_before/aura/tools/production_business_ui.py,
+SHA25646c55f4da84c3ffd7d3db43858466f922ef053790ce2b40791f38532dca51837.
+Do not replace GTK, presentation, autostart/pause, or audio core with this pack.
+
+API: safe_capture_diagnostics(stage) -> whitelist dict.
+project_business_ui attaches the dict to state['safe_capture_diagnostics'] and
+shows its fixed status_text on the existing host/footer labels. Original board
+connection-edit guard stays in effect. Model readiness remains unclaimed.
+
+Read path: stage.board_business.recording -> current capture.snapshot() once;
+recording.monitor_state/reason/enabled/stats and recording/monitor/auto errors.
+No capture start/stop/read/take, ASR, model, Store, file, device or network call.
+No PCM/utterance/transcription text, identity name, ID or path is accessed.
+
+Stable output:
+  schema = aura.safe-capture-diagnostics-1
+  error_code/error_source: selected fixed category, never raw exception text.
+  status_text: fixed actionable Chinese label.
+  monitor_state/monitor_reason/recording_state/capture_state: enumerated only.
+  monitor_enabled/microphone_open: observed booleans or null if unverified.
+  counters: armed, speech_starts, submitted, entry_rejected, visual_stops.
+  input_queue: frame_bytes, capacity_frames, capacity_ms, queued_frames,
+    peak_frames, frames_read, frames_delivered, source_read_mean_ms,
+    source_read_max_ms, queue_mean_ms, queue_max_ms and fixed lifecycle flags.
+  audio_frontend: frames, processed_samples, last_roundtrip_ms,
+    max_roundtrip_ms, enabled/closed/capture_lease_closed.
+  capture: sample_count/listening_seconds and input_ready/speech_active/has_result.
+  capture_priority: requested_nice/original_nice/effective_nice/restored_nice
+    only ints[-20,19] or null; native_tid/pump_native_tid only positive exact
+    JSON ints or null; applied/restored/restoration_confirmed only bool or null.
+    Status: not_started, unsupported_platform, permission_denied, apply_failed,
+    active, not_applied, restore_wrong_thread, restore_failed, restored,
+    not_reported or UNKNOWN. Scope only
+    capture_consumer_tid_and_inherited_pcm_pump_only or null. Error only blank,
+    capture_thread_priority_unsupported/permission_denied/apply_failed/
+    not_applied/restore_wrong_thread/restore_failed/unknown (each full prefix).
+    No priority is changed, looked up or inferred from other fields.
+Only finite nonnegative numeric values within JSON's exact integer range and
+actual bools are accepted; numeric strings/NaN/Inf/unbounded ints are omitted.
+
+Error codes:
+  pcm_input_queue_overflow, pcm_input_truncated_frame, pcm_input_read_failed,
+  pcm_input_source_stop_failed, pcm_input_reader_not_stopped,
+  capture_device_busy, arecord_failed, capture_truncated, capture_timeout,
+  frontend_error, capture_snapshot_failed, capture_not_bound,
+  capture_unknown_error, none.
+Typed queue faults take precedence over a generic monitor copy. No arbitrary
+exception __str__/repr, original suffix, body hash, error length or stderr
+appears in output. Original capture/monitor objects are never modified.
+
+Tests:
+  D:\AIModels\speaker-identity\venv\Scripts\python.exe -B -m unittest discover
+    -s deliverables\2026-10-30_board_owner\integration\safe_capture_diagnostics
+    -p test_safe_capture_diagnostics.py -v
+  11 pure fake-stage tests passed in0.004s, including private-text suffixes,
+  exceptions that reject str(), corrupt enums, numeric strings, NaN/Inf and
+  oversized integers. One snapshot call per projection; no device method used.
+  CPython3.9 AST passed. No real pipeline success is claimed by these tests.
+  Additional tests cover active/restored thread reports, malformed/secret
+  priority fields and BUSINESS_OR_NATIVE_NOT_READY, EXPLICIT_USER_PAUSE,
+  LISTENING_PREFERENCE_UNAVAILABLE and SERVICE_NOT_READY fixed reasons.
+
+No live service/source/device/model/DB action or listening-state change by this
+agent. Root is sole publisher and must inspect the real new error_code before
+choosing any capture/front-end correction. This helper does not change queue
+capacity, priorities, deadlines, wake policy, grants, ACK or audio processing.

@@ -1,0 +1,77 @@
+# 本轮审计运行过的命令清单（全部只读）
+
+审计目录：/home/ghmd/kv260_full_image_audit_20260926
+说明：以下命令要么是纯读取（ls/find/grep/sed/head/tail/cat/diff/wc/sha256sum/strings/docker images/ps/free/df），
+要么是以 `-mode batch` + `open_checkpoint`/`open_project` 做的**只读对象查询**（不写回任何工程/checkpoint）。
+没有任何命令修改工程、模型、输入、设备树、驱动、镜像、板卡配置；没有向串口写入任何字节。
+
+## 1. 环境与进程检查（只读）
+ls -la /home/ghmd ; ls -la /home/ghmd/work ; ls -la /home/ghmd/kv260_clockfix_rebuild_20260926
+for p in ...; do [ -e "$p" ] && echo EXIST || echo MISSING; done
+uname -a ; hostname ; id ; whoami ; nproc ; free -g ; df -h /home/ghmd ; uptime
+which vivado vitis petalinux-build xmutil ; ls /opt
+ps -eo pid,ppid,etime,pcpu,pmem,rss,args | grep '[v]ivado'
+ls -la /dev/ttyUSB* ; ps -ef | grep -E '[s]creen|[m]inicom|[p]icocom'
+docker images
+
+## 2. 文件与哈希清单（只读）
+sha256sum <petalinux 启动链 12 个文件>          -> reports/SHA256SUMS_local_artifacts.txt
+sha256sum <sd-card-staging-dpu-clock-fixed/*>    -> 同上
+sha256sum <kv260-sd-backup-20260924.9ZTIEc/*>    -> 同上
+sha256sum <resnet50_b2304.xmodel meta.json>      -> reports/model_and_input_hashes.txt
+sha256sum <cat2.jpg input.bin check_float.py README.txt run_check.sh SOURCE.md> -> 同上
+sha256sum <新 IP sim_netlist / 旧 IP sim_netlist> -> logs/evidence_simnetlist_diff.txt
+diff -u <旧 sim_netlist> <新 sim_netlist>         -> logs/evidence_simnetlist_diff.txt（差异仅时间戳/时钟域元数据，20 行）
+find /home/ghmd/work/models -name '*.xmodel' -o -name '*.json' | xargs sha256sum
+
+## 3. 源码/RTL/配置证据（只读）
+grep -rn 'dpu_2x_resetn|m_axi_dpu_aresetn' <ip_repo> / <gen 目录> / <xdc> / <synth 目录>
+sed -n '600,712p'  kv260_dpu.gen/.../synth/kv260_dpu_bd_dpu_0_0.sv
+grep -n -B3 '^ *inst (' kv260_dpu.gen/.../kv260_dpu_bd_dpu_0_0_sim_netlist.v
+cat ip_repo/.../doc/DPUCZDX8G_v4_1_0_changelog.txt
+head -12 ip_repo/.../Vitis/dpu/hdl/DPUCZDX8G.v ; head -8 hdl/DPUCZDX8G_v4_1_0_vl_top.sv
+grep -c 'dpu_2x_resetn' hdl/DPUCZDX8G_v4_1_0_vl_top.sv      # = 0（IEEE-1735 密文）
+grep -n 'reset' ip_repo/.../bd/bd.tcl
+grep -iE 'vart|xir|dpu-task|dpu_task|vitis-ai|unilog' images/linux/rootfs.manifest
+grep -rn 'vitis-ai|vart|xir' project-spec/meta-user/conf/*.conf
+grep -rn -i 'kv260|xilinx-k.*img|img.gz' work/vitis-ai-source/Vitis-AI-3.0/board_setup/
+grep -n 'dpu_2x_resetn|m_axi_dpu_aresetn|no load|8-7129|8-7071|tie' <新/旧 IP OOC synth runme.log>
+grep -n -E 'opt_design|Removing|removed|Trim|unused|no load' <新 impl runme.log>
+
+## 4. 既有板端日志证据（只读）
+sed -n '1,20p;40,75p;120,160p' /home/ghmd/work/kv260-boot-audit-live/serial-boot-raw.log
+cat /home/ghmd/work/kv260-boot-audit-live/report.txt
+（引用，非本轮实测；未向板卡发送任何命令）
+
+## 5. Vivado 只读查询（open_checkpoint / open_project，仅读属性）
+# 5.1 旧工程 routed DCP（100 MHz 拓扑）
+vivado -mode batch -log logs/query_orig_routed_dcp.log -journal logs/query_orig_routed_dcp.jou \
+       -source query_orig_routed_dcp.tcl
+#   退出：22:00:36；输出 reports/orig_routed_reset_query.txt
+#   结果：dpu_2x_resetn / m_axi_dpu_aresetn IS_CONNECTED=0；dpu_2x_clk / m_axi_dpu_aclk /
+#         s_axi_aresetn / s_axi_aclk IS_CONNECTED=1；HIER_RESET_PINS_TOTAL=75 CONNECTED=61
+# 5.2 新/旧 IP OOC DCP + 新 routed DCP
+vivado -mode batch -log logs/query_ip_ooc_and_new_routed.log -journal logs/query_ip_ooc_and_new_routed.jou \
+       -source query_ip_ooc_and_new_routed.tcl
+#   退出：22:03:47；输出 reports/ip_ooc_and_new_routed_reset_topology.txt
+#   结果：NEW 与 ORIG 的 IP OOC 逐字段相同（两路 reset 端口 FANOUT=0；inst/*={const0}；
+#         s_axi_aresetn 正常；RESET_PIN_TOTAL=44 CONNECTED=44 CONST_TIED=2）
+#         NEW routed：两路 reset IS_CONNECTED=0；dpu_0 边界 606 输入 / 196 悬空
+# 5.3 opt_design 阶段定位 + 旧 routed 悬空对照
+vivado -mode batch -log logs/query_opt_and_orig_dangling.log -journal logs/query_opt_and_orig_dangling.jou \
+       -source query_opt_and_orig_dangling.tcl
+#   输出 reports/opt_stage_and_orig_dangling.txt（见该文件；脚本仅 open_checkpoint 后读属性）
+# 注：本轮另有第三方进程在 /home/ghmd/kv260_full_image_audit_20260926_codex/ 下并行做同类查询，
+#     不属本报告范围；本报告未读写其目录。
+
+## 6. 被动串口采样（未写入任何字节）
+timeout 5 cat /dev/ttyUSB0 > extract/serial_passive_ttyUSB0_*.raw     # 0 字节
+timeout 5 cat /dev/ttyUSB1 > extract/serial_passive_ttyUSB1_*.raw     # 0 字节
+
+## 7. 官方资料查询（仅网页读取，未下载二进制）
+Vitis AI 3.0 ZynqMP quickstart  : https://xilinx.github.io/Vitis-AI/3.0/html/docs/quickstart/mpsoc.html
+Vitis AI 3.0 DPU IP 集成        : https://xilinx.github.io/Vitis-AI/3.0/html/docs/workflow-system-integration.html
+Vitis AI 官方 tag v3.0          : https://github.com/Xilinx/Vitis-AI/tree/v3.0
+Kria 官方文档门户                : https://xilinx.github.io/kria-apps-docs/
+Ubuntu for AMD-Xilinx（Kria）    : https://ubuntu.com/download/amd-xilinx
+Ubuntu 22.04 官方 cdimage 目录   : https://cdimage.ubuntu.com/releases/22.04/release/

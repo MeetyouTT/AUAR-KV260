@@ -1,0 +1,81 @@
+{
+  "schema": "aura.frontend-balance-candidate.v1",
+  "status": "FROZEN_LOCAL_TESTS_PASS_NOT_DEPLOYED",
+  "baseline": {
+    "startup_sha256": "1129a2a7af2b401537710d1a67651c79961c1b10198f5625ae6802e7ac99fd77",
+    "manifest_sha256": "f7ff7eaf649b54030895712479923c191fa66041dc90e7baf612534558a0c4e0",
+    "component_count": 375,
+    "source": "root-read current v10 manifest and byte-verified before/9 source files"
+  },
+  "files": [
+    {
+      "path": "tools/production_frontend_selection.py",
+      "before_sha256": "3bc5bf9601be05bac0d2a616b0ffba9dc26496ad689ea7c169e2e19619b9dd69",
+      "sha256": "1acbcdefd03d32365d8909fa63c4bf53bd713aec21c2b3b9216371129d261cea",
+      "size": 3712
+    },
+    {
+      "path": "board/runtime/audio/board_frontend_process.py",
+      "before_sha256": "ed97c0d04a4b08103cd3b13db2c8ec109d5ce6ef211685efd1bf359b65379d48",
+      "sha256": "0d64f9483d28f9e54992b617bda9b1940e347f4667c8b3f451e223ab127cbae4",
+      "size": 16779
+    }
+  ],
+  "extra_source_map_sha256": "d23116fc5ab519c9cd55d636fd1c65ee6075beb8072e7bfd64134673d95d2130",
+  "manifest_sha256": "1776140009f56b328f66dd0329474a8adae28a254ec4f01677bf5bb8b88fa353",
+  "retained_algorithm": {
+    "path": "board/runtime/audio/board_gtcrn_reuse.py",
+    "sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9",
+    "already_in_v10": true,
+    "changed": false,
+    "base_fft_sha256": "47cb8a2ec97ad292981bb42b67e217ed0f672a98d561d4ac8dc9c360cf8f6f06",
+    "base_frontend_sha256": "b3d06b653876469daf5b7bb805458b187662d9862e8ece6da731cbfa3e23a093"
+  },
+  "selection": {
+    "default": "baseline",
+    "explicit_candidate": "combined",
+    "frontend_process": true,
+    "frontend_capture_process": true,
+    "frontend_threads": 1,
+    "capture_priority_nice": -10,
+    "worker_argv": "--frontend-optimization baseline|combined",
+    "io_binding": true,
+    "buffer_reuse": true,
+    "unsupported_mode_or_binding": "Explicit failure; no fallback or replacement model"
+  },
+  "tests": {
+    "total_passed": 73,
+    "entry_plus_numerical": 47,
+    "lifecycle": 26,
+    "xml_sha256": "c6e367d26b760a73d46ed8cc46a0c22ad71666e39a8025d5a548f570ce94cc5f",
+    "lifecycle_receipt_sha256": "9c668fdf0caa4198cd0adda8a3335198c986c86c430f152f60320a58afb52dce",
+    "commands": [
+      "\"C:\\Users\\35870\\.codex\\visualizations\\2026\\10\\09\\01a12110-3ba4-7651-b3d7-2e6560916eb6\\omnivoice-runtime-py310\\Scripts\\python.exe\" -B -m pytest -q -p no:cacheprovider \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_balance_candidate\\tests\\test_mode_entry.py\" \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_frontend_optimization\\tests\\test_candidate.py\"",
+      "\"C:\\Users\\35870\\.codex\\visualizations\\2026\\10\\09\\01a12110-3ba4-7651-b3d7-2e6560916eb6\\omnivoice-runtime-py310\\Scripts\\python.exe\" -B \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_balance_candidate\\tests\\run_lifecycle.py\""
+    ],
+    "scope": "16 entry/parser/ctor/factory/no-fallback cases plus original31 numeric cases; original12 wire cases plus7 complete-capture cases under each explicit mode. All synthetic model/device fixtures; real local socket IPC."
+  },
+  "preserved": [
+    "Default baseline",
+    "Exactly one owned frontend child; no parent model",
+    "One selected GTCRN session and the original one Silero instance; two IO bindings are views of that same GTCRN session",
+    "32 constructor warmup frames and final recurrent/VAD reset in unchanged fd6e candidate",
+    "AF_UNIX/parent PID admission and arecord parent-death exec branch",
+    "Original byte-bounded protocol and strict FRAME/control receipts",
+    "Original eight-frame queue/PCM/endpoint thresholds and capture diagnostics",
+    "All proxy RPC/reset/cancel/close/shutdown methods AST-equal",
+    "GUI/null metadata fix/keep-awake/16fps/identity/memory untouched"
+  ],
+  "readiness": {
+    "local_source_only": true,
+    "actual_arm_combined_admission": false,
+    "actual_long_silence_or_physical_dialogue_pass": false,
+    "live_mode_proof": "Parent should verify configured option and actual worker argv; this patch does not alter wire ABI to add mode strings."
+  },
+  "next_parent_checks": [
+    "Normal serial GUI/worker shutdown then one combined owner; verify actual child argv/source pins and no previous arecord/model owner.",
+    "Use retained ARM NumPy1.21.2/ORT1.17.3/sherpa1.13.8 and unchanged weights; exact public PCM/VAD/endpoint equality before performance claims.",
+    "Compare full endpoint wall/thread CPU, queue peak/overflow, capture failures and renderer budget against same-load baseline; keep8-frame queue and16fps.",
+    "Actual pause/resume/cancel/arecord release and listener rearm, then same-load long silence and operator dialogue."
+  ]
+}

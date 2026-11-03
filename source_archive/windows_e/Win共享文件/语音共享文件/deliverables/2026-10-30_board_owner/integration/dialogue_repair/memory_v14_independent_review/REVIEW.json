@@ -1,0 +1,53 @@
+{
+  "schema": "aura.memory-v14-independent-source-review.v1",
+  "decision": "APPROVED_FOR_ROOT_ATOMIC_SAME_WINDOW_PUBLICATION",
+  "blocking_findings": [],
+  "candidate": "../memory_health_collaboration/v14_validation_candidate",
+  "reviewed_sha256": {
+    "common/board_memory.py": "fe50db190aaafcb8841eaa132ed9ea218a80bc582efacb3c3c83e952bf985e9f",
+    "board/runtime/board_memory_policy.py": "6050ed5e4dcfeb456c5d0969e257f624552f80ff722b3c3999a573f86cd933c2",
+    "common/board_memory_backoff.py_unchanged": "9710c079fc589eae8f2eb26fba7f0dd80038b66736b3e45e000a98904716ce82"
+  },
+  "fixed_enum_review": {
+    "maximum_categories": 7,
+    "values": ["protected_name_missing", "protected_number_missing_or_changed", "negation_missing", "planned_status_missing", "completed_status_missing", "cancelled_status_missing", "observation_evidence_missing"],
+    "export": "Only enum membership is copied; no exception text parsing, protected name, number, body, source identifier or frame identifier is added to diagnostics",
+    "acceptance": "The existing predicates remain identical; collecting multiple failures replaces only fail-fast reporting. The original test's 1500 synthetic combinations preserve v13 acceptance."
+  },
+  "structured_camera_review": [
+    "Only device scope/topic visual and camera_observed sources are eligible; every eligible original source is inspected, not a filtered camera-only subset",
+    "Exact metadata key set excludes names/negated/status and all unrecognized metadata; four unique producer claim fields, actual-source marker, integer counts/frame IDs and consistent numbers/event kind are required",
+    "Each original text must match the fixed board producer templates; appended or unknown free text declines the structured route",
+    "Counts are rendered in recorded_utc/event_id order, with zero described only as that sample's no-detection; no arrival/departure/identity or continuous-presence claim is created",
+    "Narrative does not export source/frame identifiers. Original complete refs/revisions and required claims are retained for Store validation; original event metadata remains after body compaction",
+    "Output exceeding the existing final-summary capacity declines instead of truncating, omitting sources or publishing a partial count sequence",
+    "The result still passes original full-source protected-field validation, exact source refs/claims validation, cutoff/open-turn/lease/activity/source-revision checks and original atomic commit/readback/body-delete transaction",
+    "Unsupported or mixed sources use the original complete eligible-source LLM path. No source is deleted merely because the typed renderer declined."
+  ],
+  "unchanged": [
+    "All Store/worker/permission/transaction functions are AST-identical to v13",
+    "Same-boot generation fix and validated remote cancellation/timeout classification",
+    "Backoff, fair task selection and source attempt handling",
+    "Five-minute policy, transcript deletion authorization and rollback behavior",
+    "Per-packet fresh read session and full actual playback ACK"
+  ],
+  "independent_focused_tests": {
+    "passed": 42,
+    "failed": 0,
+    "seconds": 1.79,
+    "candidate_tests_rerun": 34,
+    "new_independent_cases": 8,
+    "source": "test_review.py",
+    "evidence": "results.xml",
+    "new_checks": ["Three public sources inserted out of recording order render as exact sequence 2,0,7", "All three source refs/revisions and every required claim survive real synthetic atomic commit", "All three bodies removed only after successful commit", "Additional names/negated/planned metadata declines local projection", "Mixed user source is not silently discarded", "Capacity decline does not truncate or delete", "Boolean count/frame identifiers cannot impersonate integers"],
+    "actual_model_requests": 0
+  },
+  "same_window_notes": [
+    "Publish both changed modules together because policy imports the new typed reason constant",
+    "Do not install the unrelated first-wait optional_prefix whole file based on 9af4 policy; any context-order experiment must be rebased onto this new policy while preserving generation and structured validation",
+    "The fixed renderer applies only to eligible typed events. This review does not claim the actual backlog composition or that every pending source will now compact",
+    "summary_diagnostics complete/method describes candidate construction; root should verify durable commit/backlog changes and retained-source correctness after publication"
+  ],
+  "candidate_files_modified_by_reviewer": false,
+  "hardware_private_database_or_actual_model_accessed": false
+}

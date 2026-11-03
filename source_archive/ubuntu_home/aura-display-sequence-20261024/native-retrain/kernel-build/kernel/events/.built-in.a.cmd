@@ -1,0 +1,1 @@
+cmd_kernel/events/built-in.a := echo >/dev/null; rm -f kernel/events/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST kernel/events/built-in.a kernel/events/core.o kernel/events/ring_buffer.o kernel/events/callchain.o kernel/events/hw_breakpoint.o kernel/events/uprobes.o

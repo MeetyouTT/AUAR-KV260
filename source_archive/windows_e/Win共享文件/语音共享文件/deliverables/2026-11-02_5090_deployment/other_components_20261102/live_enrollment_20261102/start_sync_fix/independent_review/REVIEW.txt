@@ -1,0 +1,14 @@
+V2 独立本地审阅：通过，无代码阻断点。
+
+候选 voice_enrollment.py SHA256:
+a9113ba40efc49828ee158554b2dae70485858396680918458f6f96bba16bacb
+基线 SHA256:
+83796dd78c57555ea66eeb2b745a89f8b3670945a4406176cb3486111d9466b8
+
+独立复验 13 个场景全部通过。先用封存 V1 字节重现：初始旧缓存 A，本次命令 C 已 accepted，随后先出现命令前生成的 B failed/ready/collect；V1 对 B 误取消或误认领。V2 对三种 B 均不认领、不取消，等待真实来源戳晚于 ACK 的 C，且只发一次 start。另核 issued<source_stamp<ACK、source_stamp==ACK、旧 A 重新发布、错误 target、始终不发布、取消发生在 start 前/可信认领前/认领后、原授权先到期，均符合边界。只有可信认领后的取消会清理 C。
+
+静态核对：仅 _start_simple 和 handle 发生 AST 差异；handle 仅透传原 is_current。_send、_cancel_sample、guide、_save_ready、目标选择及其他原方法 AST 相同。start ACK 使用原八字段协议，六项归属逐值校验；ACK 没有 sampling session_id。认领还要求新序号、原 observed 时间严格晚于 ACK 且早于原命令期限、完整来源/上下文/库版本/目标绑定、不同于旧 SID、collect/front。时间戳没有替换为读取时刻。至多 50 轮和 2.5 秒，原授权可提前终止；90 秒引导窗口从发命令前计，未顺延。
+
+作者专项 XML 核实 32/32 通过。原流程两版各 37 项：35 通过，同样 2 项旧角色别名 fixture 失败，0 error；另 1 HTTP 项 deselected。两份原测试文件在基线、baseline_runtime、candidate_runtime 字节相同，适配器只补真实 ACK 和明确逻辑源帧推进。Windows 缺 fcntl 的更广相机集成收集失败保留为限制，没有计作通过。
+
+此结论限本地候选。审阅没有 SSH、设备/模型/真实库调用，没有服务、GUI、转轴、生产或候选修改，没有导出真实姓名、ID、模板、照片、语音、转写。现场是否完整保存人脸并完成三段声纹及最终 ACTIVE 关联，仍须 root 应用精确候选后走原流程验收。原缓存竞态可重现，现网 15/15 后实际失败码为采样或确认超时；先前摘要缺会话标识，不能将每条现场观测无条件串为同一会话。

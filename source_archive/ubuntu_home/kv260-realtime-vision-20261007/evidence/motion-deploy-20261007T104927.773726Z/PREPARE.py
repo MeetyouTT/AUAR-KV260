@@ -1,0 +1,2 @@
+import os;from pathlib import Path;assert os.uname().machine=='aarch64';assert Path('/sys/block/mmcblk1/device/cid').read_text().strip()=='0353445345333247805558c00401a100';assert Path('/proc/sys/kernel/random/boot_id').read_text().strip()=='4365d744-ddef-4325-a264-e7bb57cc9bb8';
+p=Path('/home/root/aura-realtime-vision-20261007/motion-bundle-68bd0def762cc3cf0e8ba306bb417e27f3f3d3ab69ca64dd97fed0df4a85f5dc.upload');p.parent.mkdir(parents=True,exist_ok=True);assert not p.exists();p.write_bytes(b"")

@@ -1,0 +1,387 @@
+{
+  "created_utc": "2026-11-03T16:49:12.011663+00:00",
+  "basis": {
+    "track": "3.3 自主选题赛道",
+    "pdf": "C:/Users/REVO1/Downloads/全国大学生嵌入式芯片与系统设计竞赛'2026FPGA赛道选题指南-AMD.pdf",
+    "pdf_sha256": "c6ad82acd4f7bdcd13bd412e232ed85d05f2a87dd5e2cdd04f9d219f88b569fc",
+    "rar_sha256": "022422d9d1efa6106c2b247ac901dddd2f439a1a5e8eb19a22539010c3a944f4",
+    "rar_bytes": 44475833,
+    "files": 1687,
+    "checksums": 1686,
+    "hashes_match": true
+  },
+  "conclusion": "源码与本机构建/仿真验证已完成；不能认定满足3.3全部提交要求。主要待补为封版关联的板测对照、从零部署闭环、完整设计报告和更完整AI交互记录。",
+  "method": "核对Ubuntu最终RAR SHA，并在Windows使用同SHA副本独立解包，1686条文件校验全部匹配。未以可能继续变化的工作目录作为封版依据。",
+  "criteria": [
+    {
+      "id": "g01",
+      "clause": "3.3.5.1",
+      "requirement": "完整工程与实际采用的源码",
+      "status": "基本具备",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "RTL、BD/IP、XDC、PS/主机 Python、原生 C/C++、部署定义均有。380 项正式业务与224 项相机有封版清单。未采用的 HLS 无须额外补造。",
+      "evidence": "src/fpga; src/third_party/dpu; src/board; src/host; src/native; board/release_9a4f.json",
+      "next_action": "外置输入及源码构建结果到正式部署的连接见 g04/g05。"
+    },
+    {
+      "id": "g02",
+      "clause": "3.3.5.1",
+      "requirement": "仿真/验证结果及正确性依据",
+      "status": "已具备对应验证范围",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "4 个 XSim 测试台的 xvlog/xelab/xsim 共12步均为0；有通过标记、源码/日志SHA和失败门禁反例。Skill与模型/原生构建有回执。",
+      "evidence": "sim/rtl; report/evidence/rtl_xsim.json; report/evidence/rtl_negative.json; report/validation_summary.md",
+      "next_action": "保留模拟、编译和板测的验证层级。"
+    },
+    {
+      "id": "g03",
+      "clause": "3.3.5.1",
+      "requirement": "综合与实现报告，含资源、时钟和关键指标",
+      "status": "摘要具备，归档待完善",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "包内有资源表、时钟报告摘录、WNS/WHS、路由、DRC及原报告SHA。WNS +0.002 ns、WHS +0.010 ns、199333条网络完全布通。RAR内没有.rpt，6份实现报告和1份综合利用率原件位于Ubuntu包外。",
+      "evidence": "report/evidence/hardware_results.json; report/validation_summary.md",
+      "next_action": "将精简综合/实现报告收进下一版build/reports；更正DSP48E2 only的空白可用量/利用率单元格；解释DRC告警和外部I/O约束假设。"
+    },
+    {
+      "id": "g04",
+      "clause": "3.3.5.1 / 3.3.3.2",
+      "requirement": "上板工程、运行脚本、实测输出与参考对照",
+      "status": "尚未形成完整包内证据",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "部署/驱动/验收脚本已收录，18条历史性能摘要已提供。本轮新固件、SO和xmodel的回执均明确未实板验证。包内未收原始板测输入输出与黄金结果配对记录。",
+      "evidence": "board; src/tests/bench_identity_stop.py; data/metrics.csv; report/validation_summary.md",
+      "next_action": "先收回可公开的既有板测原件并标记版本；对本轮新产物补目标板验证和实测/参考对照，保留设备、版本、输入、输出、判定规则。"
+    },
+    {
+      "id": "g05",
+      "clause": "3.3.5.1 / 3.3.4",
+      "requirement": "可复现构建脚本及从零复现",
+      "status": "本机已通过，从零部署部分具备",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "冷启动Vivado构建及解包复跑通过。board/stage.py仍要求21个固定外置输入及现场字段，原镜像/角色原件缺公开取得路线。8个新SO中仅3个与历史输入同SHA，两份新xmodel也与旧部署图不同。",
+      "evidence": "build/reproduce.py; build/build_native.sh; build/prepare_models.py; board/stage.py; board/deploy.json; board/readme.md",
+      "next_action": "补授权输入的取得或公开示例profile，统一环境安装，完成新产物→候选清单→上板验证→封版流程；不要求评委先持有旧交付目录。"
+    },
+    {
+      "id": "s01",
+      "clause": "3.3.5.2",
+      "requirement": "skill目录和README入口",
+      "status": "满足",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "skill/README.md索引28文件的pynq-contract-testgen。目录内直接是源码、示例、模板、文档和原证据。",
+      "evidence": "skill/README.md; skill/pynq-contract-testgen",
+      "next_action": "保持源码目录直接收录。"
+    },
+    {
+      "id": "s02",
+      "clause": "3.3.5.2",
+      "requirement": "Skill适用场景、用法和失效条件",
+      "status": "满足基础要求",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "子readme与contract_format明确AXI4-Lite、uint32、启动/完成合同、元数据缺失/冲突、超时以及不支持的接口条件，含可执行命令。",
+      "evidence": "skill/pynq-contract-testgen/readme.md; contract_format.md",
+      "next_action": "顶层README可增加一张范围/用法/失效/效果索引表，减少跨文件查找。"
+    },
+    {
+      "id": "s03",
+      "clause": "3.3.5.2",
+      "requirement": "已验证效果与失败观察来源",
+      "status": "满足对应软件范围",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "15项单元测试、adder36例和CRC3237例通过。case_studies记录HWH缺寄存器定义、迟到完成反例和修复，再用两种接口布局验证。",
+      "evidence": "skill/pynq-contract-testgen/case_studies.md; tests/test_generator.py; evidence",
+      "next_action": "在设计报告内归纳提炼过程，保持原错误和修复后结果。"
+    },
+    {
+      "id": "s04",
+      "clause": "3.3.5.2",
+      "requirement": "陌生题目可复用",
+      "status": "具有基础证据",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "同一生成器处理不同IP名、寄存器偏移、完成位和读清除条件，无算法专用分支；需要使用者提供可信合同、元数据和参考。",
+      "evidence": "skill/pynq-contract-testgen/scripts/generate.py; examples/adder; examples/crc32",
+      "next_action": "可补一页独立使用示例和来源说明。"
+    },
+    {
+      "id": "s05",
+      "clause": "3.3.2 / 3.3.5.2",
+      "requirement": "通用PYNQ额外加分",
+      "status": "证据有限，不能预判得分",
+      "pdf_page": 22,
+      "printed_page": 19,
+      "observation": "已有可生成PYNQ调用代码的通用工具及两例mock证明。真实PYNQ环境、真实bit/HWH和跨板使用未验证。指南未给出本材料可获多少分的确定规则。",
+      "evidence": "skill/pynq-contract-testgen/readme.md; report/evidence/software_skill_deploy.json",
+      "next_action": "若主张换板可用，补对应环境或真实PYNQ复用证据。该加分项与基本Skill提交要求分别判断。"
+    },
+    {
+      "id": "r01",
+      "clause": "3.3.5.3",
+      "requirement": "选题背景、实际问题、前人工作和创新点",
+      "status": "待补完整论述",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "design_report.md标题为技术文档取数页，只有系统组成及取数位置。",
+      "evidence": "report/design_report.md",
+      "next_action": "按应用问题、已有方案、工程创新和可验证收益形成正文。"
+    },
+    {
+      "id": "r02",
+      "clause": "3.3.5.3",
+      "requirement": "设计原理和功能框图",
+      "status": "部分材料具备",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "源码、BD和文字分工已在，report目录没有系统功能框图，整个RAR没有已绘制的系统图或Mermaid图。",
+      "evidence": "report/design_report.md; src/fpga/bd",
+      "next_action": "补系统功能框图、数据流、状态/时序与原理说明。"
+    },
+    {
+      "id": "r03",
+      "clause": "3.3.5.3",
+      "requirement": "软硬件划分依据与接口设计",
+      "status": "部分材料具备",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "DPU/PS/主机职责和寄存器地址、时钟、PWM参数已有取数表，划分依据和端到端接口论证尚未成稿。",
+      "evidence": "report/design_report.md; src/fpga/bd/address_map.json",
+      "next_action": "补功能选择依据、寄存器/协议、跨端数据流和异常处理设计。"
+    },
+    {
+      "id": "r04",
+      "clause": "3.3.5.3 / 3.3.4",
+      "requirement": "优化过程及前后性能、资源对比",
+      "status": "部分具备",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "AI历史审阅稿中有LLM字段优化前后延迟数据。metrics.csv是历史测量摘要，本轮PL资源是单次结果，缺统一版本与条件的完整优化前后资源/性能表。",
+      "evidence": "report/ai_evidence/ai_learning_record_review.md; data/metrics.csv; report/evidence/hardware_results.json",
+      "next_action": "按基线/优化版/平台/输入/指标/资源/来源/局限整理，不能跨版本直接拼接出优化收益。"
+    },
+    {
+      "id": "r05",
+      "clause": "3.3.5.3 / 3.3.3.1",
+      "requirement": "提示词、模型回答与自我纠错记录",
+      "status": "部分具备",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "已有真实范围指令、回答摘录、Skill纠错摘要和工程证据索引；conversation_excerpts和ai_learning_record_review明确历史逐轮问答未全部归档，AI工具/模型版本仍待补。",
+      "evidence": "report/ai_collaboration.md; report/ai_evidence/conversation_excerpts.md; skill/pynq-contract-testgen/evidence/ai_collaboration.md",
+      "next_action": "补能核对的原始交互片段、模型/工具版本、错误、人工判断、修改和验证的对应关系。工作流提示词模板单独标注为模板。"
+    },
+    {
+      "id": "r06",
+      "clause": "3.3.5.3",
+      "requirement": "Skill提炼过程、验证和边界",
+      "status": "素材已具备，待并入完整报告",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "case_studies、workflow、合同说明和测试可支撑提炼过程。",
+      "evidence": "skill/pynq-contract-testgen/case_studies.md; workflow.md; contract_format.md",
+      "next_action": "整合为设计报告的一节，并引用原始反例与复跑结果。"
+    },
+    {
+      "id": "r07",
+      "clause": "3.3.5.3",
+      "requirement": "他人从零完整执行的复现说明",
+      "status": "部分具备",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "README给出可执行构建命令和目录对照。工具、EXT4、底图、外部旧输入及模型依赖仍依赖作者现存目录；主机准备说明残留src/windows旧目录。",
+      "evidence": "README.md; board/readme.md; src/models/readme.md; src/host/model_service/prepare/readme.md",
+      "next_action": "补全依赖取得/环境安装/配置生成/部署/验收顺序，移除失效路径或明确外置资料来源。"
+    },
+    {
+      "id": "c01",
+      "clause": "3.3.3.1",
+      "requirement": "工具版本",
+      "status": "允许采用当前版本，说明可完善",
+      "pdf_page": 23,
+      "printed_page": 20,
+      "observation": "指南推荐2026.1或2025.2，同时允许说明并保证复现的其他版本。本包在README、env和验证摘要明确2022.2，并有实际构建回执。",
+      "evidence": "build/env.json; report/validation_summary.md; report/evidence/implementation_receipt.json",
+      "next_action": "在正式报告写明采用2022.2及平台兼容依据；无须仅为推荐版本强行升级。"
+    },
+    {
+      "id": "c02",
+      "clause": "3.3.3.2",
+      "requirement": "AMD器件范围及型号声明",
+      "status": "满足型号声明",
+      "pdf_page": 23,
+      "printed_page": 20,
+      "observation": "Kria KV260/K26及器件xck26-sfvc784-2LV-c已在正文、Tcl和环境锁声明，属于适用器件范围。",
+      "evidence": "report/design_report.md; src/fpga/ip/ip_config.tcl; build/env.json",
+      "next_action": "实际器件运行证据按g04补齐。"
+    },
+    {
+      "id": "c03",
+      "clause": "3.3.3.3",
+      "requirement": "公开仓库和允许再分发的项目许可",
+      "status": "包内未能确认，属指南强烈要求",
+      "pdf_page": 23,
+      "printed_page": 20,
+      "observation": "有第三方许可和权利说明。根license仅保留各权利人声明，未授予项目新增公开再分发许可；包内未找到项目公开仓库地址。",
+      "evidence": "license; third_party_notices.md",
+      "next_action": "队伍确认原创部分许可、第三方和素材分发范围，并在README注明公开仓库或发布状态。此条按指南“强烈要求”记录，未改写为绝对硬性。"
+    },
+    {
+      "id": "c04",
+      "clause": "3.3.5.4",
+      "requirement": "目录和文件命名",
+      "status": "英文与无空格满足，大小写需说明",
+      "pdf_page": 24,
+      "printed_page": 21,
+      "observation": "所有2017条文件/目录条目无中文、空格或其他特殊字符。70条路径含大写，包括README.md及CMake/IP/第三方原名。指南文字要求小写，示例同时使用README.md。",
+      "evidence": "完整RAR路径清单；README.md；第三方CMake/IP文件",
+      "next_action": "保留工具必需的原名并解释适用范围，整理可控命名。长路径解压需采用较短路径，避免Windows路径上限。"
+    },
+    {
+      "id": "c05",
+      "clause": "3.3.5.4",
+      "requirement": "推荐布局及目录对照",
+      "status": "满足",
+      "pdf_page": 25,
+      "printed_page": 22,
+      "observation": "采用src/sim/build/board/data/skill/report，README已有用途对照。指南明确该树为推荐结构。",
+      "evidence": "README.md",
+      "next_action": "原始报告与板测数据按现有目录增加即可。"
+    },
+    {
+      "id": "c06",
+      "clause": "3.3.5.5",
+      "requirement": "评分权重",
+      "status": "不能据工程审查预估分数",
+      "pdf_page": 25,
+      "printed_page": 22,
+      "observation": "创新30、优化20、正确性20、AI/Skill15、文档复现15。多项依赖评审与实测，当前不作得分保证。",
+      "evidence": "指南PDF第25页",
+      "next_action": "补证据后再对照评分细则核查。"
+    },
+    {
+      "id": "c07",
+      "clause": "第六节",
+      "requirement": "决赛一页英文PPT海报",
+      "status": "条件事项，工程RAR之外",
+      "pdf_page": 28,
+      "printed_page": 25,
+      "observation": "进入决赛的自主选题队伍按AMD模板提交一页英文海报并A4彩印，海报不含队伍信息。当前RAR未含此材料。",
+      "evidence": "指南PDF第28页",
+      "next_action": "进入决赛后按官方附件模板准备。"
+    },
+    {
+      "id": "c08",
+      "clause": "第六节 / 3.3.6",
+      "requirement": "后续评分细则与时间节点",
+      "status": "本审查未覆盖",
+      "pdf_page": 28,
+      "printed_page": 25,
+      "observation": "指南要求评分公式、判定阈值与提交条件以赛道评分细则为准，当前仅提供选题指南。",
+      "evidence": "指南PDF第28页",
+      "next_action": "取得本赛道评分细则后另核。"
+    }
+  ],
+  "available_external_evidence": [
+    {
+      "id": "E17",
+      "file": "board-three-fixed.json",
+      "found": true,
+      "sha_match": true,
+      "bytes": 4481,
+      "ubuntu_path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/evidence/board-three-fixed.json",
+      "keys": [
+        "scope",
+        "boot_id",
+        "camera_before",
+        "production_config_changed",
+        "restore_timer",
+        "runtime_override_sha256",
+        "core_exit_code",
+        "core",
+        "camera_after",
+        "camera_restored",
+        "elapsed_s",
+        "ui_pid_preserved",
+        "protected_configuration_unchanged",
+        "boot_preserved",
+        "passed"
+      ],
+      "version_fields": {
+        "scope": "CONTROLLED_FIXED_INPUT_BENCHMARK_WITH_CAMERA_RESTORATION"
+      }
+    },
+    {
+      "id": "E21",
+      "file": "paired_profile.json",
+      "found": true,
+      "sha_match": true,
+      "bytes": 6169,
+      "ubuntu_path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-18_compact_reply_fields/paired_profile.json"
+    },
+    {
+      "id": "E27",
+      "file": "public_gpu_final_adaptive.json",
+      "found": true,
+      "sha_match": true,
+      "bytes": 47085,
+      "ubuntu_path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-29_parallel_interaction/public_gpu_final_adaptive.json"
+    },
+    {
+      "id": "E35",
+      "file": "RETENTION_RESULT.json",
+      "found": true,
+      "sha_match": true,
+      "bytes": 1437,
+      "ubuntu_path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/joint_balance_20261101/continued_validation_20261101/RETENTION_RESULT.json"
+    }
+  ],
+  "naming": {
+    "non_ascii": [],
+    "whitespace": [],
+    "uppercase_count": 70,
+    "uppercase_examples": [
+      "README.md",
+      "skill/README.md",
+      "src/assets/fonts/DroidSansFallbackFull.ttf",
+      "src/assets/fonts/licenses/Apache-2.0.txt",
+      "src/assets/fonts/licenses/Droid-COPYRIGHT.txt",
+      "src/board/vision/bytetrack/LICENSE",
+      "src/camera/runtime/board/vision/bytetrack/LICENSE",
+      "src/hardware/README.md",
+      "src/host/model_service/README.md",
+      "src/host/model_service/windows_launcher/deliverables/2026-10-30_board_owner/integration/production_model_host/README.txt",
+      "src/models/tts/OmniVoice",
+      "src/models/tts/OmniVoice/chat_template.jinja",
+      "src/models/tts/OmniVoice/config.json",
+      "src/models/tts/OmniVoice/download_identity.json",
+      "src/models/tts/OmniVoice/tokenizer_config.json",
+      "src/models/vision/licenses/OpenCV-LICENSE.txt",
+      "src/models/vision/licenses/SFace-LICENSE.txt",
+      "src/models/vision/licenses/YuNet-LICENSE.txt",
+      "src/motion/controller/LICENSE.Ruckig",
+      "src/motion/follow/LICENSE.Ruckig",
+      "src/motion/mmio_src/README.md",
+      "src/motion/mmio_src/SOURCE_SHA256.json",
+      "src/motion/trajectory_src/LICENSE.Ruckig",
+      "src/motion/trajectory_src/README.md",
+      "src/motion/trajectory_src/SOURCE_SHA256.json"
+    ],
+    "special": []
+  },
+  "notes": [
+    "未修改封版RAR。审查结果不是评委评分。",
+    "指南3.3没有工程包最低体积或必须达到100MB/200MB的要求。",
+    "指南未要求所有队伍提交HLS或Jupyter文件，按实际采用的实现提交。",
+    "指南3.3未单独规定设计报告必须为PDF或演示必须为MP4，正式后台如另有要求再核。",
+    "只检查包中证据不能断言团队历史上从未做过实板测试；已找到与索引SHA匹配的历史板测原件。",
+    "报告发现DSP48E2 only一行的available/util_percent为空，应按原始利用率报告更正或仅列实际支持的字段。"
+  ]
+}

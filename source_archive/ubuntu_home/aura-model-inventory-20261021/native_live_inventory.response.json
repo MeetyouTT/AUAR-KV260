@@ -1,0 +1,187 @@
+{
+  "boot": "008f3e1b-c627-4b98-b120-d2a460cdbcbe",
+  "mono_ns": 22026512344216,
+  "camera": {
+    "pid": 29563,
+    "yolo_hz": 9.95,
+    "optional": {
+      "yunet": {
+        "calls": 62491,
+        "skipped": 30834,
+        "overruns": 5,
+        "budget_exceeded": 6,
+        "estimated_budget_ms": 30.0,
+        "maximum_ms": 36.519516001135344,
+        "disabled": true,
+        "last_overrun": {
+          "elapsed_ms": 36.519516001135344,
+          "finish_after_guard_ms": 2.4540750000596745,
+          "waiting_primary": 0
+        }
+      },
+      "sface": {
+        "calls": 755,
+        "skipped": 397,
+        "overruns": 3,
+        "budget_exceeded": 3,
+        "estimated_budget_ms": 30.0,
+        "maximum_ms": 36.0811909995391,
+        "disabled": true,
+        "last_overrun": {
+          "elapsed_ms": 31.307803001254797,
+          "finish_after_guard_ms": -48.7312569966889,
+          "waiting_primary": 0
+        }
+      }
+    },
+    "owner_fenced": false,
+    "primary_calls": 218661,
+    "primary_overruns": 3,
+    "yunet_recovery": {
+      "enabled": true,
+      "phase": "LATCHED",
+      "reason": "unsafe_or_unknown_completion",
+      "cooldown_s": 10.0,
+      "window_s": 600.0,
+      "maximum_attempts": 2,
+      "required_successes": 3,
+      "probe_successes": 0,
+      "faults": 5,
+      "attempts": 4,
+      "recoveries": 4,
+      "cooldown_until_monotonic_s": 15587.415702493,
+      "attempts_in_window": 1
+    },
+    "sface_recovery": {
+      "enabled": true,
+      "phase": "LATCHED",
+      "reason": "recovery_budget_exhausted",
+      "cooldown_s": 10.0,
+      "window_s": 600.0,
+      "maximum_attempts": 2,
+      "required_successes": 3,
+      "probe_successes": 0,
+      "faults": 3,
+      "attempts": 2,
+      "recoveries": 2,
+      "cooldown_until_monotonic_s": 17810.003287345,
+      "attempts_in_window": 2
+    },
+    "feature_inference": {
+      "kind": "DPU_SFACE_INT8",
+      "model_id": "sface-int8-12b2ff5c7de15713",
+      "ready": false,
+      "unavailable_reason": "DPU_SFACE_OPTIONAL_DISABLED",
+      "detail": "人脸识别服务暂不可用，请恢复服务后重试",
+      "recovery_required": true,
+      "recovery": {
+        "enabled": true,
+        "phase": "LATCHED",
+        "reason": "recovery_budget_exhausted",
+        "cooldown_s": 10.0,
+        "window_s": 600.0,
+        "maximum_attempts": 2,
+        "required_successes": 3,
+        "probe_successes": 0,
+        "faults": 3,
+        "attempts": 2,
+        "recoveries": 2,
+        "cooldown_until_monotonic_s": 17810.003287345,
+        "attempts_in_window": 2
+      },
+      "requests": 1712,
+      "execution_attempts": 755,
+      "completed": 755,
+      "features_returned": 748,
+      "deferred": 964,
+      "slot_denials": 397,
+      "expired_after_admission": 0,
+      "last_dpu_wait_ms": 31.02758099703351,
+      "scheduler_calls_mean_admissions": true
+    }
+  },
+  "units": {
+    "aura-camera-ui.service": {
+      "Type": "simple",
+      "Restart": "on-failure",
+      "MainPID": "29563",
+      "NRestarts": "0",
+      "ExecStart": "{ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-vision-recovery-c76110abefc304bb/runtime_entry.py /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-vision-recovery-c76110abefc304bb/aura/tools/board_camera_motion.py --config /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-vision-recovery-c76110abefc304bb/board_camera_ui.json ; ignore_errors=no ; start_time=[Fri 2021-11-19 10:06:23 PST] ; stop_time=[n/a] ; pid=29563 ; code=(null) ; status=0/0 }",
+      "WorkingDirectory": "/home/root/aura-dpu-vision-20261021/postpower-retry-live/release-vision-recovery-c76110abefc304bb/aura",
+      "Requires": "system.slice -.mount sysinit.target",
+      "Wants": "",
+      "After": "basic.target local-fs.target sysinit.target system.slice systemd-journald.socket -.mount",
+      "ActiveState": "active"
+    },
+    "aura-avatar-ui.service": {
+      "Type": "notify",
+      "Restart": "on-failure",
+      "MainPID": "29588",
+      "NRestarts": "0",
+      "ExecStart": "{ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B /home/root/aura-video-cpu-20261023/66cde810eb059dce/startup/launcher.py --config /home/root/aura-video-cpu-20261023/66cde810eb059dce/startup/config.json ; ignore_errors=no ; start_time=[Fri 2021-11-19 10:06:29 PST] ; stop_time=[n/a] ; pid=29588 ; code=(null) ; status=0/0 }",
+      "WorkingDirectory": "/home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/runtime/aura",
+      "Requires": "-.mount system.slice sysinit.target",
+      "Wants": "xserver-nodm.service systemd-modules-load.service",
+      "After": "local-fs.target xserver-nodm.service systemd-journald.socket -.mount basic.target system.slice systemd-modules-load.service sysinit.target",
+      "ActiveState": "active"
+    },
+    "xserver-nodm.service": {
+      "Type": "simple",
+      "Restart": "always",
+      "MainPID": "1077",
+      "NRestarts": "0",
+      "ExecStart": "{ path=/etc/xserver-nodm/Xserver ; argv[]=/etc/xserver-nodm/Xserver ; ignore_errors=no ; start_time=[n/a] ; stop_time=[n/a] ; pid=0 ; code=(null) ; status=0/0 }",
+      "WorkingDirectory": "",
+      "Requires": "sysinit.target system.slice",
+      "Wants": "",
+      "After": "sysinit.target basic.target systemd-journald.socket system.slice",
+      "ActiveState": "active"
+    }
+  },
+  "camera_unit_text": "# /etc/systemd/system/aura-camera-ui.service\n[Unit]\nDescription=AURA shared USB camera preview and YOLOX person adapter\nAfter=local-fs.target\nStartLimitIntervalSec=0\n\n[Service]\nEnvironment=\"AURA_EXPERIMENT_GIL_MS=1\"\nEnvironment=\"AURA_PIPELINE_METRICS=1\"\nEnvironment=\"AURA_DPU_DIAGNOSTICS=1\"\nEnvironment=\"AURA_THREAD_SCHED_DIAGNOSTICS=switches\"\nType=simple\nExecStart=/usr/bin/python3 -B /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/runtime_entry.py /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/aura/tools/board_camera_motion.py --config /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/board_camera_ui.json\nWorkingDirectory=/home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/aura\nEnvironment=PYTHONUNBUFFERED=1\nRestart=on-failure\nRestartSec=3\nTimeoutStopSec=10\nKillMode=control-group\nUMask=0077\n\n[Install]\nWantedBy=multi-user.target\n\n# /run/systemd/system/aura-camera-ui.service.d/zz-aura-sface-recovery-4bcbe0999c62a348.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-sface-recovery-4bcbe0999c62a348/runtime_entry.py /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-sface-recovery-4bcbe0999c62a348/aura/tools/board_camera_motion.py --config /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-sface-recovery-4bcbe0999c62a348/board_camera_ui.json\nWorkingDirectory=/home/root/aura-dpu-vision-20261021/postpower-retry-live/release-sface-recovery-4bcbe0999c62a348/aura\n\n# /run/systemd/system/aura-camera-ui.service.d/zzz-aura-admission-floor-e4e58625c0520683.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-admission-floor-e4e58625c0520683/runtime_entry.py /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-admission-floor-e4e58625c0520683/aura/tools/board_camera_motion.py --config /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-admission-floor-e4e58625c0520683/board_camera_ui.json\nWorkingDirectory=/home/root/aura-dpu-vision-20261021/postpower-retry-live/release-admission-floor-e4e58625c0520683/aura\n\n# /etc/systemd/system/aura-camera-ui.service.d/zzzz-aura-vision-recovery-c76110abefc304bb.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-vision-recovery-c76110abefc304bb/runtime_entry.py /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-vision-recovery-c76110abefc304bb/aura/tools/board_camera_motion.py --config /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-vision-recovery-c76110abefc304bb/board_camera_ui.json\nWorkingDirectory=/home/root/aura-dpu-vision-20261021/postpower-retry-live/release-vision-recovery-c76110abefc304bb/aura\n",
+  "gui_summary": {
+    "phase": "IDLE",
+    "audio_output_state": "IDLE_READY",
+    "ui_page": "vision",
+    "paused": false,
+    "playing": false
+  },
+  "yolo_config": {
+    "model": "/home/root/aura-bytetrack-20261011/models/yolox_nano_person.xmodel",
+    "model_sha256": "def64abdeeccbd020cb651913ba907464c1a1786e30ba7d4aa077b601388950a",
+    "model_config_sha256": "e3359212356578053b71a844ab10d82617d80c33274bb926875c3f422b6de611",
+    "native_library": "/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/board/vision/native/libaura_yolox.so",
+    "native_sha256": "14524ca6364f7ecab3464999a1f20271d9f3b13e80684859f6da1573caf6efa8",
+    "arch_fingerprint": "0x101000056010407",
+    "classes": [
+      "person"
+    ],
+    "score_threshold": 0.1,
+    "person_nms_iou": 0.45,
+    "reference_image": "/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/tests/fixtures/vision/person_bus.jpg",
+    "reference_sha256": "975917d943c3dd367a27c37c4a9b0cdaf28c73ce671c881f6489a18bda20b46f"
+  },
+  "face_backends": {
+    "face_backend": {
+      "kind": "dpu_yunet",
+      "model": "/home/root/aura-dpu-vision-20261021/staging/3f10273827d88501/kit-974f2fb1a5641f10/yunet_public_int8.xmodel",
+      "manifest": "/home/root/aura-dpu-vision-20261021/staging/3f10273827d88501/kit-974f2fb1a5641f10/manifest.json",
+      "model_sha256": "54d348bfeee01756a98bda4103c056a2d5e469a26ea887822da6edc28bdbbbee",
+      "manifest_sha256": "443d3de67837fa2b16d9c1caba55fb853416f784ced94054969e4cc43c02cf22"
+    },
+    "feature_backend": {
+      "kind": "dpu_sface",
+      "model": "/home/root/aura-dpu-vision-20261021/staging/03580d3216661ba0/kit/sface_public_int8.xmodel",
+      "manifest": "/home/root/aura-dpu-vision-20261021/staging/03580d3216661ba0/kit/sface-manifest.json",
+      "model_sha256": "12b2ff5c7de157133ebd5aa71665fc5ddcd1f65d9e30e2d6e965e0752e467f25",
+      "manifest_sha256": "d52e4343910f7d3c775405c161e3fdf16db27396891dc617b0e5defdb878841b",
+      "fallback_config": "/home/root/aura-dpu-vision-20261021/runtime/81fdb11903abb71e-live-134783/board_identity.json",
+      "max_source_age_ms": 1000
+    }
+  },
+  "yunet_ttl_ms": null,
+  "inference_fps": 10,
+  "launcher_source": "\"\"\"Experimental process-local interpreter interval around the pinned entrypoint.\"\"\"\nimport hashlib\nimport json\nimport os\nfrom pathlib import Path\nimport runpy\nimport sys\n\nCAMERA_SHA='1e0e6f0b8881c2d4d4cf81a2527e79d063e673eeba1d069e33bdde2608303005'\nALLOWED_ROOT=Path('/home/root/aura-dpu-vision-20261021/postpower-retry-live')\n\n\ndef launch(argv,*,allowed_root=ALLOWED_ROOT,expected_sha=CAMERA_SHA,\n           record_directory=None,runner=runpy.run_path):\n    selected=os.environ.get('AURA_EXPERIMENT_GIL_MS')\n    if selected not in ('1','5'):raise ValueError('Explicit 1ms or 5ms experiment required')\n    if not argv:raise ValueError('Pinned camera entrypoint required')\n    target=Path(argv[0])\n    if (not target.is_absolute() or target.resolve(strict=True)!=target\n            or allowed_root.resolve() not in target.parents or target.name!='board_camera_motion.py'\n            or hashlib.sha256(target.read_bytes()).hexdigest()!=expected_sha):\n        raise ValueError('Camera entrypoint differs from pinned experiment')\n    record_directory=Path(record_directory) if record_directory is not None else Path(__file__).parent\n    old_interval=sys.getswitchinterval();old_argv=sys.argv\n    try:\n        sys.setswitchinterval(int(selected)/1000.)\n        actual=sys.getswitchinterval()\n        if abs(actual-int(selected)/1000.)>1e-9:raise RuntimeError('Interpreter interval was not applied')\n        record={'pid':os.getpid(),'requested_ms':int(selected),'actual_start_seconds':actual,\n            'previous_seconds':old_interval,'target':str(target),'target_sha256':expected_sha,\n            'scope':'interpreter startup setting in this camera process only; not OS timeslice or hardware deadline'}\n        with (record_directory/('process-setting-'+str(os.getpid())+'.json')).open('x') as f:\n            json.dump(record,f)\n        sys.argv=list(argv)\n        return runner(str(target),run_name='__main__')\n    finally:\n        sys.argv=old_argv;sys.setswitchinterval(old_interval)\n\n\nif __name__=='__main__':launch(sys.argv[1:])\n",
+  "config_sha256": "edd75843cda1aef7d0567dfc9c787cb2f8d29c3e4bb76bc18c3c0e8c7b128c8a",
+  "identity_config_sha256": "398ece6a4d5d81076c9a4f9f40a43e97cedd469e0b47e3a835e589a2255ca6e3"
+}

@@ -1,0 +1,85 @@
+本轮仅完成源代码、合成夹具和元数据只读检查，未迁真实数据、未启生产正文清理。
+
+源库及目标（五类来源统一为四个目标 SQLite）：
+1. 现有 E:/Win共享文件/语音共享文件/deliverables/2026-10-18_board_dialogue/model_host/conversations.sqlite3
+   → /home/root/.local/share/aura-board-business/timeline.sqlite3。
+2. C:/Users/35870/AppData/Local/Aura/device-memory/observations.sqlite3
+   → 同 timeline.sqlite3 的 device scope，topic=legacy.visual_observation。旧VLM历史，不是当前YOLO画面。
+3. 同 Windows private device-memory 下 speakers.sqlite3、anonymous-voices.sqlite3、identity-links.sqlite3
+   → 目标 private_root/speaker/ 下同名三库；原 identity-link-receipt.key 一并私有移交。
+   原 marker、声纹/匿名ID、登记元数据/模板、链接、registry epoch、原receipt key保留，不改模型/阈值或calibrated=false。
+   Board现有face gallery不迁移，不从Windows创建人脸库，不把原身份链接变成个人记忆grant。
+
+源结构支持及硬拒绝：
+conversation 主表 conversations/turns/conversation_facts/recall_exclusions，profile目录及关联、profile_facts/changes，
+timeline_played、timeline_visual_dependency、memory_source_dependencies/coverage、memory_fact_versions 均按原作用域及来源映射。
+每个匿名CID独立，profile目录保留原id/name/created及显式登记consent，无grant或token移交。
+个人scope内不同conversation的source_id独立，不能混成连续聊天；历史本身仍按原授权scope可查。
+被遗忘/更正/来源失效的旧内容不复活；未有可核验全播ACK、完整依赖覆盖或含旧视觉依赖的assistant不进入recall。
+memory_control_meta为旧控制安装边界，不复用为新权限；memory_delete_previews/turn_speaker_attribution当前均空，非空时明确拒绝。
+profile拥有conversation的局部facts当前为0；若出现非空，现工具明确拒绝，不能提升为整个profile事实或跳过。
+旧timeline_digests/revisions/builds只在全部source仍存在时作为可重建摘录缓存跳过；空、非法或缺失引用硬拒绝。
+未知表、字段、主键、appID、schema version、未冻结sidecar、SHA变化均拒绝；不会猜测兼容。
+visual observations/cache与visual_timeline按照同boot/epoch/frame/time/summary归并映射；同一次观察只写一个事件。
+visual旧digest同样要求全来源可用；不把旧boot/源帧/旧summary用作新画面或者新执行成功的设备动作。
+原始来源boot/frame/revision归属只保存在private migration map；公共报告只输出计数及哈希。
+
+已授权的独立WMI只读元数据检查：source-inspection-24e933f87aba413ea029efd6b59ca724.json。
+检查时：153会话/311轮/1当前fact/0profiles/7exclusions；241视觉cache/239timeline/7digest。
+全部304对话digest及7视觉digest有合法且仍存在的来源数组，无空/缺失/非法引用。
+3声纹/匿名/关联库业务行均0但原元数据/应用marker与key存在，不能直接用新空库替代这些原元数据。
+这些是检查时点，不是之后生产实时值；真正快照必须在单写移交屏障后重新校验。
+
+最小可执行私有快照：
+  Windows在已核对的独立hidden WMI用户文件视图运行：
+  <private-python> -B <此目录>/snapshot_windows_private.py --bundle-id <32hex>
+  默认仅只读预检。根确认所有旧memory/device/speaker/anonymous/link写者停止且不能自动复活后：
+  同命令追加 --execute --source-writers-stopped。
+  仅在 C:/Users/35870/AppData/Local/Aura/private-migrations/<bundle>/ 创建私有ACL目录、五个SQLite backup和原32Bkey，
+  private-snapshot.json最后写；stdout只计数/manifestSHA。没有停止进程、checkpoint原库或复制到E的动作。
+  外部“全写者停止”是跨库一致性的必要条件；SQLite逐库backup本身不冒充跨库原子快照。
+  Source main/WAL在每次backup前后还做SHA与结构/计数校验，不改源库；失败留下仅私有的暂存供根检查。
+
+板端离线预检/导入：
+  根将该新快照目录通过现有私有通道直接放板端private staging，目录0700/全部文件0600，无symlink。
+  不把任何真实DB/key/selection/body/template放共享E、zip或模型prompt。
+  PYTHONPATH=<已审runtime>/aura python3 -B <runtime>/aura/tools/board_production_import.py
+    --source-manifest <private-staging>/private-snapshot.json --source-manifest-sha256 <上一步SHA>
+    --speaker-model-id <现ECAPA完整同模型ID> --visual-device-id <配置固定device scope>
+    --trusted-utc <fresh可信UTC的ISO8601值Z或+00:00>
+  默认完整规划/schema/来源预检，不创建目标Store、不启设备/模型/网络/worker。
+  --execute --source-writers-stopped 才取与正常factory相同writer.lock，导入→三speaker原库copy→seal receipt最后发布。
+  可追加 --selection-source <board-private旧version1 ConversationSelection JSON>；必须在本次映射内且匿名scope存在。
+  未给selection不猜测153会话中的一个；不把profile关联CID冒充匿名，不merge scopes。
+  输出 PRIVATE_IMPORT_SEALED 与receipt SHA才可交给GUI；完成后不再重放快照。
+  已有receipt时必须额外给 --existing-receipt-sha256，验证同bundle后仅返回，不开写库、不重放任何旧行。
+  若partial import/seal失败，不删已有目标、不覆盖新数据；同source/bundle允许精确重试，其他source明确拒绝。
+
+启动前验证API（runtime已接）：
+  common.board_production_bootstrap.verify_production_bootstrap(root, receipt_path, expected_sha256)
+  正常GUI需在任何ASR/Store/worker构造前及writerlease内各核一次。
+  验证receipt SHA、private root0700与files0600/no redirect、原appID/schema、每DB固定UUID/bundle/import marker；
+  不钉初始liveDB SHA、当前profile数量或可变gallery epoch，所以正常新写入/显式新登记不会造成假损坏。
+  缺一个required DB/receipt/key便fail closed，不自动创建空库。
+  返回 current conversation_selection_sha256 只供GUI内部RAM绑定，禁止health/API/E报告输出。
+  register_anonymous_conversation(store,cid) 可在正常writerlease内、保存新选择前注册空匿名scope；不授profile权限。
+  initial_retention_enabled=false仅说明首次禁用；之后根可用已评审配置改true并正常重启，receipt不变。
+
+正式移交建议顺序：
+  1) 根唯一publisher保留旧画面显示，但禁止新音频/业务写入，冻结所有旧Windows业务writer与旧GUI生产者。
+  2) 根生成private快照、传输、预检、显式import；检查receipt/五类数量/匿名选择/无grant。
+  3) GUI按receipt和现外观pins受控切到board business，先retention=false、mic/listening/follow=false。
+  4) 根验证公开静音完整生成/播放ACK以及原历史查询，再按已授权配置启retention并正常重启。
+  5) 五分钟Worker空闲且时钟可信时，对闭合源先成功存摘要再原子删正文；压缩失败、过长不可约或校验失败保留源。
+     未知播放时间的旧turn保守以迁入时闭合；不能用旧2021板端wallclock提前清理。
+  6) 成功提交及核对后，仅清理本轮新增Windows/board私有临时snapshot，不新增长期逐字原文归档。
+     不删旧原始库或历史备份；正式交接后禁止恢复旧写者/用旧库覆盖新事件。
+
+验证范围：本机公开合成SQLite、fake TTS/encoder；无硬件/真实音频/真实数据库正文。
+最终测试与源SHA见 HANDOFF.json。POSIX chmod/owner/flock实际分支仍须根在板端private staging串行核验。
+
+revision 2：生产版writer lock要求目标已存在。仅离线import在全源preflight通过、显式execute及停写屏障后，
+先校验canonical路径与既有父级owner/不可被其他用户写入，直到0700私有边界；再逐层mkdir0700并复验，随后取锁。
+不chmod既有目录，不允许GUI/factory借该入口自动造库；dry-run不mkdir。目录缺失属于迁移工具的明确创建动作。
+SnapshotRejected已定义为受控code异常；invalid-bundle实际subprocess退出2、JSON错误码正常且stderr为空，未触真实源。
+最初完整manifest保留为HANDOFF.r1.json，现HANDOFF.json以previous_manifest_sha256串联，只有工具与针对性fixture变化。

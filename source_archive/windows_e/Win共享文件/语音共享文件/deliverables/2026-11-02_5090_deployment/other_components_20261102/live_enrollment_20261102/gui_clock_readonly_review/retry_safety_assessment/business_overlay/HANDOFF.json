@@ -1,0 +1,116 @@
+{
+  "schema": "aura-initialize-clock-recovery-candidate-handoff-1",
+  "sealed_host_utc": "2026-11-02T13:15:39.142535+00:00",
+  "status": "LOCAL_CANDIDATE_VALIDATED_PENDING_INDEPENDENT_REVIEW_AND_LIVE_ACCEPTANCE",
+  "candidate_sha256": "aac26f39b8cbec1496df93a3de24b0bc2a14289552d2728c585f3625ef779eae",
+  "baseline_sha256": "b08209eca7979825e26845080bca5e1d64e065d3cabd1178df763a93540573f2",
+  "scope": "Only BoardBusinessRuntime.initialize_clock; no common clock/client/producer changes",
+  "source_clock_sha256": "93b65ec3d9ca393b32499845297c78a2f1f71bc19e069b2ce3dc6f69e795af02",
+  "source_client_sha256": "600e044dedfc90c70e319e0e91999b8b4b7f648e0a5ca98e2a1bc0ab09a076b2",
+  "startup_order_public_sources": {
+    "tools/production_board_business_gui.py": {
+      "local_public_source_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\identity_dialogue_collaboration\\baseline\\tools\\production_board_business_gui.py",
+      "sha256": "b01f6edb9efe88cf95da60900e5ccc32eec93a24ef3f515ab08f51ae2ee6ada8"
+    },
+    "tools/board_business_gui.py": {
+      "local_public_source_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\identity_dialogue_collaboration\\baseline\\tools\\board_business_gui.py",
+      "sha256": "8aa7e8c674d16e58c0c4530108fc7a716fefaa0f3ee0c456bf33b64d992552ca"
+    },
+    "tools/board_avatar_gtk.py": {
+      "local_public_source_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\identity_dialogue_collaboration\\baseline\\tools\\board_avatar_gtk.py",
+      "sha256": "5e5c492832fc1273d45fa25d0ec692b47c9ffa4b6c6d46e42f176e842b50d70c"
+    },
+    "tools/production_frontend_selection.py": {
+      "local_public_source_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\identity_dialogue_collaboration\\baseline\\tools\\production_frontend_selection.py",
+      "sha256": "1acbcdefd03d32365d8909fa63c4bf53bd713aec21c2b3b9216371129d261cea"
+    },
+    "board/runtime/audio/board_frontend_process.py": {
+      "local_public_source_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\identity_dialogue_collaboration\\baseline\\board\\runtime\\audio\\board_frontend_process.py",
+      "sha256": "0d64f9483d28f9e54992b617bda9b1940e347f4667c8b3f451e223ab127cbae4"
+    },
+    "board/runtime/audio/board_capture.py": {
+      "local_public_source_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\identity_dialogue_collaboration\\baseline\\board\\runtime\\audio\\board_capture.py",
+      "sha256": "61859c4af6ccfdd3d583c07d681d4d5b4e8f1a1f076fa5059ede4f8c008117be"
+    },
+    "board/runtime/board_speaker_business.py": {
+      "local_public_source_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\identity_dialogue_collaboration\\baseline\\board\\runtime\\board_speaker_business.py",
+      "sha256": "6904267bd016a10a1508b26f372f0db54a71d78eed2eb15b043026218b1b7816"
+    }
+  },
+  "startup_order_facts": [
+    "Production GUI constructs pinned Paraformer and frontend pool before initialize_clock(timeout=3.)",
+    "Runtime creates jobs with start_worker=False; start() occurs later via GUI activation",
+    "Production GUI calls _attach_speaker and ECAPA initialization only after Date initialization succeeds",
+    "Reviewed Stage constructs recording/render worker/UiServiceClient/CameraPreviewWorker after prepare_board_business returns",
+    "Frontend process constructor waits for HELLO; no capture frame is requested by this constructor"
+  ],
+  "source_inferences_not_runtime_proof": [
+    "Native ASR/frontend sessions or a preloaded frontend child exist before Date sampling and might contend for CPU scheduling",
+    "Python sources do not establish native idle-thread spinning or GIL ownership",
+    "Current-process ECAPA or GUI preview work cannot explain the earlier constructor Date sample under this reviewed call order",
+    "External camera/OS/host scheduling remains outside this source-only analysis"
+  ],
+  "root_cause_of_actual_GUI_RTT_over_1s_proved": false,
+  "retry_rule": {
+    "same_absolute_original_deadline": true,
+    "production_caller_timeout_seconds": 3.0,
+    "attempts_max": 2,
+    "unchanged_per_sample_max_rtt_seconds": 1.0,
+    "original_ClockUnavailable_exact_type_and_args_only": [
+      "sample_rtt_exceeded"
+    ],
+    "real_original_clock_and_client_classes_only_for_retry": true,
+    "first_request_for_fake_nonstandard_timeline_retained": true,
+    "runtime_not_started_not_closed": true,
+    "source_boot_endpoint_verifier_clock_policy_and_full_anchor_unchanged": true,
+    "fatal_busy_unknown_prior_error_or_cancellation_rejects_retry": true,
+    "existing_persistent_anchor_requires_exact_rejection_save_revision_increment": 1,
+    "fresh_anchor_none_requires_before_and_after_revision_zero": true,
+    "clock_lock_used_only_for_short_readonly_detached_tokens": true,
+    "clock_or_file_lock_held_over_HTTP": false,
+    "second_failure_has_no_retry_catch": true,
+    "old_HTTP_Date_or_proof_replay_allowed": false
+  },
+  "hidden_anchor_conflict_boundary": {
+    "original_Clock_suppresses_rejection_save_ClockUnavailable_then_rethrows_RTT_error": true,
+    "code_only_retry_is_insufficient": true,
+    "actual_original_persistence_and_conflict_exercised_with_local_synthetic_files": true,
+    "revision_conflict_no_second_GET": true
+  },
+  "verified_TTL_expiry": {
+    "before": {
+      "quality_reason": "verification_expired",
+      "safe_for_compaction": false,
+      "status": "verified",
+      "last_error": "",
+      "fatal": false
+    },
+    "after": {
+      "quality": "verified",
+      "safe_for_compaction": true,
+      "status": "verified",
+      "last_error": "",
+      "fatal": false
+    },
+    "candidate_changed_for_expiry": false,
+    "original_anchor_origin_and_uncertainty_preserved": true,
+    "original_max_rtt_seconds": 1.0,
+    "two_requests_share_same_deadline": true
+  },
+  "expiry_required_candidate_change": false,
+  "synthetic_cases": 43,
+  "synthetic_cases_pass": 43,
+  "whole_module_AST_other_than_initialize_clock_unchanged": true,
+  "SQL_single_writer_clock_algorithm_anchor_origin_uncertainty_or_policy_changed": false,
+  "initial_Windows_synthetic_fixture_boundary": "Initial long fixture name failed before setup with anchor_write_failed; shorter isolated names exercised the unmodified persistence path successfully",
+  "review_artifact_hashes": {
+    "CANDIDATE.diff": "fb13913ad7398a817ff4c98aa535af66bd2103f532b64c69d61ec1cbd367bb9e",
+    "SOURCE_MANIFEST.json": "710f0e4a056a01a884680c4e652d99b2e805d3a4765080b2fccf5ee14a306a4d",
+    "VALIDATION.json": "49db7e1426d85d6ec13be0ed138aa84a8f2ce54891fac212cebb7e8feb5739d0",
+    "test_overlay.py": "a9f43f488363b473a75b46d03b898d20ea7e9e13b668bd2609f0a2f528835155"
+  },
+  "real_board_network_models_private_Store_business_anchors_or_axis_accessed": false,
+  "local_synthetic_anchor_fixture_files_created_and_retained": true,
+  "producer_three_file_candidate_or_production_sources_modified": false,
+  "live_recovery_or_deployment_claimed": false
+}

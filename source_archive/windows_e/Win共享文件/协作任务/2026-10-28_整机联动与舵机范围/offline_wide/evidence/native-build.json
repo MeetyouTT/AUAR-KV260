@@ -1,0 +1,72 @@
+{
+  "status": "AARCH64_COMPILE_AND_HOST_PROTOCOL_PASS_NO_MMIO",
+  "native_library_executed": false,
+  "board_accessed": false,
+  "elf_machine": "AArch64",
+  "library_sha256": "c21f7a905d9227c3483fc1d69c3adbe30154dbaefff21b42d9935abd6291d61e",
+  "sources": {
+    "native/vsrv_mmio.c": "dbc4822c8c67766d1b13de10f96553299b9af60121678b2918b6b5830495a8a6",
+    "native/vsrv_protocol.h": "cbd68fdceefce92a2f17a798979033228d79e3586ed1b1ba4d2cf6018e090a43",
+    "tests/test_protocol.c": "b6d42210b32221513950b18a22404bab0750f441ad41b4e2f5052f9db147fdf2"
+  },
+  "commands": [
+    {
+      "argv": [
+        "cc",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-std=c11",
+        "-O2",
+        "-I",
+        "/home/ghmd/aura-pan-wide-20261028/candidate/native",
+        "/home/ghmd/aura-pan-wide-20261028/candidate/tests/test_protocol.c",
+        "-o",
+        "/home/ghmd/aura-pan-wide-20261028/validation/native/test_protocol"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "argv": [
+        "/home/ghmd/aura-pan-wide-20261028/validation/native/test_protocol"
+      ],
+      "returncode": 0,
+      "output": "VSRV2_NATIVE_PROTOCOL_WHITELIST_PASS_NO_MMIO\n"
+    },
+    {
+      "argv": [
+        "cc",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-std=c11",
+        "-O2",
+        "-DVSRV_BUILD_ID=0",
+        "-I",
+        "/home/ghmd/aura-pan-wide-20261028/candidate/native",
+        "-fsyntax-only",
+        "/home/ghmd/aura-pan-wide-20261028/candidate/tests/test_protocol.c"
+      ],
+      "returncode": 1,
+      "output": "In file included from /home/ghmd/aura-pan-wide-20261028/candidate/tests/test_protocol.c:3:\n/home/ghmd/aura-pan-wide-20261028/candidate/native/vsrv_protocol.h:9:2: error: #error An assigned candidate build identity is required\n    9 | #error An assigned candidate build identity is required\n      |  ^~~~~\n"
+    },
+    {
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-gcc",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-std=c11",
+        "-O2",
+        "-fPIC",
+        "-shared",
+        "/home/ghmd/aura-pan-wide-20261028/candidate/native/vsrv_mmio.c",
+        "-o",
+        "/home/ghmd/aura-pan-wide-20261028/validation/native/libvsrv2.so"
+      ],
+      "returncode": 0,
+      "output": ""
+    }
+  ]
+}

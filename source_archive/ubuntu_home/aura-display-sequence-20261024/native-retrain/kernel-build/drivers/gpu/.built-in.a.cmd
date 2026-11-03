@@ -1,0 +1,1 @@
+cmd_drivers/gpu/built-in.a := echo >/dev/null; rm -f drivers/gpu/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/gpu/built-in.a drivers/gpu/drm/built-in.a drivers/gpu/vga/built-in.a

@@ -1,0 +1,431 @@
+{
+  "status": "finite_board_validation_passed_and_original_baseline_restored",
+  "board_verified": true,
+  "scope": "ZOCL repair on official app only; no permanent installation, no M3 load, no SD/QSPI flash or reboot",
+  "original_remove_refcount_errors": [
+    "[ 2066.695999] OF: ERROR: memory leak, expected refcount 1 instead of 2, of_node_get()/of_node_put() unbalanced - destroy cset entry: attach overlay node /axi/zyxclmm_drm"
+  ],
+  "cycles": [
+    {
+      "cycle": 1,
+      "uptime_before": 3519.9,
+      "uptime_after_snapshot_start": 3520.04,
+      "new_refcount_errors": 0,
+      "new_exception_lines": 0
+    },
+    {
+      "cycle": 2,
+      "uptime_before": 3596.1,
+      "uptime_after_snapshot_start": 3596.24,
+      "new_refcount_errors": 0,
+      "new_exception_lines": 0
+    },
+    {
+      "cycle": 3,
+      "uptime_before": 3672.76,
+      "uptime_after_snapshot_start": 3672.91,
+      "new_refcount_errors": 0,
+      "new_exception_lines": 0
+    }
+  ],
+  "classification_top5": [
+    [
+      "258",
+      "0.949879"
+    ],
+    [
+      "270",
+      "0.00931229"
+    ],
+    [
+      "259",
+      "0.00821807"
+    ],
+    [
+      "257",
+      "0.00498451"
+    ],
+    [
+      "279",
+      "0.00388194"
+    ]
+  ],
+  "performance": {
+    "original": {
+      "1": {
+        "fps": [
+          215.13,
+          215.148,
+          215.08
+        ],
+        "median_fps": 215.13
+      },
+      "2": {
+        "fps": [
+          238.837,
+          238.632,
+          238.932
+        ],
+        "median_fps": 238.837
+      }
+    },
+    "repaired": {
+      "1": {
+        "fps": [
+          215.106,
+          215.152,
+          215.129
+        ],
+        "median_fps": 215.129
+      },
+      "2": {
+        "fps": [
+          238.982,
+          238.885,
+          238.831
+        ],
+        "median_fps": 238.885
+      }
+    }
+  },
+  "performance_median_delta_percent": {
+    "1": -0.0004648352159186686,
+    "2": 0.020097388595563537
+  },
+  "recovery": {
+    "uptime": "3804.49 14921.70",
+    "root_device": "mmcblk1p2",
+    "drm": [
+      {
+        "name": "card0",
+        "device": "/sys/devices/platform/axi/fd4a0000.display",
+        "driver": "/sys/bus/platform/drivers/zynqmp-display",
+        "module": null
+      },
+      {
+        "name": "card0-DP-1",
+        "device": "/sys/devices/platform/axi/fd4a0000.display/drm/card0",
+        "driver": null,
+        "module": null
+      },
+      {
+        "name": "card1",
+        "device": "/sys/devices/platform/axi/axi:zyxclmm_drm",
+        "driver": "/sys/bus/platform/drivers/zocl-drm",
+        "module": "/sys/module/zocl"
+      },
+      {
+        "name": "renderD128",
+        "device": "/sys/devices/platform/axi/axi:zyxclmm_drm",
+        "driver": "/sys/bus/platform/drivers/zocl-drm",
+        "module": "/sys/module/zocl"
+      }
+    ],
+    "zocl_parameters": {
+      "enable_xgq_ert": "1"
+    },
+    "loaded_srcversion": "0991D1B457855C8987936E6",
+    "fpga_state": "operating",
+    "firmware_name": "kv260-benchmark-b4096.bit.bin",
+    "vart_conf": "firmware: /lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.xclbin\n"
+  },
+  "baseline_hashes_unchanged": true,
+  "successful_commands": 48,
+  "command_evidence": [
+    {
+      "phase": "02-state",
+      "id": "drivers_and_parameters",
+      "exit_code": 0,
+      "sha256": "13beee5028117180ded93cd3cccdb61b9c4c3ee9b31bb801063f991edb3e13c3"
+    },
+    {
+      "phase": "02-state",
+      "id": "baseline_hashes",
+      "exit_code": 0,
+      "sha256": "5bc5488c0984a3ad9b4732b9d3eeb8e19326d9ad3e37b7842fbe496685c14ae5"
+    },
+    {
+      "phase": "02-state",
+      "id": "manager_state",
+      "exit_code": 0,
+      "sha256": "0470f2e59ba9acfa6981fb1e28ff0a4e6f16746e03e143bb6dc54a76bd6eea53"
+    },
+    {
+      "phase": "03-baseline-functional",
+      "id": "dpu_query",
+      "exit_code": 0,
+      "sha256": "8de2cf9f402dfccad4d2a2aece7490e59a9a4a3d953527cd70841e3a3ef380e9"
+    },
+    {
+      "phase": "03-baseline-functional",
+      "id": "classification",
+      "exit_code": 0,
+      "sha256": "f2d1984d1116bda62d418f11b32bc6c2a9dfb905372ec0e8480ac8185c05d7c1"
+    },
+    {
+      "phase": "04-baseline-performance",
+      "id": "t1_warmup",
+      "exit_code": 0,
+      "sha256": "aa8c81d274d302a1e3902da4dd07f1a6e3e1ac07ef6ce59ab69a0686680fdea1"
+    },
+    {
+      "phase": "04-baseline-performance",
+      "id": "t1_r1",
+      "exit_code": 0,
+      "sha256": "b08a76299a74caf97bdd274d282e1225d47831a44341cc77730249242190a6a4"
+    },
+    {
+      "phase": "04-baseline-performance",
+      "id": "t1_r2",
+      "exit_code": 0,
+      "sha256": "a983dd6ee933d33285f4b3105b202d14ef176c9c55cc0628bea75b23a18f0a84"
+    },
+    {
+      "phase": "04-baseline-performance",
+      "id": "t1_r3",
+      "exit_code": 0,
+      "sha256": "e9e5d4c4bcada84c1e2063190ddf4f6b2eb0c6f2e47bebf7378ea8fbea85f599"
+    },
+    {
+      "phase": "04-baseline-performance",
+      "id": "t2_warmup",
+      "exit_code": 0,
+      "sha256": "ba61ec449c55712783ef8ef2db61edbdf181decc9f8255dc6957e4815ca4489e"
+    },
+    {
+      "phase": "04-baseline-performance",
+      "id": "t2_r1",
+      "exit_code": 0,
+      "sha256": "f14242b055ba6e133c640e77e3300d7199b22603416bda1267b04bf71f9d13a9"
+    },
+    {
+      "phase": "04-baseline-performance",
+      "id": "t2_r2",
+      "exit_code": 0,
+      "sha256": "f8e33be442b08d99eaeaa4655dd2eec436db1900f3da4096a5cc9dc09d00cffa"
+    },
+    {
+      "phase": "04-baseline-performance",
+      "id": "t2_r3",
+      "exit_code": 0,
+      "sha256": "da0165bfd4fd8513db733cded438e293ec339de3f98c8af427b25d1e366af2e0"
+    },
+    {
+      "phase": "05-save-original",
+      "id": "save-original",
+      "exit_code": 0,
+      "sha256": "8c03c2897dc145d78905d00c598b06fc0f8f2200ccddb8bb2425aef6680b4053"
+    },
+    {
+      "phase": "05b-save-live-snapshots",
+      "id": "save-live-snapshots",
+      "exit_code": 0,
+      "sha256": "d1facd439754f8c22f2073196c6a4da882a0b3ff8e53b1df960088a9290fc3a3"
+    },
+    {
+      "phase": "05c-save-action-guard",
+      "id": "save-action-guard",
+      "exit_code": 0,
+      "sha256": "db7e3c02533c651e2e0071dffdb1bfefd94dd75ea4d4674f4114923794f0980b"
+    },
+    {
+      "phase": "07-unpack-candidate",
+      "id": "unpack-candidate",
+      "exit_code": 0,
+      "sha256": "e1f99ccdd10d92246782154a8c064d36c274beba223958bf52d829355e0b56c4"
+    },
+    {
+      "phase": "08-remove-old-app",
+      "id": "remove-old-app",
+      "exit_code": 0,
+      "sha256": "7cec10a1d0e8b2dc7c32931391f21988a434c045f1813d5a3123bc4805b6c448"
+    },
+    {
+      "phase": "09-unload-original-module",
+      "id": "unload-original-module",
+      "exit_code": 0,
+      "sha256": "ac10dba16d5564a76a5d1ee04597c79c85ed481001eab545c4db281290cc4143"
+    },
+    {
+      "phase": "10-load-repaired-module",
+      "id": "load-repaired-module",
+      "exit_code": 0,
+      "sha256": "72850328205c903b2dfc76bcc61ee978f1f8b7699b1c42134c214f04ae81932b"
+    },
+    {
+      "phase": "c1-load-official",
+      "id": "load-official",
+      "exit_code": 0,
+      "sha256": "3bea904e8883fb530a5ad7f0b24dc7a74d2651e07c2bfa472a3e266274585a00"
+    },
+    {
+      "phase": "c1-functional",
+      "id": "dpu_query",
+      "exit_code": 0,
+      "sha256": "59891a02a717636f71b58ba0a9fb645b17bbc99224322cba374daccad045d548"
+    },
+    {
+      "phase": "c1-functional",
+      "id": "classification",
+      "exit_code": 0,
+      "sha256": "9545c7683c6a1e25b693647c287cd2c28bd8cc46fba4125f99ae424b0e932d32"
+    },
+    {
+      "phase": "11-repaired-performance",
+      "id": "t1_warmup",
+      "exit_code": 0,
+      "sha256": "367c59042a2bea7e196d1524c358875e0d1b08caf30b2ea2e5d3a57bd819092a"
+    },
+    {
+      "phase": "11-repaired-performance",
+      "id": "t1_r1",
+      "exit_code": 0,
+      "sha256": "95e4f8056dff3ba09d27f4823cc9be63a8de92c19ea082c94165b3217e1d211c"
+    },
+    {
+      "phase": "11-repaired-performance",
+      "id": "t1_r2",
+      "exit_code": 0,
+      "sha256": "4d9eb4d6bb152af1bbfc3f3315a57df62b467d819bf281ac0a571b5daa5e848d"
+    },
+    {
+      "phase": "11-repaired-performance",
+      "id": "t1_r3",
+      "exit_code": 0,
+      "sha256": "d7f61b8432a254ef7c2648bacba0d7aac670d9e7545a17cfbdac18bc81a8cce6"
+    },
+    {
+      "phase": "11-repaired-performance",
+      "id": "t2_warmup",
+      "exit_code": 0,
+      "sha256": "cbaf4e5c8a35914e629d404bf0b5db6b923f3d1fd3d1d333c1de39fd300bb0b3"
+    },
+    {
+      "phase": "11-repaired-performance",
+      "id": "t2_r1",
+      "exit_code": 0,
+      "sha256": "8d30f653e6a28494a8db54e35d09fb48a44d27ab2044be7292f0d705dfda6738"
+    },
+    {
+      "phase": "11-repaired-performance",
+      "id": "t2_r2",
+      "exit_code": 0,
+      "sha256": "3baf6f994acec366d1c0d82698574d30b6d4cec0f775b0bd014a66b981e7a2be"
+    },
+    {
+      "phase": "11-repaired-performance",
+      "id": "t2_r3",
+      "exit_code": 0,
+      "sha256": "9d66e2380affc833b8e6f06f5b5935ffa9ab4e92b78de474b45a146ce6064c31"
+    },
+    {
+      "phase": "c1-remove-official",
+      "id": "remove-official",
+      "exit_code": 0,
+      "sha256": "5b70a656c7242ef231140cd8ba29696b45db8c6770c8749806732743ac7e5363"
+    },
+    {
+      "phase": "c2-load-official",
+      "id": "load-official",
+      "exit_code": 0,
+      "sha256": "258e2eb60b4c69b70ed73f3cf217cdbbf44e3ce7e2141f9bbffb063411a3f2b7"
+    },
+    {
+      "phase": "c2-functional",
+      "id": "dpu_query",
+      "exit_code": 0,
+      "sha256": "862ff10b790449ac72319627b09a76a3ab11d2964ec7f963553e6abd5afc6686"
+    },
+    {
+      "phase": "c2-functional",
+      "id": "classification",
+      "exit_code": 0,
+      "sha256": "dc34aea5a73f370e79961d6219959a2b0d7db07464e5dbb5983dbf49d00d98a0"
+    },
+    {
+      "phase": "c2-remove-official",
+      "id": "remove-official",
+      "exit_code": 0,
+      "sha256": "9c86556070359ec5b2dc7971e05599ac34b4e5462ca96a308c6e7e83782000c3"
+    },
+    {
+      "phase": "c3-load-official",
+      "id": "load-official",
+      "exit_code": 0,
+      "sha256": "c3655fcc4c4b3f802819a0343a8e6b34e664cc534f31ce2f7b31e8ef8577d80d"
+    },
+    {
+      "phase": "c3-functional",
+      "id": "dpu_query",
+      "exit_code": 0,
+      "sha256": "4aef2b7e860bf810c24d3b8ca13cd98492cd9ea0456cd9781046ca8ac725aa0f"
+    },
+    {
+      "phase": "c3-functional",
+      "id": "classification",
+      "exit_code": 0,
+      "sha256": "19b46bf026f4856dd32098d2856d2ec22f41d41b2360cc2c6d337d8e219fef95"
+    },
+    {
+      "phase": "c3-remove-official",
+      "id": "remove-official",
+      "exit_code": 0,
+      "sha256": "a8164b23b15715a66a397b64a79cc2a09f155ac75ed7cb72dad05fd72ff90267"
+    },
+    {
+      "phase": "r1-unload-repaired-module",
+      "id": "unload-repaired-module",
+      "exit_code": 0,
+      "sha256": "4481aeb0f6d4898c1a695e14c3f5482b5517afb71a46c31007f136a21b78fecf"
+    },
+    {
+      "phase": "r2-restore-original-module",
+      "id": "restore-original-module",
+      "exit_code": 0,
+      "sha256": "01edcae8ac43105b028826dacf0a581f4c59775807b2baf2d63e7eb03ca32a3c"
+    },
+    {
+      "phase": "r3-restore-official-app",
+      "id": "restore-official-app",
+      "exit_code": 0,
+      "sha256": "f436d264030613b6eb4eb3ba6e42276df75982e51355e070ef079bd761319d99"
+    },
+    {
+      "phase": "r4-restored-functional",
+      "id": "dpu_query",
+      "exit_code": 0,
+      "sha256": "a3a76056ec30d3f07d2d82b195a117f44b66886a9a8da0849dae4fef61c99275"
+    },
+    {
+      "phase": "r4-restored-functional",
+      "id": "classification",
+      "exit_code": 0,
+      "sha256": "3af4ddc6ab92d15183375c0cdeab77f1c523cff7c32f598ef2477dd2cf981b9f"
+    },
+    {
+      "phase": "r5-final-state",
+      "id": "drivers_and_parameters",
+      "exit_code": 0,
+      "sha256": "74a972301db6caa5eb6ab284a43a82e35047f9994beba57c36c7afff8947fe2e"
+    },
+    {
+      "phase": "r5-final-state",
+      "id": "baseline_hashes",
+      "exit_code": 0,
+      "sha256": "5bc5488c0984a3ad9b4732b9d3eeb8e19326d9ad3e37b7842fbe496685c14ae5"
+    },
+    {
+      "phase": "r5-final-state",
+      "id": "manager_state",
+      "exit_code": 0,
+      "sha256": "0470f2e59ba9acfa6981fb1e28ff0a4e6f16746e03e143bb6dc54a76bd6eea53"
+    }
+  ],
+  "board_work_directory": "/home/root/kv260-zocl-repair-20261003T005805Z",
+  "remaining": [
+    "Permanent adoption of repaired driver not performed",
+    "Existing OF property warnings remain",
+    "Long-running/concurrent hot-unplug safety not validated",
+    "M3 co-existence and registers not tested"
+  ]
+}

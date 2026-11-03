@@ -1,0 +1,45 @@
+{
+  "scope": "Ubuntu host-side only; no UART, board, production service or actuator access",
+  "python": {
+    "executable": "/home/ghmd/kv260-adaptation-check-20261006/identity/.venv/bin/python",
+    "version": "3.8.10"
+  },
+  "tests": {
+    "command": "/home/ghmd/kv260-adaptation-check-20261006/identity/.venv/bin/python -m unittest discover -s /home/ghmd/aura-pan-follow-shadow-20261024/face_source_v9 -p 'test_*.py' -v",
+    "count": 23,
+    "failures": 0,
+    "errors": 0,
+    "reported_duration_s": 0.066,
+    "runner_summary": "Ran 23 tests in 0.066s; OK",
+    "coverage": [
+      "actual FaceTargetService single-face to detector-miss integration",
+      "existing face_source.install integration and one-time raw-flow delivery",
+      "original detector receives same capture object, frame_id and timestamp once",
+      "Flow receives capture before blocking detector offer",
+      "worker reselects latest actual capture after detector snapshot waits",
+      "250ms measurement expiry and 500ms real detector-anchor boundary",
+      "duplicate frame IDs and non-increasing timestamps rejected",
+      "multiface, true disappearance and unrelated texture rejected",
+      "motion key continuity does not modify identity key",
+      "capture source gap and arrival gap diagnostics"
+    ]
+  },
+  "compilation": {
+    "files": ["entry.py", "face_flow.py", "face_observation.py", "raw_capture.py"],
+    "result": "passed"
+  },
+  "limits": {
+    "measurement_ttl_ms": 250,
+    "detection_anchor_ttl_ms": 500,
+    "template_match_min": 0.8,
+    "minimum_visible_width_ratio": 0.55,
+    "minimum_visible_height_ratio": 0.6
+  },
+  "source_chain_verified": "Original ui_camera_service capture callback already calls face_targets.offer before YOLO; improvement is raw Flow offer ordering and selecting latest capture after snapshot lock wait",
+  "not_verified": [
+    "KV260 execution latency and capture gaps",
+    "real-person continuous tracking",
+    "mechanical smoothness",
+    "Windows synchronization"
+  ]
+}

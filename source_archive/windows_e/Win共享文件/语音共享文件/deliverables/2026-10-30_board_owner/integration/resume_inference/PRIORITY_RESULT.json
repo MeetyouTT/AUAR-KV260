@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "status": "PROBE_ONLY_PRIORITY_DIAGNOSTIC_READY_NOT_RUN_ON_BOARD_BY_CHILD",
+  "probe_sha256": "240b127aa33658b97ed966a6df4f0b7d5fd3701edda55b945278afc9a8b89bc7",
+  "test_source_sha256": "3f7c81cda6466110ebce21f64408946527f0a66d2ca71d4ef58e5a154e6c3c40",
+  "validation": {
+    "targeted_control_tests": 19,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 0.19,
+    "evidence": "audio_priority_frozen_tests.xml",
+    "evidence_sha256": "173700aeed5d353b5bafda43b690882faba111426d76a39c5c93cd3d30ef7313",
+    "earlier_queue_and_priority_combined": "31 passed in1.64 seconds before final systemctl placement; final targeted tests verify helpers run at original priority before/after the scope",
+    "real_priority_or_model_changes_on_windows": false
+  },
+  "explicit_suffixes_in_parent_execution_order": [
+    ["--mode", "frontend-profile", "--runs", "2", "--num-threads", "1", "--process-nice", "-5"],
+    ["--mode", "frontend-profile", "--runs", "2", "--num-threads", "1", "--process-nice", "0"]
+  ],
+  "priority_scope": {
+    "allowed_nice": [0, -5, -10],
+    "default": 0,
+    "scope": "Only the fresh probe TGID and its self-task threads, freshly checked through /proc/self/task before each mutation",
+    "applied_before": "ORT/NumPy/sherpa model-runtime imports and new native worker threads",
+    "restore": "finally restores each surviving original thread's original nice, and new live runtime threads to original main-thread nice; restoration failure reports FAILED",
+    "recorded": "Original, effective, finishing and restored nice/count distributions plus restoration confirmation and permission refusal",
+    "permission_failure": "Refuse before any model import/load; partial application is restored, never silently downgraded or retried with different privileges",
+    "subprocess_helpers": "Outer safety systemctl show calls run before nice and after successful restoration; inside experiment only fixed-loopback HTTP and boot/device protection checks run",
+    "other_existing_pids_modified": false,
+    "governor_firmware_or_production_defaults_changed": false,
+    "tuning_metadata": "system_tuning reflects actual own-priority changes; systemwide_tuning=false. Negative-nice runs do not claim system_tuning=false."
+  },
+  "context": {
+    "display": "Actual state.avatar_display numeric pushed/received/sequence/fps/p50_ms/p95_ms/p99_ms/max_ms/age_ms with native_sink_handoff kind",
+    "identity": "Only numeric processed/discarded/pending_frames/last_inference_ms and face_targets numeric counters; no person IDs/templates/names/images",
+    "comparisons": "Per-run before/after native rolling FPS/P95 and identity workload counters, clearly snapshots rather than whole-trial distributions",
+    "self_scheduler": "Per-run process CPU seconds, wall-minus-process-CPU, common self-task schedstat runtime/runqueue wait/timeslices and voluntary/involuntary context switches. Kernel schedstat wait can be disabled; sleep/synchronization is not equivalent to runqueue wait."
+  },
+  "preserved": {
+    "same_models_and_public_wav": true,
+    "default_pipeline_queue_frames": 8,
+    "overflow_fails_whole_capture": true,
+    "production_defaults_changed": false,
+    "actual_board_probe_started_by_child": false,
+    "previous_failures_and_profiles_retained": true
+  },
+  "acceptance": "This remains an isolated diagnostic. The parent must compare matched workload and then pass original paced capture plus UI/camera behavior; higher priority or more buffering alone is not realtime acceptance."
+}

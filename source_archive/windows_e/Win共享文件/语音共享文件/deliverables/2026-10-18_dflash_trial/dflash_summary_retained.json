@@ -1,0 +1,32 @@
+{
+  "status": "REJECT_GPU_DFLASH_ON_CURRENT_16GB_DEVICE",
+  "deployed": false,
+  "target_sha256": "d83adbbbaace8acdfcfe28004f779326176b9df00b4ec99dc6c24d749723d3b9",
+  "target_context": 2048,
+  "target_quantization": "IQ4_XS",
+  "build": "b1-620d2225c",
+  "cuda_backend": "cuda_v13/ggml-cuda.dll",
+  "draft_size_bytes": 1143006816,
+  "draft_n_max": 7,
+  "chat_sampling": {"temperature": 0.6, "top_k": 20, "top_p": 0.95, "min_p": 0, "seed": 42, "n_predict": 120},
+  "model_only_chat": {
+    "baseline_speech_ready_ms": [596.5, 929.78, 883.85, 602.42, 947.13, 889.43],
+    "dflash_speech_ready_ms": [868.94, 1094.97, 1292.29, 831.06, 1043.58, 1275.11],
+    "baseline_median_ms": 886.64,
+    "dflash_median_ms": 1069.275,
+    "question_echo_count_both": 0,
+    "limitation": "Free-generation wording differs between variants; not a fixed-text causal speedup measurement. Six cases per variant, warmups excluded."
+  },
+  "greedy_parity": {"请记住，我喜欢绿色。": true, "请重复这句话：今天比较开心，陪我聊聊。": true},
+  "complete_host_channel_first_pcm_ms": {
+    "baseline": [4905.9, 1896.21],
+    "dflash": [7541.52, 6165.71],
+    "actual_tts": true,
+    "tts_steps": 16,
+    "tts_cache_hits": 0,
+    "actual_board_playback": false,
+    "limitation": "Two cases per variant; first case after model/TTS loading can include GPU residency warmup, outputs differ. Not stable end-to-end latency or an acoustic measurement."
+  },
+  "evidence": ["runner-cuda-0-baseline.log", "runner-cuda-1-dflash.log", "runner-cuda-2-dflash.log", "runner-cuda-3-baseline.log", "pipeline-baseline.json", "pipeline-dflash.json", "draft_download.json"],
+  "archival_note": "This summary retains the completed trial console summary and independently saved full-channel JSON. An auxiliary memory probe reused the helper report path and overwrote the original detailed probe_cuda.json; helper report paths are now separated. Do not treat probe_cuda.json as the completed DFlash ABBA report. The initial CPU fallback attempt in probe.json is excluded."
+}

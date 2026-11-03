@@ -1,0 +1,11 @@
+--- a/board/runtime/board_memory_policy.py
++++ b/board/runtime/board_memory_policy.py
+@@ -124,7 +124,7 @@
+             if not fits(notes, group + recent):
+                 break
+             recent = group + recent
+-        messages = [system] + notes + recent + [current]
++        messages = [system] + recent + notes + [current]
+         self.metrics = dict(context_limit=self.maximum, budget_upper_bound=message_cost(messages, self.reserve),
+                             budget_unit='utf8_bytes_plus_reserve', continuity_summary=continuity,
+                             history_requested=history is not None, history_items=selected_history,

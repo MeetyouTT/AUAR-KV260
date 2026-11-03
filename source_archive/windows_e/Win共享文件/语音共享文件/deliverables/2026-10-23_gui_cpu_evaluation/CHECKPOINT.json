@@ -1,0 +1,111 @@
+{
+  "status": "accepted_reliability_fix_active",
+  "boot": "7924ac9f-311d-4fcd-98be-57bf023cf1aa",
+  "release": "/home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136",
+  "gui_runtime": "/home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/gui-runtime",
+  "unit_sha256": "29786434df9bb9b94a8e640a7a48db47019c224d3876037ce27d3467bb2f5512",
+  "camera_pid": 499773,
+  "gui_pid": 450525,
+  "xserver_pid": 1077,
+  "formal_identity_backend": "DPU_SFACE_INT8",
+  "identity_configuration_unchanged": true,
+  "database_unchanged": true,
+  "guard_and_controller_inactive": true,
+  "verified_source_files": 12,
+  "short_window": {
+    "scope": "SHORT_REAL_CAMERA_WORKLOAD_NOT_FIELD_ACCURACY",
+    "initial_primary_period_overruns": 1,
+    "duration_s": 60.51881905300252,
+    "yolo_hz": 9.930795236993022,
+    "face_publish_hz": 3.8169945087277677,
+    "native_yunet_completed": 231,
+    "native_sface_completed": 0,
+    "cpu": {
+      "duration_s": 60.51901119499962,
+      "cpu_percent_of_board": 56.918717753531254
+    },
+    "usb_warning_count": 0,
+    "passed": true
+  },
+  "limitations": [
+    "rare native wall tail root cause",
+    "SFace bounded automatic recovery",
+    "field unknown/multi-person accuracy",
+    "strict same-input CPU benefit",
+    "cold boot and long mixed-workload stability"
+  ],
+  "next": [
+    "Identify production GUI queue1:src and other thread CPU work",
+    "Low-overhead admission and VART wait attribution; preserve 30ms/5ms",
+    "Unknown/multi-person field accuracy and SFace recovery"
+  ],
+  "deployment_camera_pid": 450495,
+  "gui_cpu_candidate": {
+    "deployed": false,
+    "quality_passed": true,
+    "process_cpu_reduction_fraction": 0.0546433816917653,
+    "minimum_required": 0.1,
+    "decision": "REJECTED_CPU_GATE"
+  },
+  "latest_process_update": {
+    "checked_utc": "2026-10-23T12:09:01.237023+00:00",
+    "same_version_camera_restarts_this_round": 1,
+    "old_camera_pid": 450495,
+    "new_camera_pid": 499773,
+    "old_yunet_faults_preserved": 3,
+    "old_yunet_recoveries": 2,
+    "old_end_phase": "LATCHED",
+    "new_process_faults_at_snapshot": 0,
+    "final_audit": "/home/ghmd/Win\u5171\u4eab\u6587\u4ef6/\u8bed\u97f3\u5171\u4eab\u6587\u4ef6/deliverables/2026-10-23_gui_cpu_evaluation/evidence/final-audit.json",
+    "gui_restarted": false,
+    "unit_and_runtime_unchanged": true,
+    "root_cause_resolved": false
+  },
+  "same_version_recovery_short_window": {
+    "duration_seconds": 60.2142501069975,
+    "observed_yolo_hz": 9.964418703775802,
+    "observed_face_publish_hz": 3.7366570139159263,
+    "cross_restart_fault_total": 3,
+    "passed": true,
+    "new_sface_requests": 0
+  },
+  "current_cpu_unpaired": {
+    "scope": "10_SECOND_UNPAIRED_NORMAL_OPERATION_NOT_OPTIMIZATION_GAIN",
+    "duration_seconds": 10.171175847994164,
+    "whole_board_busy_percent": 63.24981017463933,
+    "groups": {
+      "aura-camera-ui.service": {
+        "pids": [
+          499773
+        ],
+        "whole_board_percent": 21.943811693242218,
+        "one_core_percent": 85.24088197442573
+      },
+      "aura-avatar-ui.service": {
+        "pids": [
+          450525,
+          450593,
+          450597,
+          450598,
+          450662
+        ],
+        "whole_board_percent": 38.395342951151605,
+        "one_core_percent": 149.14696419285332
+      },
+      "xserver-nodm.service": {
+        "pids": [
+          1077,
+          1160,
+          1319,
+          1333,
+          1343,
+          1344,
+          1348
+        ],
+        "whole_board_percent": 1.9488737028600354,
+        "one_core_percent": 7.5704128166445
+      }
+    }
+  },
+  "short_window_process_pid": 450495
+}

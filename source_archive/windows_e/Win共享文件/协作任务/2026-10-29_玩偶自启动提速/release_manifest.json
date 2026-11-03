@@ -1,0 +1,46 @@
+{
+  "task": "AURA avatar startup speed 2026-10-29",
+  "board_boot_id_at_audit": "605eaf50-c66a-4559-bfc9-5ae177e0f305",
+  "service": "aura-avatar-ui.service",
+  "active_launcher_before_sha256": "cd1680220b60f6120db1bc847ca59cfd445796ff37e48a3ba93efca65eddfd98",
+  "fixed_launcher_base_sha256": "ea68cb074bef23f5c71ec80d020fbac38c597009ab430cd3bd89eb836ef3105c",
+  "active_config_sha256": "12af11467b3ca0c0a1e6b57ac203e887d658a9799a159e39dfa90dbff60037d4",
+  "observed_startup_seconds": {
+    "systemd_start_job": 14.324,
+    "launcher_process": 17.896,
+    "gtk_child_start": 45.38,
+    "gui_ready": 90.804,
+    "display_setup_elapsed": 26.182,
+    "gui_initialization_after_child_start": 45.424
+  },
+  "display_config": {
+    "edid_grace_seconds": 15,
+    "display_stable_seconds": 3,
+    "display_retrain_off_seconds": 2,
+    "all_preserved": true,
+    "physical_panel_verified": false
+  },
+  "component_inventory": {
+    "count": 279,
+    "total_bytes": 2053383
+  },
+  "optimization": "Start GTK once the current output is on the pinned mode, or on the exact previously verified timing with the named touch device while EDID grace continues. Keep display stability/recovery and gate systemd READY on both GUI and display setup.",
+  "activation": "Install a new lexically-last systemd drop-in and daemon-reload only. Do not restart the currently active GUI or reboot.",
+  "rollback": "Remove only the new drop-in after verifying its recorded SHA256, then run systemctl daemon-reload. The already-running GUI remains untouched.",
+  "dropin_path": "/etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-avatar-startup-speed-20261029.conf",
+  "remote_release": "/home/root/aura-avatar-startup-speed-20261029",
+  "files": {
+    "launcher.py": {
+      "bytes": 22952,
+      "sha256": "5b15a8cf1813935679e5f4d30eb788e9c8d6ae18826669009d06c92cba152e03"
+    },
+    "config.json": {
+      "bytes": 30981,
+      "sha256": "12af11467b3ca0c0a1e6b57ac203e887d658a9799a159e39dfa90dbff60037d4"
+    },
+    "dropin.conf": {
+      "bytes": 176,
+      "sha256": "48b46dace7d5d280c06bf2fe1559b4040366ee8770c611b707b028452704295f"
+    }
+  }
+}

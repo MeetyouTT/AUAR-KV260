@@ -1,0 +1,38 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/41-display-wake-native-mode.json",
+  "manifest_sha256": "d53357edf511a4b06b3c7d42254120f4bec52aeceddfc9f4eac14cdf500cbeb6",
+  "started_utc": "2026-10-04T12:27:50.224817+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "wake-and-native-mode",
+      "started_utc": "2026-10-04T12:27:50.745021+00:00",
+      "entry": {
+        "id": "wake-and-native-mode",
+        "command": "python3 -B -c 'import json,os,subprocess,re;from pathlib import Path;P=Path;assert P(\"/sys/block/mmcblk1/device/cid\").read_text().strip()==\"0353445345333247805558c00401a100\";assert P(\"/proc/sys/kernel/random/boot_id\").read_text().strip()==\"b39598d6-1118-4ef3-af52-36f0c1a4d396\";env=os.environ.copy();env[\"DISPLAY\"]=\":0\";out={\"commands\":[],\"persistent_configuration_changed\":False};failed=False\ndef run(c):\n r=subprocess.run(c,env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,timeout=25);out[\"commands\"].append({\"argv\":c,\"rc\":r.returncode,\"stdout\":r.stdout,\"stderr\":r.stderr});return r\na=run([\"xrandr\",\"--display\",\":0\",\"--verbose\"]);b=run([\"xset\",\"-display\",\":0\",\"q\"]);assert a.returncode==b.returncode==0;assert re.search(r\"DP-1 connected primary 1024x768\\+0\\+0\",a.stdout);assert re.search(r\"1024x600.*preferred\",a.stdout);assert \"Monitor is Off\" in b.stdout\ntry:\n assert run([\"xset\",\"-display\",\":0\",\"dpms\",\"force\",\"on\"]).returncode==0\n assert run([\"xrandr\",\"--display\",\":0\",\"--output\",\"DP-1\",\"--mode\",\"1024x600\",\"--rate\",\"59.85\"]).returncode==0\n c=run([\"xrandr\",\"--display\",\":0\",\"--verbose\"]);d=run([\"xset\",\"-display\",\":0\",\"q\"]);assert c.returncode==d.returncode==0;assert \"DP-1 connected primary 1024x600+0+0\" in c.stdout;assert \"Monitor is On\" in d.stdout;out[\"runtime_mode_and_wake_passed\"]=True\nexcept Exception as e:\n failed=True;out[\"error\"]=str(e);out[\"rollback_mode_rc\"]=run([\"xrandr\",\"--display\",\":0\",\"--output\",\"DP-1\",\"--mode\",\"1024x768\",\"--rate\",\"60\"]).returncode;out[\"rollback_dpms_rc\"]=run([\"xset\",\"-display\",\":0\",\"dpms\",\"force\",\"off\"]).returncode\nprint(json.dumps(out,indent=2));raise SystemExit(1 if failed else 0)'",
+        "timeout": 150
+      },
+      "exit_code": 0,
+      "output_sha256": "a446e0a960656c6f7775736476e94db4e42755965e5bd5b6068d3bbc407f1941",
+      "bytes": 5063,
+      "finished_utc": "2026-10-04T12:27:55.082517+00:00"
+    },
+    {
+      "id": "native-output-kernel-state",
+      "started_utc": "2026-10-04T12:27:55.082812+00:00",
+      "entry": {
+        "id": "native-output-kernel-state",
+        "command": "python3 -B -c 'import json,base64,hashlib,subprocess;from pathlib import Path;P=Path;out={\"files\":{},\"commands\":[]}\nfor p in [P(\"/sys/class/drm/card0-DP-1\")/n for n in [\"status\",\"enabled\",\"dpms\",\"modes\"]]+[P(\"/sys/kernel/debug/dri/0/state\")]:\n if p.exists():out[\"files\"][str(p)]=p.read_text()\nb=P(\"/sys/class/drm/card0-DP-1/edid\").read_bytes();out[\"edid\"]={\"bytes\":len(b),\"sha256\":hashlib.sha256(b).hexdigest(),\"base64\":base64.b64encode(b).decode()}\nfor c in [[\"modetest\",\"-D\",\"fd4a0000.display\",\"-c\",\"-p\"],[\"systemctl\",\"show\",\"dfx-mgr.service\",\"display-manager.service\",\"-p\",\"Id\",\"-p\",\"ActiveState\",\"-p\",\"MainPID\"],[\"dmesg\"]]:\n r=subprocess.run(c,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,timeout=25);out[\"commands\"].append({\"argv\":c,\"rc\":r.returncode,\"stdout\":r.stdout,\"stderr\":r.stderr})\nprint(json.dumps(out,indent=2))'",
+        "timeout": 110
+      },
+      "exit_code": 0,
+      "output_sha256": "3163d7fabf79467eddfb09a45fe6d436540f5effd210491bea0fe554ce224ff3",
+      "bytes": 45343,
+      "finished_utc": "2026-10-04T12:27:59.099291+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T12:27:59.146379+00:00"
+}

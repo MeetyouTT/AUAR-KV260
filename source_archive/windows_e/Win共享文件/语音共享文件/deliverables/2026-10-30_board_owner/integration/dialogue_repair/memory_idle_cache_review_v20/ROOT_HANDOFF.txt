@@ -1,0 +1,49 @@
+记忆摘要空闲准入与27B上下文缓存：只读分析
+
+结论
+已确认：现有worker以“此刻无前台工作”为准入，没有连续安静等待期。有超过5分钟的可压缩记录时，两轮对话之间也可能马上处理摘要。可以增加约30秒对话保护期。
+尚未确认：这是否已经导致实际对话prefill显著变慢。当前有RAM prompt缓存，部分摘要也根本不调用模型，不能只凭single slot和completed计数下结论。
+本目录只有本地核对和建议，没有模型请求、设备连接、配置或生产源码修改。保持用户PAUSED选择。
+
+基线与证据
+使用v20 startup d24b0d0007e2aa2b417f459891c7f39f168502a58374334ceab69e31af5881dd、mapping a7141992428e47d49ef80828ce9a0b33df6bffe32b613343ba01f937f68fdafc对应的9份板端源码，逐份SHA核对。
+主控说明v21只改ASR线程和屏幕保活，本分析不把未核实的实时进程状态写成已确认。Windows本地源另外记录哈希，不声称已绑定当前Windows运行进程。
+源码位置与日志白名单数字在SOURCE_EVIDENCE.json。日志只提取缓存配置/耗时/计数，未复制任何原始日志行或提示词。
+
+当前调度链
+1. BoardBusinessRuntime._foreground_idle检查capture_idle、jobs.idle、controller.idle、声纹队列空、未关闭；idle再检查timeline时钟安全。
+2. BoardBusinessGui.capture_idle允许无speech_active的安静采集，也允许PAUSED；仅排除播放、barge、错误等。它不要求用户已离开，不查看最后一句回答结束时间。
+3. BoardMemoryWorker默认interval=3秒、max_events=2。一个批次处理完后等3秒再检查；首次step也没有额外安静期。不是每3秒必调模型：还必须有eligible sources且走到模型分支。
+4. BoardMemoryBackoffWorker的3/6/12/24/48/60秒仅用于真实失败；成功清零，取消不增加失败退避。不能把失败退避当作对话保护期。
+5. 前台ASR执行前已preempt_compaction；worker在idle变false、租约/版本失效时取消。BoardSummaryClient已有25ms取消观察；Windows broker已有前台优先和取消summary。保留整条现有取消链即可。
+
+已有活动时间的准确含义
+VoiceFirstRecordingController.last_voice_activity在初始化、送ASR、entry接受和speech_active期间更新；它没有在完整播放ACK处更新，不能直接把now-last_voice_activity当成“回答结束后已安静多久”。
+现有30秒CONVERSATION_SILENCE判断用的是listen_started；与memory准入无连接。不要顺带修改会话结束策略或监听偏好。
+BoardMemoryStore.activity_revision用于租约失效，不是单调时间戳，不能拿它当静默秒数。视觉事件和GUI刷新也不能反复重置对话安静计时。
+
+两个限制因果判断的事实
+1. v20匹配的BoardSummaryClient._structured_camera_summary/_summarize能直接渲染符合固定合同的人数视觉记录。该分支model_calls=0，仍执行保真检查和原子提交。所以completed34→37不代表新增了3次27B请求；discarded也可能发生在模型请求前。
+2. Ollama现有日志末次启动段同时显示ctx2048、parallel1、RAM prompt cache上限8192MiB以及实际cache update事件。这不是实际占用8GiB的测量。当前官方llama.cpp也有prompt_save/prompt_load，故“单slot”不等于只保留一份不可恢复上下文。
+   日志中的cache update耗时只是不带task归属的历史数字，不能与某一summary或下一轮对话绑定。主控还需在公共A/B时核对实际runner/build/配置。
+   参考：https://github.com/ggml-org/llama.cpp/blob/master/tools/server/server-context.cpp
+   Ollama wrapper启用cache_prompt的参考：https://github.com/ollama/ollama/blob/main/llm/llama_server.go
+   这两份当前上游源码不是对本机0.40.13二进制的精确源码绑定；v0.40.13 runner/ollamarunner/cache.go网址404，不用旧Go runner代码冒充当前实现。
+
+最小调度建议
+在现有owner/worker准入上加内存级单调安静时间；不增加服务、模型、线程或数据库表。
+保留当前所有idle条件，再要求：最后一次前台活动完成后，连续安静约30秒。
+讲话开始、ASR提交、手动业务指令、生成/播放忙碌都重置保护期；完整播放ACK、取消/错误完成也标记前台结束。使用已有clock和观察到的状态转换，播放期间不能让30秒倒计时提前用完。
+可参考last_voice_activity检测新讲话，但需要单独的前台结束标记或busy→idle转换。短任务跨过worker的3秒轮询也必须由已有活动标记发现，不能漏重置。
+保护期在任务租约建立和模型调用前检查；已有取消/keepalive每次复核继续生效。Date时钟刷新等已有必要维护仍按原_foreground_idle运行，不被新30秒模型保护期无意饿死。
+最简单第一版可以把同一quiet条件用于整个memory step，允许视觉本地摘要也延后约30秒。若以后要让本地结构化摘要先运行，需专门处理“未准入LLM”的正常延后，避免每3秒反复建租约/记discarded；本轮不引入该分支复杂度。
+保持PAUSED不变；暂停对话不自动清空缓存、不恢复麦克风，也不禁用全部长期维护。
+超过5分钟的记录照旧进入待压缩队列；未完成摘要时原文继续保留。摘要校验通过、原子提交后才删除旧正文，失败/取消不能提前删除。
+
+公共验证建议
+详见PUBLIC_AB_PLAN.json。先做无摘要插入与有摘要插入的缓存对照，S必须在目标D之前完成，隔离排队/取消效应。每个block都重新用同一公开对话前缀预热，防止上一个block污染下一个block。
+固定目标请求字节、实际model/backend/2048ctx/采样和输出合同。对比prefill_duration、cached token数、load_duration、首有效文本时间；不能只比较总耗时。
+已有StreamObservation.finish支持读取prompt_eval_cached_count，但model_inference_host仅在请求options含output_format时建立该观察器；当前封存BoardDialogueController没有显式选择该选项。因此不能声称现有生产对话已上报cached_count。公共测试先采响应已有的prefill等metrics；缓存计数字段缺失记unknown，不能当0。若公共D需要激活已支持的output_format，必须在两组使用完全相同且通过现有合同验证的选项，且不改生产请求。不要把当前文档的prompt_eval_count含义套到不同二进制版本而声称精确cache miss数。
+保持两个模式D的输入完全相同；若试真实上下文滚动，额外记录输入prefix hash/公共token计数，因为记忆块或历史前部改变本身也能降低prefix复用。
+建议ABBA至少两轮，报告小样本/后台负载/模型重载混杂。没有显著差异就不把KV替换当主因；若S不调用模型或RAM恢复成功，也应如实记录。
+主控决定模型公共测试时段并单独操作。本分析窗口不发模型请求。

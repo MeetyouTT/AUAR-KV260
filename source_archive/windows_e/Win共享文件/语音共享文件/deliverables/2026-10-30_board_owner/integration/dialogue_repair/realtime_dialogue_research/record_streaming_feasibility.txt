@@ -1,0 +1,15 @@
+逐句完整记录与原27B最小改动复核（仅分析）
+
+结论：逐句完整JSON记录可能提前多句回答的首句，但不是开关。未实现、未运行模型、未改协议、未操作设备/生产库。本轮仅保存JSON和TXT。
+
+三个阻断：host已stream=true却仍等done回整答；LLM/TTS共用一个service worker；Store.generated固定完整回答hash及来源。第一句不能冒充全答后追加。现每包prepared检查需要完整待播assistant事件及来源，check_turn_current仅查用户来源，不能替代。
+
+最低实验先做公开LLM-only新记录格式对照，测首条完整有效记录、完整回答、token与语义/schema失败，原模型/层数/人设/预算不动，不接TTS和Store。确有收益才验证GPU准入下LLM/TTS重叠、板端全来源暂存与封口。保持完整ABC、owner/generation/序号/期限/取消；最后绑定全PCM hash/sample/token，只有完整播放ACK提交。尾段失败不把部分播报记成完整回答，不自动整段重播。
+
+已有公开链路：LLM4503.95ms，prompt1335.20ms，29token解码3026.03ms，JSON闭合到done110ms。紧凑短答公开对照闭合到done94–110ms。名字对照ABC两轮各28token，解码2857.29/2901.98ms；已缓存214/226个提示token，prompt867.72/576.87ms。两臂台词不同，不把整体差值全归语法。这些均是既有软件计时，不是本轮新实测或扬声器首声。
+
+没有发现新的低影响大收益开关：ABC严格结构、think=false、stream=true、keep_alive=-1均已启用。120只是token上限，当前短答28token；调低不加速已有token，截断会拒绝。提示缓存不能消去约2.9秒decode。现役v14 memory_policy:139仍system→notes→recent→current，历史prefix重排候选未部署；只能以后在现役版本和更正/遗忘语义下重评，不能当新成果。省空动作/改编码已有研究且需新协议，AGENTS记录过拒绝省空动作，因此此次不建议实施。
+
+未发现用户明确禁止未来“每句完整JSON”协议；现完整响应是实现合同，不可在旧格式下放宽。板端业务/存储、权限、取消和完整ACK保持。早播首句不能撤回、重复字段增加token、GPU争用可能再次断音；单句回答重叠空间小，不承诺百分比。
+
+精确路径、源SHA和行号见record_streaming_feasibility.json。关键：model_inference_host.py:75/196/574；board_dialogue.py:523/546/553；v14 board_memory.py:571/590/638/692/714；board_dialogue_jobs.py:598/683/744。JSON内来源hash已与已保存host安装回执及v14 revision核对；不是新运行状态采样。

@@ -1,0 +1,11 @@
+# 持续空闲音频有限复核
+
+主端已确认现役worker SHA5f7f5684…及engine SHAf257cf2d…，与共享业务树对应。r4中的worker91c79fd7…和engine44303158…是历史对比，不能当现役。
+
+未找到能证明Python音频逻辑直接造成HC_DATA_BUFFER_ERROR的根因证据。设计上IDLE仍持续20ms静音，worker为100Hz有界周期，单poll最多补8块；输入24kHz/mono/480帧每20ms与输出48kHz/stereo声明一致。原7项及追加3项Fake-clock检查通过：空闲一分钟Pythonqueue/intervals为空、references≤16且仅一管线；24小时假时钟跃迁PTS单调、补推有界。不是实际USB、GStreamer或24小时实板试验。
+
+源码存在健康表达边界：仅检查GStreamer ERROR和sink位置，没有外部USB错误确认。Fake sink位置冻结而不发ERROR时，engine仍可推静音并报IDLE_READY，故不能将该字段当USB播放实际健康。worker头部称stop会release与persistent分支实际stop仅reset保活不一致；现有测试明确保活，不能误把普通stop用作释放PCM。真正close/EOF走release，主端采用正常GUI重连符合该路径。
+
+主端一次GUI重连后日志与CPU恢复，只能记录为一次恢复，不代表底层USB根因或长期稳定已解决。本子任务不实现自动恢复，也不建议取消语音或默认关闭设备。
+
+v15的54+6项及4009B压力包检查仍无必要部署阻塞，可仅启profile并测板端成本；量化候选应在独立板微基准通过后再选择启用。

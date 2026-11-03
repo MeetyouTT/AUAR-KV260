@@ -1,0 +1,51 @@
+{
+  "schema": "aura.frontend-status-fixed-copy.v1",
+  "status": "FROZEN_LOCAL_CANDIDATE_NOT_DEPLOYED",
+  "source": {
+    "path": "after/board/runtime/audio/board_frontend_auto.py",
+    "before_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_balance_candidate\\before\\board\\runtime\\audio\\board_frontend_auto.py",
+    "before_sha256": "d81275853699597a5dc92c0651f8ffb8e59f63ece760d2d9d514527078cc6573",
+    "sha256": "9d64aad827caa39fb3d85b8ea68626ca7b41419b9eeeb919918bf28c3f7a6fd7",
+    "bytes": 34829
+  },
+  "basis": "Actual v10 before d812; v11 did not alter this source. No production file changed.",
+  "changes": [
+    "Replace only four generic deepcopy calls for validated fixed status/retired status/current status/one filtered failure record.",
+    "Use a new root dict and detached audio_frontend/input_queue dictionaries; their validated values are immutable scalars.",
+    "Failure copy reconstructs its fixed metadata envelope and detaches both filtered numeric dictionaries."
+  ],
+  "preserved": [
+    "Complete validate_status body before final copy AST-equal",
+    "Exact numeric/flag/error allowlists and protocol limits unchanged",
+    "All calls still validate on every original path; no cache or rate change",
+    "Uninitialized status/failed status/cancel/rearm/retired-owner behavior",
+    "Owner generation, speech callback/READY/TAKE, single worker/model, eight-frame queue, metadata privacy and cancellation"
+  ],
+  "tests": {
+    "passed": 36,
+    "new_detach_and_reject": 17,
+    "original_lifecycle": 19,
+    "xml_sha256": "ca8a06e16e568f8ff68d194a56d985bfed32e7e020404e8c280a882f75e9e1cc",
+    "lifecycle_receipt_sha256": "3fdf019bf59e8c44a3fe56db0990ae30553f4d2faa6ae6522bb45aa17291a1c0",
+    "commands": [
+      "\"C:\\Users\\35870\\.codex\\visualizations\\2026\\10\\09\\01a12110-3ba4-7651-b3d7-2e6560916eb6\\omnivoice-runtime-py310\\Scripts\\python.exe\" -B -m pytest -q -p no:cacheprovider \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_status_copy_candidate\\tests\\test_status_copy.py\"",
+      "\"C:\\Users\\35870\\.codex\\visualizations\\2026\\10\\09\\01a12110-3ba4-7651-b3d7-2e6560916eb6\\omnivoice-runtime-py310\\Scripts\\python.exe\" -B \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_status_copy_candidate\\tests\\run_lifecycle.py\""
+    ]
+  },
+  "benchmark": {
+    "path": "tests/benchmark_result.json",
+    "sha256": "2fec4a2da11cf767d5175823a483cb7f671c6de8b415439ab8a958b6232e29bb",
+    "scope": "Local Windows Python copy operation on public synthetic status only",
+    "status_median_deepcopy_us": 19.57272,
+    "status_median_fixed_us": 0.39479499999999995,
+    "failure_median_deepcopy_us": 15.844415000000001,
+    "failure_median_fixed_us": 0.348635,
+    "warning": "This is only the synthetic local copy operation, not ARM/poll/full-snapshot/GUI/whole-board performance. Absolute saved host time is roughly19us per status copy; a large ratio does not imply a large board CPU benefit."
+  },
+  "extra_source_map_sha256": "3a6a51123f0596c3202f746eece80a860976b43e42b5784a7eef211c9e25c7e6",
+  "boundaries": [
+    "No device/model/GUI/service/private data action.",
+    "No production deployment, affinity/priority/frame-rate change or timer changes.",
+    "Root should measure same-load per-thread CPU and capture full endpoint/queue metrics before claiming real benefit."
+  ]
+}

@@ -1,0 +1,47 @@
+每轮仅写最终控件值：新boot两源后续候选
+
+证据范围
+基线为startup70a2f7fa、boot bebd3e7d-e984-4517-8cbb-211df7f1c6dc。
+40份已有安全采样，IDLE/自动WAITING_SPEECH，43.2575秒186完成帧=4.2998次/秒。
+本窗口只读取已保存metadata和本地源码，没有设备、相机、麦克风、模型、私库操作。
+实际14次setter未按widget逐项导出；以下是相同源码在合成生产监听状态中的确定性复现，
+数量与现场14一致，不冒称每个实机调用已经单独计时。
+
+重复覆盖的来源
+record_button：录音/自动对话/免点击三段分别写label三次、tooltip三次、sensitive两次，共8。
+identity_enroll：先按远端capability禁用，再按原本的本地身份条件启用，共2。
+mode_label：先写旧服务层，再写演示层，共2；之后又被正式业务投影覆盖。
+host_status_label和footer各1，随后被正式业务投影覆盖。合计14。
+原来“值相同则跳过”无法消除在同一次刷新中来回变化的值。
+
+最小改动：仅GTK与production_business_ui两份
+录音按钮保持原分支顺序和全部表达式，先算最终label/sensitive/tooltip，各应用一次。
+身份按钮保留原最终bool(identity)且无pending条件；不改命令授权或capability工具提示。
+正式业务层存在时，略去随后必定覆盖的旧mode/host/footer写入；活动toast继续立即写入。
+正式业务投影也调用已有值比较器，保持旧shell无该方法时的直接setter兼容路径。
+增加Entry editable属性比较，仍每次读取真实widget；外部改动后会重新锁定只读。
+ui_widget_writes改在business投影后取数，包含更完整的控件范围；不能与旧数字当同范围CPU指标。
+没有新增状态正文缓存、线程、timer或IO；UI刷新和命令节奏、X11唤屏行为都未改变。
+
+本地验证
+8项测试；最终控件对照覆盖正式/旧shell、presentation/debug、手动/自动/免点击、
+闲置/思考/说话/暂停/取消/错误，共72种组合。
+另核8种身份/能力/pending组合、提示显示/到期、采集错误/恢复、只读属性被外部改变后的恢复。
+真实tick方法中pause/cancel同次刷新、错误显示与cancel调用均保留。
+稳定合成生产刷新，旧14个guarded写入变为0；所有widget mutation的前后数量见TEST_RESULTS。
+这是函数与控件调用次数验证，未打开GTK/EGL，不是板端实际FPS或150ms控制延迟验收。
+AST核对保证命令/取消/暂停/close/记忆/采集/权限等其他方法未改变，tick只补了计数取样位置。
+
+主线程调度仍需root处理
+对40份已完成callback逐份配对wall与threadCPU，wall-minus-CPU中位90.128ms，
+非CPU墙钟比例中位72.3%；runtime段对应44.220ms/79.3%。这包含调度/GIL/锁/X或IO等待，
+不能凭比例直接归因于某一种等待，也不能把14次setter当作所有4.3fps损失的解释。
+root正在检查实际进程/线程CPU和无语音时捕获重开。本候选不修改相关调度或扩大8帧队列。
+
+集成与复测
+保持当前可见UI。本窗口不部署；root先核当前before两源pin，再择窗口正常合入两源并更新startup。
+native b243、pair9987、目标16、音频ACK、ASR、X11缓存、H01/speakerclose/memoryr2/新boot恢复保持。
+沿用已部署collector即可读同一组数值，但新widget计数包括business投影，须标明口径。
+用同负载短窗口核native完成速率、完整callback wall/CPU、错误/暂停/取消和采集/ACK。
+若稳定写入接近0而帧率仍低，继续按root的线程证据找等待/争用；不盲目提升native优先级或加24。
+目前没有本候选实机FPS收益结论。

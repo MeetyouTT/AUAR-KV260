@@ -1,0 +1,32 @@
+独立源码候选：雪妃原生16fps + 板端业务
+
+状态：仅供审查，未选定、未部署、未运行真实GUI/板卡/模型/音频设备。根发布者拥有唯一硬件窗口。本目录没有启停或请求8797、11435、11434、相机或任何服务。
+
+安全入口
+  D:\AIModels\speaker-identity\venv\Scripts\python.exe -B review_candidate.py
+只核验公共源码/素材与ELF依赖字节，不构造GUI或BoardBusinessRuntime，没有--run选项。它不读取板端私有readback或身份数据库，也不打开音频设备。普通GUI构造器不是这个安全检查入口；未来完整业务初始化会按原工厂加载既有板端ASR/前端/ECAPA及私有业务存储，须由根发布者另行审阅和显式配置。本轮没有执行该构造器。
+
+源码来源和合入方法
+以resume-730de9634b8daa07的完整310份Python为基底，逐项核对包内manifest；GTK采用resume_runtime/gui_candidate中的较新业务接线，worker采用独立fresh r3快照。旧527文件native包的GTK和worker整文件不用于覆盖新业务；只复制原生Yuki资产、未改动ABI库和host adapter，再生成两个可审查小补丁及独立hook。
+candidate/business_native.patch给出与较新业务GTK/fresh worker的差异。candidate/manifest.json含全部文件SHA与307份未改核心源码SHA。yuki_business.source_candidate.zip是可供未来staging的独立源码/素材包，不包含生产配置、私库、虚拟环境或语言模型权重。
+
+同版本配对
+固定xuefei-yuki-board-v1-candidate；短称雪妃，御笠雪妃/YUKI MIKASA；渲染profile为fuyukiss-yuki-freemote39-frame-mesh。人格仅使用已验978B完整prompt，不叠加另一份234B评审短片段。语音解释、设备限制、回复三字段/情绪枚举/空动作/预算均保持。
+实例只在启动时选择一次。jobs/context/显式记忆命令与身份引导的称呼入口在任何业务线程启动前绑定于该实例的私有函数namespace，不修改导入模块的shared globals。唤醒只接受确切雪妃/御笠雪妃及原欸/哎；没有猜测新同音别名。raw ASR、数字、否定、用户姓名及历史记录保持原文。旧名字仍可作为历史资料；旧名字不成为新实例的唤醒或隐式业务称呼。
+个人记忆profile与character profile完全分开；原Store/ProfileAccess/grants、身份guide、scope和用户key不复制、不重建、不迁移。原board_business.py/board_dialogue.py/board_memory_policy.py/board_dialogue_jobs.py、StreamingController及播放器原件均逐字保留。
+
+单一画面和音频归属
+仅选定新pair时：AvatarPlayer只复用真FSM/代次/回复规则，跳过ReusePreviewPlayer、旧PNG序列/SOP预载及旧眼嘴身体构造；不创建旧native pixel/video sink或FramePresenter/PreviewEncoder。一个GTK widget持有一个EGL child。原音频owner仅投递latest-one数值control，不传像素。原StreamingController的channel_event/tick/complete/pause/cancel方法直接继承；原BoardDialogueJobs完整PCM hash/sample/playback_token ACK桥不重写。
+原生目标固定16fps。未就绪返回wait，不进入旧PNG；原生失败/失去realization时，取消当前jobs和音频代次，关闭新ASR提交及后台idle准入，不能继续旧人格或退8fps。真正首次成功swap后才允许同pair激活业务。候选监控选择为RAM-only且启动false，不读取或覆盖生产handsfree偏好；渲染失败会撤销本进程的enable。
+
+配置和仍需处理的冲突
+  1. yuki_business.config.fragment.json是显式差异片段，不是完整可运行生产配置。根发布者须将它与当时新鲜r3资源/布局/字体/服务配置合并，并保留完整board_business私有配置。任何源文件/组件变化均重新rebase/pin，不以本包替换较新并行修改。
+  2. 新hook的board_business.face_readback必须显式给出{path,sha256}，没有FaceGalleryReadback.configured的旧路径回退。父给出的同boot私有候选配置路径和SHA见HANDOFF。未来进程/boot/source变化必须重新核验；本包没有读取该文件或身份模板。
+  3. 旧GREETING/DEMO_LINES仅在原默认模块中作为保留基线存在。新实例的标题/问候/演示文字来自同pair。已有缓存演示使用原cached_only队列；新问候尚无对应已验缓存音频，不得把旧音频改标签重用。含旧自称的arrival/invitation等公开cue将被拒绝，需要根在之后的授权步骤用原OmniVoice16/原声线生成并审阅。不会自动生成问候，不更换参考录音或转录。
+  4. native库为ARM64 ELF，依赖既有Mali/EGL/X11/GTK3 GdkX11环境；本地只读ELF，未加载库或做GLES测试。不引入新库或安装系统包。native源和历史验证仍以原c0107904...完整包为准。
+  5. 包中包含310基线Python与新hook，非完整r3非Python资产镜像；原布局/字体/声音/配置等仍须根显式保留并核对。LLM权重和Ollama始终留D盘，不打包、不创建共享目录联接。
+
+性能和后续验收
+保持原47cb FFT、nice0、8帧采集队列，不包含bufferreuse/IOBinding diagnostic monkeypatch，不调优先级或相机周期。父当前相机r17/100ms的信息只是后续对照条件，本轮没有调用设备。本地合成通过不意味着真实native16/全业务负载或资源改善通过。
+由根在后续独占窗口做匹配公开PCM、16fps/同分辨率/动作/业务负载的整板测试，覆盖有人脸和无人脸、8帧队列、端点/ASR、完整播放ACK/暂停/取消/口型、renderer/整板/相机/显示CPU与PSS/Mali，并补确切唤醒发音和人格实际回复验收。新“旧形象本地16fps”基线须单列，不能沿用旧remote16或8fps数据。
+切换/回退均由根在空闲取消旧请求、正常关闭旧GUI及其owner后启动新完整配对进程；不在运行中热换，不回滚用户DB，不回放取消音频。未达到条件则保持原形象。

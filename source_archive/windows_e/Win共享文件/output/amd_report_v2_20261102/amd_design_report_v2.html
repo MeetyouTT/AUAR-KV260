@@ -1,0 +1,381 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AUAR 雪妃 AMD设计报告 V2</title>
+<style>body{font:16px/1.8 "Microsoft YaHei",sans-serif;color:#111;max-width:900px;margin:40px auto;padding:0 28px}h1,h2,h3,h4{color:#000;line-height:1.5}h1{text-align:center;font-size:30px}h2{margin-top:32px}p{text-align:justify}table{border-collapse:collapse;width:100%;font-size:14px;margin:18px 0}th,td{border:1px solid #d9d9d9;padding:10px;vertical-align:middle}th{background:#243e56;color:white}tr:nth-child(even){background:#f4f6f8}img{width:100%;height:auto}figure{margin:24px 0}figcaption{text-align:center;color:#536576;font-size:14px}blockquote{margin:12px 20px;color:#243e56}pre{font:13px/1.6 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:#f4f6f8}a{overflow-wrap:anywhere}.printbreak{break-before:page}@media print{body{margin:0;max-width:none;font-size:11pt}a{color:inherit}h2,h3{break-after:avoid}figure,tr{break-inside:avoid}}</style><body>
+<h1>AUAR 雪妃</h1>
+<p>基于 KV260 的多模型交互与执行监督系统</p>
+<p>AMD 自主选题设计报告 V2  2026年11月2日</p>
+<h2>摘要</h2>
+<p>AUAR·雪妃以AMD KV260组织视觉感知、独立身份服务、语音交互、记忆和单轴执行。PS承担采集、预后处理、业务与显示，PL集成单个B4096 DPU和自研运动监督逻辑，Windows主机提供27B语言模型与OmniVoice语音合成。设计重点是多模型共享、结果时效、命令许可和完整回答交付。</p>
+<p>历史固定输入对照中，YuNet与SFace路径中位耗时分别由124.02ms、520.86ms降为61.41ms、13.56ms；宽版平台使用66,960个LUT、710个DSP。后续记录已确认转轴随动、人脸KNOWN和声纹本人识别的阶段成果；新版联合演示、冷启动及长时召回仍待对应验收。接口合同Skill在本次Windows独立目录通过15项单元测试和73个模拟用例。各结果按其版本、输入与验证层级分别报告。</p>
+<p>关键词：KV260；软硬件协同；多模型；执行监督；语音交互；可复现验证</p>
+<h3>七项要求与章节位置</h3>
+<table>
+<tr><th>AMD要求</th><th>章节</th><th>配套内容</th></tr>
+<tr><td>选题背景与创新点</td><td>第1章</td><td>既有工作、应用问题与本项目贡献分开说明</td></tr>
+<tr><td>设计原理与功能框图</td><td>第2章</td><td>总体、视觉、语音记忆与运动接口图</td></tr>
+<tr><td>软硬件划分与接口</td><td>第3章</td><td>PS/PL/Windows分工、寄存器与数据合同</td></tr>
+<tr><td>优化与性能资源对照</td><td>第4章</td><td>原始数据、样本量、前后对照与统计边界</td></tr>
+<tr><td>大模型协作记录</td><td>第5章</td><td>真实可见问答、工程复盘和工具纠错分层归档</td></tr>
+<tr><td>技能包提炼过程</td><td>第6章</td><td>失败来源、离线效果、使用方法和失效条件</td></tr>
+<tr><td>从零复现说明</td><td>第7章</td><td>附件可执行步骤、整机输入与尚待完成的验收</td></tr>
+</table>
+<div class="printbreak"></div>
+<h2>1 选题背景与创新点</h2>
+<h3>1.1 应用问题与设计目标</h3>
+<p>桌面交互终端需要同时处理“用户在哪里、面对谁交互、当前说什么、何时执行动作”等问题。单独运行视觉或语音演示时，模块容易各自成立；合入同一嵌入式平台后，相机与音频争用 CPU、模型任务相互等待、旧帧与旧回答迟到、显示与播放状态不同步等问题会直接影响使用体验。</p>
+<p>本作品选择将较重的语言模型与语音合成留在局域网主机，把真实采集、视觉推理、业务状态、记忆和受监督执行放在 KV260。设计目标是形成可解释、可验证的交互链，并明确每个动作和每项性能数据所依赖的版本与条件。应用定位是桌面交互原型及教学研究平台。</p>
+<table>
+<tr><th>需求</th><th>设计响应</th><th>验证关注点</th></tr>
+<tr><td>连续感知交互对象</td><td>唯一相机源、目标轨迹与人脸身份链</td><td>有效输出频率、帧龄、未知人拒识</td></tr>
+<tr><td>多个视觉任务共存</td><td>单 DPU 共享、主任务优先、可选任务准入</td><td>等待、超限、恢复与业务覆盖</td></tr>
+<tr><td>交互与动作保持一致</td><td>PS 校验目标及时效，PL 独立管理执行许可</td><td>旧会话、乱序、超时及停止</td></tr>
+<tr><td>自然语音与可追溯记忆</td><td>流式交付、完整播放确认、摘要校验与回收</td><td>内容正确性、取消、存储与召回</td></tr>
+<tr><td>可交接与复用</td><td>配套工件、证据索引、Skill 与复现说明</td><td>新目录复现、依赖闭包及第三方执行</td></tr>
+</table>
+<h3>1.2 前人工作与本项目定位</h3>
+<p>YOLOX 提供目标检测的公开模型基础，ByteTrack 提供通过检测框关联维持目标轨迹的方法；OpenCV Zoo 提供 YuNet 人脸检测和 SFace 特征模型。本项目使用这些已有算法与模型，工作重点是目标平台适配、任务组织、接口与系统验证。[1-4]</p>
+<p>AMD Vitis AI 提供 DPU 模型量化、编译和运行基础；官方 3.0 兼容说明列出与 2022.2 工具链的配套关系。PYNQ 提供 Overlay、DefaultIP 和寄存器访问机制，可作为接口合同生成工具的目标环境。[5-6]</p>
+<table>
+<tr><th>既有基础</th><th>本项目实际工作</th><th>应用边界</th></tr>
+<tr><td>YOLOX / ByteTrack</td><td>复用模型与关联方法，接入板端采集及目标状态</td><td>轨迹编号不等于真实身份</td></tr>
+<tr><td>YuNet / SFace</td><td>等价改写、校准、DPU 编译、模板版本隔离与质量评估</td><td>公开配对结果不代替现场识别率</td></tr>
+<tr><td>Vitis AI / DPU</td><td>同一 B4096 上组织三模型及 CPU 预后处理</td><td>调度逻辑位于 PS，未实现多 DPU 核仲裁</td></tr>
+<tr><td>PYNQ 接口机制</td><td>从合同与 HWH 生成访问及测试骨架</td><td>当前只完成离线生成和模拟验证</td></tr>
+</table>
+<h3>1.3 主要设计特点与创新价值</h3>
+<p>第一，围绕交互任务组织计算资源。视觉主任务与按需人脸任务共享同一 DPU；数据准备、推理和业务接受分别检查，关注有效结果与等待，而不只统计模型调用次数。当前已有混合运行及恢复记录，调度策略的严格同输入收益仍需单独实验。</p>
+<p>第二，把运动接口设计为带独立许可的事务。上层提供目标脉宽和有限租约，PL 检查会话、代次与连续序号，并在帧边界限速推进。停止和许可失效优先关闭输出。设计将感知和策略计算的波动与底层 PWM 时序分开约束。</p>
+<p>第三，将回答交付与记忆提交相衔接。回答文本、播放确认、摘要校验和原文回收使用可追溯状态，便于检查迟到、取消与更正。已有自然到期存储证据，真实同会话摘要召回仍待完成验收。</p>
+<p>第四，把实际失败转化为复用方法。PYNQ Skill 将“有地址窗口但缺寄存器元数据”“完成标志迟于超时”等问题固化为检查、反例和独立示例，形成可交给其他工程使用的离线工具。</p>
+<div class="printbreak"></div>
+<h2>2 设计原理与功能框图</h2>
+<h3>2.1 系统总体结构</h3>
+<figure><img src="figures/system_overview.png" alt="图1 系统总体功能框图 运行端与外设接口"><figcaption>图1 系统总体功能框图 运行端与外设接口</figcaption></figure>
+<p>相机与 MCP01 接入 KV260。PS 负责唯一采集、预后处理、视觉业务、音频前端和语音识别，通过局域网请求 Windows 的语言模型与 TTS，再在板端完成字幕、角色状态和播放。PL 中的 DPU 计算视觉网络子图，自研监督 IP 接受经 PS 检查的运动事务。</p>
+<p>系统具有两条相互配合的路径：感知交互路径将图像、语音和身份状态转为有效回答；执行路径将当前目标转为有边界的运动请求。开发链使用 Ubuntu 完成 RTL/平台构建、模型编译与文件校验，不参与日常交互推理。</p>
+<h3>2.2 视觉、跟踪与身份原理</h3>
+<figure><img src="figures/vision_pipeline.png" alt="图2 视觉处理与身份链；蓝色为 DPU 网络计算，灰色为 PS 处理"><figcaption>图2 视觉处理与身份链；蓝色为 DPU 网络计算，灰色为 PS 处理</figcaption></figure>
+<p>相机采集后保留源帧序号和时间信息。YOLOX-Nano 提供目标检测结果，跟踪过程维持目标轨迹；YuNet 提供人脸框及关键点，PS 完成解码、NMS 和对齐，SFace 输出身份特征，再由 PS 归一化、匹配并更新业务状态。身份模板按特征模型版本隔离，匹配不足或歧义时保留 UNKNOWN。</p>
+<p>部署记录中的三个网络均为 INT8 DPU 工件，每个网络包含一个 DPU 计算分区；板上共享的是单个 B4096。图像编码、后处理、对齐和身份匹配仍消耗 CPU。模型与预处理、输出端口顺序及缩放因子需要配套。[V04-V07、V19]</p>
+<table>
+<tr><th>模型</th><th>输入 NHWC</th><th>工件大小</th><th>部署 SHA256 前缀</th></tr>
+<tr><td>YOLOX-Nano</td><td>1×416×416×3</td><td>2,127,303 B</td><td>def64abdeeccbd020</td></tr>
+<tr><td>YuNet</td><td>1×320×320×3</td><td>576,254 B</td><td>54d348bfeee01756</td></tr>
+<tr><td>SFace</td><td>1×112×112×3</td><td>10,796,375 B</td><td>12b2ff5c7de15713</td></tr>
+</table>
+<h3>2.3 语音交互与记忆原理</h3>
+<figure><img src="figures/dialogue_memory.png" alt="图3 板端语音、主机回答、播放确认与记忆处理流程"><figcaption>图3 板端语音、主机回答、播放确认与记忆处理流程</figcaption></figure>
+<p>较新的板端业务记录采用板端音频前端与 ASR，Windows 保持现有 27B 语言模型和 OmniVoice 推理。板端将转写、身份及会话上下文组织为请求，主机返回有效回答和音频；板端负责播放、字幕及角色状态。较早 Windows ASR 结果只用于对应历史链路比较。</p>
+<p>一次请求应关联会话及请求标识。取消、会话切换和迟到返回需要在结果接受处检查；被取消或未完整交付的回答不直接作为完整已播历史提交。记忆处理将原文保存、摘要任务、有效摘要与回收状态分开，便于追溯来源与失败重试。[V10、V29、V31]</p>
+<p>人脸与声纹按独立服务工作。保存进度已记录人脸KNOWN和声纹本人三次独立录音识别的现场确认；普通聊天首句自动识别接入仍在推进。人脸与声纹跨模态关联已取消，不列入本版交付和联合演示的前提。[V29]</p>
+<h3>2.4 单轴执行监督原理</h3>
+<figure><img src="figures/motion_protocol.png" alt="图4 PS检查与PL命令许可 源帧时效和命令租约分别处理"><figcaption>图4 PS检查与PL命令许可 源帧时效和命令租约分别处理</figcaption></figure>
+<p>PS 根据当前目标及帧龄计算请求；PL 侧使用影子字段接收会话、代次、序号、目标脉宽和租约，再在 COMMIT 时进行一致性判断。BIND 建立上下文，REFERENCE 写入经外部确认的控制参考，ARM 开放命令接受，COMMIT 更新目标与租约，STOP 关闭输出许可。REFERENCE 是控制参考，不提供实际角度测量。</p>
+<p>宽版 RTL 使用 100 MHz 控制时钟和共享约 1 µs 时钟使能，PWM 帧周期为 20,000 µs，目标范围为 500-2500 µs，12 位字段保存脉宽，帧边界每次最多推进 4 µs。上述值来自对应实现，实际机构零点、角度、负载及允许行程另行标定。[V20-V23]</p>
+<h3>2.5 功能范围与实测范围</h3>
+<table>
+<tr><th>功能</th><th>已有证据</th><th>本稿采用的表述</th></tr>
+<tr><td>联合 FPGA 与模型共存</td><td>构建、时序、配对工件及历史上板记录</td><td>已有阶段实现与运行证据</td></tr>
+<tr><td>三模型视觉与独立身份</td><td>固定向量、公开评测、人脸KNOWN及声纹本人确认</td><td>各自报告验证范围；不加入人脸与声纹关联</td></tr>
+<tr><td>语音、字幕与角色显示</td><td>两轮真人完整播放及后续UI就绪回执</td><td>两轮属于先前启动；新版联合演示另验</td></tr>
+<tr><td>单轴随动</td><td>用户现场确认跟随正常、无卡顿</td><td>功能行为验收已通过；精确角度和载荷仍无量化结论</td></tr>
+<tr><td>摘要与原文回收</td><td>自然到期存储检查</td><td>STORAGE_PASS_RECALL_PENDING</td></tr>
+<tr><td>VLM、视觉说话人及声纹 DPU</td><td>方案、候选或待适配记录</td><td>不计入本稿已验收功能</td></tr>
+</table>
+<div class="printbreak"></div>
+<h2>3 软硬件划分依据与接口设计</h2>
+<h3>3.1 平台选择与工具版本</h3>
+<p>目标平台为 KV260，宽版实现报告声明器件为 xck26-sfvc784-2LV-c。项目沿用已有 Vivado/Vitis/PetaLinux 2022.2 与 Vitis AI 3.0 环境，原因是已有参考平台、系统和模型编译链围绕这一组合验证，官方兼容说明也给出该组合。依据 AMD 指南，采用其他工具版本应说明原因并提供可复现脚本。[5、7、V01-V03]</p>
+<p>该选择不表示任意同名镜像或 DPU 文件均可互换。最终 release 需要固定源码、实际 DPU fingerprint、模型目标、运行时、BIT/XSA/DTBO/XCLBIN 及设备树映射。</p>
+<h3>3.2 任务划分及判断依据</h3>
+<table>
+<tr><th>任务</th><th>执行位置</th><th>划分依据</th><th>主要代价与约束</th></tr>
+<tr><td>网络卷积等子图</td><td>PL / B4096 DPU</td><td>使用现有 INT8 推理硬件</td><td>受算子、形状和目标指纹约束</td></tr>
+<tr><td>采集、预后处理及身份匹配</td><td>PS / Linux</td><td>与设备、动态目标和业务状态关联</td><td>CPU 调度及内存访问影响长尾</td></tr>
+<tr><td>多模型准入与等待</td><td>PS 调度器 / 原生运行层</td><td>单 DPU 统一所有权，主任务优先</td><td>提交前估计无法给出全局硬实时保证</td></tr>
+<tr><td>PWM 与命令许可</td><td>自研 PL 监督 IP</td><td>需要独立租约、帧时序和停止逻辑</td><td>需同时验证 RTL、约束及真实电气输出</td></tr>
+<tr><td>音频前端、ASR、存储和显示</td><td>PS / Linux</td><td>保持板端真实输入与业务一致</td><td>正常业务短窗 CPU 已接近满载</td></tr>
+<tr><td>27B LLM 与 OmniVoice</td><td>Windows GPU 主机</td><td>保留现有模型质量与主机运行环境</td><td>网络、模型排队、显存与取消需配套</td></tr>
+<tr><td>构建、量化与证据整理</td><td>Ubuntu 开发机</td><td>工具链及已有工程位于开发端</td><td>需消除历史绝对路径依赖</td></tr>
+</table>
+<h3>3.3 硬件与外设接口</h3>
+<figure><img src="figures/hardware_connections.png" alt="图5 外设与执行信号关系示意；用于解释模块关系，不替代最终电气原理图"><figcaption>图5 外设与执行信号关系示意；用于解释模块关系，不替代最终电气原理图</figcaption></figure>
+<p>相机和 MCP01 通过板端外设接口接入；显示通过现有显示转换链连接屏幕；网口连接 Windows 主机。运动信号在宽版 XDC 中约束为封装脚 E10、LVCMOS33；B03参考资料将E10映射为J2.3。封装脚、连接器针号和模块端子是三类编号，实物载板版本与针1方向需要另行确认。现有方案记录使用 ADuM1201 和独立舵机供电，最终接线、两侧电源/地及实际隔离关系仍须用实物原理图核对。[V20-V22]</p>
+<p>控制器读回的 PWM 脉宽表示指令状态。它不能代替角度传感器、示波器测量或机构行程验证。附件wiring已给出资料核对版电气接线图、整机外设连接图及W01-W11逐线表，保留供电方案值和现场待核项。实物照片、实际供电值、模块端子和机械装配图需随最终实物记录补齐。</p>
+<h3>3.4 PS-PL 寄存器接口</h3>
+<p>宽版准备脚本将自研 IP 的 AXI4-Lite 地址窗口设为 0x80080000，范围 0x1000。下表为 VSRV/2、build 0x10282601 对应 RTL 的相对偏移；使用前必须核对真实映射与版本，不能套用于其他固件。[V20-V21]</p>
+<table>
+<tr><th>偏移</th><th>字段</th><th>访问与语义</th></tr>
+<tr><td>0x000 / 0x004 / 0x008</td><td>ID / ABI / BUILD_ID</td><td>只读；ID=0x56535256，ABI=2，BUILD_ID=0x10282601</td></tr>
+<tr><td>0x00c</td><td>flags / reason</td><td>只读；active、armed、referenced、bound 及拒绝原因</td></tr>
+<tr><td>0x010 / 0x014 / 0x018</td><td>shadow session / epoch / seq</td><td>影子上下文；提交时共同校验</td></tr>
+<tr><td>0x01c / 0x020</td><td>shadow width / lease</td><td>目标脉宽 µs；租约 ms</td></tr>
+<tr><td>0x024</td><td>command</td><td>BIND、REFERENCE、ARM、COMMIT、STOP、QUIESCE</td></tr>
+<tr><td>0x028 / 0x02c / 0x030</td><td>ack_seq / width / lease_left</td><td>接受序号、当前指令脉宽和剩余租约</td></tr>
+<tr><td>0x034 / 0x038</td><td>session / epoch</td><td>当前绑定上下文</td></tr>
+<tr><td>0x03c / 0x040 / 0x044</td><td>shadow reference / reference / target</td><td>控制参考、已接受参考及目标脉宽</td></tr>
+</table>
+<p>有效 COMMIT 要求已绑定、已参考、已 ARM，影子会话/代次匹配，序号恰为 ack_seq+1，脉宽在允许范围内，租约满足 4-500 ms。命令写入得到 AXI 应答后，软件还须检查业务 reason 和 ack_seq；AXI 总线成功不等于命令已生效。</p>
+<p>STOP、租约失效及完成 QUIESCE 会关闭许可并使原绑定失效。QUIESCE 允许正在输出的脉冲自然结束；显式 STOP 具有直接关闭语义。源帧时效由 PS 检查，当前 PL 租约从接受命令起计时，PL 并未验证源帧的绝对截止时间。</p>
+<h3>3.5 视觉与交互数据合同</h3>
+<table>
+<tr><th>接口</th><th>关键输入</th><th>关键输出</th><th>接受条件</th></tr>
+<tr><td>相机→视觉</td><td>图像、源序号与时间</td><td>检测框、轨迹及人脸候选</td><td>保持同源关联，旧结果不覆盖新状态</td></tr>
+<tr><td>人脸→身份</td><td>对齐图、特征模型版本</td><td>特征、匹配分数、KNOWN/UNKNOWN</td><td>模板版本及阈值配套，歧义保留未知</td></tr>
+<tr><td>视觉→运动服务</td><td>有效目标、图像位置及时效</td><td>有限目标脉宽与租约</td><td>上下文有效、单写入者、未过期</td></tr>
+<tr><td>板端→Windows</td><td>转写、会话与请求上下文</td><td>回答、音频及状态</td><td>当前请求可接受，取消与版本匹配</td></tr>
+<tr><td>播放→记忆</td><td>完整播放确认、回答来源</td><td>历史提交和摘要任务</td><td>确认交付后提交，失败保留可追溯状态</td></tr>
+</table>
+<h3>3.6 时钟、复位与异常处理</h3>
+<p>监督逻辑在对应 AXI 时钟域运行，采用时钟使能生成时间基准，避免另造低频门控时钟。复位时输出与许可关闭。平台还有 DPU、视频及显示时钟，应随最终 clocks、timing、CDC 和 DRC 报告一并提交。</p>
+<p>独立审查已记录 setup/hold 失败端点为0、路由错误为0，同时保留六类 DRC warning 和 6 个 no_input_delay、2 个 no_output_delay 端点。WNS 接近0，当前结果只覆盖已声明约束；板外 PWM、电源及机械测试仍需相应证据。[V03]</p>
+<div class="printbreak"></div>
+<h2>4 优化过程与性能、资源对比</h2>
+<h3>4.1 测量口径</h3>
+<p>本章将固定输入模型对照、模型任务质量、静态实现资源和正常业务观察分开。每张表注明输入、样本量或版本；正文的中位数与 P95 使用历史原始结果中的定义，本轮未重新采样。已有结果不混合成“最终整机平均性能”。</p>
+<p>对完整视觉路径，可把耗时分解为采集/排队、预处理、DPU 等待与执行、后处理和业务接受。对语音路径，可分别记录发言结束、ASR 完成、首正文、台词就绪、首 PCM 和板端播放开始。软件事件与扬声器真实首声属于不同测量量。</p>
+<h3>4.2 模型迁移：从 ARM FP32 到 DPU INT8</h3>
+<p>迁移先检查算子与数值，再完成代表性校准、目标编译和固定输入板测。模型外处理保留 PS，运行器以 VART 返回的端口顺序组织缓冲区。早期曾因 XIR 集合顺序与 VART 端口顺序不一致发生错误，修正后增加了顺序互换回归。[V04-V07]</p>
+<table>
+<tr><th>路径与样本</th><th>ARM FP32 中位 / P95</th><th>DPU INT8 中位 / P95</th><th>中位加速比</th></tr>
+<tr><td>YuNet，40 次固定输入，含预后处理</td><td>124.02 / 147.60 ms</td><td>61.41 / 64.75 ms</td><td>约2.02倍</td></tr>
+<tr><td>SFace，8 次已对齐固定人脸，含输入输出转换</td><td>520.86 / 627.78 ms</td><td>13.56 / 26.60 ms</td><td>约38.41倍</td></tr>
+</table>
+<p>该对照同时改变执行硬件与数值精度，收益不能全部归因于量化。迁移复用同一 DPU 位流，不新增 DPU 核；软件模型切换本身没有新增静态 LUT/DSP/BRAM。两项短测不能表示 Windows 主机或整机问答的加速比。[V04-V05]</p>
+<figure><img src="figures/model_latency.png" alt="图6 固定输入路径中位耗时对照 两个子图使用独立纵轴"><figcaption>图6 固定输入路径中位耗时对照 两个子图使用独立纵轴</figcaption></figure>
+<h3>4.3 量化质量及参考结果</h3>
+<p>SFace 使用256个身份的公开样本校准，校准与评测身份分离；2,200对用于选阈值，独立测试为1,000对，含500正对与500负对。两个精度路径各自在训练配对上选阈值，测试结果如下。[V06]</p>
+<table>
+<tr><th>指标</th><th>FP32</th><th>INT8 量化模拟</th></tr>
+<tr><td>独立测试准确率</td><td>98.8%</td><td>98.8%</td></tr>
+<tr><td>误接收 / 500负对</td><td>0</td><td>1</td></tr>
+<tr><td>误拒绝 / 500正对</td><td>12</td><td>11</td></tr>
+</table>
+<p>总体准确率相同的同时，错误类型发生变化。该1,000对评测在主机上进行，另有4组实板向量与量化参考逐整数一致。现场身份阈值与公开评测阈值不同，因此不能把98.8%直接写成整机现场身份准确率。</p>
+<p>YuNet 在256张身份独立测试图、阈值0.9时，FP32参考检出294张脸，INT8匹配293张，匹配框 IoU 中位0.97428，关键点平均误差中位约1.45像素。这里使用FP32输出作参考，尚不是人工标注真值上的检出率或AP。另有4组输入共399,500个INT8输出整数与主机参考一致。[V04、V07]</p>
+<p>YOLOX-Nano 当前使用既有INT8工件。项目场景的独立标注集、FP32/INT8 mAP及误检/漏检对照仍待补，不从约10Hz业务频率推断检测准确率。[V19]</p>
+<h3>4.4 多模型调度与原生执行</h3>
+<p>固定预编码输入下，同进程三模型切换阶段执行 YOLO 40次、YuNet 20次、SFace 8次，配置频率为10/5/2Hz，100ms周期超时为0。该阶段三模型 submit/wait 中位数分别为6.78、2.36、8.41ms。[V05]</p>
+<p>实时链路随后经历过排队、GIL重获与可选模型超限等问题，形成通知等待、独立取消、预算准入、超限回退及原生运行层等修订。已有主任务与可选任务共存记录，但前后观察背景不同，不能据此给调度策略计算严格加速比。[V17]</p>
+<p>后续公平实验应固定同一release、同一输入回放、目标人数与任务集合，对照基线和当前策略，报告主任务P50/P95/P99、有效结果频率、帧龄、等待、超限、丢弃和身份覆盖。尚无结果的项目在表中保留待测，不用预估填充。</p>
+<h3>4.5 宽范围监督：接口能力与静态资源</h3>
+<p>宽范围升级将11位位置字段扩展为12位，同时配套 RTL、原生接口和上层配置，以保存2500µs；若仍截为11位，2500会变为452，属于接口一致性错误。两版资源来自同类联合平台的布局布线报告，差异包含实现工具的布局变化，不能按差值反推单个 IP 的精确资源成本。[V01-V03、V19]</p>
+<table>
+<tr><th>指标</th><th>10月23日联合窄版</th><th>10月28日联合宽版</th><th>解释</th></tr>
+<tr><td>LUT</td><td>66,969（57.18%）</td><td>66,960（57.17%）</td><td>全平台差9，不解释为独立IP收益</td></tr>
+<tr><td>FF</td><td>124,189（53.02%）</td><td>124,192（53.02%）</td><td>全平台，增加3</td></tr>
+<tr><td>BRAM Tile</td><td>93.5（64.93%）</td><td>93.5（64.93%）</td><td>持平</td></tr>
+<tr><td>URAM</td><td>56（87.50%）</td><td>56（87.50%）</td><td>持平</td></tr>
+<tr><td>DSP</td><td>710（56.89%）</td><td>710（56.89%）</td><td>持平</td></tr>
+<tr><td>CLB站点</td><td>13,968（95.41%）</td><td>13,968（95.41%）</td><td>与 LUT 利用率是不同口径</td></tr>
+<tr><td>WNS / WHS</td><td>0.001 / 0.000ns</td><td>0.001 / 0.000ns</td><td>已约束路径</td></tr>
+<tr><td>setup / hold失败端点</td><td>0 / 0</td><td>0 / 0</td><td>静态时序结果</td></tr>
+</table>
+<p>宽版独立审查确认200,473条可布线网络全部布通，路由错误0；没有把DRC warning写成0。数字脉宽能力为500-2500µs，但最终机械零点与±90°行程未完成验收。历史新boot初始化曾出现实体异常并中止，其失败记录保留。11月2日后续交接已记录用户对随动正常、无卡顿的现场确认；这一功能行为验收不等于机械零点、精确角度或载荷测量通过。[V03、V17、V29-V30]</p>
+<h3>4.6 回答交付与资源优化</h3>
+<p>结构化输出优化把有效台词置于较早可消费的位置，保留业务字段与校验。旧/新格式各4次的模型阶段中位数如下；回复措辞和长度有变化，该小样本用于阶段定位。[V08]</p>
+<table>
+<tr><th>指标</th><th>原格式</th><th>短字段格式</th></tr>
+<tr><td>首正文</td><td>1754.07ms</td><td>1344.27ms</td></tr>
+<tr><td>台词字段就绪</td><td>2762.88ms</td><td>2287.70ms</td></tr>
+<tr><td>完整结构结束</td><td>4737.30ms</td><td>3745.70ms</td></tr>
+</table>
+<p>LLM/TTS共存优化还实现了资源观测、准入、租约、有界排队及取消接点。既有GPU资源策略和测量属于原平台；后续5090主机的原模型与LAN部署已有通过记录，保存健康状态正常；旧平台的预算和性能比仍只适用于原试验，不能移作新主机的优化收益。[V15、V29]</p>
+<h3>4.7 正常业务资源观察</h3>
+<p>2026年10月31日30.004秒观察窗中，板端由播报恢复自动聆听，视觉与三个模型计数有推进；跟随关闭。下表反映该实例的资源分布。[V09]</p>
+<table>
+<tr><th>项目</th><th>结果</th><th>统计定义</th></tr>
+<tr><td>CPU平均 / 1秒峰值</td><td>78.65% / 96.98%</td><td>四核总容量为100%，排除idle/iowait</td></tr>
+<tr><td>DPU平均 / 1秒峰值</td><td>6.27% / 8%</td><td>驱动CU任务忙时</td></tr>
+<tr><td>内存平均占用</td><td>1.466GiB，38.20%</td><td>MemTotal - MemAvailable</td></tr>
+<tr><td>最低可用内存</td><td>2.360GiB</td><td>同一观察窗</td></tr>
+<tr><td>GPU</td><td>已观察到活动，百分比未取得可信结果</td><td>中断及渲染计数推进；原接口恒0</td></tr>
+</table>
+<p>CPU与DPU忙时的差异说明该窗口中压力更多落在PS及业务侧，不能直接推算剩余并发容量。GPU/XRT/CMA属于共享系统内存的不同统计，不与总占用再次相加。长稳、温度、降频和全功能并发仍待补测。</p>
+<h3>4.8 保存进度与验收范围</h3>
+<p>以下状态依据2026年11月2日的保存进度与各模块回执摘录。它们记录不同层级的验证，不拼接成一次同版本全功能验收。保存进度的总体结论为：声纹本人识别已现场通过，普通聊天首句自动识别接入中；开机恢复剩1项离线返修及上板验证；性能后测待交接。[V29-V30]</p>
+<table>
+<tr><th>模块</th><th>保存记录中的结论</th><th>证据</th></tr>
+<tr><td>本机模型与LAN</td><td>原模型/LAN部署已通过；08:57本机健康正常</td><td>V29</td></tr>
+<tr><td>板端业务/角色UI</td><td>身份窗口08:52保存回执确认运行正常</td><td>V29</td></tr>
+<tr><td>视觉感知</td><td>相机/DPU工作；人脸登记及KNOWN已有现场确认</td><td>V29</td></tr>
+<tr><td>基础语音对话</td><td>已有两轮真人完整播放实测；新版联合轮次待重验</td><td>V29</td></tr>
+<tr><td>转轴跟随</td><td>用户最新实物验收通过：转轴正常、无一顿一顿；调参排查收口</td><td>V29</td></tr>
+<tr><td>身份与语言协同</td><td>声纹登记及本人三次识别已通过；聊天首句自动识别接入中</td><td>V29</td></tr>
+<tr><td>记忆</td><td>板端时间轴及摘要已部署；现有记忆链与长时召回待联合验证</td><td>V29</td></tr>
+<tr><td>板端CPU优化</td><td>GTK优化已发布；相机候选未上板；没有新增性能后测</td><td>V29</td></tr>
+<tr><td>开机恢复与全流程演示</td><td>新修订50项定向检查通过；独立复核剩1项返修，未部署</td><td>V29</td></tr>
+</table>
+<p>转轴随动的功能行为验收已经收口，保留现有实现和参数。后续开机恢复和其他模块维护不自动扩大这一验收结论。独立人脸和声纹能力分别表述，跨模态关联不作为待做功能。普通聊天首句自动声纹识别、同条件性能后测、现有记忆长时召回、冷启动和新版联合演示仍按各自回执验收。[V29-V30]</p>
+<h3>4.9 两轮完整播放的软件时延</h3>
+<p>已有两轮真人交互的完整播放回执；下表读取同一份原始JSON。起点为录音完成事件，终点为每0.25秒采样观察到的软件SPEAKING状态，不是最后一个发音音节到扬声器物理首声的声学测量。[V31]</p>
+<table>
+<tr><th>阶段或事件</th><th>第1轮</th><th>第2轮</th></tr>
+<tr><td>ASR</td><td>1092.74 ms</td><td>1394.85 ms</td></tr>
+<tr><td>上下文准备</td><td>25.94 ms</td><td>128.74 ms</td></tr>
+<tr><td>LLM RPC</td><td>1939.99 ms</td><td>1833.20 ms</td></tr>
+<tr><td>TTS RPC</td><td>765.95 ms</td><td>838.40 ms</td></tr>
+<tr><td>worker起点至首音频入队</td><td>4328.19 ms</td><td>4591.30 ms</td></tr>
+<tr><td>录音完成至观测SPEAKING</td><td>5044.43 ms</td><td>5285.39 ms</td></tr>
+</table>
+<p>两轮完整播放确认均已提交，记录中的当前轮欠载包和背压等待为0。样本只有两个短轮次，不据此给出可靠P95/P99、固定响应保证或新版联合性能结论。RPC耗时包含传输与服务等待；累计guard处理与后续音频事件重叠，不能把全部阶段数值直接求和当作首声时间。[V31]</p>
+<div class="printbreak"></div>
+<h2>5 大模型协作记录与自我纠错</h2>
+<h3>5.1 协作方式与人工职责</h3>
+<p>AI协作用于需求拆解、代码与脚本草拟、错误定位、测试设计、报告整理和方案比较。人工负责确定应用目标、冻结模型与质量约束、选择变更、核对原始输出、安排实板观察和接受/否决方案。执行结果由对应源码、工件、日志及数据支持。</p>
+<p>现有《AI辅助工程开发与交付记录》已整理五个工程案例和38项来源索引。五个历史工程案例保留为基于源码和日志的复盘；原始逐轮问答与准确模型构建版本按实际留存情况登记。第5.5节另列本对话真实可见提示、答复和工具纠错，附件使用不同记录类型标识，不将复盘改写成历史逐字问答。[V15-V16、V33]</p>
+<table>
+<tr><th>案例</th><th>AI协作形成或修改的文件</th><th>观察、判断与纠错</th><th>已有验证</th></tr>
+<tr><td>FPGA联合工程</td><td>visual_servo.sv、prepare.tcl、implement.tcl、export_resume.tcl</td><td>原项目导出失败后从同一已路由DCP恢复导出，核对配套载荷</td><td>4套RTL、204项控制器、18项C模拟及独立实现审查记录</td></tr>
+<tr><td>DPU移植</td><td>rewrite_sface_v2.py、reconstruct_yunet.py、量化/编译/向量脚本</td><td>区分兼容性、编译、执行一致性与任务质量；修正端口顺序</td><td>公开评测、固定向量实板及三模型切换</td></tr>
+<tr><td>结构化回答</td><td>dialogue_stream.py及配对测量脚本</td><td>提前交付有效台词，继续保留完整字段和取消</td><td>阶段测量与对应版本播放验收</td></tr>
+<tr><td>LLM/TTS共存</td><td>gpu_coordination.py、资源配置及语音生命周期接点</td><td>比较排队、常驻与冷暖加载；被否决候选不算正式收益</td><td>历史资源测量及合并回归</td></tr>
+<tr><td>记忆与回收</td><td>board_memory.py、board_memory_policy.py</td><td>校验摘要并提交后回收原文；存储与真实召回分别验收</td><td>自然到期存储检查，召回待补</td></tr>
+</table>
+<h3>5.2 可追溯的可见问答摘录</h3>
+<p>现有附件保存一条与工程范围调整有关的真实用户指令：</p>
+<blockquote>我这几天做了大语言模型优化啥的，可以把这个替换成C，你看看win里面语音模型的整个做的东西，你可以看看</blockquote>
+<p>对应AI回答开头摘录：</p>
+<blockquote>可以替换。我已查看 Windows 同步过来的主要源码、优化报告和测试记录，整理了 73 份来源，并把 C 的规划改为：</blockquote>
+<p>后续处理将C包规划调整到LLM输出、资源、记忆和语音工程，保留原异步验证子模块。该记录证明资料审阅与范围调整；五个历史开发案例仍需各自原始问答附件。[V16]</p>
+<h3>5.3 实际自我纠错示例</h3>
+<p>PYNQ Skill首轮15项单元测试出现1项失败：完成标志在200ms才被观察到，而合同超时为100ms；原逻辑先检查完成，再检查超时，错误接受了迟到结果。修正为读回后先检查观察时刻是否超时，再判断完成，随后15项全部通过，并保留此反例。[V12-V13]</p>
+<p>这一纠错可追溯到具体失败、代码修改和验证结果。其证明范围是软件轮询的观察时间，不能中断已经阻塞的MMIO操作，也不能证明硬件最坏执行时间。</p>
+<h3>5.4 可重复使用的协作工作流</h3>
+<p>协作流程为：提供明确任务和现有证据→要求AI标出假设与适配边界→人工核对接口及候选变更→先验证数值/软件反例→需要时在原设备窗口完成实板测试→接受或回退→冻结源码、工件和证据→提炼Skill。</p>
+<p>下一次新增AI协作案例应同时归档：原始提示词、关键回答、被发现的问题、人工判断、实际修改、验证命令/输入、原始结果和版本清单。无法取得的历史内容标记缺失，不从代码反向编造。</p>
+<div class="printbreak"></div>
+<h3>5.5 可见问答与文档生成纠错实录</h3>
+<p>案例AI06来自本对话可见消息和实际工具反馈，日期为2026年11月2日，工具为Codex；具体模型构建版本未记录。附件ai_collaboration/wiring_case_verbatim.json保留摘录、修订及验证来源。[V33]</p>
+<p>用户提示摘录：</p>
+<blockquote>这个怎么做，按照我这个盘里面的资料，你可以帮我做一下么</blockquote>
+<p>AI公开答复摘录：</p>
+<blockquote>我会按盘里的接线资料和 FPGA 引脚约束，先做一份可放进报告的接线图和逐线接线表。资料能确认的内容会直接标出，尚未核实的实物端子会标为“待核对”，重点处理旧图 H12 与宽版约束 E10 的差异。</blockquote>
+<p>证据核对后采用宽版XDC中的E10；B03的J2.3映射与实物端子待核状态分别标注。首次PDF绘制把颜色名称white交给HexColor，实际工具报错如下：</p>
+<pre>ValueError: invalid literal for int() with base 10: &#x27;white&#x27;</pre>
+<p>实际修正为允许颜色名称的转换函数：</p>
+<pre>c.setFillColor(colors.toColor(fill))</pre>
+<p>随后的图片审阅还发现电源域标题压到导线、W10/W11标签过近以及端口文字碰线，分别移位修订。最终三页PDF逐页通过检查，两个SVG可解析，W01-W11与逐线表一致。此案例证明的是资料核对、图纸生成与工具反馈纠错，不扩大为FPGA算法设计的原始协作记录。[V33]</p>
+<div class="printbreak"></div>
+<h2>6 技能包的提炼、验证与边界</h2>
+<h3>6.1 交付对象与内容</h3>
+<p>当前独立离线初版为 pynq-contract-testgen。输入包括AXI4-Lite uint32接口合同、HWH元数据、测试向量及独立模拟/参考模块；输出包括PYNQ访问驱动、测试骨架、合同检查报告和使用说明。包使用Python标准库，默认执行模拟路径，不要求安装PYNQ即可完成离线示例。[V12-V13]</p>
+<table>
+<tr><th>组成</th><th>作用</th><th>来源</th></tr>
+<tr><td>合同与HWH检查</td><td>校验实例、窗口、偏移、权限及完成语义</td><td>实际HWH存在地址窗口但REGISTER为0的观察</td></tr>
+<tr><td>代码/测试模板</td><td>把接口约定生成可审查代码</td><td>手工接口与元数据不一致问题</td></tr>
+<tr><td>超时反例</td><td>防止迟到完成绕过观察期限</td><td>首轮测试真实失败</td></tr>
+<tr><td>加法与CRC两例</td><td>改变布局、完成位与读清除语义</td><td>检查生成器是否依赖单一题目</td></tr>
+<tr><td>复现与校验清单</td><td>在新目录核对源字节并重跑示例</td><td>工程交接与路径依赖经验</td></tr>
+</table>
+<figure><img src="figures/skill_workflow.png" alt="图7 接口合同到生成代码与参考比对的工作流"><figcaption>图7 接口合同到生成代码与参考比对的工作流</figcaption></figure>
+<h3>6.2 从失败到规则</h3>
+<p>第一次观察是元数据不完整。真实工程HWH中自研模块的REGISTER元素数为0，表明地址窗口与完整寄存器描述不是同一种信息。工具因此区分MATCHED、INCOMPLETE和冲突；缺少定义时不能凭空生成register_map字段，已知冲突不能绕过。</p>
+<p>第二次观察是完成判定顺序。软件需要先判断观察时刻是否超时，再接受完成标志，防止“最终完成”覆盖“已错过期限”。对应反例和修正保留在包中。</p>
+<p>第三次观察是单个示例不足以证明复用。加法例与CRC例更换实例、寄存器偏移、完成位和读清除语义；算法分别放在独立模拟和黄金参考中，生成器核心不按算法分支。</p>
+<h3>6.3 已验证效果</h3>
+<table>
+<tr><th>项目</th><th>保存的结果</th><th>层级</th></tr>
+<tr><td>单元测试</td><td>15项通过</td><td>离线软件</td></tr>
+<tr><td>加法示例</td><td>36例通过</td><td>生成代码＋模拟IP＋黄金参考</td></tr>
+<tr><td>CRC32示例</td><td>37例通过</td><td>模拟采用逐位实现，参考使用zlib</td></tr>
+<tr><td>新目录复现</td><td>源SHA一致，测试与示例通过</td><td>同一助手换目录复现</td></tr>
+<tr><td>解压复现</td><td>归档CRC/SHA和73例通过</td><td>归档可执行性</td></tr>
+<tr><td>本次Windows Python 3.12.14复跑</td><td>15项单元测试、加法36例、CRC37例通过</td><td>独立目录，原Skill源码未改</td></tr>
+<tr><td>真实PYNQ / 跨板 / 非作者复用</td><td>未验证</td><td>不计入现有通过项</td></tr>
+</table>
+<p>本次复跑的是同一套已有用例，增加了Windows环境可执行性的证据，不增加用例覆盖。原始日志、新目录输出及软件环境保存在attachments/validation；board_verified与pynq_imported均为false。[V32]</p>
+<p>加法按uint32模2^32，CRC采用CRC-32/ISO-HDLC并明确四个小端字节的输入规则。软件运行耗时不作为PL加速性能。当前初版不能据此宣称已满足PYNQ跨板加分验证。[V12-V13]</p>
+<h3>6.4 使用范围与失效条件</h3>
+<p>首版限定32位标量AXI4-Lite访问。DMA、AXI-Stream、缓存一致性、中断、64位寄存器及复杂并发接口不在已验证范围内。硬件模式必须另有真实且匹配的位流/HWH、兼容PYNQ环境与目标板。合成HWH示例只用于解析及模拟，不能用于宣称硬件通过。</p>
+<h3>6.5 其他技能包规划</h3>
+<p>执行监督、DPU适配/调度和LLM语音/记忆优化已有提炼文档；原A/B/C三包仍需按各自状态完成交付。声纹DPU适配尚待确定，不与已完成的三个视觉模型合并计算。正式提交可先交付已实现的离线Skill和明确范围的工作流/踩坑清单，再由实际复用证据扩展声明。</p>
+<div class="printbreak"></div>
+<h2>7 从零复现说明与交付状态</h2>
+<h3>7.1 包内组成与复现层级</h3>
+<p>附件为本报告的可核对材料和离线Skill，不将其称为完整整机源码发布。下表分别说明可执行的离线层级与整机层级；整机层级仍需最终工程输入、配套release与目标设备验收。</p>
+<table>
+<tr><th>层级</th><th>输入与入口</th><th>完成判据</th></tr>
+<tr><td>文档与证据核对</td><td>source_index.json及attachments/evidence</td><td>每个归档证据文件SHA一致</td></tr>
+<tr><td>离线Skill复现</td><td>reproduction/reproduce_offline.py</td><td>15项单元、加法36例和CRC37例通过；board_verified=false</td></tr>
+<tr><td>FPGA完整构建</td><td>完整平台工程、参考DCP、IP仓库与2022.2工具链</td><td>新目录构建、导出和配套检查通过；本附件未完成该层级</td></tr>
+<tr><td>模型重建与板端软件</td><td>固定模型来源、校准数据、arch及最终源码清单</td><td>量化/编译/参考比对与同版部署分别通过</td></tr>
+<tr><td>最终整机复现</td><td>外设、板卡、主机和统一release</td><td>现场按说明完成业务、恢复与持续运行验收</td></tr>
+</table>
+<h3>7.2 在空目录复现包内材料</h3>
+<p>1. 将附件ZIP解压到新的工作目录，进入包含README.txt、source_index.json、skill和reproduction的目录。</p>
+<p>2. 准备Python 3.8或更高版本。离线入口只需标准库，不安装PYNQ、不调用模型服务，也不加载位流。</p>
+<p>3. 在工作目录执行以下命令；结果目录必须尚不存在。Linux可将python改为python3。</p>
+<pre>python --version
+python -B reproduction/reproduce_offline.py --out ../auar_verify_01</pre>
+<p>4. 检查新目录summary.json的status=PASS，以及examples中的adder=36例、crc32=37例。单元测试原始输出见unit_tests.log，示例输出见examples.log及examples子目录。</p>
+<p>5. summary中的board_verified和full_system_reproduced应保持false。这两个字段区分离线包可执行性与实际板卡/整机验证，不用离线PASS替代板测。</p>
+<h3>7.3 换题目使用Skill</h3>
+<p>在skill/pynq-contract-testgen目录提供自己的contract.json、真实或明确标识的HWH、输入向量与独立参考结果。只修改这些输入，保持生成器核心不变。先核对寄存器名称、偏移、访问权限、启动与完成语义，再生成驱动和测试骨架。</p>
+<pre>python -B scripts/generate.py --help
+python -B -m unittest discover -s tests -v</pre>
+<p>已有加法器和CRC两个实例改变了布局、完成位和读清除语义。真实PYNQ模式需要匹配的bit/HWH、相应环境和已核对的硬件；合成样例不能进入硬件模式。具体参数和失效条件见Skill自带readme.md与contract_format.md。[V12-V13、V32]</p>
+<h3>7.4 整机复现的必需输入</h3>
+<table>
+<tr><th>输入集合</th><th>应固定的内容</th><th>当前状态</th></tr>
+<tr><td>工具链</td><td>Vivado/Vitis/PetaLinux 2022.2、Vitis AI 3.0及原IP版本</td><td>历史配套关系有记录；需在重建环境确认安装与许可</td></tr>
+<tr><td>参考平台</td><td>source_routed.dcp、完整BD/RTL/XDC、repos.txt与IP源码</td><td>历史DCP为125,094,047B；本附件不含该DCP及完整IP仓库</td></tr>
+<tr><td>配套输出</td><td>同次BIT/XSA/DTBO/XCLBIN与设备树</td><td>阶段证据已归档；最终release仍须统一</td></tr>
+<tr><td>视觉模型</td><td>固定来源、预处理、校准/测试划分、arch与xmodel SHA</td><td>保留V19的模型身份；不能自动换用公开库最新默认文件</td></tr>
+<tr><td>板端业务</td><td>实际应用380组件、独立相机/控制器、原生库、配置与服务</td><td>以最终配套清单收拢，不任选早期aura目录替代</td></tr>
+<tr><td>Windows模型服务</td><td>27B/OmniVoice版本、运行库、外部模型路径与LAN配置</td><td>已有部署验收；旧平台性能和预算不迁作新成绩</td></tr>
+<tr><td>实物</td><td>载板版本、相机、MCP01、屏幕、供电与舵机线序</td><td>接线资料版已提供，实物核线和型号记录另补</td></tr>
+</table>
+<p>历史构建脚本要求的参考DCP SHA256为ac5f85a14eee133b56e06a514f37e3e8db30b2ae4d16a5490b79b926a07bb77e。完整重建前须取得这一输入，或先验证一条不依赖它的源码重建路线。只拿到脚本和综合报告不等于构建输入齐全。[V14]</p>
+<h3>7.5 FPGA构建步骤</h3>
+<p>1. 在Ubuntu新工作区准备完整平台工程与已核对参考DCP，固定工具版本、IP仓库、RTL/BD/XDC和输入SHA。</p>
+<p>2. 将原构建入口中的VIVADO、REFERENCE、平台输出和IP路径映射到该工作区，保存修改差异和新的输入清单。V14为历史入口证据，其绝对路径不能直接在其他机器上使用。</p>
+<p>3. 先执行tb_wide、tb_servo、tb_pulse_guard和tb_nominal四套RTL验证，再按prepare、implement顺序完成平台构建。</p>
+<p>4. 归档utilization、clocks、timing、check_timing、route、DRC，按需要检查CDC；记录警告、外部时序缺项与失败，不以单个WNS代替全部约束完整性。</p>
+<p>5. 从同次路由结果导出配套工件，核对XSA嵌入载荷、位流、DTBO/XCLBIN、IP ID/ABI/build与模型目标。独立验证成功后再安排目标板部署。</p>
+<h3>7.6 模型和软件准备步骤</h3>
+<p>1. 按V19模型清单取得固定版本YOLOX-Nano、YuNet和SFace，保留来源、许可与SHA。公开仓库会更新，复现应选择经过本项目验证的工件，而不是仅按同名最新文件替换。[3-4、V19]</p>
+<p>2. 固定B4096目标fingerprint 0x101000056010407及真实arch.json，使用项目保留的等价改写、量化与编译脚本；校准、选阈值、独立测试身份保持分离。</p>
+<p>3. 依次验证浮点等价、INT8任务质量、编译接口和实板固定向量。VART端口顺序、输入形状、缩放因子与预后处理应配套。</p>
+<p>4. 按最终应用、相机、控制器和原生库清单准备板端文件与服务。Windows准备相应LLM/TTS环境；大语言模型权重位于项目共享目录之外，使用明确的外部路径配置。</p>
+<p>5. 在各自设备维护流程下验证服务就绪和LAN请求。新启动需要建立新的上下文与实际配套关系，不沿用旧进程和旧启动的绑定凭据。</p>
+<h3>7.7 最终运行和验收步骤</h3>
+<p>在统一release上记录启动、相机有效帧、独立人脸/声纹状态、录音、ASR、回答、完整播放、字幕和记忆落盘。随后在同一合法会话自然超过五分钟后追问，记录摘要状态与真实回答，单独验证长时召回。</p>
+<p>转轴按用户已经验收的实现和参数保留，不把继续调参作为本报告的复现前提。若申报机械角度、精度或载荷指标，应另有相应测量。冷启动、长期运行、网络异常与取消恢复按最终版本分别记录；跨模态关联已取消，不新增为联合演示要求。[V29-V30]</p>
+<h3>7.8 当前证据与下一次补录</h3>
+<table>
+<tr><th>项目</th><th>当前可确认结果</th><th>仍需要的证据</th></tr>
+<tr><td>本包离线执行</td><td>本次Windows 15项单元与73例通过</td><td>陌生人员独立复用可另录</td></tr>
+<tr><td>AI协作</td><td>可见原话摘录、实际工具纠错与五项工程复盘</td><td>核心开发历史逐轮原问答、准确模型版本和个人分工继续归档</td></tr>
+<tr><td>Skill</td><td>合同/HWH检查、生成与模拟路径可执行</td><td>若申报PYNQ通用加分，补真实PYNQ/跨板或独立复用证据</td></tr>
+<tr><td>完整重建</td><td>参考脚本、接口及阶段工件证据已整理</td><td>参考DCP/IP等完整输入与新目录完整构建日志</td></tr>
+<tr><td>整机最终结果</td><td>分模块阶段通过与两轮历史播放数据</td><td>新版联合演示、同条件后测、长时召回、冷启动与持续运行</td></tr>
+</table>
+<p>本包的离线成功按其层级报告。完整整机从零复现尚未通过，因此不填写虚构的最终release、机械实测或全系统性能数据。七项要求的章节、附件与证据范围见requirements/coverage.json。</p>
+<div class="printbreak"></div>
+<h2>参考文献</h2>
+<p>[1] GE Z, LIU S, WANG F, et al. YOLOX: Exceeding YOLO Series in 2021[EB/OL]. 2021. https://arxiv.org/abs/2107.08430 .</p>
+<p>[2] ZHANG Y, SUN P, JIANG Y, et al. ByteTrack: Multi-Object Tracking by Associating Every Detection Box[EB/OL]. 2021/2022. https://arxiv.org/abs/2110.06864 .</p>
+<p>[3] WU W, PENG H, YU S. Yunet: A tiny millisecond-level face detector[J]. Machine Intelligence Research, 2023, 20(5): 656-665. 模型说明：https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet .</p>
+<p>[4] OPENCV. OpenCV Zoo: SFace model and reference implementation[EB/OL]. https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface .</p>
+<p>[5] AMD/XILINX. Vitis AI 3.0: IP and Tool Version Compatibility[EB/OL]. https://xilinx.github.io/Vitis-AI/3.0/html/docs/reference/version_compatibility.html .</p>
+<p>[6] PYNQ PROJECT. pynq.overlay Module, PYNQ v3.1 documentation[EB/OL]. https://pynq.readthedocs.io/en/v3.1/pynq_package/pynq.overlay.html .</p>
+<p>[7] AMD. 全国大学生嵌入式芯片与系统设计竞赛2026选题指南：自主选题赛道，3.3节[Z]. 用户本地完整指南及3.3.5.3截图。</p>
+<p>[8] 往届验证报告[Z]. 用户提供，9个PDF页面。仅参考验证环境、流程、指标和结果的组织方式，不采用其光计算参数或得分公式。</p>
+<p>公开算法和工具文献用于说明已有基础。项目部署、性能和完成情况由对应版本证据支持；来源路径、归档SHA及新旧证据范围见source_index.json。</p>
+<h2>附录 证据与附件导航</h2>
+<table>
+<tr><th>编号或目录</th><th>内容</th><th>使用范围</th></tr>
+<tr><td>V01-V03、V20-V25</td><td>资源、时序、RTL/Tcl、引脚与时钟</td><td>对应历史联合平台</td></tr>
+<tr><td>V04-V07、V19</td><td>模型身份、固定输入和质量JSON</td><td>模型路径及量化模拟，分别标注层级</td></tr>
+<tr><td>V08-V10</td><td>短字段、资源短窗和自然回收</td><td>对应原版本，不拼成最新整机结果</td></tr>
+<tr><td>V11、V17</td><td>旧发布状态和旧项目审查</td><td>历史快照；当前结论采用V29-V30</td></tr>
+<tr><td>V12-V16、V26-V28</td><td>Skill旧验证和工程协作复盘</td><td>保留原始范围与缺项</td></tr>
+<tr><td>V29-V31</td><td>新保存进度、转轴用户验收和两轮时延</td><td>文件中的原时点，不是本轮新设备查询</td></tr>
+<tr><td>V32</td><td>本次Windows离线Skill验证</td><td>15单元、加法36例、CRC37例；不含板测</td></tr>
+<tr><td>V33</td><td>本对话提示/答复与实际工具纠错</td><td>公开可见摘录，不冒充全部历史导出</td></tr>
+<tr><td>attachments/wiring</td><td>接线PDF、PNG、SVG、逐线表与图题</td><td>资料核对版，外部接线尚待实物核对</td></tr>
+<tr><td>reproduction</td><td>可执行离线入口与完整重建输入说明</td><td>离线可复现；整机前提和待验项明确</td></tr>
+</table>
+<p>报告正文、对照图与数据表使用同一份data/metrics.json的数值，图表与正文按来源交叉核对。原始阶段证据、实际离线输出、代码和使用边界一起保留，方便复查。</p>
+</body></html>

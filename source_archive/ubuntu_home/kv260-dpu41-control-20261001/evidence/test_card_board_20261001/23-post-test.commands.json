@@ -1,0 +1,17 @@
+[
+  {
+    "id": "post_test_state",
+    "command": "xmutil listapps && sha256sum /lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.bit.bin /lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.dtbo /lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.xclbin /usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel /home/root/kv260-test-20261001/pytorch-resnet-dog.jpg && ip -4 addr show eth0 && stty -F /dev/ttyPS1 -a",
+    "timeout": 35
+  },
+  {
+    "id": "health_log",
+    "command": "dmesg | tail -n 160; for f in /sys/class/hwmon/hwmon1/name /sys/class/hwmon/hwmon1/temp*_label /sys/class/hwmon/hwmon1/temp*_input; do if test -f \"$f\"; then printf '%s=' \"$f\"; cat \"$f\"; fi; done",
+    "timeout": 35
+  },
+  {
+    "id": "post_test_dpu",
+    "command": "env XLNX_VART_FIRMWARE=/lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.xclbin xdputil query",
+    "timeout": 35
+  }
+]

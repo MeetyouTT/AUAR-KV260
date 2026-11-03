@@ -1,0 +1,110 @@
+{
+  "result": {
+    "status": "SYNTHETIC_BENCHMARK_PASS",
+    "scope": "single isolated process, synthetic fixed pixels only; no camera, model/DPU, HTTP or motor access",
+    "elapsed_s": 3.816,
+    "opencv": "4.5.2",
+    "opencv_threads": 1,
+    "baseline_sha256": "0ce66cd95235b9b9fe259f880a43c240217f79c9957358a67155a70327547690",
+    "candidate_sha256": "72467dfbd80520622735b300562eeda8263ccf458a0b784f9df55889f4a50d94",
+    "seeds": {
+      "baseline": {
+        "elapsed_ms": 3.25,
+        "fixed_points": 0
+      },
+      "candidate": {
+        "elapsed_ms": 0.83,
+        "fixed_points": 0
+      }
+    },
+    "timings": {
+      "baseline_translation": {
+        "iterations": 5,
+        "accepted": 5,
+        "median_ms": 9.401,
+        "maximum_ms": 22.578,
+        "methods": [
+          "FACE_TEMPLATE_VISIBLE_CLIP"
+        ]
+      },
+      "baseline_rotation_scale": {
+        "iterations": 5,
+        "accepted": 0,
+        "median_ms": 24.538,
+        "maximum_ms": 38.239,
+        "methods": []
+      },
+      "baseline_absent_pixels": {
+        "iterations": 5,
+        "accepted": 0,
+        "median_ms": 24.523,
+        "maximum_ms": 30.004,
+        "methods": []
+      },
+      "candidate_translation": {
+        "iterations": 5,
+        "accepted": 5,
+        "median_ms": 9.876,
+        "maximum_ms": 31.012,
+        "methods": [
+          "FACE_TEMPLATE_VISIBLE_CLIP"
+        ]
+      },
+      "candidate_rotation_scale": {
+        "iterations": 5,
+        "accepted": 5,
+        "median_ms": 63.752,
+        "maximum_ms": 77.666,
+        "methods": [
+          "FACE_FIXED_ANCHOR_LK_AFFINE"
+        ]
+      },
+      "candidate_absent_pixels": {
+        "iterations": 5,
+        "accepted": 0,
+        "median_ms": 40.704,
+        "maximum_ms": 65.003,
+        "methods": []
+      }
+    },
+    "tests": {
+      "both_accept_real_translation": true,
+      "fixed_ncc_rotation_reproducer": true,
+      "candidate_rotation_current_pixels": true,
+      "both_reject_absent_pixels": true,
+      "candidate_rejects_random_background": true,
+      "candidate_rejects_partial_occluder": true,
+      "candidate_rejects_excessive_transform": true,
+      "candidate_rejects_unbounded_displacement": true,
+      "repeated_matches_keep_real_anchor_pixels": true,
+      "anchor_not_renewed_by_lk": true,
+      "anchor_500ms_stops": true
+    },
+    "hardware_accessed": false,
+    "physical_follow_validated": false
+  },
+  "readback_unchanged": {
+    "flags": 0,
+    "width_us": 1458,
+    "lease_left_ms": 0,
+    "session": 1633463690,
+    "epoch": 1091,
+    "reference_us": 1458,
+    "target_us": 1458,
+    "ack_seq": 0,
+    "active": false,
+    "armed": false,
+    "referenced": false,
+    "bound": false,
+    "reason": 0
+  },
+  "camera_pid": 189651,
+  "primary_overruns_before": 4,
+  "primary_overruns_after": 4,
+  "optional_overruns_after": {
+    "yunet": 0,
+    "sface": 0
+  },
+  "runtime_not_switched": true,
+  "actuator_writes": 0
+}

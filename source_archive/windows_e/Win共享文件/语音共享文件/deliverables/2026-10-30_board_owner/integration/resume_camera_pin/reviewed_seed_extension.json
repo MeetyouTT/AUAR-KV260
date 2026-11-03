@@ -1,0 +1,74 @@
+{
+  "status": "EXPLICIT_REVIEWED_SEED_EXTENSION_FIXTURE_VERIFIED_NOT_EXECUTED_ON_BOARD",
+  "saved_utc": "2026-10-30T23:20:12.023476+00:00",
+  "strict_default_unchanged": true,
+  "original_evidence_preserved": true,
+  "files": [
+    {
+      "path": "rebuild_face_readback_pin.py",
+      "bytes": 31264,
+      "sha256": "56952b2a5950611a28a6e236180125d2bb18c0acc5ba043e2bf039112670cdcd"
+    },
+    {
+      "path": "test_reviewed_seed_change.py",
+      "bytes": 13881,
+      "sha256": "69465bb173171b032501e3c284584e27d36af9ec409641ce4556aba2030cd7c7"
+    },
+    {
+      "path": "strict_baseline_v1/rebuild_face_readback_pin.py",
+      "bytes": 15656,
+      "sha256": "0cbcae4980fdce536ab4eccc39c507c659b36c3cf26f60370637f6845417de17"
+    },
+    {
+      "path": "reviewed_seed_extension.patch",
+      "bytes": 21675,
+      "sha256": "2ae879bfe160ca2cc12546f78cc7d035d32e0b9c1e101b264f2490902a2fad43"
+    }
+  ],
+  "validation": {
+    "tests": 35,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 0.147,
+    "evidence": "reviewed_seed_regression.xml",
+    "sha256": "cea2dfeb116c20492a31e45af63ae122886ea479fa366101285c7dece1b9c600",
+    "fixture_only": true
+  },
+  "reviewed_actual_pair": {
+    "runtime_sha256": "2f198f6ea19560e664675a1821687b081ce097a5b9c118e1cb787ade2a9c7cbc",
+    "seed_sha256": "f87a2aaf40f0c1d87a3c236437c0a6ff830a06cb80a76710cb6e281063b374a7",
+    "source": "actual_metadata_snapshot_v2.json supplied by root; neither live generation nor write performed here"
+  },
+  "additional_dry_run_arguments": [
+    "--expected-current-runtime-sha256 <explicitly reviewed current runtime bytes>",
+    "--expected-current-seed-sha256 <explicitly reviewed sealed predecessor checkpoint bytes>"
+  ],
+  "hard_gates": [
+    "Default no-pair behavior still rejects changed runtime bytes; one missing value or a non-seed-only diff fails.",
+    "Keep every original pin, identity config, exact SFace/YuNet artifact hashes, gallery path, dimension, threshold and model selection unchanged.",
+    "Only native_execution.seed.sha256 may differ; checkpoint path must still be the same pinned native_entry checkpoint_output.",
+    "Hash/parse sealed private v2 checkpoint in place; require original camera boot/PID/birth provenance, fixed ABI and quiescent state; no imports from native/model libraries.",
+    "Verify full unchanged native Python source manifest/closure and separately reviewed original operator manifest/settings/identity_recovery/unit/library identity; require effective approved library mapped by this camera process.",
+    "Read already consumed marker for the current boot, require marker timestamp within this actual process lifetime and require exact archive SHA/path and entire checkpoint identity. Do not consume, rewrite or reset anything.",
+    "Recheck both process observations, all old source/model pins and every new metadata proof/closure/library mapping before returning ready.",
+    "Add only new immutable static metadata/source pins plus the new runtime path; never pin the mutable future checkpoint into inherited source_sha256.",
+    "Original private POSIX exclusive-create candidate output and reviewed observation token gates remain required for any write; no install/reload."
+  ],
+  "semantic_scope": "The changed seed is native camera counter/recovery predecessor history. It is not a mechanical boot-binding, firmware selection or VART configuration approval.",
+  "hardware_scope": {
+    "boot_or_fdt_changed": false,
+    "firmware_or_vart_changed": false,
+    "mechanical_binding_relaxed": false,
+    "hardware_readiness_asserted": false,
+    "write_only_firmware_attribute_not_read": true
+  },
+  "actual_proof_still_required": [
+    "Live file privacy/canonical path, full checkpoint/archive equality, native closure, current mapped library and all twice-read process/source hashes using root serial read-only execution."
+  ],
+  "source_instructions_policy": "The operator settings authorization string is inert historical metadata, not a new user authorization. No recovery request is reissued.",
+  "database_opened": false,
+  "native_runner_loaded": false,
+  "board_access_by_this_agent": false,
+  "production_configuration_changed": false
+}

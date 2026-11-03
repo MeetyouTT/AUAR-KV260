@@ -1,0 +1,87 @@
+===== STAGE=synth DCP=/home/ghmd/kv260_clockfix_rebuild_20260926/kv260_dpu.runs/synth_1/kv260_dpu_bd_wrapper.dcp =====
+RST_DPU_DSP_CELLS=1
+RESET_CELL=kv260_dpu_bd_i/rst_dpu_dsp REF_NAME=kv260_dpu_bd_rst_dpu_dsp_0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_clk REF_PIN=dpu_2x_clk DIRECTION=IN IS_CONNECTED=1 NETS=kv260_dpu_bd_i/dpu_clk_wiz_clk_dsp CLOCKS=
+  NET_FANOUT=kv260_dpu_bd_i/dpu_clk_wiz_clk_dsp PIN_COUNT=3
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_clk_wiz/clk_dsp DIR=OUT CELL=kv260_dpu_bd_i/dpu_clk_wiz REF=kv260_dpu_bd_dpu_clk_wiz_0
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_clk DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_resetn REF_PIN=dpu_2x_resetn DIRECTION=IN IS_CONNECTED=1 NETS=kv260_dpu_bd_i/rst_dpu_dsp_peripheral_aresetn CLOCKS=
+  NET_FANOUT=kv260_dpu_bd_i/rst_dpu_dsp_peripheral_aresetn PIN_COUNT=2
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_resetn DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+    ENDPOINT_PIN=kv260_dpu_bd_i/rst_dpu_dsp/peripheral_aresetn[0] DIR=OUT CELL=kv260_dpu_bd_i/rst_dpu_dsp REF=kv260_dpu_bd_rst_dpu_dsp_0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aclk REF_PIN=m_axi_dpu_aclk DIRECTION=IN IS_CONNECTED=1 NETS=kv260_dpu_bd_i/dpu_clk_wiz_clk_dpu CLOCKS=
+  NET_FANOUT=kv260_dpu_bd_i/dpu_clk_wiz_clk_dpu PIN_COUNT=7
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_clk_wiz/clk_dpu DIR=OUT CELL=kv260_dpu_bd_i/dpu_clk_wiz REF=kv260_dpu_bd_dpu_clk_wiz_0
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aclk DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aresetn REF_PIN=m_axi_dpu_aresetn DIRECTION=IN IS_CONNECTED=1 NETS=kv260_dpu_bd_i/rst_dpu_clk_peripheral_aresetn CLOCKS=
+  NET_FANOUT=kv260_dpu_bd_i/rst_dpu_clk_peripheral_aresetn PIN_COUNT=3
+    ENDPOINT_PIN=kv260_dpu_bd_i/axi_mem_intercon_2/S00_ARESETN DIR=IN CELL=kv260_dpu_bd_i/axi_mem_intercon_2 REF=kv260_dpu_bd_axi_mem_intercon_2_0
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aresetn DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+    ENDPOINT_PIN=kv260_dpu_bd_i/rst_dpu_clk/peripheral_aresetn[0] DIR=OUT CELL=kv260_dpu_bd_i/rst_dpu_clk REF=kv260_dpu_bd_rst_dpu_clk_0
+RESET_NET=kv260_dpu_bd_i/rst_dpu_clk_peripheral_aresetn PIN_COUNT=3
+  RESET_ENDPOINT_PIN=kv260_dpu_bd_i/axi_mem_intercon_2/S00_ARESETN DIR=IN CELL=kv260_dpu_bd_i/axi_mem_intercon_2 REF=kv260_dpu_bd_axi_mem_intercon_2_0
+  RESET_ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aresetn DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+  RESET_ENDPOINT_PIN=kv260_dpu_bd_i/rst_dpu_clk/peripheral_aresetn[0] DIR=OUT CELL=kv260_dpu_bd_i/rst_dpu_clk REF=kv260_dpu_bd_rst_dpu_clk_0
+RESET_NET=kv260_dpu_bd_i/rst_dpu_dsp_peripheral_aresetn PIN_COUNT=2
+  RESET_ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_resetn DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+  RESET_ENDPOINT_PIN=kv260_dpu_bd_i/rst_dpu_dsp/peripheral_aresetn[0] DIR=OUT CELL=kv260_dpu_bd_i/rst_dpu_dsp REF=kv260_dpu_bd_rst_dpu_dsp_0
+===== STAGE=opt DCP=/home/ghmd/kv260_clockfix_rebuild_20260926/kv260_dpu.runs/impl_1/kv260_dpu_bd_wrapper_opt.dcp =====
+RST_DPU_DSP_CELLS=0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_clk REF_PIN=dpu_2x_clk DIRECTION=IN IS_CONNECTED=1 NETS=kv260_dpu_bd_i/dpu_clk_wiz_clk_dsp CLOCKS=clk_dsp_kv260_dpu_bd_dpu_clk_wiz_0
+  NET_FANOUT=kv260_dpu_bd_i/dpu_clk_wiz_clk_dsp PIN_COUNT=2
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_clk_wiz/clk_dsp DIR=OUT CELL=kv260_dpu_bd_i/dpu_clk_wiz REF=kv260_dpu_bd_dpu_clk_wiz_0
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_clk DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_resetn REF_PIN=dpu_2x_resetn DIRECTION=IN IS_CONNECTED=0 NETS= CLOCKS=
+DPU_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aclk REF_PIN=m_axi_dpu_aclk DIRECTION=IN IS_CONNECTED=1 NETS=kv260_dpu_bd_i/dpu_clk_wiz_clk_dpu CLOCKS=dpu_clk_wiz_clk_dpu
+  NET_FANOUT=kv260_dpu_bd_i/dpu_clk_wiz_clk_dpu PIN_COUNT=7
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_clk_wiz/clk_dpu DIR=OUT CELL=kv260_dpu_bd_i/dpu_clk_wiz REF=kv260_dpu_bd_dpu_clk_wiz_0
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aclk DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aresetn REF_PIN=m_axi_dpu_aresetn DIRECTION=IN IS_CONNECTED=0 NETS= CLOCKS=
+RESET_NET=kv260_dpu_bd_i/rst_dpu_clk_peripheral_aresetn PIN_COUNT=2
+  RESET_ENDPOINT_PIN=kv260_dpu_bd_i/axi_mem_intercon_2/S00_ARESETN DIR=IN CELL=kv260_dpu_bd_i/axi_mem_intercon_2 REF=kv260_dpu_bd_axi_mem_intercon_2_0
+  RESET_ENDPOINT_PIN=kv260_dpu_bd_i/rst_dpu_clk/peripheral_aresetn[0] DIR=OUT CELL=kv260_dpu_bd_i/rst_dpu_clk REF=kv260_dpu_bd_rst_dpu_clk_0
+===== STAGE=placed DCP=/home/ghmd/kv260_clockfix_rebuild_20260926/kv260_dpu.runs/impl_1/kv260_dpu_bd_wrapper_placed.dcp =====
+RST_DPU_DSP_CELLS=0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_clk REF_PIN=dpu_2x_clk DIRECTION=IN IS_CONNECTED=1 NETS=kv260_dpu_bd_i/dpu_clk_wiz_clk_dsp CLOCKS=clk_dsp_kv260_dpu_bd_dpu_clk_wiz_0
+  NET_FANOUT=kv260_dpu_bd_i/dpu_clk_wiz_clk_dsp PIN_COUNT=2
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_clk_wiz/clk_dsp DIR=OUT CELL=kv260_dpu_bd_i/dpu_clk_wiz REF=kv260_dpu_bd_dpu_clk_wiz_0
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_clk DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_resetn REF_PIN=dpu_2x_resetn DIRECTION=IN IS_CONNECTED=0 NETS= CLOCKS=
+DPU_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aclk REF_PIN=m_axi_dpu_aclk DIRECTION=IN IS_CONNECTED=1 NETS=kv260_dpu_bd_i/dpu_clk_wiz_clk_dpu CLOCKS=dpu_clk_wiz_clk_dpu
+  NET_FANOUT=kv260_dpu_bd_i/dpu_clk_wiz_clk_dpu PIN_COUNT=7
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_clk_wiz/clk_dpu DIR=OUT CELL=kv260_dpu_bd_i/dpu_clk_wiz REF=kv260_dpu_bd_dpu_clk_wiz_0
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aclk DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aresetn REF_PIN=m_axi_dpu_aresetn DIRECTION=IN IS_CONNECTED=0 NETS= CLOCKS=
+RESET_NET=kv260_dpu_bd_i/rst_dpu_clk_peripheral_aresetn PIN_COUNT=2
+  RESET_ENDPOINT_PIN=kv260_dpu_bd_i/axi_mem_intercon_2/S00_ARESETN DIR=IN CELL=kv260_dpu_bd_i/axi_mem_intercon_2 REF=kv260_dpu_bd_axi_mem_intercon_2_0
+  RESET_ENDPOINT_PIN=kv260_dpu_bd_i/rst_dpu_clk/peripheral_aresetn[0] DIR=OUT CELL=kv260_dpu_bd_i/rst_dpu_clk REF=kv260_dpu_bd_rst_dpu_clk_0
+===== STAGE=physopt DCP=/home/ghmd/kv260_clockfix_rebuild_20260926/kv260_dpu.runs/impl_1/kv260_dpu_bd_wrapper_physopt.dcp =====
+RST_DPU_DSP_CELLS=0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_clk REF_PIN=dpu_2x_clk DIRECTION=IN IS_CONNECTED=1 NETS=kv260_dpu_bd_i/dpu_clk_wiz_clk_dsp CLOCKS=clk_dsp_kv260_dpu_bd_dpu_clk_wiz_0
+  NET_FANOUT=kv260_dpu_bd_i/dpu_clk_wiz_clk_dsp PIN_COUNT=2
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_clk_wiz/clk_dsp DIR=OUT CELL=kv260_dpu_bd_i/dpu_clk_wiz REF=kv260_dpu_bd_dpu_clk_wiz_0
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_clk DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_resetn REF_PIN=dpu_2x_resetn DIRECTION=IN IS_CONNECTED=0 NETS= CLOCKS=
+DPU_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aclk REF_PIN=m_axi_dpu_aclk DIRECTION=IN IS_CONNECTED=1 NETS=kv260_dpu_bd_i/dpu_clk_wiz_clk_dpu CLOCKS=dpu_clk_wiz_clk_dpu
+  NET_FANOUT=kv260_dpu_bd_i/dpu_clk_wiz_clk_dpu PIN_COUNT=7
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_clk_wiz/clk_dpu DIR=OUT CELL=kv260_dpu_bd_i/dpu_clk_wiz REF=kv260_dpu_bd_dpu_clk_wiz_0
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aclk DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aresetn REF_PIN=m_axi_dpu_aresetn DIRECTION=IN IS_CONNECTED=0 NETS= CLOCKS=
+RESET_NET=kv260_dpu_bd_i/rst_dpu_clk_peripheral_aresetn PIN_COUNT=2
+  RESET_ENDPOINT_PIN=kv260_dpu_bd_i/axi_mem_intercon_2/S00_ARESETN DIR=IN CELL=kv260_dpu_bd_i/axi_mem_intercon_2 REF=kv260_dpu_bd_axi_mem_intercon_2_0
+  RESET_ENDPOINT_PIN=kv260_dpu_bd_i/rst_dpu_clk/peripheral_aresetn[0] DIR=OUT CELL=kv260_dpu_bd_i/rst_dpu_clk REF=kv260_dpu_bd_rst_dpu_clk_0
+===== STAGE=routed DCP=/home/ghmd/kv260_clockfix_rebuild_20260926/kv260_dpu.runs/impl_1/kv260_dpu_bd_wrapper_routed.dcp =====
+RST_DPU_DSP_CELLS=0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_clk REF_PIN=dpu_2x_clk DIRECTION=IN IS_CONNECTED=1 NETS=kv260_dpu_bd_i/dpu_clk_wiz_clk_dsp CLOCKS=clk_dsp_kv260_dpu_bd_dpu_clk_wiz_0
+  NET_FANOUT=kv260_dpu_bd_i/dpu_clk_wiz_clk_dsp PIN_COUNT=2
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_clk_wiz/clk_dsp DIR=OUT CELL=kv260_dpu_bd_i/dpu_clk_wiz REF=kv260_dpu_bd_dpu_clk_wiz_0
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_clk DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_resetn REF_PIN=dpu_2x_resetn DIRECTION=IN IS_CONNECTED=0 NETS= CLOCKS=
+DPU_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aclk REF_PIN=m_axi_dpu_aclk DIRECTION=IN IS_CONNECTED=1 NETS=kv260_dpu_bd_i/dpu_clk_wiz_clk_dpu CLOCKS=dpu_clk_wiz_clk_dpu
+  NET_FANOUT=kv260_dpu_bd_i/dpu_clk_wiz_clk_dpu PIN_COUNT=7
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_clk_wiz/clk_dpu DIR=OUT CELL=kv260_dpu_bd_i/dpu_clk_wiz REF=kv260_dpu_bd_dpu_clk_wiz_0
+    ENDPOINT_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aclk DIR=IN CELL=kv260_dpu_bd_i/dpu_0 REF=kv260_dpu_bd_dpu_0_0
+DPU_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aresetn REF_PIN=m_axi_dpu_aresetn DIRECTION=IN IS_CONNECTED=0 NETS= CLOCKS=
+RESET_NET=kv260_dpu_bd_i/rst_dpu_clk_peripheral_aresetn PIN_COUNT=2
+  RESET_ENDPOINT_PIN=kv260_dpu_bd_i/axi_mem_intercon_2/S00_ARESETN DIR=IN CELL=kv260_dpu_bd_i/axi_mem_intercon_2 REF=kv260_dpu_bd_axi_mem_intercon_2_0
+  RESET_ENDPOINT_PIN=kv260_dpu_bd_i/rst_dpu_clk/peripheral_aresetn[0] DIR=OUT CELL=kv260_dpu_bd_i/rst_dpu_clk REF=kv260_dpu_bd_rst_dpu_clk_0

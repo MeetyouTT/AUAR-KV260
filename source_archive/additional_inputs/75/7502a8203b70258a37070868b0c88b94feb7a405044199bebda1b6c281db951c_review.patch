@@ -1,0 +1,48 @@
+--- a/tools/production_board_business_gui.py
++++ b/tools/production_board_business_gui.py
+@@ -7,17 +7,29 @@
+ from tools.yuki_business_candidate import (bind_runtime_pair, load_private_face_readback,
+     selected_feedback_provider, validate_feedback_character)
+ 
++def _reviewed_asr_pins(variant):
++    if type(variant) is not str or variant not in ('baseline', 'paraformer_small'):
++        raise ValueError('Unknown explicit board ASR variant')
++    if variant == 'paraformer_small':
++        return ('3ef6c19369b912f7caf3cef8e545c5ccd1a33d9d7ec792a46668dc41c4b229ec',
++                '4b2d964e18b9cf139b473003b6698fb2ed9a2a5ec55b93daa677b28f578897aa')
++    return ('f36a0433bcf096bd6d6f11b80a3ac8bed110bdca632fe0d731df8d1a84475945',
++            '59aba8873a2ed1e122c25fee421e25f283b63290efbde85c1f01a853d83cb6e6')
++
++
+ class ProductionGuiBoardBusiness(GuiBoardBusiness):
+     def __init__(self, stage, value, aura):
+         if not isinstance(value, dict) or value.get('enabled') is not True:
+             raise ValueError('Board business must be explicitly enabled')
+         required = {'enabled', 'private_root', 'utc_bounds', 'data_origin', 'asr_directory',
+                     'frontend_directory', 'feedback_manifest', 'feedback_manifest_sha256', 'bootstrap_receipt', 'bootstrap_receipt_sha256'}
+-        optional = {'model_port', 'timeout_ms', 'timezone', 'entry_mode', 'asr_threads', 'dialogue_output_format',
++        optional = {'model_port', 'timeout_ms', 'timezone', 'entry_mode', 'asr_threads', 'asr_variant', 'dialogue_output_format',
+                     'frontend_threads', 'visual_device_id', 'speaker', 'face_readback',
+                     'retention_enabled', 'resume_saved_conversation', 'frontend_optimization', 'capture_priority_nice', 'frontend_process', 'frontend_capture_process'}
+         if not required <= set(value) or set(value) - required - optional:
+             raise ValueError('Invalid board business configuration')
++        self.asr_variant = value.get('asr_variant', 'baseline')
++        model_pin, tokens_pin = _reviewed_asr_pins(self.asr_variant)
+         if value['data_origin'] != 'board' or type(value.get('retention_enabled',False)) is not bool:
+             raise ValueError('Formal production requires explicit board origin and retention boolean')
+         if type(value.get('resume_saved_conversation',True)) is not bool:
+@@ -48,11 +60,9 @@
+         self.worker_owned = False
+         self.frontend = None
+         self.runtime = None
+-        # Pin the exact Paraformer tested on ARM; no replacement ASR model.
+-        asr = BoardParaformer(value['asr_directory'],
+-            model_sha256='f36a0433bcf096bd6d6f11b80a3ac8bed110bdca632fe0d731df8d1a84475945',
+-            tokens_sha256='59aba8873a2ed1e122c25fee421e25f283b63290efbde85c1f01a853d83cb6e6',
+-            num_threads=value.get('asr_threads', 2))
++        # Explicit variant selects one reviewed pair; the caller still supplies its directory.
++        asr = BoardParaformer(value['asr_directory'], model_sha256=model_pin,
++            tokens_sha256=tokens_pin, num_threads=value.get('asr_threads', 2))
+         feedback = local_feedback_provider(value['feedback_manifest'])
+         try:
+             self.frontend = create_frontend_pool(value['frontend_directory'],optimization=self.frontend_optimization,

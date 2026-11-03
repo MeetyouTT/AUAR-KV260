@@ -1,0 +1,110 @@
+{
+  "status": "LOCAL_REVIEWABLE_CANDIDATE_NOT_SELECTED_OR_DEPLOYED",
+  "publisher": "parent /root only",
+  "unit": "aura-camera-ui.service; parent must re-read actual unit/MainPID before use",
+  "baseline": {
+    "boot_id": "8100a7fd-0c6a-46c4-82b8-f874988a1521",
+    "observed_pid": 1334,
+    "entry": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/face-source-v17/entry.py",
+    "entry_sha256": "f26be22cb640bf44a1bd81b66bb3fa014f5b847b13320781836bf3f173387623",
+    "current_private_readback_predecessor": "/home/root/aura-board-owner-candidate-20261030/private-pin-8100a7fd-20261030/face_gallery_readback.local.json",
+    "checkpoint_path": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/state/native-protection-checkpoint.json",
+    "baseline_identity_and_camera_config": "Exact current runtime identity config/model/gallery hashes and all fields other than native_execution.seed.sha256 must remain identical; do not rewrite any configuration file."
+  },
+  "candidate_change": {
+    "only_behavior_change": "At the unchanged protected r17 entry's existing native-operator startup boundary, wrap the already loaded face_source.install once. Its original camera_wrapper call interval_ms=100,optical_flow=True is forwarded as interval_ms=200,optical_flow=True.",
+    "startup_only": true,
+    "protected_entry_modified": false,
+    "new_worker_or_scheduler": false,
+    "original_work_process_retry_and_close_preserved": true,
+    "successful_round_period_ms": 200,
+    "original_no_result_recovery_ms": 50,
+    "internal_retry_limit": "unchanged: at most two newer-frame retries, original 25 ms backoff and original 200 ms admission deadline",
+    "ttl_ms": 1000,
+    "measurement_anchor_max_age_ms": 500,
+    "measurement_max_age_ms": 250,
+    "same_source_flow": "Original raw_capture, fixed-anchor face_flow and face_observation remain unchanged. A detector budget is not permission to re-stamp a cached face or relax source guards."
+  },
+  "exact_native_apis": [
+    {
+      "api": "ui_camera_service.run signal handler",
+      "source_sha256": "9d714b9bd00ea1da12088fa1e22100d7bdb689d0cac10332c3933b31e4f4d2df",
+      "behavior": "SIGTERM/SIGINT set stop only; finally stops capture, joins YOLO, closes identity workers/runners, calls native_startup.shutdown, then closes raw preview/server. A still-live native YOLO worker refuses checkpoint."
+    },
+    {
+      "api": "board.vision.native_startup.shutdown(config,state,owner)",
+      "source_sha256": "4a729a29c6e4c5d8e89c084867f8c7b972e38e4cf1a74177250cbb31a0396fcf",
+      "behavior": "Requires complete final SFace counters; obtains atomic quiescent native checkpoint/snapshot, copies previous_kernel_history, writes checkpoint and closes owner. Native runner/reference/active/fence uncertainty is never reset."
+    },
+    {
+      "api": "board.vision.native_protection.load_business_checkpoint({'path':path,'sha256':new_sha},boot_id=current_boot)",
+      "source_sha256": "b8637c2aa387915a49ef0fd7a1c7cb9d015fb71802c4eaa11539a64466db1faa",
+      "behavior": "Read-only validation, before any YOLO owner/context creation: sealed schema/scope/purpose/current boot/current monotonic/quiescence/full SFace counters/ABI; refuses a still-live same-PID-and-birth predecessor or an existing per-checkpoint consumption marker. Return data stays private; export only whitelisted metadata. Do not call isolated_maintenance_seed."
+    },
+    {
+      "api": "native_startup.preflight -> load_business_checkpoint; attach -> NativeContext.restore_seed -> consume_checkpoint -> adopt_yolo",
+      "behavior": "Same-boot startup restores exact native counters/recovery history and exclusively consumes this new checkpoint SHA. It does not call load_new_boot_checkpoint/commit_new_boot or create a zero-counter domain. Original identity_recovery.install remains the only ABI-compatible operator adapter; its historical request_boot_id is not rewritten or reissued."
+    },
+    {
+      "api": "native_entry.py final _RETAINED hold",
+      "source_sha256": "839df536696d16c3f538bb158edee80614fb0cef55def64d7e7849d412fa30d4",
+      "behavior": "An unsafe native completion/lifecycle retains the process and lock, writes UNSAFE_OWNER_RETAINED.json and ignores TERM/INT. Do not force-kill it or start a replacement."
+    }
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "action": "Reserve the existing serial hardware window. Re-read actual camera MainPID/cmdline/birth/boot/unit ExecStart/drop-ins and current UI gates. Keep production UI entry unchanged and microphone/listening/following false, mechanical FAULT/null. Save exact unit source/effective properties and hashes; do not use 1334 without rechecking. Preserve the current private readback file byte-for-byte as predecessor evidence."
+    },
+    {
+      "id": 2,
+      "action": "Stage only the three candidate files in a fresh private directory. Verify all candidate SHA values and run python3 -B <new-directory>/entry.py --manifest-sha256 <reviewed_manifest_sha> --verify-only. This reads static sources/artifacts only and must report SOURCE_MANIFEST_VERIFIED_NO_OWNER_STARTED. Do not run the new entry without --verify-only while the old owner is alive."
+    },
+    {
+      "id": 3,
+      "action": "Add one separately named, reversible runtime-only systemd drop-in for this same camera unit, preserving every existing drop-in. Set Restart=no, SendSIGKILL=no, TimeoutStopSec=infinity and KillSignal=SIGTERM. daemon-reload, then verify effective properties and ensure ExecStart still equals the exact current original entry. Stop if reload exposed an unexpected pending change. Do not rely on a default systemctl stop timeout that may SIGKILL an uncertain native owner."
+    },
+    {
+      "id": 4,
+      "action": "Use systemctl stop --no-block aura-camera-ui.service. Poll boundedly (for example 20 s, individual waits <=1 s) for the exact PID+birth to exit and unit inactive. No direct runner.close/shutdown injection into the live process and no second DPU/camera process. If it remains alive, a checkpoint is absent/partial or any UNSAFE_OWNER_RETAINED marker exists for that run, stop the experiment with automatic restart disabled; do not force-kill or launch a replacement."
+    },
+    {
+      "id": 5,
+      "action": "After confirmed predecessor exit, read the freshly produced checkpoint bytes privately and compute a new SHA. Require sealed v2/scope/quiescence/purpose, current boot, source_pid and source_birth_ticks equal to the just-stopped actual owner (initially 1334), source_manifest and source_unit equal to the unchanged reviewed native/operator identity, and previous_kernel_history unchanged. Require this SHA's .native-consumed-<SHA> marker absent. Call only the original read-only load_business_checkpoint API for structural/ABI/source-death validation. Do not copy checkpoint token arrays, templates or vectors into shared reports."
+    },
+    {
+      "id": 6,
+      "action": "While the same unit is stopped, add/reset only ExecStart in the dedicated runtime trial drop-in to /usr/bin/python3 -B <new-directory>/entry.py --manifest-sha256 <reviewed_manifest_sha>; retain the no-kill/no-restart safeguards. daemon-reload and verify effective command plus unchanged other unit properties. Start this same unit once with --no-block and bounded observation. The original native_entry dynamically pins the new checkpoint SHA; do not edit seed/config/firmware/markers."
+    },
+    {
+      "id": 7,
+      "action": "Require exactly one new camera/native owner and new camera/service epoch. Verify actual new PID/birth/cmdline, source closure, generated runtime config (only expected seed SHA change), unchanged identity/models/gallery paths/thresholds, actual approved operator mapped library, protection_handoff.mode=native_exact_same_boot with source_pid/birth equal to stopped predecessor, inherited seed SHA and its newly created exclusive consumption marker. Require original counters/recovery history preserved (no decrease/reset), fresh capture/person/face observations and no native/identity errors. The old PID-bound private readback is now intentionally stale; do not use it for the candidate. A new readback must be explicitly reconstructed and verified from this predecessor/new owner, without the old different-boot 605e archive admission rule and without loosening model/source guards."
+    },
+    {
+      "id": 8,
+      "action": "Run only the reserved bounded paired trial: unchanged UI rendering load and detector models; no-foreign-model stress; public audio PCM with unchanged original bounded queue and 20 ms pacing, no microphone or physical playback. Measure camera/whole-board CPU deltas and actual successful detector cadence, identity/face freshness, person detection rate, current-source flow validity and display frame intervals. A faster recovery round remains explicitly allowed by the original code. Audio overflow/failure stays a failure; do not raise queue length or reduce display/person FPS."
+    },
+    {
+      "id": 9,
+      "action": "At the end of the short trial, repeat the identical safe stop and quiescent-checkpoint/dead-predecessor checks for the candidate PID. Record its NEW checkpoint SHA and full private history continuity. Restore the original exact r17 ExecStart in the runtime trial drop-in; start the same service once with this latest same-boot checkpoint. Never restore old checkpoint bytes or delete consumed markers. The restored baseline has another new PID/epoch and must be verified as native_exact_same_boot from the candidate predecessor."
+    },
+    {
+      "id": 10,
+      "action": "After the restored baseline is verified stable, remove only this experiment's runtime drop-in and daemon-reload, then verify original unit properties/all other drop-ins/parallel startup work preserved. Produce a fresh PID-bound private readback for the restored actual owner using explicit same-boot provenance; leave old private pins unchanged as historical evidence. Keep UI/microphone/listening/following state as before. Archive only small hashes/whitelisted metadata/test statistics in shared storage. Candidate selection remains separate from a successful source verification or detector-rate reduction."
+    }
+  ],
+  "abort_rules": [
+    "Any unconfirmed native owner/worker/lifecycle must keep the sole owner alive; no forced cleanup, second owner, marker removal or checkpoint replacement.",
+    "A failed start may have consumed its checkpoint. Do not retry that SHA or recover by overwriting a consumed marker. Only an actually created, confirmed fresh final checkpoint can authorize another same-boot start.",
+    "A checkpoint written before close is not sufficient alone: source PID+birth must also be gone and no retained-owner uncertainty may remain.",
+    "Original r17 recovery uses the latest candidate checkpoint. Returning to the original code never returns to earlier counters/history.",
+    "No new-boot archive gate, BOOT/FDT/firmware/VART change, mechanical activation or new operator recovery request is part of this experiment."
+  ],
+  "remaining_actual_gates": [
+    "Parent review of the candidate source manifest and this no-force-kill serial lifecycle sequence.",
+    "Actual read-only verify-only on the board.",
+    "Actual same-boot checkpoint handoff and baseline restoration, including source/counter/recovery preservation.",
+    "Paired camera/whole-board CPU evidence, identity/source/registration behavior and unchanged person/display behavior.",
+    "Actual paced audio queue/real-time acceptance; local fixtures cannot satisfy this gate."
+  ]
+}

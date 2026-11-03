@@ -1,0 +1,18 @@
+{
+  "host_utc": "2026-10-03T12:52:10.490400+00:00",
+  "device": "/dev/sda",
+  "source_by_id": "/dev/disk/by-id/usb-Mass_Storage_Device_121220160204-0:0",
+  "sectors": 62333952,
+  "bytes": 31914983424,
+  "repaired_binary_hashes": {
+    "usr/local/lib/kv260-runtime-repair/dfx-mgrd": "db9c25f09f1178177884b1114c57f32c076f1e7f9cdd0d12b7a896039038a46c",
+    "usr/local/lib/kv260-runtime-repair/zocl.ko": "5cef5e0eba083419b3ece6fd4829a9f3112e3f0daaee513e1617d60ed1f7f412"
+  },
+  "expected_repaired_binary_hashes_match": true,
+  "os_release": "ID=petalinux\nNAME=\"PetaLinux\"\nVERSION=\"2022.2_release_S10071807 (honister)\"\nVERSION_ID=2022.2_release_s10071807\nPRETTY_NAME=\"PetaLinux 2022.2_release_S10071807 (honister)\"\n",
+  "manager_dropin": "# PROPOSAL ONLY. Keep the vendor unit intact; install only after review and backup.\n[Unit]\nRequires=kv260-repaired-zocl.service\nAfter=kv260-repaired-zocl.service\n\n[Service]\nExecStart=\nExecStart=/usr/local/lib/kv260-runtime-repair/dfx-mgrd\n",
+  "fstab": "# stock fstab - you probably want to override this with a machine specific one\n\n/dev/root            /                    auto       defaults              1  1\nproc                 /proc                proc       defaults              0  0\ndevpts               /dev/pts             devpts     mode=0620,ptmxmode=0666,gid=5      0  0\ntmpfs                /run                 tmpfs      mode=0755,nodev,nosuid,strictatime 0  0\ntmpfs                /var/volatile        tmpfs      defaults              0  0\n\n# uncomment this if your device has a SD/MMC/Transflash slot\n#/dev/mmcblk0p1       /media/card          auto       defaults,sync,noauto  0  0\n\nLABEL=boot        /boot   vfat    defaults    0   2\n/dev/mmcblk1p1\t/boot\tvfat\tdefaults\t0\t0\n",
+  "udev_properties": "DEVPATH=/devices/pci0000:00/0000:00:14.0/usb3/3-8/3-8:1.0/host0/target0:0:0/0:0:0:0/block/sda\nDEVNAME=/dev/sda\nDEVTYPE=disk\nDISKSEQ=37\nMAJOR=8\nMINOR=0\nSUBSYSTEM=block\nUSEC_INITIALIZED=42846270296\nID_VENDOR=Mass\nID_VENDOR_ENC=Mass\\x20\\x20\\x20\\x20\nID_VENDOR_ID=14cd\nID_MODEL=Storage_Device\nID_MODEL_ENC=Storage\\x20Device\\x20\\x20\nID_MODEL_ID=1212\nID_REVISION=1.00\nID_SERIAL=Mass_Storage_Device_121220160204-0:0\nID_SERIAL_SHORT=121220160204\nID_TYPE=disk\nID_INSTANCE=0:0\nID_BUS=usb\nID_USB_INTERFACES=:080650:\nID_USB_INTERFACE_NUM=00\nID_USB_DRIVER=usb-storage\nID_PATH=pci-0000:00:14.0-usb-0:8:1.0-scsi-0:0:0:0\nID_PATH_TAG=pci-0000_00_14_0-usb-0_8_1_0-scsi-0_0_0_0\nID_PART_TABLE_UUID=40bd38f0\nID_PART_TABLE_TYPE=dos\nDEVLINKS=/dev/disk/by-path/pci-0000:00:14.0-usb-0:8:1.0-scsi-0:0:0:0 /dev/disk/by-id/usb-Mass_Storage_Device_121220160204-0:0\nTAGS=:systemd:\n",
+  "board_shutdown_by_this_turn": false,
+  "note": "Card was already in reader and auto-mounted when this turn started; USB reader serial is not the SD CID. Direct sudo requires authentication; UDisks noninteractive backup request also requires authorization."
+}

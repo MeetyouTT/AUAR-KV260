@@ -1,0 +1,50 @@
+修订版3：原CPU完整历史接口的实际接续点
+
+本文件是离线接口说明。设备权仍由身份窗口持有；没有运行以下板端流程。
+
+首次只读 capture
+
+FRESH_HANDOFF.example.json 新增 fresh_history_expected_pin，与 fresh_history_receipt_pin 成对。
+必须是CPU已有 validate_fresh_final_history_readonly.py 实际成功结果及其原始expected文件，
+而不是 NEW_FINAL_PRESENT、手填通过布尔值或冷启动时虚构的正常停机。
+capture校验 result.expected_sha256、确切checkpoint/owner、archive_count、完整有序archive SHA和legacy。
+当前原camera的 handoff.seed_sha256/previous_kernel_history 必须与该已接受结果一致。
+原5ca适配器按实际板端staging路径和SHA保留，不复制到本包，更不放入Native AURA源码树。
+
+真正冷启动、相机未运行
+
+原marker目录和allow_new_kernel_boot来自已核验的真实run配置；当前kernel marker存在、部分写入或
+符号链接都HOLD。旧boot的checkpoint-specific marker不删除，旧计数仅作为归档输入。
+本包在任何DFX之前按确切当前final SHA调用原CPU适配器的原封存源/完整归档API；
+使用此前独立接受的head、count、ordered archive路径/SHA和legacy pin，不从待验final自造head。
+所有旧归档字节在推进边界重核；原camera入口随后独占执行原load_new_boot_checkpoint/commit/restore。
+实际新current-kernel marker、handoff及新archive边相互一致且原完整链再次通过后，才保存新历史账本。
+运行链检查传递的仅是实际boot/head元数据；不会构造、写入或恢复任何替代Native checkpoint/seed。
+
+同boot已正常停止、准备恢复原camera
+
+CPU原正常停机与完整5ca main验证必须在原服务均停止时完成。不要在已经排队的ExecStartPre里
+谎称服务仍inactive/dead，也不要修改原guard以放行。
+既有CPU/main维护流程在本包受保护状态目录提供一个纯pin记录：
+
+  /var/lib/aura-boot-recovery/v1/same-boot-history.proof.json
+  schema: aura-existing-cpu-same-boot-history-pins-1
+  expected_pin: {path: 实际本轮5ca expected JSON路径, sha256: 实际完整SHA}
+  complete_result_pin: {path: 实际原5ca完整成功结果JSON路径, sha256: 实际完整SHA}
+
+记录只指向真实4a5 intent/result和5ca结果，不授予设备权限，不产生Native证据。
+camera-check先验证唯一已知排队start、无旧owner/硬件owner；隔离-B -I -S子进程再复用原
+validate_inputs / validate_current（含load_business_checkpoint和所有累计边界）/ validate_chain。
+这保留真实先前停机guard的结果，同时不把当前helper的运行状态冒充为inactive。
+结果必须绑定同一final SHA、旧owner、expected SHA及完整有序历史；相机启动后还要核原消费SHA行。
+
+运行及READY
+
+handoff mode由真实前驱boot关系限定；相机须active/running/noJob、同PID/birth/cmd、Native未quiesce。
+在UI/startup CAS前、账本发布前和READY前都复核生命周期；账本expected始终是最初捕获的字节。
+缺少本轮真实证明或任何归档不匹配时HOLD，不重试DFX，不补seed，不改counter/marker。
+
+范围
+
+仍只覆盖保全最新正常收尾final的冷启动。异常断电留下旧owner/final时继续HOLD；不宣称通用掉电恢复。
+当前只有离线API编排测试；实际ARM原验证器、systemd合并、dpu-auto-config和冷启动证据仍需维护窗口。

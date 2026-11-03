@@ -1,0 +1,15 @@
+--- before/tools/production_memory_presentation.py
++++ after/tools/production_memory_presentation.py
+@@ -308,6 +308,12 @@
+                 lifecycle.invalidate(confirmed)
+             return result
+         setattr(store, name, after_commit)
++    def history_delete_committed(*, operation_turn_id):
++        # The deletion adapter calls this ONLY after its SQLite transaction and
++        # original grant context exit, exactly like the existing public hooks.
++        confirmed = committed_command_owner(operation_turn_id)
++        lifecycle.invalidate(confirmed)
++    store.notify_history_delete_committed = history_delete_committed
+     return lifecycle
+ 
+ 

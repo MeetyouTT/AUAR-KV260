@@ -1,0 +1,56 @@
+配套overlay与公开角色预览（仅主协调窗口执行设备操作）
+
+当前完成
+native编译及真实Host CPU参数测试已由主协调窗口执行并取回核SHA；本窗口只验证了取回字节。
+库b2432e75a75e4dbdebee8e89a141a68ba00671c33b2b258b81ce16794b2c73d2，839928字节。
+原native回执85579d297cc61b1f52a241267c415500bd4fb4493689ca1dd6dd5f4f22d7cd79。
+冻结seal脚本产生paired_overlay的5份文件，29项本地配套复核通过。
+PAIRING_RECEIPT SHA04ea05e54da8a83837ea6072ae540c5078373fa2901570e246f475507d2cc838。
+selection SHA998710fc12bf442d6baea501bab0234665b666caa29f4be8f685741d50d82099。
+原candidate、SOURCE_MANIFEST及原HANDOFF继续冻结；新证据入口PAIRED_HANDOFF.json。
+
+合并边界
+pair JSON的10个runtime_pins中只换native_yuki.py和libaura_yuki.so两个指纹。
+其内不含tools/yuki_jobs_candidate.py，也不含声纹/视觉功能路由；不会把功能v2打包进来。
+人格、角色资源、其他8pin、native_config和腰部presentation保持原值。
+正式合并功能v3后，主窗口仍须重算全量component_sha256与production source manifest。
+GUI配置config/board_avatar_gtk.json内character_pair.selection_sha256更新为998710...，
+再重算该GUI配置组件的startup pin；不要给startup新增未知的character_pair字段。
+冻结PAIRING_RECEIPT的required_startup_change名称描述逻辑绑定变化，实际写入目标为上述GUI配置；不改回执原字节。
+不要回盖最新功能路由、用户配置或库。
+
+预览包与最小范围
+public_preview_source.zip仅含预览脚本/spec/本说明、5份配套overlay和相关公开回执。
+没有角色资源副本、模型权重、真实对话、身份模板、PCM、生产设置或业务数据库。
+运行时只读取既有runtime下6份公开角色/egl文件，逐份验pin，不读取startup/config私有字段。
+脚本导入配套3个显示适配器和既有egl_window，不导入生产main、不创建业务/音频/摄像头实例。
+唯一GTK/EGL窗口423×516，16fps目标；状态控制由其原生frame observer逐帧供给。
+另只有一个60秒粗粒度终止watchdog，无10ms采样、第二渲染循环或后台进程。
+公开计划共24秒：IDLE2、ASR_WAIT2、THINKING4、BUFFER_READY2、ANSWER4、PAUSED2、ANSWER_RESUMED3、CANCELLED2、IDLE_RETURN3。
+ANSWER只消费公开合成的数值包络；完全没有音频引擎、PCM或真实扬声器。
+--capture-character仅调用renderer自己的capture，保存423×516纯角色framebuffer PNG：
+THINKING、BUFFER_READY、ANSWER、PAUSED、CANCELLED、IDLE_RETURN各一张，绝不抓桌面/相机缩略图/真实对话界面。
+数字帧证据仅为固定phase枚举和眼嘴/时钟/渲染计数。图像人工审阅前，报告不会把visual_preview_passed写成true。
+
+主窗口stage命令顺序
+1. 将ZIP校验SHA后解到新的/home/root/aura-animation-preview-20261031/<zip前16位>。
+   不能覆盖production或原native build stage；不建立常驻服务或修改模型。
+2. 在生产仍运行时可先做纯文件预检（不会开GTK/EGL）：
+   python3 -B preview_public_states.py --runtime /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura --validate-only
+3. 主窗口以自己的现读入口与guard正常关闭production UI，保留用户PAUSED/mic=false。
+   确认aura-avatar-ui.service MainPID=0并阻止自动重开。脚本也会在创建窗口前检查MainPID=0。
+   相机/模型服务不动；不并发另一个显示测试。
+4. DISPLAY和XAUTHORITY使用主窗口正常关闭前掌握的现役显示参数，不由脚本读取/proc环境。
+   在该新stage目录，以主窗口owned进程组执行并设外层80秒+5秒硬限，例如：
+   DISPLAY="$AURA_PREVIEW_DISPLAY" XAUTHORITY="$AURA_PREVIEW_XAUTHORITY" GDK_SCALE=1 GDK_DPI_SCALE=1 python3 -B preview_public_states.py --runtime /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura --evidence ./preview_evidence --owner-unit aura-avatar-ui.service --capture-character
+   上述变量由主窗口填充，不是请求用户再提供授权；脚本不关闭/开启服务，也不自动恢复或发布。
+5. 脚本顺序预览后正常销毁窗口/EGL；preview_evidence必须是新目录，防止混入旧回执。
+   取回preview_result.json、numeric_frames.json和6张纯角色帧核SHA并视觉审阅。
+   数字PASS只说明模拟状态下眼嘴参数门控成功；不能当声学口型或物理16fps/全业务负载验收。
+6. 主窗口确认预览进程已退出和EGL已释放，再按最新现役入口恢复生产，或统一发布经审的组合版本。
+   异常时只结束本次owned测试进程，不能宽泛杀GTK/Python、不能顺带重启相机/模型。
+
+output.read审查补充
+OUTPUT_READ_AUDIT.json给出v16原read源码与pin。SelectedAudioOutput.read只在进程内加锁复制缓存snapshot；
+GStreamerAudioOutput没有覆盖read。新显示路径多一次锁/dict副本，不会发worker IPC/网络或模型调用。
+未量测这次额外缓存读取的板端CPU成本，保持为源码审查结论；冻结source不因此改动。

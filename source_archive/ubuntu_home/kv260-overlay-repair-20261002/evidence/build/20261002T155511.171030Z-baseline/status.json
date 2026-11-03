@@ -1,0 +1,167 @@
+{
+  "phase": "baseline",
+  "jobs": 8,
+  "cross_compile": "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-",
+  "original_config_sha256": "3d97bf208930f5696093d2d1999b4a0b16bcb121c97d70ca286bb8d4986e81ef",
+  "commands": [
+    {
+      "name": "compiler",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-gcc",
+        "--version"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155511.171030Z-baseline/compiler.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.008,
+      "sha256": "ee2c2cdcd3e65f25d3cc1bbdae6f9643bc678266cb809a5f91e1bfb429c32896"
+    },
+    {
+      "name": "assembler",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-as",
+        "--version"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155511.171030Z-baseline/assembler.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.006,
+      "sha256": "6c74291390d1a7d0154ff7a93e3db5327df622f640dd271f9bbbee1d19de22b0"
+    },
+    {
+      "name": "linker",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ld",
+        "--version"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155511.171030Z-baseline/linker.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.007,
+      "sha256": "baf28cae0cd6750b183c16415c56ab7a4519261b37ecb44cff845ced41e69336"
+    },
+    {
+      "name": "source-diff-check",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/XRT_baseline",
+      "log": "evidence/build/20261002T155511.171030Z-baseline/source-diff-check.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.003,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-diff",
+      "argv": [
+        "git",
+        "diff",
+        "--binary"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/XRT_baseline",
+      "log": "evidence/build/20261002T155511.171030Z-baseline/source-diff.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.004,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "zocl-modules",
+      "argv": [
+        "make",
+        "-C",
+        "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+        "O=/home/ghmd/kv260-overlay-repair-20261002/build/kernel",
+        "ARCH=arm64",
+        "CROSS_COMPILE=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-",
+        "-j8",
+        "M=/home/ghmd/kv260-overlay-repair-20261002/sources/XRT_baseline/src/runtime_src/core/edge/drm/zocl",
+        "modules"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155511.171030Z-baseline/zocl-modules.log",
+      "returncode": 0,
+      "elapsed_seconds": 4.175,
+      "sha256": "1a6fed7c92420b04e99e74eac65d6cf7d6e0728d84b9da1cdbfe72410726a425"
+    },
+    {
+      "name": "strip-debug",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-strip",
+        "--strip-debug",
+        "/home/ghmd/kv260-overlay-repair-20261002/artifacts/baseline/zocl.ko"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155511.171030Z-baseline/strip-debug.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.012,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "modinfo",
+      "argv": [
+        "/sbin/modinfo",
+        "/home/ghmd/kv260-overlay-repair-20261002/artifacts/baseline/zocl.ko"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155511.171030Z-baseline/modinfo.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.002,
+      "sha256": "c132a4205bd825a889a3f5a060e9e32e8cf203d2f8f3a9283f0fb955db1da03c"
+    },
+    {
+      "name": "undefined-symbols",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-nm",
+        "-u",
+        "/home/ghmd/kv260-overlay-repair-20261002/artifacts/baseline/zocl.ko"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155511.171030Z-baseline/undefined-symbols.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.008,
+      "sha256": "8889430817bf6a18e438262e6d5d76033a93561604027113269c0a8e78f7c26c"
+    },
+    {
+      "name": "elf-sections",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "-h",
+        "-S",
+        "/home/ghmd/kv260-overlay-repair-20261002/artifacts/baseline/zocl.ko"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155511.171030Z-baseline/elf-sections.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.008,
+      "sha256": "c36c5e26ad869e1a987cc9e24160049e4c8bb5dd05124ed2f7e210e9d2827fc4"
+    }
+  ],
+  "passed": true,
+  "kernel_commit": "19984dd147fa7fbb7cb14b17400263ad0925c189",
+  "xrt_commit": "43926231f7183688add2dccfd391b36a1f000bea",
+  "artifacts": {
+    "artifacts/baseline/Module.symvers": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "artifacts/baseline/modules.order": {
+      "bytes": 105,
+      "sha256": "02d111ca616a276fe6d2fd25f7e27eeddfa44c496a2ed5681cc1337bdaa4edf4"
+    },
+    "artifacts/baseline/zocl.debug.ko": {
+      "bytes": 7430280,
+      "sha256": "03b6ec8918cee3cc460cb0c7763f0003ba4eea8cc48b43aaee29434081e64f04"
+    },
+    "artifacts/baseline/zocl.ko": {
+      "bytes": 338840,
+      "sha256": "81b53b5d5336881bd112d5aa0960dd70a4301d7950835d08e5a8c61da8d562d9"
+    },
+    "artifacts/baseline/zocl.mod.c": {
+      "bytes": 1396,
+      "sha256": "8e42cd8bd5e01ba8ff121184003a99505f0ec395986b14d169a7dd98aca2757a"
+    }
+  },
+  "kernel_symvers_sha256": "6e582b60f2a379055924117f930e5ca0fac44c98d56f3b374dc3ce278da7b8ed"
+}

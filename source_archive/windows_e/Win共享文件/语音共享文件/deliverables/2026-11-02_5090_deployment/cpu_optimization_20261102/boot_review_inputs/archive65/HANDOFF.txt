@@ -1,0 +1,67 @@
+开机恢复并行分支交接 — 2026-11-02，America/Los_Angeles
+
+本目录是离线候选与审查包。未连接设备、未部署、未完成真实冷启动验收；ready_to_execute=false。
+原主窗口读取 BOOT_RECOVERY_STATUS.json 和 validation/LOCAL_VALIDATION.json 即可看到阶段及测试结果。
+
+已完成的实际工作
+
+1. 保存并核对原启动链证据，见 evidence/SOURCE_AUDIT.json。
+   daemon.conf 的实际键为 default_accel，指向 /etc/dfx-mgrd/default_firmware；保存值为
+   kv260-benchmark-b4096。xlnx-firmware-detect 先检查该文件；原 parse_config 读取加速器名，
+   原 dfx_init 在包扫描完成后调用 load_accelerator。没有把 default_app 当成实际配置项。
+   保存的相机有效 unit 没有 After/Requires=dfx-mgr；GUI 没有等待相机或新来源绑定的依赖。
+   这些配置与日志来自其原 boot 的保存回执；本分支不声称用户当前实测时平台仍是 benchmark。
+
+2. 写好了独立 systemd 屏障和原机制封装，见 candidate/。
+   原修复 ZOCL → 原修复 DFX daemon/default → 核验原 listPackage/动态平台 →
+   仅当实际为 benchmark 才各一次原 remove/load → 原 ID_STOP_ONLY → 原 Native 相机 →
+   精确新相机来源绑定 → 原 GUI launcher → READY 只读观察。
+   实际已经是 wide 时不执行 remove/load。冷启动只关闭轴输出，不参考初始化、不回中、不跟随。
+   不覆盖现役入口、固件、控制器、默认固件、原 Native reader/seed/counter/marker 或身份库。
+
+3. 完成带精确来源比较、审查 diff 和回退入口的部署候选。
+   capture_contract.py 只用于将来的协调窗口，自动捕获最新 380 组件、当前 owner、相机完整源码
+   闭包及原 unit/drop-in；不会把 735bf、旧 PID、旧 boot 或 c6c8 作为部署预期。
+   manage_installation.py 默认 plan；install 只新增本包文件及 daemon-reload，不停止/启动服务。
+   未提供 activation.json，示例 contract 明确不能执行。
+
+4. 本地回归覆盖启动依赖、排队 start 与 pending stop、现有 owner、未知 DFX、同 job 重入、
+   来源漂移、已消费 final 拒绝、原 bootstrap 与本次 final 的关联、READY 和精确字节回退。
+   以 validation/LOCAL_VALIDATION.json 的最终计数为准。测试使用公开/合成元数据，不是实板成绩。
+
+最新范围纠正（主窗口转达用户原话）
+
+“转轴测试是没问题的没有一顿一顿，人脸与声纹关联不用做”。
+轴跟随/顿挫按用户实体验收收口；保留现有实现和参数。本分支不改轴、不重做调参或反复运动测试。
+跨模态关联取消，不再是本任务或演示前置条件。独立声纹由身份窗口继续处理。
+将来的 cold boot 仍需新鲜平台与输出关闭凭证，但不自动重放历史方向/参考/跟随动作。
+
+现场接续的最小工作
+
+身份窗口明确交还维护权后，由原主窗口与既有轴/CPU窗口排定单一顺序。时间经过不是交接。
+先按实际新鲜状态判断是否需要任何恢复；已有 wide、owner 健康时不要为本分支再做 DFX。
+需要维护相机时，使用 CPU 现有 normal_stop_current_owner.py 和
+validate_fresh_final_history_readonly.py；本分支只按精确 SHA 引用，没有复制或重写它们。
+所有旧 final、boot/PID 和 consumed 状态均不能套用到新一轮。
+
+主窗口在原恢复窗口收尾后生成 FRESH_HANDOFF.example.json 所示元数据，再运行只读 capture。
+还需确认当前 systemd 的 merged ExecStartPre、list-jobs 列形状及依赖无环；未做真实 Linux dry-run。
+旧 unit inventory 还列出了 generated dpu-auto-config.service，但现存资料未提供其生成单元及 init 脚本正文。
+候选只在该原服务已由既有开机链拉起时排在它之后，不启用它；capture 要求主窗口补核其公开源和
+排序关系，或确认当前确实不存在。未知辅助 loader 不会靠等待时间默认为已审查。
+原相机正常启动并完成原 reader/消费/完整历史证明仍是必要门槛；缺证据时停止，不制作替代 seed。
+收集完成才能审查 install；不把离线测试或安装文件存在称为冷启动验收。
+
+未来验收只需验证一次原开机链：最新源闭包、实际 wide、原相机 owner/推进、原角色 READY、
+本 boot ID_STOP_ONLY 输出关闭及机械连接保护、无自动参考/回中/跟随。当前已获用户验收的轴参数保留。
+异常断电若未留下最新未消费 final，本候选会 HOLD；不能自动拿旧 final 补历史或猜机械位置。
+
+回退方式
+
+见 ROLLBACK.txt。默认撤回只删除属于本包且 SHA 仍匹配的 systemd 新文件与 activation，
+保留实际有效的新来源绑定及审计状态。需要撤回绑定时，必须先由现有 owner 正常收尾服务，
+再做本事务 before/after 的精确字节 CAS；遇较新身份/GTK发布立即拒绝，回退不自动启动任何服务。
+
+本分支所有新写入都在此目录；未修改全局 AGENTS/README/DEPLOYMENT_CURRENT/
+PROJECT_PROGRESS/CHAT_COORDINATION、现役源码或其他候选。原27B IQ4_XS、OmniVoice16、
+身份修复、GTK优化与 D:/AIModels 模型存储约定保持。

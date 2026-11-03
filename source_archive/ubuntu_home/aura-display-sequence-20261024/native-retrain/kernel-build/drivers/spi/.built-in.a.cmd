@@ -1,0 +1,1 @@
+cmd_drivers/spi/built-in.a := echo >/dev/null; rm -f drivers/spi/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/spi/built-in.a drivers/spi/spi.o drivers/spi/spi-mem.o drivers/spi/spi-bitbang.o drivers/spi/spi-cadence.o drivers/spi/spi-cadence-quadspi.o drivers/spi/spi-xilinx.o drivers/spi/spi-zynqmp-gqspi.o

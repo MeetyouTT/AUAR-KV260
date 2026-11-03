@@ -1,0 +1,81 @@
+雪妃：思考闭眼，回答出声后睁眼与口型（本地候选，未部署）
+
+范围与结论
+已完成3份现役Python显示适配器、2份配套native源的候选；25项本地测试通过。
+本窗口未SSH、未开麦/外放、未调用GPU/模型，未修改生产或用户PAUSED状态。
+尚未完成native编译、板端实图预览、声学口型或物理16fps验收；不能把源码测试当这些验收。
+SOURCE_MANIFEST.json记录每份before/after SHA；changes.patch可逐行审查；HANDOFF.json为机器入口。
+
+真实调用路径
+v16保存证据：/home/root/aura-board-business-20261030/production-5259eab11e42af13
+startup bf6cdd70768ea5fac4e5be874a387f444c0834d67db5e7a2a744671d9019d63c，378组件。
+组件实际位于root/runtime/aura；startup/config.json不是实际业务模块所在目录。
+board_avatar_gtk创建formal_yuki.native_controller_type与paired_recording_type；
+正式mailbox为formal_native_yuki.StrictLocalPortrait，继承native_yuki.LocalPortrait；
+现有GTK DrawingArea/EGL单所有者的16fps循环消费Control后调用libaura_yuki。
+音频证据来自PersistentGstAudioEngine的ALSA sink query_position及当前interval的audible/track。
+CALL_PATH_AUDIT.json包含各层原生产pin和行号；没有改未运行的旧PNG眨眼入口。
+
+行为
+录音提交后TRANSCRIBING期间即闭眼闭嘴，不必等ASR后才到达的channel start。
+此连接只读取已有任务状态，不调用begin_dialogue、不改FSM或代次、不改变声纹/视觉路由。
+channel start、模型text、音频入队、TTS/end/ready均不能单独开启眼嘴。
+只有active、ready、audible、track=answer且未暂停/结束/报错时才睁眼并使用原PCM音量包络。
+反馈音轨仍闭眼闭嘴，符合此次“真正回答开始后才开口”的明确范围。
+等待、PCM空档、暂停均闭眼闭嘴；取消/停止清除口型，完成后恢复原待机/聆听眨眼。
+原音轨代次/样本递增、150ms原生控制期限和单槽mailbox保留。
+
+native实现与性能边界
+利用现有PlaybackInstance::transition_difference，不新增引擎/库/角色资源或核心模块改动。
+每帧只对eye、talk、face_mouth三参数作最终叠加，值相同不重提transition。
+叠加在原有60Hz作者步进之后、prepare_frame之前；思考时自带眨眼不能再打开眼睛。
+已核对现役model.runtime.json的eyeControl：开眼0、闭眼10、blinkEnabled=1。
+开口时强制眼睛0；思考时强制眼睛10、talk0和表达嘴型0；待机解除眼部叠加。
+身体时间轴、腰部裁切三行projection、423×516、奶白/藏蓝/酒红配色与角色资源不变。
+无新常驻进程、网络请求、高频轮询或帧定时器，目标仍16fps。实际负载和帧率尚待实机。
+
+配套绑定：不能单独把Python放进原887546库
+Control/Stats的尺寸与字段偏移保持v16；expression低8位仍为6种原表情。
+0x100=思考闭眼、0x200=回答开眼；其他新增位、两个模式同时置位均拒绝。
+新增yuki_control_features导出，Python在创建native实例前要求相应能力。
+旧库/新适配器不匹配时会拒绝启动，避免无声失效。
+配套交付必须包含3个Python、编译后的libaura_yuki.so、重封的yuki_pair.formal.json，
+并由主窗口更新startup的character_pair.selection_sha256及组件/manifest绑定。
+seal_paired_overlay.py只生成新paired_overlay，不写生产；原候选不被重封脚本修改。
+
+本地复现
+使用已有带NumPy/Pillow的Python：
+C:\Users\35870\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe run_tests.py
+它用自己的test_runtime加载339份经v16 pin核验的源码和3份候选，不借用功能窗口的可变候选。
+TEST_LOG.txt与TEST_RESULTS.json为25项测试及精确Python源SHA；原始夹具失败另存TEST_RESULTS_initial.json。
+运行audit_and_seal.py可重算manifest、调用路径和交接指纹。
+
+主窗口所需native构建窗口
+由主窗口先现读startup、实际PID/路径及最新源pin，确认本候选before仍适用，保留PAUSED/mic=false。
+将候选native源、tests/native_eye_gate.cpp、build_native_isolated.py、NATIVE_BASELINE.json放到
+独立的animation_thinking_collaboration目录，不能放入生产或旧build_host中编译覆盖。
+目录中不需要私有配置、真实对话、PCM、身份模板或LLM权重。
+由主窗口在板端独占窗口运行以下一条命令（如果实际入口变更，先重新核验路径与pin）：
+
+python3 -B build_native_isolated.py --native-root /home/root/aura-yuki-validation-20261030/native_integration --model /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki/model.runtime.json --resx /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki/yuk_0.ems.resx.json --resource-root /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki
+
+该脚本不连接设备，本身应由主窗口安排在设备本地执行；仅新建native_build，拒绝覆盖旧构建。
+它核对11个原build输入与46份header，nice15串行编译一个translation unit，再链接原core/renderer对象。
+随后编译并运行CPU-only真实Host测试：640思考帧、64回答帧、640待机帧；无GTK/EGL/GPU/音频。
+覆盖完整眨眼周期、嘴型、零作者步暂停、150ms过期、feedback隔离、旧序列拒绝和待机眨眼恢复。
+脚本核查动态依赖未变，产生native_build/native_build_receipt.json；通过不等于实屏或帧率验收。
+
+构建通过后，在本地目录运行：
+python seal_paired_overlay.py --library <取回的libaura_yuki.so> --receipt <取回的native_build_receipt.json>
+结果是5份一致的生产overlay和PAIRING_RECEIPT.json；formal_yuki的pair常量也按新JSON同步重封。
+主窗口将其合入最新功能/速度候选，只更新此处renderer相关文件，再复跑相关测试。
+另分配一个单native所有者的GTK预览窗口，使用公开模拟状态/音量包络检验闭眼、开眼、暂停、取消。
+不需先恢复监听或外放；如之后要真人听音，仍由主窗口协调。
+
+回退
+未部署阶段：保持生产v16原样，无需设备动作；不要删除旧归档或无关资源。
+如主窗口发布后需要回退：先从现读的最新组合版本撤回本补丁，不回退整个过时startup。
+显示三份Python、lib与pair JSON必须配套；before目录保留这5份原始字节及对应SHA。
+同时恢复它们在最新startup中的component pins、character_pair.selection_sha256和source manifest。
+不能只恢复旧库而保留新Python；不覆盖功能窗口路由、用户设置、数据库、模型配置、音频8帧队列。
+仍由主窗口正常关闭/发布/验证，仅恢复本次renderer增量，监听偏好继续保留用户手动PAUSED。

@@ -1,0 +1,103 @@
+{
+  "schema": "aura-offline-memory-function-verdict-1",
+  "utc": "2026-11-02T08:25:57.467684+00:00",
+  "status": "PASS_CURRENT_PRODUCTION_PINNED_SYNTHETIC_MEMORY_SCOPE",
+  "actual_production_startup_sha256": "ff7c0599d8b719b66dadee193553b937027de72867f266e1cb443320a9b5dc4e",
+  "production_source_snapshot": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\MEMORY_AND_SOURCE_CURRENT.json",
+  "staged_components": 22,
+  "all_22_staged_components_match_actual_380_pins": true,
+  "main_source_sha256": {
+    "common/board_memory.py": "8905770197f114cc063addb2dd40bc745d9af942f674140f43e597ff3a6b1905",
+    "common/memory_commands.py": "6e8482c128752edfc5f4798f06c5875d31ff2f14229e7d1149705cca2c1e7dcb",
+    "common/board_timeline_clock.py": "93b65ec3d9ca393b32499845297c78a2f1f71bc19e069b2ce3dc6f69e795af02",
+    "common/timeline.py": "19b05e4ff14dba6eaf4de571c5855fd4c6f75cd97b785a4aa6b5b1a13f5e357a",
+    "common/board_memory_backoff.py": "9710c079fc589eae8f2eb26fba7f0dd80038b66736b3e45e000a98904716ce82",
+    "common/profile_access.py": "e65a118cafcfd3aa21f6614571a11fb2c0e4bc5737a24aa6dda16a41388ff8a6",
+    "board/runtime/board_memory_policy.py": "d6e459f913a6c3d9827e0d90322cb9a2fb17ada87144b853dfdf02ed300f36c6",
+    "common/profile_memory.py": "e633c661425a21405029055b586ddbaefa449584285a96ae6d6aafb3e2156c39"
+  },
+  "junit": {
+    "original": {
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\memory_function_review\\ORIGINAL_RESULTS.xml",
+      "sha256": "c8724f9f162e3ab7cb589c3df93dbd9c2b2372a583bb47ea9790133ac4a62a59"
+    },
+    "targeted": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\memory_function_review\\TARGETED_RESULTS.xml",
+      "sha256": "77c9dcd481ac33c78419d5127db4dd079289ea9824d9d8637e98852295a37d84"
+    }
+  },
+  "passed_pytest_test_cases": 20,
+  "fresh_os_process_reopen_passed": true,
+  "functional_checks": {
+    "five_minute_closure_boundary_and_original_summary_pipeline": "PASS",
+    "same_conversation_summary_retrieval_and_next_prompt": "PASS",
+    "correction_and_forget_revoke_old_content_keywords_and_late_ack": "PASS",
+    "different_conversation_and_profile_continuity_partitions": "PASS",
+    "profile_shared_facts_only_with_live_authorized_profile_grant": "PASS",
+    "missing_forged_wrong_profile_expired_revoked_or_previous_process_grant": "DENIED_AS_EXPECTED",
+    "rejected_summary_retains_bodies_and_original_backoff_recovers": "PASS",
+    "fresh_python_process_persistent_read_and_new_grant_required": "PASS"
+  },
+  "production_bug_identified_in_tested_scope": false,
+  "production_candidate_or_deployment_created": false,
+  "test_oracle_correction": "First targeted attempt assumed exact phrase search. Existing production search is token based; changed the test to verify invalidated old content/summary is absent while allowing a valid new item sharing keywords. Initial failure and fixture retained.",
+  "guard_summary": {
+    "original": {
+      "sqlite_connections": 262,
+      "network_attempts": 0,
+      "process_attempts": 0,
+      "device_library_attempts": 0,
+      "outside_database_attempts": 0,
+      "outside_write_attempts": 3,
+      "model_file_attempts": 0,
+      "windows_console_library_loads": 0
+    },
+    "targeted": {
+      "sqlite_connections": 135,
+      "network_attempts": 0,
+      "process_attempts": 0,
+      "device_library_attempts": 0,
+      "outside_database_attempts": 0,
+      "outside_write_attempts": 3,
+      "model_file_attempts": 0,
+      "windows_console_library_loads": 0
+    },
+    "reopen": {
+      "sqlite_connections": 5,
+      "network_attempts": 0,
+      "process_attempts": 0,
+      "device_library_attempts": 0,
+      "outside_database_attempts": 0,
+      "outside_write_attempts": 0,
+      "model_file_attempts": 0,
+      "windows_console_library_loads": 0
+    }
+  },
+  "blocked_write_explanation": "Three pytest Windows version probes attempted NUL redirection and were refused before process start. Targeted stack points to platform.uname/win32_ver/_syscmd_ver/subprocess._get_devnull. Original run recorded the same count without stack capture; its exact individual stacks are not reconstructed. No count reset or outside write was allowed. Reopen phase had no such attempt.",
+  "scope_limits": [
+    "All text, identities, operator keys, PCM receipts and databases are synthetic; no real database/identity gallery/model/socket/service/GUI/axis operation.",
+    "Fake-clock 300-second tests validate lifecycle logic, not five minutes of live human conversation or actual ASR/LLM/TTS.",
+    "Fake summary responses exercise original policy/Store/worker behavior; they do not establish actual 27B summary accuracy or arbitrary semantic losslessness.",
+    "Production service factory, real profile catalogue/credential configuration, real clock-quality guard, ASR routing and identity-binding enrollment are outside this offline scope.",
+    "Reopening a synthetic store in a fresh Python process is not a board cold-boot or deployment acceptance."
+  ],
+  "evidence_sha256": {
+    "prepare_verified_runtime.py": "1c5349c2b6829276f8d285eca774783871a005f79dc8c6396780b469421bcacb",
+    "run_verified_tests.py": "2dddcff3eee1fb4ee3e9f735e9da112327af8cfb5d1456f6b1b2f831cd8cbc62",
+    "test_memory_function_v24.py": "c4711e9f16db05f15abcd4459397b0ae66decb353832a9958747bb32e1000415",
+    "SOURCE_CLOSURE.json": "8891dd733781f3e247b1b75a78422daba94b898f64b77d999992be9a71a798cb",
+    "ORIGINAL_RUN.json": "ee6966812c9e65fcb4d7fc7b086189953d2b2278bf7ae203e3372b529e50d05f",
+    "TARGETED_RUN.json": "b4cc91a2b9c13dcac572b677520cbbc31f242ee7a1e8601f570bcf7d2415c252",
+    "REOPEN_RUN.json": "89aa43fc7cc0478807b3c82c2a8da3db41412be230f51b36ac8f4df86d38cf14",
+    "HARNESS_ATTEMPTS.json": "3b31f15e21ac49a7a6620db3249464bdb4d576885631d4e9a2cbe13d0e90db99",
+    "TARGETED_ATTEMPT_01_NOTE.json": "5f5d624775f75f945fa69025ff8c6c03a9dd1c7f0e7aba7f665f06251109fc18"
+  }
+}

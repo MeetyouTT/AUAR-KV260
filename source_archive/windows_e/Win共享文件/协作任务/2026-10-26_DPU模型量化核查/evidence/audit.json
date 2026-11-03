@@ -1,0 +1,575 @@
+{
+  "checked_utc": "2026-10-26T15:50:51.027817+00:00",
+  "scope": "OFFLINE_MODEL_METADATA_WITH_HISTORICAL_QUALITY_EVIDENCE",
+  "vitis_image_id": "sha256:8b2d3517c0a90cbd98c700019354dab904c82a4a5f1bf5e123532bee6ca807e5",
+  "vitis_image": "xilinx/vitis-ai-pytorch-cpu:ubuntu2004-3.0.0.106",
+  "runtime_observation_source": "Selected numeric fields transcribed from successful isolated XIR parser stdout; checked against exact model SHA and existing compiler manifests",
+  "new_inference": false,
+  "board_accessed": false,
+  "production_changed": false,
+  "models": {
+    "yunet": {
+      "sha256": "54d348bfeee01756a98bda4103c056a2d5e469a26ea887822da6edc28bdbbbee",
+      "bytes": 576254,
+      "input_shape": [
+        1,
+        320,
+        320,
+        3
+      ],
+      "input_fix_point": 7,
+      "dpu_output_dtype": "xint8",
+      "constant_xint8_nodes": 86,
+      "dpu_tensor_xint8_nodes": 139,
+      "dpu_operation_counts": {
+        "const-fix": 86,
+        "conv2d-fix": 22,
+        "depthwise-conv2d-fix": 21,
+        "download": 4,
+        "pool-fix": 5,
+        "upload": 1
+      },
+      "fingerprint": "0x101000056010407",
+      "dpu_partitions": 1,
+      "directly_parsed_this_turn": true,
+      "source_file": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/artifacts/yunet/yunet_public_int8.xmodel",
+      "cpu_partition_count": 4,
+      "cpu_operations": "fix2float only",
+      "ports_from_matching_compiler_manifest": {
+        "inputs": [
+          {
+            "name": "YuNetCore__input_0_fix",
+            "dims": [
+              1,
+              320,
+              320,
+              3
+            ],
+            "dtype": "xint8",
+            "fix_point": 7
+          }
+        ],
+        "outputs": [
+          {
+            "name": "YuNetCore__YuNetCore_Conv2d_layers__ModuleList_65__3052_fix",
+            "dims": [
+              1,
+              5,
+              5,
+              51
+            ],
+            "dtype": "xint8",
+            "fix_point": 3
+          },
+          {
+            "name": "YuNetCore__YuNetCore_Conv2d_layers__ModuleList_50__2821_fix",
+            "dims": [
+              1,
+              40,
+              40,
+              51
+            ],
+            "dtype": "xint8",
+            "fix_point": 4
+          },
+          {
+            "name": "YuNetCore__YuNetCore_Conv2d_layers__ModuleList_60__2975_fix",
+            "dims": [
+              1,
+              10,
+              10,
+              34
+            ],
+            "dtype": "xint8",
+            "fix_point": 3
+          },
+          {
+            "name": "YuNetCore__YuNetCore_Conv2d_layers__ModuleList_55__2898_fix",
+            "dims": [
+              1,
+              20,
+              20,
+              34
+            ],
+            "dtype": "xint8",
+            "fix_point": 3
+          }
+        ]
+      }
+    },
+    "sface": {
+      "sha256": "12b2ff5c7de157133ebd5aa71665fc5ddcd1f65d9e30e2d6e965e0752e467f25",
+      "bytes": 10796375,
+      "input_shape": [
+        1,
+        112,
+        112,
+        3
+      ],
+      "input_fix_point": 7,
+      "dpu_output_dtype": "xint8",
+      "constant_xint8_nodes": 170,
+      "dpu_tensor_xint8_nodes": 288,
+      "dpu_operation_counts": {
+        "concat-fix": 1,
+        "const-fix": 170,
+        "conv2d-fix": 17,
+        "depthwise-conv2d-fix": 68,
+        "download": 1,
+        "eltwise-fix": 27,
+        "reshape-fix": 1,
+        "strided_slice-fix": 2,
+        "upload": 1
+      },
+      "fingerprint": "0x101000056010407",
+      "dpu_partitions": 1,
+      "directly_parsed_this_turn": true,
+      "source_file": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/artifacts/sface/sface_public_int8.xmodel",
+      "cpu_partition_count": 1,
+      "cpu_operations": "fix2float only",
+      "ports_from_matching_compiler_manifest": {
+        "inputs": [
+          {
+            "name": "Sequential__input_0_fix",
+            "dims": [
+              1,
+              112,
+              112,
+              3
+            ],
+            "dtype": "xint8",
+            "fix_point": 7
+          }
+        ],
+        "outputs": [
+          {
+            "name": "Sequential__Sequential_Flatten_output_flatten__7678_fix",
+            "dims": [
+              1,
+              128
+            ],
+            "dtype": "xint8",
+            "fix_point": 5
+          }
+        ]
+      }
+    },
+    "yolo": {
+      "deployed_sha256": "def64abdeeccbd020cb651913ba907464c1a1786e30ba7d4aa077b601388950a",
+      "bytes": 2127303,
+      "directly_parsed_deployed_file_this_turn": false,
+      "deployed_local_xmodel_found": false,
+      "historical_board_xir": [
+        {
+          "name": "subgraph_YOLOX__YOLOX_QuantStub_quant_in__input_1",
+          "attrs": {
+            "device": "USER"
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "YOLOX__YOLOX_QuantStub_quant_in__input_1_fix",
+              "dims": [
+                1,
+                416,
+                416,
+                3
+              ],
+              "type": "xint8",
+              "fix": -2
+            }
+          ]
+        },
+        {
+          "name": "subgraph_YOLOX__YOLOX_YOLOPAFPN_backbone__BaseConv_lateral_conv0__Conv2d_conv__input_277",
+          "attrs": {
+            "device": "DPU",
+            "dpu_name": "DPUCZDX8G_ISA1_B4096"
+          },
+          "inputs": [
+            {
+              "name": "YOLOX__YOLOX_QuantStub_quant_in__input_1_fix",
+              "dims": [
+                1,
+                416,
+                416,
+                3
+              ],
+              "type": "xint8",
+              "fix": -2
+            }
+          ],
+          "outputs": [
+            {
+              "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_2__inputs_fix",
+              "dims": [
+                1,
+                13,
+                13,
+                85
+              ],
+              "type": "xint8",
+              "fix": 3
+            },
+            {
+              "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_0__inputs_3_fix",
+              "dims": [
+                1,
+                52,
+                52,
+                85
+              ],
+              "type": "xint8",
+              "fix": 3
+            },
+            {
+              "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_1__inputs_5_fix",
+              "dims": [
+                1,
+                26,
+                26,
+                85
+              ],
+              "type": "xint8",
+              "fix": 3
+            }
+          ]
+        },
+        {
+          "name": "subgraph_YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_2__inputs_fix_",
+          "attrs": {
+            "device": "CPU"
+          },
+          "inputs": [
+            {
+              "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_2__inputs_fix",
+              "dims": [
+                1,
+                13,
+                13,
+                85
+              ],
+              "type": "xint8",
+              "fix": 3
+            }
+          ],
+          "outputs": [
+            {
+              "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_2__inputs_fix_",
+              "dims": [
+                1,
+                13,
+                13,
+                85
+              ],
+              "type": "float32",
+              "fix": null
+            }
+          ]
+        },
+        {
+          "name": "subgraph_YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_1__inputs_5_fix_",
+          "attrs": {
+            "device": "CPU"
+          },
+          "inputs": [
+            {
+              "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_1__inputs_5_fix",
+              "dims": [
+                1,
+                26,
+                26,
+                85
+              ],
+              "type": "xint8",
+              "fix": 3
+            }
+          ],
+          "outputs": [
+            {
+              "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_1__inputs_5_fix_",
+              "dims": [
+                1,
+                26,
+                26,
+                85
+              ],
+              "type": "float32",
+              "fix": null
+            }
+          ]
+        },
+        {
+          "name": "subgraph_YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_0__inputs_3_fix_",
+          "attrs": {
+            "device": "CPU"
+          },
+          "inputs": [
+            {
+              "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_0__inputs_3_fix",
+              "dims": [
+                1,
+                52,
+                52,
+                85
+              ],
+              "type": "xint8",
+              "fix": 3
+            }
+          ],
+          "outputs": [
+            {
+              "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_0__inputs_3_fix_",
+              "dims": [
+                1,
+                52,
+                52,
+                85
+              ],
+              "type": "float32",
+              "fix": null
+            }
+          ]
+        }
+      ],
+      "deployed_fingerprint": "0x101000056010407",
+      "local_official_reference": {
+        "path": "/home/ghmd/aura-board-yolo-20261011/official-model/yolox_nano_pt/yolox_nano_pt.xmodel",
+        "sha256": "8493a85c05caba4457eb646b030abc511a7cf6eab2695eb309b62b4864d80c44",
+        "directly_parsed_this_turn": true,
+        "is_deployed_model": false,
+        "excluded_from_current_model_claim": true
+      }
+    }
+  },
+  "quality": {
+    "sface": {
+      "scope": "PUBLIC_LFW_HELD_OUT_PTQ_SIMULATION_NOT_BOARD_OR_FIELD_ACCEPTANCE",
+      "dataset": {
+        "scope": "PUBLIC_LFW_DEVELOPMENT_SPLITS_NOT_DEPLOYMENT_ACCEPTANCE",
+        "detector_threshold": 0.6,
+        "face_selection": "closest_to_image_center",
+        "calibration_images": 256,
+        "calibration_identities": 256,
+        "calibration_eval_identity_overlap": 0,
+        "train_test_identity_overlap": 0,
+        "splits": {
+          "train": {
+            "pairs_total": 2200,
+            "pairs_evaluable": 2200,
+            "positive_evaluable": 1100,
+            "negative_evaluable": 1100,
+            "images_total": 3443,
+            "images_missing_detection": 0,
+            "images_evaluable": 3443,
+            "identities": 2132
+          },
+          "test": {
+            "pairs_total": 1000,
+            "pairs_evaluable": 1000,
+            "positive_evaluable": 500,
+            "negative_evaluable": 500,
+            "images_total": 1549,
+            "images_missing_detection": 0,
+            "images_evaluable": 1549,
+            "identities": 963
+          }
+        },
+        "images_redistributed": false,
+        "preparation_counters": {
+          "multiple_faces": 1086,
+          "missing_faces": 0,
+          "calibration_attempts": 256
+        }
+      },
+      "fp32": {
+        "threshold": 0.38091579830248473,
+        "accuracy": 0.988,
+        "balanced_accuracy": 0.988,
+        "true_accept_rate": 0.976,
+        "false_accept_rate": 0.0,
+        "false_accepts": 0,
+        "negative_pairs": 500,
+        "false_rejects": 12,
+        "positive_pairs": 500
+      },
+      "int8_simulation": {
+        "threshold": 0.36647344896602485,
+        "accuracy": 0.988,
+        "balanced_accuracy": 0.988,
+        "true_accept_rate": 0.978,
+        "false_accept_rate": 0.002,
+        "false_accepts": 1,
+        "negative_pairs": 500,
+        "false_rejects": 11,
+        "positive_pairs": 500
+      },
+      "same_image_cosine": {
+        "minimum": 0.9358090979878952,
+        "p05": 0.9728572478967068,
+        "median": 0.9824243379233425,
+        "p95": 0.9883164025925444
+      }
+    },
+    "yunet": {
+      "scope": "HELD_OUT_PUBLIC_FP32_INT8_AGREEMENT_NOT_GROUND_TRUTH_AP",
+      "identity_disjoint_calibration_evaluation": true,
+      "thresholds": {
+        "0.6": {
+          "counts": {
+            "reference_faces": 322,
+            "int8_faces": 320,
+            "matched_iou_ge_05": 316,
+            "same_face_count_images": 250,
+            "images": 256
+          },
+          "reference_face_recovery": 0.9813664596273292,
+          "matched_box_iou_median": 0.9736015498638153,
+          "landmark_error_pixels_median": 1.4395177364349365,
+          "score_absolute_error_median": 1.0728836059570312e-06
+        },
+        "0.9": {
+          "counts": {
+            "reference_faces": 294,
+            "int8_faces": 293,
+            "matched_iou_ge_05": 293,
+            "same_face_count_images": 255,
+            "images": 256
+          },
+          "reference_face_recovery": 0.9965986394557823,
+          "matched_box_iou_median": 0.974275529384613,
+          "landmark_error_pixels_median": 1.4464402198791504,
+          "score_absolute_error_median": 1.0728836059570312e-06
+        }
+      },
+      "field_acceptance": false
+    },
+    "fixed_input_board_comparison": {
+      "yunet": {
+        "cpu_fp32": {
+          "samples": 40,
+          "median_ms": 124.02086549991509,
+          "p95_ms": 147.59829079939664,
+          "max_ms": 166.48304499904043
+        },
+        "dpu_int8_with_cpu_postprocess": {
+          "samples": 40,
+          "median_ms": 61.41036400003941,
+          "p95_ms": 64.74686154961091,
+          "max_ms": 68.8141579994408
+        }
+      },
+      "sface": {
+        "arm_cpu_fp32": {
+          "samples": 8,
+          "median_ms": 520.8553945003587,
+          "p95_ms": 627.7771442501944,
+          "maximum_ms": 649.3216340004437
+        },
+        "dpu_int8_with_input_output_conversion": {
+          "samples": 8,
+          "median_ms": 13.560350999796356,
+          "p95_ms": 26.599515300040363,
+          "maximum_ms": 28.09538099972997
+        }
+      },
+      "yunet_speedup": 2.019542914610236,
+      "sface_speedup": 38.4101705411741,
+      "not_pure_quantization_or_end_to_end_gain": true
+    }
+  },
+  "checks": {
+    "inspection_script_syntax": true,
+    "yunet_matches_runtime_observation": true,
+    "yunet_matches_deployed_snapshot": true,
+    "yunet_matches_compiler_manifest": true,
+    "yunet_one_dpu": true,
+    "yunet_fingerprint": true,
+    "yunet_input_matches": true,
+    "yunet_ops_match_direct_parse": true,
+    "yunet_int8_ports": true,
+    "yunet_cpu_only_dequantization": true,
+    "sface_matches_runtime_observation": true,
+    "sface_matches_deployed_snapshot": true,
+    "sface_matches_compiler_manifest": true,
+    "sface_one_dpu": true,
+    "sface_fingerprint": true,
+    "sface_input_matches": true,
+    "sface_ops_match_direct_parse": true,
+    "sface_int8_ports": true,
+    "sface_cpu_only_dequantization": true,
+    "yolo_reference_not_deployed": true,
+    "yolo_historical_sha_matches_deployed": true,
+    "yolo_history_one_dpu_int8": true,
+    "sface_same_heldout_accuracy": true,
+    "sface_errors_changed": true,
+    "identity_disjoint_splits": true,
+    "sface_256_calibration_1000_test": true,
+    "historical_board_yunet_exact": true,
+    "historical_board_sface_exact": true,
+    "historical_sface_board_same_hash": true
+  },
+  "all_checks_passed": true,
+  "sources": [
+    {
+      "path": "/home/ghmd/aura-model-quant-audit-20261026/inspect_xmodel.py",
+      "bytes": 2436,
+      "sha256": "988bd101d8f6350174c78ce9b4bda745600e6b4a3b82a053bd03ccb557c8ecb6"
+    },
+    {
+      "path": "/home/ghmd/aura-native-live-20261024/inventory.private.json",
+      "bytes": 12952,
+      "sha256": "9fd77a4d2c8b0dbfb648f2347b072fd6762e0b1ef37ff893656ef6673681a35d"
+    },
+    {
+      "path": "/home/ghmd/aura-board-yolo-20261011/evidence/20261011T110127.568415Z-model_inspect/response.json",
+      "bytes": 28226,
+      "sha256": "66d1f2be3367085ed2e81fba01fc2ef90810defe8ce6d9ff9bd2c03c77d15390"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/artifacts/yunet/yunet_public_int8.xmodel",
+      "bytes": 576254,
+      "sha256": "54d348bfeee01756a98bda4103c056a2d5e469a26ea887822da6edc28bdbbbee"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/artifacts/yunet/compiler-manifest.json",
+      "bytes": 6435,
+      "sha256": "443d3de67837fa2b16d9c1caba55fb853416f784ced94054969e4cc43c02cf22"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/artifacts/sface/sface_public_int8.xmodel",
+      "bytes": 10796375,
+      "sha256": "12b2ff5c7de157133ebd5aa71665fc5ddcd1f65d9e30e2d6e965e0752e467f25"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/artifacts/sface/compiler-manifest.json",
+      "bytes": 6381,
+      "sha256": "d52e4343910f7d3c775405c161e3fdf16db27396891dc617b0e5defdb878841b"
+    },
+    {
+      "path": "/home/ghmd/aura-board-yolo-20261011/official-model/yolox_nano_pt/yolox_nano_pt.xmodel",
+      "bytes": 2127303,
+      "sha256": "8493a85c05caba4457eb646b030abc511a7cf6eab2695eb309b62b4864d80c44"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/evidence/sface-evaluation-report.json",
+      "bytes": 3791,
+      "sha256": "6e75a23ab655ecdae286a19d4b5c86855028d4d5889e12344d414747468f29f6"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/evidence/yunet-evaluation-report.json",
+      "bytes": 1023,
+      "sha256": "57fad747e1307b6fad959dc9def64928ea9baa4e97626130df98bf21ecf30f97"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/evidence/board-yunet-v2.json",
+      "bytes": 6964,
+      "sha256": "a25760980b71a8ec8d26518452820c1796671a980094769c93f9f183222a867d"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/evidence/board-three-fixed.json",
+      "bytes": 4481,
+      "sha256": "abb051bd04bb1e0b6a2296690552478a97ccae1c3e78a4668130cabdcadabf02"
+    }
+  ]
+}

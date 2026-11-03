@@ -1,0 +1,129 @@
+{
+  "date": "2026-10-18",
+  "scope": "Recheck only; no production source or model settings changed",
+  "regression": {
+    "passed": 27,
+    "failed": 0,
+    "elapsed_seconds": 1.34
+  },
+  "source_manifest_matches": {
+    "aura/common/voice_channel.py": true,
+    "aura/tools/dialogue_stream.py": true,
+    "aura/tools/voice_channel_source.py": true,
+    "aura/board/runtime/audio/voice_channel.py": true,
+    "aura/tools/board_model_host.py": true,
+    "aura/tools/dialogue_host_ollama.py": true,
+    "aura/tools/probe_voice_channel.py": true,
+    "aura/tests/framework/test_voice_channel.py": true
+  },
+  "health_after": {
+    "ready": true,
+    "source_kind": "actual",
+    "asr_model": "paraformer-f36a0433bcf096bd6d6f11b8",
+    "llm_model": "aura-qwen3.8-27b-abliterated:iq4_xs",
+    "tts": "omnivoice",
+    "num_step": 16,
+    "voice_protocol": "aura-voice-1",
+    "voice_channel_protocol": "aura-channel-1",
+    "channel_experimental": true,
+    "busy": false
+  },
+  "host_first_pcm_ms": [
+    5406.0,
+    4281.0
+  ],
+  "board_first_pcm_ms": [
+    5605.38,
+    5028.94
+  ],
+  "board_after": {
+    "phase": "IDLE",
+    "playing": false,
+    "error": ""
+  },
+  "model_capabilities": [
+    "tools",
+    "thinking",
+    "completion"
+  ],
+  "native_thinking_test": {
+    "production_configuration_changed": false,
+    "automatic_routing_tested": false,
+    "feedback_audio_tested": false,
+    "results": [
+      {
+        "thinking_enabled": false,
+        "model": "aura-qwen3.8-27b-abliterated:iq4_xs",
+        "question": "一件商品原价240元，先打八折，再减30元，最后加12元运费，实付多少钱？请给出金额和一句简短核对。",
+        "expected_amount": 174,
+        "first_content_ms": 859.0,
+        "first_thinking_ms": null,
+        "thinking_characters": 0,
+        "done_reason": "stop",
+        "load_duration": 1021700,
+        "prompt_eval_duration": 852358000,
+        "prompt_eval_count": 147,
+        "eval_duration": 5463662000,
+        "eval_count": 55,
+        "final_json": {
+          "avatar_action": "",
+          "emotion": "friendly",
+          "reply_text": "算下来是162元哦。240打八折192，减30加12，刚好162。"
+        },
+        "amount_correct": false,
+        "status": "FAIL",
+        "total_ms": 6344.0
+      },
+      {
+        "thinking_enabled": true,
+        "model": "aura-qwen3.8-27b-abliterated:iq4_xs",
+        "question": "一件商品原价240元，先打八折，再减30元，最后加12元运费，实付多少钱？请给出金额和一句简短核对。",
+        "expected_amount": 174,
+        "first_content_ms": 38422.0,
+        "first_thinking_ms": 1953.0,
+        "thinking_characters": 838,
+        "done_reason": "stop",
+        "load_duration": 1635400,
+        "prompt_eval_duration": 1704082000,
+        "prompt_eval_count": 183,
+        "eval_duration": 42706869000,
+        "eval_count": 391,
+        "final_json": {
+          "avatar_action": "",
+          "emotion": "friendly",
+          "reply_text": "实付174元，240八折192，减30再加12，对啦。"
+        },
+        "amount_correct": true,
+        "status": "PASS_NATIVE_CAPABILITY",
+        "total_ms": 44656.0
+      }
+    ]
+  },
+  "test_options": {
+    "temperature": 0,
+    "seed": 42,
+    "num_predict": 512,
+    "num_ctx": 2048,
+    "stream": true,
+    "changes_apply_to_test_requests_only": true
+  },
+  "feature_status": {
+    "streaming_transport_and_clause_pipeline": "IMPLEMENTED_AND_RETESTED",
+    "production_ui_streaming_playback": "NOT_IMPLEMENTED",
+    "persistent_audio_output": "NOT_IMPLEMENTED",
+    "dedicated_context_cache_optimization": "NOT_IMPLEMENTED",
+    "dflash_backend": "NOT_IMPLEMENTED",
+    "native_streaming_tts": "NOT_IMPLEMENTED",
+    "automatic_long_thought_routing": "NOT_IMPLEMENTED",
+    "cached_thinking_feedback_and_interruption": "NOT_IMPLEMENTED",
+    "per_request_native_thinking": "SUPPORTED_AND_TESTED"
+  },
+  "subsecond_verified": false,
+  "acoustic_playback_tested": false,
+  "limitations": [
+    "Historical recording, no new user recording",
+    "One arithmetic problem is not a quality benchmark",
+    "Native-thinking timings exclude TTS and physical playback",
+    "No automatic routing or feedback audio implementation to validate"
+  ]
+}

@@ -1,0 +1,1 @@
+cmd_drivers/video/backlight/built-in.a := echo >/dev/null; rm -f drivers/video/backlight/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/video/backlight/built-in.a drivers/video/backlight/backlight.o

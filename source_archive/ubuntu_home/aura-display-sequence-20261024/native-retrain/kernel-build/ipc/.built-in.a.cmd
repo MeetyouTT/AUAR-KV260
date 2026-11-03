@@ -1,0 +1,1 @@
+cmd_ipc/built-in.a := echo >/dev/null; rm -f ipc/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST ipc/built-in.a ipc/compat.o ipc/util.o ipc/msgutil.o ipc/msg.o ipc/sem.o ipc/shm.o ipc/syscall.o ipc/ipc_sysctl.o ipc/mqueue.o ipc/namespace.o ipc/mq_sysctl.o

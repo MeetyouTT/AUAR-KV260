@@ -1,0 +1,28 @@
+{
+  "schema": "aura-current-boot-binding26-local-static-review-1",
+  "utc": "2026-11-02T11:16:39.927838+00:00",
+  "reviewed_script_sha256": "15821164c35ec59cd025807cdfd00d46c5ae417c16354c33308b26dcc6b0c1d0",
+  "original_readonly_precheck_exact_prefix_preserved": true,
+  "only_subprocess_actions": [
+    [
+      "systemctl",
+      "show",
+      "aura-avatar-ui.service",
+      "--property=MainPID,Job,ActiveState,SubState"
+    ],
+    [
+      "systemctl",
+      "show",
+      "aura-camera-ui.service",
+      "--property=MainPID,Job,ActiveState,SubState"
+    ]
+  ],
+  "candidate_hashes_match_precheck": true,
+  "single_ui_spec_and_single_startup_component_pin": true,
+  "source_or_seed_or_private_store_changed_by_target_script": false,
+  "status": "HOLD_BEFORE_BYTES_ORIGIN_CAS_ASSERTIONS_MISSING",
+  "blocking_change_required": "After before-byte capture, assert SHA(before[STARTUP])==STARTUP_SHA and SHA(before[UI])==UI_SHA. Otherwise a prefix-to-capture concurrent change can become the CAS expected bytes while after values still derive from the old snapshot.",
+  "rollback_guard_recommended": "Call units(); owner() before each CAS rollback; unknown foreign/current bytes must not be overwritten.",
+  "if_already_submitted": "Do not resend or blind rollback. Read saved before-byte hashes and actual new files/applied receipt to reconcile.",
+  "board_accessed_by_this_review": false
+}

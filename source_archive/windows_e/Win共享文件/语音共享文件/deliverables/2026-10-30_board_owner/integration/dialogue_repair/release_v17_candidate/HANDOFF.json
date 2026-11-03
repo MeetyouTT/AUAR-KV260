@@ -1,0 +1,73 @@
+{
+  "schema": "aura.v17-merge-publisher-candidate.v1",
+  "status": "FROZEN_LOCAL_DRY_VALIDATED_ROOT_EXECUTION_PENDING",
+  "stage": "response-latency-v17-thinking-and-feature-queries",
+  "scripts": {
+    "release_common.py": "1017ad2039adfd3706f4e74d68678043c049d04aa982f7155debf959c8eb01f1",
+    "guard_v16_paused.py": "29586c07dff505734d6bdd6cf2613800233f325381fdbc56a0bcf2d133b338e4",
+    "apply_v17_closed.py": "27dfc3210e5e813f58017507ca02795b5bdf3a62adc308a3bd4adcc2bc9d4c0b",
+    "publish_v17_ready.py": "27b3b91b957346a738d482800e712ed5d5a1f98f70d4334a10094f9f4596b03f"
+  },
+  "upstream": {
+    "listening_entry_fix/apply_closed_revision.py": "74bd266353d58f7edd8728ef0dd1ae1ab613eb8386884bba32940018b510bfe2",
+    "production_business_acceptance/publish_business_ui.py": "fa6be3387961d32c40051fd3fd495ee1db62ef8888d23c6dcdafbab2dcc4085a"
+  },
+  "remote_sha256": {
+    "guard": "b8a45d595495c22c05cb4d9de482c18e41a661a9e0fba599fcdd08b6c4b01aa8",
+    "apply": "62ca89aaeb63254906e27aa8d72e8312c68fb7d50d1c9784cbacd6fcf1337b0d",
+    "publish": "de829f8c4287d97d586e083bfb25da769dbce5cb2f7f18fc850fdeed34f6ee7f"
+  },
+  "payload": {
+    "feature_version": "candidate_v3",
+    "feature_source_manifest_sha256": "395eda57127551cd788c112ef1a8001f8d75c40d46b400d4a9a2af417702bb7e",
+    "animation_pair_receipt_sha256": "04ea05e54da8a83837ea6072ae540c5078373fa2901570e246f475507d2cc838",
+    "source_files": 13,
+    "python_files": 11,
+    "non_python_allowlist": ["tools/libaura_yuki.so", "config/yuki_pair.formal.json"],
+    "only_added_file": "common/feature_intents.py",
+    "component_pins_before": 378,
+    "component_pins_after": 379,
+    "business_options": {},
+    "gui_configuration_change": "config/board_avatar_gtk.json.character_pair.selection_sha256",
+    "new_pair_sha256": "998710fc12bf442d6baea501bab0234665b666caa29f4be8f685741d50d82099",
+    "new_native_sha256": "b2432e75a75e4dbdebee8e89a141a68ba00671c33b2b258b81ce16794b2c73d2",
+    "preserved": "Small ASR / 3 threads / every other GUI and business option / persona / presentation / playback and capture policy"
+  },
+  "local_validation": {
+    "guard_tests": 4,
+    "merge_and_publisher_tests": 6,
+    "result": "PASS",
+    "proof": "DRY_VALIDATION.json",
+    "details": [
+      "Exact 13 actual public source/binary payload hashes, native build receipt and paired selection validate.",
+      "Unknown/missing/tampered payload, receipt, changed ASR settings and business/gui option overrides reject.",
+      "Persona/presentation/unrelated runtime pin changes reject; ARM64 ELF and formal selection constant match.",
+      "Actual GUI assignment changes only nested selection SHA; complete old config is otherwise preserved.",
+      "Original apply read/create/replace helpers, normal-closed/no-force journal, publisher/writer locks, bootstrap/private root and complete source checks remain.",
+      "Start/ready source() alone changes native binding; all other publisher functions are AST-identical.",
+      "The v16 no-object capture exception accepts only never-armed PAUSED/mic=false/recording IDLE/task DISABLED/no fault/no pending metadata. Active/fault/pending/previously armed cases reject."
+    ]
+  },
+  "root_commands": [
+    "python -B guard_v16_paused.py guard --execute-root-only --spec <v16-spec.json>",
+    "python -B guard_v16_paused.py window-inspect --execute-root-only --spec <v16-spec.json>",
+    "python -B guard_v16_paused.py normal-close --execute-root-only --spec <v16-spec.json> --window-proof <actual_v16_window-inspect_*.json>",
+    "Complete the separately planned controlled native preview; if not accepted, restore original v16 while it is still unchanged.",
+    "python -B apply_v17_closed.py --execute-root-only --spec <v16-spec.json>",
+    "python -B publish_v17_ready.py start --execute-root-only --spec <this-directory/v17_spec.json>",
+    "python -B publish_v17_ready.py ready --execute-root-only --spec <this-directory/v17_spec.json>"
+  ],
+  "execution_notes": [
+    "Commands are interfaces for the main owner, not actions executed by this subagent. Omit --execute-root-only for source-only dry validation.",
+    "Root keeps explicit user PAUSED preference. The original ready_state reads and enforces that preference; this candidate never opens a mic itself.",
+    "Guard/normal-close use the old v16 native check. Start/ready require spec.native_library_sha256 to equal the fixed new reviewed native SHA and the actual startup component pin. The check is not removed.",
+    "apply creates only a new isolated v17_spec.json after a successful remote result. Original acceptance/spec.json and both upstream scripts are never edited.",
+    "The 13 payloads exclude the separately regenerated GUI config and original startup/source-manifest journals. No invented startup character_pair field is written.",
+    "Receipt validates compiled CPU facial-policy evidence only. Actual preview/FPS/physical dialogue acceptance remains a separate root decision.",
+    "Publication retains the upstream backup/intent/fsync replacement order. A partial failure leaves the normal-close guard in place; do not run start against incomplete pins or retry the same stage blindly. Root must inspect the owned stage journal/backup and recover deliberately.",
+    "No rollback, service stop/kill/restart, model, database content replay, permission changes or private-file export is added."
+  ],
+  "original_scripts_modified": false,
+  "original_spec_modified": false,
+  "hardware_model_or_full_remote_execution_by_subagent": false
+}

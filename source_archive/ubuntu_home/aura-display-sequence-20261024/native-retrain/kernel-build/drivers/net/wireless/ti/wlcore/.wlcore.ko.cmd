@@ -1,0 +1,1 @@
+cmd_drivers/net/wireless/ti/wlcore/wlcore.ko := /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ld -r  -EL  -maarch64elf  --build-id=sha1  -T scripts/module.lds -o drivers/net/wireless/ti/wlcore/wlcore.ko drivers/net/wireless/ti/wlcore/wlcore.o drivers/net/wireless/ti/wlcore/wlcore.mod.o;  true

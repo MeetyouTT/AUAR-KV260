@@ -1,0 +1,28 @@
+{
+  "boot_id": "4e34d2fb-8f97-4cda-a598-c01d510e5c99",
+  "installed_release": "/home/root/aura-ui-startup-20261009/releases/d2e45eb7fee4fa08",
+  "installed_unit": "[Unit]\nDescription=AURA cached avatar touchscreen interface\nWants=xserver-nodm.service systemd-modules-load.service\nAfter=local-fs.target xserver-nodm.service systemd-modules-load.service\nRequiresMountsFor=/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009\nStartLimitIntervalSec=300\nStartLimitBurst=5\n\n[Service]\nType=notify\nNotifyAccess=main\nUser=root\nEnvironment=DISPLAY=:0 PYTHONUNBUFFERED=1\nWorkingDirectory=/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura\nExecStart=/usr/bin/python3 -B /home/root/aura-ui-startup-20261009/releases/d2e45eb7fee4fa08/launcher.py --config /home/root/aura-ui-startup-20261009/releases/d2e45eb7fee4fa08/config.json\nRestart=on-failure\nRestartSec=5\nTimeoutStartSec=240\nTimeoutStopSec=25\nKillMode=mixed\nStandardOutput=journal\nStandardError=journal\nSyslogIdentifier=aura-avatar-ui\n\n[Install]\nWantedBy=graphical.target\n",
+  "files": {
+    "launcher.py": "61d852c0fd02077c0d6d167516cad90401e49551ff0e64f7e3fcaca3dcba932d",
+    "config.json": "5c9279a8250ba5077556cff92abb27ee7f4e7483b5f8e98bf98aac92d92f397b",
+    "aura-avatar-ui.service": "17554c9179e5660757da2a28b8408a1ea93b6377deb4cded7eebc77d3c0d7ab2",
+    "test_display_fallback.py": "b5ccc64e9ec73281a4af5eb7c0f449d5e9bf72efb30228017da5861c56839c08",
+    "test_display_startup.py": "a2877bb3d9787d30e1b22e523e65652b97fc0c765617ddff785ec1d08c5fef8e"
+  },
+  "supervisor_pid": 1047,
+  "active_args": [
+    "/usr/bin/python3",
+    "-B",
+    "/home/root/aura-ui-startup-20261009/releases/190bbd429af06931/launcher.py",
+    "--config",
+    "/home/root/aura-ui-startup-20261009/releases/190bbd429af06931/config.json",
+    ""
+  ],
+  "recovery_marker_exists": false,
+  "saved_artifacts": {
+    "board_display_tests.log": {
+      "bytes": 1835,
+      "sha256": "aeeb5296baa923dd885820b2003668c75de69a8f89a192f4407e6062b03c3798"
+    }
+  }
+}

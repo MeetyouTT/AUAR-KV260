@@ -1,0 +1,27 @@
+{
+  "read_date": "2026-10-31",
+  "sources_are_primary": true,
+  "upstream_source_pin_is_not_installed_binary_validation": true,
+  "version_binding": {
+    "local_config_ollama_version": "0.40.13",
+    "ollama_upstream_tag": "v0.40.13",
+    "ollama_upstream_commit": "04088e7c9d41cba5d33bafbf788d87a465c79d5b",
+    "upstream_LLAMA_CPP_VERSION": "b11963",
+    "llama_upstream_commit": "39febd2adb947b70da35e95f9351b3bf58ad170a"
+  },
+  "sources": [
+    {"url": "https://k2-fsa.github.io/sherpa/onnx/pretrained_models/small-online-models.html", "supports": "small true online model shortlist for constrained embedded systems; not a KV260 coexistence benchmark"},
+    {"url": "https://k2-fsa.github.io/sherpa/onnx/pretrained_models/online-ctc/zipformer-ctc-models.html", "supports": "2025-04-01 small Chinese byte-BPE CTC model, 25M int8 ONNX, OnlineRecognizer and microphone path; example endpoint defaults"},
+    {"url": "https://docs.ollama.com/api/chat", "supports": "separate load/prompt/decode metrics, cache count, schema, think and done semantics; docs may evolve"},
+    {"url": "https://github.com/ollama/ollama/blob/v0.40.13/LLAMA_CPP_VERSION", "supports": "b11963 upstream dependency pin", "retrieval": "GitHub fetch"},
+    {"url": "https://github.com/ollama/ollama/blob/v0.40.13/api/types.go", "supports": "num_thread, num_batch and draft_num_predict are runner load options", "retrieval": "web source"},
+    {"url": "https://github.com/ollama/ollama/blob/v0.40.13/llm/llama_server.go", "supports": "explicit NumThread becomes -t; default auto-detect; appendDraftArgs requires a draft type or path and positive budget; source sets cache_prompt true", "line_references": {"thread_count": [446, 450], "appendDraftArgs": [843, 861], "cache_prompt": [2307, 2313]}, "retrieval": "GitHub fetch"},
+    {"url": "https://github.com/ollama/ollama/blob/v0.40.13/docs/modelfile.mdx", "supports": "draft_num_predict only with available separate drafter or embedded MTP; not an automatic accelerator", "retrieval": "GitHub fetch and web"},
+    {"url": "https://github.com/ggml-org/llama.cpp/blob/b11963/docs/speculative.md", "supports": "draft/EAGLE/DFlash/MTP/ngram mechanisms and acceptance dependence; target-specific drafter requirements", "retrieval": "GitHub fetch"},
+    {"url": "https://github.com/ggml-org/llama.cpp/blob/b11963/grammars/README.md", "supports": "documented JSON Schema subset and prefixItems limitation", "line_references": {"prefixItems_limitation": [209, 209]}, "retrieval": "GitHub fetch"},
+    {"url": "https://github.com/ggml-org/llama.cpp/blob/b11963/common/common.cpp", "supports": "Windows physical core enumeration; common_cpu_get_num_math returns physical count on Windows; default thread postprocessing", "line_references": {"Windows_physical_cores": [120, 150], "math_threads": [206, 231], "defaults": [292, 301]}, "retrieval": "GitHub fetch"},
+    {"url": "https://github.com/ggml-org/llama.cpp/blob/b11963/common/arg.cpp", "supports": "generation -t/--threads and batch/prompt -tb/--threads-batch; short option case matters", "line_references": {"thread_options": [1528, 1546]}, "retrieval": "GitHub fetch"},
+    {"url": "https://api.github.com/repos/ollama/ollama/git/ref/tags/v0.40.13", "supports": "upstream tag resolves to recorded commit", "retrieval": "GitHub fetch"},
+    {"url": "https://api.github.com/repos/ggml-org/llama.cpp/git/ref/tags/b11963", "supports": "upstream tag resolves to recorded commit", "retrieval": "GitHub fetch"}
+  ]
+}

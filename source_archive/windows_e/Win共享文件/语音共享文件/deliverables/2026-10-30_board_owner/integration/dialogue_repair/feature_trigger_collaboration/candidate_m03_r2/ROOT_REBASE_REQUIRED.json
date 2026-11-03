@@ -1,0 +1,17 @@
+{
+  "schema": "aura.m03-r2.root-rebase-required.v1",
+  "status": "FROZEN_SOURCE_REVIEW_ONLY_DO_NOT_MERGE_OVER_COLD_START_FIX",
+  "source_manifest_sha256": "b708c78fb75a2f621fdc99363d41342689951665bc8e0053486f44aba79b1bac",
+  "handoff_sha256": "cafa85f5a92a2154700de9639780150c1dbdaa47badfc379ad4f0cc5c59c3318",
+  "instruction_source": "Main/root reported a new actual boot bebd3e7d... and a separate minimal cold-start recovery patch touching board/runtime/board_business.py.",
+  "historical_test_baseline": "Saved v18 startup12a26c.../manifestf694dd... before that cold-start repair.",
+  "collision": "M03-r2 board_business.py is a registration-only hunk against bb82c154.... Never overwrite the restored cold-start implementation with this complete file.",
+  "required_next_steps": [
+    "Root finishes recovery and records the fresh actual release/source mapping.",
+    "Apply only the reviewed M03 registration hunk by a three-way merge retaining the recovery change.",
+    "Revalidate the Store and presentation baseline pins and merge behavior against the recovered version.",
+    "Only root exclusively executes an isolated ARM replay with a newly reviewed baseline binding before any date-delete deployment."
+  ],
+  "source_or_original_failures_modified": false,
+  "production_hardware_models_or_private_store_access_by_this_chat": false
+}

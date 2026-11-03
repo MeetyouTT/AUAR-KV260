@@ -1,0 +1,14 @@
+{
+  "status": "AWAITING_EXPLICIT_APPROVAL",
+  "action": "actual_face_metadata_network_acceptance",
+  "source": "Board private INT8 face gallery, 192.168.50.2",
+  "destination": "User Windows doll Voice service, 192.168.50.1:8792, forwarding to local identity Hub",
+  "payload": ["opaque face identity IDs", "SHA256 fingerprints of face templates", "gallery model ID and revision"],
+  "excluded": ["face images", "embedding vectors", "names", "audio recordings"],
+  "purpose": "Verify face/voice identity linking and invalidate stale or deleted face links",
+  "rejected_before_execution": true,
+  "automatic_review_reason": "Sensitive biometric metadata transfer requires explicit authorization of this payload and destination",
+  "blocked_script": "verify_arm_bridge.py",
+  "safe_alternative": "verify_arm_transport.py sends public PCM only and does not read or transmit a face gallery",
+  "human_identity_acceptance": "PENDING"
+}

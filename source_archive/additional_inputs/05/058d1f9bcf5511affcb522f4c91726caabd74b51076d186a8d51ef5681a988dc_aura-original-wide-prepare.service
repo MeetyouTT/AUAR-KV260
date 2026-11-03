@@ -1,0 +1,19 @@
+# Offline candidate. Install only with a freshly sealed contract and activation.
+[Unit]
+Description=AURA original wide platform and ID STOP startup barrier
+Requires=dfx-mgr.service kv260-repaired-zocl.service
+After=local-fs.target dfx-mgr.service kv260-repaired-zocl.service dpu-auto-config.service
+# The saved unit inventory also lists this generated legacy startup helper.
+# Order after it if the existing boot pulls it in; do not enable/start it here.
+Before=aura-camera-ui.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Restart=no
+TimeoutStartSec=infinity
+TimeoutStopSec=infinity
+KillMode=process
+SendSIGKILL=no
+UMask=0077
+ExecStart=/usr/bin/python3 -B /usr/local/lib/aura-boot-recovery/v1/boot_recovery.py prepare

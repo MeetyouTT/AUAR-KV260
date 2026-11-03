@@ -1,0 +1,15 @@
+原独立声纹流程审查及合成测试已完成，24项全过；尚未审入口拆分候选。
+
+原口令：裸“登记声纹”“帮我登记声纹”“注册我的声纹”会提示带姓名重新说，并不建立待姓名状态或开始采样。可直接说“帮我登记声纹，我叫某某”。开场命令本身的PCM不计样本，接着原SpeakerDevice收到三段不同原PCM SHA的语音。默认原质量边界是16kHz单声道PCM16、每段3–20秒，其中WebRTC mode2/30ms判断的有效语音至少2.5秒；提示建议每段3–10秒。三段还需原向量一致性通过，随后明确说“确认保存声纹”才提交；“确认登记”“好的”“确认”都不能替代。原session窗口180秒，写入保留声纹库revision CAS和max32。
+
+同名不等于更新。原SpeakerDevice保存每次生成新UUID，并不按display_name寻找替换ID；与已有voice过于接近则拒绝新增，距离较远可以出现同名另一条目。不能承诺“同名自动更新”，更不能因此替换原voice或把face名自动绑到voice。原删除同名选择还要求唯一对应，因此多个同名也会拒绝含糊删除。
+
+无视觉边界：SpeakerDevice.turn只有meta/text/pcm，原BoardSpeakerBusiness.turn也没有visual参数。可在原有效audio owner、对话scope、deadline、generation检查下独立采样保存，不需要face1或face KNOWN。独立voice保存不发profile grant，未校准时不能把样本保存宣称为已确认说话者；即使匹配提示名字，也不会自动开放私人记忆。business.turn后的after_original_voice_turn只校对已有derived voice引用、记录原控制证据，不创建新的跨模态关联。不可为独立voice入口调用unified route/FaceExchange或同名自动关联。
+
+最小入口建议：先识别显式模态，再调用任何business.route/turn。faceonly走原face flow，voiceonly及其后续三段走原business.turn。另一模态已active时应明确忙/要求先完成或取消，不能把另一模态口令吞成voice样本，也不能隐式取消正在进行的face。原business.public.active合并了speaker.sessions和unified router active/name_waiting，不能当成精确的standalone voice active。
+
+已复现串扰反例：原SpeakerDevice的samples态将未识别为query/start/cancel/delete的普通句作为采样；直接把“登记视觉，我叫合成视觉”交给它，会增加一个voice样本。这说明分流必须发生在原turn之前。原认可的状态问句如“查询声纹保存状态”不会消费样本；“声纹登记好了么”不属于现窄规则，active时可能成为普通采样，不宜在现场建议使用。此审查不扩展任何口令解析规则。
+
+意外reset：原Recording.cancel/_auto_fail及select_conversation/profile调用reset_enrollment，继而LocalIdentityReplies.reset同时清face flow和business；business.reset会清独立speaker.sessions和save_receipts。刚部署的c514/01b NoSpeech修复避免真空识别走此清理，但真服务故障、明确暂停/取消、30秒audio会话静音关闭仍保持原清理语义，不应顺手移除。
+
+测试覆盖：原口令及带姓名start、开场不计样本、三独立SHA、重复PCM拒绝、2.5秒总录音不足、3秒录音中2.49秒有效拒绝/2.52秒接受、query不采样、不一致向量失败、严格最终确认、同名近声拒新增/远声新ID、取消/180秒过期、原request幂等。测试只在RAM使用合成store/encoder/VAD和生成PCM，无SSH、设备、相机、真实库、原录音或模型访问；没有修改生产或其它代理候选。

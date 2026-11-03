@@ -1,0 +1,63 @@
+{
+  "actual_device_access": false,
+  "actual_private_store_access": false,
+  "approved_product_payload_sha256": "06fa0931fff7a6d0696c8357af44af1f69d1aece3d2114c71473daa0031b3917",
+  "default_dry": true,
+  "entry_actions": [
+    "guard",
+    "window-inspect",
+    "normal-close",
+    "apply",
+    "start",
+    "ready"
+  ],
+  "files": {
+    "FROZEN_APPLY_WITH_WAIT.py": {
+      "bytes": 185528,
+      "sha256": "da7144309025c71bfb545e9277416d6b9df1ebae12c7cc45e4a148918cfc2424"
+    },
+    "LOCAL_TEST_RESULT.json": {
+      "bytes": 3157,
+      "sha256": "1721e9eb3bb3536d2db4a4c95c92dcc5215bb402f6ff8539b5b0264391ca6617"
+    },
+    "ownerless_port_wait.py": {
+      "bytes": 3317,
+      "sha256": "c9d38b5c7a17ecea206af466c1728b5979bdff756d7e74cbfc0f3e5401283664"
+    },
+    "run_minor_port_wait.py": {
+      "bytes": 3835,
+      "sha256": "1c5bfcc92b95caed5e2ed7b6843dc946c5e6b62213d99d0884b0d4672402d0e0"
+    },
+    "test_ownerless_port_wait.py": {
+      "bytes": 9983,
+      "sha256": "bac051365f6c77a79b646f74b98f9c3d057755a5415807f859e3d5f32b8a5762"
+    }
+  },
+  "linux_test_command": "python3 -B -m unittest test_ownerless_port_wait.PortReleaseWait.test_real_linux_listener_on_owned_ephemeral_port_is_detected -v",
+  "linux_test_scope": "Creates and closes one owned loopback listener on an OS-selected ephemeral port and reads procfs. Does not open the production control port.",
+  "maximum_port_wait_seconds": 70,
+  "original_minor_tools_or_product_files_modified": false,
+  "original_tool_files_verified_unchanged": {
+    "APPROVED_PAYLOAD.json": "06fa0931fff7a6d0696c8357af44af1f69d1aece3d2114c71473daa0031b3917",
+    "FROZEN_APPLY_REMOTE.py": "19ed595b96d35f5ff0eccb0bca38b2bb1dd53cef4c69ad9854febba1a05d475f",
+    "FROZEN_PUBLISH_BASELINE_REMOTE.py": "fb997bbfa52a4786570b1e551f4ce212beb3a6c4fbf770a99e1edea32f6d8cfe",
+    "FROZEN_PUBLISH_MINOR_REMOTE.py": "ede7cefcddefeec7791753baf370864888542065811922284bc871f8dd85a0bd",
+    "LOCAL_TEST_RESULT.json": "c71af96e190ee40c98c1ae0a9c446def557180263edc4abf88316966aaf94df1",
+    "apply_minor_closed.py": "81c3a3240f028dc7207e11fff7430ad34beb6603d3e8c1d8c0b58bf347d26df5",
+    "baseline_spec.json": "ea3925fea2bb8135fa1fd62c8793ba3d8030e17c835df8fded6140b3febf4685",
+    "minor_common.py": "4fa91837f57f529d6e67542f7726b3573a213365c8c1d1712a8958bc834cb5da",
+    "prepare_minor.py": "836aa58509e2274557300c9546062e57ca6e4092bb1167815d748fa0cd550c71",
+    "proposed_spec.json": "d54037ad13a395617c378b56b9677497526026570ae4bd943813bda4f285fd66",
+    "publish_minor.py": "82952fad8450482822d6c755b02765fe036a0790f0b565c52784adbc6116d262",
+    "test_minor_release.py": "6d0c2bca47a5981a905e38d402580ab1b5a7e21eaedda2d142f353e70b54b75b"
+  },
+  "probes": [
+    "Fresh boot/camera and ownerless unit/GTK process proof before every bind attempt and after success",
+    "Reject active TCP/TCP6 LISTEN on the control port immediately",
+    "Wait only on EADDRINUSE with no active listener, at most 70 seconds in 250ms steps",
+    "Other socket errors, new owner, boot change, malformed or unavailable IPv4 procfs fail closed"
+  ],
+  "real_linux_listener_test_pending": true,
+  "status": "SEPARATE_OWNERLESS_PORT_WAIT_TOOL_CANDIDATE_NOT_EXECUTED",
+  "tool_entry": "run_minor_port_wait.py"
+}

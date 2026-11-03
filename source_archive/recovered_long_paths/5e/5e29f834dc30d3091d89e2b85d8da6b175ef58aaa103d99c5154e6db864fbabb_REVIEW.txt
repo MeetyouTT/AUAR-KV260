@@ -1,0 +1,18 @@
+initialize_clock单方法overlay独立审阅（2026-11-02，洛杉矶）
+
+结论 PASS_NO_CODE_REVIEW_BLOCKERS，审阅目标 business SHA aac26f39b8cbec1496df93a3de24b0bc2a14289552d2728c585f3625ef779eae，基线b08209ec…。只改BoardBusinessRuntime.initialize_clock；Clock93b65ec3…及client600e044d…源码不改。三文件独立登记候选原c01bb内容也未改；AST精确替换该方法再还原，整个模块（包括LocalIdentityReplies mode/reset/epoch代码）恢复原AST。
+
+执行方式：只载入原assessment_cases.py中results初始化前的公共导入、类和夹具声明，避开作者测试及其报告写入尾部；精确抽取候选initialize_clock方法，在真实原Clock/client类型上执行，仅使用合成单调时钟、假HTTP socket和RAM持久化钩子。作者SOURCE与VALIDATION调用前后逐字节相同。未执行board命令、网络请求、模型、Store或真实anchor。
+
+关键核验：
+1. self.started/self.closed为真实Runtime构造末尾建立的bool属性，正式工厂在构造完成后initialize_clock，属性存在。首次取样保留原行为；第二次仅在仍未started/closed且原objects/boot/source/policy/anchor均稳定时允许。
+2. timeline.source_validator通常保存的是client.validate_sample的bound method。不同次属性访问产生不同method对象，Python的==会比较同self/同func；用!=做完整等价验证是正确的，不应改为is。换成另一个client的同名method会拒绝。
+3. retry只捕精确ClockUnavailable类型且args恰为sample_rtt_exceeded。HTTP framing、peer、role、Date、deadline、取消、其它Clock异常、子类/普通同文字异常都不重试。第二次仍走原client验证proof/source与原Clock policy；两份sample/proof/socket独立，第一份proof在原finally清掉，不重放拒绝样本。最多2次。
+4. 现有anchor拒绝时，原observe可能吞_save_locked失败；因此不能只看last_error。候选要求exact file_revision+1且anchor/source/policy/boot/path不变。原_save_locked只有os.replace成功后才更新file_revision，所以可信原源码下该增量是拒绝持久化成功的必要回执；隐藏revision conflict不+1即阻断第二GET。第二次原保存仍重新读文件revision并CAS核同boot anchor/source/policy，期间发生的新冲突原样抛出，不第三次。
+5. 无anchor时保持revision0；有RAM anchor无path时revision不变。它们没有可持久化的拒绝anchor记录，不伪造revision。成功新Date也不替换原UTC原点或缩小原误差界，只按原逻辑推进verified时间。
+6. token只在原clock RLock内复制短小metadata，锁内无HTTP、文件或SQL。网络前释放，原Store的SQL→clock锁序、权限/原anchor保存顺序、compaction门槛均不改。busy/fatal/deferred状态非空即拒绝续取。
+7. 两次sample_health_date共享首次计算的同一个绝对deadline，默认3秒；每份Date接受的原max_rtt仍1秒。剩余预算不足或取消不新建预算，成功才按原代码清刷新错误/计数并设600秒下次时点。这里保持的是原客户端绝对截止合同，不额外声称原OS锁/文件IO具备硬实时3秒总墙钟保证。
+
+18项独立检查全部通过，详见REVIEW_VERDICT.json。包含慢首包后全新快包成功、首次就取消、第二次wrong_role/wrong_peer/bad_date/RTT失败无第三次、慢且wrong_role不伪装RTT、第二份body内取消不创建anchor、先前非RTT拒绝不隐藏、bound verifier同实例/异实例、已started拒绝续取、RAM anchor及持久成功/冲突分支、共享截止、整个模块单方法变化、c01bb AST叠加保全。
+
+限制：本审查证明候选门槛和合成行为，不代表现场下一份health一定RTT<1秒，也不保证每次GUI启动成功；连续两份慢仍应保留原sample_rtt_exceeded失败。Root发布时需实读CPU返还后的最新startup/各pin，以该方法AST叠加到已审登记候选，不能整文件覆盖未合并的c01bb或覆盖CPU GTK/相机变更。没有读取真实anchor内容或修改作者payload。

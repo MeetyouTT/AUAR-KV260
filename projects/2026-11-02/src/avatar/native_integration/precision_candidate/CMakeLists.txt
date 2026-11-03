@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+project(yuki_tile_uv_cpu_test LANGUAGES CXX)
+get_filename_component(BASE "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+add_executable(uv_remap_test uv_remap_test.cpp allocation_counter.cpp)
+target_compile_features(uv_remap_test PRIVATE cxx_std_20)
+target_include_directories(uv_remap_test PRIVATE "${BASE}/native_integration/candidate_core/include")
+target_compile_options(uv_remap_test PRIVATE -O2 -Wall -Wextra -Wpedantic)

@@ -1,0 +1,137 @@
+﻿AUAR·雪妃：RAR源码复现包目录
+按用户提供的赛事方老师说明：完整源码＋重建脚本＋精简关键说明。
+以下是设计；目录应收齐实际源码，所有脚本均为建议目标。
+未收集真实源码，未生成业务占位文件，未制作RAR。
+
+auar_xuefei/
+├── README.md                              # 简介/器件/工具、架构、接口、复现顺序、目录对照及边界
+├── license                                # 队伍原创内容的正式开源许可
+├── third_party_notices.md                  # 代码/IP/模型/资源来源、许可及固定外部输入
+├── checksums.sha256                        # 可选：实际包内文件校验，不包含自身
+│
+├── src/                                   # 全部实际实现，保留现有源码包布局
+│   ├── fpga/
+│   │   ├── rtl/                            # 实际自研RTL、参数、package及必要头文件
+│   │   ├── bd/
+│   │   │   ├── create_bd.tcl               # PS、DPU、互联、自研IP和连线的建图入口
+│   │   │   └── address_map.json            # 地址、窗口、中断与ABI
+│   │   ├── constraints/
+│   │   │   ├── pins.xdc                    # 引脚、电平、驱动和边沿
+│   │   │   └── clocks.xdc                  # 实际时钟约束；已有时序例外和其他XDC也须保留
+│   │   ├── overlay/
+│   │   │   ├── aura-visual-servo.dtsi      # 实际设备树overlay源
+│   │   │   └── readme.md                   # 固件命名、接口与base DTB匹配要求
+│   │   ├── ip/
+│   │   │   ├── custom/                    # [条件] 实际自研封装IP源码及元数据
+│   │   │   └── ip_config.tcl               # IP版本、参数、来源和生成步骤；只由建图链调用一次
+│   │   └── xrt_metadata/                  # [条件] 选择从JSON/XML生成XCLBIN时的完整元数据输入
+│   ├── common/                            # 共享协议单一源码；沿用真实包名与模块名
+│   ├── kv260/
+│   │   ├── requirements.lock.txt           # ARM环境实际依赖锁
+│   │   ├── aura/                          # 实际板端源码包；包名若不同，保留原名
+│   │   └── native/                        # 实际C/C++、头文件及原有makefile/CMake等构建定义
+│   └── windows/
+│       ├── requirements.lock.txt           # Windows环境实际依赖锁
+│       ├── aura/                          # 实际模型服务源码包；保留原名和诊断模块
+│       ├── ollama/
+│       │   └── modelfile                   # 模型导入参数，权重位置由本机配置给出
+│       └── scripts/
+│           ├── start.ps1                   # 本项目服务启动及共享模块导入路径
+│           └── stop.ps1                    # 本项目所属进程收尾
+│
+├── config/                                # 脱敏模板，字段和目标运行文件名按真实加载器
+│   ├── readme.md                           # 原模板→实际目标文件映射；真实优先级和路径解析
+│   ├── board_avatar_gtk.example.json
+│   ├── board_camera_ui.example.json
+│   ├── board_identity.example.json
+│   ├── board_dialogue_model.example.json
+│   ├── board_ui_services.example.json
+│   ├── servo_calibration.example.json
+│   ├── pan_follow.shadow.example.json
+│   ├── timeline_memory.example.json
+│   ├── anonymous_identity.example.json
+│   ├── voice_latency.example.json
+│   ├── model_manifest.example.json
+│   ├── windows.model_inference.example.json
+│   ├── windows.model_storage.example.json
+│   └── toolchain_lock.example.json         # [条件] 程序确实需要时，从build/env.json统一生成
+│
+├── sim/
+│   └── rtl/
+│       ├── tb_registers.sv                 # 用现有真实测试台；以下名字是职责示意
+│       ├── tb_pwm.sv
+│       ├── tb_command_guard.sv
+│       ├── vectors/                       # 此处固定为RTL向量位置，run.tcl按相对路径访问
+│       └── run.tcl                        # 真实仿真入口，失败须返回非零
+│
+├── build/
+│   ├── reproduce.py                        # 统一参数/日志/退出码的入口，调用Vivado等真实工具
+│   ├── build.tcl                           # 建图→综合→实现→报告→BIT/XSA，不依赖历史DCP
+│   ├── export_firmware.py                  # 生成并核对BIT.BIN、DTBO、XCLBIN、shell.json
+│   ├── prepare_models.py                   # 取得/校验/改写/校准/量化/编译入口
+│   ├── build_native.sh                     # 调用包内真实原生构建定义
+│   └── env.json                            # 工具/补丁/平台/ABI/指纹/频率及固定输入
+│
+├── board/
+│   ├── systemd/
+│   │   ├── aura-camera.service
+│   │   ├── aura-business.service
+│   │   └── dropins/                       # [条件] 最终有效追加参数及加载顺序
+│   ├── udev/
+│   │   └── 99-aura-devices.rules            # [条件] 已采用的设备规则
+│   ├── system/
+│   │   ├── image_manifest.json             # 镜像/内核/XRT/VART/Python/base DTB的来源和校验
+│   │   └── patches/                       # [条件] 实际系统、驱动、设备树修改
+│   ├── deploy.json                         # 源→目标、权限、配置、解释器、服务、就绪和回滚
+│   └── install.sh                          # 按deploy.json执行，安装失败须停止
+│
+├── models/
+│   ├── readme.md                           # 各模型取得到部署的完整步骤与实际限制
+│   ├── manifest.csv                        # 固定来源/revision/文件/SHA/许可/接口/预处理/目标
+│   ├── adapt/                             # 原有导出、等价改写、校准、量化与编译适配源码
+│   └── calibration/                       # 数据来源/划分、quant_info、arch及编译配置
+│
+├── assets/                                # 最终使用且有权交付的必要原始资源
+│   ├── character/
+│   ├── fonts/
+│   └── audio/
+│       ├── reference/
+│       └── cues/
+│
+├── data/
+│   ├── metrics.csv                         # 数值、单位、版本、条件、优化对照及证据来源
+│   ├── samples/                           # 软件测试的小型公开/合成输入，不与RTL向量重复归档
+│   └── expected/                          # 参考输出、人工转写和容差
+│
+├── tests/
+│   ├── protocol/
+│   ├── kv260/
+│   │   └── bench_identity_stop.py          # [条件] 实际采用的验收脚本及其包内依赖
+│   ├── windows/
+│   └── integration/
+│
+├── skill/
+│   ├── README.md                           # 各项范围、用法、实际效果、失败来源和边界
+│   └── pynq-contract-testgen/              # 现有完整离线包，保留全部源/例子/证据/许可
+│       ├── readme.md
+│       ├── workflow.md
+│       ├── contract_format.md
+│       ├── case_studies.md
+│       ├── license
+│       ├── scripts/                       # generate.py、reproduce.py、package.py
+│       ├── templates/                     # PYNQ驱动与测试模板
+│       ├── examples/
+│       │   ├── adder/                     # 合同、合成HWH、模拟、独立参考和向量
+│       │   └── crc32/
+│       ├── tests/
+│       └── evidence/                      # 原有离线结果、日志及真实纠错说明
+│
+├── third_party/                           # [条件] 文中引用的必要上游源码/补丁/原许可
+│   ├── source/                            # 必需且允许交付的第三方源，含IP引用的真实头文件
+│   ├── patches/                           # 队伍对固定上游版本的实际修改
+│   └── licenses/                          # 原始许可文本
+│
+└── report/
+    ├── design_report.md                    # 正文源稿，覆盖AMD七项；正式PDF另交
+    ├── validation_summary.md               # 实际输入/方法/结果/失败/局限及关键工具报告摘录
+    └── ai_collaboration.md                 # 真实提示、回答、纠错和验证摘录

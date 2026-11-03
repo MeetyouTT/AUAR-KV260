@@ -1,0 +1,281 @@
+{
+  "read_only": true,
+  "utc": "2026-11-02T08:08:30.203639+00:00",
+  "boot_id": "903cfade-b93c-48fa-804e-379be1967313",
+  "unit": {
+    "Restart": "on-failure",
+    "TimeoutStopUSec": "1min 30s",
+    "MainPID": "96487",
+    "Result": "success",
+    "ExecMainPID": "96487",
+    "ExecMainCode": "0",
+    "ExecMainStatus": "0",
+    "ExecStart": "{ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B /home/root/aura-boundary-nav-20261029/editor-page-sync-v2/face_zone_editor.py --settings /home/root/aura-pan-wide-resume-20261029/55152f95/face-zone-settings.json ; ignore_errors=no ; start_time=[Sun 2026-11-01 23:31:39 PST] ; stop_time=[n/a] ; pid=96487 ; code=(null) ; status=0/0 }",
+    "ControlGroup": "/system.slice/aura-face-zone-editor.service",
+    "KillMode": "control-group",
+    "SendSIGKILL": "yes",
+    "Id": "aura-face-zone-editor.service",
+    "Requires": "system.slice sysinit.target",
+    "Wants": "",
+    "BindsTo": "",
+    "PartOf": "aura-avatar-ui.service",
+    "WantedBy": "aura-avatar-ui.service",
+    "Before": "shutdown.target",
+    "After": "system.slice systemd-journald.socket aura-avatar-ui.service sysinit.target basic.target",
+    "LoadState": "loaded",
+    "ActiveState": "active",
+    "SubState": "running",
+    "FragmentPath": "/etc/systemd/system/aura-face-zone-editor.service",
+    "DropInPaths": "/etc/systemd/system/aura-face-zone-editor.service.d/z-boundary-page-sync-20261029.conf /etc/systemd/system/aura-face-zone-editor.service.d/zz-boundary-page-sync-20261029.conf",
+    "Job": ""
+  },
+  "unit_files": {
+    "/etc/systemd/system/aura-face-zone-editor.service": {
+      "sha256": "8cfa029ca2917d7248e5cafa756d283413b09795128b1986c82f3a4e47ac5325",
+      "text": "[Unit]\nDescription=AURA face boundary display\nAfter=aura-avatar-ui.service\nPartOf=aura-avatar-ui.service\n[Service]\nType=simple\nExecStart=/usr/bin/python3 -B /home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/zone-editor-recenter-v1/face_zone_editor.py --settings /home/root/aura-pan-current-20261024/da36c36a/face-zone-settings.json\nRestart=on-failure\nRestartSec=3\n[Install]\nWantedBy=aura-avatar-ui.service\n"
+    },
+    "/etc/systemd/system/aura-face-zone-editor.service.d/z-boundary-page-sync-20261029.conf": {
+      "sha256": "7f72599243ed534175dadd0efd7738db42a393438343b3da2df96f1f7d8d8165",
+      "text": "[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-boundary-nav-20261029/editor-page-sync-v1/face_zone_editor.py --settings /home/root/aura-pan-wide-resume-20261029/55152f95/face-zone-settings.json\n"
+    },
+    "/etc/systemd/system/aura-face-zone-editor.service.d/zz-boundary-page-sync-20261029.conf": {
+      "sha256": "496add857eeb179395d439b2392c13a867bdab51c990d75178af98c0b7fdee66",
+      "text": "[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-boundary-nav-20261029/editor-page-sync-v2/face_zone_editor.py --settings /home/root/aura-pan-wide-resume-20261029/55152f95/face-zone-settings.json\n"
+    }
+  },
+  "process": {
+    "pid": 96487,
+    "birth_ticks": 2616081,
+    "cmdline_sha256": "01e4235db0ef119f57c936919ed990c9d9d18943e6e5c9364fc3a1cd53eef21b",
+    "argv": [
+      "/usr/bin/python3",
+      "-B",
+      "/home/root/aura-boundary-nav-20261029/editor-page-sync-v2/face_zone_editor.py",
+      "--settings",
+      "/home/root/aura-pan-wide-resume-20261029/55152f95/face-zone-settings.json"
+    ],
+    "cgroup": "11:debug:/\n10:blkio:/\n9:freezer:/\n8:pids:/system.slice/aura-face-zone-editor.service\n7:devices:/system.slice/aura-face-zone-editor.service\n6:cpuset:/\n5:perf_event:/\n4:memory:/system.slice/aura-face-zone-editor.service\n3:cpu,cpuacct:/\n2:net_cls,net_prio:/\n1:name=systemd:/system.slice/aura-face-zone-editor.service\n0::/system.slice/aura-face-zone-editor.service\n"
+  },
+  "settings": {
+    "path": "/home/root/aura-pan-wide-resume-20261029/55152f95/face-zone-settings.json",
+    "sha256": "75fa126b6834f32e5b4a8fa9323eb3cf1f9a4d2a58c897a077af40383e6e5c39",
+    "geometry_fields": {
+      "board_boot_id": "903cfade-b93c-48fa-804e-379be1967313",
+      "left_camera_ratio": 0.1,
+      "right_ratio": 0.7158253629442671,
+      "target_center_ratio": 0.5,
+      "frame_width": 640,
+      "frame_height": 480,
+      "mirror_horizontal": true,
+      "viewport": [
+        8,
+        112,
+        568,
+        300
+      ]
+    }
+  },
+  "sources": {
+    "/home/root/aura-boundary-nav-20261029/editor-page-sync-v2/face_zone_editor.py": {
+      "sha256": "6a8bce7270534bb3b0f71dff657eac5da92b46855fdb7c9748a63b678be8ede4",
+      "contract_excerpt": [
+        {
+          "line": 3,
+          "text": "from pathlib import Path"
+        },
+        {
+          "line": 4,
+          "text": "from boundary_visibility import VisibilityServer"
+        },
+        {
+          "line": 5,
+          "text": "os.environ['DISPLAY']=':0'"
+        },
+        {
+          "line": 6,
+          "text": "import gi"
+        },
+        {
+          "line": 50,
+          "text": "        self.pending=None;self.drag=False;self.timer=None;self.ratio=.75;self.last_slider_stop=0."
+        },
+        {
+          "line": 51,
+          "text": "        self.saved_fields={};self.left_camera_ratio=.1"
+        },
+        {
+          "line": 52,
+          "text": "        if path.is_file():"
+        },
+        {
+          "line": 53,
+          "text": "            old=json.loads(path.read_text());self.saved_fields=dict(old)"
+        },
+        {
+          "line": 54,
+          "text": "            self.ratio=float(old.get('right_ratio',.75));self.left_camera_ratio=float(old.get('left_camera_ratio',.1))"
+        },
+        {
+          "line": 55,
+          "text": "        if not math.isfinite(self.left_camera_ratio) or not 0<=self.left_camera_ratio<=.3:"
+        },
+        {
+          "line": 56,
+          "text": "            raise ValueError('Finite left camera boundary in 0..0.3 required')"
+        },
+        {
+          "line": 57,
+          "text": "        self.ratio=max(widget_ratio(.3),min(widget_ratio(.95),self.ratio));self.active=False;self.updating=False"
+        },
+        {
+          "line": 112,
+          "text": "        self.line.move(round(VIEW[0]+VIEW[2]*self.ratio)-3,VIEW[1]);self.line.resize(7,VIEW[3])"
+        },
+        {
+          "line": 113,
+          "text": "        self.left_line.move(round(CONTENT[0]+CONTENT[2]*self.left_camera_ratio)-2,CONTENT[1]);self.left_line.resize(5,CONTENT[3])"
+        },
+        {
+          "line": 114,
+          "text": "        self.center_line.move(round(CONTENT[0]+CONTENT[2]*self.target_center_ratio)-1,CONTENT[1]);self.center_line.resize(2,CONTENT[3])"
+        },
+        {
+          "line": 115,
+          "text": ""
+        },
+        {
+          "line": 134,
+          "text": ""
+        },
+        {
+          "line": 135,
+          "text": "    def queue_save(self):"
+        },
+        {
+          "line": 136,
+          "text": "        self.timer=None"
+        },
+        {
+          "line": 137,
+          "text": "        value=dict(self.saved_fields)"
+        },
+        {
+          "line": 138,
+          "text": "        value.update({'schema':'aura-face-zone-settings-1','board_boot_id':Path('/proc/sys/kernel/random/boot_id').read_text().strip(),"
+        },
+        {
+          "line": 139,
+          "text": "               'left_ratio':0.,'left_camera_ratio':self.left_camera_ratio,'right_ratio':self.ratio,'target_kind':'face','reference':'face_center',"
+        },
+        {
+          "line": 140,
+          "text": "               'left_reference':'face_box_left_edge','right_reference':'face_center',"
+        },
+        {
+          "line": 141,
+          "text": "               'frame_width':640,'frame_height':480,'mirror_horizontal':True,'viewport':list(VIEW),'updated_mono_ms':int(time.monotonic()*1000)})"
+        },
+        {
+          "line": 154,
+          "text": "                os.chmod(tmp,0o600);os.replace(tmp,self.path)"
+        },
+        {
+          "line": 155,
+          "text": "                GLib.idle_add(self.status.set_text,'已保存左线 '+str(round(value['left_camera_ratio']*100))+'%、右线 '+str(round(image_ratio(value['right_ratio'])*100))+'%；只用人脸位置。')"
+        },
+        {
+          "line": 156,
+          "text": "            except Exception as exc:GLib.idle_add(self.status.set_text,'边界保存失败：'+type(exc).__name__)"
+        },
+        {
+          "line": 157,
+          "text": ""
+        },
+        {
+          "line": 190,
+          "text": ""
+        },
+        {
+          "line": 191,
+          "text": "    def install_page_visibility(self):"
+        },
+        {
+          "line": 192,
+          "text": "        self.visibility_channel=VisibilityServer("
+        },
+        {
+          "line": 193,
+          "text": "            lambda fn,*args:GLib.idle_add(fn,*args,priority=GLib.PRIORITY_HIGH),self.page_visibility_applied)"
+        },
+        {
+          "line": 194,
+          "text": ""
+        },
+        {
+          "line": 195,
+          "text": "    def page_visibility_applied(self,page):"
+        },
+        {
+          "line": 196,
+          "text": "        if page!='vision':"
+        },
+        {
+          "line": 197,
+          "text": "            self.drag=False"
+        },
+        {
+          "line": 202,
+          "text": ""
+        },
+        {
+          "line": 203,
+          "text": "    def poll(self):"
+        },
+        {
+          "line": 204,
+          "text": "        opener=urllib.request.build_opener(urllib.request.ProxyHandler({}));active=False;next_ui=0;following={};page_revision=-1"
+        },
+        {
+          "line": 205,
+          "text": "        while not self.closed.is_set():"
+        },
+        {
+          "line": 218,
+          "text": "                    packet=self.get(opener,8790,'/v1/motion/face/observation')"
+        },
+        {
+          "line": 219,
+          "text": "                    face,hint,position=face_position(packet,self.boot,int(time.monotonic()*1000),self.left_camera_ratio,image_ratio(self.ratio))"
+        },
+        {
+          "line": 220,
+          "text": "                    control=following.get('control') or {}"
+        },
+        {
+          "line": 221,
+          "text": "                    if self.recenter_enabled and face is not None:"
+        },
+        {
+          "line": 244,
+          "text": ""
+        },
+        {
+          "line": 245,
+          "text": "def main():"
+        },
+        {
+          "line": 246,
+          "text": "    p=argparse.ArgumentParser();p.add_argument('--settings',type=Path,required=True);args=p.parse_args()"
+        },
+        {
+          "line": 247,
+          "text": "    setup_font();editor=Editor(args.settings);editor.install_page_visibility();Gtk.main()"
+        },
+        {
+          "line": 248,
+          "text": ""
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "started_utc": "2026-10-02T07:59:03.874636+00:00",
+  "source": "/home/ghmd/kv260-dpu41-control-20261001/downloads/kv260-benchmark-b4096-dpu41-runtime.tar.gz",
+  "destination": "/home/root/kv260-test-20261001/kv260-benchmark-b4096-dpu41-runtime.tar.gz",
+  "bytes": 3285722,
+  "expected_sha256": "74470f03231a21ddd4b4525f299688b498910c23b3e85f658791c9b34ee3c80d",
+  "board_code": "import os,sys,termios,tty,time,select,base64,hashlib\nfrom pathlib import Path\np=Path(sys.argv[1]); expected=sys.argv[2]; count=int(sys.argv[3]); tmp=p.with_name(p.name+'.partial')\nif p.exists() or tmp.exists(): raise SystemExit('Refusing existing image or partial file')\np.parent.mkdir(parents=True,exist_ok=True)\nfd=sys.stdin.fileno(); old=termios.tcgetattr(fd); h=hashlib.sha256(); total=0; seq=0; pending=b''\ntry:\n tty.setraw(fd)\n with tmp.open('xb') as out:\n  os.write(1,b'PACKAGE_READY\\n')\n  while total<count:\n   until=time.monotonic()+20\n   while b'\\n' not in pending:\n    if time.monotonic()>until: raise RuntimeError('Frame timeout')\n    if select.select([fd],[],[],.2)[0]: pending+=os.read(fd,4096)\n   line,pending=pending.split(b'\\n',1); index,checksum,data=line.split(b' ',2)\n   data=base64.b64decode(data,validate=True)\n   if int(index)!=seq or hashlib.sha256(data).hexdigest().encode()!=checksum: raise RuntimeError('Bad frame')\n   if total+len(data)>count: raise RuntimeError('Unexpected size')\n   out.write(data); h.update(data); total+=len(data)\n   os.write(1,('PACKAGE_ACK %d\\n'%seq).encode()); seq+=1\n  out.flush(); os.fsync(out.fileno())\n if h.hexdigest()!=expected: raise RuntimeError('Final hash mismatch')\n os.link(str(tmp),str(p)); tmp.unlink()\n os.write(1,('PACKAGE_DONE %d %s\\n'%(total,h.hexdigest())).encode())\nfinally:\n termios.tcsetattr(fd,termios.TCSANOW,old)\n",
+  "complete": true,
+  "frames_acknowledged": 1070,
+  "finished_utc": "2026-10-02T08:05:58.307194+00:00"
+}

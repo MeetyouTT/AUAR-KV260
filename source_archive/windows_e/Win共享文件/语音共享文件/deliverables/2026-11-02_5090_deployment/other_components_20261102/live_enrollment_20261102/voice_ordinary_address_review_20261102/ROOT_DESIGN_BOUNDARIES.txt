@@ -1,0 +1,84 @@
+Review of root proposed three-file implementation
+
+Scope: worker + board_business.py (Runtime and LIR) + board_dialogue.py.
+No product edits or runtime tests were performed in this supplemental review.
+
+The chosen request-level provider in Controller._messages is an appropriate
+owner boundary. Reuse the existing sole-worker progressive analysis and strict
+legacy records; derive the standalone address candidate from the exact fresh
+Provisional streak only. The proposed 300s volatile conversation address is a
+separate adopted nickname lease, not an extension of a biometric proof or an
+identity/private-memory authorization. Root owns final candidate implementation
+and explicit offline/runtime validation.
+
+Concrete early-query routing detail
+LocalIdentityReplies.__call__ (board_business.py:236) may return None BEFORE
+calling controller.prepare_local_sequence, only when the full utterance is a
+strict everyday self-recognition query and no face/voice/joint/name-waiting
+workflow is active. Actual Yuki _route returns (handler_result,None), so this
+causes normal plan=None flow: Jobs analysis_provider runs before prepare_text.
+In contrast, returning DIALOGUE_ROUTE inside produce is too late: the existing
+prepare_local_sequence immediately invokes its own _prepare, before the outer
+Jobs._execute gets to analysis_provider. Calling original business.turn/route
+first is also wrong for this route: after_original_voice_turn creates a
+precomputed control record that can suppress the later actual PCM analysis.
+Readonly status questions and active enrollment workflows keep original paths.
+
+First-turn adoption and cancellation
+- The first pending candidate must not become a shared conversation lease just
+  because the worker future completes. Require successful exact-request consumer
+  adoption with current generation/session/cid/source, same scope, same direct
+  cancellation Event, original deadline, model/dimension/revision/source token.
+- A cancel between worker completion and consumer adoption must prevent the
+  lease; a late callback from an older generation must not clear or overwrite a
+  newer adopted lease. Retain only tiny metadata plus the direct Event, not job,
+  PCM, embedding or closure references in any persistent RAM cache.
+- Wait with the minimum of original 12s analysis deadline, original request
+  deadline and remaining turn budget. Never refresh any capture budget or block
+  under service.lock/controller condition/timeline locks. Busy/failed analysis
+  falls back to ordinary dialogue without fake progress or repeated-query cues.
+- Worker analysis_result status COMPLETE alone is insufficient: the existing
+  future callback can run after cancellation, and row.job may already be None.
+  Keep/check the pending candidate's cancellation ownership until adoption.
+
+Short, rejected and duplicate captures are different cases
+- INSUFFICIENT_SPEECH / voiced_ms 0: preserve the already adopted nickname (or
+  pending acquisition) and keep normal chat. It provides no contradictory match.
+- Valid quality + current named match UNKNOWN or AMBIGUOUS: clear the adopted
+  nickname. Existing Provisional.observe clears that actor's streak on rejection.
+- No exact current-pair membership alone does NOT prove UNKNOWN: a repeated PCM
+  in a new capture may match KNOWN while original distinctness logic declines to
+  append the new capture ID. Treat this as NO_FRESH_RESULT; do not falsely call
+  it UNKNOWN or count it as a fresh contribution.
+- A stale previous-generation streak never supplies the new candidate. Check
+  exact generation, zipped(capture_id,digest), model/revision and observation time.
+- Source change/no enrollment must invalidate the lease before use. Perform
+  store checks on its owner worker, never via a foreground SQLite connection.
+
+Lease lifetime versus normal rearm
+Recording's successful ACK/rearm path calls Jobs.cancel/_invalidate, increasing
+Jobs generation even though the same conversational session continues. Clearing
+all adopted nicknames on every such generation change defeats follow-up natural
+addressing. Cancel only that capture's unadopted result; clear the conversation
+lease on explicit workflow reset/end/session/cid/profile change, 300s expiry,
+source change or accepted negative evidence. Exact generation still protects
+pending capture adoption.
+
+Known asynchronous boundary
+If later conversation turns immediately use a valid adopted nickname while their
+new capture analysis runs in the background, an incoming different speaker can
+receive the previously adopted address on that same turn before UNKNOWN arrives.
+The background result can clear the lease for subsequent context; it cannot
+retract already emitted audio. That behavior is compatible with a provisional
+current-conversation address, but must not be described as current-capture
+identity verification. Current user reports only one speaker; no speaker-change
+accuracy has been accepted. Avoid introducing any identity/profile authority.
+
+Context note
+Only a short bounded display_name candidate plus fixed nonauthorizing semantics
+belongs in the model-input note. Do not send identity IDs, source tokens, scores,
+private DB fields or templates. Count the note in the existing 2048-byte upper
+bound budget or omit it; do not silently add an unbudgeted system message. Raw
+ASR, selected persona, normal memory scope and actual profile grants are unchanged.
+Names may naturally appear in ordinary generated assistant history; do not write
+new candidate facts or custom persistent identity events.

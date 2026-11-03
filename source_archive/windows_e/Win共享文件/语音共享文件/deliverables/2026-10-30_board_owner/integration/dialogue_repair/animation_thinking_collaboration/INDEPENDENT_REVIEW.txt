@@ -1,0 +1,10 @@
+独立源码审查结论：未发现阻止受控预览的代码问题；不等于实机画面、帧率或口型验收通过。
+
+1. output.read/position 仅访问 GUI 进程内缓存。新读取不会增加 GStreamer IPC、10ms sink poll 或麦克风工作；正常 active 路径替代旧 ready 属性的内部 read，空闲多一次小 dict 拷贝。没有实测 CPU 开销数据。
+2. ASR/生成等待闭眼；只有 active+ready+audible+真实 answer track、且未暂停/结束/报错时睁眼并转发嘴型。反馈音、PCM 间隙、暂停均闭眼收口。音频位置仍取 sink 缓存。
+3. 取消清 waiting 并继承原 stream/音频/generation 清理；完整播放 ACK 不变。旧 generation/sequence/sample 拒绝规则保留。双缓存读取不是原子快照，边界可能保守地多闭一帧，没有由不匹配 track 授权嘴型的路径。
+4. expression 低字节保留原六种表情；只接受 0x100/0x200 单一眼睛策略，拒绝未知/冲突位。新版 Python 先验证 native capability；配套库和适配器必须一起安装。超过 150ms 的 native control 会收口闭眼。
+5. 5 文件 overlay 与功能 v2 的 7 文件无交集；pair 仅更新 native_yuki/lib 两个 renderer pin，未固定 yuki_jobs_candidate。主控合并最新功能候选后仍须重封 source/config/startup pins，并同步 selection SHA 998710fc12bf442d6baea501bab0234665b666caa29f4be8f685741d50d82099。
+
+已本地核验源文件、overlay、native build receipt 的 SHA 一致，以及 native scheduler/prepare_portrait AST 未变。没有重跑原 25 tests、执行 native、访问设备/模型/私库或修改候选。
+现有 640/64/640 CPU 参数测试使用 Renderer 替身，不是实图，也不证明实际达到 16fps。下一步仍是主控保持 PAUSED/mic=false 的受控预览。

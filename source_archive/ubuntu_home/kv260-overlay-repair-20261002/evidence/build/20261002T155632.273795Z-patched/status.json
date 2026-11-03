@@ -1,0 +1,167 @@
+{
+  "phase": "patched",
+  "jobs": 8,
+  "cross_compile": "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-",
+  "original_config_sha256": "3d97bf208930f5696093d2d1999b4a0b16bcb121c97d70ca286bb8d4986e81ef",
+  "commands": [
+    {
+      "name": "compiler",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-gcc",
+        "--version"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155632.273795Z-patched/compiler.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.008,
+      "sha256": "ee2c2cdcd3e65f25d3cc1bbdae6f9643bc678266cb809a5f91e1bfb429c32896"
+    },
+    {
+      "name": "assembler",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-as",
+        "--version"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155632.273795Z-patched/assembler.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.007,
+      "sha256": "6c74291390d1a7d0154ff7a93e3db5327df622f640dd271f9bbbee1d19de22b0"
+    },
+    {
+      "name": "linker",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ld",
+        "--version"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155632.273795Z-patched/linker.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.01,
+      "sha256": "baf28cae0cd6750b183c16415c56ab7a4519261b37ecb44cff845ced41e69336"
+    },
+    {
+      "name": "source-diff-check",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/XRT_patched",
+      "log": "evidence/build/20261002T155632.273795Z-patched/source-diff-check.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.006,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-diff",
+      "argv": [
+        "git",
+        "diff",
+        "--binary"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/XRT_patched",
+      "log": "evidence/build/20261002T155632.273795Z-patched/source-diff.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.006,
+      "sha256": "4c319fe15313db709bd396473cf0dc399435c11cc374274b6a5a225eb9c95661"
+    },
+    {
+      "name": "zocl-modules",
+      "argv": [
+        "make",
+        "-C",
+        "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+        "O=/home/ghmd/kv260-overlay-repair-20261002/build/kernel",
+        "ARCH=arm64",
+        "CROSS_COMPILE=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-",
+        "-j8",
+        "M=/home/ghmd/kv260-overlay-repair-20261002/sources/XRT_patched/src/runtime_src/core/edge/drm/zocl",
+        "modules"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155632.273795Z-patched/zocl-modules.log",
+      "returncode": 0,
+      "elapsed_seconds": 3.765,
+      "sha256": "85a9d279a317cb3b771c58c178e65a76100305e4305e2a7eb40999f0596b962d"
+    },
+    {
+      "name": "strip-debug",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-strip",
+        "--strip-debug",
+        "/home/ghmd/kv260-overlay-repair-20261002/artifacts/patched/zocl.ko"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155632.273795Z-patched/strip-debug.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.012,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "modinfo",
+      "argv": [
+        "/sbin/modinfo",
+        "/home/ghmd/kv260-overlay-repair-20261002/artifacts/patched/zocl.ko"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155632.273795Z-patched/modinfo.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.002,
+      "sha256": "9ebc9ee00eac3f15e3f799680edbfe8ba45c5afd433cda665a7e3b03e8cb78bc"
+    },
+    {
+      "name": "undefined-symbols",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-nm",
+        "-u",
+        "/home/ghmd/kv260-overlay-repair-20261002/artifacts/patched/zocl.ko"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155632.273795Z-patched/undefined-symbols.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.009,
+      "sha256": "8889430817bf6a18e438262e6d5d76033a93561604027113269c0a8e78f7c26c"
+    },
+    {
+      "name": "elf-sections",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "-h",
+        "-S",
+        "/home/ghmd/kv260-overlay-repair-20261002/artifacts/patched/zocl.ko"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "log": "evidence/build/20261002T155632.273795Z-patched/elf-sections.log",
+      "returncode": 0,
+      "elapsed_seconds": 0.01,
+      "sha256": "eb349a7f97c1b302117668aba3e0b32461caf078737f0fb884cc01dae4fce80f"
+    }
+  ],
+  "passed": true,
+  "kernel_commit": "19984dd147fa7fbb7cb14b17400263ad0925c189",
+  "xrt_commit": "43926231f7183688add2dccfd391b36a1f000bea",
+  "artifacts": {
+    "artifacts/patched/Module.symvers": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "artifacts/patched/modules.order": {
+      "bytes": 104,
+      "sha256": "62488e2ef8d489c26df291893ba53d4f976ea71a2c7d7fc2e591de8bfd3e502f"
+    },
+    "artifacts/patched/zocl.debug.ko": {
+      "bytes": 7435624,
+      "sha256": "bb0314f3e7e6d5c3fb3a85445215029a67d72fef144c333958eba4c16fad049c"
+    },
+    "artifacts/patched/zocl.ko": {
+      "bytes": 339600,
+      "sha256": "5cef5e0eba083419b3ece6fd4829a9f3112e3f0daaee513e1617d60ed1f7f412"
+    },
+    "artifacts/patched/zocl.mod.c": {
+      "bytes": 1396,
+      "sha256": "ebf0ac85bbf2c3d0656299311d18de72ffca966dce7495ed213c485d94b308ce"
+    }
+  },
+  "kernel_symvers_sha256": "6e582b60f2a379055924117f930e5ca0fac44c98d56f3b374dc3ce278da7b8ed"
+}

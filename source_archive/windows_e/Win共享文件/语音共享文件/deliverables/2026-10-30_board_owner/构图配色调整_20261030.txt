@@ -1,0 +1,22 @@
+雪妃外观调整已生效并保存为默认启动配置。
+
+构图：移除旧464×480素材contain造成的顶部空白，让原生角色使用完整423×516区域；原生投影只显示头顶至腰部，中心x=-50、顶部-3500、下沿-2090、按高度填充96%。保留完整头顶，下沿落在腰部；没有改模型、纹理、人格、音色或业务数据，没有额外截图缩放。
+
+配色：奶白#FCFCF3角色底、柔暖灰#F4EFF1卡片、藏蓝#303950标题、酒红#873A4D选中/主按钮；正文#282C3C、次级文字#5E5B6A。红/绿/琥珀状态语义保留，14项文字对比检查≥4.51。实际角色图及导航条已检查。
+
+本轮只做源码构建、启动与视觉检查，未追加性能基准测试。原生库只改3行投影参数，C导出和依赖相同；原renderer对象及播放核心未变。截图仅含公开角色及静态导航条，不含摄像头、身份或对话内容。
+
+当前root仍 /home/root/aura-character-xuefei-20261030/f94fca2c94288acb，但完整内容已有appearance增量，不能按初始f94f ZIP直接覆盖。
+当前startup SHA：4c78824ba9c1c04bb95389a49b64215a7f624a323becae637bc8d4e7c4db4d7e，304pins。
+当前完整manifest SHA：c575e94292cb605fb11db9f13d91b360d950908e2fe6c713dfe426f71b545891。
+当前原生库SHA：887546c09eb1897845c8d7f55a9e3f9b9c761448c7410f2b599259ae0b51efd2。
+最后观测supervisor560251/GTK560316、相机260102；后续重新读取PID/boot。默认服务入口未变，临时guard已移除。
+
+回执：integration/APPEARANCE_UPDATE.json、APPEARANCE_MANIFEST.json。
+预览：integration/appearance_patch/evidence/portrait_after.png、navigation_after.png。
+增量包：integration/appearance_patch/xuefei_waist_theme.overlay.zip。
+投影源/编译证据：integration/appearance_native_framing/HANDOFF.json。
+
+本次源文件备份在板端 /home/root/aura-character-appearance-20261030/waist-wine-v1/before；如仅撤回外观，正常关闭UI后恢复这7项程序文件及原manifest/绑定，再启动同一雪妃入口。不要为撤回外观直接调用正式角色发布器的rollback-start（它会恢复到更早的旧形象）。真实记忆/身份/设置不参与回滚。
+
+旧r3 runtime四settings/原stage与xuefei-static-cues公开提示音仍是正式依赖，保留不清理。

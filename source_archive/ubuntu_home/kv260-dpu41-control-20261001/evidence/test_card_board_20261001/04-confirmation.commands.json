@@ -1,0 +1,17 @@
+[
+  {
+    "id": "model_arch",
+    "command": "python3 -B -c 'import xir; r=xir.Graph.deserialize(\"/usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel\").get_root_subgraph(); print(\"child API:\", [k for k in dir(r) if \"child\" in k or \"topo\" in k]); print([(s.get_name(), {k:(hex(s.get_attr(k)) if k in (\"fingerprint\",\"dpu_fingerprint\") else s.get_attr(k)) for k in (\"device\",\"fingerprint\",\"dpu_fingerprint\",\"target\") if s.has_attr(k)}) for s in r.toposort_child_subgraph()])'",
+    "timeout": 30
+  },
+  {
+    "id": "network_config",
+    "command": "cat /lib/systemd/network/80-wired.network; networkctl status eth0 --no-pager; systemctl status dropbear.socket --no-pager | head -20; ip -br addr; ip route",
+    "timeout": 35
+  },
+  {
+    "id": "user_images",
+    "command": "find /home/root /tmp /boot /media -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \\) | head -60; ls -la /home/root; cat /sys/class/thermal/thermal_zone*/temp",
+    "timeout": 30
+  }
+]

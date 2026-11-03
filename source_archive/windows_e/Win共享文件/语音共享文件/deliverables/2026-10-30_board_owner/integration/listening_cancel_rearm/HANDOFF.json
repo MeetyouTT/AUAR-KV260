@@ -1,0 +1,40 @@
+{
+  "schema": "aura.production-listening-cancel-rearm.v2",
+  "status": "SOURCE_ONLY_PARENT_INTEGRATION_REQUIRED",
+  "saved_utc": "2026-10-31T05:44:56.468242+00:00",
+  "files": [
+    {
+      "target": "aura/tools/production_listening.py",
+      "source": "deliverables/2026-10-30_board_owner/integration/listening_cancel_rearm/after/aura/tools/production_listening.py",
+      "sha256": "b11e4a1fab51f91fc6e8b59901bbedc13c9fc5616411a191e6e801a14df26d47",
+      "bytes": 6609
+    }
+  ],
+  "inputs": {
+    "baseline_source": "deliverables/2026-10-30_board_owner/integration/listening_entry_fix/automatic_preference/after/aura/tools/production_listening.py",
+    "baseline_sha256": "d5f9dd7bbb978962a49be633325c6d66580da323f17384f1ca423bc76475e3fe",
+    "changed_files": [
+      "aura/tools/production_listening.py"
+    ]
+  },
+  "original_after_unchanged": true,
+  "gtk_unchanged": true,
+  "source_changes_only": [
+    "Bind original recording.cancel per instance",
+    "After successful internal/stop-this-turn cancel restore only previously-enabled listening with >=0.5s cooldown and WAITING_SERVICE",
+    "Explicit handsfree_toggle pause persists false and stays RAMfalse",
+    "Closed/_closing/runtime.closed or originally-paused never restore",
+    "Original cancel exception propagates with no restore",
+    "Original native/runtime/feedback/idle gates remain the only microphone admission"
+  ],
+  "tests": {
+    "command": "python -B deliverables/2026-10-30_board_owner/integration/listening_cancel_rearm/test_cancel_rearm.py",
+    "passed": 16,
+    "failed": 0,
+    "seconds": 0.04,
+    "scope": "Real paired VoiceFirst class and original listening tests with fake device/transport/pair; stop-turn rearm, pause/restart, shutdown, readiness, no implicit preference write, exception propagation"
+  },
+  "production_io_or_threads_added": false,
+  "actual_device_or_service_action": false,
+  "production_deployed": false
+}

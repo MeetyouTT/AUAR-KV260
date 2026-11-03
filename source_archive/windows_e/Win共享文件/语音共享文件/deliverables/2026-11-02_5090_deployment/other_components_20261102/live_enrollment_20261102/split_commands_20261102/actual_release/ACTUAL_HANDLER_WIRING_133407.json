@@ -1,0 +1,134 @@
+{
+  "host_utc": "2026-11-02T13:34:07.159460+00:00",
+  "board_result": {
+    "attach_methods": [
+      {
+        "function": "attach_speaker_business",
+        "code": [
+          {
+            "line": 156,
+            "source": "    def attach_speaker_business(self, business, readback=None):"
+          },
+          {
+            "line": 157,
+            "source": "        if self.flow.public()['active']:"
+          },
+          {
+            "line": 158,
+            "source": "            raise RuntimeError('Attach board speaker business before starting a face workflow')"
+          },
+          {
+            "line": 159,
+            "source": "        from board.runtime.audio.face_binding_bridge import FaceBindingBridge"
+          },
+          {
+            "line": 160,
+            "source": "        self.business = business"
+          },
+          {
+            "line": 161,
+            "source": "        self.bridge = FaceBindingBridge(self.snapshot, self.original_command, readback,"
+          },
+          {
+            "line": 162,
+            "source": "                                        clock=lambda: round(self.clock()*1000))"
+          },
+          {
+            "line": 163,
+            "source": "        self.flow.snapshot, self.flow.command = self.bridge.snapshot, self.bridge.command"
+          }
+        ]
+      },
+      {
+        "function": "attach_speaker_business",
+        "code": [
+          {
+            "line": 575,
+            "source": "    def attach_speaker_business(self, business, *, face_readback=None):"
+          },
+          {
+            "line": 576,
+            "source": "        \"\"\"Attach the one board CPU/three-store owner before starting UI jobs.\"\"\""
+          },
+          {
+            "line": 577,
+            "source": "        if self.started or self.closed or self.speaker_business is not None:"
+          },
+          {
+            "line": 578,
+            "source": "            raise RuntimeError('Attach speaker business once before startup')"
+          },
+          {
+            "line": 579,
+            "source": "        if (business.boot != self.boot_id or business.clock is not self.clock"
+          },
+          {
+            "line": 580,
+            "source": "                or business.wall_clock != self.timeline.event_time or business.data_origin != self.config.data_origin):"
+          },
+          {
+            "line": 581,
+            "source": "            raise ValueError('Speaker business must share the exact board boot, clock and data origin')"
+          },
+          {
+            "line": 582,
+            "source": "        if self.identity_handler is None:"
+          },
+          {
+            "line": 583,
+            "source": "            raise BoardCapabilityNotReady('board_identity_provider')"
+          },
+          {
+            "line": 584,
+            "source": "        self.identity_handler.attach_speaker_business(business, face_readback)"
+          },
+          {
+            "line": 585,
+            "source": "        self.speaker_business = business"
+          },
+          {
+            "line": 586,
+            "source": "        self.jobs.special_handlers['speaker_identity'] = self.identity_handler"
+          },
+          {
+            "line": 587,
+            "source": "        self.jobs.analysis_provider = self._submit_speaker_analysis"
+          }
+        ]
+      }
+    ],
+    "capability_booleans": {
+      "ordinary_dialogue": true,
+      "visual_entry": true,
+      "explicit_memory": true,
+      "wake_entry": true,
+      "native_rate_bridge": false,
+      "history_routing": true,
+      "profile_selection": true
+    },
+    "available_special_handlers": [
+      "identity_enrollment",
+      "identity_query",
+      "speaker_identity"
+    ],
+    "latency": {
+      "asr_calls": 1,
+      "asr_completed": true,
+      "entry_rejected": false,
+      "complete": true,
+      "error_class": "none"
+    },
+    "last_voice_route": {
+      "generation": 44,
+      "transcript_characters": 13,
+      "board_owned": true,
+      "history_requested": false
+    },
+    "entry_state": {
+      "active": false,
+      "stage": "idle",
+      "entry_mode": null,
+      "entry_name_pending": false
+    }
+  }
+}

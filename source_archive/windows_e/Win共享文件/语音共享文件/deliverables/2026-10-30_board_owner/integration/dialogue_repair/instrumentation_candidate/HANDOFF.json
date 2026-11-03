@@ -1,0 +1,59 @@
+{
+  "schema": "aura.dialogue-numeric-instrumentation-handoff.v1",
+  "status": "FROZEN_SOURCE_ONLY",
+  "manifest_sha256": "1ed26977267791f4a118b2b99a77eb470982d932ad78e9900c73f9d29286effe",
+  "overlay_sha256": "6df6145351089bec9790f0bbccdd7de7292ad2a7af57b0bf57f278296ca6bdd6",
+  "files": [
+    {
+      "path": "board/runtime/audio/board_dialogue_jobs.py",
+      "before_sha256": "2206239b0e7c1bdabb2002a5d932550201541a2a6a15f2b5ff3f381de5d07da2",
+      "sha256": "1536fe63361a9f971a22a0bcfd93145f9f8316607dc7a344b298933f1253672f",
+      "size": 48070
+    },
+    {
+      "path": "tools/board_recording.py",
+      "before_sha256": "a194a026bc224df4f153ff14ce4a228e111778bc39e6f86a09d472d61adde277",
+      "sha256": "f5be518103182bc49eb6af85a82e2b185c43045538875cebad4e03ffee33df00",
+      "size": 18974
+    }
+  ],
+  "test": {
+    "passed": 11,
+    "xml_sha256": "33d14810e9234fd8e57a6b972b4a0aa69f15868f5affc59c8c881bb1d1ead4ef",
+    "source_sha256": "5ec7f3a4958f87c24eb361bd94ab60bb30f3e54c8fa77ddc6ea63798a2c78eb8",
+    "command": "\"C:\\Users\\35870\\.codex\\visualizations\\2026\\10\\09\\01a12110-3ba4-7651-b3d7-2e6560916eb6\\omnivoice-runtime-py310\\Scripts\\python.exe\" -B -m pytest -q -p no:cacheprovider \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\instrumentation_candidate\\tests\\test_instrumentation.py\""
+  },
+  "api_paths": {
+    "producer": "local_transcription.service.diagnostics",
+    "consumer": "stream_diagnostics",
+    "failure_class": "local_transcription.service.latency.error_class",
+    "prepare": "local_transcription.service.latency.prepare"
+  },
+  "timing_semantics": {
+    "guard_calls": "Each attempted ordinary admission guard including failed checks and checks after queue waits.",
+    "guard_total_ms": "Wall time inside guard only; includes its SQL and scheduling, not queue wait.",
+    "progress_wait_ms": "Sum of actual condition.wait wall time; ordinary playback backpressure is included.",
+    "progress_wait_peak_ms": "Largest individual condition.wait duration, not total queue delay.",
+    "progress_queue_peak": "Highest queue depth immediately after a producer append; hard capacity remains 128.",
+    "drain_calls": "Calls while current transcript is TRANSCRIBING/GENERATING/PLAYING; reset at the next transcription.",
+    "max_drain_gap_ms": "Largest start-to-start gap of active owner drain calls; native render FPS is not assumed equal.",
+    "audio_packets": "Audio channel_event calls that returned successfully; no claim of physical audibility.",
+    "channel_event_total_ms": "All channel_event call wall time including failed calls, excludes producer SQL.",
+    "prepare": "Only current invocation metadata, even if prepare_text raises; previous turn metrics cleared before invocation."
+  },
+  "preserved": [
+    "480-sample packets",
+    "128-item progress queue",
+    "8-event / 6ms consumer budget",
+    "Every existing durable authority check and post-wait recheck",
+    "Packet order and PCM bytes",
+    "Full receipt/ACK, cancellation and owner checks",
+    "Existing 8-frame capture queue and child process"
+  ],
+  "boundaries": [
+    "No hardware, microphone, model or service call performed.",
+    "Metrics identify waits; no measured production bottleneck is claimed yet.",
+    "No source IDs, text, PCM or exception messages are added to diagnostics.",
+    "Existing legacy progress error payload behavior is unchanged; the new error_class is strictly allowlisted."
+  ]
+}

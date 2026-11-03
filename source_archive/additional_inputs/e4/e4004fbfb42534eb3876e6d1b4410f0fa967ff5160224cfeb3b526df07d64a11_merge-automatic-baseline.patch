@@ -1,0 +1,507 @@
+--- tools/board_avatar_gtk.py
++++ tools/board_avatar_gtk.py
+@@ -94,6 +94,11 @@
+         if config.get('streaming_conversation'):
+             for rel in ('common/voice_channel.py','board/runtime/audio/voice_channel.py','board/runtime/audio/channel_jobs.py',
+                         'tools/streaming_controller.py','tools/gstreamer_persistent_engine.py'):
++                self.source_hashes[rel]=hashlib.sha256((AURA/rel).read_bytes()).hexdigest()
++        if config.get('automatic_turns'):
++            if not config.get('streaming_conversation') or not config.get('persistent_audio'):
++                raise ValueError('Automatic turns require streaming conversation and persistent audio')
++            for rel in ('board/runtime/audio/automatic_capture.py','board/runtime/audio/vad.py'):
+                 self.source_hashes[rel]=hashlib.sha256((AURA/rel).read_bytes()).hexdigest()
+         if config.get('voice_identity_enrollment'):
+             for rel in ('board/identity/voice_enrollment.py', 'common/voice_text.py'):
+@@ -165,7 +170,7 @@
+             self.preview_output = CameraPreviewWorker(self.services)
+             self.bridge = StageBridge(self.root, int(config['browser_port']),
+                                       extra_commands=('ui_settings', 'ui_page', 'ui_service_config',
+-                                                      'service_action', 'ui_refresh', 'preview_open', 'record_toggle', 'ui_layer', 'asr_config'))
++                                                      'service_action', 'ui_refresh', 'preview_open', 'record_toggle', 'conversation_toggle', 'ui_layer', 'asr_config'))
+             self.build_window(windowed)
+             self.schedule_tick()
+             self.foreground_timer = self.GLib.timeout_add(500, self.present_window)
+@@ -326,7 +331,8 @@
+         main, vision, demo, devices, connection, settings = [page_widgets[n] for n in self.page_names]
+         slots = spec['main']
+         self.status = self.label('等你开口', 0, slots['status']['y'], left_width, slots['status']['height'], 'status', main)
+-        self.label('和汐蓝聊一聊，按下按钮开始说话。',0,slots['hint']['y'],left_width,slots['hint']['height'],parent=main).get_style_context().add_class('muted')
++        self.label('点一次开始对话，说完后自动接话。' if self.config.get('automatic_turns') else
++                   '和汐蓝聊一聊，按下按钮开始说话。',0,slots['hint']['y'],left_width,slots['hint']['height'],parent=main).get_style_context().add_class('muted')
+         self.label('你说',0,slots['transcript_title']['y'],left_width,slots['transcript_title']['height'],parent=main).get_style_context().add_class('section')
+         self.label('汐蓝的回答',0,slots['reply_title']['y'],left_width,slots['reply_title']['height'],parent=main).get_style_context().add_class('section')
+         video = spec['vision']
+@@ -747,6 +753,7 @@
+         interaction = modules.get('interaction',{})
+         audio = modules.get('audio',{})
+         local_recording = state.get('local_recording',{})
++        automatic = state.get('automatic_conversation',{})
+         transcription = state.get('local_transcription',{})
+         local_conversation=bool(transcription.get('service',{}).get('conversation'))
+         local_recording_active = local_recording.get('state') == 'RECORDING'
+@@ -788,8 +795,14 @@
+                     '汐蓝已回答' if transcription.get('state')=='ANSWERED' else status)
+         if not fixture and self.ui_layer == 'presentation':
+             self.mode_label.set_text('视觉追踪 · '+('相机已连接' if modules.get('camera',{}).get('state') == 'READY' else '等待相机连接')
+-                if self.page == 'vision' else '玩偶交流 · 录音后自动回答' if local_conversation else
++                if self.page == 'vision' else '玩偶交流 · 连续对话' if self.config.get('automatic_turns') else '玩偶交流 · 录音后自动回答' if local_conversation else
+                 '玩偶交流 · '+('语音主机已连接' if modules.get('host',{}).get('state') == 'READY' else '语音主机待连接'))
++        if automatic.get('enabled'):
++            if automatic.get('state') == 'LISTENING':
++                status = '正在听你说…' if automatic.get('speech_active') else '我在听，停顿后自动回答'
++            elif automatic.get('state') in ('WAITING_ACK','SETTLING'):
++                status = '这一轮说完了，马上继续听…'
++        elif automatic.get('error'): status = '对话已暂停，请检查后重新开始'
+         self.status.set_text(status)
+         target,identity = modules.get('target',{}), modules.get('identity',{})
+         people = modules.get('vision',{}).get('people_count')
+@@ -822,12 +835,14 @@
+                      if transcription.get('state') == 'TRANSCRIBING' else
+                      '录音已完成。语音服务尚未连接，暂未生成识别内容和回答。')
+         elif local_recording_active:
+-            reply = '正在聆听。再次点击“停止录音”结束，点击“取消本轮”丢弃录音。'
++            reply = ('我在听，你说完后我会自动回答。' if automatic.get('enabled') else
++                     '正在聆听。再次点击“停止录音”结束，点击“取消本轮”丢弃录音。')
+         if transcription.get('voice_reply'):reply=transcription['voice_reply']['reply_text']
+         elif transcription.get('service',{}).get('streaming') and state.get('reply'):reply=state['reply']
+         elif local_conversation and transcription.get('state')=='TRANSCRIBING':reply='稍等，我在听懂并准备回答。'
+         elif local_conversation and not local_recording_active and transcription.get('state') in {'IDLE','DISABLED'}:
+-            reply='我在呢，点一下开始录音，聊完再点停止。'
++            reply=('我在呢，点一下开始对话，就可以直接和我聊天。' if self.config.get('automatic_turns') else
++                   '我在呢，点一下开始录音，聊完再点停止。')
+         if reply != self.reply_text:
+             self.reply_view.get_buffer().set_text(reply)
+             self.reply_text = reply
+@@ -842,6 +857,13 @@
+         self.record_button.set_sensitive(bool(record_available) and not local_busy
+             and not state['avatar_command_pending'] and not view['pending_count'] and (recording or not remote_busy))
+         self.record_button.set_tooltip_text('点击开始，再次点击停止；最长录音20秒' if record_available else '请先结束当前播放或录音')
++        if self.config.get('automatic_turns'):
++            self.record_button.set_label('结束对话' if automatic.get('enabled') else '开始对话')
++            self.record_button.set_sensitive(bool(automatic.get('can_stop') or
++                automatic.get('can_start') and not state['avatar_command_pending'] and not view['pending_count'] and not remote_busy))
++            self.record_button.set_tooltip_text('停止聆听并结束当前回答' if automatic.get('enabled') else
++                '开启后说完自动接话；汐蓝回答完会继续听下一句')
++            self.interaction_cancel.set_tooltip_text('取消当前录音或回答，并结束连续对话')
+         preview_ref = snapshot.get('preview') if snapshot else None
+         frame_fresh = bool(preview_ref and time.monotonic()*1000-preview_ref['captured_mono_ms'] <= 1500)
+         frame_fresh = frame_fresh and preview_ref==display['frame_reference']
+@@ -1041,6 +1063,17 @@
+             return {'ok':True,'message':'正在刷新状态'}
+         if kind == 'service_dialog':
+             return self.service_dialog(data['action'])
++        if kind == 'conversation_toggle' or kind == 'record_toggle' and getattr(self,'config',{}).get('automatic_turns'):
++            automatic = self.controller.public().get('automatic_conversation',{})
++            if not automatic.get('enabled'):
++                snapshot = self.services.read()['snapshot']
++                modules = snapshot.get('modules',{}) if snapshot else {}
++                if (modules.get('audio',{}).get('state') in ('RECORDING','PLAYING') or
++                        modules.get('interaction',{}).get('state') in ('LISTENING','PROCESSING','SPEAKING')):
++                    raise ValueError('请先结束当前交互')
++            method = 'conversation_stop' if automatic.get('enabled') else 'conversation_start'
++            intent = getattr(self.controller,method)()
++            return {'ok':True,'queued':True,'command_id':intent,'message':'正在结束对话' if automatic.get('enabled') else '正在开启对话'}
+         if kind == 'record_toggle':
+             snapshot = self.services.read()['snapshot']
+             local = self.controller.public().get('local_recording',{})
+--- tools/board_recording.py
++++ tools/board_recording.py
+@@ -4,7 +4,8 @@
+ 
+ 
+ class RecordingController:
+-    def __init__(self, controller, *, capture_factory=Mcp01Capture, transcriber=None):
++    def __init__(self, controller, *, capture_factory=Mcp01Capture, transcriber=None,
++                 auto_capture_factory=None, clock=time.monotonic):
+         self.controller, self.capture_factory = controller, capture_factory
+         self.capture = self.utterance = None
+         self.recording_state = 'IDLE'
+@@ -12,6 +13,82 @@
+         self.closed = False
+         self.transcriber = transcriber
+         self.transcription = self._empty_transcription('IDLE' if transcriber and transcriber.enabled() else 'DISABLED')
++        self.auto_capture_factory, self.clock = auto_capture_factory, clock
++        self.capture_kind = None
++        self.auto_enabled = False; self.auto_state = 'STOPPED'; self.auto_error = ''
++        self.auto_turns = 0; self.rearm_at = self.ack_deadline = None
++
++    def _capture_for(self, automatic):
++        kind = 'automatic' if automatic else 'manual'
++        if self.capture_kind != kind:
++            if self.capture is not None: self.capture.close()
++            factory = self.capture_factory
++            if automatic:
++                if self.auto_capture_factory is None:
++                    from board.runtime.audio.automatic_capture import AutomaticMcp01Capture
++                    factory = AutomaticMcp01Capture
++                else: factory = self.auto_capture_factory
++            self.capture = factory(self._playback_active, max_seconds=20)
++            self.capture_kind = kind
++        return self.capture
++
++    def _listen(self):
++        if self._playback_active(): raise ValueError('请先结束当前播放')
++        if self.transcriber.public().get('pending'): raise ValueError('上一轮仍在处理')
++        self.transcriber.cancel()
++        capture_id = self._capture_for(True).start()
++        self.utterance = None
++        self.recording_state, self.recording_error = 'RECORDING', ''
++        self.transcription = self._empty_transcription('IDLE')
++        self.auto_state = 'LISTENING'; self.rearm_at = self.ack_deadline = None
++        return capture_id
++
++    def conversation_start(self):
++        self._collect()
++        if self.closed or self.auto_enabled: raise ValueError('对话已开启或已关闭')
++        if (self.transcriber is None or not self.transcriber.enabled()
++                or getattr(self.transcriber,'feedback_assets',None) is None
++                or not self.transcriber.public().get('feedback_ready')):
++            raise ValueError('语音服务尚未就绪')
++        if self._recording() or self._playback_active(): raise ValueError('请先结束当前录音或播放')
++        self.auto_error = ''; self.last_error = ''; self.auto_turns = 0
++        try: capture_id = self._listen()
++        except Exception as exc:
++            self._auto_fail(str(exc)); raise
++        self.auto_enabled = True
++        return {'enabled':True,'state':'LISTENING','capture_id':capture_id}
++
++    def conversation_stop(self):
++        self.cancel()
++        return {'enabled':False,'state':'STOPPED'}
++
++    def _auto_fail(self, error):
++        self.auto_enabled = False; self.auto_state = 'ERROR'; self.auto_error = error
++        if self.capture is not None: self.capture.cancel()
++        if self.transcriber: self.transcriber.cancel()
++        self.controller.cancel()
++
++    def _auto_tick(self):
++        if not self.auto_enabled: return
++        if self.recording_state == 'ERROR' or self.transcription['state'] == 'ERROR' or self.last_error:
++            self._auto_fail(self.recording_error or self.transcription['error'] or self.last_error); return
++        if self._recording():
++            self.auto_state = 'LISTENING'; return
++        if self.transcription['state'] == 'ANSWERED':
++            self.auto_state = 'WAITING_ACK'
++            ack = self.transcriber.public().get('last_playback_ack') or {}
++            if ack.get('request_id') == self.transcription['request_id']:
++                if not ack.get('committed'):
++                    self._auto_fail('回答已播放，但记忆确认失败，请重新开始对话'); return
++                self.auto_state = 'SETTLING'
++                if (self.clock() >= self.rearm_at and not self._playback_active()
++                        and not self.transcriber.public().get('pending')):
++                    try: self._listen()
++                    except Exception as exc: self._auto_fail(str(exc))
++            elif self.clock() >= self.ack_deadline:
++                self._auto_fail('回答已播放，但记忆确认超时，请重新开始对话')
++        else:
++            self.auto_state = 'SPEAKING' if self.controller.public().get('playing') else 'PROCESSING'
+ 
+     @staticmethod
+     def _empty_transcription(state):
+@@ -72,6 +149,7 @@
+                     self.transcription.update(state='ERROR',error='Voice playback rejected: '+str(exc))
+ 
+     def configure_transcription(self,values):
++        if self.auto_enabled: raise ValueError('请先结束连续对话')
+         if self.transcriber is None:raise ValueError('Transcription adapter is unavailable')
+         self.transcriber.configure(values)
+         self._queue_transcription()
+@@ -116,13 +194,12 @@
+     def record_start(self):
+         if self.closed:
+             raise ValueError('录音已关闭')
++        if self.auto_enabled: raise ValueError('请先结束连续对话')
+         self._collect()
+         if getattr(self.transcriber,'feedback_assets',None) is not None and self._playback_active():self.cancel()
+         if self._recording() or self._playback_active():
+             raise ValueError('请先结束当前录音或播放')
+-        if self.capture is None:
+-            self.capture = self.capture_factory(self._playback_active, max_seconds=20)
+-        capture_id = self.capture.start()
++        capture_id = self._capture_for(False).start()
+         if self.transcriber:self.transcriber.cancel()
+         self.transcription = self._empty_transcription('IDLE')
+         self.utterance = None
+@@ -131,6 +208,7 @@
+         return {'capture_id':capture_id, 'state':'RECORDING'}
+ 
+     def record_stop(self):
++        if self.auto_enabled: raise ValueError('连续对话会在停顿后自动提交，请使用结束对话')
+         self._collect()
+         if self._recording():
+             self.capture.stop()
+@@ -148,6 +226,7 @@
+         return result
+ 
+     def submit(self, *args, **kwargs):
++        if self.auto_enabled: raise ValueError('请先结束连续对话')
+         self._collect()
+         if self._recording():
+             raise ValueError('请先停止录音')
+@@ -159,6 +238,8 @@
+         return self.controller.toggle_pause()
+ 
+     def cancel(self):
++        self.auto_enabled = False; self.auto_state = 'STOPPED'; self.auto_error = ''
++        self.rearm_at = self.ack_deadline = None
+         if self.capture is not None:
+             self.capture.cancel()
+         self.utterance = None
+@@ -173,6 +254,8 @@
+             self.cancel()
+         elif self._recording():
+             raise ValueError('请先停止录音')
++        elif self.auto_enabled:
++            raise ValueError('请先结束连续对话')
+         return self.controller.event(name)
+ 
+     def tick(self):
+@@ -183,8 +266,15 @@
+                 complete=self.controller.take_completion()
+                 if complete is None:break
+                 owner,value=complete
++                if (owner.get('request_id') != self.transcription['request_id']
++                        or owner.get('capture_id') != self.transcription['capture_id']): continue
+                 self.transcriber.acknowledge(owner,value)
+                 self.transcription['state']='ANSWERED'
++                if self.auto_enabled:
++                    self.auto_turns += 1
++                    self.rearm_at = self.clock()+.5
++                    self.ack_deadline = self.clock()+7
++        self._auto_tick()
+         return result
+ 
+     def public(self):
+@@ -201,6 +291,15 @@
+             'can_stop':recording,'max_seconds':20}
+         state['local_transcription'] = dict(self.transcription,
+             service=self.transcriber.public() if self.transcriber else {'enabled':False,'pending':False})
++        state['automatic_conversation'] = {'enabled':self.auto_enabled,'state':self.auto_state,
++            'error':self.auto_error,'completed_turns':self.auto_turns,
++            'speech_active':snapshot.get('speech_active',False),
++            'can_start':not self.closed and not self.auto_enabled and not recording and not self._playback_active()
++                and bool(self.transcriber and self.transcriber.enabled()
++                         and self.transcriber.public().get('streaming')
++                         and self.transcriber.public().get('feedback_ready')
++                         and not self.transcriber.public().get('pending')),
++            'can_stop':self.auto_enabled}
+         return state
+ 
+     def close(self):
+--- tools/board_avatar_worker.py
++++ tools/board_avatar_worker.py
+@@ -36,7 +36,7 @@
+         with self.condition:
+             if self.closed:
+                 raise ValueError('演示服务已关闭')
+-            if method == 'cancel' or method == 'event' and args[0] in ('cancel','reset'):
++            if method in ('cancel','conversation_stop') or method == 'event' and args[0] in ('cancel','reset'):
+                 self.generation += 1
+                 for old in self.waiting:
+                     self.results.append({'command_id':old['id'],'ok':False,'error':'已取消'})
+@@ -55,6 +55,8 @@
+     def cancel(self):return self.request('cancel')
+     def record_start(self):return self.request('record_start')
+     def record_stop(self):return self.request('record_stop')
++    def conversation_start(self):return self.request('conversation_start')
++    def conversation_stop(self):return self.request('conversation_stop')
+     def configure_transcription(self,values):return self.request('configure_transcription',values)
+ 
+     def read(self):
+--- /dev/null
++++ board/runtime/audio/automatic_capture.py
+@@ -0,0 +1,90 @@
++"""Energy endpointing only: one bounded speech turn from an idle microphone.
++
++No ASR/TTS/model inference runs here. Idle PCM is discarded; a short pre-roll
++retains quiet initial consonants. The existing MCP01 owner closes capture
++before the controller can start playback.
++"""
++from collections import deque
++import signal
++import threading
++
++from board.runtime.audio.capture import Mcp01Capture
++from board.runtime.audio.vad import EnergyVad, VadConfig
++
++
++class SpeechEndpoint:
++    def __init__(self, max_seconds=20):
++        if not 1 <= max_seconds <= 20: raise ValueError('Speech limit must be 1–20 seconds')
++        self.config = VadConfig(min_silence_ms=700, max_utterance_ms=int(max_seconds*1000)-200)
++        self.vad = EnergyVad(self.config)
++        self.frame_bytes = self.config.frame_samples*2
++        self.pre_frames = 200//self.config.frame_ms
++        self.start_frames = (self.config.min_speech_ms+self.config.frame_ms-1)//self.config.frame_ms
++        self.ring = deque(maxlen=self.pre_frames+self.start_frames)
++        self.pending = bytearray(); self.prefix = b''
++        self.total_samples = self.speech_samples = self.start_sample = 0
++        self.active = self.done = False
++
++    def feed(self, pcm):
++        import numpy as np
++        if self.done: raise ValueError('Speech turn already completed')
++        self.pending.extend(pcm)
++        while len(self.pending) >= self.frame_bytes:
++            raw = bytes(self.pending[:self.frame_bytes]); del self.pending[:self.frame_bytes]
++            self.total_samples += self.config.frame_samples
++            self.ring.append(raw)
++            if self.active: self.speech_samples += self.config.frame_samples
++            samples = np.frombuffer(raw,dtype='<i2').astype(np.float32)/32768
++            for event in self.vad.accept(samples):
++                if event.kind == 'speech_start':
++                    self.active = True
++                    self.prefix = b''.join(list(self.ring)[:-self.start_frames])
++                    self.speech_samples = len(self.prefix)//2+self.start_frames*self.config.frame_samples
++                elif event.kind == 'speech_end':
++                    # PCM16 -> float32 / 32768 -> PCM16 is exact for these samples.
++                    result = self.prefix + np.rint(event.audio*32768).clip(-32768,32767).astype('<i2').tobytes()
++                    self.start_sample = self.total_samples-len(result)//2
++                    self.speech_samples = len(result)//2
++                    self.active = False; self.done = True
++                    return result
++        return None
++
++
++class AutomaticMcp01Capture(Mcp01Capture):
++    def _command(self):
++        # Continuous only while waiting for one speech turn. Its memory stays
++        # bounded even if the user remains silent for several minutes.
++        return super()._command()[:-2]
++
++    def _capture_timer(self):
++        self.endpoint = SpeechEndpoint(self.max_seconds)
++        return None
++
++    def _captured_start(self, started):
++        return round(started+self.endpoint.start_sample*1000/16000)
++
++    def _read_pcm(self, process):
++        while True:
++            raw = process.stdout.read(self.endpoint.frame_bytes)
++            if not raw:
++                if self._cancelled: return b''
++                raise RuntimeError('Microphone ended before a complete speech turn')
++            was_active = self.endpoint.active
++            result = self.endpoint.feed(raw)
++            with self._lock:
++                self._sample_count = self.endpoint.speech_samples
++                if self.endpoint.active and not was_active and self._timer is None:
++                    self._timer = threading.Timer(self.max_seconds+2,self._timeout)
++                    self._timer.daemon = True; self._timer.start()
++                if result is not None:
++                    if len(result) > self.max_samples*2: raise ValueError('Speech turn exceeds input budget')
++                    self._stopping = True; self._signal(signal.SIGINT)
++                    return result
++
++    def snapshot(self):
++        with self._lock:
++            value = super().snapshot()
++            endpoint = getattr(self,'endpoint',None)
++            value.update(automatic=True,speech_active=bool(endpoint and endpoint.active),
++                         listening_seconds=endpoint.total_samples/16000 if endpoint else 0)
++            return value
+--- board/runtime/audio/capture.py
++++ board/runtime/audio/capture.py
+@@ -83,6 +83,28 @@
+             os.close(self._owner)
+             self._owner = None
+ 
++    def _command(self):
++        return ['arecord', '--quiet', '--device', self.device,
++                '--format', 'S16_LE', '--rate', '16000', '--channels', '1',
++                '--file-type', 'raw', '--samples', str(self.max_samples)]
++
++    def _capture_timer(self):
++        return threading.Timer(self.max_seconds + 2, self._timeout)
++
++    def _captured_start(self, started):
++        return started
++
++    def _read_pcm(self, process):
++        pcm = bytearray()
++        while True:
++            chunk = process.stdout.read(min(4096, self.max_samples * 2 - len(pcm) + 1))
++            if not chunk: break
++            pcm.extend(chunk)
++            with self._lock: self._sample_count = len(pcm)//2
++            if len(pcm) > self.max_samples * 2:
++                raise ValueError('Capture exceeded the declared sample limit')
++        return pcm
++
+     def start(self):
+         with self._lock:
+             if self._closed or self.state == 'RECORDING' or self._thread and self._thread.is_alive():
+@@ -94,9 +116,7 @@
+             self._acquire_owner()
+             log = tempfile.TemporaryFile()
+             try:
+-                process = self.process_factory(['arecord', '--quiet', '--device', self.device,
+-                    '--format', 'S16_LE', '--rate', '16000', '--channels', '1',
+-                    '--file-type', 'raw', '--samples', str(self.max_samples)],
++                process = self.process_factory(self._command(),
+                     stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=log)
+             except Exception:
+                 log.close()
+@@ -110,12 +130,12 @@
+             self._sample_count = 0
+             self.state = 'RECORDING'
+             started = round(self.clock() * 1000)
+-            self._timer = threading.Timer(self.max_seconds + 2, self._timeout)
+-            self._timer.daemon = True
++            self._timer = self._capture_timer()
++            if self._timer is not None: self._timer.daemon = True
+             self._thread = threading.Thread(target=self._read,
+                 args=(process, log, capture_id, self.epoch, started),
+                 name='aura-mcp01-capture', daemon=True)
+-            self._timer.start()
++            if self._timer is not None: self._timer.start()
+             self._thread.start()
+             return capture_id
+ 
+@@ -135,15 +155,7 @@
+     def _read(self, process, log, capture_id, epoch, started):
+         pcm, error = bytearray(), ''
+         try:
+-            while True:
+-                chunk = process.stdout.read(min(4096, self.max_samples * 2 - len(pcm) + 1))
+-                if not chunk:
+-                    break
+-                pcm.extend(chunk)
+-                with self._lock:
+-                    self._sample_count = len(pcm)//2
+-                if len(pcm) > self.max_samples * 2:
+-                    raise ValueError('Capture exceeded the declared sample limit')
++            pcm = self._read_pcm(process)
+             rc = process.wait(timeout=2)
+             with self._lock:
+                 stopping = self._stopping
+@@ -167,7 +179,7 @@
+                 process.stdout.close()
+                 log.close()
+             with self._lock:
+-                self._timer.cancel()
++                if self._timer is not None: self._timer.cancel()
+                 self._release_owner()
+                 self._process = None
+                 if self._cancelled:
+@@ -180,7 +192,7 @@
+                 else:
+                     self._result = CapturedAudio(capture_id,
+                         AudioRef(epoch, 0, len(pcm)//2, FORMAT), bytes(pcm),
+-                        started, round(self.clock()*1000))
++                        self._captured_start(started), round(self.clock()*1000))
+                     self.state = 'READY'
+ 
+     def _finish(self, cancel):
+--- config/board_avatar_gtk.json
++++ config/board_avatar_gtk.json
+@@ -8,5 +8,6 @@
+   "tick_ms": 33,
+   "persistent_audio": true,
+   "streaming_conversation": true,
+-  "voice_identity_enrollment": false
++  "voice_identity_enrollment": false,
++  "automatic_turns": true
+ }

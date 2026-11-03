@@ -1,0 +1,1 @@
+cmd_drivers/usb/gadget/legacy/g_mass_storage.ko := /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ld -r  -EL  -maarch64elf  --build-id=sha1  -T scripts/module.lds -o drivers/usb/gadget/legacy/g_mass_storage.ko drivers/usb/gadget/legacy/g_mass_storage.o drivers/usb/gadget/legacy/g_mass_storage.mod.o;  true

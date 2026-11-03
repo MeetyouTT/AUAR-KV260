@@ -1,0 +1,15 @@
+# 上板资料扩充记录
+
+本工程以原方案A源码RAR为输入，原RAR SHA-256为 `022422d9d1efa6106c2b247ac901dddd2f439a1a5e8eb19a22539010c3a944f4`。9a4f正式运行文件、相机源码、模型适配、FPGA工程及比赛Skill均保留原字节。原有修改限于根README、board/readme和验证摘要三份说明。
+
+新增内容包括 board/bringup 的4个执行入口和成套产物清单，board/artifacts_candidate 的6件候选硬件/固件，board/evidence 的3组历史实测公开副本与来源索引，board/evidence_sources 的历史采集源码，data/board_reference 的统计参考和2个合成输入/8个量化参考张量，以及逐项CSV和5项反例测试。
+
+当前离线验证为147项历史证据复核、439项安装文件比对和5项反例测试。候选产物均核对SHA、大小和BIT/XSA配置数据配对。冷构建实现回执的20个硬件输入指纹与扩充包一致，原实现报告可按同一输入继续引用。压缩包解包后的RTL、建工程、软件和Skill复跑结果保存在包旁 archive_verification.json。
+
+本次没有执行新的目标KV260固件加载、板端推理、相机/麦克风或机械动作。历史DPU实测属于2026-10-21的固定模型，性能采样属于2026-11-02的独立startup，9a4f的板端回执按其发布范围保留。新候选的 board_verified 为 false。
+
+原44MB纯源码交付保留。本扩充RAR包含已生成的候选产物；Skill仍为28个普通文件，未增加内层压缩包。
+
+## 后续正式角色素材补充
+
+本版又补入5件正式雪妃素材和匹配ARM64渲染库，更新board/release_9a4f.json及board/deploy.json中的取件位置。6项内容SHA、380项组件绑定、硬件输入和Skill字节均保持一致。原版本中的包外素材说明以本次src/assets/yuki/readme.md为准。

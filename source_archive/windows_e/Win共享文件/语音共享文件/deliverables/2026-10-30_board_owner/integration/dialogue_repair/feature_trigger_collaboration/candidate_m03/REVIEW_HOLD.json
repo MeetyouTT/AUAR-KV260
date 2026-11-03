@@ -1,0 +1,91 @@
+{
+  "schema": "aura.m03.independent-review-hold.v1",
+  "status": "HOLD_NOT_FOR_RELEASE_WAITING_INDEPENDENT_COUNTEREXAMPLES",
+  "instruction_source": "Authorized main/root chat: independent win_inference review; v18 excludes M03/D01",
+  "candidate_sources_and_evidence_unchanged": true,
+  "checked_references": [
+    {
+      "path": "candidate_m03\\SOURCE_MANIFEST.json",
+      "sha256": "0839d8aae1a0cf00fab116767fa005477b25c90cb8c59dbd04b0ff6a1be623a8",
+      "bytes": 1427
+    },
+    {
+      "path": "candidate_m03\\HANDOFF.json",
+      "sha256": "c2e1d76ec9adc69650c03b14cce4db437a94982440929c30aa511f94060f4ca3",
+      "bytes": 2276
+    },
+    {
+      "path": "candidate_m03\\after\\board\\runtime\\history_delete.py",
+      "sha256": "26015f4cec1077ab3a888116eb1e3f7c592f352cc506e3350fb17b8b06695026",
+      "bytes": 12873
+    },
+    {
+      "path": "candidate_m03\\after\\board\\runtime\\board_business.py",
+      "sha256": "e09db2b3557f6b3a89c41e6e89675906df22b21bbae90b4d8afe21ae2e826420",
+      "bytes": 36105
+    },
+    {
+      "path": "candidate_m03\\REGRESSION_02.xml",
+      "sha256": "8a9d03f140915aeb7ac00a5ec376a463c97fd63a6be4bc5d9d5a69c41fe059f1",
+      "bytes": 33009
+    },
+    {
+      "path": "board_integration_v17\\local_runtime_v17\\tools\\production_memory_presentation.py",
+      "sha256": "8c0cddcdcd91c44eccfd73240826f7b08b8a118c367e15e26295942b9b7ba4aa",
+      "bytes": 18372
+    },
+    {
+      "path": "board_integration_v17\\local_runtime_v17\\common\\timeline.py",
+      "sha256": "19b05e4ff14dba6eaf4de571c5855fd4c6f75cd97b785a4aa6b5b1a13f5e357a",
+      "bytes": 10799
+    },
+    {
+      "path": "tests\\test_history_delete_m03.py",
+      "sha256": "aeda56935cb3b2c3b215fbbf711cfbd6e925571190f0ce0bb33a41d3f6aaaacd",
+      "bytes": 9221
+    }
+  ],
+  "source_manifest_bindings": {
+    "board/runtime/board_business.py": {
+      "declared_sha256": "6df601ce42509ddfa4d37aa3cce6a820f538169a5ecd0c197d644a798dcfd932",
+      "actual_sha256": "e09db2b3557f6b3a89c41e6e89675906df22b21bbae90b4d8afe21ae2e826420",
+      "matches": false,
+      "lf_normalized_sha256": "6df601ce42509ddfa4d37aa3cce6a820f538169a5ecd0c197d644a798dcfd932"
+    },
+    "board/runtime/history_delete.py": {
+      "declared_sha256": "26015f4cec1077ab3a888116eb1e3f7c592f352cc506e3350fb17b8b06695026",
+      "actual_sha256": "26015f4cec1077ab3a888116eb1e3f7c592f352cc506e3350fb17b8b06695026",
+      "matches": true,
+      "lf_normalized_sha256": "254220f56f44768d4af85ac0c32492142e8a0319850765a2ea7edefd96742ec0"
+    }
+  },
+  "additional_manifest_defect": "M03 board_business.py was written with Windows CRLF while its manifest digest was computed from LF text. Actual e09d... differs from declared6df6..., with LF normalization equal. Keep original artifact, correct byte sealing only in a separately named revision.",
+  "findings": [
+    {
+      "id": "calendar_end_is_inclusive",
+      "level": "source_verified_runtime_counterexample_pending",
+      "source": "candidate_m03/after/board/runtime/history_delete.py:59",
+      "description": "Selection uses recorded_utc<=end. common.timeline.query yields the next local midnight for a completed calendar day; exact next-day midnight is therefore eligible.",
+      "intended_review_boundary": "A single calendar day needs a precise half-open end in its requested timezone, including DST. Do not change general history semantics incidentally."
+    },
+    {
+      "id": "today_end_frozen_at_preview",
+      "level": "source_verified_runtime_counterexample_pending",
+      "source": "candidate_m03/after/board/runtime/history_delete.py:156",
+      "description": "query(date,now=event_time) truncates today end to preview time and pending stores this same end. A later valid source after that end may be outside confirmation reselect.",
+      "existing_test_gap": "The new_source test appends while its fake monotonic clock remains unchanged, so it covers an equal-timestamp addition only.",
+      "intended_review_boundary": "Determine exact counterexample and required preview semantics. A new source in the requested day must not be silently treated as covered/deleted; any correction must still require a new explicit preview if membership changes."
+    },
+    {
+      "id": "presentation_postcommit_hook_bypassed",
+      "level": "source_verified_runtime_counterexample_pending",
+      "source": "board_integration_v17/local_runtime_v17/tools/production_memory_presentation.py:301",
+      "description": "Production bind_presentation wraps instance correct/forget/clear/commit_compaction. M03 _confirm calls private _invalidate/_save_operation directly, so those wrappers are not invoked.",
+      "existing_test_gap": "Synthetic Harness does not bind the production presentation lifecycle; body/fact invalidation and simulated complete ACK alone do not prove display projection or queued audio invalidation.",
+      "intended_review_boundary": "Require explicit postcommit/presentation proof, stale display and source/audio/late-ACK cases. Notify only after transaction/scope locks have exited; preserve current confirmation ownership and original lock order."
+    }
+  ],
+  "next_action": "Wait for independent reviewer counterexamples and root direction, then create a separate minimal revision plus unchanged failing-case replay. Do not edit current candidate or negative evidence.",
+  "no_production_or_model_or_device_or_private_store_access": true,
+  "previous_tests": "183 local passes remain scoped historical evidence and do not cover these three review concerns."
+}

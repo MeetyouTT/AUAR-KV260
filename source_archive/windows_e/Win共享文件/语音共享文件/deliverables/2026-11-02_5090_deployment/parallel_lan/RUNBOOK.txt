@@ -1,0 +1,84 @@
+5090 / KV260 专用网口模型联调准备
+
+当前状态：显式受控维护释放版仅完成准备与隔离验证，实际继续冻结。必须先有本机完整 READY，并由主代理重新明确接续，才开新事务执行。
+本目录不修改板端设置、服务、固件、身份/记忆库，也不打开任何音视频设备。
+旧事务547dcb18385242fba3f991e4b9a5983e已实际发过正常stop，manager旧快照竞态误报后按约停住；真实最终CLOSED、无TTS/8797，未改LAN或start。原失败记录与原字节证据保持，不改为通过、不用新代码恢复旧事务。模型代理已由主代理单独授权修竞态、维护释放并恢复新回环，当前owner以新的主代理实际交接和再次inspect为准。
+
+主机重启后的接口复核
+- 初始交接写的接口22已不再是物理I226-V。2026-11-02T02:29Z 新鲜枚举中，隐藏22为WAN Miniport(Network Monitor)。
+- 物理I226-V当前为23；MAC C8-53-09-B0-89-DA，InterfaceGuid f14f89e5-18f4-483c-b22b-cd8010578636。
+- 该设备Up，192.168.50.1/24 Preferred，无默认路由。主代理已明确允许按新鲜物理身份固定脚本目标为23。
+- Python与防火墙入口同时固定23、设备描述、MAC、GUID；不会自动选其它网卡，不改地址、DNS、网关或Wi-Fi。
+- 旧22拒绝证据保留在read_only_network_baseline.json/adapter_inventory.json；新身份证据在dedicated_adapter_verified_23.json与read_only_adapter_guard.json。
+
+授权与串行窗口
+1. model_deployment完成127.0.0.1:8797本机验收：STATUS.complete=true，phase=READY_LOCAL_ONLY_BOARD_INTEGRATION_PENDING，READY_LOCAL与最终source_manifest齐全。清单至少10项，包含实际model_inference_host.py、model_inference_wire.py和inference_output_contract.py，本入口逐项SHA核对。
+2. 一次性部署流程已退出并交接；主代理确认没有其它manage/模型操作并发。本入口自持lan_operation.lock，但原manage不读取这个外部锁。
+3. 主代理另发新的明确LAN执行授权，范围包括同session原模型受控维护释放；CLI必须另外显式传入--explicit-controlled-model-release。缺少该参数即拒绝，inspect与普通默认CLI不会卸载模型。本次准备修订没有实际模型启停、释放、防火墙增删或板端连接。
+
+固定执行入口（PowerShell；以下变量均为本地任务路径）
+$voice='D:\AURARuntimes\voice-py310\Scripts\python.exe'
+$lan='E:\Win共享文件\语音共享文件\deliverables\2026-11-02_5090_deployment\parallel_lan'
+$deployment=Split-Path -Parent $lan
+
+A. 新鲜检查（只读模型状态，不加载模型或发送推理）
+& $voice -B -X utf8 "$lan\lan_control.py" inspect
+if($LASTEXITCODE -ne 0){throw 'Local readiness/owner inspection failed'}
+$inspection=Get-Content -LiteralPath "$lan\latest_inspection.json" -Raw -Encoding UTF8|ConvertFrom-Json
+
+这会验证完整本机验收、原权重SHA回执与当前文件大小/修改时间、接受的源码/配置哈希、实活launcher/main/TTS进程家族、唯一TTS、8797唯一监听owner、当前空闲health、原27B/2048驻留、保护11434和项目11435 owner。B在停止前收集物理接口23的全部IPv4，严格要求只有192.168.50.1/24 Preferred；额外IPv4会拒绝。LAN工具不重新计算14.4GB的SHA，完整SHA来自已完成的部署验收。
+
+B. 已获主代理明确接续授权后切换
+& $voice -B -X utf8 "$lan\lan_control.py" switch --expected-session $inspection.session_id --expected-config-sha $inspection.configuration_sha256 --execute --explicit-controlled-model-release
+
+入口必须确认当前state.owns_fixed_model=true、foreground空闲、session与fixed daemon身份一致；原runtime.require_owned_model复核同daemon/唯一MODEL所有权，原runtime.ollama_json再读回唯一原MODEL且context_length=2048。随后调用原manage.stop(release=True)，由原runtime在同生命周期锁下先关闭本服务/自有TTS，再显式释放本项目原模型；不直接发送卸载HTTP、不接管其它模型。
+只有同session正常CLOSED、server_closed=true、owned_tts_closed=true、model_release.released=true、daemon/其它模型未停止，并且真实/api/ps为空、无8797监听与无TTS残留，才写LAN配置。事务标记explicit_controlled_model_release=true和维护契约，保留完整释放回执及空驻留读回。
+仅保存并改变model_inference.local.json的host和allowed_peers：192.168.50.1 / [192.168.50.2]；local_health=true、端口8797、无TTL及其它参数不变。此次维护切换会显式卸载并重新加载这一项目模型；服务运行期间keep_alive=-1、2048上下文、原量化与原OmniVoice音色16步均保持。
+随后再次确认同一daemon中模型未驻留，再调用原manage.start，保留原TTS-first/300秒契约，核对新session/main/TTS、owns_fixed_model=true及原11435/其它11434 owner不变；本地GET健康可读，本地POST推理必须403(peer_denied)。不强停、不清锁，不增加驻留复用或放宽原启动guard。
+成功输出transaction_id与LAN session_id。完整证据和原配置字节保存在transactions/<id>/transaction.json、local_config.before.json。
+失败同样返回transaction_id/receipt并停在真实状态；不会通过额外卸载、强停、删除或放宽启动条件掩盖失败，先读对应事务。
+
+C. 管理员为当前LAN session添加最小范围防火墙（由主代理在最后处理UAC）
+在管理员PowerShell执行：
+& "$deployment\configure_model_firewall.ps1" -Action Apply -ExpectedSession '<B输出的LAN session_id>'
+
+默认Action=Check。Apply只在完整本机READY和当前owner/health前后核验通过时创建或复用唯一同名规则。
+规则：AURA-5090-KV260-8797，Inbound Allow TCP8797，LocalAddress192.168.50.1，RemoteAddress192.168.50.2，只绑定核验后的物理I226-V别名，EdgeTraversal=Block。保留其它规则。
+当前规则范围或身份不同则拒绝覆盖；重复同名ActiveStore规则也拒绝。
+firewall_result.json与firewall_history保存真实回读及其它规则/过滤器前后摘要；创建时另存firewall_creation_receipt.json。
+防火墙结果现在位于parallel_lan内，不再写部署目录根部旧model_firewall_result.json。
+如需要单独复核：
+& "$deployment\configure_model_firewall.ps1" -Action Check -ExpectedSession '<当前LAN session_id>'
+
+D. 已有精确规则后，只做公开板端推理探测
+& $voice -B -X utf8 "$lan\lan_control.py" probe-board --transaction '<B的transaction_id>' --expected-session '<当前LAN session_id>' --execute
+
+该入口再次核对固定owner并调用防火墙Check，使用现有可信board_ssh.py执行python3 -B -标准输入脚本，明确禁写导入字节码缓存。
+板端只读取本boot ID 903cfade-b93c-48fa-804e-379be1967313；若boot变化则拒绝，不自动接受新boot。
+真实common/model_inference_wire.py与inference_output_contract.py源码仅在板端内存执行，保留完整owner字段回显与PCM SHA/格式校验。
+请求只用公开合成内容，路径/health、/v1/inference/llm、/v1/inference/tts。TTS用本次公开随机编号，响应PCM只在内存解码；仅记录样本数、采样率、SHA和耗时，LLM仅记录字数。
+不会打开板端私库、播放、录音、显示、相机、FPGA、跟随或机械设备，不写板端文件。
+结果证明专用网口模型链路，不代表实际听音、业务/记忆、转轴或多小时稳定性验收。
+
+回退
+1. 若本次创建了防火墙规则，在管理员PowerShell执行：
+   & "$deployment\configure_model_firewall.ps1" -Action Rollback
+   仅当创建回执的InstanceID和完整规则指纹仍与当前规则完全匹配才删除；复用的外部既存规则没有创建回执，不会被删除。删除后读回不存在并核对其它规则未变。回退移除规则不依赖模型健康或网线Up，但物理设备身份仍须匹配。
+2. 按事务中记录的当前candidate_record.session_id执行模型回退：
+   & $voice -B -X utf8 "$lan\lan_control.py" rollback --transaction '<同一新transaction_id>' --expected-session '<事务记录的当前LAN候选session_id>' --execute --explicit-controlled-model-release
+   只接受标明新维护契约的事务、该事务记录的最新owner和原/本次LAN配置哈希；旧547d等无该维护契约的事务直接冻结拒绝。
+   READY且owns_fixed_model=true的本次LAN实例，必须以同一完整身份/空闲/唯一MODEL2048证明调用原manage.stop(release=True)，确认释放回执和模型实际为空，才恢复原配置字节，再按原TTS-first启动新的回环session。核对原项目11435及其它11434 owner保持，新回环owns_fixed_model=true。
+   未完成的STARTING/FAILED候选只有在已确认模型未驻留时，才可原manage.stop(release=False)正常清理本次自有TTS；清理后仍须再次确认无模型、无8797监听、无TTS才恢复和启动。
+   候选owner已退出但模型仍驻留、READY模型并非该session所有、daemon变化或任何无法证明的所有权链，一律停在真实状态，不直接调用release_owned_model维修、不启动复用、不改原TTS-first guard；由主代理另行协调同一明确所有权链的受控维护释放。不同owner、后来改过的配置或资源残留也失败关闭，不清锁、不强停、不接管。
+3. 回退发生新失败时保留原配置、事务与现有owner证据，停在错误处，主代理按实际latest/session/health继续正常控制，不重放旧PID或套用其它事务。
+
+已完成验证
+- Windows PowerShell 5.1.26100.9711解析configure_model_firewall.ps1、firewall_scope.ps1、test_firewall_scope.ps1、validate_preparation.ps1。
+- 24项Python隔离验证通过：同session显式释放后空驻留/TTS-first重启及回退、默认无释放授权拒绝、unowned/busy/daemon变化/foreign model/上下文变化拒绝、缺释放回执或仍驻留拒绝、死owner残留模型冻结、未完成且空驻留候选正常清理、旧事务冻结；并保持完整回执/源码绑定、网卡全部IPv4、远端-B、真实loopback ACL与wire/PCM检查。
+- 防火墙精确scope通过；13个变更/扩围scope、5个错误物理身份被拒绝，没有调用增删防火墙cmdlet。
+- 早前实际只读固定设备guard通过，未更改网络。本次受控释放版准备修订仅跑隔离验证，无真实模型请求、释放/启停、防火墙增删、板端SSH或设备操作。旧547d实际停止及失败证据另行完整保留。
+- 首次PowerShell5.1验证遇到unittest正常stderr被ErrorAction Stop解释为NativeCommandError；仅测试runner输出改为stdout，原失败日志python_tests.ps51_native_stderr.log保留，正式guard未放宽。
+
+重复准备检查：
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$lan\validate_preparation.ps1"
+仅该进程使用ExecutionPolicy Bypass，不修改全局执行策略。

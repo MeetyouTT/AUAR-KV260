@@ -1,0 +1,429 @@
+#include "wallpaper_item.hpp"
+
+#include <QDir>
+#include <QEvent>
+#include <QHoverEvent>
+#include <QMouseEvent>
+#include <QQuickWindow>
+#include <QSGRendererInterface>
+#include <QStandardPaths>
+#include <QUrl>
+#include <QUuid>
+#include <QWheelEvent>
+#include <algorithm>
+#include <chrono>
+#include <utility>
+
+#include "qt_input.hpp"
+
+namespace nekomote::plasma
+{
+NekoWallpaperItem::NekoWallpaperItem(QQuickItem* parent) : WallpaperItemBase(parent)
+{
+    state_ = std::make_shared<nekomote::qt_quick::WallpaperState>();
+    setMirrorVertically(true);
+    setAcceptHoverEvents(true);
+    setAcceptedMouseButtons(Qt::LeftButton);
+    connect(this, &WallpaperItemBase::failed, this, &NekoWallpaperItem::set_error);
+    timer_ = new QTimer(this);
+    timer_->setTimerType(Qt::PreciseTimer);
+    timer_->setInterval(17);
+    connect(timer_, &QTimer::timeout, this,
+            [this]
+            {
+                const int fps_limit = state_->fps_limit.load(std::memory_order_acquire);
+                const int interval =
+                    fps_limit == 0
+                        ? 0
+                        : (fps_limit > 0 ? std::max(1, (1000 + fps_limit / 2) / fps_limit) : 17);
+                if (timer_->interval() != interval)
+                    timer_->setInterval(interval);
+                update();
+            });
+    connect(this, &QQuickItem::visibleChanged, this, &NekoWallpaperItem::refresh_playback);
+}
+
+NekoWallpaperItem::~NekoWallpaperItem()
+{
+    stop_timer();
+    if (host_window_)
+        host_window_->removeEventFilter(this);
+    for (const auto& connection : window_connections_)
+        disconnect(connection);
+}
+
+QQuickFramebufferObject::Renderer* NekoWallpaperItem::createRenderer() const
+{
+    return nekomote::qt_quick::create_wallpaper_renderer(state_);
+}
+
+bool NekoWallpaperItem::paused() const
+{
+    return paused_;
+}
+int NekoWallpaperItem::status() const
+{
+    return status_;
+}
+QString NekoWallpaperItem::errorString() const
+{
+    return error_string_;
+}
+QString NekoWallpaperItem::assetsDir() const
+{
+    return assets_dir_;
+}
+QString NekoWallpaperItem::renderBackend() const
+{
+    return render_backend_;
+}
+
+QString NekoWallpaperItem::instanceId() const
+{
+    return instance_id_;
+}
+
+QString NekoWallpaperItem::createInstanceId() const
+{
+    return QUuid::createUuid().toString(QUuid::WithoutBraces);
+}
+
+void NekoWallpaperItem::setInstanceId(const QString& value)
+{
+    // The package persists this ID in its containment-specific KConfig group.
+    // Only UUIDs become filenames; QML/configuration cannot inject a path.
+    QString normalized;
+    std::filesystem::path config_path;
+    if (!value.isEmpty())
+    {
+        const QUuid uuid(value);
+        normalized = uuid.toString(QUuid::WithoutBraces);
+        if (uuid.isNull() || value.compare(normalized, Qt::CaseInsensitive) != 0)
+        {
+            set_error(QStringLiteral("Invalid NekoMote wallpaper instance UUID: %1").arg(value));
+            return;
+        }
+        const auto directory =
+            QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+        if (!QDir::isAbsolutePath(directory))
+        {
+            set_error(QStringLiteral("NekoMote configuration directory must be absolute"));
+            return;
+        }
+        config_path = QDir(directory)
+                          .filePath(QStringLiteral("nekomote/plasma/%1.json").arg(normalized))
+                          .toStdString();
+    }
+    if (instance_id_ == normalized && status_ != 2)
+        return;
+    instance_id_ = normalized;
+    state_->config_path = std::move(config_path);
+    state_->config_dirty = true;
+    error_string_.clear();
+    emit errorStringChanged();
+    if (status_ != 3)
+        set_status(assets_dir_.isEmpty() ? 0 : 1);
+    emit instanceIdChanged();
+    update();
+}
+
+void NekoWallpaperItem::setRenderBackend(const QString& value)
+{
+    if (value != QStringLiteral("opengl") && value != QStringLiteral("vulkan"))
+    {
+        set_error(QStringLiteral("Unknown NekoMote rendering backend: %1").arg(value));
+        return;
+    }
+    if (render_backend_ == value && status_ != 2)
+        return;
+    render_backend_ = value;
+    state_->backend = value == QStringLiteral("vulkan")
+                          ? nekomote::qt_quick::GraphicsBackend::Vulkan
+                          : nekomote::qt_quick::GraphicsBackend::OpenGL;
+    state_->config_dirty = true;
+    if (status_ != 3)
+    {
+        error_string_.clear();
+        emit errorStringChanged();
+        set_status(assets_dir_.isEmpty() ? 0 : 1);
+    }
+    // Choosing the engine backend cannot make an unsupported Qt scene graph
+    // available. Keep that capability failure and suspended scheduling visible.
+    check_backend();
+    emit renderBackendChanged();
+    update();
+}
+
+void NekoWallpaperItem::setAssetsDir(const QString& value)
+{
+    if (assets_dir_ == value)
+        return;
+    assets_dir_ = value;
+    if (state_)
+    {
+        QString local = value;
+        if (local.startsWith(QStringLiteral("file://")))
+            local = QUrl(value).toLocalFile();
+        state_->assets_dir = local.toStdString();
+        state_->config_dirty = true;
+    }
+    if (!value.isEmpty())
+        set_status(1);
+    else
+        set_status(0);
+    emit assetsDirChanged();
+}
+
+void NekoWallpaperItem::setPaused(bool value)
+{
+    if (paused_ == value)
+        return;
+    paused_ = value;
+    refresh_playback();
+    emit pausedChanged();
+    update();
+}
+
+unsigned NekoWallpaperItem::queryRendererCreated() const
+{
+    return state_ ? state_->renderer_created.load() : 0;
+}
+
+unsigned NekoWallpaperItem::queryRendererDestroyed() const
+{
+    return state_ ? state_->renderer_destroyed.load() : 0;
+}
+
+unsigned NekoWallpaperItem::queryRenderedFrames() const
+{
+    return state_ ? state_->rendered_frames.load() : 0;
+}
+
+void NekoWallpaperItem::set_status(int value)
+{
+    if (status_ == value)
+        return;
+    status_ = value;
+    refresh_playback();
+    emit statusChanged();
+}
+
+void NekoWallpaperItem::set_error(const QString& value)
+{
+    error_string_ = value;
+    emit errorStringChanged();
+    set_status(2);
+    input_count_ = 0;
+}
+
+nekomote::qt_quick::ItemState NekoWallpaperItem::get_item_state() const
+{
+    return {effective_paused_, playback_revision_, inputs_, input_count_, diagnostic_notification_};
+}
+
+void NekoWallpaperItem::clear_inputs()
+{
+    input_count_ = 0;
+}
+
+std::shared_ptr<nekomote::qt_quick::WallpaperState> NekoWallpaperItem::wallpaper_state() const
+{
+    return state_;
+}
+
+void NekoWallpaperItem::enqueue(nekomote::qt_quick::InputKind kind, QPointF position, float scroll,
+                                int button, std::uint64_t timestamp_ms)
+{
+    if (diagnostic_inputs_ || effective_paused_ || status_ != 1)
+        return;
+    if (input_count_ == inputs_.size())
+    {
+        emit failed(QStringLiteral("input queue capacity exceeded"));
+        return;
+    }
+    inputs_[input_count_++] = {
+        kind,
+        static_cast<float>(position.x()),
+        static_cast<float>(position.y()),
+        scroll,
+        button,
+        timestamp_ms
+            ? timestamp_ms
+            : static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                             std::chrono::steady_clock::now().time_since_epoch())
+                                             .count())};
+    update();
+}
+
+void NekoWallpaperItem::hoverEnterEvent(QHoverEvent* event)
+{
+    enqueue(nekomote::qt_quick::InputKind::Enter, nekomote::qt_quick::input_position(*event), 0, 0,
+            event->timestamp());
+}
+void NekoWallpaperItem::hoverMoveEvent(QHoverEvent* event)
+{
+    enqueue(nekomote::qt_quick::InputKind::Move, nekomote::qt_quick::input_position(*event), 0, 0,
+            event->timestamp());
+}
+void NekoWallpaperItem::hoverLeaveEvent(QHoverEvent*)
+{
+    enqueue(nekomote::qt_quick::InputKind::Leave);
+}
+void NekoWallpaperItem::mousePressEvent(QMouseEvent* event)
+{
+    enqueue(nekomote::qt_quick::InputKind::Press, nekomote::qt_quick::input_position(*event), 0,
+            event->button() == Qt::RightButton ? 1 : 0, event->timestamp());
+    event->accept();
+}
+void NekoWallpaperItem::mouseReleaseEvent(QMouseEvent* event)
+{
+    enqueue(nekomote::qt_quick::InputKind::Release, nekomote::qt_quick::input_position(*event), 0,
+            event->button() == Qt::RightButton ? 1 : 0, event->timestamp());
+    event->accept();
+}
+void NekoWallpaperItem::mouseMoveEvent(QMouseEvent* event)
+{
+    enqueue(nekomote::qt_quick::InputKind::Move, nekomote::qt_quick::input_position(*event), 0, 0,
+            event->timestamp());
+    event->accept();
+}
+void NekoWallpaperItem::wheelEvent(QWheelEvent* event)
+{
+    enqueue(nekomote::qt_quick::InputKind::Scroll, nekomote::qt_quick::input_position(*event),
+            static_cast<float>(event->angleDelta().y()) / 120, 0, event->timestamp());
+    event->accept();
+}
+
+void NekoWallpaperItem::componentComplete()
+{
+    WallpaperItemBase::componentComplete();
+    if (!assets_dir_.isEmpty() && status_ == 0)
+        set_status(1);
+}
+
+void NekoWallpaperItem::itemChange(ItemChange change, const ItemChangeData& data)
+{
+    WallpaperItemBase::itemChange(change, data);
+    if (change == ItemSceneChange)
+        attach_window(data.window);
+}
+
+void NekoWallpaperItem::check_backend()
+{
+    auto* host = host_window_.data();
+    if (!host || !host->isSceneGraphInitialized())
+        return;
+    backend_checked_ = true;
+    const auto api = host->rendererInterface()->graphicsApi();
+    if (api != QSGRendererInterface::OpenGL)
+    {
+        error_string_ =
+            QStringLiteral("NekoMote requires an OpenGL Qt Quick backend; actual API=%1")
+                .arg(static_cast<int>(api));
+        emit errorStringChanged();
+        set_status(3);
+    }
+    else if (status_ == 3)
+    {
+        error_string_.clear();
+        emit errorStringChanged();
+        set_status(!assets_dir_.isEmpty() ? 1 : 0);
+    }
+    refresh_playback();
+}
+
+void NekoWallpaperItem::attach_window(QQuickWindow* host)
+{
+    if (host_window_ == host)
+        return;
+    if (host_window_)
+        host_window_->removeEventFilter(this);
+    for (const auto& connection : window_connections_)
+        disconnect(connection);
+    host_window_ = host;
+    backend_checked_ = false;
+    ++playback_revision_;
+    if (host)
+    {
+        host->installEventFilter(this);
+        window_connections_[0] = connect(host, &QQuickWindow::sceneGraphInitialized, this,
+                                         &NekoWallpaperItem::check_backend, Qt::QueuedConnection);
+        window_connections_[1] = connect(
+            host, &QQuickWindow::sceneGraphInvalidated, this,
+            [this, source = QPointer<QQuickWindow>(host)]
+            {
+                if (source != host_window_)
+                    return;
+                backend_checked_ = false;
+                refresh_playback();
+            },
+            Qt::QueuedConnection);
+        window_connections_[2] =
+            connect(host, &QWindow::visibleChanged, this, &NekoWallpaperItem::refresh_playback);
+        check_backend();
+    }
+    refresh_playback();
+}
+
+bool NekoWallpaperItem::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == host_window_ &&
+        (event->type() == QEvent::Expose || event->type() == QEvent::Show ||
+         event->type() == QEvent::Hide || event->type() == QEvent::WindowStateChange))
+        QTimer::singleShot(0, this, [this] { refresh_playback(); });
+    return WallpaperItemBase::eventFilter(watched, event);
+}
+
+void NekoWallpaperItem::refresh_playback()
+{
+    const bool suspended = paused_ || status_ != 1 || !backend_checked_ || !isVisible() ||
+                           !host_window_ || !host_window_->isVisible() ||
+                           !host_window_->isExposed();
+    if (suspended != effective_paused_)
+    {
+        effective_paused_ = suspended;
+        ++playback_revision_;
+        if (suspended)
+            input_count_ = 0;
+        update();
+    }
+    if (suspended)
+        stop_timer();
+    else
+        start_timer();
+}
+
+bool NekoWallpaperItem::configure_diagnostics(int steps, bool fixed, std::uint32_t seed)
+{
+    if (!state_ || steps < 0 || steps > 100000 || (!fixed && steps != 0))
+        return false;
+    if (fixed)
+    {
+        if (state_->renderer_created.load() != 0)
+            return false;
+        state_->seed = seed;
+        state_->fixed_steps = steps;
+        state_->deterministic = true;
+        state_->config_dirty = true;
+    }
+    diagnostic_inputs_ = true;
+    diagnostic_notification_ = true;
+    setAcceptHoverEvents(false);
+    setAcceptedMouseButtons(Qt::NoButton);
+    input_count_ = 0;
+    update();
+    return true;
+}
+
+void NekoWallpaperItem::start_timer()
+{
+    if (timer_ && !timer_->isActive() && !effective_paused_)
+        timer_->start();
+}
+
+void NekoWallpaperItem::stop_timer()
+{
+    if (timer_)
+        timer_->stop();
+}
+} // namespace nekomote::plasma

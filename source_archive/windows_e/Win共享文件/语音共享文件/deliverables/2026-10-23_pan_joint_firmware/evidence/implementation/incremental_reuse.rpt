@@ -1,0 +1,172 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2022.2 (lin64) Build 3671981 Fri Oct 14 04:59:54 MDT 2022
+| Date         : Fri Oct 23 08:17:17 2026
+| Host         : ghmd-MRA-XXX running 64-bit Ubuntu 20.04.4 LTS
+| Command      : report_incremental_reuse -file /home/ghmd/aura-pan-joint-20261023/implementation/incremental_reuse.rpt
+| Design       : kv260_ispMipiRx_vcu_DP_wrapper
+| Device       : xck26
+| Design State : Unknown
+------------------------------------------------------------------------------------------------------------------------
+
+Incremental Implementation Information
+
+Table of Contents
+-----------------
+1. Incremental Flow Summary
+2. Reuse Summary
+3. Reference Checkpoint Information
+4. Comparison with Reference Run
+5. Optimization Comparison With Reference Run
+5.1 iphys_opt_replay Optimizations
+5.2 QoR Suggestion Optimizations
+6. Command Comparison with Reference Run
+6.1 Reference:
+6.2 Incremental:
+7. Non Reuse Information
+
+1. Incremental Flow Summary
+---------------------------
+
++-----------------------+---------------+
+|    Flow Information   |     Value     |
++-----------------------+---------------+
+| Synthesis Flow        |       Default |
+| Auto Incremental      |            No |
+| Incremental Directive | TimingClosure |
+| Reuse mode            |          High |
+| Target WNS            |           0.0 |
+| QoR Suggestions       |             0 |
++-----------------------+---------------+
+
+
+2. Reuse Summary
+----------------
+
++-------+----------------------+----------------------------+--------------------+--------+
+|  Type | Matched % (of Total) | Current Reuse % (of Total) | Fixed % (of Total) |  Total |
++-------+----------------------+----------------------------+--------------------+--------+
+| Cells |                99.84 |                      99.83 |               0.01 | 225131 |
+| Nets  |                99.97 |                      99.57 |               0.00 | 192985 |
+| Pins  |                    - |                      99.59 |                  - | 793118 |
+| Ports |               100.00 |                     100.00 |             100.00 |     23 |
++-------+----------------------+----------------------------+--------------------+--------+
+
+
+3. Reference Checkpoint Information
+-----------------------------------
+
++----------------+-----------------------------------------------------------------------------------------------------------------+
+| DCP Location:  | /home/ghmd/kv260-visual-servo-20261007/evidence/20261008T091618.800421Z-source-implementation/source_routed.dcp |
++----------------+-----------------------------------------------------------------------------------------------------------------+
+
+
++--------------------------------+----------------------------+
+|         DCP Information        |            Value           |
++--------------------------------+----------------------------+
+| Vivado Version                 |                     2022.2 |
+| DCP State                      |                 POST_ROUTE |
+| Recorded WNS                   |                      0.001 |
+| Recorded WHS                   |                      0.001 |
+| Reference Speed File Version   | PRODUCTION 1.30 05-15-2022 |
+| Incremental Speed File Version | PRODUCTION 1.30 05-15-2022 |
++--------------------------------+----------------------------+
+* Recorded WNS/WHS timing numbers are estimated timing numbers. They may vary slightly from sign-off timing numbers.
+
+
+4. Comparison with Reference Run
+--------------------------------
+
++-----------------+---------------------------+---------------------------+---------------------------+
+|                 |          WNS(ns)          |  Runtime(elapsed)(hh:mm)  |    Runtime(cpu)(hh:mm)    |
++-----------------+-------------+-------------+-------------+-------------+-------------+-------------+
+|      Stage      |  Reference  | Incremental |  Reference  | Incremental |  Reference  | Incremental |
++-----------------+-------------+-------------+-------------+-------------+-------------+-------------+
+| synth_design    |             |             |       00:01 |       00:01 |       00:01 |       00:01 |
+| opt_design      |             |             |       00:03 |       00:07 |       00:09 |       00:08 |
+| read_checkpoint |             |             |       00:12 |       00:15 |       00:17 |       00:18 |
+| place_design    |       0.001 |             |       00:10 |             |       00:23 |             |
+| phys_opt_design |       0.001 |             |     < 1 min |             |     < 1 min |             |
+| route_design    |       0.001 |             |       00:15 |             |       00:29 |             |
+| phys_opt_design |       0.001 |             |     < 1 min |             |     < 1 min |             |
++-----------------+-------------+-------------+-------------+-------------+-------------+-------------+
+
+
+5. Optimization Comparison With Reference Run
+---------------------------------------------
+
+5.1 iphys_opt_replay Optimizations
+----------------------------------
+
++-------------------------+--------+------------+
+| iphys_opt_design replay | Reused | Not Reused |
++-------------------------+--------+------------+
+| create_bufg             |      1 |          0 |
+| critical_cell_opt       |      2 |          0 |
+| dsp_register_opt        |    227 |          0 |
+| equ_drivers_opt         |      2 |          0 |
+| fanout_opt              |     46 |          0 |
+| bram_register_opt       |      1 |          0 |
+| hold_fix                |    945 |          0 |
++-------------------------+--------+------------+
+
+
+5.2 QoR Suggestion Optimizations
+--------------------------------
+
++-------------------------------------+-------+
+|           QoR Suggestions           | Value |
++-------------------------------------+-------+
+| QoR Suggestions (Recommended)       |     0 |
+|   Suggestions Included In Reference |     0 |
+|     Yet to apply                    |     0 |
+|     Applied                         |     0 |
+|     Failed to apply                 |     0 |
+|   New Suggestions (INCR_FRIENDLY=1) |     0 |
+|     Yet to apply                    |     0 |
+|     Applied                         |     0 |
+|     Failed to apply                 |     0 |
+| QoR Suggestions (Not Recommended)   |     0 |
+|   New Suggestions (INCR_FRIENDLY=0) |     0 |
+|     Yet to apply                    |     0 |
+|     Applied                         |     0 |
+|     Failed to apply                 |     0 |
+| Disabled New Suggestions            |     0 |
++-------------------------------------+-------+
+
+
+6. Command Comparison with Reference Run
+----------------------------------------
+
+6.1 Reference:
+--------------
+synth_design-verilog_define default::[not_specified] -top  kv260_ispMipiRx_vcu_DP_wrapper -part  xck26-sfvc784-2LV-c 
+opt_design
+read_checkpoint -directive TimingClosure  -incremental /home/ghmd/kv260-visual-servo-20261007/evidence/20261007T111257.242565Z-joint-build/joint_routed.dcp
+place_design -directive Explore
+phys_opt_design -directive AggressiveExplore
+route_design -directive Explore
+phys_opt_design -directive AggressiveExplore
+
+6.2 Incremental:
+----------------
+synth_design-verilog_define default::[not_specified] -top  kv260_ispMipiRx_vcu_DP_wrapper -part  xck26-sfvc784-2LV-c 
+opt_design
+read_checkpoint -directive TimingClosure  -incremental /home/ghmd/kv260-visual-servo-20261007/evidence/20261008T091618.800421Z-source-implementation/source_routed.dcp
+
+7. Non Reuse Information
+------------------------
+
++------------------------------------------------------+------+
+|                         Type                         |   %  |
++------------------------------------------------------+------+
+| Non-Reused Cells                                     | 0.16 |
+|   New                                                | 0.14 |
+|   Discarded illegal placement due to netlist changes | 0.01 |
+|   Discarded to improve timing                        | 0.01 |
+| Partially reused nets                                | 0.16 |
+| Non-Reused nets                                      | 0.26 |
+| Non-Reused Ports                                     | 0.00 |
++------------------------------------------------------+------+
+
+

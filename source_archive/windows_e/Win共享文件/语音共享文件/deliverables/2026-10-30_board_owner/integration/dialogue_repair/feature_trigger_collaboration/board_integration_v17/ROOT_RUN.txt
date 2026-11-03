@@ -1,0 +1,32 @@
+v17隔离公开库集成入口；主窗口独占板端执行。
+
+仅需上传 worker.py、source_mapping.json、MANIFEST.json 到新的独立stage目录。
+不要上传local_runtime_v17：板端直接导入已核验生产runtime/aura源代码。
+默认依赖Python>=3.9标准库、现有numpy；不需要pytest、ONNX或新模型。
+不会读取生产私库、身份模板、原settings、录音或窗口截图。
+不会开麦克风/相机/扬声器，不会修改监听、启动、进程或模型状态。
+所有业务库只在脚本自建/dev/shm/aura-public-v17-*目录，关闭后自动移除。
+
+先静态核验（STARTUP_PATH由root现读实际文件位置，禁止猜测）：
+python3 -B worker.py --runtime-root /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura --startup-config STARTUP_PATH --coordinated-slot ROOT_SLOT --check-only --output /ABS_NEW_STAGE/CHECK.json
+
+再运行（输出必须新路径，保留失败证据）：
+python3 -B worker.py --runtime-root /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura --startup-config STARTUP_PATH --coordinated-slot ROOT_SLOT --output /ABS_NEW_STAGE/ACTUAL.json
+
+运行前后主窗口自行按当前用户授权核对owner和监听状态。本脚本不要求PAUSED，
+不恢复/暂停生产监听；协调标签是执行归属说明，不是权限授予。
+startup或manifest不为精确v17时会拒绝；必须重新审核绑定，不能删掉hash校验。
+
+证据边界：真实v17生产类/paired路由、存储事务、来源依赖、原完整ACK校验。
+ASR、PCM、相机health、声纹编码器、UTC锚、原生ready和播放消费均为明确fixture。
+完整ACK是逐包PCM重算全流hash/长度、拒绝少1样本的回执、再提交完整回执；
+不是实际扬声器播放，也不证明真实ASR/声纹模型/人体检测或真人听感。
+脚本不用time.time，不把板端旧系统墙钟用于时间范围；UTC为公开合成固定时刻。
+不授予profile权限；个人记忆缺少原grant必须被拒绝。
+
+本地第二轮：23例，22 PASS，H01 FAIL；LOCAL_REPLAY_01/02保留。
+首轮中的观察包装器缺少public/reset转发、未创建save_receipts属性、
+及命令格式等测试入口错误已修正；未改任何生产文件或放宽断言。
+第二轮H01为实际缺口：当前查询本身占据历史检索/2048预算，公开目标来源未进入
+模型上下文。脚本保留失败断言，板端运行如重现会退出1，但其他用例独立写入。
+G01/G02的PASS只表示稳定重现未绑定handler错误，不表示日期删除/推理能力通过。

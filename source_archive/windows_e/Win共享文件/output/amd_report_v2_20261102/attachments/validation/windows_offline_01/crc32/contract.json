@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "name": "crc32",
+  "ip_name": "checksum_unit_0",
+  "data_width": 32,
+  "addr_range": 512,
+  "metadata_source": "synthetic_fixture",
+  "timeout_ms": 100,
+  "poll_interval_ms": 1,
+  "registers": [
+    {
+      "name": "command",
+      "hwh_name": "CMD",
+      "offset": 64,
+      "width": 32,
+      "access": "wo",
+      "read_effect": "none"
+    },
+    {
+      "name": "status",
+      "hwh_name": "STATUS",
+      "offset": 68,
+      "width": 32,
+      "access": "ro",
+      "read_effect": "clear"
+    },
+    {
+      "name": "word",
+      "hwh_name": "DATA",
+      "offset": 128,
+      "width": 32,
+      "access": "rw",
+      "read_effect": "none"
+    },
+    {
+      "name": "digest",
+      "hwh_name": "CRC",
+      "offset": 160,
+      "width": 32,
+      "access": "ro",
+      "read_effect": "none"
+    }
+  ],
+  "inputs": [
+    "word"
+  ],
+  "outputs": [
+    "digest"
+  ],
+  "control": {
+    "start": {
+      "register": "command",
+      "value": 4
+    },
+    "done": {
+      "register": "status",
+      "mask": 128,
+      "value": 128
+    },
+    "done_reset": "on_start"
+  }
+}

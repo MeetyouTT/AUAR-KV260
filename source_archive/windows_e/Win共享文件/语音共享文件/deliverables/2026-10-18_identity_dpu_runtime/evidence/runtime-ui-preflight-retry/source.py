@@ -1,0 +1,17 @@
+import hashlib,json,os,subprocess
+from pathlib import Path
+root=Path('/home/root/aura-adaptation-20261006/identity_dpu_runtime_20261018/96f86ddef3a96b93')
+app=root/'candidate/runtime/aura'
+p=root/'candidate/startup/config.json'
+cfg=json.loads(p.read_text());cfg['gui_sha256']=hashlib.sha256((app/'tools/board_avatar_gtk.py').read_bytes()).hexdigest()
+manifest=json.loads((root/'staged-manifest.json').read_text())
+changed={row['path'] for row in manifest['files']}|{'config/board_avatar_gtk.json','config/board_camera_ui.json'}
+for rel,expected in list(cfg['component_sha256'].items()):
+ actual=hashlib.sha256((app/rel).read_bytes()).hexdigest()
+ if rel in changed:cfg['component_sha256'][rel]=actual
+ else:assert actual==expected,'Unexpected baseline component change: '+rel
+for rel in changed:cfg['component_sha256'][rel]=hashlib.sha256((app/rel).read_bytes()).hexdigest()
+p.write_text(json.dumps(cfg,indent=2)+'\n')
+env=dict(os.environ,DISPLAY=':0',PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin')
+process=subprocess.run(['python3','-B',str(root/'candidate/startup/launcher.py'),'--config',str(p),'--preflight'],env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=18)
+print(json.dumps({'status':'PREFLIGHT_PASS' if process.returncode==0 else 'PREFLIGHT_FAILED','exit_code':process.returncode,'output':process.stdout[-2500:],'config_keys':sorted(cfg.keys())}),flush=True)

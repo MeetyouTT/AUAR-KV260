@@ -1,0 +1,38 @@
+34
+python3 -B build/reproduce.py --out "$OUT" --stage prepare \
+--vivado "$VIV/bin/vivado" --vitis-root "$VIT" \
+--rtl-results "$OUT/rtl/result.json"
+python3 -B build/reproduce.py --out "$OUT" --stage implement \
+--vivado "$VIV/bin/vivado" --vitis-root "$VIT" \
+--rtl-results "$OUT/rtl/result.json"
+BIT 与 XSA 必须来自对应实现，导出固件还需 base DTB、dtc、fdtoverlay、
+xclbinutil 与 bootgen。仅 metadata-only 测试没有产生完整可加载位流；新原生库编译通
+过，也不等于已替换正式运行库。具体导出和交叉编译命令见附录 B。
+8.5 模型准备 量化与编译
+先运行 build/prepare_models.py check，核对原 ONNX、目标 xmodel 与固定输入锁。
+模型准备需要代表性校准集、独立评测数据、适配脚本及目标架构。两份原 ONNX 与三个目标
+图的来源和 SHA 由输入锁描述，人脸像素向量保留在授权的包外数据区，不用任意图片替代
+固定测试后仍沿用旧结果。
+重新量化应保存校准身份、样本数、工具镜像、适配版本、张量布局和模型指纹；编译后
+先做固定向量比对，再做任务质量和路径计时。工程包已重新运行两模型的量化、评估和目标
+编译，生成的候选 SHA 见 E32。历史逐整数一致及 1000 对质量数据继续与旧工件绑定，新
+编译输出的质量与板端执行按其自己的记录评价。报告另附历史 YuNet 全零合成输入及四个
+期望 INT8 输出，共 16,085 字节，无人脸像素；完整四组的输入输出字节数及 SHA 见
+public_vectors/historical_vector_manifest.json。[E36]
+8.6 板端与 Windows 软件安装配置
+board/install.sh 的 plan 先显示现场输入，index 建立白名单原件索引，board 与
+windows 在全新输出树还原各自布局。音频依赖以独立附件传入，逐项校验后落盘。离线安装
+和真实设备安装是两个阶段，前者不能证明服务已经在 KV260 或 Windows 运行。
+sh board/install.sh plan
+sh board/install.sh index --input-root "$INPUTS" --out "$OUT/inputs.json"
+sh board/install.sh board --index "$OUT/inputs.json" \
+--audio "$AUDIO_ZIP" --out "$OUT/offline-board"
+sh board/install.sh windows --index "$OUT/inputs.json" \
+--out "$OUT/historical-host"
+INPUTS 由读者设置为有权读取的原件目录，AUDIO_ZIP 指向独立音频附件，不能省略后
+声称相同安装。
+15 项板端音频依赖包含 ASR、前端降噪/VAD、说话人模型和 ARM64 Python 轮子，未压
+缩 合 计 211,612,620 字 节 ， 逐 件 路 径 、 大 小 与 SHA 在
+src/models/inputs/board_audio_dependencies.json 。 授 权 持 有 者 需 另 备
+auar_board_audio_dependencies.zip；省略 --audio 时回执明确记录 0 项。公开分发和取
+得路线仍须依据各上游与团队授权，源码包本身不包含这些权重。

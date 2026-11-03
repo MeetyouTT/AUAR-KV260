@@ -1,0 +1,94 @@
+SOURCE CANDIDATE ONLY. No production file, inference, model or service changed.
+
+One target: aura/tools/model_inference_host.py
+Before SHA256: ace827aa21d9b6c404366677d05fc20054fe88f265af8ca0a20107e082cbf5c8
+After SHA256:  1bdb20045ac07950840dafc478679efbdce3c295765189280ac5c95c9d6f9bd1
+
+Exactly two changes:
+  _preload_llm_request:454 keep_alive='30m' -> keep_alive=-1.
+  _ollama:507 body.update explicitly adds keep_alive=-1. The existing fast
+    chat_body otherwise supplies30m and would reset even a resident preload.
+No shared dialogue_host_ollama, environment, daemon, timer or heartbeat change.
+Caller-owned messages, fixed27B, ctx2048, thinkFalse default, temperature0.6,
+dialogue120/summary512 defaults, num_predict override and all deadlines remain.
+OmniVoice16, voice/reference, full24kmonoRAM output and GPU protection unchanged.
+
+5 actual-method fake-socket tests passed in0.092s. They verify both preload/chat
+payloads, task defaults, caller messages, numeric-ms whitelist, original GPU
+acquire, fixed11435 target, identical deadlines and every other method AST.
+No real socket, model, service, database, board, microphone or playback test.
+  D:\AIModels\speaker-identity\venv\Scripts\python.exe -B -m unittest discover
+    -s deliverables\2026-10-30_board_owner\integration\response_latency\warm_model_candidate
+    -p test_warm_model_candidate.py -v
+
+Measured scope (root's separately executed public probes, not these fake tests):
+  Initial model_baseline: LLM4772.8ms, TTS706.6ms, combined5480.2ms.
+  model_warm: LLM4034ms, model load1.79ms, prefill545.26ms/232tokens,
+    decode3399.71ms/32tokens (~9.4tokens/s), TTS645ms.
+No ASR, physical playback or true-memory access in these public model probes.
+Residency prevents another cold load; it does not remove the warm4s decode.
+Stable-prefix caching can affect prefill, not those3.4s of autoregressive decode.
+Do not promise a4s gain from residency or a first-sentence gain from later-clause
+TTS overlap. Root's separate same-text multi-sentence test measures that change.
+No output-quality cap, quantization, context or GPU admission tuning proposed.
+
+Read-only resource evidence captured earlier at2026-10-31T06:30Z:
+  Same host16492/session33178f1216bf43e3ba04e66473ad356e, RAM TTS actual worker
+ 15520 beneath frontend26444; fixed11435 daemon26036. All require fresh proof
+ before maintenance. Llama runner10752 was born06:26:15Z while host/TTS existed
+ since04:02Z; /api/ps expiration06:56:26Z was consistent with30m residency.
+  27B size_vram11579215051B (~11042MiB); whole GPU13990/16311MiB used,
+  free2061MiB. WarmLLM requirement512+reserve768=1280MiB; warmTTS384+768=1152.
+  Keeping the same weights resident adds no second model/worker or larger ctx.
+  Every request still samples physical free memory under adaptive/enforcing;
+  external allocations can still cause refusal. No eviction/stop of other models.
+  ColdTTS5120+reserve768=5888MiB cannot be assumed available with27B resident.
+
+Root-only quiet maintenance procedure (this agent has NOT executed any step):
+ 1. Root establishes its quiet board-business window: no generating/playing
+    request or background summary can race a host replacement. Read current
+    start_inference.ps1 -Action Status and record exact session/main/TTS and
+    fixed11435 daemon owner. Verify the formal target still has the before SHA.
+ 2. Use the existing normal lifecycle:
+      .\start_inference.ps1 -Action Stop -ReleaseOwnedModel
+    This rejects active/queued jobs or missing ownership. It proves the same
+    fixed daemon PID/birth/exe/command/listener and sole exact fixed model,
+    closes ONLY its8797 host and ownedTTS, then releases ONLY its owned27B.
+    Require CLOSED, owned_tts_closed true and model_release.released true.
+    No taskkill, Stop-Process, other daemon stop, GPU reset or guard weakening.
+    If rejected/timed out, inspect metadata; do not force or bypass ownership.
+ 3. Only after clean close, root copies the reviewed one-file candidate to
+    aura/tools/model_inference_host.py and verifies the exact after SHA. Preserve
+    the before source/receipt in root's local source revision archive. Do not
+    touch weights, references, config, model directory, caches or identity/DB.
+ 4. Update the Windows-only source revision manifest: this file is the changed
+    dependency. The original production_model_host/source_manifest.json and
+    HANDOFF are historical evidence; preserve them, record a new revision and
+    link its source SHA and baseline. Do NOT blindly rerun finalize_handoff.py:
+    its original pending-wrapper/marker assumptions predate the applied board
+    ownership gate. No board component pins/client-wire/persona change needed.
+ 5. .\start_inference.ps1 -Action Start
+    Existing <=300s TTS-first startup/soleTTS proof then fixed27B preload under
+    the original GPU admission. Keep11435 daemon/default11434 and other models.
+    A plain Stop without ReleaseOwnedModel leaves27B resident: that alone does
+    not make a fresh coldTTS start safe. Do not claim an immediate safe restart.
+ 6. Require new sessionREADY, role=model_inference_only, same fixed daemon owner,
+    exactly one ownedTTS, num_step16, tts_ready true, adaptive/enforcing, no body
+    logging/persistence, lifetime_seconds null. Refresh source/owner metadata in
+    root's model handoff/current Windows owner references and dashboard snapshot.
+    Record actual newPIDs; never reuse16492/26444 as current after replacement.
+    Verify /api/ps reports the selected model resident with the new residency
+    policy; do not invent a30min idle-survival pass without actually waiting.
+ 7. Root's public, noStore/noPlayback baseline or agreed basic check only, then
+    restore its board-business window. A failed startup may be rolled back to
+    before SHA only after the failed owner/worker are normally closed and its
+    own fixed model is safely released, using the same lifecycle protections.
+
+Permanent residency lifecycle caveat: ordinary Stop closes host/TTS but keeps
+the project27B. With keep_alive=-1 it remains loaded until the explicit owned
+release/restart path; do not describe normal Stop as freeing all GPU models.
+No global OLLAMA_KEEP_ALIVE edit is needed. Official primary documentation:
+https://docs.ollama.com/faq#how-do-i-keep-a-model-loaded-in-memory-or-make-it-unload-immediately
+Negative keep_alive keeps that selected model resident; per-request keep_alive
+overrides an environment default. Dedicated model ownership and the measured
+GPU admission protections, rather than a longer lease, remain authoritative.

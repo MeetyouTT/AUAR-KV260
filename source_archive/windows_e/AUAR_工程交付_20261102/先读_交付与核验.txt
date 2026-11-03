@@ -1,0 +1,30 @@
+﻿AUAR·雪妃　KV260 初级组自主命题工程交付
+2026-11-02　含板上公开资源的更新版
+
+交付文件
+  auar_kv260_engineering.rar　主工程，RAR5，165,867,671 字节，解压后 1,977 个文件。
+  auar_board_audio_dependencies.zip　板端 ASR、音频前端、VAD、CPU 声纹模型和 ARM64 wheel，共 15 个锁定文件。
+  auar_skills.zip　运动命令保护、三模型感知时效、语音大模型运行优化。三套专题技能已在单核 Ubuntu 上单独复跑；另附已有的通用 PYNQ 工具。
+  auar_wide_source_routed.dcp　原版 wide 已布线检查点，可用 Vivado 2022.2 跳过综合布线直接导出。
+  SHA256SUMS.txt　上述四件交付物的 SHA-256。verification 保存解包、硬件工程导出、模型/技能以及板上公开资源的核验记录。aura 为可直接浏览的工程树。
+
+这次从 KV260 补回了什么
+  三段已选音色的原始系统提示音和 feedback.json 位于 aura/board/public_cues。问候 2.66 秒、邀请 2.28 秒、思考 1.79 秒，均为 24 kHz 单声道 16 位 PCM。
+  上版待从原卡补入的 12 项已逐项核对并随主 RAR 交付，包括 7 个历史相机校验项、现役相机原生共享库和这 4 个语音文件。
+  界面和相机的两个原始 systemd 服务及 56 份已加载追加配置已归档。相机启动前的 20 道文件校验会引用 135 个不同文件。文件清单与原部署路径为 aura/board/config/public_board_resources.json。
+  从这份 RAR 解压后，在隔离的 Ubuntu 暂存树中执行了原版 20 道文件校验，并用界面和语音业务的原版提示音读取代码加载三段 WAV。结果在 verification/board_public_runtime_replay.json。实板操作仅限读取公开发布文件和启动配置，未采集录音或访问个人数据。
+
+另一台低核 Ubuntu 20.04
+  四个交付件和 SHA256SUMS.txt 放在同一目录时，可运行 sha256sum -c SHA256SUMS.txt 校验传输。
+  用支持 RAR5 的 unrar 执行 unrar x auar_kv260_engineering.rar，或直接从此处复制 aura。进入 aura 后执行
+    python3 -B build/scripts/reproduce.py --out "$HOME/auar-check-01"
+  请使用新的输出目录。复核只需 Python 3.8+ 标准库。本次从最终压缩包解压，在 Ubuntu 20.04.4、Python 3.8.10、单个 CPU 核心上运行，9 项检查均通过。
+  准备板端文件时将板端音频 ZIP 留在 aura 旁，在 aura 内执行
+    python3 -B board/scripts/stage.py --out "$HOME/auar-rootfs-01" --audio ../auar_board_audio_dependencies.zip
+  已核对生成的 1,558 个暂存文件及 15/15 音频依赖的落盘哈希。三段提示音来自主 RAR，默认暂存就能放回原路径。独立复跑原版读取代码需 Linux 用户命名空间及 bubblewrap，用法见 board/readme.md。
+  载入 Vivado 2022.2 后可从原检查点导出
+    python3 -B build/scripts/fpga.py export --checkpoint ../auar_wide_source_routed.dcp --out "$HOME/auar-xsa-01"
+  从该检查点导出的四个板端固件与原版逐字节一致。FPGA 全量构建见 build/readme.md。Windows 的 27B 和 OmniVoice 外部权重按固定版本准备，入口见 src/windows/readme.md。
+
+工程与实机验收
+  性能采样和覆盖范围见 report/performance_addendum.txt 与 report/release_status.md。本次为只读收录及离线复验，空白卡冷启动和三分钟全功能同时运行仍须实物验证；移动残影与自动向右偶发抖动保留原现场记录。公开发布前，队伍需确认角色美术再分发授权、团队开源声明和仓库地址。

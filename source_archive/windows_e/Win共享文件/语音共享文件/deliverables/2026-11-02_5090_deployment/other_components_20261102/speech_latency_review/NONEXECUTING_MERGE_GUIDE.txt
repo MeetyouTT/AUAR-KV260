@@ -1,0 +1,17 @@
+数值计时候选的非执行合并说明（本轮不部署、不重启）
+
+候选只包含两份非UI业务Python：board/runtime/board_dialogue.py与board/runtime/audio/board_dialogue_jobs.py。它们必须成套审阅；Jobs新增常量import依赖新controller。没有候选startup、GUI配置、主页面文件或部署/重启脚本。
+
+未来若安排实际发布：
+1. 先按届时唯一维护操作者和现役实际入口重新读取状态；本说明不授权现在改变服务、麦克风或主页面。读取两份实际源，分别必须仍精确匹配before SHA c877cdee602ff0bda669cc2b2fefa77e9328ce205a744e317df82ffb17146de6 与687b80cde20d70e4de56dd71956683b9cec59f55bd25965491dc08d00c8cb248；不符就停止并基于新来源重新合并，不能覆盖别人的更新。
+2. 读取那一刻最新startup原字节和完整component_sha256，核完整来源闭包，保存原字节备份。ff7c…只是本次来源采样SHA，bcb…或后续主页面版本都不得被旧快照整体覆盖。以最新startup深拷贝为基准，仅修改上述两个component key到candidate after SHA；所有其余字段、组件项、GUI配置pin、主页面改动、模型/音色/身份/记忆/转轴选择逐项保持。不得从本目录测试runtime拷贝整棵源码。
+3. 使用逐文件精确before字节CAS写候选，仅在最新startup仍等于本次写前字节时CAS提交新两pin版本。不得以旧ff7c/bcb固定常量恢复整份startup，也不得替换主页面配置或为了载入候选临时重启并行主页面服务。本轮没有执行这一流程。
+4. 写后核两份after SHA、完整组件闭包及startup语义diff恰为两个component值；其他所有key、值和来源均与本次写前最新状态一致。新startup SHA只能在届时按最新内容生成，不能在此预填。
+5. 未知结果先读取真实文件和事务，不重复写入。回退只有在对应文件仍为本次精确after字节、startup仍为本次精确after字节且维护所有权不变时才允许CAS恢复这次备份；任何并行主页面更新出现都不得用旧startup整份回退覆盖。两模块协调载入留给未来正式维护安排，本轮不触发服务动作。
+
+四项原回归失败明细（before/after集合完全相同，不计通过）：
+- test_missing_sensitive_board_handlers_never_fall_back_to_model的“西蓝，记住我”用例：旧角色称呼未被当前雪妃词表剥离，旧fixture预期identity_enrollment不能满足。
+- test_explicit_memory_precedes_reasoning_and_retains_raw_alias：输入为旧“西蓝记住我喜欢价格50+20”，当前称呼词表不认可该前缀，fixture期待原显式记忆路径而controller.calls为空。
+- test_wake_alias_and_wake_only_follow_existing_audio_gate：仍将西蓝/汐蓝当作现役唤醒名与ASR别名，当前公开角色配置为雪妃、asr_aliases=[]，before/after均保守拒绝该旧唤醒。
+- test_real_board_store_memory_and_history_flow_without_legacy_services：合成记忆指令仍以西蓝开头，fixture预期本地直答只调用TTS，但两版当前配置下都经过LLM/TTS。使用的是新临时合成SQLite，不是生产数据库。
+这些旧fixture假设与当前公开角色选择不一致；本补丁未改角色/别名、路由或这些断言，未为了出绿改生产行为。有效专项基线仍是5fail/16pass，候选21pass/0fail/0error；旧60回归两版各56pass/4相同失败，8场景请求/输出/回执/权限/取消行为trace一致。

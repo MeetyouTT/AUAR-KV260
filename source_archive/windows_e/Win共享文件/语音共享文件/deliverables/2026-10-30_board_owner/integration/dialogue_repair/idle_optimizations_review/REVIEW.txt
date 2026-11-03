@@ -1,0 +1,31 @@
+v15两项窄优化独立源码审查：NO_BLOCKER（未操作设备/生产）
+
+审查对象
+playback_idle_candidate/after/tools/gstreamer_audio_worker.py：a454792d11e2e308dfebfa3e963ac73fa13a887485b7804d52a8a2bd162fd466，父63fd37185b6aa6909134945a440be2c33781ed95d2e81dfd95905afe4e17dce7。
+presentation_idle_candidate/after/tools/board_avatar_gtk.py：7d95b5f682f7abf4a69509d5843c3345dcc31f8dbefeb0e9f3af27b19aa3542d，父4c3e692acf23f78c9ce9c66f75f6f95f14c08b34ec371ff09842ffbdd911951a。
+父v14为39b102a4/378pins；审查使用与该组件pin相同的实际音频消费者、53e13当前RealtimeController和8c0当前PresentationLifecycle，未以旧AURA中f487生命周期代替现役8c0。
+
+音频：行为链与关键门
+worker GLib仍10ms执行，命令仍先处理最多16项，再engine.poll。poll中ALSA推送、真实sink query、错误bus、时钟和EOS判断原样；只在publisher之前判断是否重复状态。稳定key包括token/ready/done/error/device_ready/device_state/audible/track/duration等，engine.active严格False、persistent/device_ready True、IDLE_READY、无pause/声音/error才可限流。
+active、WAITING_PCM、paused、错误或非persistent默认都逐tick。首次idle、key变化、任何命令、1秒心跳即时publish；exception重置gate并发布错误，下一次相同idle恢复也不会被旧key吞掉。EOS的activeTrue→False以及done/ready改变仍同tick发布，不能因idle分类而延后完整播放完成。close/EOF释放分支仍在gate之前。
+稳定idle省略publish时仍每tickflush，原nonblocking publisher的partial-write和broken-pipe收尾保持；take_references仍每tick执行，reference序号/50ms过期/8packet边界原样。未改PCM、设备、token、信号、消息排序、ACK或播放器queue。
+
+消费者无idle freshness门的具体来源
+realtime_audio.py：receive只按相同token更新snapshot（约27–38行），不存收到时间/last_state/age；read仅复制（45–46），ready取ready，finished只检查active/error/done（69–74）。
+gstreamer_audio.py（pin f6bf258c...）：position只read duration/clock（58–61），没有snapshot age。
+streaming_controller.py（pin4b76e137...）：80–83读error/position，124–125以output.finished且network结果存在才生成completion；没有idle-age失效判断。
+实际RealtimeController pin53e13...（ui_budget_candidate/after）：149–150 position/finished，164后一次output_snapshot用于public，未加时间年龄门。正式Recording/VoiceFirst/listening链未发现音频IPC idle-age门；视觉service的STALE校验是另一来源，不能混为音频状态频率约束。因此当前1Hz稳定idle心跳无需仅凭猜测改4Hz。
+
+字幕：单一写者与生命周期
+候选仅3组guard，涵盖4slots：refresh_runtime不再给已有production_presentation的transcript label/tooltip和reply buffer+reply_text写旧值；tick同条件跳过旧reply label写入。计算、状态/按钮、身份服务、设置读取、project_business_ui、样本/桥发布全继续。
+生产bind_presentation在render worker之前完成，attach在窗口构建后、tick之前完成；实际tick仍refresh_runtime→project_business_ui→project_presentation。后者每次project/repaint都调用原_expire；原8c0生命周期字节未改，既有长度门/300秒显示期限不靠重绘续期。新guard没有缓存或授权语义，也没有绕过生命周期的实际widget读取/修复逻辑。
+Store正确返回后的correct/forget/clear/commit_compaction失效、generation/cancel/stream_failed、precommit旧start阻止、当前操作确认reply、metadata-only bridge/evidence与close清理都沿原hook。失败Store操作不误清，已过期/已撤销内容不会被旧widget刷新重新注入。reply_text是GTK旧去重/生命周期paint的显示缓存，不是模型prompt或权限/FSM数据源。
+无生命周期的非生产路径继续原4slot写法。存在但已关闭的生产lifecycle也不回落旧字幕来源，保留原隐私关闭语义；窗口最终销毁/生命周期失效仍原流程。
+
+测试证据评估
+已阅读12项actual main/fakeGLib音频测试：真实tick路径覆盖110次poll仅2个idle状态、token/done/ready即时、WAITING_PCM/paused/active全频率、EOS、重复stop、错误与恢复、partial-write flush、echo refs、close/EOF及非persistent。
+已阅读8项真实before/after refresh_runtime+tick AST与冻结实际lifecycle的假GTK/时钟/Store用例：覆盖21tick最终显示相同且重复写减少、增量回答、硬过期/旧副本、提交更正/删除/清理/压缩、失败操作不清、同owner确认、新代次及非生产分支。
+结论基于控制流/数据与生命周期，不仅是测试数量。此独立审查没有执行模型、设备或真实库，也未修改两代理候选。主控仍应按原正常闭合/启动方式，只合并这2份after源并重算pins。
+
+实际收益与验证边界
+音频候选减少重复JSON/IPC，不减少真实ALSA静音包、engine.poll或reference计算；闲置诊断计数最多晚约1秒不参与播放授权。字幕候选减少重复layout触发，不降低16fps设置或owner tick频率。两者均不能据源码或fake计数推断整板CPU/首声已改善。主控后续可用同条件idle CPU/IPC、native计数和一轮公开完整播放ACK/暂停取消复核；无需改模型/阈值/队列/私库。

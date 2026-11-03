@@ -1,0 +1,35 @@
+{
+  "schema": "aura-root-explicit-continue-source-review-1",
+  "decision": "APPROVED_SINGLE_SOURCE_FOR_PUBLIC_ARM_AND_SERIAL_PACKAGE_PREPARATION",
+  "requested_behavior": "User explicitly chose to continue the current conversation after pause.",
+  "base_spec_sha256": "62b99e24560229c78a3be000fed5752b6a50c4fb16ab6bc2c88e987561831177",
+  "source": "tools/voice_first_recording.py",
+  "before_sha256": "57375530fddbcf7a8f431201bf86ba904d289828e69a82cdee81ab0324987427",
+  "after_sha256": "54fa17ac97e3fdbeeb2725b6534a86dec9ece60839f2b14ffa77c348e714dafc",
+  "frozen_handoff_sha256": "dcb2014b328c21234c5214925bc56eba8c440c83dc07b0667428ad7d62daf7ab",
+  "matched_support_sources": 7,
+  "changed_methods": [
+    "__init__",
+    "_finish_session",
+    "_monitor_tick",
+    "cancel",
+    "handsfree_toggle"
+  ],
+  "added_helpers": [
+    "_conversation_resume_binding",
+    "_same_resume_binding",
+    "_select_listening_conversation"
+  ],
+  "local_public_tests": 9,
+  "checks": [
+    "Pending RAM binding is created only by explicit UI enable for an already admitted anonymous active==saved conversation.",
+    "Binding matches the same jobs, selection, boot, transport session and CID under the existing jobs RLock at consumption.",
+    "Original select_conversation handles generation/session invalidation and durable reference; no direct selection-file writes added.",
+    "Cancel/finish clear the one-use marker; automatic silence expiry/rebuild still selects a new anonymous conversation.",
+    "Saved file alone grants no continuation; profile/custom scope providers keep the original route with no new grants.",
+    "Original recording, ASR, model, playback, presentation, memory-policy and mechanical code remain unchanged."
+  ],
+  "deployment_claimed": false,
+  "physical_or_long_duration_acceptance_claimed": false,
+  "device_model_or_private_database_access_by_reviewer": false
+}

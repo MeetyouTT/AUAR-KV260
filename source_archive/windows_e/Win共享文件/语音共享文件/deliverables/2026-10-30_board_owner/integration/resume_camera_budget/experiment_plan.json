@@ -1,0 +1,34 @@
+{
+  "status": "LOCAL_ONLY_AWAITING_CURRENT_EXTERNAL_HOOK_SOURCE",
+  "purpose": "Reduce redundant face-target detection attempts with an explicit 200 ms start cadence; do not change the person detector or identity decision rules.",
+  "candidate_only": true,
+  "production_changed": false,
+  "hardware_access_by_this_agent": false,
+  "required_invariants": [
+    "Keep the current single camera publisher and its latest immutable frame ownership.",
+    "Keep YOLO/ByteTrack models, thresholds, scheduling and output geometry unchanged.",
+    "Keep face DPU model hashes, detector thresholds, matching and ambiguity thresholds, 1000 ms TTL and epoch/generation rules unchanged.",
+    "Use the latest pending source frame only after the cadence wait; never return a fabricated or re-stamped cached detection.",
+    "Keep original face processing, face observation, enrollment sampling, source guards and operator ABI/recovery lifecycle hooks.",
+    "Leave the protected r17 entry and all old source/configuration files untouched; use an independently pinned candidate entry and source manifest.",
+    "Do not modify native libraries, checkpoint, consumed markers, BOOT/FDT/firmware/VART or mechanical protections.",
+    "Do not claim CPU savings from fewer detector calls alone or audio readiness from synthetic scheduler tests."
+  ],
+  "measurement_design": {
+    "paired_arms": ["unchanged r17 baseline", "independent explicit 200 ms candidate"],
+    "scenes": ["no face", "one steady face", "face disappears and returns", "multiple faces / ambiguous ownership"],
+    "hold_equal": ["camera input and resolution", "person model and tracking", "identity model and authorized gallery", "display frame rate and animation load", "audio source PCM and 20 ms pacing", "audio frontend threads and process priority", "CPU frequency and governor", "warmup and trial duration"],
+    "primary_cpu_evidence": "Read-only process/thread CPU deltas over the same monotonic measurement window; report whole-board and camera deltas separately.",
+    "scheduler_evidence": "Actual face detection attempt start gaps, processed/overwritten counters, source frame IDs and existing freshness/discard counters; no image or biometric template export.",
+    "audio_evidence": "Actual public PCM paced full frontend/ASR/encoder composition with the original bounded eight-frame queue and unchanged fail-on-overflow gate.",
+    "functional_evidence": "Original face absence/multiple-face/expiry/source-epoch/enrollment tests and same-source checks plus bounded-start/latest-pending/close tests.",
+    "temporal_cost_to_report": "An explicit 200 ms detector cadence can add up to one extra 100 ms sampling interval per observation relative to a 100 ms cadence. Initial confirmation/reacquisition latency must be measured, not described as identical.",
+    "acceptance": [
+      "A measurable paired reduction in camera and/or whole-board CPU work beyond run-to-run variation.",
+      "No source freshness, ownership, native recovery, person tracking or original identity decision regression.",
+      "No silent audio frame drop, queue-size expansion, model/threshold relaxation or lower display frame rate.",
+      "Audio real-time and queue acceptance remain separate actual gates; detector call reduction alone does not satisfy them."
+    ]
+  },
+  "deployment": "Not selected. Parent must review independent pins and serial single-publisher/native-owner handoff steps before any hardware action."
+}

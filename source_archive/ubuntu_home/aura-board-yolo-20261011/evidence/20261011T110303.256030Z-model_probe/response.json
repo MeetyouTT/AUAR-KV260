@@ -1,0 +1,34 @@
+{
+  "model_sha256": "def64abdeeccbd020cb651913ba907464c1a1786e30ba7d4aa077b601388950a",
+  "dpu_attrs": [
+    {
+      "dpu_fingerprint": "72339070457545735",
+      "runner": "{'ref': 'libvart-cpu-runner.so', 'run': 'libvart-dpu-runner.so', 'sim': 'libvart-sim-runner.so'}",
+      "dpu_name": "DPUCZDX8G_ISA1_B4096",
+      "device": "DPU"
+    }
+  ],
+  "attr_keys": [
+    [
+      "reg_id_to_hw_segment",
+      "children_topological_sort",
+      "reg_id_to_context_type",
+      "dpu_fingerprint",
+      "mc_code_preload",
+      "runner",
+      "dpu_name",
+      "workload",
+      "if_prefetch",
+      "workload_on_arch",
+      "reg_id_to_context_type_v2",
+      "mc_code",
+      "reg_id_to_parameter_value",
+      "device",
+      "reg_id_to_size",
+      "debug_mode"
+    ]
+  ],
+  "jpeg_source": "/*\n * Copyright 2019 Xilinx Inc.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n#include <glog/logging.h>\n\n#include <iostream>\n#include <memory>\n#include <opencv2/core.hpp>\n#include <opencv2/highgui.hpp>\n#include <opencv2/imgproc.hpp>\n#include <vitis/ai/yolovx.hpp>\n#include <vitis/ai/demo.hpp>\n\n#include \"./process_result.hpp\"\n\nint main(int argc, char* argv[]) {\n  std::string model = argv[1];\n  return vitis::ai::main_for_jpeg_demo(\n      argc, argv,\n      [model] {\n        return vitis::ai::YOLOvX::create(model);\n      },\n      process_result, 2);\n}\n",
+  "header": "/*\n * Copyright 2021 Xilinx Inc.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n/*\n * Filename: yolov3.hpp\n *\n * Description:\n * This network is used to detecting object from an image, it will return\n * its coordinate, label and confidence.\n *\n * Please refer to document \"Xilinx_AI_SDK_User_Guide.pdf\" for more details\n * of these APIs.\n */\n#pragma once\n#include <memory>\n#include <opencv2/core.hpp>\n#include <vector>\n#include <vitis/ai/configurable_dpu_task.hpp>\n#include <vitis/ai/nnpp/yolovx.hpp>\nnamespace vitis {\nnamespace ai {\n\n/**\n * @brief Base class for detecting objects in the input image (cv::Mat).\n *\n * Input is an image (cv::Mat).\n *\n * Output is the position of the pedestrians in the input image.\n *\n * Sample code:\n * @code\n *\n  auto yolo = vitis::ai::YOLOvX::create(\"yolovx_pt\", true);\n\n  Mat img = cv::imread(\"sample_yolovx.jpg\");\n  auto results = yolo->run(img);\n\n  for (auto& result : results.bboxes) {\n    int label = result.label;\n    auto& box = result.box;\n\n    cout << \"RESULT: \" << label << \"\\t\" << std::fixed << std::setprecision(2)\n         << box[0] << \"\\t\" << box[1] << \"\\t\" << box[2] << \"\\t\" << box[3] << \"\\t\"\n         << std::setprecision(6) << result.score << \"\\n\";\n    rectangle(img, Point(box[0], box[1]), Point(box[2], box[3]),\n              Scalar(0, 255, 0), 1, 1, 0);\n  }\n  imwrite(\"result.jpg\", img);\n\n   @endcode\n *\n */\nclass YOLOvX : public ConfigurableDpuTaskBase {\n public:\n  /**\n   * @brief Factory function to get an instance of derived classes of class\n   * YOLOvX.\n   *\n   * @param model_name Model name\n   *\n   * @param need_preprocess Normalize with mean/scale or not, default\n   *value is true.\n   *\n   * @return An instance of YOLOvX class.\n   *\n   */\n  static std::unique_ptr<YOLOvX> create(const std::string& model_name,\n                                        bool need_preprocess = true);\n  /**\n   * @brief Factory function to get an instance of derived classes of class\n   * YOLOvX.\n   *\n   * @param model_name Model name\n   * @param attrs XIR attributes, used to bind different models to the same dpu\n   * core\n   * @param need_preprocess Normalize with mean/scale or not, default\n   * value is true.\n   *\n   * @return An instance of YOLOvX class.\n   *\n   */\n  static std::unique_ptr<YOLOvX> create(const std::string& model_name,\n                                        xir::Attrs* attrs,\n                                        bool need_preprocess = true);\n  /**\n   * @cond NOCOMMENTS\n   */\n protected:\n  explicit YOLOvX(const std::string& model_name, bool need_preprocess);\n  explicit YOLOvX(const std::string& model_name, xir::Attrs* attrs,\n                  bool need_preprocess);\n  YOLOvX(const YOLOvX&) = delete;\n\n public:\n  virtual ~YOLOvX();\n  /**\n   * @endcond\n   */\n public:\n  /**\n   * @brief Function to get running result of the YOLOvX neural network.\n   *\n   * @param image Input data of input image (cv::Mat).\n   *\n   * @return YOLOvXResult.\n   *\n   */\n  virtual YOLOvXResult run(const cv::Mat& image) = 0;\n  /**\n   * @brief Function to get running result of the YOLOvX neural network\n   * in batch mode.\n   *\n   * @param images Input data of input images (std:vector<cv::Mat>). The size of\n   * input images equals batch size obtained by get_input_batch.\n   *\n   * @return The vector of YOLOvXResult.\n   *\n   */\n  virtual std::vector<YOLOvXResult> run(const std::vector<cv::Mat>& images) = 0;\n};\n}  // namespace ai\n}  // namespace vitis\n",
+  "images": []
+}

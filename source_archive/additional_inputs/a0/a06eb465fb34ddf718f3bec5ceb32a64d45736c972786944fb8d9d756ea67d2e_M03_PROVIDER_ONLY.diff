@@ -1,0 +1,10 @@
+--- M03-b336/board/runtime/board_business.py
++++ combined/board/runtime/board_business.py
+@@ -496,6 +496,7 @@
+         try:
+             result = self.speaker_business.submit_analysis(job.meta, job.pcm, cid,
+                 visual=self.identity_handler._visual(job), is_current=is_current,
++                gallery_provider=lambda: self.identity_handler._gallery(job),
+                 cancel_event=cancel_event, deadline=job.deadline, on_evidence=evidence)
+             self.speaker_analysis_error = ''
+             return result

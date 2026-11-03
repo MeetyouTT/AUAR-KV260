@@ -1,0 +1,29 @@
+{
+  "status": "PASS_USER_CONFIRMED_FIXED_LIVE_BOARD_ONSET",
+  "date": "2026-10-18",
+  "confirmed_utc": "2026-10-18T09:49:10.861798+00:00",
+  "user_confirmed_original_wav_clear": true,
+  "user_feedback_after_patch": "开头完整清楚",
+  "continuous_stream_comparison": "First sentence missing beginning; second complete",
+  "extra_300ms_silence_result": "Both similarly muffled",
+  "extra_500ms_silence_result": "第一个字听不清",
+  "extra_1000ms_silence_result": "完整清楚",
+  "startup_silence_seconds": 1.0,
+  "local_tests_passed": 14,
+  "board_tests_passed": 14,
+  "live_playing_samples": 33,
+  "live_nonzero_mouth_samples": 26,
+  "startup_mouth_stayed_closed": true,
+  "recording_capture_matched": true,
+  "request_to_content_audio_seconds": 2.5726168099999995,
+  "voice_wav_sha256_verified": "1b5c3619c42f6e9bbac821b8dfa234f6490c0dd1fafb062c5e4cd52a52923a05",
+  "camera_pid_preserved": 976,
+  "voice_parameters_changed": false,
+  "voice_pcm_changed": false,
+  "implementation": "Validate original SHA; create per-play temporary PCM16 WAV with 1s leading zeros; subtract 1s from public audio clock; release/delete on stop/EOS/error.",
+  "root_cause_scope": "Output startup path: inferred from same-PCM continuous replay and lead-in experiments. Internal MCP01 amplifier/DSP mechanism not instrumented.",
+  "limits": [
+    "Adds 1s to playback startup; shorter values must be listening-tested.",
+    "Single live post-fix turn and listening confirmation; long-term/coldboot endurance not claimed."
+  ]
+}

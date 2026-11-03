@@ -1,0 +1,1 @@
+cmd_/home/ghmd/aura-display-sequence-20261024/native-retrain-v2/aura_dp_retrain_candidate.mod := { echo  /home/ghmd/aura-display-sequence-20261024/native-retrain-v2/aura_dp_retrain_candidate.o;  echo; } > /home/ghmd/aura-display-sequence-20261024/native-retrain-v2/aura_dp_retrain_candidate.mod

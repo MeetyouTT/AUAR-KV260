@@ -1,0 +1,17 @@
+[
+  {
+    "id": "drivers_and_parameters",
+    "command": "python3 -B -c 'import os,json\nfrom pathlib import Path\nroot_dev=os.stat('\"'\"'/'\"'\"').st_dev\ndrm=[]\nfor p in sorted(Path('\"'\"'/sys/class/drm'\"'\"').iterdir()):\n if not (p.name.startswith('\"'\"'card'\"'\"') or p.name.startswith('\"'\"'render'\"'\"')) or not (p/'\"'\"'device'\"'\"').exists(): continue\n dev=p/'\"'\"'device'\"'\"'; driver=dev/'\"'\"'driver'\"'\"'\n drm.append({'\"'\"'name'\"'\"':p.name,'\"'\"'device'\"'\"':str(dev.resolve()),'\"'\"'driver'\"'\"':str(driver.resolve()) if driver.exists() else None,'\"'\"'module'\"'\"':str((driver/'\"'\"'module'\"'\"').resolve()) if (driver/'\"'\"'module'\"'\"').exists() else None})\nmodule=Path('\"'\"'/sys/module/zocl'\"'\"')\nparams={p.name:p.read_text().strip() for p in (module/'\"'\"'parameters'\"'\"').iterdir()}\nfirmware=Path('\"'\"'/proc/device-tree/fpga-full/firmware-name'\"'\"')\nprint(json.dumps({'\"'\"'uptime'\"'\"':Path('\"'\"'/proc/uptime'\"'\"').read_text().strip(),'\"'\"'root_device'\"'\"':Path('\"'\"'/sys/dev/block/%d:%d'\"'\"'%(os.major(root_dev),os.minor(root_dev))).resolve().name,'\"'\"'drm'\"'\"':drm,'\"'\"'zocl_parameters'\"'\"':params,'\"'\"'loaded_srcversion'\"'\"':(module/'\"'\"'srcversion'\"'\"').read_text().strip(),'\"'\"'fpga_state'\"'\"':Path('\"'\"'/sys/class/fpga_manager/fpga0/state'\"'\"').read_text().strip(),'\"'\"'firmware_name'\"'\"':firmware.read_bytes().rstrip(b'\"'\"'\\0'\"'\"').decode(),'\"'\"'vart_conf'\"'\"':Path('\"'\"'/etc/vart.conf'\"'\"').read_text()},indent=2))\n'",
+    "timeout": 100
+  },
+  {
+    "id": "baseline_hashes",
+    "command": "python3 -B -c 'import json,hashlib\nfrom pathlib import Path\nfiles=list(Path('\"'\"'/lib/firmware/xilinx/kv260-benchmark-b4096'\"'\"').glob('\"'\"'*'\"'\"'))+list(Path('\"'\"'/usr/share/vitis_ai_library/models/resnet18'\"'\"').glob('\"'\"'resnet18.*'\"'\"'))\nfiles += [Path('\"'\"'/home/root/kv260-test-20261001/'\"'\"'+x) for x in ('\"'\"'pytorch-resnet-dog.jpg'\"'\"','\"'\"'samoyed.list'\"'\"','\"'\"'baseline-backup/baseline-files.tar.gz'\"'\"')]\nfiles += [Path('\"'\"'/home/root/Vitis-AI/examples/vai_library/samples/classification/'\"'\"'+x) for x in ('\"'\"'test_jpeg_classification'\"'\"','\"'\"'test_performance_classification'\"'\"')]\nfor p in files:\n if not p.is_file(): continue\n h=hashlib.sha256()\n with p.open('\"'\"'rb'\"'\"') as f:\n  for b in iter(lambda:f.read(1048576),b'\"'\"''\"'\"'): h.update(b)\n print(json.dumps({'\"'\"'path'\"'\"':str(p),'\"'\"'bytes'\"'\"':p.stat().st_size,'\"'\"'sha256'\"'\"':h.hexdigest()}))\n'",
+    "timeout": 180
+  },
+  {
+    "id": "manager_state",
+    "command": "dfx-mgr-client -listPackage",
+    "timeout": 45
+  }
+]

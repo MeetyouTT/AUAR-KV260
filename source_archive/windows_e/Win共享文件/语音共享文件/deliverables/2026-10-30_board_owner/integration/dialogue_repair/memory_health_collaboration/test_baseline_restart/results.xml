@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.108" timestamp="2026-10-31T02:50:32.574695-07:00" hostname="zhenghang"><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_restart_generation" name="test_same_boot_restart_never_rewinds_persistent_host_generation" time="0.002"><failure message="RuntimeError: Summary inference failed: stale_generation">def test_same_boot_restart_never_rewinds_persistent_host_generation():
+        host = InferenceHost(Backend())
+        try:
+            client = Client(host)
+            # A controlled restart completes after the previous worker has stopped;
+            # advance its same-boot clock explicitly (no sleeps or clock reset).
+            base_time = time.monotonic()
+            now = [base_time]
+            old = BoardSummaryClient(client, board_boot_id='synthetic-unchanged-boot', clock=lambda: now[0])
+            assert infer(old)['summary'] == '公开合成摘要。'
+            assert infer(old)['summary'] == '公开合成摘要。'
+            # A board GUI/runtime restart recreates this object while the Windows
+            # model-only host and the physical board boot remain unchanged.
+            now[0] += .001
+            new = BoardSummaryClient(client, board_boot_id='synthetic-unchanged-boot', clock=lambda: now[0])
+&gt;           assert infer(new)['summary'] == '公开合成摘要。'
+                   ^^^^^^^^^^
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\tests\test_restart_generation.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\tests\test_restart_generation.py:37: in infer
+    return summary._infer([dict(source='user_said', text='公开资料。')], lambda: False,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;board.runtime.board_memory_policy.BoardSummaryClient object at 0x000001EF1F4F35C0&gt;
+sources = [{'source': 'user_said', 'text': '公开资料。'}]
+cancelled = &lt;function infer.&lt;locals&gt;.&lt;lambda&gt; at 0x000001EF218C6A20&gt;
+deadline = 25995.968, keepalive = None, multipart = False
+
+    def _infer(self, sources, cancelled, *, deadline, keepalive=None, multipart=False):
+        if cancelled():
+            raise InterruptedError('Summary cancelled before model request')
+        if keepalive is not None and not keepalive():
+            raise InterruptedError('Summary source lease is no longer live')
+        messages = self._messages(sources, multipart)
+        if message_cost(messages, self.reserve) &gt; self.maximum:
+            raise ContextLimitError('Closed segment exceeds safe summary capacity; keep its bodies pending')
+        if self.metrics['model_calls'] &gt;= self.max_calls or self.clock() &gt;= deadline:
+            raise TimeoutError('Multipart summary reached its bounded work allowance')
+        call_deadline = min(deadline, self.clock() + self.budget_ms / 1000)
+        call_budget = min(self.budget_ms, int((call_deadline - self.clock()) * 1000))
+        if call_budget &lt; 1:
+            raise TimeoutError('Summary deadline elapsed')
+        self.generation += 1
+        owner = Owner(self.id_factory(), self.boot, 'memory-worker', self.generation)
+        payload = dict(protocol_version=1, **owner.as_dict(), budget_ms=call_budget,
+                       task='summary', messages=messages, options={'num_predict': self.reserve})
+        self.metrics['model_calls'] += 1
+        finished = threading.Event()
+        def watch():
+            while not finished.wait(.025):
+                if cancelled():
+                    self.client.cancel(owner)
+                    return
+        watcher = threading.Thread(target=watch, name='board-summary-cancel', daemon=True)
+        watcher.start()
+        try:
+            result = self.client.request('llm', payload, deadline=call_deadline,
+                                         cancelled=cancelled)
+            response = validate_response(result, owner, 'llm')
+            if cancelled():
+                raise InterruptedError('Summary cancelled before adoption')
+            if not response['ok']:
+&gt;               raise RuntimeError('Summary inference failed: ' + response['error']['code'])
+E               RuntimeError: Summary inference failed: stale_generation
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\before\board\runtime\board_memory_policy.py:276: RuntimeError</failure></testcase></testsuite></testsuites>

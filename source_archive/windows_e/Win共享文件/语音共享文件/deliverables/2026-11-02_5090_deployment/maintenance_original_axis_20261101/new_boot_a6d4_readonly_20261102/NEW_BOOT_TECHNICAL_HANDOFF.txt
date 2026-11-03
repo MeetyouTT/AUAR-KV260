@@ -1,0 +1,17 @@
+新 boot 转轴只读技术交接（洛杉矶2026-11-02）
+
+仍冻结转轴开启和发布。未触碰GUI/相机/DFX维护权；本轮0板端动作、0轴命令、0配置或源文件修改，也未读取或修改native检查点、seed、计数和marker，未导出私有内容。
+
+主机11:25:18 UTC实读boot a6d4a069-e9b0-4065-8df7-dc23556b168e。当前startup 9a9a709a7b2e898879bac595758f9b7ece6f2ff2e75a4c9f42ed9c38e043072a；380项组件匹配。GUI supervisor2142/birth76636，GTK2151/birth76768；相机1332/birth2236。完整命令指纹见JSON。
+
+实际固件kv260-benchmark-b4096.bit.bin，VART和overlay也为benchmark；FDT ed0e2ace1f5bda2b937a61f5f8a5ef05cf01065a24627b23ca2de6614948542f。原转轴要求wide组合，当前不匹配。相机1332仍加载原VART/native operator并持renderD128，当前不能执行DFX。
+
+原stable150控制root和25文件完整，manifest仍9cd35b967bf9c859ed3f1f4de4dc5dad199e81ddfed845435fc8745a41be0ba9。左停点.40、右.45、稳定恢复150ms参数保持。pan_manual boot/FDT、follow context、direction与human evidence均仍是903c旧boot；不能只改boot字段直接运动，也不能恢复旧1492us或把旧方向实测写成本boot通过。
+
+GUI当前跟随false，转轴FAULT，pulse/readback均null。仅确认无跟随进程和原保护失配；本boot没有新鲜寄存器STOP回读，不能填写flags0/lease0。旧903c STOP仅历史。
+
+边界editor当前1471已按原行为生成a6d4 zone，左右几何保持；zone SHA已变为9f227159bf3d0e1d16e16f0d63377a40c37897029274bf029f656b5815c5e2bd，后续应新鲜核对，不能硬用旧815f。身份26pin现99c53c59，run b9656e，全部source pin匹配；未来若换相机PID/run，应通过原verifier重绑最新闭包，不回退旧25pin或覆盖登记/CPU优化新源。
+
+后续顺序：先等身份登记及CPU维护完成并明确交还维护窗口；正常释放GUI/相机及VART/render owner后，沿原client成套恢复wide并核实际FDT/固件/VART/overlay/ZOCL；原ID_STOP_ONLY、新context、当前停止参考与有界方向观察；按最新startup/pan pins版本化更新绑定，保留原控制25与最新身份/CPU改动；原native生命周期恢复相机/GUI、重新核选用source闭包和原时钟guard；最后由唯一轴owner有界开启/STOP，root只读采样。不得重放旧封存seed或重写计数/marker。
+
+板墙钟2021仅诊断，技术交接使用主机UTC；未修改墙钟或原HTTP-Date可信锚策略。

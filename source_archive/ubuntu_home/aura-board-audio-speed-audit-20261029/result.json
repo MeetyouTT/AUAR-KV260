@@ -1,0 +1,70 @@
+{
+  "board/runtime/audio/automatic_capture.py": {
+    "sha256": "751a26e70fe79e9371dc50d63a399386e4b5c637d58ca5b8142617d4de7ef4c0",
+    "matches": [
+      {
+        "line": 16,
+        "code": "def __init__(self, max_seconds=20, *, frame_classifier=None,pre_roll_ms=200):"
+      },
+      {
+        "line": 18,
+        "code": "if type(pre_roll_ms) is not int or not 200<=pre_roll_ms<=1000:raise ValueError('Invalid speech pre-roll')"
+      },
+      {
+        "line": 19,
+        "code": "self.config = VadConfig(min_silence_ms=700, max_utterance_ms=int(max_seconds*1000)-pre_roll_ms)"
+      },
+      {
+        "line": 23,
+        "code": "self.pre_frames = pre_roll_ms//self.config.frame_ms"
+      },
+      {
+        "line": 68,
+        "code": "pre_roll_ms=500 if enabled else 200)"
+      },
+      {
+        "line": 83,
+        "code": "return super()._command()[:-2]+['--buffer-time='+str(self.buffer_time_us),'--period-time=20000']"
+      }
+    ]
+  },
+  "board/runtime/audio/remote_frontend.py": {
+    "sha256": "33e1e370ea647d13dfec5fbbf9e2e684a179e4489babff13fa563006ccc6f55b",
+    "matches": [
+      {
+        "line": 25,
+        "code": "connection.setsockopt(socket.IPPROTO_TCP,socket.TCP_NODELAY,1)"
+      }
+    ]
+  },
+  "board/runtime/audio/channel_jobs.py": {
+    "sha256": "5ac4823798fd6bb0ed26a477001b26e97ef9e1db515c392e380f362c577ac974",
+    "matches": []
+  },
+  "tools/board_avatar_gtk.py": {
+    "sha256": "874f0075741b0794a6bed4ba8aab33dfd0280e57a899d63a38ffa70f76b3cda9",
+    "matches": []
+  },
+  "tools/gstreamer_audio_worker.py": {
+    "sha256": "5f7f56849a92f03f34af89d52282f9c581549940cb522650fe4a427afc5af6fd",
+    "matches": [
+      {
+        "line": 113,
+        "code": "glib.timeout_add(10, tick)"
+      }
+    ]
+  },
+  "tools/gstreamer_persistent_engine.py": {
+    "sha256": "f5d987904aec0dc679936da27018f404f9cc77f42d300e0579a3b52a95f0655c",
+    "matches": [
+      {
+        "line": 38,
+        "code": "sink.set_property('buffer-time',80000);sink.set_property('latency-time',10000)"
+      },
+      {
+        "line": 200,
+        "code": "if self.next_pts>=running+60000000:break"
+      }
+    ]
+  }
+}

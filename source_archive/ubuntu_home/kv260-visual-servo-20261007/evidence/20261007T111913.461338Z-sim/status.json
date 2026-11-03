@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "evidence": "/home/ghmd/kv260-visual-servo-20261007/evidence/20261007T111913.461338Z-sim",
+  "source_sha256": {
+    "rtl/visual_servo.sv": "cc62cf5f71c2b76668417c0de49e95563d41a56f0d0fd702ac74fb465b7684f3",
+    "tests/tb_nominal.sv": "8938e8913d28e2ab1c5442b91ddebe5ed992702811e539291c7600e2905be7a7"
+  },
+  "commands": [
+    {
+      "command": [
+        "xvlog",
+        "-sv",
+        "visual_servo.sv",
+        "tb_nominal.sv"
+      ],
+      "rc": 0
+    },
+    {
+      "command": [
+        "xelab",
+        "tb_nominal",
+        "-s",
+        "servo_snapshot"
+      ],
+      "rc": 0
+    },
+    {
+      "command": [
+        "xsim",
+        "servo_snapshot",
+        "-runall"
+      ],
+      "rc": 0
+    }
+  ],
+  "board_accessed": false
+}

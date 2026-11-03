@@ -1,0 +1,70 @@
+# Temporary use of the two exact binaries that passed previous board tests.
+# Only this run's test harness kernel-log comparison changes.
+def review_kernel_interval(before_path,after_path,label,allow_stock_remove=False):
+    before_raw=Path(before_path).read_bytes()
+    after_raw=Path(after_path).read_bytes()
+    old=before_raw.decode('utf-8','replace').splitlines()
+    new=after_raw.decode('utf-8','replace').splitlines()
+    size=min(16,len(old))
+    anchor=old[-size:] if size else []
+    positions=[i for i in range(len(new)-size+1) if anchor and new[i:i+size]==anchor]
+    unique=len(positions)==1
+    index=positions[0] if unique else None
+    fresh=new[index+size:] if unique else []
+    errors=[line for line in fresh if re.search(
+        r'BUG:|Oops:|Unable to handle|Kernel panic|Call trace:|ERROR|error|expected refcount',line)]
+    permitted=[line for line in errors if 'expected refcount 1 instead of 2' in line and
+               '/axi/zyxclmm_drm' in line] if allow_stock_remove else []
+    allowed=allow_stock_remove and len(permitted)<=1 and permitted==errors
+    unexpected=[] if allowed else errors
+    result={'before_log':str(before_path),'after_log':str(after_path),
+        'before_sha256':digest(before_path),'after_sha256':digest(after_path),
+        'before_line_count':len(old),'after_line_count':len(new),
+        'anchor_line_count':size,'anchor_old_index':len(old)-size,
+        'anchor_sha256':hashlib.sha256('\n'.join(anchor).encode()).hexdigest(),
+        'anchor_after_positions':positions,'continuity_confirmed':unique,
+        'continuity_problem':None if unique else ('no_anchor' if not positions else 'ambiguous_anchor'),
+        'old_prefix_removed_rows_estimate':len(old)-size-index if unique and index<=len(old)-size else None,
+        'new_lines':fresh,'new_error_lines':errors,'permitted_stock_remove_errors':permitted if allowed else [],
+        'unexpected_errors':unexpected,'allowed_once_known_stock_error':allow_stock_remove,
+        'property_warnings':[line for line in fresh if 'memory leak will occur' in line],
+        'passed':unique and not unexpected}
+    path=WORK/(label+'.json')
+    assert not path.exists(),'Refusing to overwrite kernel comparison evidence'
+    path.write_text(json.dumps(result,indent=2)+'\n')
+    print('KERNEL_INTERVAL '+json.dumps(result),flush=True)
+    assert unique,'Kernel log continuity not confirmed: '+str(path)
+    assert not unexpected,'Unexpected kernel diagnostics: '+str(path)
+    return result
+
+guard(CFG['stock_srcversion'],'kv260-benchmark-b4096')
+manager_guard(False)
+assert not Path(CFG['override']).exists()
+assert not Path(CFG['override']).parent.exists()
+assert digest(CFG['candidate_manager'])==CFG['manager_sha256']
+assert digest(CFG['candidate_module'])==CFG['module_sha256']
+before=snapshot('before-original-remove')
+run(['dfx-mgr-client','-remove'])
+guard(CFG['stock_srcversion'],None)
+assert not Path('/sys/bus/platform/devices/axi:zyxclmm_drm').exists()
+after=snapshot('after-original-remove')
+review_kernel_interval(before['kernel_log'],after['kernel_log'],'original-remove-review',allow_stock_remove=True)
+run(['rmmod','zocl'])
+guard(None,None)
+run(['insmod',CFG['candidate_module'],'enable_xgq_ert=1'])
+guard(CFG['fixed_srcversion'],None)
+run(['systemctl','stop','dfx-mgr.service'])
+assert manager_pid()==0
+override=Path(CFG['override'])
+assert not override.exists() and not override.parent.exists()
+override.parent.mkdir()
+with override.open('x') as stream:stream.write(CFG['override_text'])
+assert digest(override)==CFG['override_text_sha256']
+run(['systemctl','daemon-reload'])
+run(['systemctl','start','dfx-mgr.service'])
+wait_manager(True)
+guard(CFG['fixed_srcversion'],'kv260-benchmark-b4096')
+assert watches()==CFG['expected_watches']
+final=snapshot('candidate-started')
+review_kernel_interval(after['kernel_log'],final['kernel_log'],'candidate-start-review')
+print('CANDIDATE_STARTED '+json.dumps({'pid':manager_pid(),'driver':CFG['fixed_srcversion'],'watches':watches()}),flush=True)

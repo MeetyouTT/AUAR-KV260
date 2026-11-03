@@ -1,0 +1,28 @@
+独立审查 v1：先修补一个具体的查询覆盖缺口，暂不冻结部署
+
+候选SHA：a94ffd53a1b0e9d8ea8843f55fdf5543fdf6a5b1410da2f41804bda82220b029
+原tools/unified_identity_binding.py SHA：f083fe8b618f4b09dce1587b3c32bf47f92510948e728615ce989ef31a1757cf
+
+已独立验证：候选只有tools/unified_identity_binding.py一个Python文件改变。移除SAMPLING_VOICE中新增的ImportFrom和If两个AST节点后，整个候选AST与原文件完全相同。相关router、hub、共同谓词、resolver、worker和binding API依赖均匹配记录的380 production pins。复跑提供的11项隔离测试全部通过，候选和baseline文件未修改，未连接板卡、模型或设备。
+
+需要修正的P2覆盖缺口
+原tools/provisional_voice.py的query_reply(text,resolution)接受：
+  identity_query_requested(text)
+  或text.strip(' 。！!？?')精确为“听声音我是谁”“你认识我的声音吗”。
+原BindingHubRuntime._identity_query在binding_hub_runtime.py:170使用query_reply作为整句查询入口。
+v1新分支只接受第一项，漏掉后两句。
+
+同一真实router+hub的公开合成fixture独立实证：上述两句分别触发speaker.turn 1次，登记阶段sample1→sample2，decision.reason=ORIGINAL_VOICE_WORKFLOW，registry.resolve调用0次。原hub查询谓词接受这两句，新router谓词不接受。personal_memory_allowed仍false，所以这不是权限绕过；但合法身份查询仍被用于登记样本，修复范围不完整。详细可复现结果在INDEPENDENT_AUDIT.json。
+
+建议v2只把新增分支对齐现役query_reply的准确整句集合，不扩展引用、否定或复句。新覆盖需证明两句都进入原EXPLICIT_IDENTITY_QUERY，不调用speaker.turn、不改变SAMPLING_VOICE阶段；引用、否定、复句、保存与取消指令不被查询捕获。原v1及其SHA、日志保留。候选作者已收到这些反例，root已暂停v1部署。
+
+其余审查结果
+- 新分支位于context校验、terminal状态处理、显式取消以及AWAIT_CONFIRMATION/SAMPLING_FACE之后，未改变登记前置、姓名确认、HMAC提交回执、三个独立录音与部分提交处理。普通非问句仍走原声纹工作流。
+- shared identity_query_requested使用fullmatch，已知称呼和允许标点规范化不能让任意子串命中；80字符上限保留。引号、否定、第三人称转述、附带保存指令及问助手身份都不会被新分支当本人的整句身份查询。
+- BoardSpeakerBusiness._submit/_call仍在路由外层执行原boot/generation/context校验、BoundedSemaphore(2)、原单CPU worker、取消事件、is_current与原deadline，候选没有绕过busy或增加模型/worker。
+- BindingHubRuntime.route保留按boot/session/request键及完整内容fingerprint的120秒缓存；同请求重入复用结果，换文本/visual/gallery_digest拒绝。取消和失效处理源文件未变，原外层所有权检查仍阻止取消后采纳。
+- 对被捕获的查询，原hub会用相同请求的声音/人脸proof调用原registry.resolve；保留跨模态冲突拒绝、未标定声纹的三独立采集稳定性要求、ACTIVE链接/模型/库修订/模板指纹/时效检查。
+- face候选仍只能说“当前画面”，不能声称就是画外说话者。query_reply不发授权；router decision、binding API及resolver都保持personal_memory_allowed=false、identity_verified=false及single_speaker_verified=false。原私有记忆/权限grant未改。
+
+验证边界
+本审查自行复跑的是11项router/hub公开合成隔离测试，未调用真实数据库、推理、录音、播放或板卡。原综合回归由候选作者继续处理。完整部署还须root按真实当前startup、唯一GUI owner、单组件pin与闲置/暂停等原串行窗口核对。本审查没有授权服务操作或实体动作。

@@ -1,0 +1,53 @@
+此断电检查点已接续完成：正式12项资源对比、JPEG控制和清理均完成。以下上电计划保留作历史；最新结果见 RESOURCE_AB_REPORT.txt。
+
+雪妃替换验证：断电前检查点（Windows UTC 2026-10-30T15:41:21.497866+00:00）
+
+当前结论
+三项技术验证已完成：雪妃专用模型/网格与待机，遮罩和鼻部异常，原生 GTK/EGL 与实际 PCM 时钟及生命周期。
+鼻部不合理白块已修复；原素材本身的少量鼻尖高光保留。300 秒原生 GTK 测试约 23.96fps，P99 61.43ms，取消闭嘴约37.33ms。
+这证明本角色具备板端替换的技术基础，不证明比现役方案更省资源。生产形象未切换。
+
+资源对比只完成一次短 pilot（每项预热3秒、计量15秒），不是正式重复实验：
+                       旧 remote16      新 native16
+进程族 CPU 秒/秒          0.2818           0.2384
+进程族 PSS MiB            417.89           248.96
+整板 CPU 秒/秒            2.4832           2.5096
+可见 Mali 内存 MiB          0              32.56
+帧率 fps                  15.83            16.03
+整板 CPU 未降低，新方案有 GPU 内存成本；GPU busy 节点不更新，利用率必须写 UNKNOWN，不能写0%。
+旧方案含诊断 JPEG，新方案不含；已写好仅关闭旧方案 JPEG 的独立控制组，尚未上板执行。
+网络节省与板端计算成本分开报告；相机保持原样，pilot 中人脸身份处理计数未增长，不能外推到重人脸负载。
+
+断电收尾已完成
+1. 独立 Windows fixture PID32652（创建时间2026-10-30T13:55:55.516926Z）已按脚本/ready/创建时间核验并退出，61584已释放；现役 PID26024/8796 保持。
+2. 板端临时 renderer/sampler 剩余0；现役 supervisor918139/UI918191/相机1333 保持。
+3. 当前启动配置、启动器、10个运行源码、286项组件 pin、466个固定输入均通过保持审计。
+4. pilot 原始26个 JSON/JSONL/log 已下载、CRC验证并展开，实际执行过的5个脚本原版另存 evidence/native_integration/paired_ab。
+5. 未开麦、未输出物理音频、未操作机械/固件、未部署生产形象；UART未占用。测试窗口明确释放。
+6. 由业务主控聊天统一关板卡和 Ubuntu；本聊天不再发板端命令，不主动关机。
+板卡系统日期停留在2021年，保留原始字段并标记不可信；本检查点用 Windows UTC。性能计时用单调时钟。
+
+下次上电后的明确工作
+1. 重新申请串行测试窗口，重新采集 boot_id、现役 PID/入口/配置/源哈希和实际渲染模式。旧 boot/PID/端口不能复用。
+2. 重启独立旧形象 Windows fixture，核验来源，获得新临时端口并更新 server-proof；绝不对现役8796发送测试渲染。
+3. 保留 pilot-v1 及其源清单。NoJPEG v2 源码仅本机冻结，未上板；先复核冻结清单并同步隔离目录。
+4. 当前 suite-formal.json 仍是旧8项草案且哈希已过期，禁止直接 --execute。改成12项 A B B A A B B A C B B C，每项预热10秒、测量60秒；A=旧，B=新，C=旧仅禁JPEG。
+5. 对最新 telemetry.py/run_suite.py/NoJPEG v2 全部重新签名；analyze_results.py 是未以正式数据验证的草稿。先做一个有界 C 短探针确认 remote16、JPEG0、PCM/暂停/取消正常，再开始约22分钟正式组。
+6. 保持同一423×438窗口、16fps、公开PCM/事件、原相机背景，区分冷启动和稳态。报告4组主配对及2组JPEG控制配对的均值、离散与方向。
+7. 分别报告整板CPU、进程族CPU、PSS/RSS、Mali内存/利用率未知、帧P95/P99/掉帧、相机计数增量、显示服务CPU和网络。CPU/GPU/内存取舍不能合成一个未经定义的“省资源”。
+8. 资源结论交用户决定，不自动切换。旧候选压缩包是技术验证冻结版、配置默认24fps；不能把16fps成本结果当作24fps部署成本证明。
+
+文件入口
+native_integration/README.txt 和 verification.json：技术验证。
+native_integration/paired_ab/shutdown-checkpoint.json：机器可读收尾回执。
+native_integration/paired_ab/shutdown-windows-cleanup.json：临时fixture退出及现役端口保持。
+evidence/native_integration/paired_ab/shutdown-board-check.json：板端保持/进程审计。
+evidence/native_integration/paired_ab/pilot-v1-shutdown-evidence.zip：26份原始pilot日志。
+native_integration/paired_ab/harness-delivery-nojpeg-v2.json：下一轮源码冻结。
+isolated-yuki-candidate-20261030.zip：未部署的技术候选，保持原SHA不重打包。
+
+主控最终停机回执（来源为业务主控聊天，非本聊天重新连接验证）
+KV260于2026-10-30T15:42:37Z正常poweroff；服务正常stop、sync，UART确认Power down，echo恢复。此后不再连接板卡。Ubuntu由主控随后关机，本聊天未独立验证。Windows独立fixture已于15:39:03Z退出，61584已释放。
+
+三机收尾最终状态（由业务主控回执转记）
+Ubuntu已由人类确认正常关机；Windows由用户自行关机，本聊天未创建或修改任何关机计划。此轮设备操作与测试结束。下次上电重新核验入口、重新约串行资源A/B；替换仍待用户依据资源证据决定。

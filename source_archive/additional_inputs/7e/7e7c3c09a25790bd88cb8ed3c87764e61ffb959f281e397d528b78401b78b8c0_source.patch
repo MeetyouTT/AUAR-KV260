@@ -1,0 +1,59 @@
+--- before/tools/production_memory_presentation.py
++++ after/tools/production_memory_presentation.py
+@@ -58,6 +58,7 @@
+         self.current = None
+         self.blocked = None
+         self.confirmation_owner = None
++        self.start_permit = None  # One accepted submit owner/epoch; no body.
+         self.deadline = 0.
+         self.invalidated_at = float('-inf')
+         self.transcript = self.reply = ''
+@@ -89,11 +90,13 @@
+                 # A precommit progress item may still be queued when Store
+                 # invalidates. Its later start cannot create a fresh epoch.
+                 confirmation = key == self.confirmation_owner
+-                if admitted <= self.invalidated_at and not confirmation:
++                submitted = self.start_permit == (key, self.epoch)
++                if admitted <= self.invalidated_at and not (confirmation or submitted):
+                     return
+                 deadline = admitted + self.ttl
+                 if self.current == key:
+                     deadline = min(self.deadline, deadline)
++                self.start_permit = None
+                 self.current = key
+                 self.deadline = deadline
+                 if not confirmation:
+@@ -147,6 +150,7 @@
+             # Only the current command whose Store commit actually returned
+             # may show its new confirmation reply. Never restore its raw ASR.
+             self.confirmation_owner = confirmation_owner
++            self.start_permit = None
+             self.transcript = self.reply = ''
+             self.invalidated_at = self.clock()
+             self.epoch += 1
+@@ -284,6 +288,25 @@
+         if previous_invalidator is not None:
+             previous_invalidator(reason, owner)
+     jobs.playback_invalidator = playback_invalidated
++    original_submit = jobs.submit
++    def submit(clip):
++        # Keep the existing jobs -> presentation lock order. The jobs RLock
++        # covers its original submit and receipt; no render/Store lock is taken.
++        with jobs.condition:
++            with lifecycle.lock:
++                lifecycle.start_permit = None
++                invalidations = lifecycle.invalidations
++            result = original_submit(clip)
++            job = jobs.waiting
++            if (job is not None and jobs._current(job)
++                    and _owner(job.meta) == _owner(result)):
++                with lifecycle.lock:
++                    # Exactly submit's own invalidation may be crossed. A Store
++                    # commit racing this receipt adds another and fails closed.
++                    if not lifecycle.closed and lifecycle.invalidations == invalidations + 1:
++                        lifecycle.start_permit = (_owner(result), lifecycle.epoch)
++            return result
++    jobs.submit = submit
+     # Wrappers run only after the original transaction context has exited.
+     # No Store state/content, exception, permission or return value is changed.
+     store = stage.board_business.runtime.store

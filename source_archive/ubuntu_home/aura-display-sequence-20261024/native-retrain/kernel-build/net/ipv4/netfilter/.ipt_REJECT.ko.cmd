@@ -1,0 +1,1 @@
+cmd_net/ipv4/netfilter/ipt_REJECT.ko := /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ld -r  -EL  -maarch64elf  --build-id=sha1  -T scripts/module.lds -o net/ipv4/netfilter/ipt_REJECT.ko net/ipv4/netfilter/ipt_REJECT.o net/ipv4/netfilter/ipt_REJECT.mod.o;  true

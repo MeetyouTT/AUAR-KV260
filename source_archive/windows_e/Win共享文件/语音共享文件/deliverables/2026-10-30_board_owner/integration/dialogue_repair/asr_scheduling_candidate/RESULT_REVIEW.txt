@@ -1,0 +1,18 @@
+原ASR三线程调度ABBA复核：有局部时延差和并行计数代价，未认因果/生产通过。
+
+四槽同公开0.wav/29字且warmup同文；3个自有任务按请求nice运行后恢复0，组清理均确认。nice0中位9483.075ms，-5中位5538.442ms；描述性差41.60%，全部后台memory变化，保留BACKGROUND_CHANGED_NO_GAIN_CLAIM。
+
+slot nice | decode秒 | counter窗口秒 | native计数/s | capture/s | detected/s | preview/s
+1  0 | 9.254 | 19.781 | 5.055 | 12.284 | 9.706 | 12.234
+2 -5 | 5.715 | 12.053 | 3.568 | 9.292 | 8.297 | 9.209
+3 -5 | 5.362 | 11.231 | 2.849 | 8.904 | 8.103 | 8.815
+4  0 | 9.712 | 19.193 | 5.731 | 12.348 | 9.795 | 12.400
+
+速率按counter差/monotonic窗口计算；窗口在load之后，含warmup+decode及约0.095–0.131秒邻近开销。native计数不等于独立实屏FPS，camera已有hz字段不能替代此窗口delta。-5槽native/camera完成率也较低，不能只选ASR快的一面；这里只记录相关观察。
+历史GUI关闭原1线程7.930/7.908秒、2线程4.700/4.718秒、3线程3.741/4.283秒，同一5.614625秒样本；后续GUI开启3/4为11.126/12.238/12.138/9.902秒、全有后台变化，无4线程收益证据。不同窗口不混作因果对照。
+
+唯一建议：保留原OfflineParaformer三线程与正式nice0，继续原模型前台资源调度的受控验证；先用现有前台busy/后台抢占约束排除摘要竞争，再评估短时nice-5租约能否同时缩短ASR等待并保护native/camera完成率与新鲜度。未同时通过前不永久提优、不扩四线程或换模型。本报告不开发actor、不执行新试验。
+
+root已确认试验后恢复enabled=true/WAITING_SPEECH/mic=true、无播放；未由本分析更改正式ASR3/27B/OmniVoice16。SenseVoice由root另行对照，本报告不预判其结果。
+
+补充：GUI/camera为分开的HTTP点读，速率为区间近似均值；此独立public slot未走正常Jobs的前台busy/preempt_compaction，不能由本次后台活动推断正式前台抢占失效。

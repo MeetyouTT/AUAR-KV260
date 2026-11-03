@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="20" time="1.754" timestamp="2026-10-31T02:48:13.086678-07:00" hostname="zhenghang"><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_structured_reply_classification_preserves_sources[preempted-cancelled-0]" time="0.090" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_structured_reply_classification_preserves_sources[foreground_busy-cancelled-0]" time="0.049" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_structured_reply_classification_preserves_sources[superseded-cancelled-0]" time="0.048" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_structured_reply_classification_preserves_sources[cancelled-cancelled-0]" time="0.049" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_structured_reply_classification_preserves_sources[deadline_exceeded-deadline_exceeded-1]" time="0.050" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_structured_reply_classification_preserves_sources[backend_failed-model_failed-1]" time="0.050" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_unknown_server_error_code_is_never_exported_verbatim" time="0.047" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_diagnostic_stages" name="test_candidate_rejection_keeps_body_and_reports_only_static_stage[SYNTHETIC_PRIVATE_RESPONSE-semantic_json]" time="0.049" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_diagnostic_stages" name="test_candidate_rejection_keeps_body_and_reports_only_static_stage[{&quot;summary&quot;:&quot;\u516c\u5f00&quot;,&quot;keywords&quot;:[&quot;\u516c\u5f00&quot;],&quot;unknown&quot;:&quot;SYNTHETIC_PRIVATE_RESPONSE&quot;}-semantic_shape]" time="0.048" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_diagnostic_stages" name="test_candidate_rejection_keeps_body_and_reports_only_static_stage[{&quot;summary&quot;:&quot;\u516c\u5f00&quot;,&quot;keywords&quot;:[]}-semantic_bounds]" time="0.049" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_diagnostic_stages" name="test_candidate_rejection_keeps_body_and_reports_only_static_stage[{&quot;summary&quot;:&quot;\u516c\u5f00&quot;,&quot;keywords&quot;:[&quot;\u516c\u5f00&quot;,&quot;\u516c\u5f00&quot;]}-semantic_bounds]" time="0.049" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_diagnostic_stages" name="test_candidate_rejection_keeps_body_and_reports_only_static_stage[{&quot;summary&quot;:&quot;\u516c\u5f00&quot;,&quot;keywords&quot;:[&quot;\u516c\u5f00&quot;]}-full_source_validation]" time="0.053" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_diagnostic_stages" name="test_success_clears_diagnostics_and_processes_backlog_after_failure" time="0.079" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_metadata_script" name="test_fixed_field_reader_locates_runtime_and_keeps_db_unchanged" time="0.073" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_metadata_script" name="test_version_mismatch_exits_before_state_or_database_read" time="0.021" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_metadata_script" name="test_known_valid_bodyless_command_requires_migration_and_current_fact_proof" time="0.487" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_restart_generation" name="test_same_boot_restart_never_rewinds_persistent_host_generation" time="0.002"><failure message="RuntimeError: Summary inference failed">def test_same_boot_restart_never_rewinds_persistent_host_generation():
+        host = InferenceHost(Backend())
+        try:
+            client = Client(host)
+            old = BoardSummaryClient(client, board_boot_id='synthetic-unchanged-boot')
+            assert infer(old)['summary'] == '公开合成摘要。'
+            assert infer(old)['summary'] == '公开合成摘要。'
+            # A board GUI/runtime restart recreates this object while the Windows
+            # model-only host and the physical board boot remain unchanged.
+            new = BoardSummaryClient(client, board_boot_id='synthetic-unchanged-boot')
+&gt;           assert infer(new)['summary'] == '公开合成摘要。'
+                   ^^^^^^^^^^
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\tests\test_restart_generation.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\tests\test_restart_generation.py:37: in infer
+    return summary._infer([dict(source='user_said', text='公开资料。')], lambda: False,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;board.runtime.board_memory_policy.BoardSummaryClient object at 0x0000027BCD3EDCA0&gt;
+sources = [{'source': 'user_said', 'text': '公开资料。'}]
+cancelled = &lt;function infer.&lt;locals&gt;.&lt;lambda&gt; at 0x0000027BCD5DAC00&gt;
+deadline = 25857.828, keepalive = None, multipart = False
+
+    def _infer(self, sources, cancelled, *, deadline, keepalive=None, multipart=False):
+        self._summary_stage = 'admission'
+        if cancelled():
+            raise InterruptedError('Summary cancelled before model request')
+        if keepalive is not None and not keepalive():
+            raise InterruptedError('Summary source lease is no longer live')
+        messages = self._messages(sources, multipart)
+        if message_cost(messages, self.reserve) &gt; self.maximum:
+            raise ContextLimitError('Closed segment exceeds safe summary capacity; keep its bodies pending')
+        if self.metrics['model_calls'] &gt;= self.max_calls or self.clock() &gt;= deadline:
+            raise TimeoutError('Multipart summary reached its bounded work allowance')
+        call_deadline = min(deadline, self.clock() + self.budget_ms / 1000)
+        call_budget = min(self.budget_ms, int((call_deadline - self.clock()) * 1000))
+        if call_budget &lt; 1:
+            raise TimeoutError('Summary deadline elapsed')
+        self.generation += 1
+        owner = Owner(self.id_factory(), self.boot, 'memory-worker', self.generation)
+        payload = dict(protocol_version=1, **owner.as_dict(), budget_ms=call_budget,
+                       task='summary', messages=messages, options={'num_predict': self.reserve})
+        self.metrics['model_calls'] += 1
+        finished = threading.Event()
+        def watch():
+            while not finished.wait(.025):
+                if cancelled():
+                    self.client.cancel(owner)
+                    return
+        watcher = threading.Thread(target=watch, name='board-summary-cancel', daemon=True)
+        watcher.start()
+        try:
+            self._summary_stage = 'model_request'
+            result = self.client.request('llm', payload, deadline=call_deadline,
+                                         cancelled=cancelled)
+            self._summary_stage = 'wire_response'
+            response = validate_response(result, owner, 'llm')
+            if cancelled():
+                raise InterruptedError('Summary cancelled before adoption')
+            if not response['ok']:
+                # Use validated structured wire codes, never exception text.
+                code = response['error']['code']
+                self._reply_code = code if code in SUMMARY_REPLY_CODES else 'other'
+                if code in ('cancelled', 'preempted', 'superseded', 'foreground_busy'):
+                    raise InterruptedError('Summary deferred by foreground activity')
+                if code == 'deadline_exceeded':
+                    raise TimeoutError('Summary inference deadline exceeded')
+&gt;               raise RuntimeError('Summary inference failed')
+E               RuntimeError: Summary inference failed
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\after\board\runtime\board_memory_policy.py:305: RuntimeError</failure></testcase><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_selected_character_memory" name="test_selected_character_and_unrelated_names_keep_raw_text" time="0.063" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_selected_character_memory" name="test_current_addressed_commands_commit_on_board_and_keep_scope_permissions[\uff0c]" time="0.114" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_selected_character_memory" name="test_current_addressed_commands_commit_on_board_and_keep_scope_permissions[\uff1a]" time="0.122" /></testsuite></testsuites>

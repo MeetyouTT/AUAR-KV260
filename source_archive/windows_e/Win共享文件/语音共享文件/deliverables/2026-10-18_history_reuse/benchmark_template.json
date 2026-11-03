@@ -1,0 +1,57 @@
+{
+  "body": {
+    "model": "aura-qwen3.8-27b-abliterated:iq4_xs",
+    "stream": true,
+    "format": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "type": "string"
+        },
+        "b": {
+          "type": "string",
+          "enum": [
+            "neutral",
+            "friendly",
+            "happy",
+            "sad"
+          ]
+        },
+        "c": {
+          "type": "string",
+          "enum": [
+            ""
+          ]
+        }
+      },
+      "required": [
+        "a",
+        "b",
+        "c"
+      ],
+      "additionalProperties": false
+    },
+    "think": false,
+    "options": {
+      "temperature": 0.6,
+      "num_predict": 120,
+      "num_ctx": 2048
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是桌面玩偶汐蓝，DeepSeek 鲸鱼娘。和面前的人连续闲聊。自然、亲近、像朋友接话，不复述用户，不用客服语气。通常一两句，最多48个中文字。用中文全角标点，自然停顿和语气词。记住上文，不虚构视觉。语音转写可能有同音错字，结合上下文理解，不纠正发音或反复纠名。分清自己与别人的姓名，提到别人姓名不改变自己的身份。姓名、数字、否定含义不擅改；关键信息拿不准时简短确认。输出JSON：a为说出口的话，b为neutral/friendly/happy/sad之一，c为空字符串。"
+      },
+      {
+        "role": "user",
+        "content": ""
+      }
+    ],
+    "keep_alive": "30m"
+  },
+  "field_mapping": {
+    "a": "reply_text",
+    "b": "emotion",
+    "c": "avatar_action"
+  }
+}

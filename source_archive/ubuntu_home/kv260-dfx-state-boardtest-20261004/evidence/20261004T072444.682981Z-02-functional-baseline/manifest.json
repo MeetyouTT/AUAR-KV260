@@ -1,0 +1,5 @@
+[
+  {"id":"query","command":"xdputil query","timeout":90},
+  {"id":"classification","command":"/home/root/Vitis-AI/examples/vai_library/samples/classification/test_jpeg_classification /usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel /home/root/kv260-test-20261001/pytorch-resnet-dog.jpg","timeout":90},
+  {"id":"hardware-fd-state","command":"python3 -B -c 'import pathlib,json,os,subprocess; P=pathlib.Path; pid=subprocess.check_output([\"systemctl\",\"show\",\"dfx-mgr.service\",\"-p\",\"MainPID\",\"--value\"],text=True).strip(); paths=[\"/sys/kernel/config/device-tree/overlays\",\"/sys/class/drm\",\"/dev/dri\",\"/sys/bus/platform/drivers/zocl\"]; print(json.dumps({\"pid\":pid,\"directories\":{p:[x.name for x in P(p).iterdir()] if P(p).is_dir() else None for p in paths},\"fdinfo\":{str(p):p.read_text() for p in P(\"/proc/\"+pid+\"/fdinfo\").iterdir() if \"inotify\" in p.read_text()},\"drm_clients\":{str(p):p.read_text() for p in P(\"/sys/kernel/debug/dri\").glob(\"*/clients\")}},indent=2))'"}
+]

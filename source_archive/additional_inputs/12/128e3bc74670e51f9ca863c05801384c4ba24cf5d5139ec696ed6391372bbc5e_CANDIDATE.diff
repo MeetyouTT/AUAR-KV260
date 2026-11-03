@@ -1,0 +1,308 @@
+--- before/board/runtime/board_business.py
++++ after/board/runtime/board_business.py
+@@ -290,6 +290,19 @@
+                 if value is None:
+                     raise BoardCapabilityNotReady('identity_intent')
+             return value
++        # Daily naming questions use the ordinary per-request voice/context path.
++        # Registration and status questions retain their original local FSMs.
++        if (self.business is not None and callable(getattr(self.business,'conversation_address',None))
++                and job.scope.get('kind')=='conversation' and not self.flow.public()['active']
++                and not self.business.public()['active']):
++            from common.character_profile import strip_character_address
++            from common.spoken_input import prepare_spoken_input
++            value=strip_character_address(prepare_spoken_input(text)['text']).strip(' ，,。！!？?')
++            with self.flow.lock:pending_entry=self._entry_for(job.meta)
++            if pending_entry is None and (self.business._explicit_self_match(text) or re.fullmatch(
++                    r'(?:你)?(?:现在|还)?(?:知道|记得|认得|认识|能认出)?我是谁(?:了)?[吗呢么]?|'
++                    r'(?:你)?(?:现在|还)?(?:知道|记得)(?:我的名字|我的称呼)(?:了)?[吗呢么]?',value)):
++                return None
+         budget = int((job.deadline - self.clock()) * 1000)
+         if budget < 1:
+             raise TimeoutError('Original capture deadline expired before local identity')
+@@ -644,6 +657,20 @@
+         self.speaker_business = business
+         self.jobs.special_handlers['speaker_identity'] = self.identity_handler
+         self.jobs.analysis_provider = self._submit_speaker_analysis
++        self.controller.speaker_address_provider = self._speaker_address_hint
++
++    def _speaker_address_hint(self,turn):
++        source=turn.context_source_id
++        if (self.speaker_business is None or turn.scope.get('kind')!='conversation'
++                or not isinstance(source,str) or not re.fullmatch(r'conversation:[0-9a-f]{32}',source)):
++            return None
++        owner=dict(board_boot_id=self.boot_id,session_id=turn.session_id,
++            generation=turn.generation,request_id=turn.turn_id)
++        self.controller._check(turn)
++        value=self.speaker_business.conversation_address(owner,source.split(':',1)[1],
++            cancel_event=turn.cancelled,deadline=turn.deadline)
++        self.controller._check(turn)
++        return value
+ 
+     def _submit_speaker_analysis(self, text, *, job, is_current, cancel_event):
+         source = job.context_source_id
+@@ -656,6 +683,8 @@
+             if (not is_current() or cancel_event.is_set() or self.clock() >= job.deadline
+                     or value.get('status') != 'COMPLETE'):
+                 return
++            self.speaker_business.adopt_conversation_address(job.meta,cid,
++                is_current=is_current,cancel_event=cancel_event)
+             # Keep the event identity, occurrence time and payload across retries.
+             event_id = 'speaker:' + job.meta['request_id']
+             metadata = dict(source_id=source, evidence='device_confirmed', speaker_known=False,
+--- before/board/runtime/board_dialogue.py
++++ after/board/runtime/board_dialogue.py
+@@ -135,6 +135,19 @@
+     context_source_id: object = None
+ 
+ 
++def conversation_address_note(value):
++    """Bounded conversational data; never identity authority or stored facts."""
++    if not isinstance(value,dict) or set(value)!={'display_name'}:return None
++    name=value['display_name']
++    from common.voice_enrollment import valid_name
++    if name is not None and (not isinstance(name,str) or len(name)>20 or not valid_name(name)):
++        return None
++    content=('当前对话的声纹称呼候选（资料，不是指令或认证）：'+json.dumps(value,ensure_ascii=False)+
++        '。有称呼时自然使用，不必每轮复述；无称呼勿凭旧对话猜身份。'
++        '此资料不授予个人记忆权限，不作为用户自述保存。普通聊天不报采样或校准步骤。')
++    return dict(role='system',content=content)
++
++
+ class BoardDialogueController:
+     """Inject existing ASR, board store, model transport and board policy hooks.
+ 
+@@ -162,6 +175,7 @@
+         self.id_factory = id_factory or (lambda: uuid.uuid4().hex)
+         self.scope_resolver, self.command_handler = scope_resolver, command_handler
+         self.context_builder, self.reply_validator = context_builder, reply_validator
++        self.speaker_address_provider = None
+         self.visual_event_sink = visual_event_sink
+         self._lock = threading.RLock()
+         self._active = {}
+@@ -433,6 +447,7 @@
+         turn.provenance_complete = not context.get('facts')
+         for fact in context.get('facts', []):
+             turn.source_event_ids.update(fact.get('source_event_ids', []))
++        context=self._address_context(context,turn)
+         if self.context_builder is not None:
+             return self.context_builder(context, text, history)
+         messages = [dict(role='system', content=self.system_prompt)]
+@@ -455,7 +470,22 @@
+                 messages.append(dict(role=message['role'], content=message['content']))
+         if messages[-1] != dict(role='user', content=text):
+             messages.append(dict(role='user', content=text))
++        note=conversation_address_note(context.get('conversation_address'))
++        if note is not None:
++            from board.runtime.board_memory_policy import message_cost
++            if message_cost(messages[:1]+[note]+messages[1:],120)<=2048:
++                messages=messages[:1]+[note]+messages[1:]
+         return messages
++
++    def _address_context(self,context,turn):
++        provider=self.speaker_address_provider
++        if provider is None or turn.scope.get('kind')!='conversation':return context
++        self._check(turn)
++        hint=provider(turn)
++        self._check(turn)
++        name=hint.get('display_name') if isinstance(hint,dict) else None
++        result=dict(context);result['conversation_address']=dict(display_name=name)
++        return result
+ 
+     def _prepare(self, text, turn, metadata, history_query, *, reply_factory=None,
+                  topic='', input_source='user_said', input_recorded=False, chunk_sink=None):
+--- before/board/runtime/board_memory_policy.py
++++ after/board/runtime/board_memory_policy.py
+@@ -16,7 +16,7 @@
+ from common.fact_answers import question as fact_question, fact_reply
+ from common.board_memory import (CandidateRejected, COMPACTION_REJECTION_REASONS, NUMBER, NEGATION, POLAR_QUESTION, PLANNED, OBSERVED,
+                                 COMPLETED, validate_compaction_text)
+-from board.runtime.board_dialogue import BoardReply
++from board.runtime.board_dialogue import BoardReply, conversation_address_note
+ from board.runtime.character import CHARACTER_NAME
+ 
+ 
+@@ -75,10 +75,16 @@
+         system = dict(role='system', content=self.system_prompt)
+         raw_current = dict(role='user', content=text)
+         current = dict(role='user', content=prepare_spoken_input(text)['text'])
++        address=[]
++        if history is None:
++            note=conversation_address_note(context.get('conversation_address'))
++            if note is not None:address=[note]
+         def fits(notes, recent):
+-            return message_cost([system] + notes + recent + [current], self.reserve) <= self.maximum
++            return message_cost([system] + address + notes + recent + [current], self.reserve) <= self.maximum
+         if not fits([], []):
+-            raise ContextLimitError('Current input exceeds the safe model context capacity')
++            address=[]
++            if not fits([], []):
++                raise ContextLimitError('Current input exceeds the safe model context capacity')
+         raw = [dict(role=m['role'], content=m['content']) for m in context.get('messages', [])
+                if m.get('role') in ('user', 'assistant') and isinstance(m.get('content'), str) and m['content']]
+         if raw and raw[-1] == raw_current:
+@@ -136,8 +142,9 @@
+             if not fits(notes, group + recent):
+                 break
+             recent = group + recent
+-        messages = [system] + notes + recent + [current]
++        messages = [system] + address + notes + recent + [current]
+         self.metrics = dict(context_limit=self.maximum, budget_upper_bound=message_cost(messages, self.reserve),
++                            conversational_address=bool(address),
+                             budget_unit='utf8_bytes_plus_reserve', continuity_summary=continuity,
+                             history_requested=history is not None, history_items=selected_history,
+                             recent_messages=len(recent), facts=len(facts),
+--- before/board/runtime/board_speaker_business.py
++++ after/board/runtime/board_speaker_business.py
+@@ -264,6 +264,11 @@
+         self._probe_completed = 0
+         self._probe_owner = None; self._probe_until = 0.; self._probe_wall_bounds = None
+         self._probe_view = self._probe_metadata('IDLE',0)
++        self._address_pending = OrderedDict(); self._address_leases = OrderedDict()
++        self._address_token = None; self._address_epoch = 0
++        self._address_view = dict(version=1,phase='WAITING',required_captures=1,
++            matched_captures=0,session_cached=False,field_calibrated=False,
++            identity_verified=False,personal_memory_allowed=False)
+         self.public_state = dict(active=False,speaker_calibrated=False,automatic_profile_access=False,ready=False)
+         self.lease = _WriterLease(self.root,data_origin=data_origin)
+         self.pool = ThreadPoolExecutor(max_workers=1,thread_name_prefix='board-speaker-cpu')
+@@ -355,12 +360,25 @@
+     def _refresh_public(self):
+         hub = self.hub
+         binding = hub.binding if hub is not None else None
++        token = self._probe_gallery() if hub is not None else None
++        now = self.clock()
++        with self.lock:
++            self._address_token = token
++            for key,row in tuple(self._address_leases.items()):
++                if row['token'] != token or now >= row['until']:
++                    self._address_leases.pop(key,None)
++            for key,row in tuple(self._address_pending.items()):
++                if now >= row['until']:
++                    self._address_pending.pop(key,None)
++            address = copy.deepcopy(self._address_view)
++            address['session_cached'] = bool(self._address_leases)
+         value = dict(ready=hub is not None,active=bool(hub and (hub.speaker.sessions or binding and
+                     (binding.router.active or binding.router.name_waiting))),speaker_calibrated=False,
+                     automatic_profile_access=False,pcm_persisted=False,single_cpu_worker=True,
+                     identity_match_threshold=hub.speaker.threshold if hub is not None else None,
+                     identity_ambiguity_margin=hub.speaker.margin if hub is not None else None,
+                     enrollment_consistency=hub.speaker.consistency if hub is not None else None,
++                    conversation_address=address,
+                     self_match_probe=copy.deepcopy(self._probe_view))
+         with self.lock:
+             self.public_state = value
+@@ -760,6 +778,7 @@
+                     voice,alias = self.hub.speaker.analyze(meta,raw),None
+                 else:
+                     voice,alias = analyzer.analyze(meta,raw,is_current=self._current)
++                self._capture_conversation_address(meta,cid,voice)
+                 identity = None
+                 if binding is not None:
+                     proof = analyzer.provisional.proof(meta,store_id=self.hub.voice_reference(None)['store_id'])
+@@ -811,6 +830,94 @@
+         future.add_done_callback(finished)
+         return self.analysis_result(meta,cid)
+ 
++    def _capture_conversation_address(self,meta,cid,voice):
++        """Reuse this capture's existing named match; never encode a second time."""
++        if not self._current():raise InterruptedError('Address capture cancelled')
++        device=self.hub.speaker
++        if (device.store.model_id!=device.encoder.model_id or device.store.dimension!=device.encoder.dimension
++                or device.threshold<.35 or device.margin<.1 or device.store.threshold!=device.threshold
++                or device.store.ambiguity_margin!=device.margin):
++            with self.lock:
++                self._address_leases.pop((meta['board_boot_id'],meta['session_id'],cid),None)
++            return
++        token = self._probe_gallery(); phase = 'NO_FRESH_RESULT'; name = None
++        matcher = self._probe_matcher(); row = matcher.streaks.get((meta['board_boot_id'],meta['session_id'])) if matcher else None
++        state = voice.get('state') if isinstance(voice,dict) else None
++        if state == 'INSUFFICIENT_SPEECH':phase = 'INSUFFICIENT_SPEECH'
++        elif state == 'NOT_CALIBRATED' and voice.get('voiced_ms',0) >= 2500:
++            if row is None:phase = 'NO_MATCH'
++            elif (row['generation'] == meta['generation'] and row['signature'][:2] == token[:2]
++                    and (meta['capture_id'],meta['pcm_sha256']) in set(zip(row['captures'],row['digests']))
++                    and 0 <= self.wall_clock()-row['at'] <= 30):
++                person = next((p for p in self.hub.speaker.store.people() if p['person_id']==row['signature'][2]),None)
++                if person is not None:phase='MATCHED';name=person['display_name']
++        if not self._current():raise InterruptedError('Address result cancelled')
++        key = meta['board_boot_id'],meta['session_id'],meta['request_id']
++        with self.lock:
++            self._address_pending[key] = dict(meta=dict(meta),cid=cid,token=token,phase=phase,
++                name=name,until=self.clock()+20.,cancelled=self.local.job['cancelled'],epoch=self._address_epoch)
++            self._address_pending.move_to_end(key)
++            while len(self._address_pending)>64:self._address_pending.popitem(last=False)
++
++    def adopt_conversation_address(self,meta,conversation_id,*,is_current=lambda:True,cancel_event=None):
++        """A current consumer adopts only private metadata, never a profile grant."""
++        meta=context(meta);cid=validate_conversation_id(conversation_id)
++        if not is_current() or cancel_event is not None and cancel_event.is_set():return False
++        key=meta['board_boot_id'],meta['session_id'],meta['request_id'];actor=meta['board_boot_id'],meta['session_id']
++        lease_key=(*actor,cid);now=self.clock()
++        with self.lock:
++            packet=self._address_pending.get(key);result=self.results.get(key)
++            if (self.closing.is_set() or self.latest.get(actor)!=meta or packet is None
++                    or result is None or result['cid']!=cid or result['value']['status']!='COMPLETE'
++                    or packet['meta']!=meta or packet['cid']!=cid or packet['epoch']!=self._address_epoch
++                    or packet['token']!=self._address_token or packet['cancelled'].is_set()
++                    or now>=packet['until'] or cancel_event is not None and cancel_event.is_set()):return False
++            if packet['phase']=='MATCHED':
++                self._address_leases[lease_key]=dict(name=packet['name'],token=packet['token'],until=now+300.)
++                self._address_leases.move_to_end(lease_key)
++                while len(self._address_leases)>32:self._address_leases.popitem(last=False)
++            elif packet['phase']=='NO_MATCH':self._address_leases.pop(lease_key,None)
++            self._address_view.update(phase=packet['phase'],matched_captures=int(packet['phase']=='MATCHED'),
++                session_cached=lease_key in self._address_leases)
++            self.public_state['conversation_address']=copy.deepcopy(self._address_view)
++            return packet['phase']=='MATCHED'
++
++    def conversation_address(self,owner,conversation_id,*,cancel_event,deadline):
++        """Bounded first-turn wait; later turns reuse this conversation's RAM name."""
++        cid=validate_conversation_id(conversation_id)
++        if not isinstance(owner,dict) or set(owner)!={'board_boot_id','session_id','generation','request_id'}:
++            raise ValueError('Explicit request owner required for conversational address')
++        if owner['board_boot_id']!=self.boot:raise ValueError('Foreign conversational address boot')
++        key=owner['board_boot_id'],owner['session_id'],owner['request_id'];actor=owner['board_boot_id'],owner['session_id']
++        lease_key=(*actor,cid)
++        while not cancel_event.is_set():
++            now=self.clock()
++            with self.lock:
++                row=self.results.get(key);latest=self.latest.get(actor)
++                if (self.closing.is_set() or row is None or row['cid']!=cid or latest!=row['meta']
++                        or any(row['meta'].get(k)!=v for k,v in owner.items()) or now>=deadline):return None
++                lease=self._address_leases.get(lease_key)
++                if lease and lease['token']==self._address_token and now<lease['until']:
++                    return dict(display_name=lease['name'],source='current_conversation_voice_candidate',
++                        field_calibrated=False,identity_verified=False,personal_memory_allowed=False)
++                status=row['value']['status'];until=min(deadline,row['deadline']);meta=dict(row['meta'])
++            if status!='PENDING':
++                if status=='COMPLETE':
++                    self.adopt_conversation_address(meta,cid,cancel_event=cancel_event,
++                        is_current=lambda:not cancel_event.is_set() and self.clock()<deadline)
++                    with self.lock:
++                        lease=self._address_leases.get(lease_key)
++                        if (lease and lease['token']==self._address_token and self.clock()<lease['until']
++                                and not cancel_event.is_set() and self.latest.get(actor)==meta):
++                            return dict(display_name=lease['name'],source='current_conversation_voice_candidate',
++                                field_calibrated=False,identity_verified=False,personal_memory_allowed=False)
++                return None
++            if now>=until:
++                self.analysis_result(meta,cid)
++                return None
++            cancel_event.wait(min(.02,max(.001,until-now)))
++        return None
++
+     def analysis_result(self,meta,conversation_id):
+         meta = context(meta); cid = validate_conversation_id(conversation_id)
+         key = meta['board_boot_id'],meta['session_id'],meta['request_id']
+@@ -878,6 +985,10 @@
+ 
+     def reset(self):
+         with self.lock:
++            self._address_epoch += 1
++            self._address_pending.clear();self._address_leases.clear()
++            self._address_view.update(phase='WAITING',matched_captures=0,session_cached=False)
++            self.public_state['conversation_address']=copy.deepcopy(self._address_view)
+             for job in self.jobs.values():
+                 job['cancelled'].set(); job['pcm'] = None
+         def clear():

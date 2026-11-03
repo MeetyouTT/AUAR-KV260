@@ -1,0 +1,14 @@
+fitimage_name=image.ub
+ramdisk_name=ramdisk.cpio.gz.u-boot
+rootfs_name=rootfs.cpio.gz.u-boot
+		if test -e ${devtype} ${devnum}:${distro_bootpart} /uEnv.txt; then
+			fatload ${devtype} ${devnum}:${distro_bootpart} 0x00200000 uEnv.txt;
+			echo "Importing environment(uEnv.txt) from ${boot_target}..."
+			bootm 0x10000000;
+		if test -e ${devtype} ${devnum}:${distro_bootpart} /${ramdisk_name} && test "${skip_tinyramdisk}" != "yes"; then
+			fatload ${devtype} ${devnum}:${distro_bootpart} 0x04000000 ${ramdisk_name};
+		if test -e ${devtype} ${devnum}:${distro_bootpart} /${rootfs_name} && test "${skip_ramdisk}" != "yes"; then
+			fatload ${devtype} ${devnum}:${distro_bootpart} 0x04000000 ${rootfs_name};
+		bootm 0x10000000;
+		bootm 0x10000000;
+uenvcmd=echo Loading DPU bitstream from SD; fatload ${devtype} ${devnum}:${distro_bootpart} 0x02000000 system.bit; fpga load 0 0x02000000 ${filesize}

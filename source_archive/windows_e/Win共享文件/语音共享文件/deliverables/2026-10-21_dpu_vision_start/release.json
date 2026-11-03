@@ -1,0 +1,66 @@
+{
+  "updated_utc": "2026-10-22T05:53:51.361260+00:00",
+  "status": "INITIAL_DPU_ADAPTATION_AND_FIXED_BOARD_VALIDATION_COMPLETE_LIVE_PROMOTION_DEFERRED",
+  "production": {
+    "yolo": "KV260_DPU",
+    "yunet": "KV260_CPU_RESTORED",
+    "sface": "WINDOWS_CPU_UNCHANGED"
+  },
+  "models": {
+    "yunet": {
+      "file": "artifacts/yunet/yunet_public_int8.xmodel",
+      "bytes": 576254,
+      "sha256": "54d348bfeee01756a98bda4103c056a2d5e469a26ea887822da6edc28bdbbbee",
+      "fingerprint": "0x101000056010407",
+      "dpu_compute_partitions": 1,
+      "calibrated": true,
+      "fixed_input_board_verified": true,
+      "field_accuracy_accepted": false,
+      "production_enabled": false
+    },
+    "sface": {
+      "file": "artifacts/sface/sface_public_int8.xmodel",
+      "bytes": 10796375,
+      "sha256": "12b2ff5c7de157133ebd5aa71665fc5ddcd1f65d9e30e2d6e965e0752e467f25",
+      "fingerprint": "0x101000056010407",
+      "dpu_compute_partitions": 1,
+      "calibrated": true,
+      "fixed_input_board_verified": true,
+      "field_accuracy_accepted": false,
+      "production_enabled": false
+    }
+  },
+  "live_promotion_gate": {
+    "passed": false,
+    "reasons": [
+      "YuNet live admission/guard and host-scheduling tails need further validation",
+      "MCP01 USB audio data-buffer warnings persisted after restoring CPU baseline and confound total CPU/video comparisons",
+      "SFace field thresholds and exact-version identity database acceptance remain pending"
+    ]
+  },
+  "private_images_embeddings_audio_copied_to_shared": false,
+  "validation": {
+    "runtime_tests": 5,
+    "schedule_tests": 6,
+    "integration_tests": 4,
+    "binary_patch_tests": 3,
+    "yunet_fp32_parity_cases": 8,
+    "lfw_train_pairs": 2200,
+    "lfw_test_pairs": 1000,
+    "three_model_fixed_period_overruns": 0
+  },
+  "final_audit": "evidence/final-audit.json",
+  "files_manifest": "FILES.sha256",
+  "final_validation": {
+    "software_tests_passed": 18,
+    "candidate_file_hashes_verified": true,
+    "compiled_model_hashes_and_batch_one_ports_verified": true,
+    "readme_links_verified": true,
+    "no_images_or_feature_arrays_in_shared_deliverable": true,
+    "original_camera_unit_restored": true,
+    "owned_restore_timers_inactive": true,
+    "xrt_statistics_disabled": true
+  },
+  "snapshot_scope": "Initial stage state as of 2026-10-22T05:53:51.361260+00:00",
+  "current_followup_release": "../2026-10-21_dpu_live_baseline/release.json"
+}

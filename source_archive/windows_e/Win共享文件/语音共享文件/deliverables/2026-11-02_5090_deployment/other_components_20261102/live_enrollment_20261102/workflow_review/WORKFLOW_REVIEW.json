@@ -1,0 +1,83 @@
+{
+  "schema": "aura-original-live-enrollment-workflow-review-1",
+  "updated_utc": "2026-11-02T09:05:19.402658+00:00",
+  "status": "ORIGINAL_WORKFLOW_VERIFIED_READONLY_NOT_EXECUTED",
+  "observed_startup_sha256": "941b8fc4814eabecf3063b74a968b17a2b649c9573e4f2d04698a780a8fe7c74",
+  "selected_sha256": "9ab2533d2c3000d61095f54de2e8199f53461ac085e2f58230ab36149be6af1f",
+  "reviewed_business_source_count": 12,
+  "original_gui_identity_methods_unchanged": true,
+  "native_face_source_sha256": "d639c4e52ab68db3c602ac6055967e3990781cfd3dcf2aa8527c249ff1be5d8c",
+  "native_sampling_source_sha256": "29dcd8546fe1a57e1a3b757fbaa9b4459009d11f2324fcc0be27001c0580009a",
+  "normal_gui_entry": {
+    "type": "service_dialog",
+    "action": "identity_enroll"
+  },
+  "voice_entry_template": "帮我登记身份，我叫〈用户本地原称呼〉",
+  "unified_entry_template": "记住我，我叫〈用户本地原称呼〉",
+  "voice_reenroll_synonyms_supported": false,
+  "known_face_cannot_be_resampled_by_current_native_start_or_enroll": true,
+  "same_name_replacement_requires_fresh_unknown_match_and_original_capability": true,
+  "same_name_update_keeps_identity_record_count_and_replaces_original_template_without_delete": true,
+  "same_name_known_unified_path_reuses_face_not_resamples": true,
+  "face_update_confirmation": "确认更新登记",
+  "unified_existing_face_link_confirmation": "确认登记",
+  "voice_final_confirmation": "确认保存身份关联",
+  "normal_cancel": "取消登记",
+  "face_sampling": {
+    "policy": "frontal_medoid_v1",
+    "minimum_collection_ms": 15000,
+    "collect_count": 10,
+    "later_validation_frames": 5,
+    "total_required": 15,
+    "sampling_deadline_ms": 90000,
+    "ready_confirmation_deadline_ms": 60000
+  },
+  "deadlines_seconds": {
+    "face_name_or_authorization": 120,
+    "face_voice_simple_sampling": 90,
+    "face_nonsimple_post_sampling_confirmation": 60,
+    "unified_attempt_total_default": 180,
+    "speaker_three_samples_and_save": 180,
+    "voice_save_receipt_query_lifetime": 60
+  },
+  "speaker_samples": {
+    "required_distinct_recordings": 3,
+    "spoken_instruction_seconds": [
+      3,
+      10
+    ],
+    "raw_pcm_allowed_seconds": [
+      3,
+      20
+    ],
+    "minimum_vad_seconds": 2.5,
+    "initial_enrollment_command_pcm_counts_as_sample": false,
+    "final_save_confirmation_counts_as_sample": false,
+    "current_bound_face_proof_required_during_unified_sampling": true
+  },
+  "public_state_paths": {
+    "face_fsm": "8783 /api/state -> board_business.dialogue.voice_enrollment.stage",
+    "combined_enrollment_active": "8783 /api/state -> board_business.dialogue.voice_enrollment.active",
+    "duplicate_jobs_projection": "8783 /api/state -> local_transcription.service.voice_enrollment",
+    "speaker_business_active": "8783 /api/state -> board_business.speaker.active",
+    "face_sampler": "8790 /v1/ui/status -> modules.identity.enrollment_sampling.stage",
+    "face_count_collect": "8790 /v1/ui/status -> modules.identity.enrollment_sampling.counts.collect",
+    "face_count_validate": "8790 /v1/ui/status -> modules.identity.enrollment_sampling.counts.validate",
+    "face_total": "8790 /v1/ui/status -> modules.identity.enrollment_sampling.total",
+    "face_total_required": "8790 /v1/ui/status -> modules.identity.enrollment_sampling.total_required"
+  },
+  "not_exposed_in_current_gui_api": [
+    "SpeakerDevice.sessions stage samples/confirm",
+    "SpeakerDevice.sessions vectors length",
+    "IdentityLinkRegistry binding_attempts.state"
+  ],
+  "internal_binding_state_storage": "private_root/speaker/identity-links.sqlite3 :: binding_attempts.state",
+  "registry_health_and_attempt_are_not_pure_readers": true,
+  "personal_memory_granted_by_enrollment": false,
+  "private_store_or_templates_photos_pcm_names_or_ids_read": false,
+  "recording_commands_services_deployment_or_motor_actions_executed": false,
+  "source_evidence_sha256": {
+    "CURRENT_WORKFLOW_SOURCE.json": "8d59b4c3e27ce145b045a2652b0c3309cc4e1f22820439f355f7c7e784644167",
+    "CURRENT_ORIGINAL_IDENTITY_UI_SOURCES.json": "2c4a63d170c1636e50355bdfa14af8da0939dab1935241c5c92793a84a98c5eb"
+  }
+}

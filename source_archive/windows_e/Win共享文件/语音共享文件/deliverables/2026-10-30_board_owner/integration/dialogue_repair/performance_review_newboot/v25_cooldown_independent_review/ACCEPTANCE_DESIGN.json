@@ -1,0 +1,56 @@
+{
+  "baseline_mapping_sha256": "6fb9899571078207b7460ae71d6da52ccd211c150b7d39f54f4003e672ec21c9",
+  "checks": [
+    {
+      "expected": "相同source IDs和revision模型调用不增加，健康成功不清理该冷却。",
+      "id": "same_source_retry_suppressed",
+      "scenario": "公开坏源完成一次candidate_rejected后，在600秒内多次step并插入健康成功。"
+    },
+    {
+      "expected": "健康turn可被选中并完整提交，不受冷却源阻塞。",
+      "id": "healthy_progress",
+      "scenario": "多个冷却turn排在健康turn前，冷却事件数超过原查询LIMIT。"
+    },
+    {
+      "expected": "坏源未新建或重建租约，attempts保持，健康任务可正常变化。",
+      "id": "lease_before_exclusion",
+      "scenario": "记录坏源任务行attempts、reserved_task、租约数，在冷却内重复step。"
+    },
+    {
+      "expected": "整个turn跳过，不拆分未冷却的兄弟事件单独压缩。",
+      "id": "whole_turn",
+      "scenario": "同turn包含user、assistant、已播文本，其中一个或更多源冷却，max_events=1。"
+    },
+    {
+      "expected": "更正后整批允许重试，到期边界后原批允许重试，旧内容不会被提交。",
+      "id": "revision_and_expiry",
+      "scenario": "失败完整多源turn仅更正user revision，其余played源版本不变。另在599.999与600.0秒测试到期。"
+    },
+    {
+      "expected": "原取消与时钟保护优先，不记录内容冷却，原提交与正文删除保护保持。",
+      "id": "cancel_and_clock",
+      "scenario": "模型抛校验异常时同步前台抢占，或原时钟守卫失效。"
+    },
+    {
+      "expected": "RAM缓存最多64批，不保存正文或导出IDs，过期条目可回收。",
+      "id": "bounded_metadata",
+      "scenario": "构造65个独立坏批次并观察health，随后推进单调时钟使缓存到期。"
+    },
+    {
+      "expected": "原全局backend退避行为、成功复位及取消不加重保持，模型调用数单独统计。",
+      "id": "backend_retry_unchanged",
+      "scenario": "连续backend异常及一次成功，检查3/6/12/24/48/60秒序列。"
+    }
+  ],
+  "model_or_device_access": false,
+  "notes": [
+    "600秒为本次待验证实现参数，旧60秒观察不足以证明减负。",
+    "公开SQLite与fake模型计数验证行为，实际前台延迟与后台请求频率由root后续单独实测。"
+  ],
+  "observed_performance_improvement": false,
+  "private_database_access": false,
+  "requested_cooldown_seconds": 600,
+  "requested_maximum_batches": 64,
+  "schema": "aura.v25.cooldown.acceptance_design.v1",
+  "status": "DESIGN_ONLY_CANDIDATE_NOT_YET_TESTED"
+}

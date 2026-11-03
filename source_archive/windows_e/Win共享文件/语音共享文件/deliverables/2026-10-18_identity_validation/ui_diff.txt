@@ -1,0 +1,22 @@
+--- active
++++ local
+@@ -175,6 +175,18 @@
+     return copy.deepcopy(params)
+ 
+ 
++def identity_completion(result, identity):
++    """A transport ACK is not a committed enrollment/deletion."""
++    operation = identity.get('last_operation', {})
++    if (result.get('accepted') is True and result.get('action') in ('identity_enroll', 'identity_delete')
++            and operation.get('command_id') == result.get('command_id')
++            and operation.get('action') == result.get('action') and operation.get('state') == 'COMMITTED'
++            and integer(operation.get('db_version')) and operation['db_version'] == identity.get('db_version')
++            and text(operation.get('detail'), 160, False)):
++        return operation['detail']
++    return ''
++
++
+ class SnapshotGate:
+     """Retain latest state, reject rollback/replayed epochs, expire by source time."""
+     def __init__(self, boot_id, clock=millis):
+

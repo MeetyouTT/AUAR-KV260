@@ -1,0 +1,29 @@
+Windows现权重27B线程数量复核（2026-10-31）
+
+结论：自动线程数已经合理匹配物理核，没有发现需要纠正的线程误配。不建议现在把 num_thread 写成12，也不建议为线程数量或省c字段的几百毫秒另开一次全链路重启。优先完成根任务现有ASR对照，以及讨论有数秒关键路径空间的真流式ASR路线。
+
+本次是2026-10-31 11:17:13 UTC的只读观测；CPU_THREAD_EVIDENCE.json保存白名单元信息。inspect_cpu_metadata.ps1可复读当前状态，不发HTTP、不调用模型、不采样GPU、不变更进程/配置。日志在写入中，以共享只读句柄读取当时固定长度的前缀并保存长度/SHA，不复制日志正文。
+
+1. CPU：Win32_Processor报告AMD Ryzen 5 7500F，6物理核、6启用核、12逻辑处理器。当前不是需要区分P/E核的混合核心处理器；也不是12个独立物理核。
+
+2. 活动runner绑定：项目记录daemon26036的PID/创建时间/可执行路径/命令行均与本机现读一致。唯一直接llama-server子进程为3724，创建UTC10:43:04.788929、端口58840、ctx2048、模型路径在D盘项目外存储。该创建时间/端口同时匹配既有日志65572行的03:43:04.788-07:00启动记录，因此后面的线程/层日志可以绑定本次活动runner，不能仅凭任意历史同名行推断现状。PID仅本次观测有效，不用于后续操作。
+
+3. 实际线程：日志65588行明确 n_threads=6、n_threads_batch=6，65841行再报 n_threads=6。65800行同一装载段为53/66层GPU。runner命令未显式给-t/--threads或-tb/--threads-batch；当前auto确实落在6/6，不是只从代码推测默认值。
+
+4. CPU路径：65579行为ggml-cpu-zen4.dll；同段AVX2/AVX512/AVX512_VBMI/AVX512_VNNI/F16C/FMA标志均为1。这没有证明每个算子最优，但没有显出误落通用scalar后端的证据。
+
+5. 调度：进程ProcessorAffinity=0xFFF，覆盖全部12个逻辑处理器；未发现显式CPU mask/range/strict参数；进程优先级AboveNormal。现读操作系统总线程数30不能当作n_threads=30，其中含运行库/网络/其他线程。没有理由据30或12逻辑核盲绑核、开RealTime或宣称线程翻倍会提速。
+
+说明：最初的临时参数解析使用了大小写不敏感匹配，曾把ctx参数-c误判成CPU掩码-C。保存的正式复核器已改为短选项大小写敏感；重读结果没有显式CPU掩码，进程亲和性也没有缩窄。该误判未写入运行配置。
+
+上游代码核验：本机配置是Ollama0.40.13，上游固定llama.cpp b11963。Ollama的llama_server.go只在NumThread>0时传-t；否则交给runner自动检测。b11963 common/common.cpp的Windows物理核枚举使用GetLogicalProcessorInformationEx，常规路径返回物理核数；common_cpu_get_num_math最后也回到物理核数。Windows检测失败的常见回退为逻辑核/2，在本CPU上仍为6。观测的6与这个设计一致。
+
+官方固定版本源码：
+https://github.com/ollama/ollama/blob/v0.40.13/llm/llama_server.go （446–450行）
+https://github.com/ollama/ollama/blob/v0.40.13/api/types.go （Runner装载选项）
+https://github.com/ggml-org/llama.cpp/blob/b11963/common/common.cpp （120–150、206–231、292–301行）
+https://github.com/ggml-org/llama.cpp/blob/b11963/common/arg.cpp （1528–1546行，生成与prefill线程分别定义）
+
+有无线程AB价值：性能最优线程数仍只能实测，不能用“默认合理”证明6绝对最优。但当前没有6错误、12才正确或缺了Zen4后端的证据，所以不是高优先级修复。若以后根任务已有必要的维护窗口，并且细分profile显示CPU部分层仍主导，可以把6对4或6对8列为单变量小组；不要现在盲目扫全部1–12或直接写12。num_thread是runner装载选项，比较时需重新确认同一权重/ctx/53层/fit/TTS/GPU预算/缓存与输出tokens，不能在“同runner不变”的现有ABBA上伪装无扰切换。13/66层是层数，不是CPU耗时比例，不能用它计算线程调整的必然总收益。
+
+本次没有运行这个AB，没有设置任何线程、亲和性、优先级或环境变量，没有重启服务，也没有权重下载。

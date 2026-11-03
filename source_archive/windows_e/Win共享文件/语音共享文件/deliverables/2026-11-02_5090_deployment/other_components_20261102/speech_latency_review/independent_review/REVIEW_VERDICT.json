@@ -1,0 +1,57 @@
+{
+  "schema": "aura-independent-numeric-timing-review-verdict-1",
+  "status": "PASS_NO_BLOCKING_FINDINGS_LOCAL_CANDIDATE_ONLY",
+  "updated_utc": "2026-11-02T08:32:39.503521+00:00",
+  "reviewed_files": {
+    "board/runtime/board_dialogue.py": {
+      "before_sha256": "c877cdee602ff0bda669cc2b2fefa77e9328ce205a744e317df82ffb17146de6",
+      "after_sha256": "bdaac7092ff889d9b2def4de8cfc5623a411046d2a072e39afc04c0838c436bf",
+      "changed_methods": [
+        "BoardDialogueController._prepare"
+      ],
+      "other_methods_ast_identical": true
+    },
+    "board/runtime/audio/board_dialogue_jobs.py": {
+      "before_sha256": "687b80cde20d70e4de56dd71956683b9cec59f55bd25965491dc08d00c8cb248",
+      "after_sha256": "dc117b493047eecb4148450d4c8c1cafbbc1b30a377aaaf8b3aca0101694adff",
+      "changed_methods": [
+        "BoardDialogueJobs._execute"
+      ],
+      "other_methods_ast_identical": true
+    }
+  },
+  "diff_exactly_matches_two_files": true,
+  "original_request_permissions_deadlines_reply_validation_audio_ack_methods_ast_unchanged": true,
+  "last_result_optional_metrics_cleared_before_each_llm_attempt": true,
+  "failed_or_cancelled_prepare_clears_backend_observation_and_counter": true,
+  "ordinary_jobs_clears_previous_metrics_before_controller_invocation": true,
+  "jobs_copies_only_explicit_numeric_backend_keys": true,
+  "added_fields_bounded_to_16": true,
+  "booleans_nonfinite_negative_huge_text_id_and_unknown_keys_excluded": true,
+  "backend_relative_ms_not_mixed_with_board_rpc_ms": true,
+  "candidate_specialized_tests_from_author_receipt": {
+    "total": 21,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "original_regressions_from_author_receipt": {
+    "total": 60,
+    "baseline_passed": 56,
+    "candidate_passed": 56,
+    "same_failures": 4,
+    "failure_set_preserved": true
+  },
+  "synthetic_trace_8_scenarios_reparsed_equal": true,
+  "new_tests_or_models_or_board_access_by_reviewer": false,
+  "candidate_or_production_or_service_mutated_by_reviewer": false,
+  "deployment_performed_or_approved_by_this_review": false,
+  "speedup_claimed": false,
+  "static_audit_sha256": "53533e016655882ee241b7527addd4cb7d7e3a104d508643fcb86837c80ea8c3",
+  "semantic_notes": [
+    "llm_backend_metrics_calls counts LLM responses with usable numeric observations during a successful prepare; a reply-quality-rejected earlier response may contribute to this count. The exposed last-result fields still belong only to the final LLM attempt.",
+    "last means the last LLM response in this prepare, not the total LLM duration over retries. Backend-relative values and board RPC elapsed values have different clock origins.",
+    "This is a numeric observability change. It does not implement early TTS, alter model inference behavior or prove latency improvement.",
+    "The four pre-existing alias/character fixture failures remain failures in both baseline and candidate, not counted as passes."
+  ]
+}

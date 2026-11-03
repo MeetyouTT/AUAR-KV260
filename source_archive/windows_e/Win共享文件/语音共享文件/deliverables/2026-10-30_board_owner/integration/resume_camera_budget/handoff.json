@@ -1,0 +1,97 @@
+{
+  "status": "LOCAL_CANDIDATE_AND_SERIAL_SAME_BOOT_PLAN_READY_NOT_DEPLOYED",
+  "saved_utc": "2026-10-30T23:40:25.292827+00:00",
+  "candidate_manifest_sha256": "b697628ac2588881628e809e207a8bbc5e88f9d0ab40a433749e1d875aa38ccd",
+  "inherited_source_and_artifact_pins": 38,
+  "source_scope": "Parent supplied actual r17/camera/native source in actual_metadata_snapshot_v4.json and native_lifecycle_more.json, not the shared old camera implementation.",
+  "files": [
+    {
+      "path": "candidate/entry.py",
+      "bytes": 6176,
+      "sha256": "9738a518ebe32afd62fe2542afdd05f2f761ef85f909c533de2074f21b04da06"
+    },
+    {
+      "path": "candidate/face_budget.py",
+      "bytes": 2056,
+      "sha256": "67cea9ea11a15a35f02c3333855f9258d6524e6288cc6c755136bf5de3430c1f"
+    },
+    {
+      "path": "candidate/candidate-manifest.json",
+      "bytes": 6993,
+      "sha256": "b697628ac2588881628e809e207a8bbc5e88f9d0ab40a433749e1d875aa38ccd"
+    },
+    {
+      "path": "build_candidate_manifest.py",
+      "bytes": 2273,
+      "sha256": "bb829a9f90aa5ca7ec390cebed9713e6b497cb15bd176e9e96a8fc23299942f8"
+    },
+    {
+      "path": "test_face_budget.py",
+      "bytes": 14868,
+      "sha256": "277ef44a6420202ee93005f62a1e862639e43ad7ef6b3e19342e3812f5973575"
+    },
+    {
+      "path": "serial_trial_plan.json",
+      "bytes": 11610,
+      "sha256": "162f1b57636754d7461ed4474c987b2646895e496a9093a4030564d3144b7602"
+    },
+    {
+      "path": "experiment_plan.json",
+      "bytes": 3471,
+      "sha256": "0c7f875d1e5bffdc51fdd7035f8e60aedd1b97b3e53f71e2f768943e8b9bbe12"
+    },
+    {
+      "path": "regression.xml",
+      "bytes": 6068,
+      "sha256": "d20402cf90b8f00a7a607334ed156580e6be0ebe76da1aeea3d75467a63d2a2d"
+    }
+  ],
+  "tests": {
+    "tests": 29,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 0.179,
+    "scope": "No-device fixture; actual inherited source/worker/process decisions, fake time and fake detector/flow only; no ARM/CPU-reduction claim"
+  },
+  "behavior_change": "Original camera_wrapper install_face_source(camera,interval_ms=100,optical_flow=True) forwarded exactly once at new-process startup to the same inherited installer with interval_ms=200,optical_flow=True.",
+  "retained_behavior": [
+    "unchanged protected r17 entry and manifest",
+    "original raw capture / face flow / observation",
+    "same DPU face models and thresholds",
+    "person YOLO/ByteTrack and camera/display schedules unchanged",
+    "same 1000 ms identity TTL / 500 ms motion-anchor limit / 250 ms measurement freshness",
+    "same epoch/generation/source frame ownership",
+    "same native ABI-compatible operator and one-time recovery protections",
+    "original two-retry 25 ms backoff / 200 ms admission deadline / 50 ms no-result recovery",
+    "original single worker/process callbacks / close / full checkpoint lifecycle"
+  ],
+  "cadence_scope": "200 ms is the successful outer round budget; original unsuccessful round recovery may be faster. No new all-attempt hard limit is claimed.",
+  "same_boot_handoff": "Parent serial trial only: exact current owner normal stop -> newly sealed same-boot checkpoint + owner confirmed dead -> candidate once -> candidate normal stop -> its latest checkpoint -> original entry. No old checkpoint restoration or new-boot reseeding.",
+  "readback_scope": "Current private boot8100/PID1334 readback remains byte-for-byte predecessor evidence and becomes intentionally stale after stop. Any new owner needs an explicitly verified new same-boot PID/source/runtime pin; the older different-boot seed extension is not an automatic new-owner rule.",
+  "verification_command_template": "python3 -B <fresh-private-candidate-directory>/entry.py --manifest-sha256 b697628ac2588881628e809e207a8bbc5e88f9d0ab40a433749e1d875aa38ccd --verify-only",
+  "actual_cpu_or_realtime_acceptance": false,
+  "actual_native_or_owner_test_executed_by_this_agent": false,
+  "hardware_access_by_this_agent": false,
+  "production_configuration_changed": false,
+  "database_opened_by_this_agent": false,
+  "model_or_native_runner_loaded_by_this_agent": false,
+  "remaining_gates": [
+    "Parent review of serial_trial_plan.json and candidate pins",
+    "Root serial actual verify-only",
+    "Confirmed normal close, fresh native same-boot checkpoint, exact handoff and baseline restoration without force-kill",
+    "Paired camera/whole-board CPU and face/identity/person/display/source evidence",
+    "Original paced public PCM queue/audio real-time acceptance under same scene and load"
+  ],
+  "observed_baseline_evidence": [
+    {
+      "path": "../resume_actual/20261030T231134-audio.json",
+      "observation": "No-face runs processed 69 face rounds during each roughly 6.95/6.82 sec frontend window; rolling snapshots are not exact per-trial distributions."
+    },
+    {
+      "path": "../resume_actual/20261030T231537-audio.json",
+      "observation": "Face-present nice -10 run RTF1.0298, face processed delta60, SFace delta11 during roughly7.23sec; display rolling15.39→14.65FPS. Cross-run priority/scene changes prevent a paired causal CPU conclusion."
+    }
+  ],
+  "measurement_warning": "Fewer detector calls do not prove CPU reduction. Native/DPU wait wall time is not CPU time. Keep 500/250 ms motion guards and report confirmation/reacquisition/expiry effects of slower sampling."
+}

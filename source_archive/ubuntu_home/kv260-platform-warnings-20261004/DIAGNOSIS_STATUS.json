@@ -1,0 +1,42 @@
+{
+  "recorded_utc": "2026-10-04T10:11:05.361Z",
+  "phase": "readonly_diagnosis_and_repair_plan",
+  "board_configuration_changed": false,
+  "boot_id": "01ca88c1-93b6-414f-9646-774482d4b2f0",
+  "diagnostic_evidence": [
+    "/home/ghmd/kv260-dfx-state-boardtest-20261004/evidence/20261004T085613.788558Z-25-readonly-warning-diagnostics",
+    "/home/ghmd/kv260-dfx-state-boardtest-20261004/evidence/20261004T100638.016386Z-26-readonly-tpm-and-nfs-startup"
+  ],
+  "nfs": {
+    "confirmed_cause": "CONFIG_NFSD 未启用，nfsd 模块不存在，但 NFS server/mountd 和 sysinit 的 nfsd 挂载仍被启用。",
+    "exports": 0,
+    "mounted_nfs_filesystems": 0,
+    "client_support_enabled": true,
+    "configuration_fix_applied": false
+  },
+  "tpm": {
+    "protocol": "2.0",
+    "startup_response_code_decimal": 256,
+    "startup_response_code_hex": "0x100",
+    "kernel_followed_with_startup": true,
+    "current_capability_query_rc": 0,
+    "device": "/dev/tpmrm0",
+    "conclusion": "首次自检的未初始化返回码被内核后续初始化恢复；当前能力查询成功，不是持续自检失败的证据。"
+  },
+  "clock": {
+    "paths": [
+      "dpdma_ref_div1",
+      "dpll_int"
+    ],
+    "return_code": -13,
+    "meaning": "EACCES，固件访问拒绝",
+    "dp_connector_status": "connected",
+    "root_cause_fully_confirmed": false
+  },
+  "overlay": {
+    "warning_origin": "drivers/of/overlay.c:add_changeset_property，向非 OF_OVERLAY 的存量节点加入/更新属性。",
+    "actual_kernel_property_leak_measured": false,
+    "kernel_fix_applied": false
+  },
+  "uart_console_echo_restored": true
+}

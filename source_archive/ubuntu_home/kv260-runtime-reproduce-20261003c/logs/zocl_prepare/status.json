@@ -1,0 +1,130 @@
+{
+  "started_utc": "2026-10-03T07:41:32.717694+00:00",
+  "scope": "Isolated host kernel/ZOCL build; no module installation",
+  "commands": [
+    {
+      "name": "compiler",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-gcc",
+        "--version"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_prepare/compiler.log",
+      "sha256": "ee2c2cdcd3e65f25d3cc1bbdae6f9643bc678266cb809a5f91e1bfb429c32896",
+      "elapsed_seconds": 0.01
+    },
+    {
+      "name": "kernel-commit",
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_prepare/kernel-commit.log",
+      "sha256": "5d727f514390d6775d8a1667ac55c8e71982eb141b3310f92a44eb14b402fe26",
+      "elapsed_seconds": 0.003
+    },
+    {
+      "name": "kernel-clean",
+      "argv": [
+        "git",
+        "diff",
+        "--name-only",
+        "HEAD"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_prepare/kernel-clean.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_seconds": 0.029
+    },
+    {
+      "name": "kernel-export",
+      "argv": [
+        "git",
+        "archive",
+        "--format=tar",
+        "--output=/home/ghmd/kv260-runtime-reproduce-20261003c/kernel_source.tar",
+        "19984dd147fa7fbb7cb14b17400263ad0925c189"
+      ],
+      "cwd": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_prepare/kernel-export.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_seconds": 5.384
+    },
+    {
+      "name": "olddefconfig",
+      "argv": [
+        "make",
+        "-C",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/linux",
+        "O=/home/ghmd/kv260-runtime-reproduce-20261003c/build/kernel",
+        "ARCH=arm64",
+        "CROSS_COMPILE=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-",
+        "olddefconfig"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_prepare/olddefconfig.log",
+      "sha256": "056b5107cf1f5d83f97fdbc668642ca364277fbf9a264e15d37b8911df610b71",
+      "elapsed_seconds": 4.292
+    },
+    {
+      "name": "modules-prepare",
+      "argv": [
+        "make",
+        "-C",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/linux",
+        "O=/home/ghmd/kv260-runtime-reproduce-20261003c/build/kernel",
+        "ARCH=arm64",
+        "CROSS_COMPILE=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-",
+        "-j4",
+        "modules_prepare"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_prepare/modules-prepare.log",
+      "sha256": "6baf2473cbeaa575d814557d6d18e5f8a624cab1adb6eee10ed1ef5f1a011805",
+      "elapsed_seconds": 2.987
+    },
+    {
+      "name": "kernel-release",
+      "argv": [
+        "make",
+        "-C",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/linux",
+        "O=/home/ghmd/kv260-runtime-reproduce-20261003c/build/kernel",
+        "ARCH=arm64",
+        "CROSS_COMPILE=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-",
+        "-s",
+        "kernelrelease"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_prepare/kernel-release.log",
+      "sha256": "a388ba11bd5e120ba0d92614d190164f2f82a6724b3ace35f6f5296aa2aa21d3",
+      "elapsed_seconds": 0.067
+    }
+  ],
+  "passed": true,
+  "board_verified_this_run": false,
+  "runner_sources": {
+    "board_preflight.py": "05254991e395bdd32d386e74b965685394e121bc1155a541ad20b8127f8f92b2",
+    "build_dfx.py": "0a98347c271834842f9696ecf3ac2ebebb61384587c538c49169a959322eb8e6",
+    "build_zocl.py": "7188d0018e29bbe0b49d66ef0ce575254caa01626e1672be46e747845c3fd9b6",
+    "common.py": "c321a0e824353053fb1edb4a57d4022f615f1a5acb67d2001cdacf751235ea4e",
+    "prepare_sources.py": "7871e054a337a3b9f7dba052705a6a2bcea73513475811f95c56fb13e78dee3b"
+  },
+  "kernel_archive_sha256": "80b3e0ccad01d9ed60bb2449e27b3082457ce8a6bc584345b0af4929a94bc074",
+  "config_changes": {
+    "CONFIG_CC_VERSION_TEXT": {
+      "original": "\"aarch64-xilinx-linux-gcc (GCC) 11.2.0\"",
+      "resolved": "\"aarch64-xilinx-linux-gcc.real (GCC) 11.2.0\""
+    }
+  },
+  "finished_utc": "2026-10-03T07:42:07.199621+00:00"
+}

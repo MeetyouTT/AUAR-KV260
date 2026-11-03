@@ -1,0 +1,66 @@
+{
+  "status": "PASS_LOCAL_REVIEW_FOR_PUBLIC_CPU_SCREEN",
+  "reviewer": "memory_stability",
+  "candidate": "jpeg_demand_actual_camera_candidate_v20",
+  "before_sha256": "9d714b9bd00ea1da12088fa1e22100d7bdb689d0cac10332c3933b31e4f4d2df",
+  "after_sha256": "44b02084cb5e80b12349892183b08e02563c4447e75c5e05276d52786b8a55c4",
+  "author_manifest_sha256": "b598afff1976c898bdb9839e0cbecb0eb65aaf0ffe28793432724c233da99a13",
+  "review_test_sha256": "2a1b62760353375b6a48be50b47d83324783deed69415145483762247765bc9e",
+  "result_sha256": "c0426adfb187b416cd2d5a3c95ab34ee1a4fb4cffb04cf8ccb6dbbb550ec6c10",
+  "result_file": "PUBLIC_REVIEW_RESULT_01.json",
+  "tests": {
+    "independently_written": 11,
+    "author_regressions_rerun": 25,
+    "total_passed": 36,
+    "failures": 0,
+    "errors": 0,
+    "new_threads_remaining": 0,
+    "opencv_actual_encode_executed": false,
+    "device_or_model_used": false,
+    "network_or_localhost_listener_opened": false
+  },
+  "proven": [
+    "All 16 local readback sources match SHA and size for boot bebd3e7d and camera owner 1335.",
+    "The protected entry redirects the exact camera script to camera_wrapper.py. It imports the actual camera source, installs the body/face wrappers and invokes camera.main().",
+    "The active APP_PINS bind camera 9d714 and camera_feed 2bf898. This candidate targets the actual camera source.",
+    "The supplied native hooks preserve preview publication, snapshot and JPEG GET delegation. Synthetic composed-route regression passes.",
+    "Reverting only the three-line producer publication block restores the entire original run AST. Capture, native ownership, identity, shutdown and thread creation are unchanged.",
+    "32 waiting requests plus 64 subsequent public frame publications retain only the latest eight frame objects and one evicted object held by the active encoder. Waiters retain no retired frame object.",
+    "24 concurrent callers for one frame cause exactly one encode and share identical output bytes. Successful cache drops the BGR payload.",
+    "Wait and encode completion revalidate epoch, timestamp, revision, error and frame retirement. A queued old revision never returns a newer replacement.",
+    "Failure is cached for that frame, unlocks the encoder and permits a subsequent publication to recover. An old-frame failure does not poison the latest publication.",
+    "HTTP body hash, MIME, length, no-store and owner/frame headers match the original route for the same bytes. Snapshot preview metadata retains its three fields.",
+    "JPEG cache cannot extend the 1000ms source TTL. Visual capture still includes deferred encoding in its stricter 750ms bound. Native raw preview retains its 250ms freshness check."
+  ],
+  "memory_and_complexity": {
+    "raw_ring_max_bytes": 7372800,
+    "one_evicted_active_raw_max_bytes": 921600,
+    "raw_reference_total_max_bytes": 8294400,
+    "raw_reference_total_mib": 7.91015625,
+    "previous_jpeg_ring_max_bytes": 2097152,
+    "new_background_threads": 0,
+    "implementation": "One per-state encoder mutex and per-frame cached success/failure reuse existing HTTP request threads.",
+    "scope": "These bounds cover retained raw payloads. OpenCV scratch, producer image, raw transport, Python objects and response bytes are additional. Existing ThreadingHTTPServer request-thread count is outside this payload bound.",
+    "tradeoff": "Idle native raw preview avoids eager JPEG work while retaining raw frames. JPEG demand adds encoding to HTTP latency and serializes distinct-frame encodes."
+  },
+  "performance_interpretation": {
+    "actual_cpu_benefit_measured_by_this_review": false,
+    "producer_metric": "preview.render_encode_publish now excludes request-side JPEG encode. Its reduction alone cannot establish whole-process CPU savings.",
+    "screen_scope": "Root's public synthetic screen should count producer and request-side CPU together with fixed frame supply and explicit no-demand/occasional-demand loads. Check JPEG completion age against the existing visual-capture deadline.",
+    "decision": "No correctness blocker found in this local scope. Keep the separate protected-camera release contingent on measured benefit and memory cost."
+  },
+  "calibration_dependency_closed": {
+    "actual_sha256": "42159f8b5a37c8bd0a86628df035d959cfd8ce8558b3433bf6b7b9fd01cfb621",
+    "root_readback": "progress_followup_20261031/v21_preflight_paths_1793504768885442500.json",
+    "root_readback_sha256": "acc834d4a0a0b86c5874db4abeb68233d91f8089b90e64cdd9e04c306647531e",
+    "matches_inspected_historical_source": true,
+    "wrapper_scope": "Only extends POST. JPEG GET delegation is inherited."
+  },
+  "pending_before_actual_release": [
+    "Public ARM CPU screening with real OpenCV.",
+    "Protected camera entry, meta and manifest pin update design. Existing native APP_PINS and candidate_ui_sha256 intentionally reject blind source replacement.",
+    "Root-owned real camera workload and native lifecycle acceptance. The 16-source preview review does not execute every transitive model/optical-flow module."
+  ],
+  "production_modified": false,
+  "author_candidate_modified": false
+}

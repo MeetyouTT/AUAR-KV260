@@ -1,0 +1,74 @@
+{
+  "schema": "aura-voice-only-enrollment-retry-handoff-1",
+  "user_requires_voice_only": true,
+  "board_keyboard_mouse_available": false,
+  "fix": {
+    "relative_source": "board/identity/voice_enrollment.py",
+    "source_sha256": "a9113ba40efc49828ee158554b2dae70485858396680918458f6f96bba16bacb",
+    "applied_startup_sha256": "680fd752c74e75bfbbcd73a296f21f4f39134ce4863a6bc30643c7e77feae1c0",
+    "new_race_tests_passed": 32,
+    "independent_synthetic_scenarios_passed": 13,
+    "source_and_pin_applied": true,
+    "loaded_gui_verified": false,
+    "live_retry_verified": false
+  },
+  "latest_start_attempt": {
+    "requested_utc": "2026-11-02T09:52:13.522646+00:00",
+    "start_submitted_once": true,
+    "failed": true,
+    "exception": "ClockUnavailable",
+    "reason": "sample_rtt_exceeded",
+    "location": "common/board_timeline_clock.py:276",
+    "phase": "initialize_clock",
+    "identity_import_or_component_pin_failure_observed": false
+  },
+  "coordination": {
+    "user_authorization_verified_in_thread": "01a19b1a-6a07-7781-8af9-aacacb1c8ca4",
+    "authorization_answer": "授权与该对话一并协调",
+    "temporary_gui_camera_writer_thread": "01a19b1a-6a07-7781-8af9-aacacb1c8ca4",
+    "this_chat_gui_camera_source_listening_writes_frozen": true,
+    "handoff_file": "cpu_optimization_20261102/IDENTITY_COORDINATION_HANDOFF.json",
+    "return_required": "Final source pins, new process owners, READY/paused state, valid selected face binding, and explicit writer handback before enrollment retry",
+    "cpu_owner_acknowledged_transfer": true,
+    "cpu_owner_pending_work": "Deploy accepted CPU candidates, restore READY, then retain GUI/listening ownership for the user's approximately 120-second dialogue and original-axis performance retest; restore PAUSED/no playback and explicitly hand back before this chat resumes enrollment"
+  },
+  "original_voice_workflow": [
+    {
+      "step": 1,
+      "local_speech": "帮我登记身份，我叫〈称呼〉",
+      "confirmation": "Follow the original spoken prompt; a fresh identity normally uses 确认登记. Use 确认更新登记 only when the original program explicitly offers update.",
+      "expected": "Original simple face flow remains active while the camera collects 10 frontal samples and 5 subsequent held-out validation samples; successful ready state saves automatically. No second confirmation is added."
+    },
+    {
+      "step": 2,
+      "local_speech": "记住我，我叫〈同一称呼〉",
+      "confirmation": "确认登记",
+      "expected": "After the newly committed face is recognized, reuse that face through the original unified binding workflow."
+    },
+    {
+      "step": 3,
+      "local_speech": "Three distinct locally spoken sentences, each lasting 3–10 seconds and containing at least 2.5 seconds of speech; wait for each original prompt.",
+      "expected": "Original workflow accepts three distinct actual captures. Enrollment commands and final confirmation are not samples."
+    },
+    {
+      "step": 4,
+      "local_speech": "确认保存身份关联",
+      "expected": "Original registry reaches ACTIVE and formal current-model voice templates plus both stored active modality links are present."
+    },
+    {
+      "step": 5,
+      "local_speech": "我是谁；听声音我是谁",
+      "expected": "User verifies the spoken name locally. Report candidate versus verified status accurately; enrollment does not establish field calibration or private-memory authorization by itself."
+    }
+  ],
+  "acceptance": {
+    "before_new_sampling": "Reconcile service/source/owners and obtain writer handback; enable listening once through the original API with an intent receipt.",
+    "face": "New successful original save receipt, increased face DB revision, and current-model face inventory count; GUI FSM and sampler remain correlated during capture.",
+    "voice_and_link": "Original binding ACTIVE, current-model formal voice template count, active face/voice links, and user-verifiable local recognition.",
+    "privacy": "Only aggregate counts, fixed states and technical process/source metadata are exported. No names, identity IDs, templates, embeddings, images, recordings or transcripts.",
+    "old_failed_samples_reused": false,
+    "thresholds_or_time_policy_relaxed": false,
+    "manual_database_reset_or_delete": false,
+    "axis_operations_by_this_chat": false
+  }
+}

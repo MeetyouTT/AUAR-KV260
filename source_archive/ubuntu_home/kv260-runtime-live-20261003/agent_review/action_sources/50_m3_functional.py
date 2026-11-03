@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: MIT
+p=Path(CFG.get('agent_helpers',str(WORK/'agent_helpers.py')))
+assert digest(p)==CFG['agent_helpers_sha256']
+exec(compile(p.read_bytes(),str(p),'exec'))
+begin_phase('50-m3-functional')
+guard(CFG['fixed_srcversion'],OFFICIAL_APP)
+manager_guard(True)
+run_logged(['dfx-mgr-client','-remove'],'official-remove')
+guard(CFG['fixed_srcversion'],None)
+kernel_check('official-removed')
+run_logged(['dfx-mgr-client','-load',M3_APP],'m3-load')
+guard(CFG['fixed_srcversion'],M3_APP)
+manager_guard(True)
+kernel_check('m3-loaded')
+query=dpu_query(M3_APP,'m3-query')
+top5=classify(M3_APP,'m3-classification')
+state=sample('m3')
+kernel_check('m3-functional')
+finish_phase({'app':M3_APP,'query':query,'top5':top5,'sample':state,
+    'register_access_executed':False,'pwm_or_actuator_executed':False})

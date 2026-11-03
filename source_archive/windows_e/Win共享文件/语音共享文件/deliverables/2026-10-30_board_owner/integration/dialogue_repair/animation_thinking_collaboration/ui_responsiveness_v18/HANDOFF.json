@@ -1,0 +1,55 @@
+{
+  "schema": "aura.ui-responsiveness-handoff.v1",
+  "status": "LOCAL16_TESTS_PASS_DEVICE_VALIDATION_PENDING",
+  "base_startup_sha256": "12a26c81167ecee7293d0d9be77ec7834894d413f07bab6d8a27e4c8cdfe0392",
+  "base_manifest_sha256": "f694dd48a7bcf2cf4fcbfaf8453e421038b5251d209c75490021d03e2f7e373a",
+  "before_pins": {
+    "tools/board_avatar_gtk.py": "c62dc730404e0de549eca2aaa886997824d4e4b381cd6b31ffb21bae509dc011",
+    "tools/x11_display_activity.py": "985d2f8c66f36228712666718da7e4a49619d0a706a9917e28be75840f64e28f"
+  },
+  "candidate_pins": {
+    "tools/board_avatar_gtk.py": "2ad5af6a7f47e9637bf889cc8977830e80ac619c7ece004da6614653aae7daa1",
+    "tools/x11_display_activity.py": "da318d5094a44bce9e62d57dda5c5c2f62ee06580d028e9cc08334737c9ceb97"
+  },
+  "changed_gtk_methods": [
+    "BoardAvatarStage.refresh_runtime",
+    "BoardAvatarStage.refresh_settings",
+    "BoardAvatarStage.tick"
+  ],
+  "new_gtk_method": "BoardAvatarStage._ui_set",
+  "guarded_setter_calls": 54,
+  "target_fps": 16,
+  "native_pair_unchanged": true,
+  "audio_ack_and_command_cadence_unchanged": true,
+  "background_threads_or_timers_added": false,
+  "product_sources": 2,
+  "synthetic_tests": 16,
+  "loaded_dependency_pins": 7,
+  "loaded_dependency_mismatches": [],
+  "widget_mutations": {
+    "stable_refreshes": 10,
+    "baseline_mutations": 610,
+    "candidate_mutations": 80,
+    "scope": "Real refresh_settings/refresh_runtime methods with synthetic widgets; not full GTK or business UI FPS"
+  },
+  "tests_sha256": "85cd5a33e2b6b3542a48bce37ffacca80793a2ee5e4a2dd10d770953f6741613",
+  "patch_sha256": "d6afb64595ad89277ec843f022c9a7d221f5f08f6ebcf802c2799ea1613027db",
+  "collector_sha256": "876c452d1a28069a3e6a429fa90cfd7821b1bd5bb1db5511a905a38010f2f750",
+  "complete_callback_field": "ui_callback_previous: previous completed full refresh, including publish; sequence and completed_mono identify it",
+  "source_sample_sha256": "b23fcc4915e0ff52071a02c5d39b4f90fd797d2b138fdcaaca1309faaeb1dde8",
+  "observed_sample_window": "Saved before coordinator observed a later board reboot; not a current-boot observation",
+  "source_sample_boot_id": "8100a7fd-0c6a-46c4-82b8-f874988a1521",
+  "root_must_recheck_current_entry": true,
+  "preserve_latest_listener_preference": true,
+  "production_modified": false,
+  "device_access": false,
+  "actual_fps_improvement_proven": false,
+  "review": "REVIEW.txt",
+  "root_steps": [
+    "Recheck current source pins and new boot/entry; preserve H01/speakerclose/memoryr2",
+    "Merge only these two source increments; keep FPS16/native pair unchanged",
+    "Use root-owned normal-close/update source startup pins/ready sequence",
+    "Use new numeric collector; compare full-callback previous, per-stage wall/CPU, setters, completed frames and audio safety",
+    "If remaining stalls are display sync/sysfs/hidden widgets, use measured substage to choose next narrow repair"
+  ]
+}

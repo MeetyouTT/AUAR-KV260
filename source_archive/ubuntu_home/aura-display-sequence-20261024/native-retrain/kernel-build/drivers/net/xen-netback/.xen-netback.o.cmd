@@ -1,0 +1,1 @@
+cmd_drivers/net/xen-netback/xen-netback.o := /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ld  -EL  -maarch64elf    -r -o drivers/net/xen-netback/xen-netback.o drivers/net/xen-netback/netback.o drivers/net/xen-netback/xenbus.o drivers/net/xen-netback/interface.o drivers/net/xen-netback/hash.o drivers/net/xen-netback/rx.o

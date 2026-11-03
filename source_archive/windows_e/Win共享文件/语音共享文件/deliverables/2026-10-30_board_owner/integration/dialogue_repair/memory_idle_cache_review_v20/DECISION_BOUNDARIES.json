@@ -1,0 +1,119 @@
+{
+  "schema": "aura.memory-performance-decision-boundaries.v1",
+  "status": "ANALYSIS_ONLY_NO_NEW_CACHE_CAUSAL_EVIDENCE",
+  "current_published_baseline": {
+    "startup_sha256": "48cb1a3a1fc62eae32c93a5be02df0bd60926cd064884a06990dd24b62762885",
+    "release": "v22",
+    "source_mapping_sha256": "25762cca701602c8ea5d3c0fea649e0b89ebf220b9b66948fc68b11c05ba4a6f",
+    "components_total": 380,
+    "asr_threads": 2,
+    "gtcrn_threads": 1,
+    "tts_steps": 16,
+    "raw_input_queue_frames": 8,
+    "listening_preference": "PAUSED",
+    "jpeg_production_selection": "Original A restored; B not formally selected",
+    "evidence_scope": "Root publication handoff, saved v22 mapping, and saved actual camera review; no live inspection in this chat"
+  },
+  "established": [
+    {
+      "finding": "Current memory admission has no continuous quiet grace",
+      "evidence": "Nine relevant board components independently SHA-matched between saved v20 and v21",
+      "boundary": "Eligible-source selection and the structured camera path still determine whether a model request happens"
+    },
+    {
+      "finding": "Memory completed/discarded counters are not LLM request counters",
+      "evidence": "Pinned structured_camera_counts path can complete with model_calls0; failures can precede model dispatch",
+      "boundary": "The ASR pilot background counter changes do not prove 27B cache interference"
+    },
+    {
+      "finding": "Saved backend startup log has single slot and an8192MiB RAM prompt-cache limit",
+      "evidence": "Sanitized numeric log metadata in SOURCE_EVIDENCE.json",
+      "boundary": "This is a capacity limit, not measured resident allocation or proof of per-dialogue cache behavior"
+    },
+    {
+      "finding": "LLM response metrics already distinguish backend prefill/generation/load from outer RPC",
+      "evidence": "Local host adapter and pinned board controller source; normal board preparation currently keeps mainly aggregate RPC timing",
+      "boundary": "Active Windows binary binding and optional cached-token metric availability must be checked by the original owner before a public experiment"
+    },
+    {
+      "finding": "ASR2 improved the small public ARM pilot and was published by root",
+      "evidence": "Independent recomputation of8timed+8warmup samples,2utterances,ABBA3/2/2/3",
+      "boundary": "Observed28percent decode-wall reduction is not a full-dialogue percentage or broad accuracy evaluation"
+    },
+    {
+      "finding": "GTCRN dual_nospin candidate failed B2 paced raw8 capture",
+      "evidence": "Independent public record review:184consumed frames,queue peak8,max age157.752ms;A2absent",
+      "boundary": "Rejected candidate; no automatic rerun and no inference about all production overflows"
+    }
+  ],
+  "hypotheses_not_established": [
+    "A non-camera summary between two dialogue requests increases the next request's prefill",
+    "RAM cache restores the dialogue prefix but adds measurable restoration latency",
+    "Backend generation rather than prefill dominates the observed multi-second LLM RPC",
+    "Thirty seconds of quiet grace materially improves real dialogue latency"
+  ],
+  "decision_order": [
+    "Original owner has restored A after the confounded real-camera ABA. Keep v22/A fixed for later user-authorized dialogue verification or a controlled cache experiment.",
+    "Read existing backend per-request numeric metrics before selecting a cache-focused change",
+    "If needed, run the public W-D versus W-S-D plan with identical D bytes and broker-counter contamination checks",
+    "Evaluate quiet30seconds as a scheduling change while preserving foreground cancellation and safe retention"
+  ],
+  "new_integration_boundaries": [
+    "Display keep-awake every5seconds is maintenance, not user dialogue activity. Quiet grace must use explicit speech/foreground/ACK monotonic timestamps, not OS input-idle state that screen maintenance may reset.",
+    "Camera frames, visual timeline records, GUI refresh and health polling must not repeatedly reset the dialogue quiet window.",
+    "Changing ASR threads or camera encoding between the arms would confound end-to-end timing. Freeze chosen versions within a cache experiment.",
+    "Direct-host cache experiments test the host mechanism; later board dialogue verification remains separate.",
+    "Continuous conversation may defer compaction. Expired-five-minute sources remain pending until validated atomic summary commit; do not delete them to satisfy a timer.",
+    "A full_source_validation/negation_missing rejection identifies a semantic-preservation guard, not whether that attempt used the LLM. Keep bodies pending and the guard intact; classify request counts and timing separately."
+  ],
+  "actions_in_this_followup": {
+    "local_analysis_files_only": true,
+    "inference_requests": 0,
+    "device_connections": 0,
+    "product_changes": 0,
+    "new_agents_or_services": 0
+  },
+  "previous_saved_baseline_v21": {
+    "startup_sha256": "94f665cf69e861d4f3d625dd627116218120cdbbef2244aa4cf2b63c39b9f1c7",
+    "release": "v21",
+    "asr_threads": 2,
+    "gtcrn_threads": 1,
+    "raw_input_queue_frames": 8,
+    "listening_preference": "PAUSED",
+    "evidence_scope": "Root publication handoff and saved v21 source mapping; this analysis did not inspect live devices"
+  },
+  "camera_candidate_evidence": {
+    "public_ARM_component_CPU_reduction_percent_reported_by_root": [
+      57,
+      64
+    ],
+    "public_RSS_increase_MB_approximately_reported_by_root": 7.8,
+    "first_GET_encoding_cost_increases": true,
+    "real_camera_recoverable_ABA": "Completed and returned to original A; B exited normally according to saved review",
+    "current_camera_A_pid_from_saved_review": 229296,
+    "actual_review_read_locally": true,
+    "actual_review_sha256": "3ea96cb662373f459cfa146e09906c5a60249e6ce34c96748c31e02ff59f4d0b",
+    "observed_B_CPU_per_capture_changes": [
+      {
+        "baseline": "A1 selected",
+        "descriptive_B_CPU_per_capture_change_percent": -22.714800580661986,
+        "causal_gain_established": false
+      },
+      {
+        "baseline": "A2",
+        "descriptive_B_CPU_per_capture_change_percent": -20.240538181295065,
+        "causal_gain_established": false
+      }
+    ],
+    "causal_JPEG_CPU_savings_established": false,
+    "per_capture_normalization_removes_all_confounding": false,
+    "boundary": "Person distribution, throughput and process age differ; neither public component percentages nor camera descriptive percentages establish global board savings"
+  },
+  "memory_validation_snapshot_reported_by_root": {
+    "completed": 45,
+    "discarded": 5,
+    "stage": "full_source_validation",
+    "reason": "negation_missing",
+    "LLM_call_count_inferred": false
+  }
+}

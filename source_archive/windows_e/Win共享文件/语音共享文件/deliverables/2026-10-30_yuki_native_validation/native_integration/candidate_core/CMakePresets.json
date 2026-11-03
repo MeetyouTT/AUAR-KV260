@@ -1,0 +1,173 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "dev",
+            "inherits": "base",
+            "displayName": "Debug with warnings-as-errors",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "NEKOMOTE_WERROR": "ON",
+                "NEKOMOTE_BUILD_PREVIEW": "ON",
+                "NEKOMOTE_BUILD_TESTS": "ON"
+            }
+        },
+        {
+            "name": "release",
+            "inherits": "base",
+            "displayName": "Release with LTO, OpenGL + Vulkan 1.0",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "NEKOMOTE_WERROR": "ON",
+                "NEKOMOTE_BUILD_PREVIEW": "ON",
+                "NEKOMOTE_BUILD_TESTS": "OFF",
+                "NEKOMOTE_BUILD_TOOLS": "OFF",
+                "NEKOMOTE_BUILD_VULKAN": "ON",
+                "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON"
+            }
+        },
+        {
+            "name": "system",
+            "inherits": "release",
+            "displayName": "Release using distribution-managed dependencies",
+            "cacheVariables": {
+                "NEKOMOTE_USE_SYSTEM_DEPS": "ON"
+            }
+        },
+        {
+            "name": "qt-quick",
+            "inherits": "release",
+            "displayName": "Isolated Qt Quick OpenGL host",
+            "cacheVariables": {
+                "NEKOMOTE_BUILD_QT_QUICK": "ON"
+            }
+        },
+        {
+            "name": "plasma",
+            "inherits": "release",
+            "displayName": "Plasma wallpaper QML module and probe",
+            "cacheVariables": {
+                "NEKOMOTE_BUILD_QT_QUICK": "ON",
+                "NEKOMOTE_BUILD_PLASMA": "ON"
+            }
+        },
+        {
+            "name": "plasma5",
+            "inherits": "release",
+            "displayName": "Plasma 5 / Qt 5 native wallpaper package",
+            "cacheVariables": {
+                "NEKOMOTE_QT_MAJOR": "5",
+                "NEKOMOTE_BUILD_QT_QUICK": "ON",
+                "NEKOMOTE_BUILD_PLASMA": "ON",
+                "NEKOMOTE_BUILD_PLASMA_PROBE": "OFF",
+                "NEKOMOTE_BUILD_PREVIEW": "OFF",
+                "NEKOMOTE_BUILD_PLAYER": "OFF"
+            }
+        },
+        {
+            "name": "layer-shell",
+            "inherits": "release",
+            "displayName": "Standalone Wayland layer-shell OpenGL/Vulkan wallpaper",
+            "cacheVariables": {
+                "NEKOMOTE_BUILD_LAYER_SHELL": "ON",
+                "NEKOMOTE_BUILD_ABI": "ON",
+                "NEKOMOTE_BUILD_PREVIEW": "OFF",
+                "NEKOMOTE_BUILD_PLAYER": "OFF",
+                "NEKOMOTE_BUILD_QT_QUICK": "OFF",
+                "NEKOMOTE_BUILD_PLASMA": "OFF",
+                "NEKOMOTE_BUILD_VULKAN": "ON"
+            }
+        },
+        {
+            "name": "x11",
+            "inherits": "release",
+            "displayName": "Standalone X11/EWMH OpenGL/Vulkan wallpaper (Ubuntu 20.04 baseline)",
+            "cacheVariables": {
+                "NEKOMOTE_BUILD_X11": "ON",
+                "NEKOMOTE_BUILD_ABI": "ON",
+                "NEKOMOTE_BUILD_PREVIEW": "OFF",
+                "NEKOMOTE_BUILD_PLAYER": "OFF",
+                "NEKOMOTE_BUILD_QT_QUICK": "OFF",
+                "NEKOMOTE_BUILD_PLASMA": "OFF",
+                "NEKOMOTE_BUILD_VULKAN": "ON"
+            }
+        },
+        {
+            "name": "asan",
+            "inherits": "base",
+            "displayName": "Debug with AddressSanitizer + UBSan",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "NEKOMOTE_ENABLE_ASAN": "ON",
+                "NEKOMOTE_BUILD_QT_QUICK": "OFF",
+                "NEKOMOTE_WERROR": "ON",
+                "NEKOMOTE_BUILD_PREVIEW": "OFF",
+                "NEKOMOTE_BUILD_ABI": "ON",
+                "NEKOMOTE_BUILD_PLAYER": "OFF",
+                "NEKOMOTE_BUILD_TESTS": "ON"
+            }
+        },
+        {
+            "name": "vulkan",
+            "inherits": "dev",
+            "displayName": "Debug with Vulkan backend",
+            "cacheVariables": {
+                "NEKOMOTE_BUILD_VULKAN": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        { "name": "dev",     "configurePreset": "dev" },
+        { "name": "release", "configurePreset": "release" },
+        { "name": "system",  "configurePreset": "system" },
+        { "name": "asan",    "configurePreset": "asan" },
+        { "name": "qt-quick", "configurePreset": "qt-quick" },
+        { "name": "plasma",   "configurePreset": "plasma" },
+        { "name": "plasma5",  "configurePreset": "plasma5" },
+        { "name": "layer-shell", "configurePreset": "layer-shell" },
+        { "name": "x11",     "configurePreset": "x11" },
+        { "name": "vulkan",   "configurePreset": "vulkan" }
+    ],
+    "testPresets": [
+        {
+            "name": "dev",
+            "configurePreset": "dev",
+            "output": { "outputOnFailure": true },
+            "execution": { "noTestsAction": "error", "stopOnFailure": false }
+        },
+        {
+            "name": "release",
+            "configurePreset": "release",
+            "output": { "outputOnFailure": true },
+            "execution": { "noTestsAction": "error", "stopOnFailure": false }
+        },
+        {
+            "name": "asan",
+            "configurePreset": "asan",
+            "output": { "outputOnFailure": true },
+            "execution": { "noTestsAction": "error", "stopOnFailure": false }
+        },
+        {
+            "name": "plasma",
+            "configurePreset": "plasma",
+            "output": { "outputOnFailure": true },
+            "execution": { "noTestsAction": "error", "stopOnFailure": false }
+        },
+        {
+            "name": "vulkan",
+            "configurePreset": "vulkan",
+            "output": { "outputOnFailure": true },
+            "execution": { "noTestsAction": "error", "stopOnFailure": false, "jobs": 1 }
+        }
+    ]
+}

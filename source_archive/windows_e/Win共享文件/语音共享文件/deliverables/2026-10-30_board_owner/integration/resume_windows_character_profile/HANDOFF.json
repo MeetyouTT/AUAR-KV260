@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "status": "DEFAULT_PROJECT_PROFILE_SELECTED_NO_SERVICES_RESTARTED",
+  "utc": "2026-10-31T02:50:26.437323+00:00",
+  "user_scope": "Authorized formal new character/persona only; no memory migration or five-minute body deletion",
+  "selected_profile": {
+    "config": "E:\\Win共享文件\\语音共享文件\\aura\\config\\character_profile.local.json",
+    "schema": "aura.character-profile-1",
+    "profile_version": "xuefei-yuki-board-v1-candidate",
+    "display_name": "雪妃",
+    "formal_name": "御笠雪妃",
+    "romanized_name": "YUKI MIKASA",
+    "address_names": [
+      "御笠雪妃",
+      "雪妃"
+    ],
+    "asr_aliases": [],
+    "wake_words": [
+      "御笠雪妃",
+      "雪妃",
+      "欸",
+      "哎"
+    ],
+    "render_profile_id": "fuyukiss-yuki-freemote39-frame-mesh",
+    "render_source_profile_sha256": "b7b71396c267db80a44c2b32df4ba53ded7920ac952b2fbbfebafba349f85f55",
+    "selection_sha256": "5dcac93339a56c549ef176e260b4ed7f01fdc3307059c53aa3784b7a382f09c3",
+    "persona_prompt_sha256": "11b1b4d04c55ac110969fd5dd7ffb37f29b29bbc26d9c7906e454d4f69af654e",
+    "persona_full_prompt_utf8_bytes": 978,
+    "legacy_fast_base_utf8_bytes": 614
+  },
+  "selection_api": {
+    "module": "common.character_profile",
+    "startup_function": "selected_profile()",
+    "explicit_check_function": "load_profile(absolute_json_path)",
+    "startup_only": true,
+    "invalid_missing_selection": "Raises CharacterProfileError; no old-name fallback",
+    "raw_history_mutated": false,
+    "user_identity_keys_or_grants_mutated": false
+  },
+  "actual_default_source_entry_trace": [
+    {
+      "file": "E:\\Win共享文件\\语音共享文件\\start_voice.ps1",
+      "calls": "deliverables/2026-10-18_board_dialogue/start_background_models.ps1"
+    },
+    {
+      "file": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-18_board_dialogue\\start_background_models.ps1",
+      "calls": "launch_models.py through independent hidden WMI process; not executed by this task"
+    },
+    {
+      "file": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-18_board_dialogue\\launch_models.py",
+      "calls": "Project aura/tools/board_model_host.py on8792; source_fingerprint and SERVICE_REVISION gate loaded health"
+    },
+    {
+      "file": "E:\\Win共享文件\\语音共享文件\\aura\\tools\\board_model_host.py",
+      "calls": "dialogue_host_ollama fast/nonfast and dialogue_stream stream_body legacy27B message construction"
+    },
+    {
+      "file": "E:\\Win共享文件\\语音共享文件\\aura\\tools\\dialogue_stream.py",
+      "calls": "selected614B fast base + exactly unchanged364B MODEL_HINT =authoritative978B; reasoning branch retains original200-character rule"
+    },
+    {
+      "file": "E:\\Win共享文件\\语音共享文件\\aura\\tools\\dialogue_host_ollama.py",
+      "calls": "fast_system_prompt loads selected profile on use; nonfast uses same name/description. Import/chat_body alone do not read selected persona, preserving model-only dependency isolation."
+    }
+  ],
+  "runtime_observation_limit": "Parent reported8792 is not running. This subtask inspected local sources only and did not read live processes or claim an in-memory service update. Future start uses project-selected profile; an already-running legacy process would require controlled restart.",
+  "future8792_handshake": {
+    "previous_revision": "voice-board-vision-20261030-r12",
+    "new_revision": "voice-xuefei-profile-20261030-r13",
+    "new_source_fingerprint": "83dbfae5359cbcfd27ed7bc895456177760d41310c785010e57bb02e833ca7de",
+    "newly_pinned_sources": [
+      "board/runtime/character.py",
+      "common/character_profile.py",
+      "config/character_profile.local.json"
+    ],
+    "full_manifest": "voice_source_manifest.json",
+    "communicated_to": "win_inference",
+    "launcher_or_device_service_executed": false
+  },
+  "model_only8797": {
+    "source": "E:\\Win共享文件\\语音共享文件\\aura\\tools\\model_inference_host.py",
+    "source_sha256": "ace827aa21d9b6c404366677d05fc20054fe88f265af8ca0a20107e082cbf5c8",
+    "source_modified": false,
+    "running_service_restarted": false,
+    "caller_messages_preserved": true,
+    "trace": "_ollama takes sampling envelope from chat_body with empty system/user, then replaces messages wholesale with payload.messages. Neither fast_system_prompt/build_system_prompt/selected_profile is called. Legacy module top-level no longer imports character selection, so this call path requires no persona load.",
+    "no_added_persona_or_business_memory": true
+  },
+  "source_changes": {
+    "board/runtime/character.py": {
+      "sha256": "1053f06b18f1100519af7082471820754468020db501654924658140aecd3916",
+      "bytes": 1054,
+      "before_sha256": "cdb024ec085cf58db3d6356e4fc61726f9e532973ab8cb11b486b12faf883fdd"
+    },
+    "common/spoken_input.py": {
+      "sha256": "d09b5cf367d5c6e411c2494aa4e783c1617a7efa13881fc9694d400b16b41dd6",
+      "bytes": 2379,
+      "before_sha256": "6c1aa21814a6776ca9a76de74001201bc5d3bb221634233334894ca7b76a9bd9"
+    },
+    "common/voice_wake.py": {
+      "sha256": "8e821edc267fa513bc6906fcc4ab41e8aaf2ce093d4a897cc4c66e80ff6dbec6",
+      "bytes": 989,
+      "before_sha256": "34f4a5a1d446f89fd9a3ac5e96c8aab25f336036f53685af4d87bdd8aa2eaa34"
+    },
+    "common/voice_enrollment.py": {
+      "sha256": "9a40e16875afb5c7c031a2994a205bd4e29f7cb78115a624586164f1a08c4f67",
+      "bytes": 6561,
+      "before_sha256": "3e7198161c49a198cd8740460726618bd5715e5db116d5c02d6fd210498683cf"
+    },
+    "common/binding_intent.py": {
+      "sha256": "8cfe3c841248b7ca56553255dcb14e400c5b52ea011e68ecd89a16862a7eb796",
+      "bytes": 1570,
+      "before_sha256": "80e701f5a6642eef5db3744450a5f53bb668a0aeebf793e980641464855e9174"
+    },
+    "common/memory_commands.py": {
+      "sha256": "6e8482c128752edfc5f4798f06c5875d31ff2f14229e7d1149705cca2c1e7dcb",
+      "bytes": 4596,
+      "before_sha256": "b4fdfb3e48eda55cb7d251c533c576c8768d140eed8bd1bd0dfcfa85e8278d3b"
+    },
+    "common/voice_service_capabilities.py": {
+      "sha256": "9df329c9c07d200f5587e0fd85edec9e3bccc588357737139e0618a7f4967f0b",
+      "bytes": 5070,
+      "before_sha256": "ab0869b0081092c2adb895ef76eee11e11121c5b3e656ba4dba1a3b7e62f9798"
+    },
+    "tools/dialogue_host_ollama.py": {
+      "sha256": "0ebd4a72b098cd7f6a2fc89aa97c55d89f5c724fd44f7f8287c59412fb66071f",
+      "bytes": 23880,
+      "before_sha256": "1e03ff0d30b305e98a449862cbc499a33425d88855c59214d25ce51b4daf6e93"
+    },
+    "tools/dialogue_stream.py": {
+      "sha256": "66b108284558e05e25e041c9c17b255cf57c7606848d07904d22f898f2defa05",
+      "bytes": 16492,
+      "before_sha256": "7e71f48cc239801cb1c6114705e951ef62de92d84984b54961da5360d896ac25"
+    },
+    "common/character_profile.py": {
+      "sha256": "f30555a68f5f4b971be911e650c10c35c54963b49f3f40442db0c667a50e01e1",
+      "bytes": 4808,
+      "before_sha256": null
+    },
+    "config/character_profile.local.json": {
+      "sha256": "5dcac93339a56c549ef176e260b4ed7f01fdc3307059c53aa3784b7a382f09c3",
+      "bytes": 1877,
+      "before_sha256": null
+    }
+  },
+  "basic_checks": {
+    "command": "D:\\AIModels\\speaker-identity\\venv\\Scripts\\python.exe -B E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_windows_character_profile\\basic_checks.py",
+    "tests": 5,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 0.028,
+    "scope": [
+      "Explicit selected profile and missing/changed config failure",
+      "978B/hash and same JSON four-emotion/empty-action contract",
+      "Original reasoning200-character policy",
+      "New exact addresses/interjections and literal old user name preservation",
+      "Unchanged model-only source and no persona builder on caller-messages path"
+    ],
+    "no_network_models_devices_gui_or_databases": true
+  },
+  "rollback": "Previous9 source files are in before/ with original hashes. Restore the whole previous source/selection+board renderer pair only under the sole publisher. This is not a DB rollback; no user data is included.",
+  "unchanged": [
+    "LLM/OmniVoice resources, weights and sampling settings",
+    "Existing real business DBs, profile permissions and archived transcripts/reference audio",
+    "Model-only8797 source and running process",
+    "Five-minute deletion remains unenabled by this character task"
+  ],
+  "next_owner": "win_inference copies the same selection/module and exact address-only parser changes into its independent legacy renderer/persona overlay; root alone publishes and selects the whole paired board bundle."
+}

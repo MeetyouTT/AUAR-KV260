@@ -1,0 +1,11 @@
+--- before/board/runtime/board_dialogue.py
++++ after/board/runtime/board_dialogue.py
+@@ -417,7 +417,7 @@
+         if history_query is not None:
+             if not isinstance(history_query, dict):
+                 raise ValueError('History routing must supply an explicit query')
+-            history = (self.store.history_with_status(turn.scope, **history_query)
++            history = (self.store.history_with_status(turn.scope, exclude_event_ids=(turn.user_event_id,), **history_query)
+                        if hasattr(self.store, 'history_with_status')
+                        else self.store.history(turn.scope, **history_query))
+         turn.source_event_ids.update(reference['event_id'] for reference in context.get('event_refs', []))

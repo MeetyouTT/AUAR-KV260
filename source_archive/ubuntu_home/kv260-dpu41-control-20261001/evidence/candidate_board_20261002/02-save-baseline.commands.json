@@ -1,0 +1,12 @@
+[
+  {
+    "id": "backup_baseline",
+    "command": "backup=/home/root/kv260-test-20261001/baseline-backup\ntest ! -e \"$backup\" && mkdir \"$backup\" && tar -czf \"$backup/baseline-files.tar.gz\" -C / lib/firmware/xilinx/kv260-benchmark-b4096 usr/share/vitis_ai_library/models/resnet18 home/root/Vitis-AI/examples/vai_library/samples/classification/test_jpeg_classification home/root/Vitis-AI/examples/vai_library/samples/classification/test_performance_classification home/root/kv260-test-20261001/pytorch-resnet-dog.jpg home/root/kv260-test-20261001/samoyed.list && tar -tzf \"$backup/baseline-files.tar.gz\" && sha256sum \"$backup/baseline-files.tar.gz\"",
+    "timeout": 60
+  },
+  {
+    "id": "backup_live_state",
+    "command": "backup=/home/root/kv260-test-20261001/baseline-backup\ndtc -I fs -O dtb -o \"$backup/baseline-live.dtb\" /proc/device-tree && dmesg >\"$backup/dmesg-before.txt\" && journalctl -u dfx-mgr --no-pager -n 100 >\"$backup/dfx-mgr-before.txt\" && sha256sum \"$backup\"/* && cat /sys/class/fpga_manager/fpga0/state",
+    "timeout": 60
+  }
+]

@@ -1,0 +1,29 @@
+原 wide 恢复与 CPU 同平台复测：纯离线编排
+
+本轮仅本地读源码、AST解析、计算哈希和整理文档；0 SSH、0板端查询、0停启/DFX/轴操作。保持冻结。登记对话当前持GUI/相机/聆听权，CPU root协调，轴对话不竞争维护权。f507为对方最新消息，不是本轮实读。当前物理状态仍引用11:25的a6d/benchmark/FAULT/null快照。
+
+已核可复用链路
+1. checkpoint_review/collect_current_prestop_readonly.py + stop_original_camera.py + 原checkpoint reader/complete final archive validator：观察累计下界→原正常停机产生真实final→全量原验证→原字节封存。旧1333/2359、c6c8、18层archive、旧下界均不可填成本次输入；不写seed/计数/marker，不恢复旧snapshot。
+2. launch_original_remove.py / read_original_remove_result.py：原dfx-mgr-client -remove 0，原systemd唯一unit托管、独占intent/stdout/stderr、无自动重启；未知结果只读同一unit reconcile。RC0不是成功充分条件，完整stdout和实际overlay/ZOCL/render卸载均须验证。
+3. launch_original_load.py / read_original_load_result.py：原client -load aura-visual-servo-b4096-wide-v1，原4FW+3driver闭包；合并核固件名、operating、唯一实际wide overlay、ZOCL父子/derived render、精确VART。不要重启/替换原daemon或手工unbind。
+4. launch_original_idstop.py / 原bench_identity_stop.py：真实wide后、恢复相机前，以新实际context做ID_STOP_ONLY；ID/ABI/build和flags0/lease0，ARM/COMMIT/BIND/REFERENCE均false。寄存器复位1500不是实体中点。
+5. verify_idstop_start_camera.py、gui_binding_review原verifier和reconnect_original_axis_config.py提供恢复相机、最新source闭包及pan事务的既有模式。所有历史固定boot/PID/startup/InvocationID/旧引用都必须用交接时真实新证据重建；旧脚本不能直接执行。保留最新身份修复、control25、左.40/右.45/stable150。
+6. 原有限初始化/观察入口和原UI随动入口均已列目录。2s/1..5us和80us/6s只是已有能力清单，本方案不安排动作或无关往返。初始命令可能从未知实体位置运动，应在必要观察阶段按实际姿态选定。20US误标签不能把80us报告变成20us资格。
+
+FDT关键判据
+/sys/firmware/fdt可能是基底flat blob，切换overlay后不保证SHA变化。后续绑定实际测得的新context SHA，同时核动态固件/overlay/VART/ZOCL；不能硬套旧d68，也不能把“SHA没变”单独当失败。
+
+交接顺序
+A 登记对话：真人确认修复结束或明确idle；无采样/录音/播放/待处理对话；完整最新startup/source pins交给CPU root。私库保持原地，不导出身份内容。
+B 当前GUI/相机维护者：正常停GUI和必要相机，交付新boot真实final、原全量reader+归档+累计下界验证及无owner/Job凭证。CPU root收到后再明确把平台窗口交给轴对话。
+C 轴对话：唯一平台/轴写入者，分阶段原remove→实际卸载→原load→成套wide读回→原ID_STOP_ONLY。CPU root不并发改平台。
+D 约定阶段交还CPU/GUI维护者按原native生命周期恢复相机，核新PID/run及最新选用source闭包；轴对话按需做本boot原有界参考/方向观察和最新pan事务。GUI原manual base变boot/FDT后须正常重启一次；pan_stop只停输出，不释放手动锁，外部bench需正常close。
+E 先保持CPU候选未部署，在同a6d、同wide、当前身份代码和原相机/GTK上采新before。root采样，轴对话唯一有界开启/STOP；两轮真人对话和60–120秒原跟随按同窗约定记录数值。
+F 轴STOP确认后，CPU root按原事务发布候选；相机改动需要再一次受保护正常stop/final生命周期，GTK-only不因此强制停相机。保留新pan和control25、最新身份修复、原保护。仍同boot同wide，按同页面/输入规格/显示/模型配置/负载/采样法做after。期间不重启板卡或切平台；若变化则重建比较。仅GUI/相机重启且原PL/reference有效时，不为重复测量再初始化实体；仍须新鲜owner和寄存器核验。
+
+CPU归因边界
+旧903c的82.5%只作历史参考；a6d benchmark也不能作为wide后CPU优化的因果before。before必须在wide恢复后、候选安装前；after保持同一次boot、同wide、匹配场景和同一计量方法。回执应同时给出实际帧率/源龄、丢帧/错误、全流程ACK、跟随中断与STOP，不能只看CPU下降。
+
+本地闭包核验
+原candidate-manifest 6a4b…原字节匹配；3driver缓存字节匹配manifest；当前stable150的25项缓存逐一匹配，并离线重建manifest得到9cd35b96…与已发布回执一致。4FW只核已封存manifest中的期望SHA，本轮未读板端/固件文件，执行窗口仍需新鲜全量核验。
+旧original_sources中e273前缀诊断副本实际SHA为b81d，不作为权威源使用；本目录选用当前control25内已验证e273原字节，旧副本未改。详细路径/完整SHA/阶段责任与未决输入见SCRIPT_AND_CLOSURE_CATALOG.json、OFFLINE_WIDE_RECOVERY_PLAN.json。本目录没有生成可直接执行的板端新恢复器。

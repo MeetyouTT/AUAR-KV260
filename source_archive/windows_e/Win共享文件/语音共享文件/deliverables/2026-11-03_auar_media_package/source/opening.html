@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>AUAR 字标片头</title>
+<style>html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#f7fbff}svg{display:block}</style></head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" aria-label="字标居中展示后淡出">
+  <rect width="1920" height="1080" fill="#f7fbff"/>
+  <g id="opening-wordmark" opacity="1">
+    <svg x="260" y="390" width="1400" height="300" viewBox="134 226 1942 332" preserveAspectRatio="xMidYMid meet" overflow="hidden">
+      <image href="../assets/wordmark-transparent.png" x="0" y="0" width="2172" height="724"/>
+    </svg>
+  </g>
+</svg>
+<script>
+window.renderOpening=t=>{
+  const q=Math.max(0,Math.min(1,(t-1)/1.6));
+  const opacity=1-q*q*(3-2*q);
+  document.getElementById('opening-wordmark').setAttribute('opacity',opacity);
+  return {time:t,opacity,center:[960,540],duration:3};
+};
+window.__openingReady=true;
+</script>
+</body></html>

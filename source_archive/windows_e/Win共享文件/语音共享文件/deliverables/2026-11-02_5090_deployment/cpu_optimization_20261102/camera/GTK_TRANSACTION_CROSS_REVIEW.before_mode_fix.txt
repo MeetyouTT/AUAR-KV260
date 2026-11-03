@@ -1,0 +1,30 @@
+GTK v2 发布事务交叉复核：apply前需要修复mode保持；其余所审发布/回滚逻辑未发现新阻塞。
+
+复核固定字节
+transaction_preview_projection.py da1f4f6b60f98da11e3c5275028a4c90c596fba33141c4c40bc113a474df6629
+transaction_payload.json 778028b7d180b258e25b2639f3fe0e3024b3af0d031ac407b9474d533302d5da
+TRANSACTION_USAGE.txt 51286027c0dbda958b986db1928640c870917be951bd1b27acc61db7aadb80f7
+
+具体需要修的1项
+create第55行把原mode传给os.open；它仍受当前umask过滤。replace_target第206至214行chown后没有fchmod，只核字节并把新identity接受下来。严格提取原replace_target，在显式POSIX模型下，原0644、umask077会成功替换成0600，未报HOLD；原0755、umask022对照保持0755。不是板端现场故障，也不是原生Linux实跑；该结果确认了代码与POSIX权限语义中的缺口。
+
+最小修复建议：chown后在stage fd上执行fchmod(fd, identity[4])，然后fsync；rename前和替换后核mode/uid/gid等于原metadata，保留现有字节/身份CAS。此问题同时影响两个源和startup。原服务若均root读取未必立即故障，但不能声称原权限已保留；回滚只恢复字节且使用当前mode，备份plan没保存原fingerprint，因此已经丢失的原mode无法仅靠当前byte rollback找回。若已经发生需另用原metadata证据协调恢复。模板本次未修改，交root统一修。现有输入没有约束umask，不建议把碰巧默认0022作为发布保证。
+
+Linux dry-run/apply条件
+模板需Linux fcntl、O_NOFOLLOW/O_DIRECTORY和systemd。默认dry-run在创建lock/TX/stage前返回；仍完整要求GUI正常inactive/dead/MainPID0/noJob/success、旧GUI owner消失、camera active/running且PID/birth/cmd不变、fresh boot/startup SHA、完整380/pan/selected来源。无历史boot或相机owner硬编码，selected精确数量从fresh expected输入，接受26及其他合法新数量。示例故意无效，实际CLI/板端本次未运行，不能把静审通过记为fresh现场通过。
+
+两源码与身份后续更改
+仅允许已审两个原/新源，ui_contract7f67e4保持；只从当前startup拷贝并改两项component pins，另378项及全部其余字段承接当前合法voice/identity/clock/pan变更。若后来直接改了这两个目标为未知版本则HOLD，避免覆盖。独立新增的小型闭包检查用真实check_closure，380合成公开源、首源NEW/次源OLD/startup两pin OLD的部分失败组合可显式回滚，后来的identity源和metadata保留。现场guard/selected读取在此检查中为stub，不冒充真实Linux部署测试。
+
+部分失败/回滚
+所有备份和plan在首个替换前落盘。plan前失败runtime未改；plan后可fresh读取已知OLD/NEW混合状态做唯一新rollback attempt。回滚从当前startup只回两pin，不恢复历史整份startup；未知字节HOLD。install同TX不可盲重发。最终rename后、receipt前断电可能实际已提交，必须fresh只读核结果再决定回滚。原stage剩余不会被自动删除或覆盖，新rollback stage使用新attempt名。
+
+26pin公共快照
+已核归档公开候选99c53c5992355a2a4dfdedceb3cc90d813981328456b987e503459fe6d0691b5，正好26来源；与两GTK源以及/startup/config.json来源交集均空。这只能说明该快照无GTK目标依赖冲突，不能代替运行前fresh实际UI spec/绑定/owner/source map验证。它含相机六文件链的来源，之后相机发布/重启必须正常重绑，不能继续套此旧owner。
+
+根协调前提
+目前身份登记对话独占设备。root正式接回写权、冻结全部不合作写者后才执行。协作flock与CAS不是跨文件内核原子事务。事务目录需root专用且放在所有AURA/runtime外，建议0700；代码没有强制owner/mode/源树之外这几个条件，root实际选择须满足。
+
+GTK事务要求相机运行，camera六文件事务要求相机正常停并拿fresh final，两阶段必须串行；相机重启后新owner和selected绑定重新验证，再运行GTK闭包。不能为了合并停机而绕过GTK camera-running guard。
+
+此次只做本地读审与两个新增隔离疑点检查；原8项不重跑，GTK候选/模板未改，未SSH/连接板/发服务/相机/模型/转轴/媒体/私库操作。机器可读证据见GTK_TRANSACTION_CROSS_REVIEW.json和GTK_TRANSACTION_TARGETED_PROBES.json。

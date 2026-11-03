@@ -1,0 +1,233 @@
+{
+  "schema": "aura-boot-fix-r6-same-boot-and-commit-gap-recheck-1",
+  "verdict": "PASS_STATIC_FOR_THE_TWO_REQUESTED_R6_FIXES",
+  "scope": "Only the R5 same-boot inactive-guard timing incompatibility and the active-written/committed-missing rollback gap. Read-only source/AST inspection and author50 evidence attribution. No test, prior counterexample, original validator, Native or device call was executed by this recheck.",
+  "snapshot": {
+    "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\boot_review_inputs\\observed_revision6\\SNAPSHOT.json",
+    "sha256": "8a0789471833ae5f05322608abeb7f21b006ffaf0edc6f58162cfb1fd4ed5d75",
+    "bytes": 2338
+  },
+  "reviewed_inputs": [
+    {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\boot_review_inputs\\observed_revision6\\candidate\\boot_recovery.py",
+      "sha256": "f1abe1a9ee15192fce5f1d436b782f8eab0841762c61d2205fdc26ef36d35a8f",
+      "bytes": 52597
+    },
+    {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\boot_review_inputs\\observed_revision6\\candidate\\original_history_gate.py",
+      "sha256": "9802e2454d9622c32b4d4ab18affb39606dfa57246ca2d3ddd569188239f46d3",
+      "bytes": 7844
+    },
+    {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\boot_review_inputs\\observed_revision6\\candidate\\manage_installation.py",
+      "sha256": "c11c46d2b9af4ce11300514b8ff31baccfaa4bed542616924fe3e99fffb9e241",
+      "bytes": 16052
+    },
+    {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\boot_review_inputs\\observed_revision6\\candidate\\capture_contract.py",
+      "sha256": "bce6d4d1b2f7547827f9f886014297d1483c1eb8a8b99ef6cf04421cd1b5562c",
+      "bytes": 12631
+    },
+    {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\boot_review_inputs\\observed_revision6\\candidate\\recovery_rules.py",
+      "sha256": "55bfc4db498be172beb040605dcae351c6f972e0df1371cecb48b7d1034ed268",
+      "bytes": 13649
+    },
+    {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\camera\\validate_fresh_final_history_readonly.py",
+      "sha256": "5ca99d4231c686de0f89dac5792299bec13af517a5c6e2b8f73c4cc66b9285c9",
+      "bytes": 30353
+    }
+  ],
+  "same_boot_fix": {
+    "status": "PRESTART_INACTIVE_GUARD_CONFLICT_RESOLVED_STATICALLY",
+    "locations": {
+      "original_history_gate.py": [
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80
+      ],
+      "boot_recovery.py": [
+        350,
+        359,
+        360,
+        388,
+        399,
+        400,
+        401,
+        402,
+        403,
+        611,
+        616
+      ],
+      "camera/validate_fresh_final_history_readonly.py": [
+        235,
+        244,
+        246,
+        249,
+        257,
+        259,
+        270,
+        274,
+        283,
+        287,
+        291,
+        303,
+        350,
+        354,
+        356,
+        361,
+        364,
+        366,
+        368,
+        370,
+        371,
+        375
+      ]
+    },
+    "exact_adapter_calls_in_same_boot_branch": [
+      "validate_inputs",
+      "original_modules",
+      "validate_current",
+      "validate_chain"
+    ],
+    "original_API_signatures": {
+      "validate_inputs": [
+        "expected",
+        "snapshot"
+      ],
+      "validate_current": [
+        "expected",
+        "intent",
+        "result",
+        "snapshot",
+        "protection",
+        "boot_module"
+      ],
+      "validate_chain": [
+        "document",
+        "history_expected",
+        "snapshot",
+        "protection",
+        "boot_module"
+      ]
+    },
+    "finding": "R6 no longer invokes adapter.main or adapter.guard from same_boot_resume. It first reads the genuine prior complete result by exact pin, binds original schema/status, final pin, source owner, expected input SHA and original reader/history/current-bound flags, and requires the four chain fields to match the full normal-stop expected. It then calls unchanged validate_inputs with the full expected object, original_modules, validate_current with the actual returned stop intent/result, and validate_chain. Original archives must equal the freshly revalidated ordered records; consumed-marker absence and snapshot byte stability remain checked. This avoids asking the old inactive-only service guard to succeed during ExecStartPre.",
+    "preserved_checks": [
+      "validate_inputs still verifies exact startup/config/manifest pins, current boot and source owner, genuine single normal-stop intent/result and independent pre-stop history source bindings including the5ca alias gates.",
+      "validate_current still calls original load_business_checkpoint and _sealed_source, checks current owner/source unit/manifest/monotonic domain, unconsumed final and all original primary/SFace/optional/Native/recovery lower bounds.",
+      "validate_chain and the entire original5ca adapter bytes are unchanged; there is no new traversal, seed, restore or forged receipt.",
+      "camera_check still runs quiet before the history helper. quiet is AST-identical to R5 and admits only its ordered helper state with no prior/live service or hardware owners. This recheck does not close the separately tracked B01 review."
+    ],
+    "provenance_boundary": "The prior complete_result_pin must really come from unchanged original main while both services were normally inactive. The new wrapper validates a pinned receipt and rechecks semantics; it does not authenticate a receipt against a malicious root or turn a fabricated flag into stop proof."
+  },
+  "commit_gap_fix": {
+    "status": "KNOWN_AFTER_LEDGER_COVERS_THE_STATED_INTERRUPTION_POINT_STATICALLY",
+    "locations": {
+      "boot_recovery.py": [
+        722,
+        723,
+        724,
+        728,
+        729,
+        730,
+        733,
+        734,
+        736,
+        738,
+        739,
+        740,
+        741,
+        743,
+        745,
+        746,
+        751,
+        752,
+        754,
+        755,
+        756,
+        757,
+        759
+      ],
+      "manage_installation.py": [
+        234,
+        235,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        249,
+        250,
+        251,
+        252,
+        256
+      ]
+    },
+    "finding": "Before the first UI/startup publication R6 computes exact active_after_raw, O_EXCL/fsync-creates active-source.after.json and seals its SHA in intent. The final active ledger CAS and committed marker use those same bytes. rollback hashes sealed-after against intent, permits missing committed, requires a present committed to equal sealed-after, and accepts the live ledger only when it is exact prior or exact sealed-after. It can therefore restore the known published-after state even when committed was never reached, without trusting current ledger contents as a new after source.",
+    "newer_ledger_rejection": "A regular newer ledger whose bytes are neither sealed before nor sealed after fails NEWER_ACTIVE_LEDGER_CONFLICT before the first UI/startup reversal. A tampered after file fails its intent SHA. A conflicting committed file also fails before source reversal. Final ledger reversal uses sealed-after as its expected CAS bytes, not a freshly blessed live read.",
+    "prior_limitation_disposition": "The old active-written/committed-missing manual HOLD limit is resolved for new R6 transactions with complete sealed before/after artifacts and normal-stop/no-owner rollback preconditions. Transactions lacking those new artifacts still require explicit manual reconciliation; no backfill or Native receipt creation is authorized.",
+    "atomicity_boundary": "This remains the existing multi-file, known-byte transaction under an exclusive writer freeze. It does not claim a kernel-wide atomic transaction across UI/startup/ledger."
+  },
+  "author_evidence_only": {
+    "record": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\R6_AUTHOR_EVIDENCE\\LOCAL_VALIDATION.json.bin",
+      "sha256": "8512ba891bc5905f6221107e9c5b5660808a7225f63228669c4a11c5f4f67db8",
+      "bytes": 9682
+    },
+    "log": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\R6_AUTHOR_EVIDENCE\\repair_final_revision3.log.bin",
+      "sha256": "671193f8897747adff31cd9f45bb795b73d9cae5b7b282c0ed0eef3bf0dbfbde",
+      "bytes": 6604
+    },
+    "tests_run": 50,
+    "failed": 0,
+    "errors": 0,
+    "source_SHAs_match_frozen_R6": true,
+    "independently_rerun_here": false,
+    "original_Native_validators_executed_per_author": false,
+    "limitations": [
+      "History-call tests use synthetic API doubles, not actual Native validation",
+      "Independent review covers its frozen revision; repaired hashes need a new review",
+      "Fresh target systemd/loader/owner/history evidence remains required"
+    ]
+  },
+  "marker_modes": "accepted_live_history is AST-identical to R5; the previously checked original same-boot raw-SHA marker and new-kernel JSON marker distinction is retained. No marker-mode test was repeated.",
+  "remaining_open_gates": [
+    "B01 remains open for root AST comparison; this narrow result does not approve it or the whole B04/package.",
+    "Fresh dpu-auto-config merged unit/helper source and ordering or actual absence remains required.",
+    "Camera candidate publication, genuine new proof and stable GUI/identity/GTK closure must precede final fresh boot-contract capture; legitimate later source drift must HOLD, not silently repin.",
+    "Real target systemd, Native, actual source/owner/receipt and READY evidence remains uncollected by this review. The device window was revoked per main coordination; no device action occurred here."
+  ],
+  "new_tests_or_counterexamples_run": 0,
+  "full65_or_author50_rerun": false,
+  "author_candidate_global_or_production_files_modified": false,
+  "board_SSH_HTTP_model_real_store_or_media_access": false,
+  "cross_window_or_cross_conversation_messages_sent": false,
+  "B01_approved": false,
+  "whole_B04_or_package_approved": false,
+  "deployment_or_device_execution_authorized": false
+}

@@ -1,0 +1,49 @@
+Frozen v23 R4 release, selected by root decision 8925ca91287561dc756b1aecd2874f57d7d1f5c0b97cbd66d6642e85ec527657.
+APPROVED_PAYLOAD.json SHA 7a44c5d9fa115fa4be319184b215b8f1c4fd0e92746bd9f9aee15a0991c3e809.
+Only root executes device actions. Every command is dry unless --execute-root-only is supplied.
+The public model window already has v22 normally closed. The original NORMAL_CLOSED guard remains required for apply.
+
+Set-Location -LiteralPath 'E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v23_memory_summary_candidate'
+D:\py312\python.exe -B -X utf8 -m unittest test_framework -v
+
+Dry baseline lifecycle review
+D:\py312\python.exe -B -X utf8 publish_summary.py guard --spec 'E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v22_camera_rebind_candidate\camera_rebind_evidence\spec.json' --spec-sha256 ecdc034bd06cdd15bffe004a3ac1be3a6bc350dc3c879d91d3a19403f5c0f74a
+
+Selected sources
+common/board_memory.py 05095d249caf3598802d5951910b412affe167b508933c7e831e3ffacc4fc0d0 -> 8905770197f114cc063addb2dd40bc745d9af942f674140f43e597ff3a6b1905
+board/runtime/board_memory_policy.py 410e5b3eaf7986be6baa68d148469eb33443654ed0db597004518877732533c5 -> a862cc22f6c23ae90d17ef06614cdf90fa0eb4605ad0a8b74766d102aad404aa
+All 380 component paths remain present. The other 378 component pins, GUI configuration, ASR2, camera229296/22pin and saved pause retain their actual v22 values.
+Expected new startup SHA d848dc90cf9a890fb8bc66b2c494b78c2ae39a7e22a4743fe0ab917ca3edbae8.
+
+1. Review and apply the already prepared selected closure.
+D:\py312\python.exe -B -X utf8 apply_summary_closed.py --spec 'E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v23_memory_summary_candidate\proposed_spec_1793514342921841100.json' --spec-sha256 7cac13357b51743e4d6b048939019ebd1117b961e5b7e84419e034916b9d24e8
+D:\py312\python.exe -B -X utf8 apply_summary_closed.py --spec 'E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v23_memory_summary_candidate\proposed_spec_1793514342921841100.json' --spec-sha256 7cac13357b51743e4d6b048939019ebd1117b961e5b7e84419e034916b9d24e8 --execute-root-only
+
+Require SUMMARY_MEMORY_SOURCES_APPLIED_UI_STOPPED.
+Original four-DB verification runs while the original UI/timeline/speaker leases are held.
+Backups and prepared bytes are durable before SUMMARY_SOURCE_INTENT.
+Order is common memory source, summary policy source, startup configuration, source manifest.
+An interruption may resume only the same exact INTENT and known old/new bytes, with the guard retained.
+GUI configuration, original external configuration, face readback and saved user pause remain pinned throughout.
+
+2. Use the actual applied spec and its SHA returned by step1. Start, prove READY and seal.
+D:\py312\python.exe -B -X utf8 publish_summary.py start --spec '<ACTUAL_APPLIED_SPEC>' --spec-sha256 <ACTUAL_APPLIED_SPEC_SHA> --execute-root-only
+D:\py312\python.exe -B -X utf8 publish_summary.py ready --spec '<ACTUAL_APPLIED_SPEC>' --spec-sha256 <ACTUAL_APPLIED_SPEC_SHA> --execute-root-only
+D:\py312\python.exe -B -X utf8 seal_summary.py --spec '<ACTUAL_APPLIED_SPEC>' --spec-sha256 <ACTUAL_APPLIED_SPEC_SHA> --ready '<ACTUAL_READY>' --ready-sha256 <ACTUAL_READY_SHA> --installed '<ACTUAL_INSTALLED>' --installed-sha256 <ACTUAL_INSTALLED_SHA> --execute-root-only
+
+Final proof requires all380 components, the unchanged sameboot camera229296/22pin/COMPLETE chain, live PAUSED/microphone false, and COMMITTED publication.
+Evidence is saved before canonical pointers advance. Root alone executes device actions.
+
+Use the direct actual_READY JSON content as --ready. publish_summary.py writes its tool result to actual_ready_<time>.json.
+Use the actual_apply_<time>.json file as --installed. The returned applied_spec_<time>.json supplies --spec.
+The camera transaction must still attest v22 ecdc034b, while the summary transaction attests the new actual v23 spec.
+Keep the execution code frozen throughout deployment. On an interrupted apply, retry the same proposed spec under its exact existing INTENT and known old/new bytes.
+
+Normal-close sequence if the GUI was explicitly restored before this release
+$baseline = 'E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v22_camera_rebind_candidate\camera_rebind_evidence\spec.json'
+D:\py312\python.exe -B -X utf8 publish_summary.py guard --spec $baseline --spec-sha256 ecdc034bd06cdd15bffe004a3ac1be3a6bc350dc3c879d91d3a19403f5c0f74a --execute-root-only
+D:\py312\python.exe -B -X utf8 publish_summary.py window-inspect --spec $baseline --spec-sha256 ecdc034bd06cdd15bffe004a3ac1be3a6bc350dc3c879d91d3a19403f5c0f74a --execute-root-only
+D:\py312\python.exe -B -X utf8 publish_summary.py normal-close --spec $baseline --spec-sha256 ecdc034bd06cdd15bffe004a3ac1be3a6bc350dc3c879d91d3a19403f5c0f74a --window-proof '<ACTUAL_WINDOW_PROOF>' --execute-root-only
+
+The temporary display policy belongs to root's closed-GUI model window. Restore the original 600-second policy and observe paused keepalive after actual READY with root's existing display procedure.
+Model evidence covers eleven fixed synthetic cases. Live conversation acceptance remains pending.

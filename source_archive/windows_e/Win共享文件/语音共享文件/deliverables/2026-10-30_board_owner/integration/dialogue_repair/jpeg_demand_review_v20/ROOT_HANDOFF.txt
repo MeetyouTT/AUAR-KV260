@@ -1,0 +1,67 @@
+JPEG 按需编码：v20 本地合同核对与最小候选建议
+
+状态：SOURCE_AUDIT_AND_DESIGN_ONLY；尚无候选源码发布、实机 CPU 节省或首个 GET 时延验收。
+本次没有连接设备、启动模型、开麦、播放或读取真实图像。只生成本目录分析材料，主窗口仍唯一设备操作者。
+
+固定基线
+startup d24b0d0007e2aa2b417f459891c7f39f168502a58374334ceab69e31af5881dd
+source_mapping release_v20_identity_history_candidate/identity_history_evidence/source_mapping.json
+mapping SHA a7141992428e47d49ef80828ce9a0b33df6bffe32b613343ba01f937f68fdafc
+相机进程记录仍为同 boot/camera1335；上述只是封存归属，不是本次实时进程探测。
+主窗口告知 saved enabled=false，保持暂停。未来实施仍由主控现读匹配归属。
+SOURCE_AUDIT.json 保存匹配当前组件 SHA 的文件位置和全部关键字命中；audit_sources.py 可重复生成。
+本地 aura/tools/board_camera_preview.py 的 SHA 不匹配本版；本核对使用经 SHA 匹配的冻结副本。
+
+已知消费者
+1. board/interaction/ui_services.py:265-280
+   非 raw 客户端在状态 preview 引用变化时 GET /v1/ui/preview.jpg，验证 MIME、boot、camera_epoch、frame_id；最大262144字节。
+   use_raw 仅在显式 local_raw、127.0.0.1、actual源、aura-local-bgr-1 四条件同时满足时跳过 JPEG。
+   当前 pin 匹配的 GTK 构造启用 local_raw=True；这是代码路径证据，未观测实时 GET 流量。
+   通用/外部客户端仍可能依赖 JPEG。snapshot 和 JPEG 在客户端成对提交，不应在等新请求时清空仍有效图像。
+2. board/runtime/visual_capture.py:7-26
+   current_frame 先读取状态，要求 actual/READY、preview年龄<750ms，再按指定 epoch/fid 请求 JPEG，校验 owner 和图像摘要。
+   board/runtime/audio/voice_channel.py:139-154 调用它。
+   board/runtime/audio/channel_jobs.py:244/254-255 声明 visual_question 能力，仅 transcript 携带 visual_request 才触发。
+   这是可达的条件调用，不等于当前启用视觉语言模型或已经发生取图，不能因 GUI 用 raw 就删除该 API。
+3. tools/board_camera_preview.py 本身不直接 GET：它读 UiServiceClient 的 JPEG 后备或 RawFrameReader。
+   snapshot 缺 preview 时连 raw 路径也会主动清屏，因此只停 imencode/publish_preview 会破坏本机视频。
+4. 已知项目外部使用方式：历史脚本 deliverables/2026-10-18_identity_validation/capture_review_preview.py:12 直接 GET 同一接口。
+   此脚本不在当前380组件中；其他临时 HTTP 客户端无法由源码枚举，公开合同继续保留。
+5. /v1/ui/identity-face.png 是独立112x112身份采样裁剪路径，不使用上述整帧 JPEG 环；本候选不改它。
+   玩偶/浏览器预览 JPEG 与相机整帧 JPEG 也是两条路径，本候选不顺带改头像编码。
+
+现有同帧合同
+CameraState.publish_preview 把 (captured_stamp, jpeg) 放入八帧环，snapshot 引用环内最新帧。
+GET 只能返回指定 camera_epoch/fid 的同一帧；旧代次、淘汰帧、camera_error 或年龄不在[0,1000)ms时404。
+JPEG MIME image/jpeg、boot/camera/frame响应头、no-store、256KiB上限及质量72继续保留。
+业务 current_frame 在完成 GET 后还会做750ms时效检查，故首次按需编码成本会计入这一路径的预算。
+原生 raw 帧另绑定 boot/service/camera_epoch，限制640x480 BGR、250ms、权限/归属/单调帧号；它只保存最新帧，不能代替八帧指定编号缓存。
+检测750ms、叠框250ms、身份自身TTL与轨迹生命周期均不改。
+
+建议的最小候选：只修改 board/vision/ui_camera_service.py
+1. 继续按现有节拍绘制 boxes/text，生成不可变 pixels=image.tobytes() 一次。
+2. 用同一 pixels 做原子 RawFrameStore.publish，再发布对应 fid/stamp 的预览记录，避免预览可见性依赖提前JPEG编码。
+3. 保留八帧环；环内存放已绘制完成的不可变BGR字节，以及首次编码后对应的JPEG缓存。不能到GET时取最新图冒充旧fid，也不能重新取当前检测结果给旧图叠框。
+4. GET 查环与时效，通过每服务一个编码互斥保证同帧缓存未命中只编码一次；编码在 CameraState.lock 外执行，避免阻塞状态、目标命令和健康检查。
+5. 取到编码互斥后再次查缓存/新鲜度；完成编码后再在状态锁下复核 epoch、camera_error、同一缓存项仍在环中及原始时间戳仍新鲜，合格才提交与返回。
+6. 排队/编码过程中不延长帧TTL。过期、淘汰或故障返回原失败语义；不得返回最新帧替代。互斥等待需要明确有限预算，避免HTTP线程无限排队，忙状态处理要由合同测试明确。
+7. 非JPEG消费者不会触发编码。多个消费者请求同一fid重用同一JPEG结果；保留现有预编码 publish_preview 测试入口或统一调整测试适配器。
+8. 捕获/检测/身份/RawFrameReader/GTK/servo/音频/ASR/现有OpenCV线程设置均不改，不新增后台线程和轮询。
+
+资源代价与预期
+8*640*480*3=7372800字节=7.03125MiB的BGR环。它替换当前只存JPEG的环；按需JPEG缓存另有最多8*256KiB=2MiB。
+持有一个正在编码但已被环淘汰的帧会额外占约0.879MiB；编码器临时缓冲和原有采集/raw文件缓冲另计。
+不要声称总RSS只增加7.03MiB或绝对节省某百分比，需实测。内存预算要包括并发HTTP引用并限制排队。
+理论收益是JPEG调用次数由每个预览帧变为实际请求的不同帧数；首次GET会增加一次编码时间。重度非raw客户端持续取图时收益可能较小。
+本核对没有采集JPEG请求频率，不能宣称当前零消费者或全量空转编码。候选不是已经落地的优化。
+
+最小验证门槛
+先用合成BGR和注入编码器本地验证：无GET零编码、原生状态继续发布、指定fid精确、同帧并发只编码一次、8帧淘汰/旧epoch/未来/过期/编码中故障拒绝、编码时状态锁可读、JPEG失败可恢复、头与大小契约。
+再复跑现有相机UI、raw预览、DPU状态、身份裁剪及业务取图合同测试，不能把普通404隐藏成成功。
+实机由主窗口串行安排：同负载基线/候选ABBA；分开无JPEG客户端与固定请求率两种模式；仅合成图/数值元数据。
+同时比较 camera进程CPU时间/系统busy/RSS、编码次数、GET首次与缓存命中p50/p95、raw显示帧龄/完成率、detector和identity推进、ASR公开音频时间。
+保留暂停；不需要用户朗读或真实录音。未通过同帧/时效或新增排队的候选不得发布。
+
+下一步
+由主窗口选择是否准备这一个源文件的候选和合同测试，在ASR/GTCRN线程测试完成后取得独占相机实施窗口。
+若先做更小改动，可先加有界的编码调用数/CPU/wall及JPEG请求计数，确认真实空转比例；计数不能新增每帧JSON/HTTP发布负担。

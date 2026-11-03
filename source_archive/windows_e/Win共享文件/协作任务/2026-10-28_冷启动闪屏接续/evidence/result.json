@@ -1,0 +1,207 @@
+{
+  "schema": "aura-hdmi-coldboot-investigation-1",
+  "created_utc": "2026-10-28T11:56:01.997002+00:00",
+  "status": "REPRODUCED_RECOVERED_BY_PHYSICAL_HDMI_REPLUG_NO_AUTOMATIC_FIX",
+  "screen_user_confirmed": "Waveshare 7inch HDMI LCD (C) Rev4.1, USB capacitive touch, 1024x600",
+  "field_observations": [
+    {
+      "step": "original",
+      "result": "Currently normal; power cycle reproduces; same power connection"
+    },
+    {
+      "step": "controlled_coldboot",
+      "result": "Still corrupted/flickering"
+    },
+    {
+      "step": "screen_usb_only",
+      "result": "Screen extinguished while unplugged; corruption persisted after reconnect"
+    },
+    {
+      "step": "hdmi_only",
+      "result": "Normal and stable after HDMI reconnect"
+    }
+  ],
+  "comparison": {
+    "same_boot": true,
+    "same_service_pids": true,
+    "same_full_drm_state": true,
+    "edid_bytes": 0,
+    "same_sysfs_edid": true,
+    "xrandr_edid_before": {
+      "bytes": 0,
+      "sha256": null,
+      "checksum_valid": null
+    },
+    "xrandr_edid_after": {
+      "bytes": 128,
+      "sha256": "727d3e1893df759c757c35232f9465b670a64d6de2011b586de48c6446e17c35",
+      "checksum_valid": true
+    },
+    "xrandr_physical_size": {
+      "before_mm": [
+        0,
+        0
+      ],
+      "after_mm": [
+        150,
+        90
+      ]
+    }
+  },
+  "runtime_after_recovery": {
+    "boot_id": "5f167a36-a715-4bbb-9186-4dff2bff8ee3",
+    "uptime_s": 682.84,
+    "camera": {
+      "pid": 1334,
+      "capture_hz": 12.44,
+      "detection_hz": 9.91,
+      "capture_frames": 8058,
+      "detected_frames": 6417,
+      "camera_error": "",
+      "detector_error": ""
+    },
+    "services": {
+      "aura-avatar-ui.service": "MainPID=1297\nNRestarts=0\nActiveState=active\n",
+      "aura-camera-ui.service": "MainPID=1334\nNRestarts=0\nActiveState=active\n",
+      "xserver-nodm.service": "MainPID=1078\nNRestarts=0\nActiveState=active\n"
+    },
+    "ui": {
+      "phase": "IDLE",
+      "audio_output_state": "IDLE_READY",
+      "playing": false
+    },
+    "pan": {
+      "state": "FAULT",
+      "automatic_following": false,
+      "pulse_us": null
+    },
+    "listening": {
+      "enabled": false,
+      "microphone_open": false
+    },
+    "connector": {
+      "status": "connected",
+      "enabled": "enabled",
+      "dpms": "On"
+    },
+    "edid_bytes": 128,
+    "native_history": {
+      "source_boot": "230ae5f0-997b-432b-a738-0065c0cb5238",
+      "current_boot": "5f167a36-a715-4bbb-9186-4dff2bff8ee3",
+      "seed_sha256": "3f797cb45f22424d519ae87735737f4c8ed941751ac043723998541c43672382",
+      "previous_kernel_history": {
+        "archive_path": "/home/root/aura-native-critical-20261024/candidates/native-v2-d7256b06808509c9/state/kernel-history/archive/5f167a36-a715-4bbb-9186-4dff2bff8ee3-3f797cb45f22424d519ae87735737f4c8ed941751ac043723998541c43672382.json",
+        "archive_sha256": "49ec10a3751a102480e2ec0044a4c8bc0d2a0389fb18879ad62d33f8492697bf",
+        "source_boot": "230ae5f0-997b-432b-a738-0065c0cb5238",
+        "source_checkpoint_sha256": "3f797cb45f22424d519ae87735737f4c8ed941751ac043723998541c43672382",
+        "history_is_lower_bound": false,
+        "scope": "Persistent archive links predecessor history; not part of current counters"
+      }
+    },
+    "faults": {
+      "primary": 1,
+      "optional": {
+        "yunet": 0,
+        "sface": 0
+      }
+    },
+    "protected_sha256": {
+      "/home/root/aura-windows-portrait-20261027/handoff-31b0c262c5b74d52966c00b978dfef3f/startup/config.json": "3d84681a728617eea1cb28b619a376f9b3798a41c04d8fb57759947a3479294f",
+      "/home/root/aura-windows-portrait-20261027/handoff-31b0c262c5b74d52966c00b978dfef3f/startup/launcher.py": "cd1680220b60f6120db1bc847ca59cfd445796ff37e48a3ba93efca65eddfd98"
+    }
+  },
+  "shutdown": {
+    "normal_stop_verified": true,
+    "poweroff_scheduled": true,
+    "checkpoint_sha256": "3f797cb45f22424d519ae87735737f4c8ed941751ac043723998541c43672382",
+    "next": "Wait for OS halt before disconnecting board power; leave HDMI connected"
+  },
+  "passive_boot_capture": {
+    "uart_bytes_sent": 0,
+    "power_down_seen": true,
+    "linux_banner_seen": true,
+    "ports": {
+      "01": {
+        "bytes": 64504
+      },
+      "02": {
+        "bytes": 638
+      }
+    },
+    "elapsed_seconds": 180.11
+  },
+  "passive_bridge_replug": {
+    "uart_bytes_sent": 0,
+    "power_down_seen": false,
+    "linux_banner_seen": false,
+    "ports": {
+      "02": {
+        "bytes": 0
+      }
+    },
+    "elapsed_seconds": 60.04
+  },
+  "bridge_firmware": {
+    "application": "Pegasus Splitter App 0.64.2.0",
+    "build": "Mar 17 2021 16:18:52",
+    "board_label": "SPLITTER_RD1_BOARD Xilinx SST TX0=HDMICfg1High TX1=DP I2C0xE6fixeda",
+    "method": "Passive FTDI interface 02 startup capture; no bytes sent",
+    "banner_count": 2,
+    "limitation": "Two bridge banners and one Linux banner captured; no per-chunk timestamps in first capture; not a reset-loop diagnosis"
+  },
+  "validation": {
+    "passed": 8,
+    "scope": "Saved historical checkpoint fixture and failure cases; no shutdown performed",
+    "transfer": "requires staged transfer: (3266, 4961)"
+  },
+  "limitations": [
+    "Physical image success is user observation; no optical waveform measurement",
+    "No replacement HDMI cable or second monitor available",
+    "No validated automatic downstream HDMI reinitialization API for this firmware",
+    "No persistent production, firmware or display startup configuration changes",
+    "A first post-boot root-shell probe timed out before running any task command; retry after login succeeded",
+    "A stale response was detected and marked invalid; coldboot evidence uses coldboot1_snapshot only"
+  ],
+  "source_files": [
+    {
+      "name": "board_snapshot.py",
+      "bytes": 2587,
+      "sha256": "f78753fc3f023db934aadd0862c8d363190a641ddd356b512d9403e3c48e0761"
+    },
+    {
+      "name": "board_display_baseline.py",
+      "bytes": 2249,
+      "sha256": "28968e43d831663574e4a32902b579a4cdab91a41ab8f1e334913eeec0d04c0d"
+    },
+    {
+      "name": "comparison_snapshot.py",
+      "bytes": 1584,
+      "sha256": "3a0100747564bad234ea175bd1f3681ba3d87ce0d60c6726edd1a331df2fcbf9"
+    },
+    {
+      "name": "listen_uart.py",
+      "bytes": 2623,
+      "sha256": "7288fd682ec94990fb5d04dfb9321b9ed087ae191aa1a8efc65a3144ae7e0bb5"
+    },
+    {
+      "name": "shutdown_policy.py",
+      "bytes": 1505,
+      "sha256": "1e0ecfa374de9f62d608552d5c721e3752e0778d4c1e10184e0486dadac741d7"
+    },
+    {
+      "name": "board_shutdown_candidate.py",
+      "bytes": 3944,
+      "sha256": "e50d643cce9ed2dee74f11f394892639c629a93b1b3b2c95bfb4918429bd2bb9"
+    },
+    {
+      "name": "final_check.py",
+      "bytes": 1732,
+      "sha256": "f4bc7ab1ea2fb505d9db60c258e0d4806d647408ac54fc1f2312c56ecb90f0c6"
+    },
+    {
+      "name": "board_shutdown_combined.py",
+      "bytes": 5450,
+      "sha256": "71eed27c50dd12b921ce4fe5ff4b9facb8151d9dee6376df48da254beb7fc55c"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "candidate_after_perf_dpu",
+    "command": "env XLNX_VART_FIRMWARE=/lib/firmware/xilinx/kv260-benchmark-b4096-dpu41/kv260-benchmark-b4096-dpu41.xclbin xdputil query",
+    "timeout": 40
+  },
+  {
+    "id": "candidate_after_perf_state",
+    "command": "dfx-mgr-client -listPackage; cat /sys/class/fpga_manager/fpga0/state; tr -d '\\0' </proc/device-tree/fpga-full/firmware-name; echo; cat /etc/vart.conf; sha256sum /lib/firmware/xilinx/kv260-benchmark-b4096-dpu41/* /lib/firmware/xilinx/kv260-benchmark-b4096/* /usr/share/vitis_ai_library/models/resnet18/resnet18.* /home/root/kv260-test-20261001/pytorch-resnet-dog.jpg /home/root/kv260-test-20261001/samoyed.list",
+    "timeout": 40
+  },
+  {
+    "id": "kernel_before_switch",
+    "command": "cat /home/root/kv260-test-20261001/baseline-backup/dmesg-before.txt",
+    "timeout": 45
+  },
+  {
+    "id": "kernel_after_candidate_tests",
+    "command": "dmesg",
+    "timeout": 60
+  }
+]

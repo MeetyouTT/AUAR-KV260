@@ -1,0 +1,20 @@
+--- r1/board/runtime/board_memory_policy.py
++++ r3/board/runtime/board_memory_policy.py
+@@ -14,7 +14,7 @@
+ from common.profile_memory import scoped_command
+ from common.spoken_input import prepare_spoken_input
+ from common.fact_answers import question as fact_question, fact_reply
+-from common.board_memory import (CandidateRejected, COMPACTION_REJECTION_REASONS, NUMBER, NEGATION, PLANNED, OBSERVED,
++from common.board_memory import (CandidateRejected, COMPACTION_REJECTION_REASONS, NUMBER, NEGATION, POLAR_QUESTION, PLANNED, OBSERVED,
+                                 COMPLETED, validate_compaction_text)
+ from board.runtime.board_dialogue import BoardReply
+ from board.runtime.character import CHARACTER_NAME
+@@ -417,7 +417,7 @@
+ 
+     def _fragments(self, eligible):
+         """Return local exported/validation pairs covering every source byte."""
+-        question_phrases = re.compile(r'(?=(去不去|买不买|做不做|要不要|能不能|会不会|是不是|有没有|可不可以))')
++        question_phrases = re.compile(r'(?=(' + POLAR_QUESTION.pattern + r'))')
+         double_negations = re.compile(
+             r'(?=((?:并不是|不是|并非|不能|不会|不得)[ \t]{0,4}(?:' + NEGATION.pattern + r')))', re.I)
+         records = []

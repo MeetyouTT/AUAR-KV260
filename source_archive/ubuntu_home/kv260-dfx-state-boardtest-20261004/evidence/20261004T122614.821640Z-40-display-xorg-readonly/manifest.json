@@ -1,0 +1,17 @@
+[
+  {
+    "id": "xorg-process-and-configuration",
+    "command": "python3 -B -c 'import json,subprocess;from pathlib import Path;P=Path;assert P(\"/sys/block/mmcblk1/device/cid\").read_text().strip()==\"0353445345333247805558c00401a100\";out={\"processes\":[],\"files\":{},\"command\":{}}\nfor p in P(\"/proc\").iterdir():\n if p.name.isdigit():\n  try:\n   comm=(p/\"comm\").read_text().strip()\n   if comm in [\"Xorg\",\"matchbox-window\",\"matchbox-deskto\"]:\n    env=dict(x.split(\"=\",1) for x in (p/\"environ\").read_bytes().decode(errors=\"replace\").split(\"\\0\") if \"=\" in x);out[\"processes\"].append({\"pid\":p.name,\"comm\":comm,\"argv\":(p/\"cmdline\").read_bytes().decode(errors=\"replace\").split(\"\\0\"),\"display_env\":{k:env[k] for k in [\"DISPLAY\",\"XAUTHORITY\"] if k in env}})\n  except OSError:pass\nfor p in [P(\"/var/log/Xorg.0.log\"),P(\"/etc/X11/xorg.conf\")]+list(P(\"/etc/X11/xorg.conf.d\").glob(\"*.conf\")):\n if p.is_file():out[\"files\"][str(p)]=p.read_text(errors=\"replace\")\nr=subprocess.run([\"systemctl\",\"cat\",\"xserver-nodm.service\"],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,timeout=20);out[\"command\"]={\"rc\":r.returncode,\"stdout\":r.stdout,\"stderr\":r.stderr};print(json.dumps(out,indent=2))'",
+    "timeout": 90
+  },
+  {
+    "id": "xrandr-xset-modetest-query",
+    "command": "python3 -B -c 'import json,os,subprocess,shutil;out=[];env=os.environ.copy();env[\"DISPLAY\"]=\":0\"\nfor c in [[\"xrandr\",\"--display\",\":0\",\"--verbose\"],[\"xset\",\"-display\",\":0\",\"q\"],[\"modetest\",\"-M\",\"xlnx\",\"-c\",\"-p\"]]:\n if not shutil.which(c[0]):out.append({\"argv\":c,\"available\":False});continue\n try:\n  r=subprocess.run(c,env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,timeout=25);out.append({\"argv\":c,\"rc\":r.returncode,\"stdout\":r.stdout,\"stderr\":r.stderr})\n except subprocess.TimeoutExpired:out.append({\"argv\":c,\"error\":\"timeout\"})\nprint(json.dumps(out,indent=2))'",
+    "timeout": 110
+  },
+  {
+    "id": "display-live-device-tree",
+    "command": "python3 -B -c 'import json;from pathlib import Path;P=Path;out={}\nfor p in P(\"/sys/firmware/devicetree/base\").glob(\"**/display@fd4a0000\"):\n for n in [\"compatible\",\"status\",\"clock-names\",\"model\"]:\n  f=p/n\n  if f.exists():out[str(f)]=f.read_bytes().decode(errors=\"replace\").replace(\"\\0\",\"|\")\np=P(\"/sys/class/drm/card0-DP-1/edid\");out[\"edid_bytes_after_probe\"]=len(p.read_bytes()) if p.exists() else None;print(json.dumps(out,indent=2))'",
+    "timeout": 30
+  }
+]

@@ -1,0 +1,39 @@
+Fresh final + 完整原历史链只读候选，供root/validator独立审查
+
+产物与状态
+validate_fresh_final_history_readonly.py：当前候选5ca99d4231c686de0f89dac5792299bec13af517a5c6e2b8f73c4cc66b9285c9，未替换原2b7da68脚本，也未执行其CLI、板端loader或任何SSH。
+test_fresh_final_history_readonly.py：旧e92候选16项小型合成检查的原FRESH_FINAL_HISTORY_TESTS.json/log保持不改，未重跑。旧e92源码/manifest/usage/测试报告完整保存在fresh_history_alias_fix/*.e92.before.bin。
+当前只针对独审发现的来源别名做最小修复；check_fresh_history_alias_fix.py的8项定向结果全PASS，见FRESH_HISTORY_ALIAS_FIX_PROBES.json。AST核对证明其它reader/chain/guard/下界逻辑不变；validate_inputs仅新增禁用SHA及向来源门传递参数。旧16项不是对新SHA重跑的证明。
+两个EXAMPLE_DO_NOT_EXECUTE.json故意含缺失/无效字段，不可运行。当前真实head、完整层数、fresh lowerbounds均没有推测填写。
+
+三条原验证路径保持
+1. 同boot current-final：原native_protection.load_business_checkpoint(pin, boot_id=实际boot)，不传now_ns，使用原实际monotonic。另调用原native_boot._sealed_source验证原C结构/恢复状态/自身时间域，并保留原checkpoint_shape对inherited_optional两任务、计数、pending0、bool/报告/recovery形状检查。
+2. 每层v2 archive：原native_boot._sealed_source，故意不调用current-boot reader、不改旧时间、不恢复旧seed。每个captured/recovery时间仅在该归档自身boot快照内验证。
+3. legacy终端：原native_boot._legacy_source；读取原ecda…字节而非重序列化SHA，保留unknown_tail/lower_bound语义。
+四个原Python source pin保持：__init__091e…、native_binding5f385…、native_protectionb863…、native_boot251e…。原封闭namespace loader只exec已钉原字节；定义NativeContext类不实例化，不调用C.CDLL/模型/设备/consume/checkpoint writer。
+
+与root新正常stop候选接口
+直接钉camera-stop-intent.json和camera-stop-result.json原字节。支持schema aura-original-camera-stop-intent-2 / aura-original-camera-normal-stop-2，严格核source_owner、boot、startup、一次normal stop、无forced_action、fresh_checkpoint与captured mono；结果必须是CAMERA_STOPPED_NEW_FINAL_PRESENT。
+下界直接来自intent：primary_calls_lower_bound、primary_period_overruns_lower_bound，以及prestop_bounds.sface完整七项、optional.yunet/sface。optional每任务required：calls/native_completed/native_failures/not_submitted/overruns；recovery的faults/attempts/recoveries/probe_successes/history_opaque。root已让正常stop的dry-run预检这些字段，缺失则不stop；当前真实health是否提供calls/native_completed仍须原NativeSchedule源码或下一窗实际公开API证明，旧final auxiliary与合成fixture不能作为health实测证据。本地只找到native_schedule.py的manifest pin dd42f211…，未找到其正文，不能先填0或从last_native_report推累计。
+可比较的累计下界：primary两项；SFace七项；optional五项；Native可明确对应的optional completed/native_failures/not_submitted/overruns；两任务recovery faults/attempts/recoveries。probe_successes是当前恢复尝试进度，只有faults/attempts未推进时才要求不回退；新fault/attempt允许其重置，最终状态仍须原_sealed_source严格通过。disabled/phase/attempts_in_window不是累计计数，不机械做>=。原2b7对probe无条件>=的历史写法没有当作跨generation数学事实。
+
+当前owner源码manifest合同
+expected.owner_run_config_pin必须是停止前已实际确认的native-run-<freshboot>-<actualpid>/config.json原字节pin，禁止猜路径来代替实际argv/原handoff证据。它native_execution里的source_manifest路径/SHA必须等于expected.source_manifest_pin，source_unit仍原C-unit7cf。
+current-final.seed.source_manifest必须等于该实际停止owner运行时manifest；第一次通常是5e08…，v3之后会不同，示例不钉历史5e08。原同boot preflight允许上一owner的seed Pythonmanifest，shutdown才写当时owner运行manifest，因此本校验必须在任何相机源码/manifest修改前执行。历史各层只比较archive.source_manifest_sha256与该层cp.seed，绝不强套最新manifest。
+
+history必填、有来源合同
+expected.history需完整head原对象、精确archive_count(1..64)、按头到尾的全部archives六字段行、legacy原pin和observed_mono_ns；provenance_pin指向停止前准备且root批准的公开history manifest。
+每行恰为path/sha256/current_boot/source_boot/source_checkpoint_sha256/history_is_lower_bound，兼容原完整reader输出的archives行。不是只删旧18断言，而是逐层结果与这份精确ordered manifest比较，终端层数也必须相等。
+provenance正文schema为aura-prestop-native-history-manifest-1。boot/source_owner/history(不含provenance_pin)须等于expected；history.observed_mono_ns必须先于这次stop intent。source_bindings用{pin,pointer}从实际已钉公开receipt逐值读取boot、owner、monotonic和原handoff history head；archive_segments逐段读fresh prefix + 先前已接受的完整历史rows，拼接结果必须等于全部archives。参考示例中的pointer均是占位符，必须按实际receipt字段选，不能假装它们已存在。
+来源receipt禁止指向当前post-stop checkpoint、stop result或manifest本身；其副本/硬链接使用相同SHA时也拒绝。在JSON pointer取值前检查来源对象及JSON envelope中的v2 checkpoint；schema匹配且seed.boot_id/source_pid/source_birth_ticks标识当前停止owner就拒绝，即使重新排版或包入checkpoint/loaded/document等envelope。不同boot或不同PID/birth的已接受历史保持可用。
+定向检查：原baseline继续接受；同SHA final副本、换排版同owner final、checkpoint envelope、同SHA stop-result副本拒绝；同boot不同PID、同PID不同birth、旧boot archive envelope接受。该门只防误把待验final路由成独立来源，不声称对能重写全部JSON/pin的恶意root提供认证，不新增签名或恢复框架。
+缺少fresh来源、当前head、完整链长或lowerbounds时HOLD，不从待验final反推期望，不套旧903c/a6d/18/19数字。root仍需审核来源的真实性与是否受信；指针/hash只能校验字节和值的绑定，不能取代跨窗口正式交权。
+
+拒绝/稳定性边界
+每层核archive固定root、原path/命名/hash/current_boot/source_boot/sourceCP SHA、lower_bound/unknown_tail、内嵌v2原canonical writer SHA、原语义和source manifest；拒绝未知schema、boot/path循环、缺失previous link、越界和提前legacy。64层上限结束还未到原legacy也拒绝。
+current与archives/legacy/source/evidence所有已读字节及inode/mtime/mode/uid/gid前后重核；marker只lexists，前后必须不存在，不读取正文或创建。两个服务均正常inactive/dead/MainPID0/noJob/success，camera保留Restartno/SendSIGKILLno/KillModeprocess/Timeoutinfinity；原owner birth仍存在即拒绝，包括exec改变cmd的情况。扫描/proc maps/fd纯元数据，Native/VART/DPU/MMIO仍有owner或live proc不可读均HOLD，不打开任何设备。
+
+后续root调用（本次没有执行）
+/usr/bin/python3 -B -I -S - --expected <fresh绝对JSON路径> --expected-sha256 <该文件fresh字节SHA>
+通过已审严格传输把候选原字节供stdin。没有apply参数，因为始终只读。成功stdout给checkpoint/source/ordered archives等公共证明与精确checked_lower_bounds名单；它不是原Native消费/恢复证明，也不是自动可直接塞入six-file transaction的归一化receipt，root须按已审合同映射并绑定本次plan。
+失败只输出HOLD并退出2，无服务、恢复、marker或checkpoint写入，无自动重试。当前别名修复等待原独审复查；candidate/Native loader/实际Linux权限与fresh现场验证均未执行。旧16项及当前8项合成检查不等于现场通过。

@@ -1,0 +1,1 @@
+cmd_drivers/mtd/tests/mtd_nandbiterrs.ko := /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ld -r  -EL  -maarch64elf  --build-id=sha1  -T scripts/module.lds -o drivers/mtd/tests/mtd_nandbiterrs.ko drivers/mtd/tests/mtd_nandbiterrs.o drivers/mtd/tests/mtd_nandbiterrs.mod.o;  true

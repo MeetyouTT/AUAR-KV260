@@ -1,0 +1,30 @@
+> 后续静止正脸检查已完成：彼此0.90～0.97、对旧模板0.71～0.75；已加载正脸选样修复，原身份保留、明确更新待用户操作。见 `../2026-10-19_front_template_selection/README.md`。
+
+# 称呼和身份问句入口修复
+
+用户反馈上一版仍走普通聊天，随后说明“我说夕蓝，他识别不到”。上一版真人查询已记为失败，登记成功仍保留：1身份/1模板/修订14。未恢复到报告当轮的完整ASR，不能断言实际误听成了哪几个字。
+
+## 已复现的入口漏项
+
+原通用称呼解释器在没有标点或问候时，不把“夕蓝我是谁”里的“夕蓝”按呼唤处理；遇到“我叫什么”又会保守保留姓名语境。原身份查询只匹配固定句子，也会漏掉“我是谁呀”“你知道我是谁”。这些确切文字输入可复现进入普通聊天，但并不证明它们就是本次用户的实际ASR。
+
+新身份查询在整句范围内接受已有“汐蓝/夕蓝/西兰/西蓝/溪蓝/希蓝/汐兰”称呼、无标点连接、自然语气词及省略“吗”的直接问句。未添加未知词为别名，未改原始ASR、通用姓名解释或登记称呼。引用、否定、假设、询问玩偶是谁、复合删除指令等仍不会通过此查询入口。旧客户端、登记动作和普通聊天保持原路由。
+
+板端保留最近一次路由诊断，只有字数、是否识别为身份问句、是否走板端、录音起点人脸数量/状态及回复码；单条RAM数据，无转写正文、称呼、图片或模板。自动续听清掉字幕后仍能查看这轮路由，过期代次不能改写诊断。
+
+## 验证与当前状态
+
+- Windows129项通过；2项依赖Linux fcntl的板端用例在Windows排除，在Linux完整202项中通过。初次Windows错误日志保留在 `tests_pc_linux_only_initial.log`，没有把平台缺依赖写成产品修复证据。
+- 受控ASR转写的真实HTTP路由测试覆盖“夕蓝我是谁呀”“西兰我叫什么名字啊”及不应拦截的问句；公开Lena/原真实人脸模型临时库与UI启动预检通过。没有把受控转写或公开单图当作用户语音/人脸精度证明。
+- PC8792已重载并报告 `identity_query_intent_revision=2`；UI `/home/root/aura-spoken-identity-routing-20261019/candidate-fa8e1697c110/runtime` 已加载，25份候选源码哈希核对。相机仍用 `/home/root/aura-windows-face-features-20261019/candidate-8ad60843f9d1/camera_live_config/board_camera_ui.json`，PID保持，DPU/ByteTrack/音频配置不变。
+- 用户库部署前后1条/修订14、哈希不变；阈值0.80、间隔0.1保持。原Paraformer/27B IQ4_XS/OmniVoice16及5项延迟开关保持，LLM数据仍在D盘。
+
+正式新录音已取到：generation4原始ASR为“我是谁呀”，用户确认原话就是“我是谁呀”，没有先叫称呼；录音起点为一张人脸、UNKNOWN，实际进入板端身份查询并返回identity_unknown，同代次完整播放。真实麦克风这句转写与用户原话一致，身份问句路由已通过；报出身份仍失败，用户听音未单独确认。本句不含“汐蓝/夕蓝”，所以不能据此声称称呼的声学识别问题已通过。证据 `real_microphone_query.json`、`live_query_observation.json`。
+
+当前人脸准确度也未因此提高：上轮12帧同生产对齐脸匹配0.437618～0.624089，全部低于0.80。人脸未识别时应播“现在还没有认出镜头前的人”或失脸提示，不能从最近登记记录取名字充当实时识别。
+
+最新只读连续8帧：与登记模板0.399185～0.696463，0帧达到0.80；这些当前帧彼此的余弦0.484475～0.937099（中位0.695921）。不能把失败只归结为登记模板：这段实时输入也有较大变化，且未取得静止正脸条件，无法区分真实姿态变化与关键点/对齐波动。`face_consistency.json`仅数值，无图像、向量或姓名。下一步等待用户准备好一小段静止正脸作只读对照，不改库/门槛。
+
+证据：`user_feedback.json`、`tests_pc.log`、`tests_board.log`、`preflight.json`、`voice_host_reload_ready.json`、`deployment.json`、`source_verification.json`、`live_query_observation.json`、`verification_summary.json` 和 `verified_source.zip`。实际听音与真人识别依然以新反馈为准。
+
+回退：结束对话后运行本目录 `rollback.py` 仅恢复上一UI；需要回退PC解析时，恢复本目录before中的common/voice_enrollment.py、tools/board_model_host.py并空闲重载8792。相机及身份库不回滚，备份 `/home/root/aura-spoken-identity-routing-20261019/candidate-fa8e1697c110/activation-backup-40e68f8a7a`。

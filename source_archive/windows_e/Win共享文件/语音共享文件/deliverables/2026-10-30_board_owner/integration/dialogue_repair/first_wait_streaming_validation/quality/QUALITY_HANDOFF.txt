@@ -1,0 +1,22 @@
+公开语音参考与合成内容验收 — 2026-10-31
+
+1. 已完成的可证实映射
+旧Paraformer 0.wav：官方Hugging Face同一维护者仓库直接读取到RAM，179712字节，SHA256与现有板端公共fixture的1a6bf940...严格相等，16k/mono/PCM16、89834帧、5.614625秒。
+官方出处：https://huggingface.co/csukuangfj/sherpa-onnx-paraformer-zh-2023-09-14/tree/main/test_wavs
+
+新CTC官方包在D盘，仅读tar目录及公开WAV字节，无提取、下载模型或加载模型。0.wav是668bf8df...、89784帧、5.6115秒；1.wav是30edbabe...、82449帧、5.1530625秒。archive内test_wavs只有0.wav、1.wav和8k.wav，没有参考转写文件。完整哈希和来源见public_reference_mapping.json。
+官方出处：https://huggingface.co/csukuangfj/sherpa-onnx-streaming-zipformer-small-ctc-zh-int8-2025-04-01/tree/main/test_wavs
+
+2. 当前缺失的金标
+未在以上官方测试音频目录/模型包及官方示例文档中找到人工或原语料明确标注的gold。官方文档所列“对我做了介绍……”是识别器输出，并非标注；已标为RECOGNIZER_EXAMPLE_OUTPUT_NOT_HUMAN_REFERENCE，不能拿它计算金标CER或宣布新模型漏字。
+官方旧示例29字字符串SHA为c4724fba...，与root本轮测得的cbe36e...不同；这不否定WAV字节已严格匹配，只说明示例输出与本轮输出不能互相冒用。没有读取本轮识别原文，没有制造人工标注。
+旧0.wav与新0.wav不仅容器SHA不同，PCM SHA也不同；新样本少50个PCM样本，3.125ms。两者具有相似的官方输出不代表是同一精确输入。现有A/B继续使用旧1a6bf940...样本。
+这里没有声称全网绝不存在gold；只说明已查官方范围中缺失。不为CTC 1.wav借用另一个同名1.wav的转写，不以模型多数投票造gold。
+
+3. 下一步最小内容检查
+synthetic_acceptance_texts.json包含8条原创、虚构、可公开的中文验收句和关键语义。覆盖普通对话、人名、数字单位、否定、更正、记住、追问、遗忘范围。只用于ASR，不把其中的“记住/忘记”发送进真实业务链。
+root可调用现有TTS逐条生成公共样本，记录文本ID、生成参数、音频SHA/实际采样率及长度。合成输入文本是“预期内容”，不等于TTS实际发音，更不等于真人金标；先保留人工听音状态false。输出报告区分 intended-text CER、关键语义保留、人工确认过的发音内容。两种ASR必须读取相同音频字节、同一统一的重采样结果，不将重采样差异当模型差异。
+不能静默删去否定/更正词、人名、数字单位或遗忘范围来让评分通过。数字的中文与阿拉伯书写差异可以单列语义等价，但不要混入逐字准确率。
+
+4. 已做的工作与边界
+只读本地公共资源、官方GitHub/Hugging Face资料，补充上述JSON和本说明。没有设备访问、TTS/ASR推理、任何数据库操作、生产配置修改或新的音频录制。

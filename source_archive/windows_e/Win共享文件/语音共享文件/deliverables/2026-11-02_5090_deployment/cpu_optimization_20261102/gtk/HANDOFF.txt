@@ -1,0 +1,58 @@
+GTK CPU候选交接（2026-11-02，root负责部署和板端负载安排）
+
+当前结论
+已完成一文件最小候选及纯边界测试。尚未在实际GStreamer进行像素与CPU对照，不能宣称收益或已完成优化。原服务、界面、相机和转轴均未由本代理改动。
+
+实际源核验
+从当前startup指定的 /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura 取回原字节并逐项核pin；读取时startup1177df3831407bc819c1f1e3b89090f8c6b97661c8e74c2866b281be93b0a9c8，380组件。后续轴专用对话可能变更startup，发布不能套用本读取时hash。
+源清单见SOURCE_SNAPSHOT.json和SOURCE_ADDITIONAL.json。仅源码、配置与技术指纹；未取得图像、声音、身份模板、记忆或对话正文。
+安装的GStreamer1.18.5；videoconvertscale不可用，videoconvert/videoscale的默认线程数均1，默认videoscale method=1/add-borders=true。工厂元数据见GST_FACTORY_INSPECTION.json，检查时设置GST_REGISTRY_UPDATE=no，仅实例化转换元素查询属性，未开启pipeline、X11或设备。
+
+已排除的重复优化
+原RawFrameReader已经使用inode/帧号去重，旧帧不重复push。
+实际GTK已经有vision/large的unmap→detach、map代数守卫、_ui_set属性去重和production_memory_presentation单源投影；不能把这些原有行为当新收益。
+当前预览原本就是raw-local BGR传输，不是每帧JPEG解码；JPEG仅为原fallback。
+
+候选精确差异
+组件 tools/board_camera_preview.py
+原SHA 6e697c16f7ae264dff56b6b35f38da4b531ea13026b69a7c8bdbfb1960a6afcd
+新SHA 022098636a41b35bc17929da1cbef0f05e5c257640f9b64a8504c1b4a13e7127
+candidate/tools/board_camera_preview.py是原字节中唯一一次：
+videoconvert ! videoscale ! video/x-raw,width=
+替换为：
+videoscale ! videoconvert ! video/x-raw,width=
+pipeline_swap.diff和CANDIDATE_MANIFEST.json可复核；逆替换逐字节恢复原文件。所有Python AST除该字符串均一致。
+目的：先在输入BGR格式缩放，再转换成X11 sink所需像素格式，减少转换的像素数。但BGR和32位像素的原生缩放实现可能有不同效率，换序也可能变慢，必须看原新对照结果。
+保留640x480输入、原输出尺寸/默认插值/边框策略、队列/appsrc容量、X11 sink、多输出、owner/epoch、250ms源截止、PTS/frame-id、blank清空、JPEG fallback和原界面/字幕/身份/记忆/声音/口型逻辑。未改帧率或功能开关。
+
+已完成的纯测试
+python -B test_preview_contract.py
+UNIT_TEST_RESULTS.json：10项方法、原版和候选均执行，0failures/0errors。
+涵盖：帧bytes与offset/PTS；-100ms未来和250ms过期精确边界；blank只推一次并失效引用；输入背压；owner切换flush；detach/rebind拒绝旧回调；双视图生命周期；read参考500/1500ms；启动失败NULL清理；AST唯一常量差异。
+这些测试使用实际方法和伪Gst后端，证明控制逻辑保持，不证明真实重采样像素或CPU收益。
+
+待root串行执行的原/新合成对照
+gst_synthetic_compare.py SHA ef9eedd2dfe5f57f921280310d9b59a400762ba91c843efd0d9e0a873139c296
+严格SSH通过stdin执行：python3 -B - --frames 30 --rounds 2 --sizes 568x300,587x440,640x480
+（也可先frames10/rounds1/sizes568x300,587x440做快速像素筛选；完整CPU对照再用30/2）
+仅合成appsrc→原convert/scale→appsink，不接相机、不接屏幕/声音/转轴/模型，不落任何图像。设置GST_REGISTRY_UPDATE=no。每帧输出等待3秒，root应对SSH保留足够的总时限；负载结束所有pipeline正常NULL，不涉及原Native服务。
+4种纯合成输入：黑、白、独立BGR色条、锐利格子。
+默认输出格式BGR、RGB、BGRx、RGBx、BGRA；核尺寸、PTS/offset，显色通道与定义alpha严格0差。X填充字节单独报告，不当alpha。上下边界也报告差异。
+CPU用process_time覆盖全部本进程转换线程，交替A/B、B/A，各尺寸单独报告CPU每帧中位数与变动百分比；并保留wall。输入像素生成和管线warmup不计入CPU阶段。
+合成结果status若PIXEL_EQUIVALENCE_FAILED_DO_NOT_DEPLOY，应保持候选未发布，不自行放宽功能等价门槛。
+这个基准没有X11 sink或UI调度，因此即使合成通过且更省CPU，仍须实际同页、同场景、原相机/GTK40秒对照以及全流程真人对话/原跟随复测。主页面和视觉页分开报告。
+
+发布/回滚前提（仅root执行）
+1. 核轴协调冻结仍有效，当前原pan控制25项、四配置和startup当前pins保持；本代理不拥有转轴写权。
+2. 重新读取actual startup和UI source pins，确认此组件仍为原6e697c…且GUI源码未另行变更；只替一个组件并按原模式更新相应startup pin。若当前selected readback或其他原manifest也pin了该组件，按真实依赖重制引用，不能绕过验证。
+3. 使用原GUI正常停/启并核新owner、全部组件/selected25闭包和原身份查询补丁；相机/native不因本候选而重启。先保留聆听/跟随原停态，再按已授权验收顺序进行。
+4. 测原视觉页与主页面CPU、显示更新、preview entry-age、frame-reference、16fps头像、放大视图、切页、失源blank/恢复；再测真人ASR/LLM/TTS完整ACK与原轴跟随。不能只测空页面来报收益。
+5. 若出现不等价、CPU退步、显色/映射异常或原路径故障，恢复保存原字节及相应pins并正常恢复GUI；勿重置相机保护计数、刷新FPGA或改模型。
+
+文件说明
+original/：从实际pin读取的源码/配置原字节。
+candidate/：唯一换序组件。
+build_candidate.py：确定性构建。
+test_preview_contract.py：无设备纯边界测试。
+gst_synthetic_compare.py：root待安排的安装Gst功能/CPU对照。
+本代理没有执行任何合成板端负载、板端写入、服务控制、页面切换或运动。

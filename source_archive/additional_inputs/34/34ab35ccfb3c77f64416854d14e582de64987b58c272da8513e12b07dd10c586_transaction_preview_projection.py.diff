@@ -1,0 +1,22 @@
+--- before/gtk/v2/transaction_preview_projection.py
++++ after/gtk/v2/transaction_preview_projection.py
+@@ -205,12 +205,17 @@
+     stage=path.parent/('.aura-ui-cpu-'+attempt+'-'+path.name+'.stage')
+     create(stage,new,identity[4])
+     os.chown(stage,identity[5],identity[6]);fd=os.open(str(stage),os.O_RDONLY|os.O_NOFOLLOW)
+-    try:os.fsync(fd)
++    try:
++        os.fchmod(fd,identity[4])
++        os.fsync(fd)
+     finally:os.close(fd)
++    staged,stage_id=read_file(stage)
++    require(staged==new and stage_id[4:7]==identity[4:7],'HOLD_STAGE_BYTES_OR_OWNERSHIP_MODE')
+     # Root's writer freeze + cooperative lock is required throughout this CAS.
+     again,file_id=read_file(path);require(again==before and file_id==identity,'HOLD_TARGET_CHANGED_AFTER_STAGE')
+     os.replace(stage,path);fsync_dir(path.parent)
+-    actual,now=read_file(path);require(actual==new,'HOLD_TARGET_CHANGED_AFTER_REPLACE')
++    actual,now=read_file(path)
++    require(actual==new and now[4:7]==identity[4:7],'HOLD_TARGET_BYTES_OR_OWNERSHIP_MODE_AFTER_REPLACE')
+     context['identities'][str(path)]=now
+ 
+ def execute(context,payload,action,apply,rollback_id):

@@ -1,0 +1,48 @@
+{
+  "host_tests_passed": true,
+  "scope": "Native helper tests; no board, FPGA access, daemon or app loading",
+  "sanitizers": "Not enabled: this existing GCC 11 SDK does not ship libasan.",
+  "results": [
+    {
+      "test": "baseline-legacy",
+      "exit_code": 0,
+      "results": [
+        "RESULT rescan rounds=130 entries=500 kernel_watches=5 legacy_defect_reproduced=1"
+      ],
+      "log": "evidence/20261003T035825.969132Z-host-tests/baseline-legacy.log"
+    },
+    {
+      "test": "patched-rescan",
+      "exit_code": 0,
+      "results": [
+        "RESULT rescan rounds=10000 entries=5 kernel_watches=5 legacy_defect_reproduced=0"
+      ],
+      "log": "evidence/20261003T035825.969132Z-host-tests/patched-rescan.log"
+    },
+    {
+      "test": "patched-lifecycle",
+      "exit_code": 0,
+      "results": [
+        "RESULT lifecycle cycles=1000 entries=5 kernel_watches=5"
+      ],
+      "log": "evidence/20261003T035825.969132Z-host-tests/patched-lifecycle.log"
+    },
+    {
+      "test": "patched-boundaries",
+      "exit_code": 0,
+      "results": [
+        "RESULT boundaries passed=1 capacity=500"
+      ],
+      "log": "evidence/20261003T035825.969132Z-host-tests/patched-boundaries.log"
+    },
+    {
+      "test": "patched-concurrent",
+      "exit_code": 0,
+      "results": [
+        "RESULT concurrent threads=8 calls=80000 entries=1"
+      ],
+      "log": "evidence/20261003T035825.969132Z-host-tests/patched-concurrent.log"
+    }
+  ],
+  "board_verified": false
+}

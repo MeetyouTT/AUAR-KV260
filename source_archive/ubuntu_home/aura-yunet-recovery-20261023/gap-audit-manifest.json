@@ -1,0 +1,79 @@
+{
+  "schema": "aura-gap-audit-candidate-2",
+  "parent_manifest_sha256": "9defe3145e88dd0c4031c66dec70cfc9e360ac879b589586646d352b8a6e3b92",
+  "board_live_verified": false,
+  "board_synthetic_verified": true,
+  "production_enabled": false,
+  "performance_claim": null,
+  "bounded_gap_record_capacity": 32,
+  "source_sha256": {
+    "board/identity/face_freshness_metrics.py": "b7d6e9eb04ce73713b9a6f7a5c905d01bc6007841043623a3eb76bb6448edd2e",
+    "board/identity/face_targets.py": "1c455397aae6252cccab0cd34e2aa6a7042b31d002b13228d7daae17bc9e9169",
+    "board/vision/dpu_vision_runtime.py": "e3b2d11140838fdf0eb548f8def033da5930ec46dfa72ae27f098c03e801c9d3",
+    "board/vision/dpu_vision_schedule.py": "acfbe653141d7098e3d87baabfbf7f530efc4309a417babfc76983ad9530dbb2",
+    "board/vision/dpu_yunet.py": "23ea72f8380e7205fafb0d1b28b692a4780f1c9a51e221d04609843bbf0c309b",
+    "board/vision/pipeline_metrics.py": "4fe111373b6a50fe6b2f657a8fe82880889cabdab5e7f1a21b9243044496aac9",
+    "board/vision/thread_sched_metrics.py": "0a9dd2618f113a457e547ef34e9f99d1cacd2b6ea1e7d8afb115c0c0461b585d"
+  },
+  "verification": {
+    "special_tests": 85,
+    "evaluator_tests": 19,
+    "board_synthetic_functional_tests": 35,
+    "board_mean_added_limit_ms": 0.5,
+    "board_assessment": {
+      "schema": "aura-synthetic-freshness-light3-assessment-1",
+      "passed": true,
+      "failures": [],
+      "signed_mean_differences_ms": {
+        "normal_empty_face": {
+          "on_minus_original": {
+            "wall": 0.29835881500000017,
+            "thread_cpu": 0.28564681500000044
+          },
+          "on_minus_off": {
+            "wall": 0.30782168500000007,
+            "thread_cpu": 0.2784295050000004
+          },
+          "off_minus_original": {
+            "wall": -0.009462869999999957,
+            "thread_cpu": 0.00721731000000006
+          }
+        },
+        "slot_unavailable": {
+          "on_minus_original": {
+            "wall": 0.12029050499999992,
+            "thread_cpu": 0.15102163999999996
+          },
+          "on_minus_off": {
+            "wall": 0.16349438999999996,
+            "thread_cpu": 0.14630600500000002
+          },
+          "off_minus_original": {
+            "wall": -0.04320388500000004,
+            "thread_cpu": 0.00471563499999994
+          }
+        },
+        "full_event_health_outer_lock": {
+          "on_minus_original": {
+            "wall": 0.31745576999999997,
+            "thread_cpu": 0.2874028850000001
+          },
+          "on_minus_off": {
+            "wall": 0.31621835499999995,
+            "thread_cpu": 0.2862340700000001
+          },
+          "off_minus_original": {
+            "wall": 0.0012374150000000021,
+            "thread_cpu": 0.0011688150000000279
+          }
+        }
+      },
+      "added_mean_limit_ms": 0.5,
+      "scope": "synthetic service hooks/health only, not full vision or identity workload",
+      "physical_board_verified": false,
+      "speedup_or_ttl_improvement_proven": false,
+      "allows_automatic_deployment": false
+    },
+    "board_report": "/home/ghmd/aura-post-power-20261022/gap3-board-cost-result.json"
+  }
+}

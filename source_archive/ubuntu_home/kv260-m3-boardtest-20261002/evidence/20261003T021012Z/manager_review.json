@@ -1,0 +1,42 @@
+{
+  "functional_validation_passed": true,
+  "manager_fix_pending": true,
+  "additional_readonly_commands": 1,
+  "total_successful_uart_commands": 54,
+  "observed_daemon_error_lines_in_captured_window": 44,
+  "first_error_uptime": 8232.393844,
+  "source_commit": "bc06691eb35d7f0acb7c2508b6d050d77b0264a0",
+  "validated_source_files": [
+    {
+      "path": "src/daemon_helper.c",
+      "git_blob_sha1": "7b1985d3d5be9d5aa613abb3ca83ae9ef6c3d5cd",
+      "sha256": "4a14fe3c1037daeffd72ed62c4f8570787258aa35bdbfd81eef256186cb602dc"
+    },
+    {
+      "path": "src/daemon_helper.h",
+      "git_blob_sha1": "17fae0d08f51dfceb51d25a08d95490c1c5eba01",
+      "sha256": "39a4489a59c7b9cda2897494eb3cac203d6f4b6ad7a2ff6ed2bc3810e04dc026"
+    }
+  ],
+  "source_internal_watch_table_capacity": 500,
+  "daemon_kernel_watch_count": 5,
+  "kernel_inotify_limits": {
+    "max_user_watches": "31576",
+    "max_user_instances": "128",
+    "max_queued_events": "16384"
+  },
+  "active_after_diagnostic": [
+    [
+      "kv260-benchmark-b4096",
+      0
+    ]
+  ],
+  "confirmed_source_defect": "listAccelerators rescans firmware; acell_dir_add calls add_to_watch before base-design deduplication; add_to_watch appends without wd/path deduplication",
+  "runtime_inference": "Exact line-554 error together with five kernel watches supports internal duplicate-table exhaustion, not the reported branch being an OS inotify limit failure",
+  "not_performed": [
+    "No daemon restart",
+    "No sysctl limit change",
+    "No board-side manager patch",
+    "No more app switching"
+  ]
+}

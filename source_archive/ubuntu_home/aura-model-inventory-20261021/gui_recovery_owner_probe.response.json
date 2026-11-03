@@ -1,0 +1,14 @@
+{
+  "reviewed_owner_source": "def single_owner(pid):\n    owners=[]\n    for proc in Path('/proc').glob('[0-9]*'):\n        try:\n            if any(x.endswith(b'/board_camera_motion.py') for x in (proc/'cmdline').read_bytes().split(b'\\0')):\n                owners.append(int(proc.name))\n        except OSError:pass\n    assert owners==[pid] or sorted(owners)==[pid], 'Unexpected camera processes: '+repr(owners)\n    assert int(service('show','aura-camera-ui.service','-p','MainPID','--value').strip())==pid\n    lock=Path('/run/aura-person-dpu.lock').stat()\n    found=[]\n    for line in Path('/proc/locks').read_text().splitlines():\n        parts=line.split()\n        if len(parts)<6 or parts[1]!='FLOCK' or parts[3]!='WRITE':continue\n        dev=parts[5].split(':')\n        if (len(dev)==3 and int(dev[0],16)==os.major(lock.st_dev)\n                and int(dev[1],16)==os.minor(lock.st_dev) and int(dev[2])==lock.st_ino):found.append(int(parts[4]))\n    assert found==[pid], 'DPU process owner lock mismatch: '+repr(found)\n\n",
+  "device_fds": {
+    "450495": [
+      "/dev/dri/renderD128",
+      "/dev/null",
+      "/dev/video0"
+    ],
+    "450525": [
+      "/dev/null"
+    ]
+  },
+  "camera_stop_policy": "TimeoutStopUSec=10s\nKillMode=control-group\nKillSignal=15\nActiveState=active\n"
+}

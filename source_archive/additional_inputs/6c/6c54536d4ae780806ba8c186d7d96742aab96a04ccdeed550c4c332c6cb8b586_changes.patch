@@ -1,0 +1,70 @@
+--- a/tools/board_avatar_gtk.py
++++ b/tools/board_avatar_gtk.py
+@@ -1590,6 +1590,10 @@
+         started = time.perf_counter()
+         interval = None if self.last_tick is None else (started-self.last_tick)*1000
+         self.last_tick = started
++        ui_timings={};checkpoint=started
++        def mark_ui(name):
++            nonlocal checkpoint
++            stamp=time.perf_counter();ui_timings[name]=round((stamp-checkpoint)*1000,3);checkpoint=stamp
+         try:
+             if self.diagnostic_result:
+                 completed,self.diagnostic_result = self.diagnostic_result,None
+@@ -1608,7 +1612,9 @@
+                     except Exception as exc:
+                         request['error'] = str(exc)
+                 request['done'].set()
++            mark_ui('commands')
+             packet = self.controller.read()
++            mark_ui('controller_read')
+             if self.native_video:
+                 self.last_image=packet['image']
+                 self.last_avatar_sequence=packet['sequence']
+@@ -1632,6 +1638,7 @@
+                 state['character_pair']=self.character_pair.status()
+             elif self.native_video:state['avatar_display']=dict(self.native_video.read(),kind='native_sink_handoff')
+             settings_text = self.refresh_settings(state)
++            mark_ui('settings')
+             state.update(character=self.character, dialogue_enabled=bool(state.get('local_transcription',{}).get('service',{}).get('conversation')), backend='gtk3-gstreamer', cached_only=True)
+             status = '已暂停' if state['paused'] else {'IDLE':'等你开口','VOICE_PREPARING':'正在准备声音…',
+                 'VOICE_STARTING':'正在准备播放…','SPEAKING':'正在说话','ACTION':'正在回应'}.get(state['phase'],state['phase'])
+@@ -1639,21 +1646,26 @@
+             if getattr(self, 'production_presentation', None) is None:
+                 self.reply.set_text(state['reply'])
+             self.refresh_runtime(state,settings_text)
++            mark_ui('runtime_widgets')
+             from tools.production_business_ui import project_business_ui
+             project_business_ui(self,state)
++            mark_ui('business_widgets')
+             from tools.production_memory_presentation import project_presentation
+             state=project_presentation(self,state)
+-            self.samples.append({'t':state['visual_time'],'interval_ms':interval,
+-                'render_ms':(time.perf_counter()-started)*1000,**{key:state[key] for key in
+-                ('phase','state','asset','index','speech_gain','mouth_level','blink_active','playing','paused','audio_time')}})
+-            state['ui_tick_ms']=round((time.perf_counter()-started)*1000,2)
++            mark_ui('presentation')
+             state['diagnostic_job']=dict(self.diagnostic_job) if self.diagnostic_job else None
+             if self.board_business is not None:
+                 state['board_business']=self.board_business.runtime.public()
++            mark_ui('business_public')
+             fault = getattr(self, 'runtime_faults', None)
+             state['runtime_faults'] = (dict(fault, last=dict(fault['last'],
+                 frames=[dict(frame) for frame in fault['last']['frames']])) if fault is not None else
+                 dict(metadata_only=True, count=0, last=None))
++            state['ui_tick_ms']=round((time.perf_counter()-started)*1000,2)
++            state['ui_stage_timings_ms']=dict(ui_timings)
++            self.samples.append({'t':state['visual_time'],'interval_ms':interval,
++                'render_ms':state['ui_tick_ms'],**{key:state[key] for key in
++                ('phase','state','asset','index','speech_gain','mouth_level','blink_active','playing','paused','audio_time')}})
+             self.bridge.publish(state,packet['jpeg'])
+         except Exception as exc:
+             previous = getattr(self, 'runtime_faults', None)
+@@ -1668,6 +1680,7 @@
+             self.controller.cancel()
+             self.status.set_text(message)
+         return True
++
+ 
+     def save_evidence(self):
+         from tools.production_memory_presentation import save_production_evidence

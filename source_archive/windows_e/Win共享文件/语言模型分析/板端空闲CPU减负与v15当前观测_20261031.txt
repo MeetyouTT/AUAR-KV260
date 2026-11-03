@@ -1,0 +1,17 @@
+v15当前恢复与空闲减负观察（只依据已保存metadata）
+
+- 现役v15：/home/root/aura-board-business-20261030/production-5259eab11e42af13；startup SHA 67d03ca40d709d22d761706bfca51a55e352adf86763ced7fb5eb5a688123a55，378份组件；manifest SHA 8312169b6747d6f0e1c2c8a73c20ecee6cd7b949083f977871412a96390c2e73；config SHA faa5bead11f6c212412cf295db7d11c092c51848a5b08b49d78449ed613ba6d7未改。
+- 恢复回执mono51155.430627971：IDLE/no playing、自动WAITING_SPEECH/enabled=true/mic=true，无唤醒词、半双工，GUI故障0；supervisor970372/GTK970411/frontend970467、camera260102/birth784437，同boot 8100a7fd-0c6a-46c4-82b8-f874988a1521。均是保存时点，下次必须现读。
+- v15连续采集、优先级作用域、磁盘暂停false→恢复true、取消rearm、arecord释放及worker复用均通过；不代替冷启动/暂停重启/多小时长稳。
+- 用户最新确认声音连续，仍认为等待过长：audio_continuity_user_confirmed=true、waiting_improvement=false；该次真人反馈的精确轮次耗时未取得可靠关联，不把后续THINKING的ASR数或旧ACK硬挂该反馈。扬声器首声尚未声学测量，不能宣布完整对话验收。
+- 两段约8秒监听观察CPU83.98%→82.33%，仅-1.65个百分点；native完成计数速率3.37→6.27次/秒，不是屏幕物理FPS且未达16目标，不构成严格A/B或等待提速证明。
+- 正式保持原Paraformer3线程、combined前端1线程/capture nice-10、原8帧；板端业务/存储/雪妃显示，Windows仅现有27B与OmniVoice16，权重仍D:/AIModels。两种新流式ASR未上线；合成意图107字对照差异3/7/12不是人工gold，CTC另有1秒credit失败。
+- 最终恢复时本进程memory completed74/discarded1/streak0无error、capture failures0；不得与v14累计493等直接相减。跟随false、机械FAULT/null、身份与每包权限/完整ACK边界保留。
+- 接续按语音项目根目录相对路径deliverables/2026-10-30_board_owner/integration/dialogue_repair/current_observation_v15.json及idle_cpu_integration/v15_current_note.txt读取；旧v14正文及文档原字节归档于docs_state_v15/before。
+
+本版只替换GTK旧字幕写入点与常驻音频重复idle状态IPC两个源。原audio poll/ALSA静音/echo reference、播放active/error/EOS、字幕TTL/取消/Store提交后失效均保留。
+30次约60秒operator_window采样没有提交或播放，不是用户确认轮；后续用户确认声音连续但等待仍长，与该空闲窗口分开记录。未宣称本版降低实际首声等待。
+两段资源观察不是同条件ABBA；native是draw/swap完成计数观测，不是物理扫描/显示FPS。两个候选模型质量仅相对合成意图文本，均未上线；正式仍原3线程识别。
+当前观测JSON SHA 9b4a12c679145a453127b1d2f3653d92d423d6a6bbb887afae4a86752d1a3d1a。本次仅更新文档及白名单metadata，未操作服务、硬件、模型或私库。
+
+该次用户反馈的精确轮次耗时未取得可靠关联，按当前证据封档；后续第3/4次提交、持续更新的录音时长和旧ACK均不归于它。后续online Paraformer仍只是独立候选，不属于v15已测/已部署。

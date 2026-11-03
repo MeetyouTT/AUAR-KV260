@@ -1,0 +1,14 @@
+import json,subprocess,urllib.request
+from pathlib import Path
+root=Path('/home/root/aura-gui-cpu-20261023/53e94ea536a981bf')
+out={'done':(root/'done.json').exists()}
+if out['done']:
+ out['status']=json.loads((root/'done.json').read_text())
+ if out['status']['exit_code']==0:out['profile']=json.loads((root/'stdout.json').read_text())
+ else:out['error']=(root/'stderr.log').read_text()[-1500:]
+out['unit_state']=subprocess.check_output(['systemctl','show','aura-gui-profile-53e94ea536a981bf.service','-p','ActiveState','--value']).decode().strip()
+op=urllib.request.build_opener(urllib.request.ProxyHandler({}))
+with op.open('http://127.0.0.1:8790/health',timeout=3) as r:h=json.load(r)
+out['current']={'camera_pid':h['pid'],'yolo_hz':h['detection_hz'],'optional':h['dpu_schedule']['optional'],
+ 'identity_ready':h['identity']['ready'],'owner_fenced':h['dpu_schedule']['owner_fenced']}
+print(json.dumps(out))

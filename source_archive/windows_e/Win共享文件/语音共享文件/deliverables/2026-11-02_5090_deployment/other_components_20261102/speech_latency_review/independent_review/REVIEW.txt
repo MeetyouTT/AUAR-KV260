@@ -1,0 +1,15 @@
+两文件数值计时透传候选独立审阅：通过，无阻断发现；仅本地候选，未部署。
+
+已核精确来源：board_dialogue基线c877cdee602ff0bda669cc2b2fefa77e9328ce205a744e317df82ffb17146de6→候选bdaac7092ff889d9b2def4de8cfc5623a411046d2a072e39afc04c0838c436bf；Jobs基线687b80cde20d70e4de56dd71956683b9cec59f55bd25965491dc08d00c8cb248→候选dc117b493047eecb4148450d4c8c1cafbbc1b30a377aaaf8b3aca0101694adff。独立重算diff与作者CANDIDATE.diff原字节内容一致。
+
+静态范围：只有BoardDialogueController._prepare和BoardDialogueJobs._execute两个方法AST改变，另有15项固定键集合及其派生字段集合、原已导入模块的附加常量导入。原_start/_check/_request/回复校验/授权/截止时间/流式音频和ACK等其余方法AST保持。
+
+数值与隐私：每次prepare新增最多15个llm_last_backend_<固定协议键>及1个计数。仅内置int/float、非负且小于1e15可进入；bool/NaN/Inf/负数/巨大数/字符串及未知键均排除。原wire验证保持，Jobs再次按固定字段名及有限数值过滤；不透传文本、身份ID、请求ID或任意字典。没有无界列表或新持久存储。
+
+失败/取消/重试/下一轮：每次LLM请求前移除上一尝试的可选字段，即使末次缺metrics也不复用前次；失败或取消prepare去掉backend观测并归零计数；_prepare入口重建当前指标，Jobs在普通prepare调用前原有清空仍保持并在finally仅复制本次指标。本地直答不继承上次LLM观测，多句TTS不覆盖本次LLM字段。
+
+时间语义：backend字段保留llm_last_backend前缀，表示主机LLM任务相对计时，llm_rpc_ms仍是板端RPC墙钟累计；不得相加或把差值直接称纯网络。重试时last只指最后一次LLM响应，不是全部重试之和。llm_backend_metrics_calls计的是成功prepare期间收到合规数值观测的LLM响应数，可能包括后来被回复质量校验拒绝的前次响应；最后一组可选值仍只来自最终尝试，不串旧值。
+
+独立核对作者证据：重新解析最终专项XML，21项/0失败/0错误/0跳过；原60项在两版均56通过、同4项旧角色称呼/alias夹具失败，失败集精确一致，没有将4项称通过。重新解析两份8场景trace JSON，逐值完全相等，涵盖请求payload/期限、输出/存储、完整及部分/外来ACK、授权、取消、模型失败、本地回答。审阅未重复运行测试、没有SSH或真实模型/库/设备访问，未改候选。
+
+本候选仅补充观测能力，没有实现首句重叠，也没有任何新提速成绩。root可在主页面其他工作完成后按新鲜实际来源另作合并/部署安排；本审阅不提供服务动作、发布授权或整份startup覆盖入口。

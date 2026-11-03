@@ -1,0 +1,40 @@
+--- r3/candidate/recovery_rules.py
++++ r4/candidate/recovery_rules.py
+@@ -159,14 +159,35 @@
+ 
+ 
+ def verify_bootstrap_handoff(handoff, gate, boot, contract_sha):
+-    require(handoff.get('mode') in {'native_new_kernel_boot', 'native_exact_same_boot'}, 'ORIGINAL_BOOTSTRAP_HANDOFF_MISSING')
++    mode = 'native_exact_same_boot' if gate['predecessor']['boot_id'] == boot else 'native_new_kernel_boot'
++    require(handoff.get('mode') == mode, 'ORIGINAL_BOOTSTRAP_MODE_DIFFERS_FROM_ACTUAL_BOOT_ROUTE')
+     require(gate['boot_id'] == boot and gate['contract_sha256'] == contract_sha
+             and handoff.get('seed_sha256') == gate['checkpoint_sha256'], 'ORIGINAL_CAMERA_USED_DIFFERENT_FINAL')
+     prior = gate['predecessor']['camera_owner']
+     require(handoff.get('source_pid') == prior['pid']
+             and str(handoff.get('source_birth_ticks')) == prior['birth_ticks'], 'ORIGINAL_BOOTSTRAP_SOURCE_OWNER_CHANGED')
+-    if handoff['mode'] == 'native_new_kernel_boot':
++    if mode == 'native_new_kernel_boot':
+         require(handoff.get('current_boot') == boot and handoff.get('source_boot') == gate['predecessor']['boot_id'], 'ORIGINAL_NEW_BOOT_ARCHIVE_PROVENANCE')
++
++
++def next_history_expected(previous, gate, handoff, boot):
++    """Extend only the actual original commit edge; never synthesize a Native final."""
++    head = handoff.get('previous_kernel_history')
++    if gate['predecessor']['boot_id'] == boot:
++        require(head == previous['head'], 'SAME_BOOT_HISTORY_HEAD_CHANGED')
++        return copy.deepcopy(previous)
++    require(isinstance(head, dict) and head.get('archive_path') == handoff.get('archive_path')
++            and head.get('archive_sha256') == handoff.get('archive_sha256')
++            and head.get('source_boot') == gate['predecessor']['boot_id']
++            and head.get('source_checkpoint_sha256') == gate['checkpoint_sha256']
++            and head.get('history_is_lower_bound') is False, 'ORIGINAL_CURRENT_BOOT_ARCHIVE_EDGE_DIFFERS')
++    count = previous['archive_count'] + 1
++    require(count <= 64, 'COMPLETE_HISTORY_ORIGINAL_DEPTH_BOUND')
++    row = dict(path=head['archive_path'], sha256=head['archive_sha256'], current_boot=boot,
++               source_boot=head['source_boot'], source_checkpoint_sha256=head['source_checkpoint_sha256'],
++               history_is_lower_bound=False)
++    return dict(head=copy.deepcopy(head), archive_count=count, archives=[row] + copy.deepcopy(previous['archives']),
++                legacy_pin=copy.deepcopy(previous['legacy_pin']))
+ 
+ 
+ def make_binding(selected, boot, current_owner, run_pin, approved_sources):

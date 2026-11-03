@@ -1,0 +1,17 @@
+原相机恢复后的GUI绑定与正常启动审阅（仅root执行变更）
+
+本子代理做过两次板卡只读核验：BINDING_PRECHECK25.json与TRANSACTION25_DRYRUN.json。没有写板端文件、控制服务、调用模型、打开真实身份/记忆库、CDLL/MMIO或运动；本地生成候选不算已部署。
+
+实际owner是boot903cfade-b93c-48fa-804e-379be1967313、camera79866/birth2265436、原cmdacf3ee12…。run-config为/home/root/aura-native-live-20261024/ops/be72669aa53de735/native-run-903cfade-b93c-48fa-804e-379be1967313-79866/config.json，SHA c8df0795664d21d52eab3a4f1cf55e0d1a721577d547c512e83ee1931d80871d。
+
+新RAM绑定保留当前selected24项所有path/SHA，追加真实新run-config成为25项。只更新owner tuple/camera_config/source pin，原模型、INT8 gallery选择、TTL3000、阈值配置与全部其余参数保持。原FaceGalleryReadback._verify只经AST隔离执行该纯校验方法，不导入模块read()或打开gallery；实读25项、222Native和7operator源及380业务组件一致，采集/检测推进、identity ready且无错误/运动。wide动态FW、VART、configfs overlay、ZOCL设备绑定和当前base FDT均符合实际；没有强求base FDT因overlay变化。
+
+apply_gui_binding25.py是原已审CAS事务的新实例。默认仅dry-run，root唯有明确参数--apply-selected-restored-camera-binding才写。应用前要求旧startup0f2a、UI fc21、selected24pin4d8、GUI正常inactive/dead/MainPID0/空Job、saved listening=false、当前camera原tuple及来源/帧推进、原default14pin e203。新TX是/home/root/aura-5090-recovery-20261102-903cfade/gui-selected-79866-25pins-v1；O_EXCL备份原startup/UI/selected字节，写新25pin文件后仅CAS替换UI face_readback spec及startup的一个组件pin；其他379项及身份router85e4保留。旧selected24文件、R2冻结绑定和default14文件不改。失败仅在同GUI状态、同camera、精确新字节条件下CAS恢复原配置；未知先查transaction.json及真实文件，不重复apply。
+
+预测新binding SHA9ab2533d2c3000d61095f54de2e8199f53461ac085e2f58230ab36149be6af1f；UI SHAfc98455a5586cc4f1896f5472ec9b204bd7ff2b0c5be2798ba5cab1788b9b959；startup SHA3f5e81abc20ce5169ac91ae302611cba8958175a6a2bdb615fd9b858353120d5。
+
+root确认camera恢复审计通过且应用后源检查通过，再为新start独占创建intent，单次运行start_gui_after_restored_binding25.py。它钉上述三SHA、新owner25pin、full380/原_verify/原default14、实际wide配套、两次相机推进及model-only原27B/OmniVoice16健康和时钟守卫；只发一次正常GUI start，不包含camera动作、PL、Native或寄存器入口。请求未知仅只读观察，不重发。
+
+等待仍沿原wait_for_gui_ready_90.py，原GUI实际启动曾46秒，不能用旧35秒误判失败。然后运行collect_gui_after_restored_binding25.py；它根据新launch.json读真实supervisor/GTK，不沿用旧16314/16318，过滤API到布尔/枚举/计数后输出16项软件checks。当前四轴配置仍是旧boot，正确预期是FAULT/UNAVAILABLE、followfalse、readback不存在、pulse null且没有vsrv/devmem映射；这项failclosed不表示wide加载失败，也不等同物理轴已验收。observer不宣称用户已再次看到物理页面，不自动开麦或恢复跟随。
+
+脚本指纹见START_OBSERVER_REVIEW.json及DELIVERY_MANIFEST.json。除RAM precheck/default dryrun外，应用、start和post-start observer尚未由本子代理执行；实际发布结果由root保存新回执。

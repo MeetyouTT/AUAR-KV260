@@ -1,0 +1,246 @@
+{
+  "schema": "aura.public-frontend-budget-handoff.v1",
+  "status": "LOCAL_FAKE_TESTS_PASS_ARM_EXECUTION_PENDING",
+  "baseline_startup_sha256": "90f6c6c40f6501362aa77483235a7260a212de6e3357615311bdaa5cc193ebbe",
+  "stage_root": "/home/root/aura-frontend-budget-public-20261031/d7a58ff4218e787d",
+  "files": {
+    "public_frontend_budget.py": {
+      "sha256": "d7a58ff4218e787d1714d2474b47bf4aa03a7dac5e7c7b40c78b61b6a46898a8",
+      "bytes": 14571
+    },
+    "compare_frontend_abba.py": {
+      "sha256": "955dbc8048bca046c71483a8e27a9cbb9d5964396b29db94dde7dd23aaaad74e",
+      "bytes": 5139
+    },
+    "test_frontend_budget.py": {
+      "sha256": "7d5d7793fd09abda647759de3417d86e1215e00c754c264989fbe9d92dc84606",
+      "bytes": 6865
+    },
+    "LOCAL_TEST_RESULT.json": {
+      "sha256": "b011d2ba2e88c7882b1c8ef4b088ca6a03991bdef6b7ec610abd997facb97c4b",
+      "bytes": 1468
+    },
+    "source_mapping.v90.json": {
+      "sha256": "df6b26927ad60d6d3513429c697d70bd15c84cfdca6d16c5527e9992cb7b04e2",
+      "bytes": 45113
+    }
+  },
+  "baseline": {
+    "gtcrn_threads": 1,
+    "silero_threads": 1,
+    "spinning": "runtime_default",
+    "buffer_reuse": true,
+    "io_binding": true
+  },
+  "candidate": {
+    "gtcrn_threads": 2,
+    "silero_threads": 1,
+    "intra_op_allow_spinning": "0",
+    "buffer_reuse": true,
+    "io_binding": true
+  },
+  "candidate_change_scope": "One existing GTCRN CPU session constructor inside the owned isolated probe process.",
+  "fixed_models": {
+    "gtcrn": "e77603ac0c23dac3227dd2d7135b3a585cbee2679048aecfa886657d3ae1b534",
+    "silero": "6b99cbfd39246b6706f98ec13c7c50c6b299181f2474fa05cbc8046acc274396"
+  },
+  "prior_evidence": [
+    {
+      "role": "old_sherpa_threads",
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\ubuntu\\evidence\\20261030T124707387349Z-board_frontend_profile\\result.json",
+      "sha256": "b846933ddc68386bd78cbf46059f28ddbbc3889dd58941d6db545b4cda1215a5"
+    },
+    {
+      "role": "old_sherpa_gtcrn_only",
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\ubuntu\\evidence\\20261030T125527705959Z-board_frontend_profile\\result.json",
+      "sha256": "19cf74f84358354e290e69bc3fcd436a09387832f4eeb3d76e34e315bfc2a2c5"
+    },
+    {
+      "role": "allocation_rejected",
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\frontend_allocation_candidate\\public_probe\\DECISION.json",
+      "sha256": "1b97452020be1ba15b72db80cd0d90607716e4159502381de072a029297034cd"
+    },
+    {
+      "role": "phasehold_plan_only",
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\capture_budget_review\\ASR_RENDER_PHASE_REVIEW.txt",
+      "sha256": "c8b760aa7e7386e5d7c2f6212be93fb674b8c037e3bf2b8f1bd2966faae54412"
+    }
+  ],
+  "prior_findings": [
+    "The older Sherpa combined pipeline measured 30.4033ms with one GTCRN thread and 34.9328ms with two. It predates the current NumPy FFT and IO-binding production implementation.",
+    "The older GTCRN-only experiment also increased wall time and roughly doubled process CPU with two threads. This motivates a limited test of two threads with spinning disabled, not automatic promotion.",
+    "The later allocation candidate failed the same raw-eight-frame pipeline at B1 and was not deployed. It is not included here.",
+    "The phase-hold document covers ASR-stage rendering only. It was not implemented and does not reduce continuous GTCRN/Silero processing per input frame."
+  ],
+  "official_option_sources": [
+    "https://raw.githubusercontent.com/microsoft/onnxruntime/v1.17.3/include/onnxruntime/core/session/onnxruntime_session_options_config_keys.h",
+    "https://onnxruntime.ai/docs/performance/tune-performance/threading.html"
+  ],
+  "option_rationale": "ORT 1.17.3 provides session.intra_op.allow_spinning. Disabling worker spinning can reduce busy-wait CPU. The board latency and total CPU tradeoff must be measured.",
+  "measured_stages": [
+    "full_gate_wall",
+    "full_gate_consumer_cpu",
+    "full_gate_process_cpu_including_ORT_workers",
+    "GTCRN_wall",
+    "GTCRN_fft_ORT_ifft_ola",
+    "Silero_accept_waveform",
+    "paced_original_raw8_endpoint"
+  ],
+  "profiling_scope": "Two full public-file repetitions per slot, then one original paced raw8 endpoint. Profiling and output-digest overhead are included equally in both arms. Constructor32-frame warmup and load are separate.",
+  "invocations": [
+    {
+      "slot": "A1",
+      "mode": "baseline_1",
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/root/aura-frontend-budget-public-20261031/d7a58ff4218e787d/public_frontend_budget.py",
+        "--source-mapping",
+        "/home/root/aura-frontend-budget-public-20261031/d7a58ff4218e787d/source_mapping.v90.json",
+        "--code-root",
+        "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura",
+        "--pipeline-helper",
+        "/home/root/aura-public-frontend-allocation-20261031/c7988d2439fbb0d7/public_probe/allocation_public_probe.py",
+        "--pump-helper",
+        "/home/root/aura-public-frontend-allocation-20261031/c7988d2439fbb0d7/public_probe/reference/board_audio_runtime_probe.py",
+        "--wav",
+        "/home/root/aura-board-owner-candidate-20261030/asr-1.13.8/models/paraformer/test_wavs/0.wav",
+        "--frontend-models",
+        "/home/root/aura-board-owner-candidate-20261030/frontend-b3d06b653876469d/models",
+        "--fft-deps",
+        "/home/root/aura-board-owner-candidate-20261030/fft-ee19b936d17aa451/deps",
+        "--asr-deps",
+        "/home/root/aura-board-owner-candidate-20261030/asr-1.13.8/deps",
+        "--slot",
+        "A1",
+        "--mode",
+        "baseline_1",
+        "--execute-root-only"
+      ]
+    },
+    {
+      "slot": "B1",
+      "mode": "dual_nospin",
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/root/aura-frontend-budget-public-20261031/d7a58ff4218e787d/public_frontend_budget.py",
+        "--source-mapping",
+        "/home/root/aura-frontend-budget-public-20261031/d7a58ff4218e787d/source_mapping.v90.json",
+        "--code-root",
+        "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura",
+        "--pipeline-helper",
+        "/home/root/aura-public-frontend-allocation-20261031/c7988d2439fbb0d7/public_probe/allocation_public_probe.py",
+        "--pump-helper",
+        "/home/root/aura-public-frontend-allocation-20261031/c7988d2439fbb0d7/public_probe/reference/board_audio_runtime_probe.py",
+        "--wav",
+        "/home/root/aura-board-owner-candidate-20261030/asr-1.13.8/models/paraformer/test_wavs/0.wav",
+        "--frontend-models",
+        "/home/root/aura-board-owner-candidate-20261030/frontend-b3d06b653876469d/models",
+        "--fft-deps",
+        "/home/root/aura-board-owner-candidate-20261030/fft-ee19b936d17aa451/deps",
+        "--asr-deps",
+        "/home/root/aura-board-owner-candidate-20261030/asr-1.13.8/deps",
+        "--slot",
+        "B1",
+        "--mode",
+        "dual_nospin",
+        "--execute-root-only"
+      ]
+    },
+    {
+      "slot": "B2",
+      "mode": "dual_nospin",
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/root/aura-frontend-budget-public-20261031/d7a58ff4218e787d/public_frontend_budget.py",
+        "--source-mapping",
+        "/home/root/aura-frontend-budget-public-20261031/d7a58ff4218e787d/source_mapping.v90.json",
+        "--code-root",
+        "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura",
+        "--pipeline-helper",
+        "/home/root/aura-public-frontend-allocation-20261031/c7988d2439fbb0d7/public_probe/allocation_public_probe.py",
+        "--pump-helper",
+        "/home/root/aura-public-frontend-allocation-20261031/c7988d2439fbb0d7/public_probe/reference/board_audio_runtime_probe.py",
+        "--wav",
+        "/home/root/aura-board-owner-candidate-20261030/asr-1.13.8/models/paraformer/test_wavs/0.wav",
+        "--frontend-models",
+        "/home/root/aura-board-owner-candidate-20261030/frontend-b3d06b653876469d/models",
+        "--fft-deps",
+        "/home/root/aura-board-owner-candidate-20261030/fft-ee19b936d17aa451/deps",
+        "--asr-deps",
+        "/home/root/aura-board-owner-candidate-20261030/asr-1.13.8/deps",
+        "--slot",
+        "B2",
+        "--mode",
+        "dual_nospin",
+        "--execute-root-only"
+      ]
+    },
+    {
+      "slot": "A2",
+      "mode": "baseline_1",
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/root/aura-frontend-budget-public-20261031/d7a58ff4218e787d/public_frontend_budget.py",
+        "--source-mapping",
+        "/home/root/aura-frontend-budget-public-20261031/d7a58ff4218e787d/source_mapping.v90.json",
+        "--code-root",
+        "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura",
+        "--pipeline-helper",
+        "/home/root/aura-public-frontend-allocation-20261031/c7988d2439fbb0d7/public_probe/allocation_public_probe.py",
+        "--pump-helper",
+        "/home/root/aura-public-frontend-allocation-20261031/c7988d2439fbb0d7/public_probe/reference/board_audio_runtime_probe.py",
+        "--wav",
+        "/home/root/aura-board-owner-candidate-20261030/asr-1.13.8/models/paraformer/test_wavs/0.wav",
+        "--frontend-models",
+        "/home/root/aura-board-owner-candidate-20261030/frontend-b3d06b653876469d/models",
+        "--fft-deps",
+        "/home/root/aura-board-owner-candidate-20261030/fft-ee19b936d17aa451/deps",
+        "--asr-deps",
+        "/home/root/aura-board-owner-candidate-20261030/asr-1.13.8/deps",
+        "--slot",
+        "A2",
+        "--mode",
+        "baseline_1",
+        "--execute-root-only"
+      ]
+    }
+  ],
+  "environment": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "PYTHONNOUSERSITE": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "root_execution_gates": [
+    "Use one fresh child per slot, stop normally before the next slot and give each owned child an external90-second hard timeout.",
+    "Root retains the existing device window and verifies current source/startup/boot, process births, Windows model-host idle and no active summary before starting. The worker checks all current component hashes and the existing paused/no-microphone/no-playback/no-following gate.",
+    "Run A1,B1,B2,A2 under matched camera/UI load. Preserve original failure receipts and stop after any failed slot without automatically replacing it.",
+    "Record source owner, camera/UI cadence and background summary activity around each slot. Invalidate causal comparisons if these differ.",
+    "Do not change production frontend configuration based only on this public screening. Its normal IPC/process entry and sustained physical dialogue still require root integration and validation."
+  ],
+  "acceptance_thresholds": {
+    "candidate_mean_wall_ms_max": 16.0,
+    "minimum_relative_gain_percent": 15.0,
+    "maximum_process_cpu_ratio": 1.25,
+    "maximum_complete_50frame_mean_ms": 18.0,
+    "candidate_queue_peak_max": 6,
+    "candidate_queue_wait_ms_max": 120.0
+  },
+  "numerical_gate": "Exact public float32/PCM16 output, per-frame VAD decisions and original contiguous endpoint PCM must agree across all four slots and both repeated inputs.",
+  "tests": {
+    "passed": 10,
+    "fake_session_and_offline_comparator_only": true,
+    "actual_models_loaded_locally": false
+  },
+  "actions": {
+    "board_contacted": false,
+    "production_modified": false,
+    "models_copied": false,
+    "windows_asr_added": false
+  }
+}

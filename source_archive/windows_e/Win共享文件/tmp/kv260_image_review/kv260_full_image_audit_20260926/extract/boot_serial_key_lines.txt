@@ -1,0 +1,100 @@
+# 启动日志关键行（QSPI 固件与 SD 内核）
+Zynq MP First Stage Boot Loader 
+Release 2023.2   Mar 18 2024  -  06:43:04
+MultiBootOffset: 0x40
+Reset Mode	:	System Reset
+Platform: Silicon (4.0), Running on A53-0 (64-bit) Processor, Device Name: XCZUUNKNEG
+QSPI 32 bit Boot Mode 
+FlashID=0x20 0xBB 0x20
+PMU Firmware 2023.2	Mar 18 2024   06:43:04
+PMU_ROM Version: xpbr-v8.1.0-0
+NOTICE:  BL31: Non secure code at 0x8000000
+NOTICE:  BL31: v2.8(release):xlnx_rebase_v2.8_2023.2_ksb_aug
+NOTICE:  BL31: Built : 12:21:43, Aug 31 2023
+
+
+U-Boot 2023.01 (May 10 2024 - 06:24:11 +0000)
+
+CPU:   ZynqMP
+Silicon: v3
+Chip:  xck26
+Detected name: zynqmp-smk-k26-xcl2g-rev2-sck-kv-g-rev2
+---
+Secure Boot:	not authenticated, not encrypted
+Core:  127 devices, 35 uclasses, devicetree: fit
+NAND:  0 MiB
+MMC:   mmc@ff170000: 1
+Loading Environment from nowhere... OK
+In:    serial
+Out:   serial
+Err:   serial
+Bootmode: QSPI_MODE
+Reset reason:	SOFT 
+Net:   PHY reset timed out
+
+ZYNQ GEM: ff0e0000, mdio bus ff0e0000, phyaddr 1, interface rgmii-id
+eth0: ethernet@ff0e0000
+[2J[1;1Hgpio: pin gpio@ff0a000038 (gpio 38) value is 0
+gpio: pin gpio@ff0a000038 (gpio 38) value is 1
+starting USB...
+Bus usb@fe200000: Register 2000440 NbrPorts 2
+Starting the controller
+USB XHCI 1.00
+scanning bus usb@fe200000 for devices... 3 USB Device(s) found
+       scanning usb for storage devices... 0 Storage Device(s) found
+Hit any key to stop autoboot:  2  1  0 
+ZynqMP> mmc dev 1
+switch to partitions #0, OK
+mmc1 is current device
+ZynqMP> fatload mmc 1:1 0x10000000 image.ub
+122901532 bytes read in 7879 ms (14.9 MiB/s)
+ZynqMP> setenv bootargs "earlycon=cdns,mmio,0xff010000 console=ttyPS0,115200 root=/dev/ram0 rw clk_ignore_unused initcall_blacklist=xlnx_dpu_drv_init"
+ZynqMP> printenv bootargs
+bootargs=earlycon=cdns,mmio,0xff010000 console=ttyPS0,115200 root=/dev/ram0 rw clk_ignore_unused initcall_blacklist=xlnx_dpu_drv_init
+ZynqMP> bootm 0x10000000
+## Loading kernel from FIT Image at 10000000 ...
+   Using 'conf-system-top.dtb' configuration
+   Trying 'kernel-1' kernel subimage
+     Description:  Linux kernel
+---
+   Loading Ramdisk to 723ae000, end 78fffd23 ... OK
+   Loading Device Tree to 000000000fff2000, end 000000000ffff7dc ... OK
+Working FDT set to fff2000
+
+Starting kernel ...
+
+efi_free_pool: illegal free 0x0000000077810040
+efi_free_pool: illegal free 0x000000007780e040
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd034]
+[    0.000000] Linux version 5.15.36-xilinx-v2022.2 (oe-user@oe-host) (aarch64-xilinx-linux-gcc (GCC) 11.2.0, GNU ld (GNU Binutils) 2.37.20210721) #1 SMP Mon Oct 3 07:50:07 UTC 2022
+[    0.000000] Machine model: ZynqMP SM-K26 Rev1/B/A
+[    0.000000] earlycon: cdns0 at MMIO 0x00000000ff010000 (options '')
+[    0.000000] printk: bootconsole [cdns0] enabled
+[    0.000000] efi: UEFI not found.
+[    0.000000] Zone ranges:
+[    0.000000]   DMA32    [mem 0x0000000000000000-0x00000000ffffffff]
+[    0.000000]   Normal   [mem 0x0000000100000000-0x000000087fffffff]
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000000000000-0x000000007fefffff]
+[    0.000000]   node   0: [mem 0x0000000800000000-0x000000087fffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000000000000-0x000000087fffffff]
+[    0.000000] On node 0, zone Normal: 256 pages in unavailable ranges
+[    0.000000] cma: Reserved 256 MiB at 0x0000000062000000
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: PSCIv1.1 detected in firmware.
+[    0.000000] psci: Using standard PSCI v0.2 function IDs
+[    0.000000] psci: MIGRATE_INFO_TYPE not supported.
+[    0.000000] psci: SMC Calling Convention v1.2
+[    0.000000] percpu: Embedded 18 pages/cpu s34776 r8192 d30760 u73728
+[    0.000000] Detected VIPT I-cache on CPU0
+[    0.000000] CPU features: detected: ARM erratum 845719
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 1031940
+[    0.000000] Kernel command line: earlycon=cdns,mmio,0xff010000 console=ttyPS0,115200 root=/dev/ram0 rw clk_ignore_unused initcall_blacklist=xlnx_dpu_drv_init
+[    0.000000] Dentry cache hash table entries: 524288 (order: 10, 4194304 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] software IO TLB: mapped [mem 0x000000007bf00000-0x000000007ff00000] (64MB)
+[    0.000000] Memory: 3651792K/4193280K available (13888K kernel code, 990K rwdata, 3924K rodata, 2176K init, 573K bss, 279344K reserved, 262144K cma-reserved)
+[    0.000000] rcu: Hierarchical RCU implementation.
+[    0.000000] rcu: 	RCU event tracing is enabled.

@@ -1,0 +1,76 @@
+{
+  "status": "FROZEN_PUBLIC_ARM_SCREEN_PREPARED_NOT_EXECUTED",
+  "archive": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\jpeg_demand_arm_screen_v20\\jpeg_public_arm_screen.zip",
+  "archive_sha256": "ee4f83fe0b4f37c14eb9744a06d37304d1cd0735be4b97df9f3a34dbb7268cdd",
+  "archive_bytes": 47770,
+  "worker_sha256": "94d819dd7893479687440321956939727445b63d29c3c718a9ccb19b8cf216c1",
+  "source_manifest_sha256": "2a35303cb6d50b488a6d4dc22f4609050b0f220ac0223b47f31829ac590fec12",
+  "files": {
+    "PUBLIC_SOURCES.json": "2a35303cb6d50b488a6d4dc22f4609050b0f220ac0223b47f31829ac590fec12",
+    "worker.py": "94d819dd7893479687440321956939727445b63d29c3c718a9ccb19b8cf216c1",
+    "public_sources/after/board/vision/ui_camera_service.py": "44b02084cb5e80b12349892183b08e02563c4447e75c5e05276d52786b8a55c4",
+    "public_sources/before/board/vision/ui_camera_service.py": "9d714b9bd00ea1da12088fa1e22100d7bdb689d0cac10332c3933b31e4f4d2df",
+    "public_sources/support/board/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_sources/support/board/identity/__init__.py": "eaff718e0f25e20927ce7b73e8b2ce04af3b0cead77016473703dd6012dbdbc9",
+    "public_sources/support/board/identity/calibration_http.py": "42159f8b5a37c8bd0a86628df035d959cfd8ce8558b3433bf6b7b9fd01cfb621",
+    "public_sources/support/board/interaction/__init__.py": "6cc7172557b3118d0c15c88b8f706fcb452bfe4582e3615872ea39b2318d7f10",
+    "public_sources/support/board/interaction/ui_contract.py": "7f67e4bdfe4a95396fbe6445759c80f8ea79cf51d2d991269213409a83daec86",
+    "public_sources/support/board/vision/__init__.py": "091e8b3b95a7f46655ba0c5275630eb3aee2079b57a95a0f5ef35d4e44c47284",
+    "public_sources/support/board/vision/camera_device.py": "caab1b14ea25ca52918ac4f41c75482fe56487d5a7afadda6e5472cc5dfcfe5b",
+    "public_sources/support/board/vision/local_preview.py": "f40212f3ebe7645cb7b55ecc9846882ec7d02c38a6a2703b98f934d7703d8f11",
+    "public_sources/support/board/vision/native_errors.py": "8be44a5793070168145a53adeea0703c50f55b4d0922662b76f33b61993e1388",
+    "public_sources/support/board/vision/pipeline_metrics.py": "f1606a7129d317a62f547c28a4a871ad2e83ee753a5678855bc6e096b3003b27",
+    "public_sources/support/common/__init__.py": "9194622c40cccdf5c8db07fd11f4c472fcba36cfb935e5ab04396fe51b818cfe",
+    "public_sources/support/common/visual_question.py": "e44275c7cb05e7adc456a2d2028163b95dd1d1a0c7aaecada6f5b94fea011e86"
+  },
+  "local_test_sha256": "2f37241e91e599db3f9e3180f88fc182f993fe3d333cffbd3a42c4dca15c4ad8",
+  "local_test_report_sha256": "61e29a93e34b347da58ccef74a482ff32588456dcc56e79b046136e30ae1767d",
+  "local_test_scope": "6 public harness tests only; synthetic encoder/raw/RSS fixtures; no actual OpenCV/ARM CPU result",
+  "camera_before_sha256": "9d714b9bd00ea1da12088fa1e22100d7bdb689d0cac10332c3933b31e4f4d2df",
+  "camera_after_sha256": "44b02084cb5e80b12349892183b08e02563c4447e75c5e05276d52786b8a55c4",
+  "default_plan": {
+    "frames_per_arm": 60,
+    "modes": [
+      "no_get",
+      "low_get",
+      "legacy_get"
+    ],
+    "order": "AB",
+    "measured_frames_total": 360,
+    "warmup_per_arm": 5,
+    "logical_capture_fps": 15,
+    "get_intervals_seconds": [
+      null,
+      2.0,
+      0.6
+    ],
+    "opencv_threads": 1,
+    "expected_after_encodes": [
+      0,
+      2,
+      7
+    ],
+    "expected_before_encodes_per_arm": 60
+  },
+  "source_packages": 14,
+  "raw_directory_parent": "/dev/shm",
+  "raw_directory_prefix": "aura-jpeg-public-",
+  "runtime_gui_startup_or_pid_bound": false,
+  "runtime_network_access": false,
+  "device_accessed": false,
+  "physical_camera_native_or_models_initialized": false,
+  "production_modified": false,
+  "root_execution_prerequisite": "Root completes v21 publication and takes a fresh owner/runtime context before serial scheduling. The public worker itself does not contact production.",
+  "cli_in_extracted_directory": "python3 -B worker.py --frames 60 --logical-capture-fps 15 --opencv-threads 1 --order AB",
+  "describe_cli": "python3 -B worker.py --describe",
+  "output": "One JSON report on stdout. Root preserves it as actual evidence. No saved public image/PCM files.",
+  "limits": [
+    "CPU-only extracted producer and in-memory HTTP handler. Real capture synchronization, detector/identity/DPU and TCP are excluded.",
+    "Producer CPU includes raw.publish and all legacy JPEG work. First-request CPU includes lazy encode; immediate cache probes are reported separately.",
+    "Pattern generation, hashing and raw validation are outside primary CPU durations; workload is unpaced and GET frequency is a logical density.",
+    "Real RawFrameStore files use only a newly created private /dev/shm directory. No fallback. Directory removal requires emptiness.",
+    "A hard timeout terminates only the public child and reports new matching RAM-directory metadata without recursively deleting unknown content.",
+    "Each arm is a fresh process with one OpenCV thread and five warmup frames. No equivalence to current production CPU threading is claimed.",
+    "Measured component CPU reduction cannot establish total board CPU, conversational latency or actual-camera stability."
+  ]
+}

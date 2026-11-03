@@ -1,0 +1,104 @@
+{
+  "protocol_version": 1,
+  "ok": true,
+  "observation_only": true,
+  "reservation": false,
+  "gpu_policy": {
+    "mode": "adaptive",
+    "enforcing": true,
+    "calibration_id": "5060ti16gb-27biq4xs-ctx2048-fit4096-ov16-20261030-r1"
+  },
+  "memory": {
+    "available": true,
+    "gpu_uuid": "GPU-fd752a2e-1923-22d0-63af-4e3d8e6f17b8",
+    "total_mib": 16311,
+    "free_mib": 1623,
+    "used_mib": 14428,
+    "age_ms": 0,
+    "scope": "device snapshot; not a reservation or inference peak"
+  },
+  "llm_residency": {
+    "available": true,
+    "llm_resident": true,
+    "llm_gpu_resident": true,
+    "llm_gpu_bytes": 11579215051,
+    "model": "aura-qwen3.8-27b-abliterated:iq4_xs",
+    "scope": "Ollama /api/ps; independent of /api/tags model availability",
+    "fresh": true,
+    "sampled_mono": 41101.015,
+    "age_ms": 0,
+    "ttl_ms": 2000,
+    "probe_calls": 1
+  },
+  "tts_ownership": {
+    "available": true,
+    "logical_workers": 1,
+    "external_workers": 1,
+    "owned_workers": 0,
+    "workers": [
+      {
+        "root_pid": 24240,
+        "pids": [
+          24240,
+          28388
+        ],
+        "modes": [
+          "cached"
+        ],
+        "owned": false
+      }
+    ],
+    "scope": "read-only process metadata; launcher and interpreter children form one family"
+  },
+  "tts_ready": false,
+  "admission": {
+    "llm": {
+      "extra_mib": 512,
+      "reserve_mib": 768,
+      "active_reserved_mib": 0,
+      "required_free_mib": 1280,
+      "observed_free_mib": 1623,
+      "shortfall_mib": 0,
+      "can_admit_now": true,
+      "reason": "snapshot_headroom_available",
+      "phase": "warm"
+    },
+    "tts": {
+      "extra_mib": 5120,
+      "reserve_mib": 768,
+      "active_reserved_mib": 0,
+      "required_free_mib": 5888,
+      "observed_free_mib": 1623,
+      "shortfall_mib": 4265,
+      "can_admit_now": false,
+      "reason": "insufficient_headroom",
+      "phase": "cold_or_unknown"
+    }
+  },
+  "startup": {
+    "can_warm_unique_tts_now": false,
+    "blocked_reasons": [
+      "external_tts_owner_present",
+      "llm_already_resident_for_tts_first_startup",
+      "cold_tts_headroom_unavailable"
+    ],
+    "order": [
+      "externally_release_old_tts_owner",
+      "explicit_ram_tts_warmup",
+      "verify_same_owned_worker_ready",
+      "recheck_original_llm_admission",
+      "load_existing_27b",
+      "recheck_steady_tts_admission"
+    ],
+    "cold_tts_required_free_mib": 5888,
+    "post_warmup_llm_admission_must_be_rechecked": true,
+    "external_business_single_writer_confirmation_required": true,
+    "external_idle_and_process_ownership_confirmation_required": true,
+    "external_rollback_plan_required": true,
+    "automatic_stop_or_unload": false
+  },
+  "captured_utc": "2026-10-30T12:50:41.320832+00:00",
+  "real_model_inference_performed": false,
+  "candidate_tts_spawned": false,
+  "services_stopped_or_reloaded": false
+}

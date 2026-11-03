@@ -1,0 +1,126 @@
+{
+  "schema": "aura.ordinary-tts-streaming-handoff.v1",
+  "status": "FROZEN_SOURCE_AND_SYNTHETIC_CONTRACT_PASS",
+  "baseline_startup_sha256": "ac9be342ffbf933a7e044e99f74ce6ddc45b947970f04741e3534744644bc1f7",
+  "hardware_executed": false,
+  "production_modified": false,
+  "files": {
+    "board/runtime/board_dialogue.py": {
+      "sha256": "bce1f21962d083275d9e8a966f244d8c227d0d62e9a30314767453d04c05b475",
+      "bytes": 31766,
+      "before_sha256": "bcaef073a6bcecfe33097074f1de5e16bb121b57d0c3c8d59ec6384435ed6f30"
+    },
+    "board/runtime/audio/board_dialogue_jobs.py": {
+      "sha256": "2206239b0e7c1bdabb2002a5d932550201541a2a6a15f2b5ff3f381de5d07da2",
+      "bytes": 45760,
+      "before_sha256": "8afe32d3499517ff9fbb556674136bccc29deb2cb8a5da0a9e36738a2a302010"
+    }
+  },
+  "artifacts": {
+    "ordinary_streaming.overlay.zip": {
+      "sha256": "63acf224a94dea8055d6e212aaf66cb72a02cae4a9e680a440bead20630ebaa9",
+      "bytes": 19797
+    },
+    "overlay_manifest.json": {
+      "sha256": "87a4dd27ab57146e543b2cf1dfa6403f3a3b88d1ca76a1b79f6c87dc72de2e3d",
+      "bytes": 715
+    },
+    "extra_source_map.json": {
+      "sha256": "71f31af8d77f6aceb73aa087138b915dab9db2dc8b68fadbb5b5151dc4cfef97",
+      "bytes": 524
+    },
+    "build_overlay.py": {
+      "sha256": "c27f28970dcbff1d95e397875985f77179a1610d40ea7da15f8c072f353b1d42",
+      "bytes": 15762
+    },
+    "tests/test_streaming.py": {
+      "sha256": "00bc5b86e79f5353d18440a0821c42cb4c332ae90e3cc5f26b30b85100ba9cf4",
+      "bytes": 12675
+    },
+    "tests/test_stream_memory_contract.py": {
+      "sha256": "7c6e888ffeaa3d413d7ff4e15639f8b98df66adbc43ac77544e51e82086bef13",
+      "bytes": 15173
+    },
+    "tests.xml": {
+      "sha256": "b98f0f7cc7a342d96f9ec5cb83b616640241ca12f03f0620c725400910dd5497",
+      "bytes": 3666
+    },
+    "REVIEW.txt": {
+      "sha256": "27bf3dfc79cc5d8ae572a7b3e96cd71d5db5aee4d4a08dc9760bd9cb58e6e1c8",
+      "bytes": 4618
+    }
+  },
+  "required_store": {
+    "name": "BoardMemoryStore.check_prepared_turn_current(turn_id, *, generation) -> True",
+    "before_sha256": "19dabc48425ed711af17fc56929a0198067217c52593e157db23b8724ddffde3",
+    "after_sha256": "943bf88c05400c49c76a1aee68a0bb242cb929cee3e213bc21f465ac3ef77d46",
+    "path": "after/common/board_memory.py",
+    "readonly": true,
+    "schema_or_state_machine_changed": false,
+    "all_other_module_AST_unchanged": true
+  },
+  "store_contract_receipt": {
+    "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_board_owner\\integration\\response_latency\\memory_candidate\\STREAM_CONTRACT_HANDOFF.json",
+    "sha256": "19bc1e6c6e066d8543595e45c3679f34aee44245963f04f95047fca16ca5f76a",
+    "bytes": 3861
+  },
+  "tests": {
+    "prepared_API_real_synthetic_Store_cases": 18,
+    "independent_stream_real_synthetic_Store_cases": 25,
+    "runtime_agent_stream_fake_cases": 14,
+    "combined_passed": 57,
+    "combined_failed": 0,
+    "combined_seconds": 3.5,
+    "command": "python -B -m pytest -p no:cacheprovider deliverables/2026-10-30_board_owner/integration/response_latency/memory_candidate/tests/test_prepared_turn.py deliverables/2026-10-30_board_owner/integration/response_latency/streaming_candidate/tests/test_stream_memory_contract.py deliverables/2026-10-30_board_owner/integration/response_latency/streaming_candidate/tests/test_streaming.py --basetemp=deliverables/2026-10-30_board_owner/integration/response_latency/streaming_candidate/combined-test-run-1 -q"
+  },
+  "interface": "prepare_text(..., chunk_sink=None); same callback(chunk,reply,start_sample,token) as existing local sequence",
+  "unchanged_default": "No sink keeps original buffering/native-rate plan; explicit converter keeps buffered bridge",
+  "streaming_admission": {
+    "full_reply_json": true,
+    "whole_text_limit": 240,
+    "all_sentence_boundaries_preflight": true,
+    "generated_before_TTS": true,
+    "prepared_durable_API_required": true,
+    "native_rate": 24000,
+    "max_samples": 720000,
+    "unique_complete_playback_token": true,
+    "partial_ACK": false,
+    "queue_capacity": 128,
+    "packet_backpressure_guard": true
+  },
+  "timings": {
+    "path": "board_business.dialogue.latency",
+    "origin": "board_job_worker_start",
+    "measured": [
+      "asr_ms",
+      "admission_ms",
+      "route_ms",
+      "analysis_enqueue_ms",
+      "prepare.context_ms",
+      "prepare.llm_rpc_ms",
+      "prepare.tts_rpc_ms",
+      "prepare.first_tts_ready_ms",
+      "first_audio_queued_ms",
+      "worker_total_ms"
+    ],
+    "speaker_first_audio_measured": false,
+    "contains_body_or_ids_or_pcm": false
+  },
+  "limitations": [
+    "Complete LLM JSON is still required before first TTS; LLM token streaming is unchanged",
+    "TTS requests remain sequential; gain depends on later sentences to overlap",
+    "Failed preparation metrics may not reach Jobs latency before its exception handler",
+    "Reasoning/identity local-sequence DIALOGUE_ROUTE fallback retains original buffered path",
+    "Real TTS/first speaker audio, physical ASR and long-run acceptance remain root-owned"
+  ],
+  "supplemental_legacy_regression": {
+    "passed": 70,
+    "failed": 4,
+    "same_failed_cases_reproduced_on_unmodified_main": true,
+    "scope": "Stale former-character aliases; not claimed as a passing full legacy suite",
+    "reports": [
+      "regression_tests.xml",
+      "legacy_baseline_tests.xml"
+    ]
+  }
+}

@@ -1,0 +1,1 @@
+cmd_net/can/built-in.a := echo >/dev/null; rm -f net/can/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST net/can/built-in.a net/can/af_can.o net/can/proc.o net/can/raw.o net/can/bcm.o net/can/gw.o

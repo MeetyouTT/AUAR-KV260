@@ -1,0 +1,16 @@
+# 集成版 YuNet 重试独立审查
+
+软件审查通过，未发现阻塞项。审查期间只读 `/home/ghmd/aura-yunet-retry-integration-20261022`，未接板/UART、未修改候选、生产、共享或项目日志；不能据此称实板开销或长期稳定通过。
+
+独立重新运行：39项专项、67项身份、66项计时回归全部通过。另在本目录新增5项独立反例检查并通过：真实execute异常与非零wait status不会被计作撤回；guard已准入撤回明确native未提交；30ms拒绝记账后第二次CPU准备仍到55ms才开始；190ms拒绝记账不能将200ms绝对截止推迟。
+
+关键核验：
+
+- 25ms退让和200ms窗口锚点分开。前者从拒绝返回后的retry_clock开始；后者沿用第一次准入尝试开始时刻，诊断慢不能延长。
+- 只在pre_execute抛AdmissionCancelled时增加native_not_submitted标记，发生于execute_async前；service的withdrawn_after_slot是可区分撤回的数字证据。真正VART异常或status失败仍保留native_failed且withdrawal为0，未被隐藏。
+- 默认关闭时health没有slot_retry字段，基线回调/SlotUnavailable/200ms节拍一致；启用才公开固定数字计数。SFace默认runtime API兼容。
+- 三份改动仅face_targets/runtime/dpu_yunet；scheduler、metrics、thread observer逐字节保持，原30ms/5ms与YOLO优先未改。DPU时隙内state锁仍非阻塞，撤回不会触发准入重试。
+
+source针脚：face_targets `863a9c94c02f4d303b4444f6ab2e8de1253b528cb28d1091d9e8b98981887f31`；runtime `e3b2d11140838fdf0eb548f8def033da5930ec46dfa72ae27f098c03e801c9d3`；dpu_yunet `23ea72f8380e7205fafb0d1b28b692a4780f1c9a51e221d04609843bbf0c309b`。完整六源SHA、范围、限制与日志SHA见 retry-integration-review.json。
+
+仍需板端验证额外CPU成本、时效改善、USB环境和长稳。guard只是当时状态检查，不能中断已开始native调用或保证检查后不被抢占；诊断attempt/failure仍可能包含明确撤回，只能结合撤回计数和status0完成数解释，scheduler.calls不等于推理完成数。根目录README旧37描述由root负责更新，本审查以实际源和日志为依据。

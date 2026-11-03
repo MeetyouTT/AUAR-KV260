@@ -1,0 +1,60 @@
+--- R4/capture_contract.py
++++ R5/capture_contract.py
+@@ -63,6 +63,14 @@
+             and history.get('complete_ordered_history_verified') is True
+             and history.get('all_required_current_boot_cumulative_lower_bounds_checked') is True
+             and history.get('checkpoint_or_marker_written') is False, 'CPU_ORIGINAL_FRESH_FULL_HISTORY_PROOF_REQUIRED')
++    history_expected_pin = expected['fresh_history_expected_pin']
++    original_expected = json.loads(pinned(history_expected_pin))
++    require(history_expected_pin['sha256'] == history['expected_sha256']
++            and original_expected['boot_id'] == boot and original_expected['checkpoint_pin'] == history['checkpoint_pin']
++            and original_expected['camera_owner'] == history['source_owner'], 'CAPTURE_HISTORY_RECEIPT_INPUT_NOT_BOUND')
++    accepted_history = {key: original_expected['history'][key] for key in ('head', 'archive_count', 'archives', 'legacy_pin')}
++    require(accepted_history['archives'] == history['archives'] and accepted_history['archive_count'] == history['archive_count']
++            and accepted_history['legacy_pin'] == history['legacy_pin'], 'CAPTURE_COMPLETE_ORDERED_HISTORY_DIFFERS')
+     # Reuse the CPU adapters by exact reference, without copying/reimplementing them.
+     references = json.loads(regular(Path(__file__).resolve().parent / 'cpu_adapters.reference.json'))['adapters']
+     for role in ('normal_stop_adapter_pin', 'full_history_adapter_pin'):
+@@ -76,6 +84,7 @@
+     handoff = (health.get('dpu_schedule') or {}).get('protection_handoff') or {}
+     require(handoff.get('mode') == 'native_exact_same_boot'
+             and handoff.get('seed_sha256') == history['checkpoint_pin']['sha256'], 'CURRENT_CAMERA_MUST_CONSUME_REVIEWED_FRESH_FINAL')
++    require(handoff.get('previous_kernel_history') == accepted_history['head'], 'LIVE_HISTORY_HEAD_DIFFERS_FROM_ACCEPTED_PROVENANCE')
+     ui_path = aura / 'config/board_avatar_gtk.json'
+     ui_raw = regular(ui_path)
+     ui = json.loads(ui_raw)
+@@ -98,6 +107,8 @@
+ 
+     for path, pin in selected['source_sha256'].items():
+         keep(path, pin)
++    for pin in (history_expected_pin, expected['fresh_history_receipt_pin'], expected['full_history_adapter_pin']):
++        keep(pin['path'], pin['sha256'])
+     native_manifest = dict(path=native['source_manifest'], sha256=native['source_manifest_sha256'])
+     python_manifest = json.loads(pinned(native_manifest))
+     python_root = Path(native_manifest['path']).parent / 'aura'
+@@ -146,12 +157,16 @@
+                     startup_path=source['path'], runtime_aura=str(aura), component_count=len(startup['component_sha256']),
+                     native_ops_root=str(OPS), native_manifest=native_manifest,
+                     native_boot_policy={key: native[key] for key in ('allow_new_kernel_boot', 'new_boot_marker_directory')},
++                    history_adapter_pin=expected['full_history_adapter_pin'],
+                     listening_preference_path='/home/root/.local/share/aura-board-business/listening_preference.json',
+                     immutable_files=files, original_units=units, absent_platform_units=absent_units,
+                     installation_handoff=copy_handoff(expected),
+                     initial_source_state=dict(contract_sha256='INITIAL_CONTRACT', startup_sha256=digest(startup_raw),
+                                               ui_sha256=digest(ui_raw), selected_pin=selected_pin,
+                                               selected_sources=selected['source_sha256'],
++                                              history_expected=accepted_history,
++                                              history_provenance=dict(expected_pin=history_expected_pin,
++                                                                      result_pin=expected['fresh_history_receipt_pin']),
+                                               predecessor=dict(boot_id=boot, camera_owner=camera)))
+     require(pinned(source) == startup_raw and process(camera['pid']) == camera and process(supervisor['pid']) == supervisor
+             and process(gtk['pid']) == gtk, 'SOURCE_OR_OWNER_CHANGED_DURING_CAPTURE')
+@@ -161,7 +176,7 @@
+ def copy_handoff(expected):
+     # Only explicit metadata keys; never copy arbitrary text or API documents.
+     keys = ('boot_id', 'camera_owner', 'gui_supervisor', 'gtk_owner', 'startup_pin', 'idstop_report_pin',
+-            'fresh_history_receipt_pin', 'normal_stop_adapter_pin', 'full_history_adapter_pin')
++            'fresh_history_receipt_pin', 'fresh_history_expected_pin', 'normal_stop_adapter_pin', 'full_history_adapter_pin')
+     return {key: expected[key] for key in keys}
+ 
+ 

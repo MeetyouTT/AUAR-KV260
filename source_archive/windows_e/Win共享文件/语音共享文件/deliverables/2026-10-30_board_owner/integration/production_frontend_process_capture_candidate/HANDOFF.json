@@ -1,0 +1,149 @@
+{
+  "schema": "aura.complete-automatic-capture-process.rev3",
+  "status": "FROZEN_SOURCE_ONLY_ROOT_ARM_ADMISSION_REQUIRED",
+  "hardware_executed": false,
+  "files": {
+    "aura/board/runtime/audio/board_frontend_auto.py": {
+      "sha256": "94400137437292cc3d072b0dc1625818a45c5fbe69c1f055f867fe55793d333a",
+      "bytes": 32338,
+      "before_sha256": null
+    },
+    "aura/board/runtime/audio/board_frontend_process.py": {
+      "sha256": "7e61f1a963f9dbde7c20b9b76785eb2493e416525df21d2b0d4e961fa96712c3",
+      "bytes": 15652,
+      "before_sha256": "8b5db6681e7ae1dd7040ab9aa2247ba59efb515286feebed5956034a6993dd63"
+    },
+    "aura/tools/production_board_business_gui.py": {
+      "sha256": "ff624a31f60c043fd02d6648c65cad8bce473aa525ef97ce1923545dc342aa66",
+      "bytes": 10789,
+      "before_sha256": "911ee09873a84d4c4c176e3798749a1813bee4d42dd05c6fc0ed108c6c7cfe2a"
+    },
+    "aura/tools/production_frontend_selection.py": {
+      "sha256": "3bc5bf9601be05bac0d2a616b0ffba9dc26496ad689ea7c169e2e19619b9dd69",
+      "bytes": 3637,
+      "before_sha256": "bfef18d9ccd06e39357f5f375e6dc4c1d5d187bed51787e78206018658bb1a1b"
+    }
+  },
+  "artifacts": {
+    "frontend_capture_process.overlay.zip": {
+      "sha256": "6c793edbebd3ae8886e18ecce08466722e0891cc16806143e32d1ed2c3629886",
+      "bytes": 16912
+    },
+    "overlay_manifest.json": {
+      "sha256": "1f9cb9156d01302ca4cb8d7d1e802709df39c9c96695146f620bf9758f022106",
+      "bytes": 1173
+    },
+    "extra_source_map.json": {
+      "sha256": "bbc4d3e368c101145bbeaae4c9418b5a73de55ca361e30d27e37e5109c7e5416",
+      "bytes": 1131
+    },
+    "build_overlay.py": {
+      "sha256": "512b482411b41a64f70889699ea228b31dfceb4e9a4cb4a70fecb7b7e9c193ca",
+      "bytes": 8389
+    },
+    "tests.xml": {
+      "sha256": "21dd85c88253f2c0cf7df613cefcf718d68a5c2b4533923661d3a55ea585666c",
+      "bytes": 5423
+    },
+    "tests/test_capture_contract_external.py": {
+      "sha256": "3a9baa97240b32afaf8c537a7758cb76267d06fa848f6c628beb419f6482164f",
+      "bytes": 16965
+    },
+    "tests/test_worker_ipc.py": {
+      "sha256": "4c362ba94e87e71aee9a4a02083064535c3d259e7068f167ec35f296b5d374d0",
+      "bytes": 10025
+    },
+    "ARM_ADMISSION.txt": {
+      "sha256": "077a461c19b3d0105c0919e58b81711046543aeb16474d19b7fc7933221979ff",
+      "bytes": 2169
+    }
+  },
+  "configuration": {
+    "frontend_process": true,
+    "frontend_capture_process": true,
+    "frontend_optimization": "baseline",
+    "frontend_threads": 1,
+    "capture_priority_nice": -10
+  },
+  "default_frontend_capture_process": false,
+  "admission": {
+    "pool": "create_frontend_pool(directory, optimization='baseline', num_threads=1, frontend_process=True)",
+    "capture": "RemoteAutomaticCapture(lambda:False, frontend_pool=pool, max_seconds=2, speech_start_ready=lambda cid:True)",
+    "run": "start; owner-thread snapshot loop for at most 1.5s; finally cancel; close; pool.close; require gate.shutdown",
+    "document": "ARM_ADMISSION.txt"
+  },
+  "model_ownership": {
+    "instances": 1,
+    "gate": "Original BoardFftSpeechGate in existing sole child",
+    "pool": "Single original BoardFrontendPool in child arbitrates auto and gate-RPC barge",
+    "normal_capture": "Original BoardAutomaticCapture / SpeechEndpoint / BoundedPcmCaptureMixin / 8-frame queue in child",
+    "parent": "RemoteAutomaticCapture metadata poll plus once-only completed original PCM TAKE",
+    "barge": "Original parent capture/echo/verification/ACK; same child gate via existing fixed-frame RPC",
+    "manual": "Unchanged original parent manual capture",
+    "no_fallback": true,
+    "no_extra_model": true
+  },
+  "protocol": {
+    "control_kinds": [
+      "GATE_RELEASE",
+      "AUTO_START",
+      "AUTO_POLL",
+      "AUTO_TAKE",
+      "AUTO_CANCEL",
+      "AUTO_CLOSE"
+    ],
+    "transport": "Existing anonymous socketpair, no network listener/audio file",
+    "input_frame_limit": 1280,
+    "control_metadata_limit": 4096,
+    "completed_pcm_limit": 640000,
+    "take_limit": "Only AUTO_TAKE response permits 640000B PCM +4096B metadata+4B length",
+    "metadata": "Strict fixed status/clip schema, fixed error codes, scalar metric white list",
+    "poll_interval_seconds": 0.05,
+    "callback": "Owner start-thread snapshot/take only; current CID/recording/monitor guard",
+    "ready": "Original Mcp READY plus reader/source/owner released; parent onset callback before READY",
+    "invalidation": "Start/cancel/close/take local revision barriers reject late polls and completed results",
+    "pcm": "Original CapturedAudio/AudioRef metadata + exact bytes + SHA, no parent waveform transform"
+  },
+  "cleanup": {
+    "normal": "Remote cancel/close waits original child capture cleanup, keeps worker for reuse",
+    "shutdown": "Original pool close then owned worker STOP; 6s grace for original bounded capture cleanup, no worker SIGKILL",
+    "start_failure": "Explicit original source/endpoint/mic lock retirement after partial original start failure",
+    "ipc_failure": "Lost start ACK or cancel/close IPC failure retires exact owned worker, no guessing a new capture",
+    "abrupt_worker_exit": "Original arecord argv execs under guarded Python shim: parent PID before/after Linux prctl PDEATHSIG SIGTERM",
+    "preexec_fn": false,
+    "retired_owner": "Two bounded metadata-only tombstones allow old automatic close without affecting active barge"
+  },
+  "public_metadata": {
+    "path": "snapshot.audio_frontend (existing recording/API projection)",
+    "fields": [
+      "worker_pid",
+      "worker_process_alive",
+      "worker_capture_process",
+      "worker_generation",
+      "microphone_pid"
+    ]
+  },
+  "tests": {
+    "passed": 19,
+    "subtests_passed": 3,
+    "failed": 0,
+    "seconds": 2.37,
+    "evidence": "tests.xml",
+    "groups": [
+      "12 independent real-proxy/manager/controller cases (3 corrupt metadata subcases)",
+      "4 real socketpair + original BoardAutomaticCapture/endpoint/8queue cases with fake arecord/model",
+      "3 parent-death guard/argv/payload-bound/Python3.9 source checks"
+    ]
+  },
+  "preserved": [
+    "Original models/thresholds/FFT/PCM/queue capacity",
+    "Parent playback and full ACK",
+    "Latest independent b11 cancel-rearm and diagnostics overlays",
+    "Current appearance/persona/private data/source pins"
+  ],
+  "limitations": [
+    "No ARM subprocess/pass_fds/prctl/actual device test by this agent",
+    "No claim that model compute or total GUI capacity passes; root admission and formal runtime observation remain",
+    "Normal parent ASR/business/player still use existing process and ownership"
+  ]
+}

@@ -1,0 +1,21 @@
+--- board_recover_audio_camera_order_20261022.py
++++ board_affinity_audio_recover_once_20261022.py
+@@ -70,7 +70,7 @@
+         restore_preference();run(['systemctl','start','--no-block','aura-avatar-ui.service'])
+ 
+ def main():
+-    out={'recurrence':'MCP01 realtime warning recurred after restored two-model transition; controlled audio-closed camera restart, then audio reopen; causal test not root-cause proof','complete':False,'phase':'PREFLIGHT','root':str(ROOT),'source_sha256':DIGEST}
++    out={'recurrence':'MCP01 warning persisted after aborted affinity short trial and original restoration; one audio-closed original-camera restart then original audio reopen; causal test not root-cause proof','complete':False,'phase':'PREFLIGHT','root':str(ROOT),'source_sha256':DIGEST}
+     save(out);stopped=False
+     try:
+         boot=Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+@@ -132,7 +132,8 @@
+         assert out['protected_after']==out['protected_before'],'Protected file changed'
+         assert out['preference_sha_after']==out['preference_sha_before'],'Monitoring preference changed'
+         for n in ('xserver-nodm.service',):assert out['units_after'][n]==out['units_before'][n],n+' changed'
+-        assert out['after']['camera']['detected_frames']>out['camera_before']['detected_frames']
++        assert out['after']['camera']['pid']==cam['pid']
++        assert out['after']['camera']['detected_frames']>cam['detected_frames']
+         assert not out['after']['camera']['camera_error'] and not out['after']['camera']['detector_error']
+         assert Path('/proc/sys/kernel/random/boot_id').read_text().strip()==boot
+         out['complete']=True;out['phase']='RESTORED_AND_SAMPLED'

@@ -1,0 +1,64 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/25-readonly-warning-diagnostics.json",
+  "manifest_sha256": "e693a546c4022931bc4718192cc515bd37ef9231168083dafbf7b32cd6fc07a4",
+  "started_utc": "2026-10-04T08:56:13.788727+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "nfs-service-diagnostics",
+      "started_utc": "2026-10-04T08:56:14.290877+00:00",
+      "entry": {
+        "id": "nfs-service-diagnostics",
+        "command": "python3 -B -c 'import json,subprocess,pathlib\nP=pathlib.Path\nassert P(\"/sys/block/mmcblk1/device/cid\").read_text().strip()==\"0353445345333247805558c00401a100\"\ncmds=[[\"systemctl\",\"show\",\"proc-fs-nfsd.mount\",\"nfs-server.service\",\"nfs-mountd.service\",\"rpcbind.service\",\"-p\",\"Id\",\"-p\",\"UnitFileState\",\"-p\",\"ActiveState\",\"-p\",\"SubState\",\"-p\",\"Result\",\"-p\",\"Requires\",\"-p\",\"WantedBy\",\"-p\",\"RequiredBy\"],[\"systemctl\",\"cat\",\"proc-fs-nfsd.mount\",\"nfs-server.service\",\"nfs-mountd.service\"],[\"journalctl\",\"-b\",\"-u\",\"proc-fs-nfsd.mount\",\"-u\",\"nfs-server.service\",\"--no-pager\",\"-o\",\"short-monotonic\"],[\"modprobe\",\"-n\",\"-v\",\"nfsd\"],[\"findmnt\",\"-rn\",\"-t\",\"nfs,nfs4\",\"-o\",\"FSTYPE,TARGET\"]]\nout=[]\nfor c in cmds:\n r=subprocess.run(c,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,timeout=30)\n out.append({\"argv\":c,\"rc\":r.returncode,\"stdout\":r.stdout,\"stderr\":r.stderr})\nprint(json.dumps(out,indent=2))'",
+        "timeout": 90
+      },
+      "exit_code": 0,
+      "output_sha256": "025edb7083f921b6a5996d9c92975b24a9cf14d21e46aa00bcb4b871e40a07f9",
+      "bytes": 4217,
+      "finished_utc": "2026-10-04T08:56:16.340211+00:00"
+    },
+    {
+      "id": "kernel-config-and-nfs-usage",
+      "started_utc": "2026-10-04T08:56:16.340503+00:00",
+      "entry": {
+        "id": "kernel-config-and-nfs-usage",
+        "command": "python3 -B -c 'import json,pathlib,gzip\nP=pathlib.Path\np=P(\"/proc/config.gz\")\nout={\"boot_id\":P(\"/proc/sys/kernel/random/boot_id\").read_text().strip(),\"kernel\":P(\"/proc/sys/kernel/osrelease\").read_text().strip(),\"nfsd_filesystem_registered\":\"nfsd\" in P(\"/proc/filesystems\").read_text().split(),\"kernel_config_available\":p.exists(),\"nfs_export_entry_count\":0}\nif p.exists():\n out[\"kernel_config\"]=[l for l in gzip.decompress(p.read_bytes()).decode().splitlines() if any(s in l for s in [\"CONFIG_NFSD\",\"CONFIG_NFS_FS\",\"CONFIG_TCG_\",\"CONFIG_OF_OVERLAY\"])]\nfor f in [P(\"/etc/exports\")]+list(P(\"/etc/exports.d\").glob(\"*.exports\")):\n if f.is_file(): out[\"nfs_export_entry_count\"]+=sum(bool(l.strip()) and not l.lstrip().startswith(\"#\") for l in f.read_text().splitlines())\nprint(json.dumps(out,indent=2))'",
+        "timeout": 90
+      },
+      "exit_code": 0,
+      "output_sha256": "c2110b1fb7878c84a0df059b6d527b710ce800c463eff13feaf8b263be6c7501",
+      "bytes": 860,
+      "finished_utc": "2026-10-04T08:56:18.099890+00:00"
+    },
+    {
+      "id": "tpm-current-state",
+      "started_utc": "2026-10-04T08:56:18.100248+00:00",
+      "entry": {
+        "id": "tpm-current-state",
+        "command": "python3 -B -c 'import json,pathlib,shutil\nP=pathlib.Path\nout={\"tools\":{s:shutil.which(s) for s in [\"tpm2_getcap\",\"tpm2_startup\",\"tpm2_clear\"]},\"devices\":{str(p):p.exists() for p in [P(\"/dev/tpm0\"),P(\"/dev/tpmrm0\")]},\"sysfs\":{}}\nfor t in P(\"/sys/class/tpm\").glob(\"tpm*\"):\n info={\"device\":str((t/\"device\").resolve()),\"driver\":str((t/\"device/driver\").resolve())}\n for p in [t/\"tpm_version_major\",t/\"device/of_node/compatible\",t/\"device/of_node/status\"]:\n  if p.exists(): info[str(p)]=p.read_bytes().decode(errors=\"replace\").replace(\"\\0\",\"|\")\n out[\"sysfs\"][t.name]=info\nprint(json.dumps(out,indent=2))'",
+        "timeout": 90
+      },
+      "exit_code": 0,
+      "output_sha256": "d0cac1234cc9ae92577a67667468f601a1d46094becf1dd474c4cffcb61d6394",
+      "bytes": 532,
+      "finished_utc": "2026-10-04T08:56:19.603603+00:00"
+    },
+    {
+      "id": "clock-and-live-log",
+      "started_utc": "2026-10-04T08:56:19.603956+00:00",
+      "entry": {
+        "id": "clock-and-live-log",
+        "command": "python3 -B -c 'import json,pathlib,subprocess\nP=pathlib.Path\nclk=P(\"/sys/kernel/debug/clk/clk_summary\")\nout={\"display_clock_summary\":[l for l in clk.read_text().splitlines() if any(s in l.lower() for s in [\"dpll\",\"dpdma\",\"dp_video\",\"dp_audio\",\"dp_ref\"])] if clk.exists() else None,\"drm_connector_status\":{str(p):p.read_text().strip() for p in P(\"/sys/class/drm\").glob(\"card*-*/status\")},\"commands\":[]}\nfor c in [[\"dmesg\"],[\"systemctl\",\"show\",\"dfx-mgr.service\",\"-p\",\"MainPID\",\"-p\",\"ActiveState\",\"-p\",\"SubState\",\"-p\",\"ExecStart\"]]:\n r=subprocess.run(c,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=30)\n out[\"commands\"].append({\"argv\":c,\"rc\":r.returncode,\"stdout\":r.stdout,\"stderr\":r.stderr})\nprint(json.dumps(out,indent=2))'",
+        "timeout": 90
+      },
+      "exit_code": 0,
+      "output_sha256": "fd97ffd750179f1868d7d99e06c6ff7ea58888a246d8f3b11ed471dba0eccc93",
+      "bytes": 50267,
+      "finished_utc": "2026-10-04T08:56:23.444965+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T08:56:23.492123+00:00"
+}

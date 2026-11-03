@@ -1,0 +1,1 @@
+cmd_net/netfilter/xt_CHECKSUM.ko := /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ld -r  -EL  -maarch64elf  --build-id=sha1  -T scripts/module.lds -o net/netfilter/xt_CHECKSUM.ko net/netfilter/xt_CHECKSUM.o net/netfilter/xt_CHECKSUM.mod.o;  true

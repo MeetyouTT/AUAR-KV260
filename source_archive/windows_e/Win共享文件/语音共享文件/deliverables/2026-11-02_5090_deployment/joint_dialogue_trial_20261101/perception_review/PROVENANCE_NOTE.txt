@@ -1,0 +1,28 @@
+本轮视觉、角色、身份只读结论及参数来源更正
+
+最新观测 2026-11-02T05:21:28Z：boot、GUI16314/16318、camera1333、startup3fd124、380组件、selected24pin和原隔离_verify通过，222份Native Python实读哈希通过。人体目标3/3为CONFIRMED；人脸只在1/3点有有效目标，该点身份结果年龄261ms、当前目标归属匹配、状态UNKNOWN；其余2点没有人脸目标。KNOWN新鲜识别为0/3。身份模型链ready=true不等于本轮已识别人，更不能据UNKNOWN推断空库、阈值原因或人员归属。
+
+角色主页面main、原pair READY，可见native帧推进；GUI运行故障0。MCP01原持久播放worker存活，软件输出IDLE_READY且无播放错误；聆听PAUSED、麦克风关闭、IDLE且未播放。口型相关指标存在，当前空闲mouth=0/speech_gain=0；本次没有播放或录音，因此没有进行本轮声音/口型同步实测。业务writer、原回执与时钟锚定就绪。转轴仍FAULT/null/跟随false，完整含转轴的五模块协作尚未就绪。
+
+参数须分开陈述两个事实：
+1. 本次rebind前后原配置保持：true。旧23pin、新24pin与当前文件三者的同一身份配置SHA均为398ece6a4d5d81076c9a4f9f40a43e97cedd469e0b47e3a835e589a2255ca6e3，23项旧source pins全部原值保留。
+2. 符合最后已记录用户选择：true。当前实际直接JSON字段threshold=0.50、ambiguity_margin=0.10、result_ttl_ms=3000。已直接读取deliverables/2026-10-19_threshold_050/README.md；其中用户明确要求“现在那就调成0.5”，并明确更新此前保留0.80/0.85的约定。故0.85不是当前要求，不应恢复或自动修改0.50。
+
+perception_current_02.json中的original_identity_threshold_margin_ttl_preserved=false来自本专项沿用旧0.85历史预期的错误命名和判断。该原始结果完整保留；它不表示本次部署修改了阈值，也不表示当前0.50不符合最后用户选择。本更正采用已记录的新授权，不重复同一观测、不改生产配置、不覆盖旧证据。
+
+当前确切身份配置：
+/home/root/aura-dpu-vision-20261021/postpower-retry-live/release-sface-int8-9025bd49fe52-333217/board_identity.sface_int8.json
+SHA256：398ece6a4d5d81076c9a4f9f40a43e97cedd469e0b47e3a835e589a2255ca6e3
+该路径由原selected绑定和当前boot/pid的已固定run-config选用。旧23pin与新24pin同SHA证据见identity_policy_provenance_01.json；未把路径名称当作模型切换或身份ID。
+
+真实消费者源码均来自已验证Native manifest 5e08f7cf587d74334ef24104ea01f79701629b48f2004fb772ce3f8ea82afd0d，对源码只作文本读取，未导入项目、未调用开库函数：
+- native-r4-metrics-fix/aura/board/identity/camera_faces.py:233读取config_for(root,config_path)，第234行确认dpu_sface分支，第244–245行调用open_dpu_store(config)。该文件SHA ad80ee2e4694b1e498b9ecfeca8ba5d59d83112e778c56ee79716aff43305c04。
+- board/identity/model_store.py:131以config['threshold']和config['ambiguity_margin']传入IdentityStore，证明0.50/0.10是直接消费的实际字段，不是.get(None)或错误字段名。文件SHA 310b4f3290fdf9d07b47800477e8ceb4c7631fbb9e622fac0f8c547a0d1563da。
+- camera_faces.py:263把config['result_ttl_ms']传给IdentityService。live.py:115–118以当前target、TTL和库修订共同判定fresh；第155–163行仅在fresh时发布KNOWN/UNKNOWN及source_mono_ms。文件SHA d639c4e52ab68db3c602ac6055967e3990781cfd3dcf2aa8527c249ff1be5d8c。
+- store.py:95比较self.threshold，第98行比较self.ambiguity_margin。文件SHA cd9f535dccb789938eaa9d625b85b104482226943dd2536c09c8002ae03c3c1a。
+
+本机参考live.py比实板Native版本多recognition_diagnostics；当前实板版本没有该方法，health也未提供该对象。先前identity_diagnostic_reason=null只代表接口不存在，不是一个识别故障或低分结论。实际识别判定采用新鲜UI snapshot经原validate_snapshot验证后的state、source age与当前目标一致性。
+
+当前公开health没有本专项可投影的图库条数或图库可用布尔，见policy_consumers_health_01.json。未读取SQLite、未推断为空库、未导出姓名/ID/模板/图片/相似度分数/对话。所有板端操作为GET和文件/进程元数据只读；没有登记、修改阈值、录音、播放、GUI动作、服务/模型/FPGA/转轴控制。
+
+接续应区分：视觉/角色/播放设备软件就绪；身份链就绪但本窗口未实际认出人；当前转轴未恢复。真人身份与完整含实体转轴协作的验收仍需后续真实条件和原控制路径，不以模型加载或历史成功代替。

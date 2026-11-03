@@ -1,0 +1,129 @@
+=== 演示剧本：跨素材池轮换观感验收 ===
+全剧 66 s ｜ 步长 0.10 s ｜ 模式 虚拟时钟全速
+中性说话素材：talking_calm_reuse_v1 / talking_calm_reuse_v1_b
+
+========================================================================================
+=== 剧本标记 ===
+    0.00s  ① 开机待机：IDLE（无池，素材应恒定 idle_normal）
+    3.00s     └ 静止 3 s 后再来人（给足对比时间）
+    3.00s  ② 来访者进入 → PRESENT
+    5.50s  ③ 关键词唤醒 → AWAKE（burst 惊讶，单次）
+    8.50s  ④ 倾听结束 → 思考（停顿 3 s）
+   11.50s  ⑤b 短句 11 字 · 中性档（friendly 不在高涨表 ⇒ SPEAKING_NEUTRAL）
+   15.00s  ⑥a 用户说完 → THINKING
+   15.50s  ⑥b 长句 92 字 · 中性档：观察口型池交替
+   39.00s  ⑦a 用户说完 → THINKING
+   39.50s  ⑦b 点头 + 高涨档：burst 播完接 SPEAKING（池 2 素材）
+   44.00s  ⑧a 用户说完 → THINKING
+   44.50s  ⑧b 低落档：SPEAKING_LOW ⇒ talking_low（慢 / 低 / 轻）
+   50.50s  ⑨a 用户说完 → THINKING
+   51.00s  ⑨b 高涨长句起播（8 s 后打断）
+   59.00s  ⑩ 打断：代次作废 + 平滑收起 exit（不该跳帧）
+   62.00s  ⑪ 重来：FSM 回 IDLE + 播放时间基归零
+   66.00s  ⑫ 剧本结束（全剧 66 s 虚拟时间）
+
+=== 事件（已执行）===
+    0.00s  reset → IDLE
+    3.00s  scene.person_enter → PRESENT
+    5.50s  audio.kws_detected → AWAKE
+    6.50s  动作段播完 → LISTENING
+    8.50s  audio.vad_end → THINKING
+   11.50s  reply(emotion=friendly action=-) → SPEAKING_NEUTRAL
+   14.90s  playback_stopped → IDLE
+   15.00s  board.key_pressed → LISTENING
+   15.40s  audio.vad_end → THINKING
+   15.50s  reply(emotion=neutral action=-) → SPEAKING_NEUTRAL
+   38.50s  playback_stopped → IDLE
+   39.00s  board.key_pressed → LISTENING
+   39.40s  audio.vad_end → THINKING
+   39.50s  reply(emotion=happy action=ack_nod) → ACK_NOD
+   40.50s  动作段播完 → SPEAKING
+   43.50s  playback_stopped → IDLE
+   44.00s  board.key_pressed → LISTENING
+   44.40s  audio.vad_end → THINKING
+   44.50s  reply(emotion=sad action=-) → SPEAKING_LOW
+   50.00s  playback_stopped → IDLE
+   50.50s  board.key_pressed → LISTENING
+   50.90s  audio.vad_end → THINKING
+   51.00s  reply(emotion=excited action=-) → SPEAKING
+   59.00s  cancel → PRESENT
+   62.00s  reset → IDLE
+
+=== 状态段时长 ===
+  IDLE                 0.00 →   3.00 s   时长 3.00 s
+  PRESENT              3.00 →   5.50 s   时长 2.50 s
+  AWAKE                5.50 →   6.60 s   时长 1.10 s
+  LISTENING            6.60 →   8.50 s   时长 1.90 s
+  THINKING             8.50 →  11.50 s   时长 3.00 s
+  SPEAKING_NEUTRAL    11.50 →  14.90 s   时长 3.40 s
+  IDLE                14.90 →  15.00 s   时长 0.10 s
+  LISTENING           15.00 →  15.40 s   时长 0.40 s
+  THINKING            15.40 →  15.50 s   时长 0.10 s
+  SPEAKING_NEUTRAL    15.50 →  38.50 s   时长 23.00 s
+  IDLE                38.50 →  39.00 s   时长 0.50 s
+  LISTENING           39.00 →  39.40 s   时长 0.40 s
+  THINKING            39.40 →  39.50 s   时长 0.10 s
+  ACK_NOD             39.50 →  40.60 s   时长 1.10 s
+  SPEAKING            40.60 →  43.50 s   时长 2.90 s
+  IDLE                43.50 →  44.00 s   时长 0.50 s
+  LISTENING           44.00 →  44.40 s   时长 0.40 s
+  THINKING            44.40 →  44.50 s   时长 0.10 s
+  SPEAKING_LOW        44.50 →  50.00 s   时长 5.50 s
+  IDLE                50.00 →  50.50 s   时长 0.50 s
+  LISTENING           50.50 →  50.90 s   时长 0.40 s
+  THINKING            50.90 →  51.00 s   时长 0.10 s
+  SPEAKING            51.00 →  59.00 s   时长 8.00 s
+  PRESENT             59.00 →  62.00 s   时长 3.00 s
+  IDLE                62.00 →  66.00 s   时长 4.00 s
+                     合计 66.00 s
+
+=== ★ 素材切换点（跨素材池轮换的直接证据）===
+  状态 PRESENT   池 = ['idle_present']
+      3.00s  idle_normal          → idle_present          (idx=0, stage=enter)
+     59.80s  talking_normal_b     → idle_present          (idx=0, stage=enter)   +56.80s
+  状态 AWAKE   池 = ['emo_surprised']
+      5.50s  idle_present         → emo_surprised         (idx=0, stage=loop)
+  状态 LISTENING   池 = ['idle_listening']
+      6.60s  emo_surprised        → idle_listening        (idx=0, stage=enter)
+     15.20s  talking_calm_reuse_v1 → idle_listening        (idx=0, stage=enter)   +8.60s
+     39.00s  idle_normal          → idle_listening        (idx=0, stage=enter)   +23.80s
+     50.50s  idle_normal          → idle_listening        (idx=0, stage=enter)   +11.50s
+  状态 THINKING   池 = ['idle_thinking']
+      8.50s  idle_listening       → idle_thinking         (idx=0, stage=enter)
+     15.40s  idle_listening       → idle_thinking         (idx=0, stage=enter)   +6.90s
+     39.40s  idle_listening       → idle_thinking         (idx=0, stage=enter)   +24.00s
+     50.90s  idle_listening       → idle_thinking         (idx=0, stage=enter)   +11.50s
+  状态 SPEAKING_NEUTRAL   池 = ['talking_calm_reuse_v1', 'talking_calm_reuse_v1_b']
+     11.50s  idle_thinking        → talking_calm_reuse_v1  (idx=0, stage=loop)
+     15.50s  idle_thinking        → talking_calm_reuse_v1  (idx=0, stage=loop)   +4.00s
+     21.80s  talking_calm_reuse_v1 → talking_calm_reuse_v1_b  (idx=0, stage=loop)   +6.30s
+     28.10s  talking_calm_reuse_v1_b → talking_calm_reuse_v1  (idx=0, stage=loop)   +6.30s
+     34.40s  talking_calm_reuse_v1 → talking_calm_reuse_v1_b  (idx=0, stage=loop)   +6.30s
+  状态 IDLE   池 = ['idle_normal']
+     38.80s  talking_calm_reuse_v1_b → idle_normal           (idx=0, stage=enter)
+     50.40s  talking_low          → idle_normal           (idx=0, stage=enter)   +11.60s
+     62.00s  idle_present         → idle_normal           (idx=0, stage=enter)   +11.60s
+  状态 ACK_NOD   池 = ['ack_nod']
+     39.50s  idle_thinking        → ack_nod               (idx=0, stage=enter)
+  状态 SPEAKING   池 = ['talking_normal', 'talking_normal_b']
+     40.60s  ack_nod              → talking_normal        (idx=0, stage=enter)
+     51.00s  idle_thinking        → talking_normal        (idx=0, stage=enter)   +10.40s
+     58.30s  talking_normal       → talking_normal_b      (idx=0, stage=enter)   +7.30s
+  状态 SPEAKING_LOW   池 = ['talking_low']
+     44.50s  talking_normal       → talking_low           (idx=0, stage=enter)
+
+=== 池使用总览 ===
+  ACK_NOD            恒定  用到 1 个：['ack_nod']（池 1 个）
+  AWAKE              恒定  用到 1 个：['emo_surprised']（池 1 个）
+  IDLE               恒定  用到 1 个：['idle_normal']（池 1 个）
+  LISTENING          恒定  用到 1 个：['idle_listening']（池 1 个）
+  PRESENT            恒定  用到 1 个：['idle_present']（池 1 个）
+  SPEAKING           轮换  用到 2 个：['talking_normal', 'talking_normal_b']（池 2 个）
+  SPEAKING_LOW       恒定  用到 1 个：['talking_low']（池 1 个）
+  SPEAKING_NEUTRAL   轮换  用到 2 个：['talking_calm_reuse_v1', 'talking_calm_reuse_v1_b']（池 2 个）
+  THINKING           恒定  用到 1 个：['idle_thinking']（池 1 个）
+
+=== 结论 ===
+  有池且发生轮换的状态：['SPEAKING_NEUTRAL', 'SPEAKING']
+  池内换素材（共 4 次）每次都从首帧起播：是
+========================================================================================

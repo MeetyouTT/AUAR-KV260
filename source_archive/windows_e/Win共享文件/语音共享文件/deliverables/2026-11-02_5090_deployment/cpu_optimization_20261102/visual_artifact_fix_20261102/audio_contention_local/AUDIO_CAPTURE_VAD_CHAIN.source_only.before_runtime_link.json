@@ -1,0 +1,1091 @@
+{
+  "schema": "aura-current-composed-audio-capture-vad-static-review-1",
+  "recorded_host_utc": "2026-11-02T20:18:48.003698+00:00",
+  "status": "COMPLETE_LOCAL_STATIC_CHAIN_NO_PATCH_NO_BOARD_CALLS",
+  "scope": {
+    "source_patch": false,
+    "candidate_change": false,
+    "device_calls": 0,
+    "SSH_or_HTTP_calls": 0,
+    "runtime_tests": 0,
+    "benchmark_calls": 0,
+    "model_or_real_library_execution": 0,
+    "media_or_private_store_read": false,
+    "existing_ASR_ECAPA_threshold_035_Native_and_pan_control_25_unchanged": true
+  },
+  "baseline": {
+    "startup_sha256": "c3861fa3d2cbb10fee424804f7b3932eadd576819a2a6290c7ca406d900b9602",
+    "component_count": 380,
+    "component_map_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\joint_acceptance_180s_20261102\\LIVE_READY_HANDOFF.json",
+    "component_map_file_sha256": "83ea2cdcd620edb5fd3825923ecbb757ebebdd99d34b4758f467caee8b68c8d5",
+    "source_index_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\visual_artifact_fix_20261102\\audio_contention_local\\EXACT_AUDIO_SOURCE_INDEX.json",
+    "source_index_file_sha256": "f175bc5dc520e568745e257fbd7adb34f9646bf02629d25c6606194e49a9e9a9",
+    "sources_independently_rehashed_for_this_review": 30,
+    "source_mismatch_or_missing": [],
+    "actual_GUI_config": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\visual_artifact_fix_20261102\\audio_contention_local\\board_avatar_gtk.current.json",
+      "sha256": "3898575acb418dff84ace73b23c7980b9b2c871bee9427c2cba1e1a6d9299f89",
+      "top_audio_flags": {
+        "handsfree_dialogue": true,
+        "automatic_turns": true,
+        "early_listen": false,
+        "voice_barge_in": false,
+        "persistent_audio": true,
+        "streaming_conversation": true,
+        "native_avatar": true,
+        "native_ui_tick_ms": 200,
+        "tick_ms": 33,
+        "audio_frontend": null
+      },
+      "board_business_audio_flags": {
+        "entry_mode": "voice_first",
+        "frontend_process": true,
+        "frontend_capture_process": true,
+        "frontend_optimization": "combined",
+        "frontend_threads": 1,
+        "capture_priority_nice": -10,
+        "asr_variant": "paraformer_small",
+        "asr_threads": 2
+      }
+    }
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "level": "source-proven",
+      "finding": "Actual continuous microphone, GTCRN and Silero work runs in the one preloaded frontend child, not in the GTK main thread or the GUI aura-avatar-render thread.",
+      "qualification": "They still share board CPU resources; process isolation does not reserve compute.",
+      "evidence": [
+        {
+          "file": "tools/production_board_business_gui.py",
+          "lines": "104-113",
+          "sha256": "279ef8deb388e963e846453de71ddfe865fc05ab49e78c496321537234407168"
+        },
+        {
+          "file": "tools/production_frontend_selection.py",
+          "lines": "51-60",
+          "sha256": "1acbcdefd03d32365d8909fa63c4bf53bd713aec21c2b3b9216371129d261cea"
+        },
+        {
+          "file": "board/runtime/audio/board_frontend_auto.py",
+          "lines": "219-281;361-398",
+          "sha256": "9d64aad827caa39fb3d85b8ea68626ca7b41419b9eeeb919918bf28c3f7a6fd7"
+        }
+      ]
+    },
+    {
+      "id": "F2",
+      "level": "source-proven",
+      "finding": "Silent continuous listening still invokes the full GTCRN plus Silero gate on every 20 ms raw block. There is no cheap RMS early rejection before the injected classifier.",
+      "derived_nominal_rates": {
+        "input_frames_per_second": 50,
+        "GTCRN_hops_per_second_long_run": 62.5,
+        "derivation": "16000 samples/s divided by 320 samples/block and 256 samples/hop respectively; these are framing-derived rates, not measured completed throughput."
+      },
+      "evidence": [
+        {
+          "file": "board/runtime/audio/automatic_capture.py",
+          "lines": "31-41",
+          "sha256": "5e7abc5a15840aff51d0471313498a46efc940f16d4bd7ee95fed65f98fdcc0a"
+        },
+        {
+          "file": "board/runtime/audio/vad.py",
+          "lines": "104-118",
+          "sha256": "7a974702847b5854e5593c8ec12b9616cefefa3d99fb0298a3c8359f7f63388f"
+        },
+        {
+          "file": "board/runtime/audio/board_gtcrn_reuse.py",
+          "lines": "146-182",
+          "sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9"
+        },
+        {
+          "file": "board/runtime/audio/board_gtcrn_fft.py",
+          "lines": "107-125",
+          "sha256": "47cb8a2ec97ad292981bb42b67e217ed0f672a98d561d4ac8dc9c360cf8f6f06"
+        }
+      ]
+    },
+    {
+      "id": "F3",
+      "level": "source-proven-priority-scope;live-inheritance-unmeasured",
+      "finding": "The selected remote automatic path replaces the earlier PriorityBoardAutomaticCapture factory. The real frontend worker sets its own main task nice to -10 before model construction and before later capture/pump/arecord creation.",
+      "qualification": "Do not apply the unused PriorityBoardAutomaticCapture arecord-priority-restoration behavior to this path. Linux task inheritance is the expected consequence; exact task nice/sched values require root-provided already-authorized live metadata, not this static review.",
+      "evidence": [
+        {
+          "file": "tools/production_frontend_selection.py",
+          "lines": "42-60",
+          "sha256": "1acbcdefd03d32365d8909fa63c4bf53bd713aec21c2b3b9216371129d261cea"
+        },
+        {
+          "file": "board/runtime/audio/board_frontend_process.py",
+          "lines": "332-345",
+          "sha256": "0d64f9483d28f9e54992b617bda9b1940e347f4667c8b3f451e223ab127cbae4"
+        },
+        {
+          "file": "board/runtime/audio/board_frontend_auto.py",
+          "lines": "71-76;219-224;270-281",
+          "sha256": "9d64aad827caa39fb3d85b8ea68626ca7b41419b9eeeb919918bf28c3f7a6fd7"
+        },
+        {
+          "file": "board/runtime/audio/capture.py",
+          "lines": "119-139",
+          "sha256": "0b32186bd1fef871c57ae27b941ad3d112c1e2287e7d1dbeedd7fcdc93a98d3f"
+        }
+      ]
+    },
+    {
+      "id": "F4",
+      "level": "source-proven-Python-waits;native-internals-not-established",
+      "finding": "No unbounded empty Python busy-poll loop found in the selected path. Raw pipe reads block, PCM consumers use Condition.wait(.02), parent status polling uses Event.wait(.05), and child socket receive blocks with timeouts.",
+      "qualification": "GTCRN/Silero compute can be continuously runnable because audio continuously arrives. This review does not establish behavior inside shipped native ORT/sherpa binaries or native wait/spin pools.",
+      "evidence": [
+        {
+          "file": "board/runtime/audio/board_pcm_queue.py",
+          "lines": "61-127",
+          "sha256": "b38c922d3c7446458bbd0ca4bf99316ec769fb52f3baf4525aa24923cccf300d"
+        },
+        {
+          "file": "board/runtime/audio/board_frontend_auto.py",
+          "lines": "566-579",
+          "sha256": "9d64aad827caa39fb3d85b8ea68626ca7b41419b9eeeb919918bf28c3f7a6fd7"
+        },
+        {
+          "file": "board/runtime/audio/board_frontend_process.py",
+          "lines": "52-101",
+          "sha256": "0d64f9483d28f9e54992b617bda9b1940e347f4667c8b3f451e223ab127cbae4"
+        },
+        {
+          "file": "board/runtime/audio/board_frontend_auto.py",
+          "lines": "384-385",
+          "sha256": "9d64aad827caa39fb3d85b8ea68626ca7b41419b9eeeb919918bf28c3f7a6fd7"
+        }
+      ]
+    },
+    {
+      "id": "F5",
+      "level": "source-proven",
+      "finding": "The GUI process performs bounded 50 ms metadata IPC, cached status copies, controller ticks and repeated metadata projection. It does not receive each 20 ms PCM frame or run a second denoiser/VAD for the automatic remote path.",
+      "qualification": "Repeated snapshot/public calls remain real Python/GIL and lock work, but current _copy_status is detached scalar/dictionary copying, not the obsolete full deep-copy hot path. No evidence quantifies this as the dominant cost.",
+      "evidence": [
+        {
+          "file": "board/runtime/audio/board_frontend_auto.py",
+          "lines": "111-118;460-499;548-616",
+          "sha256": "9d64aad827caa39fb3d85b8ea68626ca7b41419b9eeeb919918bf28c3f7a6fd7"
+        },
+        {
+          "file": "tools/handsfree_recording.py",
+          "lines": "224-245",
+          "sha256": "a7e1a55e797e97fa605725ad7423e80704612c3ed4a703db177345ca4fe6a924"
+        },
+        {
+          "file": "tools/board_recording.py",
+          "lines": "215-229;319-360",
+          "sha256": "e70a9f4ca4768b3a1fabfc33145e39edbcb8cf20e0c76f269cc0b032fb54ce26"
+        }
+      ]
+    },
+    {
+      "id": "F6",
+      "level": "source-proven",
+      "finding": "32 warmup frames run once when the frontend gate is constructed. A capture rearm resets existing denoiser/VAD recurrent state and acquires a single lease without rerunning model warmup.",
+      "evidence": [
+        {
+          "file": "board/runtime/audio/board_gtcrn_reuse.py",
+          "lines": "116-144",
+          "sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9"
+        },
+        {
+          "file": "board/runtime/audio/board_capture.py",
+          "lines": "13-46",
+          "sha256": "61859c4af6ccfdd3d583c07d681d4d5b4e8f1a1f076fa5059ede4f8c008117be"
+        }
+      ]
+    },
+    {
+      "id": "F7",
+      "level": "source-proven-call-boundary",
+      "finding": "ASR is submitted after completed microphone release and a READY/take transition; no continuous idle ASR decode is called from this capture/VAD loop. Actual config asr_threads=2 passes unchanged through c514 BoardParaformer to recognizer_factory. There is no forced three-thread ASR in this pinned source.",
+      "qualification": "This is an API/source call-boundary statement, not proof that every preloaded native runtime thread is CPU-idle. Root ABA reports no pending/playing/speaker-active samples.",
+      "evidence": [
+        {
+          "file": "tools/board_recording.py",
+          "lines": "215-223;109-120",
+          "sha256": "e70a9f4ca4768b3a1fabfc33145e39edbcb8cf20e0c76f269cc0b032fb54ce26"
+        },
+        {
+          "file": "board/runtime/audio/board_dialogue_jobs.py",
+          "lines": "628-655",
+          "sha256": "580b2cf796275104cf15f2295afa2de29f82f32eabdd783a4b3aff858840a464"
+        },
+        {
+          "file": "tools/production_board_business_gui.py",
+          "lines": "64-65",
+          "sha256": "279ef8deb388e963e846453de71ddfe865fc05ab49e78c496321537234407168"
+        },
+        {
+          "file": "board/runtime/audio/board_asr.py",
+          "lines": "27-52;58-83",
+          "sha256": "c51488ac6bd3563bc3dc42934b321e98e26cb2b58d700318765a60ca4908ef60"
+        }
+      ]
+    },
+    {
+      "id": "F8",
+      "level": "source-proven",
+      "finding": "The composed production wrappers keep direct voice-first half-duplex listening: wake-word gate false, barge false, early_listen false, social false. DeviceObserver is a pinned inert compatibility stub, so enabling its property adds no uploader/thread/device work.",
+      "evidence": [
+        {
+          "file": "tools/production_listening.py",
+          "lines": "93-110",
+          "sha256": "a9ccbc44cefef8d2f3a6dd9695355cbd2156f4e5288237a51c394608bf6d5d09"
+        },
+        {
+          "file": "tools/voice_first_recording.py",
+          "lines": "231-234",
+          "sha256": "54fa17ac97e3fdbeeb2725b6534a86dec9ece60839f2b14ffa77c348e714dafc"
+        },
+        {
+          "file": "board/runtime/device_observer.py",
+          "lines": "1-18",
+          "sha256": "06391079cfddb7342350f1007cfd35c0b5d8285e1b6bf6a0db1bfd3bf1c1370d"
+        },
+        {
+          "file": "tools/board_avatar_gtk.py",
+          "lines": "306-315",
+          "sha256": "d3c3d18aad2afdd02e25c5619befc67cfdd3fd8a7ef9f8713b5403a88c9a7bc5"
+        }
+      ]
+    }
+  ],
+  "complete_composed_entry": [
+    {
+      "order": 1,
+      "owner": "GUI process / startup",
+      "call": "board_avatar_pan.main -> stage_type(BoardAvatarStage,factory) -> FaceStage(PanStage(BoardAvatarStage))",
+      "detail": "Actual entry replaces only this process stage class. PanStage and FaceStage forward non-pan commands to super; neither substitutes the audio capture factory. Native ownership/rendering wrappers are included in this review.",
+      "source_evidence": [
+        {
+          "file": "tools/board_avatar_pan.py",
+          "lines": "11-24",
+          "sha256": "9bdc7ed97da9a3f33ba33604e3488d04165f603dd3b43f9f90f7c3032790c1a3"
+        },
+        {
+          "file": "tools/face_pan_controls.py",
+          "lines": "4;180-195;226-265",
+          "sha256": "3ebb1b32368c8f12864e0f13da68853e4d9653e4279eada124eb337c5ca9d7ee"
+        },
+        {
+          "file": "tools/pan_controls.py",
+          "lines": "6-23;67-86",
+          "sha256": "0a6571320fa7f45b1bc4049d000b85f8ce40434bcb266af4368242543cd99aa1"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "owner": "GUI process / startup",
+      "call": "ProductionGuiBoardBusiness -> create_frontend_pool -> BoardFrontendPool(BoardProcessSpeechGate)",
+      "detail": "Selected combined mode starts one frontend child and preloads the exact GTCRN/Silero gate there. Parent has a process proxy; it is not an independent per-frame inference owner.",
+      "source_evidence": [
+        {
+          "file": "tools/board_avatar_gtk.py",
+          "lines": "275-280",
+          "sha256": "d3c3d18aad2afdd02e25c5619befc67cfdd3fd8a7ef9f8713b5403a88c9a7bc5"
+        },
+        {
+          "file": "tools/production_board_business_gui.py",
+          "lines": "40-43;64-69",
+          "sha256": "279ef8deb388e963e846453de71ddfe865fc05ab49e78c496321537234407168"
+        },
+        {
+          "file": "tools/production_frontend_selection.py",
+          "lines": "20-28",
+          "sha256": "1acbcdefd03d32365d8909fa63c4bf53bd713aec21c2b3b9216371129d261cea"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "owner": "GUI process / startup",
+      "call": "recording_options priority -> automatic_capture_recording_options override",
+      "detail": "capture_priority_nice=-10 initially supplies PriorityBoardAutomaticCapture, then frontend_capture_process=true replaces auto_capture_factory with RemoteAutomaticCapture. The first factory is not the final active automatic factory.",
+      "source_evidence": [
+        {
+          "file": "tools/production_board_business_gui.py",
+          "lines": "104-113",
+          "sha256": "279ef8deb388e963e846453de71ddfe865fc05ab49e78c496321537234407168"
+        },
+        {
+          "file": "tools/production_frontend_selection.py",
+          "lines": "42-61",
+          "sha256": "1acbcdefd03d32365d8909fa63c4bf53bd713aec21c2b3b9216371129d261cea"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "owner": "GUI process / startup",
+      "call": "PairedRecording(VoiceFirstRecordingController(BargeInRecordingController(HandsFreeRecordingController(RecordingController))))",
+      "detail": "Full recording MRO: paired wrapper readiness gate and display waiting sync; VoiceFirst supplies audio session identity; inherited barge and handsfree wrappers retain original owners.",
+      "source_evidence": [
+        {
+          "file": "tools/board_avatar_gtk.py",
+          "lines": "295-340",
+          "sha256": "d3c3d18aad2afdd02e25c5619befc67cfdd3fd8a7ef9f8713b5403a88c9a7bc5"
+        },
+        {
+          "file": "tools/formal_yuki.py",
+          "lines": "327-378",
+          "sha256": "c74b5f00d52208d992e8ee82c998250001c781c900d31b1f72a18bdda6f492e9"
+        },
+        {
+          "file": "tools/voice_first_recording.py",
+          "lines": "11-31",
+          "sha256": "54fa17ac97e3fdbeeb2725b6534a86dec9ece60839f2b14ffa77c348e714dafc"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "owner": "GUI process / startup and audio owner",
+      "call": "bind_automatic_listening -> bind_presentation -> AvatarRenderWorker(recording)",
+      "detail": "Production restores saved preference, wraps monitor/toggle/cancel and disables barge/wake; presentation wraps instance tick/public without a new audio model/capture; AvatarRenderWorker becomes the one command/tick owner.",
+      "source_evidence": [
+        {
+          "file": "tools/production_listening.py",
+          "lines": "75-145",
+          "sha256": "a9ccbc44cefef8d2f3a6dd9695355cbd2156f4e5288237a51c394608bf6d5d09"
+        },
+        {
+          "file": "tools/production_memory_presentation.py",
+          "lines": "255-309",
+          "sha256": "de04c6cd22e3672ff17c2cfb71f5539f6908c98daf74e8d94d154c8fd280d4c2"
+        },
+        {
+          "file": "tools/board_avatar_gtk.py",
+          "lines": "336-345",
+          "sha256": "d3c3d18aad2afdd02e25c5619befc67cfdd3fd8a7ef9f8713b5403a88c9a7bc5"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "owner": "GTK main thread -> aura-avatar-render",
+      "call": "BoardAvatarStage.command(conversation_toggle) -> AvatarRenderWorker.handsfree_toggle/request -> queued command",
+      "detail": "GTK enqueues the action. Avatar worker executes the recording method; it does not start capture on GTK thread. Current GTK refresh is configured 200 ms and reads cached worker packets.",
+      "source_evidence": [
+        {
+          "file": "tools/board_avatar_gtk.py",
+          "lines": "416-425;1538-1541;1656-1671",
+          "sha256": "d3c3d18aad2afdd02e25c5619befc67cfdd3fd8a7ef9f8713b5403a88c9a7bc5"
+        },
+        {
+          "file": "tools/board_avatar_worker.py",
+          "lines": "137-185;249-269",
+          "sha256": "3c83a97c7b1d032fccce0ac3fc57d1195246ea4e83858413f7c5d51a0ee5aa68"
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "owner": "GUI process / aura-avatar-render",
+      "call": "production monitor_tick -> VoiceFirst._monitor_tick -> _capture_for(True) -> PairedRecording._listen -> VoiceFirst/HandsFree/Recording._listen",
+      "detail": "Ready anonymous audio session is established; speech owner callback bound; real playback/pending gates checked before capture.start. VoiceFirst._current returns stable audio owner without camera query.",
+      "source_evidence": [
+        {
+          "file": "tools/production_listening.py",
+          "lines": "101-110",
+          "sha256": "a9ccbc44cefef8d2f3a6dd9695355cbd2156f4e5288237a51c394608bf6d5d09"
+        },
+        {
+          "file": "tools/voice_first_recording.py",
+          "lines": "73-85;168-229",
+          "sha256": "54fa17ac97e3fdbeeb2725b6534a86dec9ece60839f2b14ffa77c348e714dafc"
+        },
+        {
+          "file": "tools/handsfree_recording.py",
+          "lines": "87-101",
+          "sha256": "a7e1a55e797e97fa605725ad7423e80704612c3ed4a703db177345ca4fe6a924"
+        },
+        {
+          "file": "tools/board_recording.py",
+          "lines": "29-53",
+          "sha256": "e70a9f4ca4768b3a1fabfc33145e39edbcb8cf20e0c76f269cc0b032fb54ce26"
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "owner": "GUI audio owner -> anonymous socketpair -> frontend child",
+      "call": "RemoteAutomaticCapture.start -> AutomaticCaptureTransport.start -> GATE_RELEASE/AUTO_START -> serve_shared -> ChildAutomaticSession.start",
+      "detail": "The existing child creates/reuses ordinary BoardAutomaticCapture, with child-local frontend_pool.acquire and owned_arecord_factory. No raw audio crosses parent socket per input frame.",
+      "source_evidence": [
+        {
+          "file": "board/runtime/audio/board_frontend_auto.py",
+          "lines": "460-479;548-564;219-281;361-398",
+          "sha256": "9d64aad827caa39fb3d85b8ea68626ca7b41419b9eeeb919918bf28c3f7a6fd7"
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "owner": "frontend child main task; frontend child capture/pump threads; arecord grandchild",
+      "call": "BoardAutomaticCapture(_BoardEndpoint,BoundedPcmCaptureMixin,AutomaticMcp01Capture) -> Mcp01Capture.start",
+      "detail": "Single microphone file-lock, exact MCP01 PCM16/16kHz/mono arecord. Child acquires frontend lease then creates aura-mcp01-capture thread. That thread starts bounded aura-board-raw-pcm pump. arecord is an owned separate process.",
+      "source_evidence": [
+        {
+          "file": "board/runtime/audio/board_capture.py",
+          "lines": "93-108",
+          "sha256": "61859c4af6ccfdd3d583c07d681d4d5b4e8f1a1f076fa5059ede4f8c008117be"
+        },
+        {
+          "file": "board/runtime/audio/capture.py",
+          "lines": "71-139",
+          "sha256": "0b32186bd1fef871c57ae27b941ad3d112c1e2287e7d1dbeedd7fcdc93a98d3f"
+        },
+        {
+          "file": "board/runtime/audio/automatic_capture.py",
+          "lines": "115-125",
+          "sha256": "5e7abc5a15840aff51d0471313498a46efc940f16d4bd7ee95fed65f98fdcc0a"
+        },
+        {
+          "file": "board/runtime/audio/board_pcm_queue.py",
+          "lines": "194-217",
+          "sha256": "b38c922d3c7446458bbd0ca4bf99316ec769fb52f3baf4525aa24923cccf300d"
+        },
+        {
+          "file": "board/runtime/audio/board_frontend_auto.py",
+          "lines": "51-76",
+          "sha256": "9d64aad827caa39fb3d85b8ea68626ca7b41419b9eeeb919918bf28c3f7a6fd7"
+        }
+      ]
+    }
+  ],
+  "continuous_block_path": [
+    {
+      "order": 1,
+      "owner": "arecord grandchild -> frontend child aura-board-raw-pcm",
+      "call": "Blocking stream.read(640) -> bounded deque",
+      "detail": "One nominal 20 ms/320 sample raw PCM16 block; capacity8=160 ms. Timestamp/counters and condition notification. Overflow faults the capture instead of replaying/drop-concealing frames.",
+      "source_evidence": [
+        {
+          "file": "board/runtime/audio/board_pcm_queue.py",
+          "lines": "22-45;61-127",
+          "sha256": "b38c922d3c7446458bbd0ca4bf99316ec769fb52f3baf4525aa24923cccf300d"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "owner": "frontend child aura-mcp01-capture",
+      "call": "AutomaticMcp01Capture._read_automatic_pcm -> _feed_endpoint -> SpeechEndpoint.feed",
+      "detail": "Consumer blocks on queue when empty. Endpoint keeps bounded raw pre-roll ring, converts PCM16 to normalized float32, and updates existing feed timing scalars. No endpoint feed on GTK.",
+      "source_evidence": [
+        {
+          "file": "board/runtime/audio/automatic_capture.py",
+          "lines": "16-53;72-96;134-154",
+          "sha256": "5e7abc5a15840aff51d0471313498a46efc940f16d4bd7ee95fed65f98fdcc0a"
+        },
+        {
+          "file": "board/runtime/audio/board_pcm_queue.py",
+          "lines": "99-127",
+          "sha256": "b38c922d3c7446458bbd0ca4bf99316ec769fb52f3baf4525aa24923cccf300d"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "owner": "same frontend child capture thread",
+      "call": "EnergyVad.accept -> _FrontendLease -> ReuseFftSpeechGate.__call__",
+      "detail": "EnergyVad builds its float buffer and always invokes the injected classifier. It does not calculate RMS in parallel when classifier exists. Gate validates finite normalized data and performs the original PCM16-grid quantization in reused float storage.",
+      "source_evidence": [
+        {
+          "file": "board/runtime/audio/vad.py",
+          "lines": "104-118",
+          "sha256": "7a974702847b5854e5593c8ec12b9616cefefa3d99fb0298a3c8359f7f63388f"
+        },
+        {
+          "file": "board/runtime/audio/board_capture.py",
+          "lines": "66-80",
+          "sha256": "61859c4af6ccfdd3d583c07d681d4d5b4e8f1a1f076fa5059ede4f8c008117be"
+        },
+        {
+          "file": "board/runtime/audio/board_gtcrn_reuse.py",
+          "lines": "146-168",
+          "sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "owner": "same frontend child capture thread / CPU native calls",
+      "call": "ReuseFftGtcrnDenoiser inherited __call__/_consume -> _hop",
+      "detail": "320 input samples accumulate; process every256 sample hop with512 point FFT, one GTCRN recurrent ORT run_with_iobinding, inverse FFT and overlap-add. Reused buffers and ping-pong recurrent state avoid a second GTCRN execution; remaining numpy FFT/concatenate/output-copy allocations still exist.",
+      "source_evidence": [
+        {
+          "file": "board/runtime/audio/board_gtcrn_fft.py",
+          "lines": "107-125",
+          "sha256": "47cb8a2ec97ad292981bb42b67e217ed0f672a98d561d4ac8dc9c360cf8f6f06"
+        },
+        {
+          "file": "board/runtime/audio/board_gtcrn_reuse.py",
+          "lines": "34-113",
+          "sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "owner": "same frontend child capture thread / sherpa native calls",
+      "call": "vad.accept_waveform(denoised samples) -> is_speech_detected -> pop completed native segments",
+      "detail": "Silero threshold .5 and original sample/timeline settings. One call to accept_waveform for each nonempty denoised output; exact binary-internal Silero inference/window cadence is not established by Python source. Only boolean feeds endpoint; ASR clip remains original PCM.",
+      "source_evidence": [
+        {
+          "file": "board/runtime/audio/board_gtcrn_reuse.py",
+          "lines": "133-182",
+          "sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9"
+        },
+        {
+          "file": "board/runtime/audio/board_asr_frontend.py",
+          "lines": "45-52",
+          "sha256": "b3d06b653876469daf5b7bb805458b187662d9862e8ece6da731cbfa3e23a093"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "owner": "same frontend child capture thread",
+      "call": "EnergyVad counters -> SpeechEndpoint state",
+      "detail": "Original 180 ms continuous speech onset and700 ms endpoint silence. 500 ms pre-roll from BoardEndpoint. When still waiting or speaking, processing continues on the next block. No fixed sleep per inference or repeated32-frame warmup.",
+      "source_evidence": [
+        {
+          "file": "board/runtime/audio/board_capture.py",
+          "lines": "93-98",
+          "sha256": "61859c4af6ccfdd3d583c07d681d4d5b4e8f1a1f076fa5059ede4f8c008117be"
+        },
+        {
+          "file": "board/runtime/audio/vad.py",
+          "lines": "32-45;120-148",
+          "sha256": "7a974702847b5854e5593c8ec12b9616cefefa3d99fb0298a3c8359f7f63388f"
+        },
+        {
+          "file": "board/runtime/audio/automatic_capture.py",
+          "lines": "16-53",
+          "sha256": "5e7abc5a15840aff51d0471313498a46efc940f16d4bd7ee95fed65f98fdcc0a"
+        }
+      ]
+    }
+  ],
+  "parallel_metadata_and_GUI_path": {
+    "parent_status_poll": {
+      "thread": "GUI process / aura-automatic-control-poll",
+      "wait": "Event.wait(.05) before each synchronous metadata RPC; RPC response bounded .5 s for poll",
+      "payload": "AUTO_POLL capture owner metadata; no per-frame PCM",
+      "copies": "Child status validates fixed schema and finite scalar metrics; parent decoder validates, _poll validates, _install validates. snapshot uses detached dict copies of two scalar metric dictionaries; not old full deepcopy.",
+      "evidence": [
+        {
+          "file": "board/runtime/audio/board_frontend_auto.py",
+          "lines": "111-131;313-331;480-499;566-616",
+          "sha256": "9d64aad827caa39fb3d85b8ea68626ca7b41419b9eeeb919918bf28c3f7a6fd7"
+        }
+      ]
+    },
+    "child_control_loop": {
+      "thread": "frontend child main/control task",
+      "wait": "channel.receive(None,poll_interval=.5); socket recv blocks. Metadata status shares child GIL and short capture locks with PCM/endpoint Python sections, while capture thread runs model calls.",
+      "evidence": [
+        {
+          "file": "board/runtime/audio/board_frontend_auto.py",
+          "lines": "313-331;384-418",
+          "sha256": "9d64aad827caa39fb3d85b8ea68626ca7b41419b9eeeb919918bf28c3f7a6fd7"
+        },
+        {
+          "file": "board/runtime/audio/board_frontend_process.py",
+          "lines": "76-101",
+          "sha256": "0d64f9483d28f9e54992b617bda9b1940e347f4667c8b3f451e223ab127cbae4"
+        }
+      ]
+    },
+    "audio_owner_repeated_status": {
+      "thread": "GUI process / aura-avatar-render",
+      "calls": "HandsFree.tick invokes monitor_tick before and after Recording.tick. Active VoiceFirst monitor reads proxy snapshot via _recording then explicit snapshot; _collect and public read it again. These return cached metadata and never issue one new model call per snapshot.",
+      "presentation": "Outer presentation tick calls lifecycle.retire_consumed -> runtime._foreground_idle -> GuiBoardBusiness.capture_idle, which may read one more cached capture status; it preserves existing memory/ACK ownership.",
+      "scheduling": "Worker uses Condition.wait until next frame/command, interval1/24 and separate16fps visual slots. Do not equate nominal interval with a measured exact tick count.",
+      "evidence": [
+        {
+          "file": "tools/handsfree_recording.py",
+          "lines": "224-228",
+          "sha256": "a7e1a55e797e97fa605725ad7423e80704612c3ed4a703db177345ca4fe6a924"
+        },
+        {
+          "file": "tools/voice_first_recording.py",
+          "lines": "168-200",
+          "sha256": "54fa17ac97e3fdbeeb2725b6534a86dec9ece60839f2b14ffa77c348e714dafc"
+        },
+        {
+          "file": "tools/board_recording.py",
+          "lines": "215-229;319-360",
+          "sha256": "e70a9f4ca4768b3a1fabfc33145e39edbcb8cf20e0c76f269cc0b032fb54ce26"
+        },
+        {
+          "file": "tools/production_memory_presentation.py",
+          "lines": "216-247;273-281",
+          "sha256": "de04c6cd22e3672ff17c2cfb71f5539f6908c98daf74e8d94d154c8fd280d4c2"
+        },
+        {
+          "file": "board/runtime/board_business.py",
+          "lines": "792-795",
+          "sha256": "9c6da51f569d19d71dd2b25f8e2c4549bfa5c5059f1e7bc45d1124807400b5b2"
+        },
+        {
+          "file": "tools/board_business_gui.py",
+          "lines": "138-153",
+          "sha256": "8aa7e8c674d16e58c0c4530108fc7a716fefaa0f3ee0c456bf33b64d992552ca"
+        },
+        {
+          "file": "tools/board_avatar_worker.py",
+          "lines": "233-301;479-491",
+          "sha256": "3c83a97c7b1d032fccce0ac3fc57d1195246ea4e83858413f7c5d51a0ee5aa68"
+        }
+      ]
+    },
+    "GTK_main": {
+      "work": "Commands, GLib callbacks, cached AvatarRenderWorker.read/snapshot_copy, widgets/UI status. No raw PCM block frontend call in normal listening path.",
+      "shared_resources": "GUI GTK/main, audio-owner, proxy poll, HTTP/service/preview Python threads share GUI process GIL and CPU scheduling. Frontend main+capture+pump share a different process GIL. All processes still compete for board CPU.",
+      "evidence": [
+        {
+          "file": "tools/board_avatar_gtk.py",
+          "lines": "416-425;1656-1671",
+          "sha256": "d3c3d18aad2afdd02e25c5619befc67cfdd3fd8a7ef9f8713b5403a88c9a7bc5"
+        },
+        {
+          "file": "tools/board_avatar_worker.py",
+          "lines": "193-219;382-389",
+          "sha256": "3c83a97c7b1d032fccce0ac3fc57d1195246ea4e83858413f7c5d51a0ee5aa68"
+        }
+      ]
+    }
+  },
+  "recording_end_and_cancel": {
+    "normal_order": [
+      "SpeechEndpoint returns one original-PCM utterance after continuous700 ms endpoint silence (or original max speech bound); _read_automatic_pcm signals exact arecord SIGINT.",
+      "Bounded PCM pump finish checks reader/fault state; endpoint lease is closed; Mcp01Capture._read waits for arecord and releases microphone file lock before READY result publication.",
+      "ChildAutomaticSession.status masks READY as RECORDING until process+owner+capture-thread all released. No completed PCM exported early.",
+      "Parent metadata poll sees READY; only its recorded audio-owner thread can dispatch speech callback and consume. _consume stops/invalidate poll, AUTO_TAKE transports bounded original PCM once and rebuilds/validates capture receipt.",
+      "RecordingController._collect takes utterance and queues transcriber.submit; BoardDialogueJobs._execute invokes ASR only after this boundary. Existing admission, identity, memory, model dialogue, full playback ACK and guard remain unchanged."
+    ],
+    "normal_evidence": [
+      {
+        "file": "board/runtime/audio/automatic_capture.py",
+        "lines": "134-154",
+        "sha256": "5e7abc5a15840aff51d0471313498a46efc940f16d4bd7ee95fed65f98fdcc0a"
+      },
+      {
+        "file": "board/runtime/audio/board_pcm_queue.py",
+        "lines": "203-217",
+        "sha256": "b38c922d3c7446458bbd0ca4bf99316ec769fb52f3baf4525aa24923cccf300d"
+      },
+      {
+        "file": "board/runtime/audio/capture.py",
+        "lines": "155-196",
+        "sha256": "0b32186bd1fef871c57ae27b941ad3d112c1e2287e7d1dbeedd7fcdc93a98d3f"
+      },
+      {
+        "file": "board/runtime/audio/board_frontend_auto.py",
+        "lines": "240-243;313-342;581-647",
+        "sha256": "9d64aad827caa39fb3d85b8ea68626ca7b41419b9eeeb919918bf28c3f7a6fd7"
+      },
+      {
+        "file": "tools/board_recording.py",
+        "lines": "215-223;109-120",
+        "sha256": "e70a9f4ca4768b3a1fabfc33145e39edbcb8cf20e0c76f269cc0b032fb54ce26"
+      },
+      {
+        "file": "board/runtime/audio/board_dialogue_jobs.py",
+        "lines": "628-655",
+        "sha256": "580b2cf796275104cf15f2295afa2de29f82f32eabdd783a4b3aff858840a464"
+      }
+    ],
+    "explicit_OFF": "Production explicit-toggle scope prevents automatic rearm. Recording.cancel invokes RemoteAutomaticCapture.cancel -> stops status poll -> AUTO_CANCEL -> child capture.cancel, after which normal cleanup must release microphone and pool. Frontend process/model remain preloaded waiting for commands; no continuous block loop remains after successful cancellation.",
+    "cancel_evidence": [
+      {
+        "file": "tools/production_listening.py",
+        "lines": "112-130",
+        "sha256": "a9ccbc44cefef8d2f3a6dd9695355cbd2156f4e5288237a51c394608bf6d5d09"
+      },
+      {
+        "file": "tools/handsfree_recording.py",
+        "lines": "153-172",
+        "sha256": "a7e1a55e797e97fa605725ad7423e80704612c3ed4a703db177345ca4fe6a924"
+      },
+      {
+        "file": "tools/board_recording.py",
+        "lines": "278-289",
+        "sha256": "e70a9f4ca4768b3a1fabfc33145e39edbcb8cf20e0c76f269cc0b032fb54ce26"
+      },
+      {
+        "file": "board/runtime/audio/board_frontend_auto.py",
+        "lines": "344-354;652-673",
+        "sha256": "9d64aad827caa39fb3d85b8ea68626ca7b41419b9eeeb919918bf28c3f7a6fd7"
+      }
+    ]
+  },
+  "existing_ABA_evidence": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\visual_artifact_fix_20261102\\AUDIO_CONTENTION_ABA_1_ANALYSIS.json",
+    "sha256": "598674f563f5bbac0340c0c01cca91865f0d7deb231e8947ad6767fd58795d4c",
+    "phase_numeric_projection": [
+      {
+        "phase": "A_LISTEN_ON",
+        "n": 24,
+        "seconds_first_to_last": 5.914,
+        "recording_states": [
+          "RECORDING"
+        ],
+        "display_counter_delta": 54,
+        "GUI_HTTP_median_ms": 68.587,
+        "GUI_main_runqueue_wait_percent": 26.9,
+        "GUI_process_cpu_percent": 101.5,
+        "camera_process_cpu_percent": 115.2,
+        "raw_age_ge250": 0,
+        "playing_or_pending_samples": 0,
+        "speaker_active_samples": 0
+      },
+      {
+        "phase": "B_LISTEN_OFF",
+        "n": 24,
+        "seconds_first_to_last": 5.808,
+        "recording_states": [
+          "CANCELLED"
+        ],
+        "display_counter_delta": 88,
+        "GUI_HTTP_median_ms": 36.131,
+        "GUI_main_runqueue_wait_percent": 19.7,
+        "GUI_process_cpu_percent": 107.1,
+        "camera_process_cpu_percent": 164.4,
+        "raw_age_ge250": 0,
+        "playing_or_pending_samples": 0,
+        "speaker_active_samples": 0
+      },
+      {
+        "phase": "C_LISTEN_ON",
+        "n": 24,
+        "seconds_first_to_last": 5.947,
+        "recording_states": [
+          "RECORDING"
+        ],
+        "display_counter_delta": 41,
+        "GUI_HTTP_median_ms": 70.5385,
+        "GUI_main_runqueue_wait_percent": 27.0,
+        "GUI_process_cpu_percent": 95.8,
+        "camera_process_cpu_percent": 120.6,
+        "raw_age_ge250": 0,
+        "playing_or_pending_samples": 0,
+        "speaker_active_samples": 0
+      }
+    ],
+    "facts": "Same c386/vision/camera ON-OFF-ON. All72 raw HEADER age samples under250 ms; no playing/pending or speaker-active samples. Display count and HTTP response worsen again with listening ON.",
+    "inference": "Compatible with board CPU/scheduling contention introduced by the continuous frontend path, with high-priority child an evidence-backed suspect. Association does not yet isolate individual model kernels, scheduler priority, GUI GIL, or final physical scanout behavior.",
+    "limitations": [
+      "Parent ABA observes GUI and camera process CPU but not the frontend child/arecord aggregate in this analysis JSON; GUI CPU alone cannot estimate audio CPU cost.",
+      "OFF GUI CPU is higher (107.1% vs101.5/95.8%) despite lower main runqueue wait; do not describe it as a measured reduction in GUI total CPU. Camera can complete more work when contention is reduced.",
+      "Display counter delta is software counter, not measured scanout pixels or proof that flicker/ghosting is resolved.",
+      "Short sequential phases and finite samples limit root-cause attribution; no new local or board experiment run by this agent."
+    ]
+  },
+  "root_existing_process_thread_sched_correlation_fields": [
+    "Map frontend process worker_pid plus microphone_pid from current capture status to root-provided exact PPID/starttime/boot identity; no new query requested from this agent.",
+    "Separate frontend main/control, aura-mcp01-capture consumer, aura-board-raw-pcm pump and native runtime threads; compare CPU time and runqueue-wait with ON/OFF phases using existing measured task IDs rather than labels alone.",
+    "Check actual per-task nice/scheduler values. Selected child main explicitly sets nice-10; capture/pump/arecord inheritance must be confirmed in the observed tree.",
+    "Do not infer native spinning or model thread-pool fanout from configuration alone: GTCRN num_threads=1/inter_op=1, Silero1; Python source does not show shipped binary thread implementations."
+  ],
+  "delivery_boundary": "Analysis only; no new setter, TTL, source patch, threshold/thread/model change, test or benchmark. Existing flags, Native, ECAPA .35 and motion controls are preserved. Root owns any subsequent action.",
+  "source_inventory": [
+    {
+      "relative_runtime_path": "tools/board_avatar_pan.py",
+      "sha256": "9bdc7ed97da9a3f33ba33604e3488d04165f603dd3b43f9f90f7c3032790c1a3",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\board_avatar_pan.py",
+      "evidence_line_ranges": [
+        "11-24"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/face_pan_controls.py",
+      "sha256": "3ebb1b32368c8f12864e0f13da68853e4d9653e4279eada124eb337c5ca9d7ee",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\face_pan_controls.py",
+      "evidence_line_ranges": [
+        "4",
+        "180-195",
+        "226-265"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/pan_controls.py",
+      "sha256": "0a6571320fa7f45b1bc4049d000b85f8ce40434bcb266af4368242543cd99aa1",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\pan_controls.py",
+      "evidence_line_ranges": [
+        "6-23",
+        "42-57",
+        "67-99"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/board_avatar_gtk.py",
+      "sha256": "d3c3d18aad2afdd02e25c5619befc67cfdd3fd8a7ef9f8713b5403a88c9a7bc5",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\visual_artifact_fix_20261102\\gtk\\tools\\board_avatar_gtk.py",
+      "evidence_line_ranges": [
+        "275-345",
+        "416-425",
+        "1538-1541",
+        "1639-1671"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/formal_yuki.py",
+      "sha256": "c74b5f00d52208d992e8ee82c998250001c781c900d31b1f72a18bdda6f492e9",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\formal_yuki.py",
+      "evidence_line_ranges": [
+        "327-378"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/production_board_business_gui.py",
+      "sha256": "279ef8deb388e963e846453de71ddfe865fc05ab49e78c496321537234407168",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\production_board_business_gui.py",
+      "evidence_line_ranges": [
+        "40-43",
+        "64-69",
+        "104-113"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/production_frontend_selection.py",
+      "sha256": "1acbcdefd03d32365d8909fa63c4bf53bd713aec21c2b3b9216371129d261cea",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\production_frontend_selection.py",
+      "evidence_line_ranges": [
+        "4-17",
+        "20-39",
+        "42-61"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/production_listening.py",
+      "sha256": "a9ccbc44cefef8d2f3a6dd9695355cbd2156f4e5288237a51c394608bf6d5d09",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\production_listening.py",
+      "evidence_line_ranges": [
+        "75-145"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/production_memory_presentation.py",
+      "sha256": "de04c6cd22e3672ff17c2cfb71f5539f6908c98daf74e8d94d154c8fd280d4c2",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\production_memory_presentation.py",
+      "evidence_line_ranges": [
+        "216-247",
+        "255-309"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/board_business_gui.py",
+      "sha256": "8aa7e8c674d16e58c0c4530108fc7a716fefaa0f3ee0c456bf33b64d992552ca",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\board_business_gui.py",
+      "evidence_line_ranges": [
+        "124-153"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/voice_first_recording.py",
+      "sha256": "54fa17ac97e3fdbeeb2725b6534a86dec9ece60839f2b14ffa77c348e714dafc",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\voice_first_recording.py",
+      "evidence_line_ranges": [
+        "12-31",
+        "73-116",
+        "141-229",
+        "231-270"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/barge_in_recording.py",
+      "sha256": "59794f4f234ba0e6433e8b26a44ca65dbd5616af513a5111fb2c6d6738530b6d",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\barge_in_recording.py",
+      "evidence_line_ranges": [
+        "7-35",
+        "46-78",
+        "80-146",
+        "148-171"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/handsfree_recording.py",
+      "sha256": "a7e1a55e797e97fa605725ad7423e80704612c3ed4a703db177345ca4fe6a924",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\handsfree_recording.py",
+      "evidence_line_ranges": [
+        "15-32",
+        "87-101",
+        "125-147",
+        "153-172",
+        "224-245"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/board_recording.py",
+      "sha256": "e70a9f4ca4768b3a1fabfc33145e39edbcb8cf20e0c76f269cc0b032fb54ce26",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\board_recording.py",
+      "evidence_line_ranges": [
+        "7-53",
+        "109-186",
+        "206-229",
+        "278-360"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/board_avatar_worker.py",
+      "sha256": "3c83a97c7b1d032fccce0ac3fc57d1195246ea4e83858413f7c5d51a0ee5aa68",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\board_avatar_worker.py",
+      "evidence_line_ranges": [
+        "73-123",
+        "137-185",
+        "193-219",
+        "223-305",
+        "382-389",
+        "479-491"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/audio/board_frontend_process.py",
+      "sha256": "0d64f9483d28f9e54992b617bda9b1940e347f4667c8b3f451e223ab127cbae4",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\audio\\board_frontend_process.py",
+      "evidence_line_ranges": [
+        "52-123",
+        "128-175",
+        "202-246",
+        "314-346"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/audio/board_frontend_auto.py",
+      "sha256": "9d64aad827caa39fb3d85b8ea68626ca7b41419b9eeeb919918bf28c3f7a6fd7",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\audio\\board_frontend_auto.py",
+      "evidence_line_ranges": [
+        "1-44",
+        "51-76",
+        "95-131",
+        "219-300",
+        "313-457",
+        "460-673"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/audio/board_capture.py",
+      "sha256": "61859c4af6ccfdd3d583c07d681d4d5b4e8f1a1f076fa5059ede4f8c008117be",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\audio\\board_capture.py",
+      "evidence_line_ranges": [
+        "13-108"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/audio/board_pcm_queue.py",
+      "sha256": "b38c922d3c7446458bbd0ca4bf99316ec769fb52f3baf4525aa24923cccf300d",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\audio\\board_pcm_queue.py",
+      "evidence_line_ranges": [
+        "22-127",
+        "159-230"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/audio/capture.py",
+      "sha256": "0b32186bd1fef871c57ae27b941ad3d112c1e2287e7d1dbeedd7fcdc93a98d3f",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\audio\\capture.py",
+      "evidence_line_ranges": [
+        "20-40",
+        "50-69",
+        "71-140",
+        "155-196"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/audio/automatic_capture.py",
+      "sha256": "5e7abc5a15840aff51d0471313498a46efc940f16d4bd7ee95fed65f98fdcc0a",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\audio\\automatic_capture.py",
+      "evidence_line_ranges": [
+        "16-53",
+        "56-166"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/audio/vad.py",
+      "sha256": "7a974702847b5854e5593c8ec12b9616cefefa3d99fb0298a3c8359f7f63388f",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\audio\\vad.py",
+      "evidence_line_ranges": [
+        "32-45",
+        "60-150"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/audio/board_gtcrn_reuse.py",
+      "sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\audio\\board_gtcrn_reuse.py",
+      "evidence_line_ranges": [
+        "26-187"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/audio/board_gtcrn_fft.py",
+      "sha256": "47cb8a2ec97ad292981bb42b67e217ed0f672a98d561d4ac8dc9c360cf8f6f06",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\audio\\board_gtcrn_fft.py",
+      "evidence_line_ranges": [
+        "29-136",
+        "139-163"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/audio/board_asr_frontend.py",
+      "sha256": "b3d06b653876469daf5b7bb805458b187662d9862e8ece6da731cbfa3e23a093",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\audio\\board_asr_frontend.py",
+      "evidence_line_ranges": [
+        "19-84"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/audio/board_asr.py",
+      "sha256": "c51488ac6bd3563bc3dc42934b321e98e26cb2b58d700318765a60ca4908ef60",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\audio\\board_asr.py",
+      "evidence_line_ranges": [
+        "27-83"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/audio/board_dialogue_jobs.py",
+      "sha256": "580b2cf796275104cf15f2295afa2de29f82f32eabdd783a4b3aff858840a464",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\audio\\board_dialogue_jobs.py",
+      "evidence_line_ranges": [
+        "335-345",
+        "628-689",
+        "998-1020"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/board_business.py",
+      "sha256": "9c6da51f569d19d71dd2b25f8e2c4549bfa5c5059f1e7bc45d1124807400b5b2",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\board_business.py",
+      "evidence_line_ranges": [
+        "792-795"
+      ]
+    },
+    {
+      "relative_runtime_path": "board/runtime/device_observer.py",
+      "sha256": "06391079cfddb7342350f1007cfd35c0b5d8285e1b6bf6a0db1bfd3bf1c1370d",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\board\\runtime\\device_observer.py",
+      "evidence_line_ranges": [
+        "1-18"
+      ]
+    },
+    {
+      "relative_runtime_path": "tools/streaming_controller.py",
+      "sha256": "4b76e137d49994f01ae43a7a608e0b9feb13b9eff66cc981346823bace576899",
+      "exact_local_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\candidate_runtime\\tools\\streaming_controller.py",
+      "evidence_line_ranges": [
+        "77-149"
+      ]
+    }
+  ]
+}

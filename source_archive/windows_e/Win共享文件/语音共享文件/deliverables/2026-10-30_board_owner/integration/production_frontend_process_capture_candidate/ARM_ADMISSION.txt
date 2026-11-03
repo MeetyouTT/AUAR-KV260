@@ -1,0 +1,42 @@
+Root-only ARM admission; this agent did not run it or any device action.
+
+Keep the normal Python3.9 / original ARM dependency PYTHONPATH. Put the new
+runtime/aura first and retain current FFT/ASR/WebRTC dependency paths. The
+helper is copied as pinned Python source, not imported from a second model root.
+
+Exact interfaces:
+
+from tools.production_frontend_selection import create_frontend_pool
+from board.runtime.audio.board_frontend_auto import RemoteAutomaticCapture
+
+pool = create_frontend_pool(frontend_directory, optimization='baseline',
+                           num_threads=1, frontend_process=True)
+capture = RemoteAutomaticCapture(lambda: False, frontend_pool=pool,
+    max_seconds=2, speech_start_ready=lambda capture_id: True)
+
+Run start(), then snapshot() on THAT SAME owner thread for a bounded 1.5s.
+An optional capture.on_speech_start callback is invoked by owner snapshot/take,
+never by the poll thread. snapshot is RAM metadata; it does not request PCM.
+No take() is needed for the short microphone admission. In a finally block:
+
+capture.cancel()
+capture.close()
+pool.close()
+assert pool.gate.shutdown()
+
+Use nested finally blocks so pool/worker cleanup still occurs if capture cleanup
+raises. Read snapshot['audio_frontend']['worker_pid'], worker_process_alive,
+worker_capture_process and microphone_pid. Original input_queue fields include
+capacity_frames=8, frames_read/delivered/peak_frames. Confirm worker and its
+original arecord/consumer threads nice -10, GTK/camera nice0 independently.
+After cancel require original microphone process gone and owner lock released;
+after shutdown require the exact worker gone. Normal resume must keep worker PID
+and create a fresh capture ID. This is basic admission, not physical ASR/audio or
+full GUI scheduling acceptance.
+
+Formal configuration additionally sets:
+frontend_process=true, frontend_capture_process=true,
+frontend_optimization='baseline', frontend_threads=1, capture_priority_nice=-10.
+The capture priority option remains for the original parent barge path; normal
+automatic capture now executes inside the sole worker. No combined frontend is
+selected. Both process options default false.

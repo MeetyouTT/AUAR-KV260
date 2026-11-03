@@ -1,0 +1,49 @@
+﻿收尾性能测量结果 可并入技术设计报告
+
+一 作品概述 性能指标建议正文
+在原视觉服务持续运行、转轴停止条件下，板端180秒采样90点，整板CPU均值69.08%。YOLOX、YuNet、SFace业务计数率分别为9.907、9.862、0.740次/s。27B暖态JSON解码中位40.85 token/s，OmniVoice16 RPC实时率中位0.1276，均为5次有效请求。主观测段监听暂停；本次为性能测量。
+
+二 性能验证与测量条件
+本次在原运行版本、原模型与原参数下测量，转轴保持停止，原视觉服务持续运行。板卡采集90点、实际时长180.151s；主模型窗口时长180.004s。主窗口180个GUI快照全部为main/IDLE、PAUSED、mic=false、follow=false，运行故障计数0。不得按交接前的监听开启状态描述本次测量。
+两侧使用同一boot的板端单调时钟，但起点不同：主窗口T0=36573.036785114，板卡资源T0=36616.130162435，相差43.093s，按起止标记重叠136.948s；不作同起止180s处理。资源最后一段不在主GUI观测覆盖内。板卡墙钟未用于对齐。
+DPU计数采用最早与最后成功8790快照的差分，分母为179.773885s。YOLOX使用primary_calls，YuNet与SFace使用native_completed。阶段耗时使用同窗口累计total_ms与count的差分均值，未把进程累计均值或滚动256点P95当作完整窗口的分布。
+YOLOX native_and_decode含解码，YuNet和SFace native_lease为现有原生临界区墙钟耗时，均不表述为纯DPU硬件内核时延。硬件利用率接口本次未提供。
+27B为原27.3B IQ4_XS模型，context=2048、num_predict=120、think=false、JSON输出；OmniVoice为原16步、24kHz单声道s16le配置。两模型预先驻留，生产前缀缓存保留。计划各6组公开输入，其中第4组因当前业务或后台请求活跃跳过，实际各5次均成功；不得写成6次或6/6。
+首内容为软件首个JSON内容时间，解码吞吐包含JSON token；TTS RPC实时率包含网络、准入和返回传输，全部TTS样本cache_hit=false。未进行ASR新录音、播放或声学首声测量，也不据旧GUI缓存补入这些指标。
+
+三 可编辑性能结果表
+YOLOX业务计数频率：9.907 次/s。计数增加1781 / 179.773885s；primary_calls；非独立满载FPS。
+YuNet业务计数频率：9.862 次/s。计数增加1773 / 179.773885s；native_completed；非独立满载FPS。
+SFace业务计数频率：0.740 次/s。计数增加133 / 179.773885s；native_completed；非独立满载FPS。
+YOLOX原生调用与解码阶段均值：15.924 ms。窗口Δtotal_ms/Δcount，n=1781；不是纯DPU硬件内核时间。
+YOLOX检测路径均值：27.211 ms。窗口Δtotal_ms/Δcount，n=1781；不是纯DPU硬件内核时间。
+YuNet原生临界区均值：2.411 ms。窗口Δtotal_ms/Δcount，n=1773；不是纯DPU硬件内核时间。
+SFace原生临界区均值：8.422 ms。窗口Δtotal_ms/Δcount，n=133；不是纯DPU硬件内核时间。
+整板CPU：采样均值 69.08% 观测最大 76.15%。90点，目标2秒间隔；全部在线核心合计100%。
+系统可用内存最小值：2767.699 MiB（2.703 GiB）。Linux MemAvailable；不与进程RSS重复相加。
+27B完整LLM RPC：中位数 1.837 s 范围 1.668–2.129 s。5次有效暖态请求，含网络、准入与完整响应。
+27B首个JSON内容：中位数 0.469 s 范围 0.359–0.687 s。服务首个非空JSON内容；不是声学首声。
+27B JSON解码速率：中位数 40.853 token/s 范围 39.627–41.170 token/s。eval_count/eval_duration；含完整JSON输出token。
+OmniVoice16完整TTS RPC：中位数 0.718 s 范围 0.667–1.471 s。5次有效暖态请求，cache_hit均false；不含播放。
+OmniVoice16 RPC实时率：中位数 0.1276  范围 0.0867–0.1462 。完整RPC秒数/返回PCM秒数。
+TTS返回音频时长：4.56–10.08 s。24kHz 单声道 s16le；本轮未播放。
+Windows设备显存观测峰：19136 MiB。180个1秒设备快照，含桌面和其他进程；不是保证峰值。
+Windows设备最少空闲显存：5002 MiB。同上；非模型专属分配。
+DPU硬件利用率：未提供。只读驱动统计为空；不以CPU%或静态资源替代。
+
+四 图表与结论使用范围
+板卡资源图按其自身采样T0绘制；DPU及语音核心图由主性能测量窗口生成，引用同一批闭合原始数值。
+视觉异常及右向转轴断续仍为待处理问题，本次STOP态性能结果不构成全功能、跟随稳定性或整机验收通过结论。
+小样本指标采用中位数和实际范围描述；不据5次请求作精确尾延迟、准确率或长期稳定性保证。
+
+五 原始来源与校验
+E:\Win共享文件\协作任务\2026-11-02_收尾性能实测_01a19c53\data\board_numeric.jsonl
+SHA256 ed7de4c04907952a4d37dfb2e16396a07d76f9135a0e95f0b8a6e8e34a7f9b61
+E:\Win共享文件\语音共享文件\deliverables\2026-11-02_5090_deployment\performance_measurement_20261102\RESULTS.json
+SHA256 6ee0ab924031f7a043e7b141848d389c66e3c5f6b5dcce2bf7e0af2db5ed3033
+E:\Win共享文件\语音共享文件\deliverables\2026-11-02_5090_deployment\performance_measurement_20261102\llm_cases.csv
+SHA256 85c8ca1ded879340e934f7c579a2386f8f55d281ba6549798c234974274b5dc3
+E:\Win共享文件\语音共享文件\deliverables\2026-11-02_5090_deployment\performance_measurement_20261102\tts_cases.csv
+SHA256 3b82334978d898e2396ab1c02fc6f002d5996d280b3a8ad33fa014cef8b85d06
+E:\Win共享文件\语音共享文件\deliverables\2026-11-02_5090_deployment\performance_measurement_20261102\windows_gpu_timeseries.csv
+SHA256 863f0dde879e6645e69e2a29894b61b34eac71d6738650368a3539bf645ad077

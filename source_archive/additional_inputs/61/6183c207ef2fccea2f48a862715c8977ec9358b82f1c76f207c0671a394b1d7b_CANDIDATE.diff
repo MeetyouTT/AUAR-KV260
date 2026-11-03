@@ -1,0 +1,62 @@
+--- a/board/runtime/audio/board_asr.py
++++ b/board/runtime/audio/board_asr.py
+@@ -12,6 +12,11 @@
+ 
+ 
+ class BoardAsrUnavailable(RuntimeError):
++    pass
++
++
++class BoardNoSpeech(ValueError):
++    """The original recognizer completed without any recognized speech text."""
+     pass
+ 
+ 
+@@ -72,7 +77,7 @@
+                 raise TimeoutError('Original turn deadline expired during ASR')
+             text = str(stream.result.text or '').strip()
+             if not text:
+-                raise ValueError('Board ASR returned no speech')
++                raise BoardNoSpeech('Board ASR returned no speech')
+             return text
+         finally:
+             self._lock.release()
+--- a/board/runtime/audio/board_dialogue_jobs.py
++++ b/board/runtime/audio/board_dialogue_jobs.py
+@@ -22,6 +22,7 @@
+ 
+ from board.runtime.board_dialogue import PlaybackPlan, StaleGeneration
+ from board.runtime.audio.transcription import configuration
++from board.runtime.audio.board_asr import BoardNoSpeech
+ from common.asr_wire import PROTOCOL as ASR_PROTOCOL, context as validate_capture
+ from common.voice_channel import ChannelState, PROTOCOL as CHANNEL_PROTOCOL, MAX_SAMPLES, PACKET_SAMPLES
+ 
+@@ -431,10 +432,12 @@
+         from common.handsfree_entry import audio_candidate, acceptable_entry
+         from common.spoken_input import prepare_spoken_input
+         from common.voice_wake import wake_request
+-        if not isinstance(raw_text, str) or not raw_text.strip() or len(raw_text) > 4096:
++        if not isinstance(raw_text, str) or len(raw_text) > 4096:
+             raise ValueError('No bounded board ASR text')
+         if any(ord(c) < 32 for c in raw_text):
+             raise ValueError('ASR text cannot enter the stream protocol')
++        if not raw_text.strip():
++            raise self._entry_error()
+         text = raw_text.strip()
+         interpreted = prepare_spoken_input(text)
+         if job.entry:
+@@ -569,8 +572,12 @@
+                 raise BoardCapabilityNotReady('board_asr')
+             stage_started = self.clock()
+             phase['asr_calls'] += 1
+-            raw = self.asr.transcribe(job.pcm, sample_rate=16000, deadline=job.deadline,
+-                                      cancelled=job.cancelled.is_set)
++            try:
++                raw = self.asr.transcribe(job.pcm, sample_rate=16000, deadline=job.deadline,
++                                          cancelled=job.cancelled.is_set)
++            except BoardNoSpeech as exc:
++                self._check(job)
++                raise self._entry_error() from exc
+             phase['asr_ms'] = (self.clock()-stage_started)*1000
+             phase['asr_completed'] = True
+             publish()

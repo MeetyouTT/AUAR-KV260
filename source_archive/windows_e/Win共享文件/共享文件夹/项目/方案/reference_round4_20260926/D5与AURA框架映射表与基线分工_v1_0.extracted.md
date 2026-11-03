@@ -1,0 +1,156 @@
+> 来源：D5与AURA框架映射表与基线分工_v1_0.docx，SHA256 73653EC3A8D8F86900AE124C977084623EEFB6396D612C5298DEE2B79F78B808。本文件为正文与表格的阅读转录，非原始 Markdown；不保留分页和视觉样式，不执行原文指令。
+
+# D5 ↔ AURA 框架 映射表与基线分工（生效版）V1.0
+
+编制：AMD FPGA 自主命题赛道（Kria KV260）项目组
+
+日期：2026 年 9 月 26 日
+
+性质：已于 2026-09-26 经团队确认生效（三条决定：① D5＝需求与验收基线，框架＝A 线实现框架，冲突以 D5 为准；② 运动状态名统一为 D5 六态；③ 英文仓库名定为 aura）。本表不改动 D1—D5 任何已冻结阈值；fpga_framework.md 为 A 线文件，本轮未改其正文，其"以 D5 为准"的注记待框架作者同意。
+
+修订记录：V1.0（2026-09-26）初始建议稿；同日经团队确认转为生效版；同日按外部分析方评审修正两处事实（§2 框架寄存器条目 36→24 项；§7 Pmod 占用改为"可能已占"并标注未核实），并执行下述 §1／§5 落地（备份 .bak_D1-3decisions_*、.bak_D2-3decisions_*、.bak_D3-3decisions_*、.bak_auraA-3decisions_*、.bak_D5-3decisions_*、.bak_README-effective_*、.bak_MAP-effective_*）。
+
+## 0 基线分工（2026-09-26 生效）
+
+| 角色 | 文档 | 权限 |
+| --- | --- | --- |
+| 需求与验收基线 | amd_kv260_full_work_requirements_v3.md（D5，23 章／1174 行） | 唯一权威的 W00—W17 工作编号与 T01—T30 验收矩阵；凡冲突以 D5 为准 |
+| A 线实现框架 | fpga_framework.md（09-23，47,423 B） | 模块划分（motion_guard_ip／audio_doa_ip）、G0—G7 关卡、寄存器草案、v01—v11 测试矩阵 |
+| 外设采购与连接规格 | AURA_KV260_外设控制与采购规格_2026-09-26.md（9,468 B） | 采购与连接口径（与 000.docx 同源） |
+| 器件与方案记录 | servo_drive_scheme_confirmation_…、器件规格确认_…、扩展板设计分析_… | 器件、供电、保护、风险与验证计划 |
+| 对外往来 | 000_外设选型与舵机控制建议_审查记录_v1_0.md、000方案回应_…、000方案回应第二轮_… | 与外部分析方的问答与采纳记录 |
+
+为什么这样分：D5 是唯一同时具备"编号体系 + 验收阈值 + 收敛任务（§23）"的文档；框架是唯一具备"A 线可执行关卡 + 模块/RTL 划分 + 测试矩阵"的文档。二者职责不重叠，缺一不可。
+
+## 1 运动状态机：三套状态名已统一（2026-09-26 生效）
+
+| 来源 | 状态集合 | 备注 |
+| --- | --- | --- |
+| D1 §10.5 | RESET_SAFE / NEEDS_REFERENCE / DISARMED / ARMED_HOLD / ACTIVE / FAULT_LATCHED | 转移：RESET_SAFE → NEEDS_REFERENCE → DISARMED → ARMED_HOLD → ACTIVE → FAULT_LATCHED；FAULT_LATCHED →（安全条件 + CLEAR_FAULT）→ DISARMED |
+| D5 W17-11（裁定） | DISARMED / NEEDS_REFERENCE / ARMED / TRACKING / AT_LIMIT / FAULT | 明文"FAULT_LATCHED 并入 FAULT"、状态名集合唯一 |
+| 框架 §5.4 | DISABLED / ARMED / ACTIVE / EXPIRED / FAULT | 其中 EXPIRED 是"许可耗尽" |
+
+唯一集合＝D5 的 6 态（2026-09-26 定；因其已被 §23 登记为唯一且被 T 矩阵引用）。映射如下：
+
+| D1 名 | 框架名 | 统一采用（D5） | 说明 |
+| --- | --- | --- | --- |
+| RESET_SAFE | （隐含在复位/DISABLED） | 复位后 → DISARMED | 复位态不单列为状态，作为复位行为 |
+| NEEDS_REFERENCE | — | NEEDS_REFERENCE | 无编码器时重启必须处于此态，不得显示"实际角度＝0°" |
+| DISARMED | DISABLED | DISARMED | 框架的 DISABLED 改名 |
+| ARMED_HOLD | ARMED | ARMED | 框架名保留为别名 |
+| ACTIVE | ACTIVE | TRACKING | 表示"有有效命令在执行" |
+| （无） | EXPIRED | ——事件，非状态 | 许可耗尽 → 撤销输出许可并回到 ARMED 或进入 AT_LIMIT（由 D5 的转移定义） |
+| FAULT_LATCHED | FAULT | FAULT | 锁存；由受控 CLEAR_FAULT 清理 |
+| （无） | （无） | AT_LIMIT | 触及软/硬限位 |
+
+落地方式（已执行）：D1 v1.1/v1.2、D3、aura_plan_a 已按上表改写；D5 本就一致。`fpga_framework.md` 本轮未改正文——其 DISABLED/ACTIVE/EXPIRED 在实现时按上表映射为 D5 名，注记待作者同意。
+
+## 2 运动寄存器：D5 合同 ↔ D1 偏移 ↔ 框架偏移
+
+D5 §7.3 合同（按功能分组，不写死偏移）：IP_ID/VERSION/CONFIG_CRC｜CONTROL/STATUS/FAULT｜MOTION_SESSION/CMD_SESSION/SAFETY_EPOCH/EXPECTED_EPOCH｜TARGET_MDEG/CMD_SEQ/LEASE_US/COMMIT｜APPLIED_SEQ/REJECT_REASON/LIMITED_TARGET_MDEG/PWM_EFFECTIVE_US｜时间戳与遥测。
+
+D1 §10.5（25 项，`0x000—0x05C`，已冻结）：IP_ID 0x000、IP_VERSION 0x004、CONFIG_CRC 0x008、CAPABILITIES 0x00C、CONTROL 0x010、STATUS 0x014、FAULT_CODE 0x018、REJECT_REASON 0x01C、CURRENT_SESSION 0x020、CMD_SESSION 0x024、CMD_SEQ 0x028、TARGET_MDEG 0x02C、LEASE_US 0x030、COMMIT 0x034、APPLIED_SEQ 0x038、LIMITED_TARGET_MDEG 0x03C、CMD_AGE_US 0x040、PWM_PERIOD_TICKS 0x044、PWM_PULSE_TICKS 0x048、ESTOP_COUNT 0x04C、WATCHDOG_COUNT 0x050、REJECT_COUNT 0x054、STATUS_TIME_LO 0x058、STATUS_TIME_HI 0x05C。
+
+框架 §5.5（24 项，`0x00—0x5c`；2026-09-26 外部分析方指出"36 项"有误，我方核对本地副本 §5.5 表行确认为 24 项）：IP_ID/IP_VERSION/BUILD_ID/CONTROL/STATUS/FAULT_FLAGS/REJECT_REASON/SAFETY_EPOCH/SESSION_SHADOW/EPOCH_SHADOW/SEQ_SHADOW/TARGET_MDEG_SHADOW/LEASE_US_SHADOW/COMMIT/ACCEPTED_SEQ/ACCEPT_COUNT/REJECT_COUNT/ACTIVE_TARGET_MDEG/PWM_EFFECTIVE_TICKS/LEASE_REMAIN_US/ACTIVE_SESSION/CONFIG_CRC/SNAPSHOT/SNAPSHOT_SEQ。
+
+| D5 合同项 | D1 偏移与名称 | 框架偏移与名称 | 差异与处理 |
+| --- | --- | --- | --- |
+| IP_ID | 0x000 IP_ID | 0x00 IP_ID | 一致 |
+| VERSION | 0x004 IP_VERSION | 0x04 ABI_VERSION | 命名不同；以 D1 名为准，框架名作别名 |
+| CONFIG_CRC | 0x008 | 0x54 | 一致（偏移不同，各自表内自洽） |
+| CONTROL | 0x010 CONTROL（reference confirm／arm／disarm／clear fault） | 0x0c CONTROL（DISARM/ARM/CLEAR_FAULT/BEGIN_SESSION） | 框架多 `BEGIN_SESSION`（D1 用"reference + arm 建立新 session"实现）⇒ 语义映射，不新增字段 |
+| STATUS | 0x014 | 0x10 | 一致（框架显式列 armed/active/stop_seen/config_valid） |
+| FAULT | 0x018 FAULT_CODE | 0x14 FAULT_FLAGS | 命名不同，语义一致 |
+| REJECT_REASON | 0x01C | 0x18 | 一致 |
+| MOTION_SESSION | 0x020 CURRENT_SESSION | 0x50 ACTIVE_SESSION | 命名不同，语义一致 |
+| CMD_SESSION | 0x024（D1 已有） | 0x20 SESSION_SHADOW | 命名不同；D1 名保留 |
+| CMD_SEQ | 0x028 | 0x28 SEQ_SHADOW | 一致 |
+| TARGET_MDEG | 0x02C | 0x2c TARGET_MDEG_SHADOW | 一致 |
+| LEASE_US | 0x030 | 0x30 | 一致 |
+| COMMIT | 0x034 | 0x34 | 一致 |
+| APPLIED_SEQ | 0x038 | 0x38 ACCEPTED_SEQ | 命名不同；D1 名保留 |
+| LIMITED_TARGET_MDEG | 0x03C | 0x44 ACTIVE_TARGET_MDEG | 命名不同（D1 明文禁止 `actual_angle`，只允许 limited_target_mdeg／commanded_angle_mdeg） |
+| PWM_EFFECTIVE_US | 0x048 PWM_PULSE_TICKS | 0x48 PWM_EFFECTIVE_TICKS | 名称与单位口径（ticks vs µs）需统一 |
+| `SAFETY_EPOCH` | D1 表内无 | 0x1c | 缺项：按 D5 §7.3 合同补进 D1 表（或明确由 CMD_SESSION 承担） |
+| `EXPECTED_EPOCH` | D1 表内无 | 0x24 EPOCH_SHADOW | 缺项：同上 |
+| 遥测/时间戳 | 0x040 CMD_AGE_US、0x04C ESTOP_COUNT、0x050 WATCHDOG_COUNT、0x054 REJECT_COUNT、0x058/0x05C STATUS_TIME_LO/HI | 0x3c ACCEPT_COUNT、0x40 REJECT_COUNT、0x4c LEASE_REMAIN_US、0x58 SNAPSHOT、0x5c SNAPSHOT_SEQ | 各有独有项；以 D1 为基准，框架独有项按需并入 |
+| 快照协议 | D1：多字段状态采用锁存快照或一致读取 | 框架：SNAPSHOT/SNAPSHOT_SEQ | 两者一致（框架给出了具体实现） |
+
+唯一命名纪律（D1 明文，务必保留）：无编码器时禁止出现 `actual_angle` 字段名，只能使用 limited_target_mdeg 或 commanded_angle_mdeg。
+
+## 3 音频寄存器：D2（25 项）↔ 框架（20 项）
+
+D2 §6.4（`audio_doa_ip`，`0x000—0x060`，25 项）：IP_ID、IP_VERSION、CONFIG_CRC、CAPABILITIES、CONTROL、STATUS、CLK_MEAS、DIR_CODE、CONFIDENCE、LAG_Q8、PEAK_RATIO_Q10、ENERGY_L、ENERGY_R、FRAME_COUNT、DROP_COUNT、THRESH_DIR_Q8、THRESH_VAD_Q、GAIN_TRIM_L、GAIN_TRIM_R、HOLD_MS、INTERP_EN、LATENCY_US、CALIB_OFFSET_Q8、STATUS_TIME_LO、STATUS_TIME_HI。
+
+框架 §6.5（`0x00—0x4c`，20 项）：IP_ID、ABI_VERSION、BUILD_ID、CONTROL、STATUS、AUDIO_EPOCH、SNAPSHOT、SNAPSHOT_SEQ、WINDOW_SEQ、SAMPLE_START_LO/HI、SAMPLE_END_LO/HI、DIRECTION、PEAK_LAG、QUALITY、RESULT_FLAGS、DROP_COUNT、PERF_CYCLES、SAMPLE_RATE_HZ。
+
+| 语义 | D2 | 框架 | 处理 |
+| --- | --- | --- | --- |
+| 身份/版本 | IP_ID／IP_VERSION／CONFIG_CRC／CAPABILITIES | IP_ID／ABI_VERSION／BUILD_ID | 命名不同；以 D2 名为准，BUILD_ID 与 CONFIG_CRC 合并为 CONFIG_CRC（或并存但各有 CRC） |
+| 方向码 | DIR_CODE（0 中／1 左／2 右／3 无效） | DIRECTION（0 UNKNOWN／1 LEFT／2 CENTER／3 RIGHT） | 编码含义不同，必须统一（建议用 D2 的 0=中；否则软件两侧判档相反） |
+| 延迟/质量 | LAG_Q8、CONFIDENCE(Q10)、PEAK_RATIO_Q10 | PEAK_LAG、QUALITY | 命名不同；D2 的 Q 格式更明确（QUALITY 未定量纲，D2 已定 Q10 0—1000） |
+| 采样证据 | 无 SAMPLE_START/END、无 WINDOW_SEQ | WINDOW_SEQ、SAMPLE_START_LO/HI、SAMPLE_END_LO/HI | 框架更快，与 D5 §16 对"窗口/样本范围"的取证要求一致 ⇒ 建议并入 D2 表 |
+| 采样率实测 | CLK_MEAS（实测 BCLK/WS 分频比） | SAMPLE_RATE_HZ | 保留 D2 的 CLK_MEAS（更直接对应 W17-07 的"实测量"） |
+| 丢样/性能 | DROP_COUNT、FRAME_COUNT | DROP_COUNT、PERF_CYCLES | 两者都保留 |
+| 重启代次 | 无 | AUDIO_EPOCH | 建议并入 D2 表（对应"采样重启代次"，与运动侧会话同思路） |
+| 标定/门限 | THRESH_DIR_Q8、THRESH_VAD_Q、GAIN_TRIM_L/R、HOLD_MS、INTERP_EN、CALIB_OFFSET_Q8 | 无 | D2 更完整，保留 |
+
+结论：以 D2 表为基准，把框架的 WINDOW_SEQ／SAMPLE_START·END／AUDIO_EPOCH／PERF_CYCLES 并入；DIR_CODE 与 DIRECTION 的编码必须统一为一种（否则软件判档会反）。
+
+## 4 验收编号：框架 v01—v11 ↔ D5 T01—T30（2026-09-26 已逐条核对）
+
+以 D5 第 16.1 节的 T01—T30 为唯一验收矩阵；框架的 v01—v11 是模块级测试，按下表锚定到 T 编号（一个 v 可锚定多个 T）。无对应 T 的按"工程内部门槛"登记，不新造验收编号。
+
+| 框架 | 主题 | 锚定的 D5 编号 | 判定 |
+| --- | --- | --- | --- |
+| v01 | AXI-Lite 协议（AW/W 错拍、背压、WSTRB、非法地址、复位中断） | T12（协议故障须 100% 拒绝）＋ T10 的前置 | 已核对：协议级门槛，单独不构成 T |
+| v02 | PWM（最小/最大脉宽、周期边界更新、禁能、跳变） | T10 | 已核对（一一对应） |
+| v03 | 命令快照（漏字段、部分写、COMMIT 同拍、拒绝不续期） | T12 | 已核对 |
+| v04 | 监督状态（错会话/代次、重复/逆序、越界、零租约、到期、停止恢复） | T11（停止）＋ T12（会话/代次/不续租） | 已核对 |
+| v05 | I2S（正负样本、位偏移、左右声道、启动无效段、复位） | T13 ＋ 音频并入指标②（单侧 ≥10 dB） | 已核对 |
+| v06 | 窗口（缓冲满、计算慢、跨域、快照一致性） | T13（≥30 min 且 DROP_COUNT=0） | 已核对 |
+| v07 | 相关（人工延迟、极值、同长度有效范围、定点精度） | T13 ＋ 音频并入指标⑤（方向码一致率 ≥95%） | 已核对 |
+| v08 | 方向（静音、噪声、多峰、削波、左中右、同侧多人） | T14（粗方向〔P1〕）＋ 拒判率证据 | 已核对 |
+| v09 | 平台共存（同配置 DPU＋寄存器＋PWM＋音频） | T02（DPU 共存；P1 完整版须含音频 IP） | 已核对 |
+| v10 | 系统异常（停帧、旧结果、网络断开、进程退出、重启） | T24（观察依据）＋ T26（失联）＋ T27（稳定性） | 已核对 |
+| v11 | 复现（他人冷启动、重建、部署、运行） | T30（独立复现）＋ T28（冷启动 ≥3 次） | 已核对 |
+
+结论：v01—v11 与 T01—T30 不冲突——框架的 v 只作模块级测试编号，对外一律引 T 编号；若必须引用 v，须同时给出上表锚点。音频 5 项并入指标见 D5 第 16.1 节的并入段（不新增 T 编号）。
+
+## 5 命名统一（产品名／仓库名／目录）
+
+| 项 | 现有写法 | 建议统一为 | 影响 |
+| --- | --- | --- | --- |
+| 产品中文名 | 雾镜 Lite（D1—D5）↔ AURA（三份 30 天计划、框架、采购规格） | 已定（2026-09-26）：对外统一用 AURA；"雾镜 Lite"降为历史名（D1—D5 正文暂不改，引用时注明"历史名·现名 AURA"） | W17-01／W17-21 |
+| 英文仓库名 | 历史：mistmirror_kv260（V1.0）→ fogmirror-kv260（V2.0／W17-01 第一版目标）→ `aura` | 已定 `aura`（2026-09-26）；D5 §19.2、D2 §8.4/§11.1/§15.2、D3 §15、20 天计划、旧全案已全部改为 aura/；W17-01 目标名同步更新 | W17-01／W17-21 |
+| 目录结构 | D5 §19.2 蓝图 ↔ 框架 §10 的 aura/（含 contracts/、skill/、report/） | 已定（2026-09-26）：以框架结构为准（更贴合官方 3.3.5 的 src/sim/build/board/data/skill/report）；D5 §19.2 已加"结构以框架为准"的对照注，本节的需求侧视图与框架结构逐项对应 | W17-21／W16 |
+| 文件命名 | 官方要求英文目录与文件名 | 保持英文；正文可中文（与框架 §10 一致） | — |
+
+## 6 参数口径
+
+| 参数 | 现状 | 建议 |
+| --- | --- | --- |
+| 麦距 d | 已定：50 mm（2026-09-26 按用户指示统一；D2 已由 4 cm 改为 50 mm，最大 lag ±5.6→±7.0 样本、角分辨率 10.2°→8.2°、判档门限 ±2.4→±3.0） | 已执行（与 D5 §9.1／D3 §6.1／框架一致）：① 与需求基线 D5 一致；② 分辨率更好（最大时差 ≈145 µs ≈ 7.0 样本 @48 kHz，优于 4 cm 的 ±5.6）；③ 框架的 ±8 lag 与之自洽。代价：D2 §2.3"为什么必须 d=4 cm"的论证需改写为 50 mm 版本，且麦距公差仍须实测（±1 mm ≈ 2%） |
+| BCLK／fs | 48 kHz、64 BCLK → 3.072 MHz；100 MHz 整数分频不可得 | 三份文档一致（D2 §5.2、D5 W17-07、框架 §8.1）⇒ 直接沿用，实测 BCLK/WS 回填 |
+| lag 搜索范围 | D2 = ±5.6 样本算例（4 cm）；框架 = −8…+8（50 mm） | 随麦距统一后取 −8…+8，并把"每 lag 同长度有效区间"写进定点参考 |
+
+## 7 平台选择硬约束（来自框架 §4 的发现）
+
+框架指出：官方 2022.2 参考平台（`kv260_ispMipiRx_vcu_DP`）可能已把 8 个 Pmod 信号用于音频收发（未经我方核实：本地无该 overlay 的 pin.xdc 正文；2026-09-26 外部分析方复核亦未取得官方约束正文，故不得作为已核实结论）。若沿用该平台，我方"Pmod 用 7 余 1"的前提不成立。
+
+| 动作 | 内容 | 编号 |
+| --- | --- | --- |
+| 硬约束 | 平台选型必须满足"Pmod 8 根可自由分配"，或明确重映射方案与代价 | W02-05／W02-06 |
+| 取证 | 取得候选 overlay 的 pin.xdc，逐信号列出 Pmod 占用 | W01-04／W02-05 |
+| 备选 | 无音频占用的 DPU/benchmark 类平台 | W02-06 |
+| 影响面 | 若必须让出 Pmod，则 7 根预算（PWM/使能/停止/I2S×4）需重新排布，或把某一路移到 PS 侧 | Q3／W17-06 |
+
+## 8 本表怎么用（生效条件）
+
+已生效：2026-09-26 团队确认三条决定（① D5＝需求与验收基线；② 状态名用 D5 六态；③ 仓库名 aura），本表自该日起作为引用规则。§4（v↔T 逐条核对）已于 2026-09-26 完成（见本节）。
+
+落地方式：不改 D5、不改框架原文；在实现层（RTL 命名、软件头文件、对外材料）执行"D5 命名优先"。§1（状态名）已执行于 D1 v1.1／v1.2、D3、aura_plan_a；§5（命名）已执行于 D5 §19.2、D2、D3、20 天计划、旧全案。框架中与 D5 冲突处，在框架侧加一行"以 D5 为准"的注记（需框架作者同意，尚未加）。
+
+维护：本表随 D5 §23 的 W17 收敛同步更新；每次更新登记字节/行/哈希（见同名落档校验报告）。
+
+不在本表范围内：采购与接线（见《扩展板设计分析》§12／§13）、器件规格（见《器件规格确认》）、与外部分析方的问答（见 000 系列文件）。

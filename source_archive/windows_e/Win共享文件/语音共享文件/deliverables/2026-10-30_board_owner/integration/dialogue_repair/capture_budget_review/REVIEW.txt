@@ -1,0 +1,26 @@
+v15采集预算只读复核
+
+结论：目前证据支持“完整20ms帧处理余量不足，叠加瞬时等待或输入突发后溢出”。不是工作进程死亡，也没有证据表明需要增大队列或改变阈值。本次只读本地源码与保存的metadata，未操作硬件、模型、私库或现役源码，未修改当前接续文档。
+
+1. 失败代70：488次endpoint.feed，wall均值19.579ms、线程CPU均值18.286ms。消费起点间隔均值20.312ms，相对理想20ms累计超出151.739ms；这是名义供给周期比较，不是逐时刻队列轨迹。实际queue_max159.18ms、峰8，497次读取减488次交付为9，符合第9个待处理帧触发整轮拒绝并清队列。
+   恢复代71：wall均值18.925ms、CPU18.043ms，间隔20.011ms，队列峰5，failure计数仍3。恢复后约25秒正常不等于余量充足或长稳通过。
+
+2. 20ms输入320samples，GTCRN hop为256samples/16ms。重置后每四帧的推理hop序列为1、1、1、2，不是每帧恰好一次推理。488帧对应610hop，首hop延迟后输出155904samples，和失败记录完全一致；末帧488的CPU28.48ms正落在双hop位置。这是现有模型分帧合同，不能删第二次推理或改hop来“提速”。
+
+3. 最大wall69.092ms，而整代最大单帧CPU仅32.917ms，因此最大wall所在帧至少约36.174ms不属于该线程CPU执行。它可能包含调度、GIL、native同步等待等，当前计数不能区分。
+   代码能确认：ReuseFftSpeechGate的gate.lock是非阻塞获取，忙时直接拒绝；不能把69ms解释为在此锁等待。_FrontendLease.__call__末尾的pool._release会取得pool.RLock，是可能的同步点，但没有该帧持锁/等待轨迹。Automatic._feed_endpoint的诊断capture._lock在wall/CPU采样之后才取得，不在这69ms计时内。原native ORT/Silero内部及GIL交接没有本次锁追踪，不能宣称已经定位到GIL或mutex。
+
+4. nice-10作用域：board_frontend_process._worker_main的priority回调在模型构造前，仅对当前子进程调用os.setpriority(PRIO_PROCESS,0,-10)。Linux是每线程nice；随后该主线程创建的模型运行线程、自动采集consumer和raw pump继承它的nice；arecord包装子进程也从该主线程创建并继承。GTCRN intra_op=1/inter_op=1，Silero num_threads=1，没有另开父端前端模型。当前优先级回执在协议内只直接证明worker主线程；全部实际线程仍应以主控已有OS作用域验收为准。代码不调整GUI、相机或Windows模型进程，也不在每帧重新提优。仅继续提高nice不能降低18ms左右的计算需求。
+
+5. 已排除重复方案：combined已启用量化/FFT缓冲复用、CPU IO绑定和两套循环状态交替；自动采集、endpoint、8帧raw queue都在唯一child中，父端不是每20ms传一帧，只约每50ms拉状态。模型SHA检查和32帧预热在构造，未在逐帧路径重做。v13已替换大部分状态deepcopy，v15已门控空闲播放器IPC；不能再把它们列作尚未启用的收益。
+
+6. 两个可以独立验证的小型无损分配优化，目前仅提出、未实现：
+   a) SpeechEndpoint.feed收到不可变bytes、pending为空且长度正好640B时，可直接使用该bytes，省去pending.extend/slice/bytes/del；保留原碎片/批量输入分支和全部VAD、起点、500ms预卷、700ms收尾、原PCM契约。
+   b) ReuseFftGtcrnDenoiser可覆盖继承的_consume：只有一个hop结果时直接返回该数组，因为_hop已返回ola切片的独立copy；两个以上仍concat。生产320samples输入约75%的调用属于单hop。可保持基类47cb源与其SHA不变。
+   两者只省小数组/对象成本，不减少神经网络计算；没有实测收益，不能承诺解决90%单核负载。验证需包括碎片输入、reset/flush、输出与后续调用不别名、逐字节PCM、同VAD/endpoint、原取消和单owner；然后由主控用同一公开流、完整GUI/相机做受控对照。
+
+7. phase机会与限制：原Mcp.start先Popen arecord，再创建endpoint/重置现有gate/绑定循环缓冲，最后启动reader。可以研究在严格单lease下将这部分准备提前，减少rearm阶段重叠，但尚无reset耗时证据，不能归为本次10秒后溢出的已证根因，也不降低持续CPU成本。quiet listening当前允许后台记忆工作，可研究仅在rearm/队列恢复期间有界延后新后台任务；不能无限等待暂停、改变5分钟清理策略或跳过身份/来源检查。
+
+8. 当前两份记录无法分解首次arecord/USB等待与后续PCM突发。失败和正常轮的source_read_max都超过800ms，单凭这个最大值不能断言USB故障。也不能把当前保留的上轮ASR/ACK耗时绑定到本次失败。下一次如需定位，应复用已有轻量/proc采样，在同一代同时观察consumer的schedstat/迁核与队列趋势；不与正在进行的SenseVoice试验叠加。
+
+精确输入SHA、源码pin和数值计算见同目录REVIEW.json。新的allocation候选、调度更改及性能收益均未实施或验收。

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "dpu_query",
+    "command": "env XLNX_VART_FIRMWARE=/lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.xclbin xdputil query",
+    "timeout": 45
+  },
+  {
+    "id": "model_arch",
+    "command": "python3 -B -c 'import xir; r=xir.Graph.deserialize(\"/usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel\").get_root_subgraph(); print([(s.get_name(), {k:s.get_attr(k) for k in (\"device\",\"fingerprint\",\"dpu_fingerprint\",\"target\") if s.has_attr(k)}) for s in r.children_topological_sort()])'",
+    "timeout": 25
+  },
+  {
+    "id": "network_details",
+    "command": "ip -details link show eth0; command -v ethtool udhcpc dhclient netstat; ethtool eth0; systemctl list-unit-files | grep -Ei 'ssh|dropbear|network'; systemctl list-units --all | grep -Ei 'ssh|dropbear|network'; netstat -lntp; ls -l /etc/systemd/network/ /etc/network/interfaces",
+    "timeout": 30
+  },
+  {
+    "id": "sample_images",
+    "command": "find / -xdev -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \\) | head -60; dmesg | grep -Ei 'mmc|ext4|zocl|dpu|fpga|ethernet|eth0' | tail -65",
+    "timeout": 30
+  }
+]

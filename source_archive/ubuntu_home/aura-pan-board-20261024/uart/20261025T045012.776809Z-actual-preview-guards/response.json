@@ -1,0 +1,38 @@
+{
+  "sources": [
+    {
+      "name": "tools/board_camera_preview.py",
+      "sha256": "f58b3347bcc720fac57c42837afa39ec43585d7a0e736d3c0c2e9dac81cceea6",
+      "expected": "f58b3347bcc720fac57c42837afa39ec43585d7a0e736d3c0c2e9dac81cceea6",
+      "snippets": [
+        {
+          "line": 132,
+          "text": "        with self.lock:\n            output=self.outputs.get(name)\n            ref=copy.deepcopy(output['reference']) if output else None\n            deadline=250 if self.reader_owner else 1500\n            if ref and not -100<=time.monotonic()*1000-ref['captured_mono_ms']<deadline:ref=None\n            times=[t for t in output['times'] if time.monotonic()-t<2] if output else []\n            ages=sorted(output['ages']) if output else []"
+        }
+      ]
+    },
+    {
+      "name": "tools/board_avatar_gtk.py",
+      "sha256": "95405ddd1ef40855d67da1362d795dd4f5dd86cc1b819287d013808aede9d257",
+      "expected": "95405ddd1ef40855d67da1362d795dd4f5dd86cc1b819287d013808aede9d257",
+      "snippets": [
+        {
+          "line": 1126,
+          "text": "        self.controls['vision_identity'].set_tooltip_text(identity.get('detail') or '身份服务尚未接入')\n        for index in range(len(self.lines)):\n            self.controls['demo_'+str(index)].set_sensitive(not remote_busy and not local_recording_active)\n        image=display['frame_visible']\n        # Freshness controls the placeholder/actions, never the native XID.\n        # Hiding this canvas on a late frame can leave an obsolete drawable\n        # after remapping. The worker already clears expired pixels."
+        },
+        {
+          "line": 1130,
+          "text": "        # Freshness controls the placeholder/actions, never the native XID.\n        # Hiding this canvas on a late frame can leave an obsolete drawable\n        # after remapping. The worker already clears expired pixels.\n        self.preview_image.set_visible(True)\n        if self.large_preview:\n            self.large_preview_note.set_text('实时画面 · '+count_label+str(people) if image and people is not None else\n                '实时画面 · 等待检测结果' if image else '画面已失联或过期，等待重新连接')"
+        },
+        {
+          "line": 1135,
+          "text": "            self.large_preview_note.set_text('实时画面 · '+count_label+str(people) if image and people is not None else\n                '实时画面 · 等待检测结果' if image else '画面已失联或过期，等待重新连接')\n        self.preview_expand.set_sensitive(bool(image))\n        self.preview_placeholder.set_visible(not bool(image))\n        self.preview_placeholder.set_text('当前画面已失联或过期' if modules.get('camera',{}).get('state') == 'LOST' else\n            '等待视觉画面\\n接入后显示当前画面与目标')\n        self.vision_note.set_text(('界面预览 · 示例数据，非实时采集。' if fixture else"
+        }
+      ]
+    }
+  ],
+  "backup_files": [
+    "preview-fix-backup/config.json",
+    "preview-fix-backup/tools/board_camera_preview.py"
+  ]
+}

@@ -1,0 +1,49 @@
+set trace_signals(kernel_group) {
+  DPUCZDX8G_1 { \
+    S_AXI_CONTROL*ARADDR \
+    S_AXI_CONTROL*RDATA \
+    S_AXI_CONTROL*RVALID \
+    S_AXI_CONTROL*RREADY \
+    S_AXI_CONTROL*AWADDR \
+    S_AXI_CONTROL*WDATA \
+    S_AXI_CONTROL*WVALID \
+    S_AXI_CONTROL*WREADY \
+    M_AXI_GP0*ARADDR \
+    M_AXI_GP0*RDATA \
+    M_AXI_GP0*RVALID \
+    M_AXI_GP0*RREADY \
+    M_AXI_GP0*AWADDR \
+    M_AXI_GP0*WDATA \
+    M_AXI_GP0*WVALID \
+    M_AXI_GP0*WREADY \
+    M_AXI_HP0*ARADDR \
+    M_AXI_HP0*RDATA \
+    M_AXI_HP0*RVALID \
+    M_AXI_HP0*RREADY \
+    M_AXI_HP0*AWADDR \
+    M_AXI_HP0*WDATA \
+    M_AXI_HP0*WVALID \
+    M_AXI_HP0*WREADY \
+    M_AXI_HP2*ARADDR \
+    M_AXI_HP2*RDATA \
+    M_AXI_HP2*RVALID \
+    M_AXI_HP2*RREADY \
+    M_AXI_HP2*AWADDR \
+    M_AXI_HP2*WDATA \
+    M_AXI_HP2*WVALID \
+    M_AXI_HP2*WREADY \
+  } {}
+
+}
+
+set trace_signals(kernel) {
+  ap_start ap_ready ap_done
+}
+
+set trace_signals(adapter) {
+  *axis_*tdata *axis_*tvalid *axis_*tready S*WADDR S*WDATA S*ARADDR S*RDATA
+}
+
+set trace_signals(datamover) {
+  stream_t* reg_bus_awaddr reg_bus_wdata
+}

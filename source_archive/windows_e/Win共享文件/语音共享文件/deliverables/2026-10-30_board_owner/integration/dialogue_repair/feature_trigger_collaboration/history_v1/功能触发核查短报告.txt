@@ -1,0 +1,15 @@
+2026-10-31 功能触发协作：候选已冻结，尚未发布
+
+现役基线为v16，startup bf6cdd70768ea5fac4e5be874a387f444c0834d67db5e7a2a744671d9019d63c。339份Python源码/公共角色配置按主窗口板端实读映射逐份核对；候选5份替换源的before完全匹配，另新增1个纯意图模块。没有读取真实私人库、模板、录音或正文，没有访问板卡或调用模型，没有开麦/播放/重启/发布；用户手动PAUSED保持。
+
+真实架构是“自然语言→板端路由→原有受控功能→真实结果直接TTS回执”。视觉/身份/声纹不由27B判断，也没有模型function calling协议。正式工厂会把jobs._route绑定到tools/yuki_jobs_candidate._route；候选同时处理实际绑定方法与核心方法，不能只替换核心类。普通27B只接收原授权上下文/明确历史资料，不能把口头答复当执行凭据。
+
+本地正式绑定路由31句探针复现10处入口错配，候选31句全部命中预期。另修正“镜头左边有几个人”被当整幅人数的问题；当前查询只支持人体目标总数，方位/任意物品/颜色/提问者本人均不能由它证明。声纹状态、听声音我是谁、记住我的声音、删除和确认保存接入原FSM；引用/否定不误执行。无待确认会话不虚报保存/删除；本机有记录但未标定不冒充当前说话者已登记。
+
+最终本地265项通过，3项历史入口测试排除，详见TESTS.xml。包含真实pair绑定、原话保留、真实临时Store/FSM、三段不同合成PCM、明确确认、原一致性/版本边界、TTS输出与完整ACK；ASR输出、encoder、TTS和native ready均为明确fake。历史测试仅替换退役角色称呼，断言未放宽；两个退役Windows业务HTTP测试及一个旧bootstrap前提的锁测试不冒充通过，新增测试保留现役bootstrap与POSIX锁门槛。
+
+六份候选源码、精确SHA、原字节before、补丁与最小回退见candidate/SOURCE_MANIFEST.json、candidate/review.patch、HANDOFF.json。主窗口唯一负责核对和集成。回退仅恢复5份before与前一source/startup绑定，移除新helper引用；不恢复私库、历史正文、身份库、监听偏好或模型状态。
+
+仍有明确缺口：当前factory未注册reasoning_dialogue与history_delete_preview，特定计算/日期删除请求会失败关闭；候选没有把它们伪装成可用。方位/通用视觉理解未实现，声纹现场未标定、不能自动解锁私人记忆。真人人脸重返/声纹关联/现场登记、实际扬声器和16fps/长稳均待验。
+
+公开模型诊断首版从Windows直发，因正式服务仅允许板卡IP提交推理/取消而在第1题报WireError，不能据此推断模型或功能失败。原失败证据PUBLIC_MODEL_GROUNDING.json及PUBLIC_MODEL_ROOT_WINDOW.json保留。板端v2已冻结于public_board_probe_v2/STAGE_BUNDLE.json，只stage worker与两份既有public metadata；从正式板端只读核验源码、真实boot和已验配置UTC范围，不放宽白名单，不复制私库或源码。该诊断只测试无工具结果时的回答，不代表功能真实执行；逐题结果/失败/取消回执原子保存，未经人工核对不填模型验收通过。v2另有2项fake传输协议测试，不与265项功能回归混算。TEST_MATRIX.json明确每项执行者、模型可见结果和三类验收状态。设备时段与真人短脚本由主窗口协调，本窗口不会自动恢复聆听或操作现有真实库。

@@ -1,0 +1,256 @@
+{
+  "report": {
+    "complete": true,
+    "passed": false,
+    "production_observer_enabled": false,
+    "dpu_jobs_submitted": 0,
+    "before": {
+      "pid": 499773,
+      "yolo_hz": 9.93,
+      "optional": {
+        "yunet": {
+          "calls": 5376,
+          "skipped": 3034,
+          "overruns": 2,
+          "budget_exceeded": 5,
+          "estimated_budget_ms": 30.0,
+          "maximum_ms": 37.06898099335376,
+          "disabled": true,
+          "last_overrun": {
+            "elapsed_ms": 37.06898099335376,
+            "finish_after_guard_ms": 1.5057850032462738,
+            "waiting_primary": 0
+          }
+        },
+        "sface": {
+          "calls": 264,
+          "skipped": 132,
+          "overruns": 0,
+          "budget_exceeded": 2,
+          "estimated_budget_ms": 30.0,
+          "maximum_ms": 28.664296994975302,
+          "disabled": false
+        }
+      },
+      "owner_fenced": false,
+      "gaps": 1
+    },
+    "compile": {
+      "exit_code": 0,
+      "seconds": 4.838482493003539,
+      "log": "",
+      "command": [
+        "gcc",
+        "-O2",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fPIC",
+        "-shared",
+        "-I/usr/include/python3.9",
+        "/home/root/aura-native-wait-20261023/9a06d89a2899f6ff/schedprobe.c",
+        "-o",
+        "/home/root/aura-native-wait-20261023/9a06d89a2899f6ff/_aura_schedprobe.cpython-39-aarch64-linux-gnu.so"
+      ]
+    },
+    "module_sha256": "56ae9becbde6137e4327ec933f1dee583162498323e040245b9df7c182a68858",
+    "check_exit_code": 0,
+    "result": {
+      "scope": "ISOLATED_OBSERVER_SEMANTICS_AND_COST_NOT_PRODUCTION_OR_DPU_TEST",
+      "predeclared_cost_gate": {
+        "mean_cpu_ns": 100000,
+        "p99_cpu_ns": 500000,
+        "p99_wall_ns": 1000000
+      },
+      "semantics": [
+        "numeric_same_owner_ordered_clocks",
+        "intentional_sleep_is_off_cpu_without_gil_claim",
+        "cpu_clock_observes_busy_work",
+        "cross_thread_rejected_fresh_thread_allowed",
+        "fork_inheritance_rejected_parent_and_fresh_child_valid",
+        "close_dealloc_no_descriptor_leak",
+        "arguments_reinit_closed_calls_rejected"
+      ],
+      "cost": {
+        "existing_switch": {
+          "complete_call_wall": {
+            "count": 1000,
+            "mean_ns": 258596.528,
+            "p50_ns": 99181,
+            "p95_ns": 166981,
+            "p99_ns": 1967619,
+            "max_ns": 33466455
+          },
+          "complete_call_thread_cpu": {
+            "count": 1000,
+            "mean_ns": 97656.296,
+            "p50_ns": 92341,
+            "p95_ns": 125012,
+            "p99_ns": 200802,
+            "max_ns": 427174
+          },
+          "reported_read_wall": {
+            "count": 1000,
+            "mean_ns": 68251.081,
+            "p50_ns": 29881,
+            "p95_ns": 33150,
+            "p99_ns": 94411,
+            "max_ns": 23750128
+          },
+          "stopped_early": false,
+          "state": {
+            "enabled": true,
+            "mode": "CALLING_THREAD_CONTEXT_SWITCHES_ONLY",
+            "runqueue_time_collected": false,
+            "samples": 1032,
+            "read_failures": 0,
+            "maximum_read_ns": 23750128,
+            "maximum_cpu_read_ns": 209943,
+            "wall_late_samples": 3,
+            "disabled_after_slow_read": false,
+            "closed": false,
+            "slow_read_limit_ns": 2000000,
+            "cpu_read_limit_ns": 500000,
+            "stop_rule": "CPU read >0.5ms; wall read >2ms if CPU clock missing; low-CPU late wall reads stay flagged",
+            "scope": "calling thread switch counts only; cannot time CPU runqueue or identify GIL/native root cause",
+            "observer_cost_scope": "original optional hard cap includes all observation work; never subtracted"
+          }
+        },
+        "existing_python_schedstat": {
+          "complete_call_wall": {
+            "count": 9,
+            "mean_ns": 506961.77777777775,
+            "p50_ns": 197552,
+            "p95_ns": 2902619,
+            "p99_ns": 2902619,
+            "max_ns": 2902619
+          },
+          "complete_call_thread_cpu": {
+            "count": 9,
+            "mean_ns": 219886.66666666666,
+            "p50_ns": 190492,
+            "p95_ns": 401994,
+            "p99_ns": 401994,
+            "max_ns": 401994
+          },
+          "reported_read_wall": {
+            "count": 9,
+            "mean_ns": 423196.77777777775,
+            "p50_ns": 129792,
+            "p95_ns": 2713717,
+            "p99_ns": 2713717,
+            "max_ns": 2713717
+          },
+          "stopped_early": true,
+          "state": {
+            "enabled": true,
+            "disabled_after_slow_read": true,
+            "closed": false,
+            "samples": 41,
+            "schedstat_read_failures": 0,
+            "usage_read_failures": 0,
+            "slow_reads": 1,
+            "maximum_read_ns": 2713717,
+            "slow_read_limit_ns": 2000000,
+            "missing_value": -1,
+            "scope": "calling thread; scheduler counter interval surrounds execute wall interval; not DPU busy time",
+            "zero_counter_scope": "all-zero schedstat is unavailable, not proof of no scheduling delay",
+            "observer_cost_scope": "before/after reads remain inside original optional hard cap; never subtracted"
+          }
+        },
+        "native_full_adapter": {
+          "complete_call_wall": {
+            "count": 1000,
+            "mean_ns": 390132.16,
+            "p50_ns": 177492,
+            "p95_ns": 395863,
+            "p99_ns": 6856249,
+            "max_ns": 27196842
+          },
+          "complete_call_thread_cpu": {
+            "count": 1000,
+            "mean_ns": 183193.388,
+            "p50_ns": 170452,
+            "p95_ns": 255302,
+            "p99_ns": 410464,
+            "max_ns": 545325
+          },
+          "reported_read_wall": {
+            "count": 1000,
+            "mean_ns": 206065.05,
+            "p50_ns": 101161,
+            "p95_ns": 188932,
+            "p99_ns": 2107711,
+            "max_ns": 27061791
+          },
+          "stopped_early": false,
+          "state": {
+            "enabled": true,
+            "mode": "NATIVE_SCHEDSTAT_RUSAGE_GIL_HELD",
+            "closed": false,
+            "disabled_after_cpu_cost": false,
+            "samples": 1032,
+            "read_failures": 0,
+            "readers": 1,
+            "maximum_cpu_ns": 412794,
+            "maximum_wall_ns": 27061791,
+            "late_wall_samples": 11,
+            "cpu_cost_stop_ns": 500000,
+            "scope": "calling thread counters; ordered non-atomic snapshots, not DPU time or GIL attribution",
+            "cpu_clock_scope": "CLOCK_THREAD_CPUTIME_ID; schedstat runtime is auxiliary and can lag",
+            "timing_scope": "self read timers precede aggregate updates; external benchmark includes complete call",
+            "late_scope": "late calls retained; no time subtraction or hard-cap/guard changes"
+          }
+        }
+      },
+      "sleep_interval": {
+        "wall_ns": 30238883,
+        "thread_cpu_ns": 93961,
+        "run_delay_ns": 0,
+        "voluntary": 1,
+        "involuntary": 0
+      },
+      "busy_interval": {
+        "wall_ns": 36414464,
+        "thread_cpu_ns": 15039200,
+        "run_delay_ns": 21375104
+      },
+      "cost_gate_passed": false,
+      "semantic_checks_passed": true,
+      "closed_all_observers": true
+    },
+    "after": {
+      "pid": 499773,
+      "yolo_hz": 9.93,
+      "optional": {
+        "yunet": {
+          "calls": 5376,
+          "skipped": 3034,
+          "overruns": 2,
+          "budget_exceeded": 5,
+          "estimated_budget_ms": 30.0,
+          "maximum_ms": 37.06898099335376,
+          "disabled": true,
+          "last_overrun": {
+            "elapsed_ms": 37.06898099335376,
+            "finish_after_guard_ms": 1.5057850032462738,
+            "waiting_primary": 0
+          }
+        },
+        "sface": {
+          "calls": 264,
+          "skipped": 132,
+          "overruns": 0,
+          "budget_exceeded": 2,
+          "estimated_budget_ms": 30.0,
+          "maximum_ms": 28.664296994975302,
+          "disabled": false
+        }
+      },
+      "owner_fenced": false,
+      "gaps": 1
+    }
+  },
+  "unit_state": "inactive"
+}

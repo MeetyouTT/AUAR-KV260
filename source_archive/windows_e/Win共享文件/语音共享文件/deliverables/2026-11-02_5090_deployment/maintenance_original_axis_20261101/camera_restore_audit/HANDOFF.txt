@@ -1,0 +1,23 @@
+原相机同boot恢复只读审计：通过。
+
+新实际owner：PID79866，birth2265436，命令SHA acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd。
+新run config：/home/root/aura-native-live-20261024/ops/be72669aa53de735/native-run-903cfade-b93c-48fa-804e-379be1967313-79866/config.json
+run config SHA：c8df0795664d21d52eab3a4f1cf55e0d1a721577d547c512e83ee1931d80871d。
+
+2026-11-02T07:10:39Z审计的21项检查均true，原222份Native Python和7份operator文件完整匹配。相机原Restart=no/KillMode=process/SendSIGKILL=no/TimeoutStopUSec=infinity保持。唯一DPU owner是79866，没有libvsrv或/dev/mem owner，没有不可读的存活进程。
+
+新run seed精确指向原1333正常stop形成并封存的c6c8baab1de423e27740137330f8315796a7778e36735c93a0c87f2a56029471文件；recovery-audit的exact_seed_before_operator_request逐值等于封存final.seed。原消费marker精确为该SHA加换行，共65bytes；原指针与sealed原字节仍完全相同。
+实际C健康状态seed_loaded=true、protection_handoff.mode=native_exact_same_boot、first_use=true、实际unit7cf7，承接原PID1333/birth2359。两次采样无fence/quiesce或采集/检测/身份错误。
+
+1.14秒窗口：capture68679→68714，detected22332→22343，YuNet processed22331→22342。primary_calls233254→233265，primary_period_overruns累计2；封存时为1，明确新增1次，未重置也不据此声称时限全部通过。
+SFace completed3464，封存为3463；短窗未继续增加，不当持续负载或人物识别准确率验收。
+
+2026-11-02T07:13:17Z补查：原18层归档文件精确SHA全部保持，实际handoff.previous_kernel_history逐值等于sealed原history；七项SFace累计计数逐项不回退，原recovery两任务均RUNNING且disabled=false。完整比较见PRESERVED_ARCHIVES_AND_COUNTERS.json。
+
+recovery-audit.status保持PREPARING，原因有原源码支持：RecoveryWorker.work在request_boot_id463c与当前903c不符时第一条件直接return，未发旧operator请求。audit是一次性operator请求状态，不是C恢复完成标志；真实C恢复由真seed、原marker、seed_loaded和handoff及运行进度证明。本审计没有改status、settings、requestboot或任何marker。
+
+首个结构探针曾误将原plain marker按JSON读取而失败；原探针源码保留，之后根据consume_checkpoint原源码确认并用新v2只读探针校验原始65bytes。此为观察器格式假设错误，不是产品/恢复故障；细节见PROBE_ATTEMPTS.json。
+
+本代理全程只读板卡公共源、配置、控制计数与进程元数据。没有项目import、NativeContext/CDLL/设备访问、服务动作、PL切换、MMIO、运动或真实身份/记忆库访问。未读取图像、人脸名字、personID、模板或对话内容。
+
+此结论只适用于原相机恢复。GUI新绑定、转轴实体位置/方向/范围/跟随、外部波形、识别准确率和整机长稳仍须root后续分别验收。/health未提供frame尺寸，不能由本审计预填新640x480实读证据。

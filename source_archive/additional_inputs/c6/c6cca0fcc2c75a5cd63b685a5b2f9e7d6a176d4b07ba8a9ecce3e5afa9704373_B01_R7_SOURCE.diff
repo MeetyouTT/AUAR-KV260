@@ -1,0 +1,18 @@
+--- R6/candidate/boot_recovery.py
++++ R7/candidate/boot_recovery.py
+@@ -286,10 +286,14 @@
+                         and job_state == 'running', 'ANOTHER_PLATFORM_PREPARE_JOB_PENDING')
+                 continue
+             entries = ' '.join(current.get(key, '') for key in ('ExecStart', 'ExecStartPre', 'ExecStartPost')).lower()
++            # Own Python ID_STOP_ONLY jobs also touch the platform. Pending
++            # actions block advancement; observe_job binds an existing action
++            # to its durable unit/InvocationID without another submission.
++            own_action_job = name.startswith('aura-boot-wide-')
+             loader_name = bool(re.search(r'dfx|xmutil|fpga|zocl|dpu-auto', name, flags=re.IGNORECASE))
+             loader_entry = ('dfx-mgr-client' in entries or 'dfx-mgrd' in entries
+                             or ('xmutil' in entries and ('loadapp' in entries or 'unloadapp' in entries)))
+-            require(not loader_name and not loader_entry, 'OTHER_PLATFORM_OR_DAEMON_JOB_PENDING_NO_DFX')
++            require(not own_action_job and not loader_name and not loader_entry, 'OTHER_PLATFORM_OR_DAEMON_JOB_PENDING_NO_DFX')
+         for path in Path('/proc').iterdir():
+             if not path.name.isdigit() or int(path.name) == os.getpid():
+                 continue

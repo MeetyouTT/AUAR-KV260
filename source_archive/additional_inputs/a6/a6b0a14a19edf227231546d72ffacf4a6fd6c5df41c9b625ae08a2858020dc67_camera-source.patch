@@ -1,0 +1,1444 @@
+--- baseline/aura/board/identity/camera_faces.py
++++ candidate/aura/board/identity/camera_faces.py
+@@ -232,6 +232,12 @@
+     from board.identity.store import IdentityStore
+     config = config_for(root, config_path)
+     dpu = (config.get('feature_backend') or {}).get('kind') == 'dpu_sface'
++    if getattr(schedule,'native_critical',False):
++        if not dpu or (config.get('face_backend') or {}).get('kind') != 'dpu_yunet':
++            raise ValueError('Native execution requires both reviewed INT8 face backends')
++        for name in ('dpu_sface_shadow','dpu_sface_calibration','dpu_sface_producer'):
++            if (config.get(name) or {}).get('enabled'):
++                raise ValueError('Legacy auxiliary runner cannot bypass the shared native gate: '+name)
+     if dpu:
+         if schedule is None or owner is None:
+             raise ValueError('Select a shared DPU scheduler and owner before opening INT8 identity storage')
+--- baseline/aura/board/identity/face_targets.py
++++ candidate/aura/board/identity/face_targets.py
+@@ -126,6 +126,13 @@
+ 
+     def _process(self, packet, detector, attempt=None, *, admission_check=None):
+         image,fid,stamp=packet
++        if getattr(detector,'native_critical',False):
++            if admission_check is None:
++                from board.vision.dpu_vision_runtime import AdmissionCancelled
++                def admission_check():
++                    if self.closed:raise AdmissionCancelled('closed')
++                    if not 0<=self.clock()-stamp<self.ttl:raise AdmissionCancelled('expired')
++            admission_check.source_expires_monotonic_ns=(stamp+self.ttl)*1_000_000
+         if attempt is not None:attempt['stamp_ms']=stamp
+         input_now=self.clock()
+         if attempt is not None:attempt['input_now_ms']=input_now
+--- baseline/aura/board/vision/dpu_sface.py
++++ candidate/aura/board/vision/dpu_sface.py
+@@ -33,7 +33,13 @@
+         for name,value in getattr(schedule,'inherited_sface_counters',{}).items():
+             setattr(self,name,value)
+         self._closed = False
+-        self.runner = PinnedRunner(backend['model'], backend['manifest'], owner)
++        if getattr(schedule,'native_critical',False):
++            from board.vision.native_runtime import NativePinnedRunner
++            self.runner = NativePinnedRunner(backend['model'],backend['manifest'],owner,task='sface',
++                model_sha256=backend['model_sha256'],manifest_sha256=backend['manifest_sha256'])
++            self.native_critical = True
++        else:
++            self.runner = PinnedRunner(backend['model'], backend['manifest'], owner)
+         if (self.runner.input_fix != 7 or list(self.runner.inputs[0].dims) != [1, 112, 112, 3]
+                 or len(self.runner.outputs) != 1 or list(self.runner.outputs[0].dims) != [1, 128]
+                 or self.runner.outputs[0].get_attr('fix_point') != 5):
+@@ -82,6 +88,8 @@
+             source = encode(normalized, self.runner.input_fix)
+             if not self._fresh(source_mono_ms):
+                 return None
++            if getattr(self,'native_critical',False):
++                return self._native_encoded(source,source_mono_ms)
+             # Encoding and runner output allocation/dequantization are outside
+             # the scheduling lock. Only execute_async/wait hold the DPU slot.
+             def before_native():
+@@ -109,6 +117,43 @@
+         self.features_returned += 1
+         return result
+ 
++    def _native_encoded(self, source, stamp):
++        """No Python optional lease; native wait/admission/ACK own protection."""
++        until = min(time.monotonic()+self.schedule.sface_slot_wait_ms/1000.,
++                    (stamp+self.source_ttl)/1000.)
++        expires = (stamp+self.source_ttl)*1_000_000
++        while self._fresh(stamp):
++            def before_native():
++                if not self._fresh(stamp):
++                    raise AdmissionCancelled('SFace source expired before native submission')
++            try:
++                values = self.runner.execute_encoded(source,source_expires_ns=expires,pre_execute=before_native)
++            except AdmissionCancelled:
++                self._defer('SFace source expired before native submission')
++            except Exception:
++                report=self.runner.last_report
++                if report is not None:
++                    self.execution_attempts += int(bool(report['submitted'] or (report['outcome']==5 and report['start_ns'])))
++                    self.completed += int(report['completed'])
++                raise
++            report = self.runner.last_report
++            if report is None:raise RuntimeError('Native SFace omitted its execution report')
++            attempted = bool(report['submitted'] or (report['outcome']==5 and report['start_ns']))
++            self.execution_attempts += int(attempted)
++            self.completed += int(report['completed'])
++            if report['completed']:
++                # NativePinnedRunner already performs the post-GIL fresh ACK.
++                # A completed probation probe remains counted even while its
++                # raw output is withheld from identity matching/publication.
++                return values
++            self.slot_denials += 1
++            if (not self.schedule.sface_slot_wait_ms or time.monotonic()>=until or
++                    self.schedule.disabled('sface') and not self.schedule.recovery_probe_allowed('sface') or
++                    not self.schedule.wait_for_optional('sface',until)):
++                return None
++        self.expired_after_admission += 1
++        return None
++
+     def availability(self):
+         """Persistent protection is unavailable; ordinary slot contention is not."""
+         status=getattr(self.schedule,'optional_status',lambda kind:{})('sface')
+@@ -131,7 +176,10 @@
+                 'deferred': self.deferred, 'slot_denials': self.slot_denials,
+                 'expired_after_admission': self.expired_after_admission,
+                 'last_dpu_wait_ms': self.runner.last_ms,
+-                'scheduler_calls_mean_admissions': True}
++                'scheduler_calls_mean_admissions': True,
++                'native_critical':getattr(self,'native_critical',False),
++                'execution_attempts_scope':('inherited predecessor attempts plus native submit/unknown-attempt reports'
++                    if getattr(self,'native_critical',False) else 'legacy fresh optional admission attempts')}
+ 
+     def close(self):
+         self._closed = True
+--- baseline/aura/board/vision/dpu_yunet.py
++++ candidate/aura/board/vision/dpu_yunet.py
+@@ -24,7 +24,14 @@
+         self._health_lock=threading.Lock()
+         self.fallback_calls=self.fallback_failures=0
+         self.fallback_last_ms=None;self.fallback_total_ms=0.;self.fallback_reason=None
+-        self.runner = PinnedRunner(config['face_backend']['model'], config['face_backend']['manifest'], owner)
++        backend = config['face_backend']
++        if getattr(schedule,'native_critical',False):
++            from board.vision.native_runtime import NativePinnedRunner
++            self.runner = NativePinnedRunner(backend['model'],backend['manifest'],owner,task='yunet',
++                model_sha256=backend['model_sha256'],manifest_sha256=backend['manifest_sha256'])
++            self.native_critical = True
++        else:
++            self.runner = PinnedRunner(backend['model'],backend['manifest'],owner)
+         if self.runner.input_fix != 7 or list(self.runner.inputs[0].dims) != [1, 320, 320, 3]:
+             self.runner.close()
+             raise ValueError('Unexpected YuNet candidate input')
+@@ -36,12 +43,51 @@
+         # CPU input conversion is outside the DPU critical section.
+         source = encode(normalized, self.runner.input_fix)
+         check = getattr(self, '_admission_check', None)
++        if getattr(self,'native_critical',False):
++            return self._native_scheduled(source,check)
+         if check is not None:
+             # An expired round must not seek another slot after preparation.
+             check()
+             return self.runner.execute_encoded(source,
+                 slot=self._guarded_slot(), pre_execute=check)
+         return self.runner.execute_encoded(source, slot=self._completed_slot())
++
++    def _native_scheduled(self, source, check):
++        from board.vision.dpu_vision_runtime import AdmissionCancelled, SlotUnavailable
++        if check is None:
++            raise ValueError('Native YuNet requires the source frame admission guard')
++        expires = getattr(check,'source_expires_monotonic_ns',None)
++        if type(expires) is not int or expires <= 0:
++            raise ValueError('Native YuNet requires the original source expiry')
++        began = time.monotonic()
++        wait_ms = self.schedule.yunet_slot_wait_ms
++        until = min(began+wait_ms/1000.,expires/1e9)
++        deadline = getattr(check,'deadline_monotonic',None)
++        if deadline is not None:
++            if type(deadline) not in (int,float) or not math.isfinite(deadline):
++                raise ValueError('Invalid face retry deadline')
++            until = min(until,deadline)
++            expires = min(expires,int(deadline*1e9))
++        attempted = False
++        while True:
++            check()
++            if attempted and (not wait_ms or time.monotonic() >= until):
++                raise SlotAdmissionDenied(began)
++            values = self.runner.execute_encoded(source,source_expires_ns=expires,pre_execute=check)
++            report = self.runner.last_report
++            if report is None:raise RuntimeError('Native YuNet omitted its execution report')
++            if report['submitted'] or report['completed']:
++                if values is not None:return values
++                if time.monotonic_ns() >= expires:raise AdmissionCancelled('expired')
++                if self.schedule.disabled('yunet'):
++                    raise OptionalJobDisabled('YuNet disabled by native DPU protection')
++                raise SlotUnavailable('Native YuNet completed but business result is withheld')
++            attempted = True
++            if self.schedule.disabled('yunet') and not self.schedule.recovery_ready('yunet'):
++                raise OptionalJobDisabled('YuNet disabled by native DPU protection')
++            if not wait_ms or not self.schedule.wait_for_optional('yunet',until):
++                check()
++                raise SlotAdmissionDenied(began)
+ 
+     @contextmanager
+     def _completed_slot(self):
+--- baseline/aura/board/vision/native_binding.py
++++ candidate/aura/board/vision/native_binding.py
+@@ -0,0 +1,529 @@
++"""Pinned ctypes boundary for the isolated native candidate, not production.
++
++The production scheduler/adapters still need a joint migration. No module import
++loads a DSO or model. All execution uses CDLL (not PyDLL or Python callbacks).
++The C++ context owns adopted YOLO and optional-runner storage until confirmed
++quiescent close. Unknown calls retain the Python context as well.
++"""
++import ctypes as C
++from dataclasses import dataclass
++import hashlib
++import json
++import os
++from pathlib import Path
++import time
++import threading
++
++
++FINGERPRINT = '0x101000056010407'
++_RETAINED = {}
++
++
++class BridgeError(RuntimeError):
++    pass
++
++
++class CompletionUnknown(BridgeError):
++    native_execution_unknown = True
++    def __init__(self, message, *, native_report=None):
++        super().__init__(message)
++        self.native_report = native_report
++
++
++class Report(C.Structure):
++    _fields_ = [(n, C.c_uint32) for n in
++                ('abi_version', 'outcome', 'hardcap', 'guard', 'submitted', 'completed')]
++    _fields_ += [('native_status', C.c_int32), ('task', C.c_uint32)]
++    _fields_ += [(n, C.c_uint64) for n in
++                ('start_ns', 'native_return_ns', 'release_decision_ns', 'after_unlock_ns')]
++    _fields_ += [(n, C.c_uint32) for n in ('business_ready', 'result_fresh', 'recovery_phase', 'reserved')]
++    _fields_ += [('result_token', C.c_uint64)]
++
++
++class TensorInfo(C.Structure):
++    _fields_ = [('rank', C.c_uint32), ('dims', C.c_int32 * 8),
++                ('fix_point', C.c_int32), ('bytes', C.c_uint64), ('name', C.c_char * 256)]
++
++
++class Buffer(C.Structure):
++    _fields_ = [('data', C.c_void_p), ('bytes', C.c_uint64)]
++
++
++class Recovery(C.Structure):
++    _fields_ = [(n, C.c_uint32) for n in ('enabled', 'phase', 'reason', 'probe_successes',
++                 'attempt_count', 'history_opaque', 'opaque_attempt_count', 'reserved')]
++    _fields_ += [(n, C.c_uint64) for n in ('cooldown_until_ns', 'fault_primary_calls',
++                 'fault_primary_overruns', 'faults', 'attempts', 'recoveries', 'observed_ns')]
++    _fields_ += [('attempt_times_ns', C.c_uint64 * 2)]
++
++
++class State(C.Structure):
++    _fields_ = [(n, C.c_uint32) for n in
++                ('abi_version', 'active', 'fenced', 'primary_waiting')]
++    _fields_ += [('next_primary_ns', C.c_uint64), ('disabled', C.c_uint32 * 3),
++                 ('seed_loaded', C.c_uint32), ('active_task', C.c_uint32),
++                 ('fence_reason', C.c_uint32), ('quiesced', C.c_uint32),
++                 ('checkpoint_kind', C.c_uint32),
++                 ('admissions', C.c_uint64 * 3),
++                 ('overruns', C.c_uint64 * 3)]
++    _fields_ += [(n, C.c_uint64 * 3) for n in ('completed', 'native_failures', 'not_submitted')]
++    _fields_ += [(n, C.c_uint64) for n in ('primary_calls', 'primary_period_overruns', 'last_primary_ns')]
++    _fields_ += [('pending_result_tokens', C.c_uint64 * 3), ('recovery', Recovery * 2)]
++
++
++class Seed(C.Structure):
++    _fields_ = [(n, C.c_uint32) for n in ('abi_version', 'struct_size', 'fenced', 'checkpoint_kind')]
++    _fields_ += [(n, C.c_uint64) for n in ('captured_mono_ns', 'primary_calls',
++                 'primary_period_overruns', 'last_primary_ns')]
++    _fields_ += [('source_pid', C.c_uint32), ('reserved2', C.c_uint32),
++                 ('source_birth_ticks', C.c_uint64), ('boot_id', C.c_char * 40),
++                 ('source_manifest_sha256', C.c_char * 65), ('reserved_bytes', C.c_char * 7)]
++    _fields_ += [(n, C.c_uint64 * 3) for n in ('admissions', 'overruns', 'completed',
++                 'native_failures', 'not_submitted')]
++    _fields_ += [('disabled', C.c_uint32 * 3), ('reserved3', C.c_uint32), ('recovery', Recovery * 2)]
++
++
++class Ack(C.Structure):
++    _fields_ = [(n, C.c_uint32) for n in ('abi_version', 'accepted', 'business_ready',
++                 'result_fresh', 'recovery_phase', 'reserved')]
++    _fields_ += [('result_token', C.c_uint64)]
++
++
++def _structure_dict(value):
++    result = {}
++    for name, _ in value._fields_:
++        item = getattr(value, name)
++        if isinstance(item, C.Array):
++            result[name] = [_structure_dict(v) if isinstance(v, C.Structure) else v for v in item]
++        else:
++            result[name] = item
++    return result
++
++
++def _pinned(path, digest):
++    if (not isinstance(digest, str) or len(digest) != 64 or
++            any(c not in '0123456789abcdef' for c in digest)):
++        raise ValueError('Explicit lowercase SHA256 required')
++    path = Path(path).resolve(strict=True)
++    if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
++        raise ValueError('Pinned artifact differs: ' + path.name)
++    return path
++
++
++def _ns(value):
++    if type(value) is not int or not 0 < value < 2 ** 63:
++        raise ValueError('Positive CLOCK_MONOTONIC nanoseconds required')
++    return value
++
++
++def _report(value, task):
++    result = {name: getattr(value, name) for name, _ in Report._fields_}
++    if (result['abi_version'] != 2 or result['task'] != task or
++            not 0 <= result['outcome'] <= 10 or
++            any(result[n] not in (0, 1) for n in ('hardcap', 'guard', 'submitted', 'completed',
++                'business_ready', 'result_fresh')) or not 0 <= result['recovery_phase'] <= 3):
++        raise CompletionUnknown('Invalid native report; context retained')
++    if result['completed'] and not result['submitted']:
++        raise CompletionUnknown('Inconsistent completion report')
++    if result['start_ns'] and not (result['start_ns'] <= result['native_return_ns'] <=
++            result['release_decision_ns'] <= result['after_unlock_ns']):
++        raise CompletionUnknown('Invalid native time ordering')
++    return result
++
++
++@dataclass(frozen=True)
++class Execution:
++    report: dict
++    outputs: tuple
++    returned_mono_ns: int
++    source_expires_ns: int
++
++    @property
++    def native_usable(self):
++        # Recheck TTL at access, including time waiting to regain Python's GIL.
++        # Business publication/probation checks remain mandatory downstream.
++        r = self.report
++        return (r['outcome'] == 0 and r['submitted'] == r['completed'] == 1 and
++                r['native_status'] == 0 and not r['hardcap'] and not r['guard'] and
++                bool(r['result_fresh']) and
++                time.monotonic_ns() < self.source_expires_ns)
++
++    @property
++    def usable(self):
++        return self.native_usable and bool(self.report['business_ready'])
++
++
++class NativeContext:
++    def __init__(self, owner, library, library_sha256):
++        self.pid = os.getpid()
++        self.owner, self.handle = owner, 0
++        self.models, self.quarantined = {}, False
++        self.adopted = False
++        # Only lifecycle/bookkeeping takes this lock. Never hold it across an
++        # inference call, which would again delay YOLO until Python resumes.
++        self._lifecycle = threading.RLock()
++        if owner.fingerprint != FINGERPRINT or owner.ownership is None or not owner.handle:
++            raise ValueError('The existing live pinned DPU owner is required')
++        bridge = _pinned(library, library_sha256)
++        yolo = _pinned(owner.config['native_library'], owner.config['native_sha256'])
++        # CDLL releases the GIL for the entire C entry. PyDLL is prohibited.
++        self.native = C.CDLL(str(bridge))
++        self._configure()
++        if (self.native.aura_native_abi() != 2 or
++                self.native.aura_native_report_size() != C.sizeof(Report) or
++                self.native.aura_native_state_size() != C.sizeof(State) or
++                self.native.aura_native_seed_size() != C.sizeof(Seed) or
++                self.native.aura_native_recovery_size() != C.sizeof(Recovery) or
++                self.native.aura_native_ack_size() != C.sizeof(Ack)):
++            raise BridgeError('Native ABI or structure size differs')
++        try:
++            self.handle = self.native.aura_native_context_create(owner.ownership.fileno(), str(yolo).encode())
++        except BaseException:
++            self._retain('context factory result unconfirmed')
++            raise
++        if not self.handle:
++            raise BridgeError(self._error())
++
++    def _configure(self):
++        signatures = {
++            'abi': (C.c_uint32, []), 'report_size': (C.c_uint32, []),
++            'state_size': (C.c_uint32, []), 'error': (C.c_char_p, []),
++            'seed_size': (C.c_uint32, []), 'recovery_size': (C.c_uint32, []),
++            'ack_size': (C.c_uint32, []),
++            'context_create': (C.c_uint64, [C.c_int, C.c_char_p]),
++            'context_close': (C.c_int, [C.c_uint64]),
++            'adopt_yolo': (C.c_int, [C.c_uint64, C.c_void_p]),
++            'snapshot': (C.c_int, [C.c_uint64, C.POINTER(State)]),
++            'announce_primary': (C.c_int, [C.c_uint64, C.c_uint64]),
++            'restore_seed': (C.c_int, [C.c_uint64, C.POINTER(Seed)]),
++            'wait_optional': (C.c_int, [C.c_uint64, C.c_uint, C.c_uint64]),
++            'ack_result': (C.c_int, [C.c_uint64, C.c_uint, C.c_uint64, C.c_uint32, C.POINTER(Ack)]),
++            'checkpoint': (C.c_int, [C.c_uint64, C.c_char_p, C.POINTER(Seed)]),
++            'runner_create': (C.c_uint64, [C.c_uint64, C.c_uint, C.c_char_p]),
++            'runner_close': (C.c_int, [C.c_uint64, C.c_uint64]),
++            'tensor_info': (C.c_int, [C.c_uint64, C.c_uint64, C.c_uint, C.c_uint, C.POINTER(TensorInfo)]),
++            'optional_execute': (C.c_int, [C.c_uint64, C.c_uint64, C.c_void_p, C.c_uint64,
++                C.POINTER(Buffer), C.c_uint, C.c_uint64, C.POINTER(Report)]),
++            'yolo_execute': (C.c_int, [C.c_uint64, C.c_void_p, C.c_int, C.c_int, C.c_int,
++                C.POINTER(C.c_float), C.c_int, C.c_int, C.POINTER(C.c_int),
++                C.c_uint64, C.c_uint64, C.POINTER(Report)]),
++        }
++        for name, (result, args) in signatures.items():
++            function = getattr(self.native, 'aura_native_' + name)
++            function.restype, function.argtypes = result, args
++
++    def _error(self):
++        return (self.native.aura_native_error() or b'Native candidate error').decode(errors='replace')
++
++    def _check(self, *, allow_quarantined=False):
++        # Never touch an inherited C++ mutex or library registry after fork.
++        if os.getpid() != self.pid:
++            raise BridgeError('Fork-inherited native binding rejected')
++        if not self.handle:
++            raise BridgeError('Native context is closed')
++        if self.quarantined and not allow_quarantined:
++            raise CompletionUnknown('Native context retained after uncertain call')
++
++    def _retain(self, *values):
++        self.quarantined = True
++        _RETAINED[id(self)] = (self, values)
++
++    def adopt_yolo(self):
++        with self._lifecycle:
++            self._adopt_yolo()
++
++    def _adopt_yolo(self):
++        self._check()
++        # Detach BEFORE the GIL-releasing call. Even asynchronous Python
++        # exceptions must not leave the original close path owning this handle.
++        with self.owner.lock:
++            pointer = self.owner.handle
++            if not pointer or self.adopted:
++                raise BridgeError('YOLO must be adopted exactly once')
++            rejected = False
++            try:
++                self.owner.handle = None
++                code = self.native.aura_native_adopt_yolo(self.handle, pointer)
++                if code != 0:
++                    # Native adopt has the strong exception guarantee: a
++                    # negative return has not transferred detector ownership.
++                    self.owner.handle = pointer
++                    rejected = True
++                    raise BridgeError(self._error())
++                self.adopted = True
++            except BaseException:
++                if not rejected:
++                    self._retain(pointer)
++                raise
++
++    def snapshot(self):
++        self._check(allow_quarantined=True)
++        state = State()
++        if self.native.aura_native_snapshot(self.handle, C.byref(state)) != 0:
++            raise BridgeError(self._error())
++        if state.abi_version != 2:
++            raise BridgeError('Native state ABI differs')
++        return _structure_dict(state)
++
++    def restore_seed(self, values):
++        from board.vision.native_protection import make_native_seed
++        with self._lifecycle:
++            self._check()
++            seed = make_native_seed(values, Seed, Recovery)
++            rejected = False
++            try:
++                if self.native.aura_native_restore_seed(self.handle, C.byref(seed)) != 0:
++                    rejected = True
++                    raise BridgeError(self._error())
++            except BaseException:
++                if not rejected:self._retain(seed, 'seed restoration result unconfirmed')
++                raise
++
++    def checkpoint(self, source_manifest_sha256):
++        from board.vision.native_protection import digest
++        with self._lifecycle:
++            self._check()
++            seed = Seed()
++            rejected = False
++            try:
++                if self.native.aura_native_checkpoint(self.handle,
++                        digest(source_manifest_sha256,'source_manifest_sha256').encode(),C.byref(seed)) != 0:
++                    rejected = True
++                    raise BridgeError(self._error())
++                values = _structure_dict(seed)
++                for key in ('boot_id','source_manifest_sha256','reserved_bytes'):
++                    values[key] = values[key].decode('ascii')
++                values['purpose'] = 'final_quiescent_business_checkpoint'
++                return values
++            except BaseException:
++                if not rejected:self._retain(seed,'native checkpoint result unconfirmed')
++                raise
++
++    def wait_optional(self, task, until_ns):
++        self._check()
++        if task not in (1, 2):raise ValueError('Optional task required')
++        code = self.native.aura_native_wait_optional(self.handle, task, _ns(until_ns))
++        if code == -2:raise CompletionUnknown(self._error())
++        if code not in (0, 1):raise BridgeError(self._error())
++        return code == 0
++
++    def confirm_result(self, execution):
++        token = execution.report['result_token']
++        if not token:return execution
++        self._check()
++        ack = Ack()
++        try:
++            code = self.native.aura_native_ack_result(self.handle, execution.report['task'], token,
++                int(execution.native_usable), C.byref(ack))
++            if code < 0:raise BridgeError(self._error())
++            if ack.abi_version != 2 or ack.result_token != token:
++                raise CompletionUnknown('Native result acknowledgment differs')
++            report = dict(execution.report, business_ready=ack.business_ready,
++                result_fresh=ack.result_fresh, recovery_phase=ack.recovery_phase)
++            return Execution(report, execution.outputs, execution.returned_mono_ns, execution.source_expires_ns)
++        except BaseException:
++            self._retain(execution, 'result acknowledgment unconfirmed')
++            raise
++
++    def announce_primary(self, deadline_ns):
++        self._check()
++        if self.native.aura_native_announce_primary(self.handle, _ns(deadline_ns)) != 0:
++            raise BridgeError(self._error())
++
++    def execute_yolo(self, bgr, *, width, height, stride, source_expires_ns, primary_finish_ns):
++        self._check()
++        if not self.adopted:
++            raise BridgeError('YOLO ownership has not been transferred')
++        if (any(type(v) is not int for v in (width, height, stride)) or
++                not 0 < width <= 4096 or not 0 < height <= 4096 or stride < width * 3):
++            raise ValueError('Bounded uint8 BGR geometry required')
++        _ns(source_expires_ns)
++        _ns(primary_finish_ns)
++        view = memoryview(bgr)
++        if (not view.c_contiguous or view.itemsize != 1 or view.format not in ('B', 'b', 'c') or
++                not (height - 1) * stride + width * 3 <= view.nbytes <= 64 * 1024 ** 2):
++            raise ValueError('BGR buffer does not cover the declared geometry')
++        source = (C.c_ubyte * view.nbytes).from_buffer_copy(view)
++        output, count, report = (C.c_float * (16 * 6))(), C.c_int(), Report()
++        try:
++            code = self.native.aura_native_yolo_execute(self.handle, source, width, height, stride,
++                output, 16, 0, C.byref(count), source_expires_ns, primary_finish_ns, C.byref(report))
++            returned = time.monotonic_ns()
++            if code == -1 and not report.abi_version:
++                raise BridgeError(self._error())
++            result = _report(report, 0)
++            if code == -2 or result['outcome'] == 5:
++                raise CompletionUnknown(self._error(),native_report=result)
++            if code not in (0, 1):
++                raise BridgeError(self._error())
++            if code == 0 and not (result['outcome'] == 0 and result['submitted'] == result['completed'] == 1
++                                 and result['native_status'] == 0):
++                raise CompletionUnknown('YOLO success did not confirm native completion')
++            if not 0 <= count.value <= 16:
++                raise BridgeError('YOLO output count outside original capacity')
++            rows = tuple(tuple(output[i * 6:i * 6 + 6]) for i in range(count.value)) if code == 0 else ()
++            return Execution(result, rows, returned, source_expires_ns)
++        except BridgeError as exc:
++            if isinstance(exc, CompletionUnknown):
++                self._retain(source, output, count)
++            raise
++        except BaseException:
++            self._retain(source, output, count)
++            raise
++
++    def close(self):
++        with self._lifecycle:
++            self._close()
++
++    def _close(self):
++        self._check()
++        # Native close refuses referenced runners, active jobs and fence. This
++        # method never clears a fence, destroys/recreates a context or retries.
++        rejected = False
++        try:
++            if self.native.aura_native_context_close(self.handle) != 0:
++                rejected = True
++                raise BridgeError(self._error())
++            self.handle = 0
++            # owner.handle is detached after adoption; parent closes only its FD.
++            if self.adopted:
++                self.owner.close()
++        except BaseException:
++            if not rejected:
++                self._retain('context close result or Python bookkeeping unconfirmed')
++            raise
++
++
++class NativeRunner:
++    def __init__(self, context, task, model_path, model_sha256, manifest_path, manifest_sha256):
++        with context._lifecycle:
++            self._initialize(context, task, model_path, model_sha256, manifest_path, manifest_sha256)
++
++    def _initialize(self, context, task, model_path, model_sha256, manifest_path, manifest_sha256):
++        context._check()
++        if not context.adopted:
++            raise BridgeError('YOLO must use the same native gate before optional models are enabled')
++        if task not in ('yunet', 'sface'):
++            raise ValueError('Only pinned optional models are supported')
++        self.context, self.task = context, 1 if task == 'yunet' else 2
++        self.handle = 0
++        model = _pinned(model_path, model_sha256)
++        manifest = json.loads(_pinned(manifest_path, manifest_sha256).read_text())
++        partitions = [p for p in manifest['partitions'] if p['device'] == 'DPU']
++        if (manifest['sha256'] != model_sha256 or len(partitions) != 1 or
++                partitions[0]['fingerprint'] != FINGERPRINT):
++            raise ValueError('Pinned xmodel manifest differs')
++        expected = partitions[0]
++        if len(expected['inputs']) != 1 or len(expected['outputs']) != (4 if task == 'yunet' else 1):
++            raise ValueError('Unexpected manifest port count')
++        try:
++            self.handle = context.native.aura_native_runner_create(context.handle, self.task, str(model).encode())
++        except BaseException:
++            context._retain(self, 'runner factory result unconfirmed')
++            raise
++        if not self.handle:
++            raise BridgeError(context._error())
++        # Keep strong ownership before any subsequent validation can fail.
++        context.models[self.handle] = self
++        try:
++            self.inputs = self._metadata(False, len(expected['inputs']))
++            self.outputs = self._metadata(True, len(expected['outputs']))
++            for actual, target in ((self.inputs, expected['inputs']), (self.outputs, expected['outputs'])):
++                if (len({t['name'] for t in actual}) != len(actual) or
++                        {t['name']: t for t in actual} != {t['name']: t for t in target}):
++                    raise ValueError('Native VART tensor ports differ from the pinned manifest')
++            expected_shape = [1, 320, 320, 3] if task == 'yunet' else [1, 112, 112, 3]
++            if self.inputs[0]['dims'] != expected_shape or self.inputs[0]['fix_point'] != 7:
++                raise ValueError('Unexpected pinned input quantization or shape')
++            if task == 'sface' and (self.outputs[0]['dims'] != [1, 128] or self.outputs[0]['fix_point'] != 5):
++                raise ValueError('Unexpected SFace INT8 feature contract')
++        except BaseException:
++            self.close()
++            raise
++
++    def _metadata(self, output, count):
++        result = []
++        for i in range(count):
++            info = TensorInfo()
++            if self.context.native.aura_native_tensor_info(self.context.handle, self.handle,
++                    int(output), i, C.byref(info)) != 0:
++                raise BridgeError(self.context._error())
++            if not 1 <= info.rank <= 8:
++                raise ValueError('Native tensor rank outside contract')
++            dims = list(info.dims)[:info.rank]
++            size = 1
++            for dimension in dims:
++                if dimension <= 0:
++                    raise ValueError('Native tensor has an invalid dimension')
++                size *= dimension
++            if size != info.bytes or not 0 < size <= 64 * 1024 ** 2:
++                raise ValueError('Native tensor byte size outside contract')
++            result.append({'name': info.name.decode('utf-8', errors='strict'), 'dims': dims,
++                           'dtype': 'xint8', 'fix_point': info.fix_point})
++        return result
++
++    @staticmethod
++    def _bytes(meta):
++        size = 1
++        for d in meta['dims']:
++            size *= d
++        return size
++
++    def execute_encoded(self, source, *, source_expires_ns):
++        self.context._check()
++        if not self.handle:
++            raise BridgeError('Native optional runner is closed')
++        _ns(source_expires_ns)
++        view = memoryview(source)
++        if not view.c_contiguous or view.itemsize != 1 or view.format not in ('b', 'B', 'c'):
++            raise ValueError('Contiguous encoded INT8 bytes required')
++        size = self._bytes(self.inputs[0])
++        if view.nbytes != size:
++            raise ValueError('Encoded input size differs from the pinned model')
++        source_array = (C.c_int8 * size).from_buffer_copy(view)
++        arrays = [(C.c_int8 * self._bytes(meta))() for meta in self.outputs]
++        ports = (Buffer * len(arrays))(*(Buffer(C.cast(a, C.c_void_p), C.sizeof(a)) for a in arrays))
++        report = Report()
++        try:
++            code = self.context.native.aura_native_optional_execute(self.context.handle, self.handle,
++                source_array, size, ports, len(arrays), source_expires_ns, C.byref(report))
++            returned = time.monotonic_ns()
++            if code == -1 and not report.abi_version:
++                raise BridgeError(self.context._error())
++            result = _report(report, self.task)
++            if code == -2 or result['outcome'] == 5:
++                raise CompletionUnknown(self.context._error(),native_report=result)
++            if code not in (0, 1):
++                raise BridgeError(self.context._error())
++            if code == 0 and not (result['outcome'] == 0 and result['submitted'] == result['completed'] == 1
++                                 and result['native_status'] == 0):
++                raise CompletionUnknown('Success return did not confirm native completion')
++            return Execution(result, tuple(bytes(a) for a in arrays) if code == 0 else (),
++                             returned, source_expires_ns)
++        except BridgeError as exc:
++            if isinstance(exc, CompletionUnknown):
++                self.context._retain(self, source_array, arrays, ports)
++            raise
++        except BaseException:
++            self.context._retain(self, source_array, arrays, ports)
++            raise
++
++    def close(self):
++        with self.context._lifecycle:
++            self._close()
++
++    def _close(self):
++        self.context._check()
++        if not self.handle:
++            return
++        rejected = False
++        try:
++            if self.context.native.aura_native_runner_close(self.context.handle, self.handle) != 0:
++                rejected = True
++                raise BridgeError(self.context._error())
++            del self.context.models[self.handle]
++            self.handle = 0
++        except BaseException:
++            if not rejected:
++                self.context._retain(self, 'runner close result or Python bookkeeping unconfirmed')
++            raise
+--- baseline/aura/board/vision/native_errors.py
++++ candidate/aura/board/vision/native_errors.py
+@@ -0,0 +1,5 @@
++"""Packet deferral is distinct from an unconfirmed native execution failure."""
++
++
++class PrimaryAdmissionDeferred(RuntimeError):
++    """Keep the detector/owner and wait for the next real captured frame."""
+--- baseline/aura/board/vision/native_protection.py
++++ candidate/aura/board/vision/native_protection.py
+@@ -0,0 +1,219 @@
++"""Strict serialized native protection state; no model or service operations.
++
++Production uses a hash-pinned final quiescent checkpoint. A legacy health
++observation is not an exact shutdown checkpoint and is deliberately insufficient
++for automatically resuming recovery. Maintenance seeds are a separate scope.
++"""
++import ctypes as C
++import hashlib
++import json
++import math
++import os
++from pathlib import Path
++import time
++import uuid
++
++
++PHASES = ('RUNNING', 'COOLDOWN', 'PROBATION', 'LATCHED')
++REASONS = (None, 'unsafe_or_unknown_completion', 'recovery_budget_exhausted',
++           'completed_hardcap_only', 'primary_overrun_after_fault', 'primary_overrun_during_probation')
++FEATURE_COUNTERS = ('requests', 'execution_attempts', 'completed', 'features_returned',
++                    'deferred', 'slot_denials', 'expired_after_admission')
++
++
++def integer(value, name, *, maximum=2**64-1):
++    if type(value) is not int or not 0 <= value <= maximum:
++        raise ValueError('Invalid native protection integer: ' + name)
++    return value
++
++
++def digest(value, name):
++    if not isinstance(value, str) or len(value) != 64 or any(c not in '0123456789abcdef' for c in value):
++        raise ValueError('Pinned lowercase SHA256 required: ' + name)
++    return value
++
++
++def _boot(value):
++    if not isinstance(value, str) or str(uuid.UUID(value)) != value:
++        raise ValueError('Canonical kernel boot ID required')
++    return value
++
++
++def isolated_maintenance_seed(*, boot_id, captured_mono_ns, production_snapshot_sha256):
++    """A new *test* counter domain, never a production recovery operation."""
++    _boot(boot_id);integer(captured_mono_ns, 'captured_mono_ns')
++    digest(production_snapshot_sha256, 'production_snapshot_sha256')
++    recovery = []
++    for _ in range(2):
++        recovery.append(dict(enabled=1, phase=0, reason=0, probe_successes=0,
++            attempt_count=0, history_opaque=0, opaque_attempt_count=0,
++            cooldown_until_ns=0, fault_primary_calls=0, fault_primary_overruns=0,
++            faults=0, attempts=0, recoveries=0, observed_ns=captured_mono_ns,
++            attempt_times_ns=[0, 0]))
++    return dict(abi_version=2, purpose='isolated_model_equivalence', fenced=0,
++        checkpoint_kind=0,
++        captured_mono_ns=captured_mono_ns, primary_calls=0, primary_period_overruns=0,
++        last_primary_ns=0, source_pid=0, source_birth_ticks=0, boot_id=boot_id,
++        source_manifest_sha256=production_snapshot_sha256,
++        parent_snapshot_sha256=production_snapshot_sha256,
++        admissions=[0]*3, overruns=[0]*3, completed=[0]*3,
++        native_failures=[0]*3, not_submitted=[0]*3, disabled=[0]*3, recovery=recovery)
++
++
++def make_native_seed(values, seed_type, recovery_type):
++    """Build the fixed C ABI only after explicit scope and range validation."""
++    if not isinstance(values, dict) or values.get('abi_version') != 2:
++        raise ValueError('Native seed schema mismatch')
++    purpose = values.get('purpose')
++    if purpose not in ('final_quiescent_business_checkpoint', 'isolated_model_equivalence',
++                        'validated_new_kernel_boot'):
++        raise ValueError('Explicit native seed purpose required')
++    if purpose == 'isolated_model_equivalence':
++        digest(values.get('parent_snapshot_sha256'), 'parent_snapshot_sha256')
++    result = seed_type()
++    result.abi_version, result.struct_size = 2, C.sizeof(seed_type)
++    result.checkpoint_kind = 1 if purpose == 'final_quiescent_business_checkpoint' else 0
++    if values.get('checkpoint_kind') != result.checkpoint_kind:
++        raise ValueError('Health prefix or mismatched checkpoint kind cannot authorize execution')
++    for name in ('fenced', 'captured_mono_ns', 'primary_calls', 'primary_period_overruns',
++                 'last_primary_ns', 'source_pid', 'source_birth_ticks'):
++        maximum = 2**32-1 if name == 'source_pid' else 2**64-1
++        setattr(result, name, integer(values[name], name, maximum=maximum))
++    if result.fenced or not result.captured_mono_ns:
++        raise ValueError('Unconfirmed completion or missing capture time')
++    result.boot_id = _boot(values['boot_id']).encode()
++    result.source_manifest_sha256 = digest(values['source_manifest_sha256'], 'source_manifest_sha256').encode()
++    if purpose == 'final_quiescent_business_checkpoint' and not (result.source_pid and result.source_birth_ticks):
++        raise ValueError('Business history requires predecessor provenance')
++    if purpose != 'final_quiescent_business_checkpoint' and (result.source_pid or result.source_birth_ticks):
++        raise ValueError('Fresh/maintenance counter domains cannot impersonate a predecessor')
++    for name in ('admissions', 'overruns', 'completed', 'native_failures', 'not_submitted', 'disabled'):
++        items = values[name]
++        if not isinstance(items, list) or len(items) != 3:
++            raise ValueError('Exactly three native task counters required: ' + name)
++        for i, item in enumerate(items):
++            getattr(result, name)[i] = integer(item, name, maximum=1 if name == 'disabled' else 2**64-1)
++    states = values['recovery']
++    if not isinstance(states, list) or len(states) != 2:
++        raise ValueError('Independent YuNet/SFace recovery states required')
++    for i, state in enumerate(states):
++        target = result.recovery[i]
++        for name, field in recovery_type._fields_:
++            if name == 'reserved':continue
++            if name == 'attempt_times_ns':
++                times = state[name]
++                if not isinstance(times, list) or len(times) != 2:
++                    raise ValueError('Fixed two-entry recovery history required')
++                for j, value in enumerate(times):target.attempt_times_ns[j] = integer(value, name)
++            else:
++                maximum = 2**32-1 if field is C.c_uint32 else 2**64-1
++                setattr(target, name, integer(state[name], name, maximum=maximum))
++        if (target.enabled not in (0,1) or not 0 <= target.phase <= 3 or not 0 <= target.reason <= 5 or
++                target.attempt_count > 2 or target.history_opaque not in (0,1)):
++            raise ValueError('Invalid native recovery enum or history count')
++        if target.history_opaque and (target.phase != 3 or not result.disabled[i+1]):
++            raise ValueError('Opaque legacy history must remain disabled and LATCHED')
++    if purpose != 'final_quiescent_business_checkpoint':
++        if (result.primary_calls or result.primary_period_overruns or result.last_primary_ns or
++                any(values[name][i] for name in ('admissions','overruns','completed','native_failures',
++                    'not_submitted','disabled') for i in range(3)) or
++                any(s['phase'] or s['faults'] or s['attempts'] or s['recoveries'] or
++                    s['attempt_count'] or s['history_opaque'] for s in states)):
++            raise ValueError('Fresh/maintenance seed cannot discard or replay prior faults')
++    return result
++
++
++def _read_pinned(pin):
++    if not isinstance(pin, dict) or set(pin) != {'path', 'sha256'}:
++        raise ValueError('Hash-pinned native checkpoint required')
++    path = Path(pin['path'])
++    if not path.is_absolute() or path.is_symlink() or path.resolve() != path:
++        raise ValueError('Native checkpoint path redirects')
++    raw = path.read_bytes()
++    if len(raw) > 262144 or hashlib.sha256(raw).hexdigest() != digest(pin['sha256'], 'checkpoint SHA'):
++        raise ValueError('Native checkpoint hash mismatch')
++    return path, json.loads(raw)
++
++
++def load_business_checkpoint(pin, *, boot_id, now_ns=None):
++    """Read/validate only. Source-owner shutdown is separately verified below."""
++    path, document = _read_pinned(pin)
++    if document.get('schema') != 'aura-native-protection-checkpoint-2':
++        raise ValueError('Legacy health-only seed lacks exact native recovery/checkpoint history')
++    if document.get('scope') != 'final_quiescent_before_native_owner_close':
++        raise ValueError('Final quiescent checkpoint scope required')
++    seed, auxiliary = document['seed'], document['auxiliary']
++    if (seed.get('purpose') != 'final_quiescent_business_checkpoint' or
++            seed.get('checkpoint_kind') != 1 or seed['boot_id'] != _boot(boot_id)):
++        raise ValueError('Business checkpoint boot or counter domain differs')
++    now = time.monotonic_ns() if now_ns is None else now_ns
++    if not 0 < integer(seed['captured_mono_ns'], 'captured_mono_ns') <= now:
++        raise ValueError('Checkpoint capture lies outside current monotonic domain')
++    if any(integer(v, 'pending_result_tokens') for v in auxiliary['pending_result_tokens']):
++        raise ValueError('Pending Python result confirmation must finish before checkpoint')
++    if auxiliary['active'] or auxiliary['primary_waiting'] or auxiliary['fenced']:
++        raise ValueError('Native checkpoint owner was not safely idle')
++    digest(document['source_unit_sha256'], 'source_unit_sha256')
++    counters = auxiliary['sface_counters']
++    if set(counters) != set(FEATURE_COUNTERS):raise ValueError('Complete SFace counters required')
++    for name, value in counters.items():integer(value, 'sface.'+name)
++    if not counters['features_returned'] <= counters['completed'] <= counters['execution_attempts'] <= counters['requests']:
++        raise ValueError('Inconsistent SFace checkpoint counters')
++    # Static validation must finish before checked_backend creates the original
++    # YOLO owner or runs its startup references. The C layer rechecks its own
++    # stricter policy/clock constraints later, before any gate can execute.
++    from board.vision.native_binding import Seed, Recovery
++    make_native_seed(seed, Seed, Recovery)
++    source = Path('/proc') / str(integer(seed['source_pid'], 'source_pid')) / 'stat'
++    if source.exists():
++        birth = int(source.read_text().rsplit(')',1)[1].split()[19])
++        if birth == seed['source_birth_ticks']:
++            raise ValueError('Predecessor still alive; second native owner forbidden')
++    marker = path.with_name(path.name+'.native-consumed-'+pin['sha256'])
++    if marker.exists():raise ValueError('Native checkpoint was already consumed; refusing history reset')
++    return dict(seed=seed, auxiliary=auxiliary, document=document, marker=str(marker), sha256=pin['sha256'])
++
++
++def consume_checkpoint(loaded):
++    """Call after confirmed native restore, before any adoption or worker."""
++    marker = Path(loaded['marker'])
++    fd = os.open(str(marker), os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_CLOEXEC|os.O_NOFOLLOW, 0o600)
++    try:
++        raw = (loaded['sha256']+'\n').encode()
++        if os.write(fd, raw) != len(raw):raise OSError('Incomplete native checkpoint consumption marker')
++        os.fsync(fd)
++    finally:os.close(fd)
++
++
++def checkpoint_document(state, *, native_seed, source_unit_sha256, sface_counters,
++                        inherited_optional=None):
++    """Serialize only a confirmed idle native owner after business workers stop."""
++    if (state['active'] or state['primary_waiting'] or state['fenced'] or
++            any(state['pending_result_tokens']) or not state['seed_loaded'] or not state['quiesced']):
++        raise ValueError('Cannot checkpoint a busy, pending or fenced owner')
++    seed = dict(native_seed)
++    if seed.get('purpose') != 'final_quiescent_business_checkpoint' or seed.get('abi_version') != 2:
++        raise ValueError('Atomic native checkpoint is required')
++    if seed['source_pid'] != os.getpid():raise ValueError('Native checkpoint belongs to another process')
++    return {'schema':'aura-native-protection-checkpoint-2',
++        'scope':'final_quiescent_before_native_owner_close', 'seed':seed,
++        'source_unit_sha256':digest(source_unit_sha256,'source_unit_sha256'),
++        'auxiliary':{'active':0,'primary_waiting':0,'fenced':0,'pending_result_tokens':[0]*3,
++            'sface_counters':{name:integer(sface_counters[name],name) for name in FEATURE_COUNTERS},
++            'inherited_optional':inherited_optional or {}}}
++
++
++def write_checkpoint(path, document):
++    path = Path(path)
++    if not path.is_absolute() or path.is_symlink() or path.resolve() != path:
++        raise ValueError('Explicit nonredirecting checkpoint output required')
++    raw = (json.dumps(document,sort_keys=True,separators=(',',':'))+'\n').encode()
++    if len(raw)>262144:raise ValueError('Native checkpoint exceeds bound')
++    temporary = path.with_name(path.name+'.partial-'+str(os.getpid()))
++    fd = os.open(str(temporary),os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_CLOEXEC|os.O_NOFOLLOW,0o600)
++    try:
++        if os.write(fd,raw)!=len(raw):raise OSError('Incomplete native checkpoint write')
++        os.fsync(fd)
++    finally:os.close(fd)
++    os.replace(str(temporary),str(path))
++    return {'path':str(path),'sha256':hashlib.sha256(raw).hexdigest()}
+--- baseline/aura/board/vision/native_runtime.py
++++ candidate/aura/board/vision/native_runtime.py
+@@ -0,0 +1,73 @@
++"""Native execution with unchanged encoded INT8/dequantized model interfaces."""
++import time
++import numpy as np
++
++from board.vision.native_binding import NativeRunner, CompletionUnknown
++from board.vision.dpu_vision_runtime import NativeExecutionError, encode, AdmissionCancelled
++
++
++class TensorPort:
++    def __init__(self, meta):
++        self.name, self.dims, self.dtype = meta['name'], list(meta['dims']), meta['dtype']
++        self.fix_point = meta['fix_point']
++    def has_attr(self, name):return name == 'fix_point'
++    def get_attr(self, name):
++        if name != 'fix_point':raise ValueError('Unsupported tensor attribute')
++        return self.fix_point
++
++
++class NativePinnedRunner:
++    native_critical = True
++
++    def __init__(self, model_path, manifest_path, owner, *, task, model_sha256, manifest_sha256):
++        self.owner = owner
++        self.schedule = owner.native_schedule
++        self.runner = NativeRunner(owner.native_context, task, model_path, model_sha256,
++                                   manifest_path, manifest_sha256)
++        self.inputs = [TensorPort(meta) for meta in self.runner.inputs]
++        self.outputs = [TensorPort(meta) for meta in self.runner.outputs]
++        self.input_fix = self.inputs[0].fix_point
++        self.stage_kind = task
++        self.metrics = owner.pipeline_metrics
++        self.last_ms = None
++        self.last_execution = self.last_report = None
++
++    def execute_encoded(self, source, *, source_expires_ns, pre_execute=None):
++        self.last_execution = self.last_report = None
++        if (not isinstance(source,np.ndarray) or source.dtype != np.int8 or
++                not source.flags.c_contiguous or list(source.shape) != self.inputs[0].dims):
++            raise ValueError('DPU input shape mismatch')
++        if pre_execute is not None:
++            try:pre_execute()
++            except AdmissionCancelled as exc:
++                exc.native_not_submitted=True
++                raise
++        try:
++            execution = self.runner.execute_encoded(source, source_expires_ns=source_expires_ns)
++            self.last_execution, self.last_report = execution, execution.report
++            execution = self.owner.native_context.confirm_result(execution)
++            self.last_execution, self.last_report = execution, execution.report
++        except CompletionUnknown as exc:
++            self.last_report = getattr(exc,'native_report',None) or self.last_report
++            error = NativeExecutionError('Native C++ completion was not confirmed')
++            error.native_report = self.last_report
++            raise error from exc
++        report = execution.report
++        self.schedule.note_result(self.stage_kind, report)
++        if report['start_ns']:
++            self.last_ms = (report['release_decision_ns']-report['start_ns'])/1e6
++            self.metrics.value(self.stage_kind+'.native_lease',self.last_ms)
++            self.metrics.value(self.stage_kind+'.python_return_after_release',
++                max(0.,execution.returned_mono_ns-report['after_unlock_ns'])/1e6)
++        if not execution.usable:return None
++        if len(execution.outputs) != len(self.outputs):raise RuntimeError('Native port count changed')
++        began = time.monotonic_ns()
++        values = {port.name:np.frombuffer(raw,dtype=np.int8).reshape(port.dims).astype(np.float32)
++                  * (2.**-port.fix_point) for port,raw in zip(self.outputs,execution.outputs)}
++        self.metrics.elapsed(self.stage_kind+'.dequantize',began)
++        return values
++
++    def close(self):
++        if self.runner is not None:
++            self.runner.close()
++            self.runner = None
+--- baseline/aura/board/vision/native_schedule.py
++++ candidate/aura/board/vision/native_schedule.py
+@@ -0,0 +1,163 @@
++"""Business/health facade; native code alone owns the shared DPU lease.
++
++No Python lock spans an inference call. Notification waits are performed by the
++native condition variable and release the GIL without acquiring a DPU lease.
++"""
++from contextlib import contextmanager
++import copy
++import math
++import threading
++import time
++
++from board.vision.native_protection import PHASES, REASONS
++
++
++class NativeDpuSchedule:
++    native_critical = True
++
++    def __init__(self, context, *, yunet_slot_wait_ms=0, sface_slot_wait_ms=0,
++                 inherited_optional=None, inherited_sface_counters=None, diagnostics=None):
++        self.context = context
++        self._local = threading.local()
++        self._metrics_lock = threading.Lock()
++        self._last_reports = {}
++        self._inherited = copy.deepcopy(inherited_optional or {})
++        self.inherited_sface_counters = dict(inherited_sface_counters or {})
++        self.diagnostics = diagnostics
++        self.protection_handoff = {}
++        self._wait = {}
++        for task, limit in (('yunet', yunet_slot_wait_ms), ('sface', sface_slot_wait_ms)):
++            if type(limit) is not int or not 0 <= limit <= 100:
++                raise ValueError('Native optional notification wait must be in 0..100ms')
++            setattr(self, task+'_slot_wait_ms', limit)
++            self._wait[task] = dict(enabled=bool(limit), maximum_wait_ms=limit,
++                calls=0, ready=0, timeouts=0, total_wall_ms=0., maximum_wall_ms=0.)
++
++    @staticmethod
++    def _task(kind):
++        if kind not in ('yunet', 'sface'):raise ValueError('Unknown optional task')
++        return 1 if kind == 'yunet' else 2
++
++    @contextmanager
++    def primary(self, next_deadline):
++        if type(next_deadline) not in (int,float) or not math.isfinite(next_deadline) or next_deadline <= 0:
++            raise ValueError('Finite original primary deadline required')
++        if getattr(self._local, 'primary_deadline_ns', None) is not None:
++            raise RuntimeError('Nested primary business scope')
++        deadline = int(next_deadline * 1e9)
++        self.context.announce_primary(deadline)
++        self._local.primary_deadline_ns = deadline
++        try:
++            # Only a thread-local deadline is retained here. The native YOLO
++            # call acquires/releases the actual gate, before regaining the GIL.
++            yield
++        finally:
++            self._local.primary_deadline_ns = None
++
++    def primary_deadline_ns(self):
++        value = getattr(self._local, 'primary_deadline_ns', None)
++        if value is None:raise RuntimeError('YOLO business inference requires the original primary scope')
++        return value
++
++    def optional(self, kind):
++        raise RuntimeError('Legacy Python optional execution lease is forbidden for native execution')
++
++    def native_starting(self, kind):
++        raise RuntimeError('Native recovery is owned by the compiled execution path')
++
++    def native_completed(self, kind, *, usable=True):
++        raise RuntimeError('Native completion is confirmed through the result-token protocol')
++
++    def _snapshot(self):
++        return self.context.snapshot()
++
++    def disabled(self, kind):
++        task = self._task(kind)
++        state = self._snapshot()
++        return bool(state['fenced'] or state['quiesced'] or self.context.quarantined or state['disabled'][task])
++
++    @staticmethod
++    def _policy(state, index):
++        raw = state['recovery'][index]
++        return dict(enabled=bool(raw['enabled']), phase=PHASES[raw['phase']], reason=REASONS[raw['reason']],
++            cooldown_s=10., window_s=600., maximum_attempts=2, required_successes=3,
++            probe_successes=raw['probe_successes'], faults=raw['faults'], attempts=raw['attempts'],
++            recoveries=raw['recoveries'], cooldown_until_monotonic_s=raw['cooldown_until_ns']/1e9,
++            attempts_in_window=(raw['opaque_attempt_count'] if raw['history_opaque'] else raw['attempt_count']),
++            history_opaque=bool(raw['history_opaque']))
++
++    def optional_status(self, kind):
++        task = self._task(kind)
++        state = self._snapshot()
++        result = copy.deepcopy(self._inherited.get(kind, {}))
++        result.update(calls=state['admissions'][task], overruns=state['overruns'][task],
++            disabled=bool(state['disabled'][task] or state['fenced'] or self.context.quarantined),
++            native_completed=state['completed'][task], native_failures=state['native_failures'][task],
++            not_submitted=state['not_submitted'][task], estimated_budget_ms=30.,
++            recovery=self._policy(state, task-1), pending_result_token=state['pending_result_tokens'][task])
++        with self._metrics_lock:
++            report = copy.deepcopy(self._last_reports.get(kind))
++        if report is not None:result['last_native_report'] = report
++        return result
++
++    def recovery_ready(self, kind):
++        task = self._task(kind)
++        state = self._snapshot()
++        policy = state['recovery'][task-1]
++        if state['fenced'] or self.context.quarantined or policy['phase'] != 1 or policy['history_opaque']:
++            return False
++        # A native query performs the policy's due/primary checks. It may wait
++        # at most 1ms for an opportunity and owns no execution lease.
++        return self.context.wait_optional(task, time.monotonic_ns()+1_000_000)
++
++    def recovery_probe_allowed(self, kind):
++        task = self._task(kind)
++        state = self._snapshot()
++        if state['fenced'] or self.context.quarantined:return False
++        if state['recovery'][task-1]['phase'] == 2 and not state['disabled'][task]:return True
++        return self.recovery_ready(kind)
++
++    def wait_for_optional(self, kind, deadline):
++        task = self._task(kind)
++        if type(deadline) not in (int,float) or not math.isfinite(deadline):
++            raise ValueError('Finite notification deadline required')
++        limit = getattr(self, kind+'_slot_wait_ms')
++        if not limit:return False
++        began = time.monotonic_ns()
++        until = min(int(deadline*1e9), began+limit*1_000_000)
++        if until <= began:return False
++        ready = self.context.wait_optional(task, until)
++        elapsed = (time.monotonic_ns()-began)/1e6
++        with self._metrics_lock:
++            stats = self._wait[kind]
++            stats['calls'] += 1
++            stats['ready' if ready else 'timeouts'] += 1
++            stats['total_wall_ms'] += elapsed
++            stats['maximum_wall_ms'] = max(stats['maximum_wall_ms'], elapsed)
++        return ready
++
++    def note_result(self, kind, report):
++        self._task(kind)
++        # This runs after native release/confirmation. It has no authority over
++        # admission, native completion, recovery counters or protected state.
++        with self._metrics_lock:
++            self._last_reports[kind] = dict(report)
++
++    def health(self):
++        state = self._snapshot()
++        with self._metrics_lock:wait = copy.deepcopy(self._wait)
++        active = ('yolo','yunet','sface')[state['active_task']] if state['active'] and state['active_task']<3 else None
++        return dict(active=active, primary_calls=state['primary_calls'],
++            primary_period_overruns=state['primary_period_overruns'], waiting_primary=state['primary_waiting'],
++            budget_ms=20., guard_ms=5., admission_floor_ms=30.,
++            optional={kind:self.optional_status(kind) for kind in ('yunet','sface')},
++            yunet_recovery=self._policy(state,0), sface_recovery=self._policy(state,1),
++            owner_fenced=bool(state['fenced'] or self.context.quarantined),
++            owner_fault_reason=state['fence_reason'] or None, seed_loaded=bool(state['seed_loaded']),
++            quiesced=bool(state['quiesced']), checkpoint_kind=state['checkpoint_kind'],
++            diagnostic_failures=0, diagnostic_snapshot_atomic_with_schedule=False,
++            occupancy_scope='native start through retained release decision; after-unlock upper endpoint retained',
++            optional_diagnostics=dict(enabled=False, mode='NATIVE_C_ABI_REPORTS',
++                inherited_provenance_retained=bool(self._inherited)),
++            native_critical=True, native_abi=2, protection_handoff=copy.deepcopy(self.protection_handoff),
++            yunet_slot_wait=wait['yunet'], sface_slot_wait=wait['sface'])
+--- baseline/aura/board/vision/native_startup.py
++++ candidate/aura/board/vision/native_startup.py
+@@ -0,0 +1,124 @@
++"""Explicit camera startup/shutdown wiring for the native candidate."""
++import hashlib
++import json
++from pathlib import Path
++
++from board.vision.native_binding import NativeContext
++from board.vision.native_protection import (consume_checkpoint, digest, load_business_checkpoint,
++    checkpoint_document, write_checkpoint, FEATURE_COUNTERS)
++from board.vision.native_schedule import NativeDpuSchedule
++from board.vision.native_yolo import NativeYoloOwner
++
++
++def configuration(config):
++    value = config.get('native_execution')
++    if value is None:return None
++    keys = {'library','library_sha256','seed','source_manifest','source_manifest_sha256',
++            'source_unit_sha256','checkpoint_output'}
++    if not isinstance(value,dict) or set(value) != keys:
++        raise ValueError('Explicit complete native execution configuration required')
++    for name in ('library_sha256','source_manifest_sha256','source_unit_sha256'):
++        digest(value[name],name)
++    for name in ('library','source_manifest','checkpoint_output'):
++        path = Path(value[name])
++        if not path.is_absolute() or path.is_symlink() or path.resolve() != path:
++            raise ValueError('Explicit nonredirecting native path required: '+name)
++    if config.get('detector_backend') != 'dpu_yolox':
++        raise ValueError('Native execution requires the original YOLO DPU owner')
++    if config.get('optional_admission_floor_ms') != 30:
++        raise ValueError('Native execution preserves the conservative 30ms admission floor')
++    if not config.get('yunet_dpu_recovery') or not config.get('sface_dpu_recovery'):
++        raise ValueError('Independent native recovery policies are mandatory')
++    for task in ('yunet','sface'):
++        limit = config.get(task+'_slot_wait_ms',0)
++        if type(limit) is not int or not 0<=limit<=100:
++            raise ValueError('Native notification waits remain in 0..100ms')
++    return value
++
++
++def verify_runtime_manifest(native, root):
++    path = Path(native['source_manifest'])
++    raw = path.read_bytes()
++    if hashlib.sha256(raw).hexdigest() != native['source_manifest_sha256']:
++        raise ValueError('Native runtime manifest SHA mismatch')
++    value = json.loads(raw)
++    if value.get('schema') != 'aura-native-python-source-2' or not isinstance(value.get('files'),dict):
++        raise ValueError('Native runtime source manifest schema differs')
++    root = Path(root).resolve()
++    actual = {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest()
++              for p in root.rglob('*.py') if not p.is_symlink()}
++    if actual != value['files']:
++        raise ValueError('Native camera source closure differs from the pinned manifest')
++
++
++def preflight(config, *, boot_id, root):
++    native = configuration(config)
++    if native is None:return None
++    verify_runtime_manifest(native,root)
++    loaded = load_business_checkpoint(native['seed'],boot_id=boot_id)
++    if loaded['document']['source_unit_sha256'] != native['source_unit_sha256']:
++        raise ValueError('Predecessor unit provenance differs')
++    return loaded
++
++
++def attach(config, state, original, loaded):
++    """Run after original fixed-input YOLO checks, before any business worker."""
++    native = configuration(config)
++    if native is None:raise ValueError('Native attachment not configured')
++    if loaded is None:raise ValueError('Validated exact native checkpoint required before attachment')
++    context = NativeContext(original,native['library'],native['library_sha256'])
++    try:
++        context.restore_seed(loaded['seed'])
++        consume_checkpoint(loaded)
++        context.adopt_yolo()
++        aux = loaded['auxiliary']
++        schedule = NativeDpuSchedule(context,
++            yunet_slot_wait_ms=config.get('yunet_slot_wait_ms',0),
++            sface_slot_wait_ms=config.get('sface_slot_wait_ms',0),
++            inherited_optional=aux.get('inherited_optional'),
++            inherited_sface_counters=aux['sface_counters'],
++            diagnostics=state.pipeline_metrics.optional_diagnostics)
++        schedule.protection_handoff = dict(mode='native_exact_same_boot',
++            seed_sha256=loaded['sha256'],source_pid=loaded['seed']['source_pid'],
++            source_birth_ticks=loaded['seed']['source_birth_ticks'],
++            counter_scope='exact sealed native predecessor counters plus current execution',
++            first_use=True)
++        owner = NativeYoloOwner(original,context,schedule)
++        owner.pipeline_metrics = state.pipeline_metrics
++        return owner,schedule
++    except BaseException as original_error:
++        if context.quarantined:
++            # The native call or its Python bookkeeping may have completed;
++            # retaining the original owner is part of that uncertain outcome.
++            context._retain(original, original_error, 'native startup failed after uncertain operation')
++        else:
++            try:
++                context.close()
++            except BaseException as close_error:
++                # Cleanup refusal/unknown outcome must not replace the actual
++                # startup failure or lose its sole owner/lifecycle references.
++                context._retain(original, original_error, close_error,
++                    'native startup cleanup was not confirmed')
++        raise
++
++
++def shutdown(config, state, owner):
++    """Call only after camera/identity workers joined and their runners closed."""
++    native = configuration(config)
++    if native is None:return None
++    counters = getattr(state.dpu_schedule,'inherited_sface_counters',{})
++    if state.identity is not None:
++        health = state.identity.health()
++        current = health.get('feature_inference') or {}
++        if all(name in current for name in FEATURE_COUNTERS):counters=current
++    if not all(name in counters for name in FEATURE_COUNTERS):
++        raise RuntimeError('Final SFace counters unavailable; refusing a partial native checkpoint')
++    seed = owner.native_context.checkpoint(native['source_manifest_sha256'])
++    snapshot = owner.native_context.snapshot()
++    document = checkpoint_document(snapshot,native_seed=seed,
++        source_unit_sha256=native['source_unit_sha256'],sface_counters=counters,
++        inherited_optional={task:state.dpu_schedule.optional_status(task) for task in ('yunet','sface')})
++    try:
++        return write_checkpoint(native['checkpoint_output'],document)
++    finally:
++        owner.close()
+--- baseline/aura/board/vision/native_yolo.py
++++ candidate/aura/board/vision/native_yolo.py
+@@ -0,0 +1,52 @@
++"""YOLO business owner after controlled adoption by the common native gate."""
++import time
++import numpy as np
++
++from board.vision.yolo_dpu import original_person_boxes
++from board.vision.native_errors import PrimaryAdmissionDeferred
++
++
++PrimaryFrameDeferred = PrimaryAdmissionDeferred
++
++
++class NativeYoloOwner:
++    backend_kind = 'DPU'
++    kind = 'DPU_YOLOX_NANO_PERSON'
++    native_critical = True
++
++    def __init__(self, original, context, schedule):
++        if not context.adopted or original.handle is not None:
++            raise ValueError('YOLO must be exclusively adopted before business use')
++        self.original, self.native_context, self.native_schedule = original, context, schedule
++        self.config, self.fingerprint = dict(original.config), original.fingerprint
++        self.reference_check = getattr(original,'reference_check',None)
++        self.startup_native_checks = dict(scope='reference/blank before context and workers; not recovery primary progression',
++                                         result=self.reference_check)
++        self.pipeline_metrics = getattr(original,'pipeline_metrics',None)
++        self._closed = False
++
++    @property
++    def ownership(self):return self.original.ownership
++
++    def detect_bgr(self, image, *, source_mono_ms):
++        if self._closed:raise RuntimeError('Native YOLO is closed')
++        if (not isinstance(image,np.ndarray) or image.dtype != np.uint8 or
++                image.ndim != 3 or image.shape[2] != 3):
++            raise ValueError('YOLO expects uint8 BGR image data')
++        if type(source_mono_ms) is not int or source_mono_ms < 0:
++            raise ValueError('Original captured monotonic millisecond stamp required')
++        image = np.ascontiguousarray(image)
++        height,width = image.shape[:2]
++        execution = self.native_context.execute_yolo(image,width=width,height=height,
++            stride=image.strides[0], source_expires_ns=(source_mono_ms+750)*1_000_000,
++            primary_finish_ns=self.native_schedule.primary_deadline_ns())
++        if not execution.usable:raise PrimaryFrameDeferred('YOLO source or original primary deadline expired')
++        return original_person_boxes(execution.outputs,width,height,self.config['score_threshold'],
++                                     self.config.get('person_nms_iou',.45))
++
++    def verify_runtime(self):return self.fingerprint
++
++    def close(self):
++        if not self._closed:
++            self.native_context.close()
++            self._closed = True
+--- baseline/aura/board/vision/ui_camera_service.py
++++ candidate/aura/board/vision/ui_camera_service.py
+@@ -5,6 +5,7 @@
+ The detector and association are loaded from A's explicitly pinned sources.
+ """
+ import argparse
++from board.vision.native_errors import PrimaryAdmissionDeferred
+ from collections import OrderedDict
+ import copy
+ import fcntl
+@@ -384,10 +385,17 @@
+     import gi
+     gi.require_version('Gst','1.0')
+     from gi.repository import Gst
++    native_loaded=None
++    if config.get('native_execution') is not None:
++        from board.vision.native_startup import preflight
++        native_loaded=preflight(config,boot_id=Path('/proc/sys/kernel/random/boot_id').read_text().strip(),root=AURA)
+     cv2,np,detector,Tracks=checked_backend(config)
+     Gst.init(None)
+     state=CameraState(Path('/proc/sys/kernel/random/boot_id').read_text().strip(),detector_info=detector_info(config),device=device)
+-    if config.get('detector_backend') == 'dpu_yolox':
++    if config.get('native_execution') is not None:
++        from board.vision.native_startup import attach
++        detector,state.dpu_schedule=attach(config,state,detector,native_loaded)
++    elif config.get('detector_backend') == 'dpu_yolox':
+         from board.vision.dpu_vision_schedule import DpuVisionSchedule
+         state.dpu_schedule = DpuVisionSchedule(diagnostics=state.pipeline_metrics.optional_diagnostics,
+             yunet_recovery=config.get('yunet_dpu_recovery', False),
+@@ -455,7 +463,9 @@
+                             with state.dpu_schedule.primary(started + 1/config['inference_fps']):
+                                 state.pipeline_metrics.elapsed('yolo.schedule_wait',schedule_started)
+                                 native_started=time.monotonic_ns()
+-                                detections=detector.detect_bgr(image)
++                                if getattr(detector,'native_critical',False):
++                                    detections=detector.detect_bgr(image,source_mono_ms=stamp)
++                                else:detections=detector.detect_bgr(image)
+                                 state.pipeline_metrics.elapsed('yolo.native_and_decode',native_started)
+                         else:
+                             detections=detector.detect_bgr(image) if hasattr(detector,'detect_bgr') else detector.detect(image)
+@@ -481,9 +491,16 @@
+                         state.pipeline_metrics.value('yolo.publish_source_age',max(0,millis()-stamp))
+                         if state.identity and not state.identity.face_targets:
+                             state.identity.offer(image, fid, stamp, observation, state.camera_epoch)
++                except PrimaryAdmissionDeferred:
++                    state.pipeline_metrics.value('yolo.native_source_or_deadline_deferred',1)
+                 except Exception as exc:
+                     with state.lock:state.detector_error=str(exc)[:150]
+-                    if detector and hasattr(detector,'close'):detector.close()
++                    if detector and hasattr(detector,'close'):
++                        try:detector.close()
++                        except Exception:
++                            # Unknown completion retains the native owner;
++                            # the context registry forbids replacement jobs.
++                            state._retained_native_owner=detector
+                     detector=None
+                 # Detection has its own budget; live preview never waits for it.
+                 stop.wait(max(0,1/config['inference_fps']-(time.monotonic()-started)))
+@@ -549,9 +566,15 @@
+             state.pipeline_metrics.close()
+             with condition:condition.notify_all()
+             if capture:capture.set_state(Gst.State.NULL)
+-            if worker:worker.join(timeout=2)
++            if worker:
++                worker.join(timeout=2)
++                if config.get('native_execution') is not None and worker.is_alive():
++                    raise RuntimeError('Native YOLO worker did not stop; checkpoint refused')
+             if preview_worker:preview_worker.join(timeout=2)
+             if state.identity:state.identity.close()
++            if config.get('native_execution') is not None and detector is not None:
++                from board.vision.native_startup import shutdown
++                state.native_checkpoint=shutdown(config,state,detector)
+             if raw:raw.close()
+             if server:server.shutdown();server.server_close()
+             if thread:thread.join(timeout=2)

@@ -1,0 +1,37 @@
+{
+  "stage": "automatic-listening-v15-idle-cpu",
+  "before_startup_sha256": "39b102a4a505db491cf06b90e3a5232bfb656c79cb0a3c221551d76d414a9a0a",
+  "before_manifest_sha256": "a2545970650f60b95cdc6e4f0a31c234f37adb5f0662c9f04ded791352f53353",
+  "sources": {
+    "tools/board_avatar_gtk.py": {
+      "source": "deliverables/2026-10-30_board_owner/integration/dialogue_repair/presentation_idle_candidate/after/tools/board_avatar_gtk.py",
+      "sha256": "7d95b5f682f7abf4a69509d5843c3345dcc31f8dbefeb0e9f3af27b19aa3542d",
+      "before_sha256": "4c3e692acf23f78c9ce9c66f75f6f95f14c08b34ec371ff09842ffbdd911951a"
+    },
+    "tools/gstreamer_audio_worker.py": {
+      "source": "deliverables/2026-10-30_board_owner/integration/dialogue_repair/playback_idle_candidate/after/tools/gstreamer_audio_worker.py",
+      "sha256": "a454792d11e2e308dfebfa3e963ac73fa13a887485b7804d52a8a2bd162fd466",
+      "before_sha256": "63fd37185b6aa6909134945a440be2c33781ed95d2e81dfd95905afe4e17dce7"
+    }
+  },
+  "business_options": {
+    "frontend_process": true,
+    "frontend_capture_process": true,
+    "frontend_optimization": "combined",
+    "frontend_threads": 1,
+    "capture_priority_nice": -10,
+    "asr_threads": 3,
+    "dialogue_output_format": "dialogue_abc_v1"
+  },
+  "gui_options": {
+    "voice_barge_in": false
+  },
+  "wake_word_required": false,
+  "conversation_mode": "half_duplex",
+  "source_only": true,
+  "private_data_replayed": false,
+  "models_or_thresholds_changed": false,
+  "queue_frames": 8,
+  "target_fps": 16,
+  "reason": "Avoid duplicate idle audio state IPC and conflicting subtitle writers."
+}

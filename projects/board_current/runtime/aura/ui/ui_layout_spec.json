@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.1",
+  "title": "UiLayoutSpec",
+  "description": "UI 像素级布局合同 —— 板端 1024×600「上左右 + 下通栏」三区（上左=交互信息 585×556 / 上右=玩偶动画 439×556 / 下栏=系统信息 1024×44）。PySide6 原型与板端 LVGL 版必须按同一数值实现。PC 1280×720 档已废弃（用户决定，2026-09-11）。",
+  "canvas": { "width": 1024, "height": 600 },
+  "split": {
+    "left_ratio": 0.571,
+    "right_ratio": 0.429,
+    "left_width": 585,
+    "right_width": 439
+  },
+  "top_area": { "y0": 0, "y1": 556, "height": 556 },
+  "left_panel": {
+    "x0": 0, "x1": 585,
+    "y0": 0, "y1": 556,
+    "padding": 8
+  },
+  "right_panel": {
+    "x0": 585, "x1": 1024,
+    "y0": 0, "y1": 556,
+    "padding": 8
+  },
+  "bottom_bar": { "x0": 0, "x1": 1024, "y0": 556, "y1": 600, "height": 44 },
+  "left_inner": {
+    "top_offset": 12,
+    "video": { "height": 300 },
+    "info_line": { "height": 20 },
+    "separator_gap": 8,
+    "dialogue": { "height": 80, "asr_h": 20, "reply_lines": 3, "line_h": 20 },
+    "latency_line": { "height": 12 },
+    "events": { "height": 56, "lines": 4, "line_h": 14 }
+  },
+  "right_inner": {
+    "label_h": 24,
+    "avatar_box": { "width": 423, "height": 516 },
+    "fade_h": 28,
+    "overlay_slot": {
+      "enabled": true,
+      "align": "top",
+      "reserved_height": 80,
+      "content": "empty"
+    }
+  },
+  "framing": {
+    "fit": "contain",
+    "align": "bottom",
+    "crop_bottom_ratio": 0.42,
+    "safe_margin": 0
+  },
+  "status_items": ["camera", "npu", "pl", "audio", "lan", "save", "privacy", "mode", "fps"]
+}

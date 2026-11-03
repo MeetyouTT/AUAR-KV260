@@ -1,0 +1,94 @@
+{
+  "python": "3.8.10",
+  "platform": "Linux",
+  "scope": "normalized public trace unit tests and source identity",
+  "rtl_sha256": "0fc6e305a51f22a31a50dfc88a9c2d2c80a303c79f9ef9d2b146bdb3ad12e180",
+  "rtl_matches_profile": true,
+  "examples": [
+    {
+      "input": "trace_pass",
+      "expected": "PASS",
+      "actual": {
+        "status": "PASS",
+        "scope": "normalized_saved_trace_only",
+        "evidence_kind": "synthetic_public_example",
+        "events": 8,
+        "accepted_commits": 2,
+        "rejected_commits": 2,
+        "errors": [],
+        "unknown": [],
+        "device_accessed": false,
+        "rtl_simulated": false,
+        "physical_waveform_verified": false,
+        "absolute_source_deadline_verified": false
+      },
+      "returncode": 0,
+      "matched": true
+    },
+    {
+      "input": "trace_fail",
+      "expected": "FAIL",
+      "actual": {
+        "status": "FAIL",
+        "scope": "normalized_saved_trace_only",
+        "evidence_kind": "synthetic_public_example",
+        "events": 8,
+        "accepted_commits": 3,
+        "rejected_commits": 1,
+        "errors": [
+          "event[2] accepted replay or out-of-order sequence",
+          "event[6] output still active"
+        ],
+        "unknown": [],
+        "device_accessed": false,
+        "rtl_simulated": false,
+        "physical_waveform_verified": false,
+        "absolute_source_deadline_verified": false
+      },
+      "returncode": 1,
+      "matched": true
+    },
+    {
+      "input": "trace_unknown",
+      "expected": "UNKNOWN",
+      "actual": {
+        "status": "UNKNOWN",
+        "scope": "normalized_saved_trace_only",
+        "errors": [],
+        "unknown": [
+          "missing events"
+        ],
+        "device_accessed": false
+      },
+      "returncode": 2,
+      "matched": true
+    }
+  ],
+  "unit_returncode": 0,
+  "unit_output": [
+    "test_accepted_lease_out_of_contract (test_trace.GuardTraceTests) ... ok",
+    "test_accepted_out_of_range (test_trace.GuardTraceTests) ... ok",
+    "test_accepted_sequence_gap (test_trace.GuardTraceTests) ... ok",
+    "test_boolean_is_not_a_zero_register_readback (test_trace.GuardTraceTests) ... ok",
+    "test_boot_context_must_match (test_trace.GuardTraceTests) ... ok",
+    "test_cli_rejects_bad_saved_trace (test_trace.GuardTraceTests) ... ok",
+    "test_clock_regression (test_trace.GuardTraceTests) ... ok",
+    "test_expiry_does_not_assume_all_flags_zero (test_trace.GuardTraceTests) ... ok",
+    "test_lease_overrun (test_trace.GuardTraceTests) ... ok",
+    "test_lease_register_requires_integer (test_trace.GuardTraceTests) ... ok",
+    "test_missing_activity_is_unknown (test_trace.GuardTraceTests) ... ok",
+    "test_missing_stop_is_unknown (test_trace.GuardTraceTests) ... ok",
+    "test_new_epoch_sequence_is_independent (test_trace.GuardTraceTests) ... ok",
+    "test_public_positive_and_negative_decisions (test_trace.GuardTraceTests) ... ok",
+    "test_reject_everything_is_not_full_validation (test_trace.GuardTraceTests) ... ok",
+    "test_replay_must_not_be_accepted (test_trace.GuardTraceTests) ... ok",
+    "test_stop_must_clear_arm (test_trace.GuardTraceTests) ... ok",
+    "test_wrong_document_type (test_trace.GuardTraceTests) ... ok",
+    "",
+    "----------------------------------------------------------------------",
+    "Ran 18 tests in 0.022s",
+    "",
+    "OK"
+  ],
+  "passed": true
+}

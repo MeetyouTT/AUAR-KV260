@@ -1,0 +1,279 @@
+--- before/board/runtime/audio/board_dialogue_jobs.py
++++ after/board/runtime/audio/board_dialogue_jobs.py
+@@ -462,6 +462,7 @@
+             enrollment_requested, identity_query_requested, cancelled, confirmed, update_confirmed,
+         )
+         from common.binding_intent import binding_intent
++        from common.feature_intents import speaker_requested,speaker_query_requested
+         from common.thinking_policy import route
+         from common.timeline import recall_requested, query
+         from common.profile_memory import scoped_command
+@@ -472,21 +473,25 @@
+         visual_requested_by_policy = bool(self.visual_intent_matcher is not None and
+                                           self.visual_intent_matcher(intent_text))
+         binding = binding_intent(intent_text)
++        speaker_requested_by_policy = speaker_requested(intent_text)
+         command_text = re.sub(r'^\s*' + re.escape(CHARACTER_NAME) + r'[\s，,：:]*', '', intent_text, count=1)
+         command, _ = scoped_command(command_text, job.scope.get('kind') == 'profile')
+-        if command is not None and binding['kind'] not in ('remember_self', 'name_hint', 'invalid_name'):
++        if (command is not None and not speaker_requested_by_policy
++                and binding['kind'] not in ('remember_self', 'name_hint', 'invalid_name')):
+             if self.controller.command_handler is None:
+                 raise BoardCapabilityNotReady('explicit_memory_commands')
+             return None, None
+         recalled = recall_requested(text)
+         capability = None
+-        if (self._enrollment_state().get('active') or enrollment_requested(text)
++        if speaker_query_requested(intent_text):
++            capability = 'speaker_identity'
++        elif (self._enrollment_state().get('active') or enrollment_requested(text)
+                 or cancelled(text) or confirmed(text) or update_confirmed(text)
+                 or binding['kind'] in ('remember_self', 'name_hint', 'invalid_name')):
+             capability = 'identity_enrollment'
+         elif identity_query_requested(text):
+             capability = 'identity_query'
+-        elif re.search(r'(?:登记|注册|标定|识别|绑定|关联).{0,8}(?:声纹|声音)|(?:声纹|声音).{0,8}(?:登记|注册|标定|绑定|关联)', text):
++        elif speaker_requested_by_policy:
+             capability = 'speaker_identity'
+         elif (re.search(r'(?:删除|清除|清理).{0,12}(?:昨天|前天|历史|时间轴|记录)', text)
+               or re.fullmatch(r'(?:确认|取消)(?:删除|清除)(?:记录|历史|时间轴)?[。！!？?]*', text)):
+--- before/board/runtime/board_business.py
++++ after/board/runtime/board_business.py
+@@ -231,6 +231,15 @@
+             try:
+                 if self.business is not None:
+                     options = dict(is_current=current, cancel_event=cancel_event, deadline=job.deadline)
++                    from common.feature_intents import speaker_query_requested
++                    if speaker_query_requested(text):
++                        # Skip the unified enrollment router: a status question
++                        # must not become one of its three captured samples.
++                        spoken=self.business.turn(job.meta,text,job.pcm,**options)
++                        if spoken is None:
++                            raise BoardCapabilityNotReady('speaker_status_result')
++                        emit(BoardReply(spoken,'friendly'),final_cue=True)
++                        return
+                     routed = (self.business.route(job.meta, text, job.pcm,
+                                 visual=self._visual(job), gallery_packet=self._gallery(job), **options)
+                               if self.business.config['enabled'] else None)
+--- before/board/runtime/visual_policy.py
++++ after/board/runtime/visual_policy.py
+@@ -21,6 +21,7 @@
+ _PAST = re.compile(r'刚才|刚刚|之前|先前|上次|上一次|昨天|前天|今早|今天|昨晚|上周|本周|这周|最近|过去|回忆|历史|还记得|时间轴|视觉记忆|画面记忆|一直|分钟前|小时前|秒前|去年|今年|上个月|这个月|上月|上星期|大前天|前几天|前些天|那天|当天|上午|下午|晚上|凌晨|近(?:\d+|[一二两三四五六七八九十]{1,3})(?:分钟|小时|天)|\d{4}年|\d{1,2}月|\d{4}[-年]\d{1,2}[-月]\d{1,2}')
+ _COUNT = re.compile(r'几(?:个)?人|多少(?:个)?人|人数|人体目标|有人吗|有没有人|是否有人|人多不多|无人|没人')
+ _UNSUPPORTED = re.compile(r'物品|杯子|手机|颜色|手里|拿的|这是什么|这个是什么|这东西|是谁|谁在|叫什么|认识|身份|人名|图片|图中|照片|相片|视频')
++_SPATIAL = re.compile(r'左边|右边|左侧|右侧|中间|前面|后面|方位|位置|哪边|哪里|哪儿')
+ 
+ 
+ def requested(text):
+@@ -37,12 +38,15 @@
+     standalone = re.fullmatch(r'(?:现在|刚才|刚刚|之前|先前|昨天|前天|这里).{0,4}'
+         r'(?:几(?:个)?人|多少(?:个)?人|人数|有人吗|有没有人|没人吗)[呢啊吗？?！!。]*',plain)
+     seen_question = re.search(r'(?:看到|看见).{0,6}(?:几(?:个)?人|多少(?:个)?人|人数|人体目标|什么|啥|谁|人吗|有没有人)',text)
++    presence_question = re.fullmatch(r'(?:你)?(?:现在)?(?:能|可以)?(?:看到|看见|检测到)我(?:了)?[吗呢啊？?！!。]*',plain)
++    spatial_count = re.fullmatch(r'(?:现在)?(?:我|镜头|画面|这里)?(?:的)?(?:左边|右边|左侧|右侧|中间|前面|后面).{0,3}(?:几个人|多少人|有没有人|有人吗)[呢吗？?！!。]*',plain)
+     return bool(legacy_visual_requested(text) or re.search(r'这个是什么|这件是什么',text) or
+-        strong and re.search(r'几|多少|人|什么|啥|谁|吗|记录|回忆',text) or seen_question or standalone)
++        strong and re.search(r'几|多少|人|什么|啥|谁|吗|记录|回忆',text) or seen_question or standalone
++        or presence_question or spatial_count)
+ 
+ 
+ def _kind(text):
+-    if _UNSUPPORTED.search(text):
++    if _UNSUPPORTED.search(text) or _SPATIAL.search(text):
+         return 'unsupported_visual'
+     if not _COUNT.search(text) and not re.search(r'看到了?什么|看见了?什么|画面.{0,3}(?:什么|啥)',text):
+         return 'unsupported_visual'
+@@ -225,7 +229,7 @@
+             current()
+             status = {}
+             if kind == 'unsupported_visual':
+-                value = SourcedBoardReply('我目前仅记录镜头人体目标数量，无法判断物品、颜色或身份。')
++                value = SourcedBoardReply('我目前仅记录镜头人体目标数量，无法判断方位、物品、颜色或说话者身份。')
+             elif kind == 'current_person_count':
+                 source = self.worker.record_current_observation()
+                 if source is None:
+--- before/common/feature_intents.py
++++ after/common/feature_intents.py
+@@ -0,0 +1,68 @@
++"""Narrow speech-only routing; a match conveys no consent beyond original FSMs.
++
++Quoted, hypothetical and negative requests never become enrollment commands.
++The raw transcript and captured PCM stay unchanged in their original owner.
++"""
++import re
++
++from common.character_profile import strip_character_address
++from common.spoken_input import prepare_spoken_input
++
++
++def speaker_text(text, *, active=False):
++    """Return the existing speaker FSM's canonical input, or None.
++
++    Arbitrary utterances during an active enrollment are still handled by the
++    original sampler. General cancel/save words are only interpreted there.
++    """
++    if not isinstance(text, str) or not 1 <= len(text) <= 2000:
++        return None
++    value = strip_character_address(prepare_spoken_input(text)['text'].strip(' \t\r\n。！!？?'))
++    value = value.strip(' \t\r\n，,。！!？?')
++    if value in ('取消声纹登记', '停止声纹登记', '不登记声纹了', '不要保存声纹'):
++        return '取消声纹登记'
++    if value in ('确认保存声纹', '确认删除声纹'):
++        return value
++    if active and value in ('取消登记', '取消', '不保存'):
++        return value
++    name = r'([^，,。！？!?\s]{1,20})'
++    found = re.fullmatch(r'(?:请)?(?:帮我)?(?:登记我的声纹|记住我的声音|登记声纹)[，, ]*(?:我叫|名字是)'+name, value)
++    if found:
++        return '登记我的声纹，我叫'+found[1]
++    found = re.fullmatch(r'(?:请)?删除声纹[，, ]*(?:名字是|名为)?'+name, value)
++    if found:
++        return '删除声纹，名字是'+found[1]
++    if re.fullmatch(r'(?:请)?(?:帮我)?(?:登记|注册)(?:我的)?声纹', value):
++        return '登记我的声纹'
++    # Read-only questions use the existing readiness/calibration/match path.
++    # Full matches prevent quotations and negation from executing an action.
++    question = value
++    if question.startswith('请问'):
++        question = question[2:]
++    question = question.removesuffix('？').removesuffix('?')
++    if re.fullmatch(r'(?:你)?(?:现在|刚才)?(?:已经)?(?:帮我|给我|为我)?(?:把)?(?:我的)?声纹'
++                    r'(?:登记)?(?:保存|录入|登记)(?:成功|完成|好)?(?:了)?[吗呢]?', question):
++        return '查询声纹保存状态'
++    endings = r'[吗呢么啊呀]?'
++    patterns = (
++        r'(?:现在)?(?:我的)?声纹(?:识别)?(?:现在)?(?:是否|能否)?(?:可用|能用|正常|就绪|有记录|已登记|登记过)'+endings,
++        r'(?:我|我的声音|我的声纹)(?:以前|之前)?(?:已经|曾经)?登记过声纹'+endings,
++        r'(?:我)?(?:已经)?登记(?:过|了)声纹'+endings,
++        r'(?:请)?(?:查询|检查|识别|辨认)(?:一下)?(?:我的)?(?:声纹|声音)'+endings,
++        r'(?:你)?(?:现在)?(?:能|可以|会)?(?:识别|辨认|认出|认识)(?:我的)?(?:声纹|声音)'+endings,
++        r'(?:你)?(?:听|听听|根据|通过)(?:我的)?声音(?:你)?(?:能|可以)?(?:知道|判断|识别|认出)?(?:我是谁|谁在说话)'+endings,
++        r'(?:你)?(?:能|可以)?(?:根据|通过)(?:我的)?声音(?:识别|认出|辨认)(?:我|我是谁)'+endings,
++        r'(?:我的)?声纹(?:是否|有没有|有无)(?:登记|记录|保存)'+endings,
++        r'(?:现在)?(?:你的)?声纹(?:识别)?(?:功能)?(?:怎么样|状态如何|准备好了吗|能用了吗)',
++    )
++    if question == '查询我的声纹' or any(re.fullmatch(p, question) for p in patterns):
++        return '查询我的声纹'
++    return None
++
++
++def speaker_requested(text):
++    return speaker_text(text) is not None
++
++
++def speaker_query_requested(text):
++    return speaker_text(text) in ('查询我的声纹','查询声纹保存状态')
+--- before/common/voice_enrollment.py
++++ after/common/voice_enrollment.py
+@@ -51,6 +51,7 @@
+     r'(?:(?:'+_ADDRESSES+r')[啊呀]?)?'
+     r'(?:请问(?:一下)?|问一下|我想问一下)?'
+     r'(?:我是谁|我叫什么(?:名字)?|我的名字是什么'
++    r'|我(?:以前|之前)?(?:已经|曾经)?登记过(?:身份|人脸)'
+     r'|你(?:还)?(?:知道|记得)(?:我是谁|我叫什么(?:名字)?|我的名字(?:是什么)?)'
+     r'|(?:你)?(?:还)?(?:认识|认得|记得)我'
+     r'|(?:你)?(?:还)?(?:能|可以)?(?:认出我|认出来我|认得出我)(?:了)?'
+--- before/tools/speaker_device.py
++++ after/tools/speaker_device.py
+@@ -59,11 +59,31 @@
+         self.latest[key]=generation
+         while len(self.latest)>32:self.latest.pop(next(iter(self.latest)))
+         active=self.state(meta)['active'];row=self.sessions.get(key)
+-        compact=text.strip(' 。！!？?')
++        from common.feature_intents import speaker_text
++        compact=speaker_text(text,active=active) or text.strip(' 。！!？?')
++        if compact in ('查询我的声纹','查询声纹保存状态'):
++            # A question is never an enrollment sample or a save confirmation.
++            if active:
++                if row['stage']=='delete':return '声纹删除还在等待明确确认，本轮删除尚未执行。'
++                if row['stage']=='confirm':return '本轮声纹样本已准备好，仍在等待明确确认保存。'
++                return '本轮声纹仍在采样，尚未提交保存。'
++            if compact=='查询声纹保存状态':
++                receipt=getattr(self,'save_receipts',{}).get(key)
++                if (receipt is not None and self.clock()<receipt['until']
++                        and receipt['revision']==self.store.revision
++                        and generation>receipt['generation']
++                        and any(p['person_id']==receipt['identity_id'] for p in self.store.people())):
++                    return '本次会话已收到声纹保存提交回执；这不代表说话者身份已确认。'
++                return '当前没有可核对的本轮声纹保存回执，不能判断是否保存成功。'
+         if compact in ('取消登记','取消声纹登记','取消','不保存'):
+             self.sessions.pop(key,None);return '已取消，没有保存新的声纹。'
++        if not active and compact in ('确认保存声纹','确认删除声纹'):
++            return '当前没有待确认的声纹操作，没有保存或删除。'
++        if not active and compact=='登记我的声纹':
++            return '尚未开始声纹登记。请说“登记我的声纹，我叫某某”，再按提示采样并确认保存。'
+         match=re.fullmatch(r'(?:请)?(?:登记我的声纹|记住我的声音|登记声纹)[，, ]*(?:我叫|名字是)([^，,。！？!?\s]{1,20})',compact)
+         if match:
++            getattr(self,'save_receipts',{}).pop(key,None)
+             while len(self.sessions)>=4:self.sessions.pop(next(iter(self.sessions)))
+             self.sessions[key]={'stage':'samples','name':match[1],'vectors':[],'hashes':set(),'until':self.clock()+180}
+             return '好的，开始登记你的声纹。请分三次说不同的句子，每次三到十秒。先介绍一下你今天做了什么。'
+@@ -84,7 +104,16 @@
+                 other=self.store.best_other_score(vector)
+                 if other is not None and other>=self.threshold:
+                     self.sessions.pop(key,None);return '样本与已有声纹过于接近，这次没有新增，请先核对已有登记。'
+-                self.store.enroll(uuid.uuid4().hex,row['name'],vector,consent=True,expected_revision=row['revision'],max_people=32)
++                identity_id=uuid.uuid4().hex
++                self.store.enroll(identity_id,row['name'],vector,consent=True,expected_revision=row['revision'],max_people=32)
++                # Receipt is derived from the actual original transaction and
++                # exact resulting gallery revision, never from spoken/LLM text.
++                if (self.store.revision==row['revision']+1
++                        and any(p['person_id']==identity_id for p in self.store.people())):
++                    self.save_receipts=getattr(self,'save_receipts',{})
++                    self.save_receipts[key]=dict(identity_id=identity_id,revision=self.store.revision,
++                        generation=generation,until=self.clock()+60.)
++                    while len(self.save_receipts)>32:self.save_receipts.pop(next(iter(self.save_receipts)))
+                 self.sessions.pop(key,None)
+                 return '声纹样本已保存。现场识别阈值还需要校准，不会据此自动打开私人记忆。' if not self.calibrated else '声纹已保存。'
+             return '样本准备好了，请说“确认保存声纹”，或说“取消”。'
+@@ -101,9 +130,9 @@
+                 self.sessions.pop(key,None);return '三段声音不够一致，没有保存，请在安静环境重新登记。'
+             row.update(stage='confirm',revision=self.store.revision)
+             return '三段样本已经准备好。要保存请说“确认保存声纹”，不保存请说“取消”。'
+-        if re.search('声纹|我的声音|听声音.*谁|声音.*认识',text):
++        if re.search('声纹|我的声音|听声音.*谁|声音.*认识',compact):
+             if not self.store.people():return '还没有登记声纹。可以说“登记我的声纹，我叫某某”。'
+-            if not self.calibrated:return '声纹已登记，但现场阈值尚未校准，现在不能可靠确认说话者身份。'
++            if not self.calibrated:return '本机有声纹记录，但现场阈值尚未校准，不能确认当前说话者是否已登记。'
+             try:raw,quality=self.quality(pcm);result=self.store.match(self.encoder.encode(raw))
+             except ValueError:return '这句话太短或不够清楚，请多说几秒，再让我辨认声音。'
+             if result.state=='KNOWN':return '声音匹配到登记的'+result.name+'。这不是身份验证，也不会自动打开私人记忆。'
+--- before/tools/yuki_jobs_candidate.py
++++ after/tools/yuki_jobs_candidate.py
+@@ -42,6 +42,7 @@
+         enrollment_requested, identity_query_requested, cancelled, confirmed, update_confirmed,
+     )
+     from common.binding_intent import binding_intent
++    from common.feature_intents import speaker_requested,speaker_query_requested
+     from common.thinking_policy import route
+     from common.timeline import recall_requested, query
+     from common.profile_memory import scoped_command
+@@ -57,21 +58,25 @@
+     visual_requested_by_policy = bool(self.visual_intent_matcher is not None and
+                                       self.visual_intent_matcher(intent_text))
+     binding = binding_intent(intent_text)
++    speaker_requested_by_policy = speaker_requested(intent_text)
+     command_text = re.sub(r'^\s*' + re.escape(CHARACTER_NAME) + r'[\s，,：:]*', '', intent_text, count=1)
+     command, _ = scoped_command(command_text, job.scope.get('kind') == 'profile')
+-    if command is not None and binding['kind'] not in ('remember_self', 'name_hint', 'invalid_name'):
++    if (command is not None and not speaker_requested_by_policy
++            and binding['kind'] not in ('remember_self', 'name_hint', 'invalid_name')):
+         if self.controller.command_handler is None:
+             raise BoardCapabilityNotReady('explicit_memory_commands')
+         return None, None
+     recalled = recall_requested(text)
+     capability = None
+-    if (self._enrollment_state().get('active') or enrollment_requested(text)
++    if speaker_query_requested(intent_text):
++        capability = 'speaker_identity'
++    elif (self._enrollment_state().get('active') or enrollment_requested(text)
+             or cancelled(text) or confirmed(text) or update_confirmed(text)
+             or binding['kind'] in ('remember_self', 'name_hint', 'invalid_name')):
+         capability = 'identity_enrollment'
+     elif identity_query_requested(text):
+         capability = 'identity_query'
+-    elif re.search(r'(?:登记|注册|标定|识别|绑定|关联).{0,8}(?:声纹|声音)|(?:声纹|声音).{0,8}(?:登记|注册|标定|绑定|关联)', text):
++    elif speaker_requested_by_policy:
+         capability = 'speaker_identity'
+     elif (re.search(r'(?:删除|清除|清理).{0,12}(?:昨天|前天|历史|时间轴|记录)', text)
+           or re.fullmatch(r'(?:确认|取消)(?:删除|清除)(?:记录|历史|时间轴)?[。！!？?]*', text)):

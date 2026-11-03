@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="1" tests="57" time="0.744" timestamp="2026-10-29T20:18:17.018813-07:00" hostname="zhenghang"><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.test_audio_flow" name="test_full_pipe_returns_without_wait_and_retains_only_latest_clock" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.test_audio_flow" name="test_partial_writes_keep_valid_lines_and_never_splice_different_owners" time="0.000" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.test_audio_flow" name="test_fresh_clocks_are_not_starved_by_permanent_echo_reference_stream" time="0.000" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.test_audio_flow" name="test_stale_reference_is_dropped_with_its_sequence_never_relabelled" time="0.000" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.test_audio_flow" name="test_peer_disconnect_is_observable_without_blocking_audio_tick" time="0.000" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.test_audio_flow" name="test_new_diagnostics_preserve_existing_pcm_and_sink_clock_contract" time="0.019"><failure message="RuntimeError: Persistent audio device is not ready">def test_new_diagnostics_preserve_existing_pcm_and_sink_clock_contract():
+     case=persistent_fixtures.PersistentTests();case.setUp()
+     try:
+&gt;     case.play(1);assert case.engine.queued_samples==4800
+      ^^^^^^^^^^^^
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\test_audio_flow.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\effective_tests\tests\framework\test_persistent_audio.py:47: in play
+    def play(self,token):self.engine.command({'type':'play','token':token,'path':str(self.path),'sha256':self.sha})
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;tools.gstreamer_persistent_engine.PersistentGstAudioEngine object at 0x0000019D971C0710&gt;
+message = {'path': 'E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-29_audio_animation_polish\\test_tmp\\e0f46811c3aa47da84428d48546d...w\\clip.wav', 'sha256': '4743c403070e9559d5aab6a152000d6bd28691f8d901bd85d692beafab9acf08', 'token': 1, 'type': 'play'}
+
+    def command(self,message):
+        token=message.get('token')
+        if type(token) is not int or token&lt;self.token:return False
+        kind=message.get('type')
+        if kind in ('play','stream','stop','close'):
+            self._reset(token)
+            if kind=='close':self.release();return True
+            if kind=='stop':return True
+&gt;           if not self.device_ready:raise RuntimeError('Persistent audio device is not ready')
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           RuntimeError: Persistent audio device is not ready
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\candidate\board\tools\gstreamer_persistent_engine.py:106: RuntimeError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.test_audio_flow" name="test_late_audio_poll_is_measured_without_skipping_content" time="0.008"><failure message="RuntimeError: Persistent audio device is not ready">def test_late_audio_poll_is_measured_without_skipping_content():
+     case=persistent_fixtures.PersistentTests();case.setUp()
+     try:
+&gt;     case.play(1);case.advance(.1)
+      ^^^^^^^^^^^^
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\test_audio_flow.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\effective_tests\tests\framework\test_persistent_audio.py:47: in play
+    def play(self,token):self.engine.command({'type':'play','token':token,'path':str(self.path),'sha256':self.sha})
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;tools.gstreamer_persistent_engine.PersistentGstAudioEngine object at 0x0000019DAEFBCEC0&gt;
+message = {'path': 'E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-29_audio_animation_polish\\test_tmp\\e0f46811c3aa47da84428d48546d...j\\clip.wav', 'sha256': '4743c403070e9559d5aab6a152000d6bd28691f8d901bd85d692beafab9acf08', 'token': 1, 'type': 'play'}
+
+    def command(self,message):
+        token=message.get('token')
+        if type(token) is not int or token&lt;self.token:return False
+        kind=message.get('type')
+        if kind in ('play','stream','stop','close'):
+            self._reset(token)
+            if kind=='close':self.release();return True
+            if kind=='stop':return True
+&gt;           if not self.device_ready:raise RuntimeError('Persistent audio device is not ready')
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           RuntimeError: Persistent audio device is not ready
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\candidate\board\tools\gstreamer_persistent_engine.py:106: RuntimeError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.test_audio_flow" name="test_reference_gap_ends_only_monitor_and_never_authorizes_interruption" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_persistent_audio.PersistentTests" name="test_corrupt_clip_and_wrong_stream_offsets_rejected" time="0.009"><failure message="RuntimeError: Persistent audio device is not ready">self = &lt;test_persistent_audio.PersistentTests testMethod=test_corrupt_clip_and_wrong_stream_offsets_rejected&gt;
+
+    def test_corrupt_clip_and_wrong_stream_offsets_rejected(self):
+&gt;       with self.assertRaises(ValueError):self.engine.command({'type':'play','token':1,'path':str(self.path),'sha256':'0'*64})
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\effective_tests\tests\framework\test_persistent_audio.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def command(self,message):
+        token=message.get('token')
+        if type(token) is not int or token&lt;self.token:return False
+        kind=message.get('type')
+        if kind in ('play','stream','stop','close'):
+            self._reset(token)
+            if kind=='close':self.release();return True
+            if kind=='stop':return True
+&gt;           if not self.device_ready:raise RuntimeError('Persistent audio device is not ready')
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           RuntimeError: Persistent audio device is not ready
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\candidate\board\tools\gstreamer_persistent_engine.py:106: RuntimeError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_persistent_audio.PersistentTests" name="test_echo_reference_precedes_sound_while_history_clock_still_uses_sink" time="0.007"><failure message="RuntimeError: Persistent audio device is not ready">self = &lt;test_persistent_audio.PersistentTests testMethod=test_echo_reference_precedes_sound_while_history_clock_still_uses_sink&gt;
+
+    def test_echo_reference_precedes_sound_while_history_clock_still_uses_sink(self):
+&gt;       self.engine.take_references();self.play(1)
+                                      ^^^^^^^^^^^^
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\effective_tests\tests\framework\test_persistent_audio.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\effective_tests\tests\framework\test_persistent_audio.py:47: in play
+    def play(self,token):self.engine.command({'type':'play','token':token,'path':str(self.path),'sha256':self.sha})
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;tools.gstreamer_persistent_engine.PersistentGstAudioEngine object at 0x0000019DAEFBE180&gt;
+message = {'path': 'E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-29_audio_animation_polish\\test_tmp\\e0f46811c3aa47da84428d48546d...w\\clip.wav', 'sha256': '4743c403070e9559d5aab6a152000d6bd28691f8d901bd85d692beafab9acf08', 'token': 1, 'type': 'play'}
+
+    def command(self,message):
+        token=message.get('token')
+        if type(token) is not int or token&lt;self.token:return False
+        kind=message.get('type')
+        if kind in ('play','stream','stop','close'):
+            self._reset(token)
+            if kind=='close':self.release();return True
+            if kind=='stop':return True
+&gt;           if not self.device_ready:raise RuntimeError('Persistent audio device is not ready')
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           RuntimeError: Persistent audio device is not ready
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\candidate\board\tools\gstreamer_persistent_engine.py:106: RuntimeError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_persistent_audio.PersistentTests" name="test_pause_freezes_after_queued_tail_and_resume_uses_same_device" time="0.007"><failure message="RuntimeError: Persistent audio device is not ready">self = &lt;test_persistent_audio.PersistentTests testMethod=test_pause_freezes_after_queued_tail_and_resume_uses_same_device&gt;
+
+    def test_pause_freezes_after_queued_tail_and_resume_uses_same_device(self):
+&gt;       self.play(1);self.advance(.1)
+        ^^^^^^^^^^^^
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\effective_tests\tests\framework\test_persistent_audio.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\effective_tests\tests\framework\test_persistent_audio.py:47: in play
+    def play(self,token):self.engine.command({'type':'play','token':token,'path':str(self.path),'sha256':self.sha})
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;tools.gstreamer_persistent_engine.PersistentGstAudioEngine object at 0x0000019D9713F4D0&gt;
+message = {'path': 'E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-29_audio_animation_polish\\test_tmp\\e0f46811c3aa47da84428d48546d...l\\clip.wav', 'sha256': '4743c403070e9559d5aab6a152000d6bd28691f8d901bd85d692beafab9acf08', 'token': 1, 'type': 'play'}
+
+    def command(self,message):
+        token=message.get('token')
+        if type(token) is not int or token&lt;self.token:return False
+        kind=message.get('type')
+        if kind in ('play','stream','stop','close'):
+            self._reset(token)
+            if kind=='close':self.release();return True
+            if kind=='stop':return True
+&gt;           if not self.device_ready:raise RuntimeError('Persistent audio device is not ready')
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           RuntimeError: Persistent audio device is not ready
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\candidate\board\tools\gstreamer_persistent_engine.py:106: RuntimeError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_persistent_audio.PersistentTests" name="test_stale_pcm_stop_and_duplicate_feedback_do_not_replay" time="0.008"><failure message="RuntimeError: Persistent audio device is not ready">self = &lt;test_persistent_audio.PersistentTests testMethod=test_stale_pcm_stop_and_duplicate_feedback_do_not_replay&gt;
+
+    def test_stale_pcm_stop_and_duplicate_feedback_do_not_replay(self):
+&gt;       self.engine.command({'type':'stream','token':1})
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\effective_tests\tests\framework\test_persistent_audio.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;tools.gstreamer_persistent_engine.PersistentGstAudioEngine object at 0x0000019DAF03C5F0&gt;
+message = {'token': 1, 'type': 'stream'}
+
+    def command(self,message):
+        token=message.get('token')
+        if type(token) is not int or token&lt;self.token:return False
+        kind=message.get('type')
+        if kind in ('play','stream','stop','close'):
+            self._reset(token)
+            if kind=='close':self.release();return True
+            if kind=='stop':return True
+&gt;           if not self.device_ready:raise RuntimeError('Persistent audio device is not ready')
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           RuntimeError: Persistent audio device is not ready
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\candidate\board\tools\gstreamer_persistent_engine.py:106: RuntimeError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_persistent_audio.PersistentTests" name="test_stream_feedback_not_counted_as_answer_and_audio_is_identical" time="0.007"><failure message="RuntimeError: Persistent audio device is not ready">self = &lt;test_persistent_audio.PersistentTests testMethod=test_stream_feedback_not_counted_as_answer_and_audio_is_identical&gt;
+
+    def test_stream_feedback_not_counted_as_answer_and_audio_is_identical(self):
+&gt;       self.engine.command({'type':'stream','token':1})
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\effective_tests\tests\framework\test_persistent_audio.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;tools.gstreamer_persistent_engine.PersistentGstAudioEngine object at 0x0000019DAF03C3B0&gt;
+message = {'token': 1, 'type': 'stream'}
+
+    def command(self,message):
+        token=message.get('token')
+        if type(token) is not int or token&lt;self.token:return False
+        kind=message.get('type')
+        if kind in ('play','stream','stop','close'):
+            self._reset(token)
+            if kind=='close':self.release();return True
+            if kind=='stop':return True
+&gt;           if not self.device_ready:raise RuntimeError('Persistent audio device is not ready')
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           RuntimeError: Persistent audio device is not ready
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\candidate\board\tools\gstreamer_persistent_engine.py:106: RuntimeError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_persistent_audio.PersistentTests" name="test_two_clips_and_idle_keep_same_device_without_per_clip_padding" time="0.009"><failure message="AssertionError: False is not true">self = &lt;test_persistent_audio.PersistentTests testMethod=test_two_clips_and_idle_keep_same_device_without_per_clip_padding&gt;
+
+    def test_two_clips_and_idle_keep_same_device_without_per_clip_padding(self):
+&gt;       self.assertTrue(self.engine.device_ready)
+E       AssertionError: False is not true
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\effective_tests\tests\framework\test_persistent_audio.py:50: AssertionError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_persistent_audio.PersistentTests" name="test_wall_schedule_does_not_forge_sink_content_time" time="0.007"><failure message="RuntimeError: Persistent audio device is not ready">self = &lt;test_persistent_audio.PersistentTests testMethod=test_wall_schedule_does_not_forge_sink_content_time&gt;
+
+    def test_wall_schedule_does_not_forge_sink_content_time(self):
+&gt;       self.play(1)
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\effective_tests\tests\framework\test_persistent_audio.py:63: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\effective_tests\tests\framework\test_persistent_audio.py:47: in play
+    def play(self,token):self.engine.command({'type':'play','token':token,'path':str(self.path),'sha256':self.sha})
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;tools.gstreamer_persistent_engine.PersistentGstAudioEngine object at 0x0000019DAF0B8D40&gt;
+message = {'path': 'E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-29_audio_animation_polish\\test_tmp\\e0f46811c3aa47da84428d48546d...9\\clip.wav', 'sha256': '4743c403070e9559d5aab6a152000d6bd28691f8d901bd85d692beafab9acf08', 'token': 1, 'type': 'play'}
+
+    def command(self,message):
+        token=message.get('token')
+        if type(token) is not int or token&lt;self.token:return False
+        kind=message.get('type')
+        if kind in ('play','stream','stop','close'):
+            self._reset(token)
+            if kind=='close':self.release();return True
+            if kind=='stop':return True
+&gt;           if not self.device_ready:raise RuntimeError('Persistent audio device is not ready')
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           RuntimeError: Persistent audio device is not ready
+
+语音共享文件\deliverables\2026-10-29_audio_animation_polish\candidate\board\tools\gstreamer_persistent_engine.py:106: RuntimeError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_cancel_releases_pipeline_and_discards_old_eos" time="0.009" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_clock_uses_sink_position_not_wall_elapsed" time="0.008" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_corrupt_cache_rejected_before_any_pipeline" time="0.013" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_device_error_is_reported_and_releases_audio" time="0.009" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_eos_settles_duration_and_releases_device" time="0.008" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_old_pause_does_not_change_new_playback" time="0.008" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_pause_before_preroll_does_not_timeout" time="0.008" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_pause_freezes_and_resume_continues_same_token" time="0.008" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_start_timeout_does_not_use_wall_clock_as_audio_position" time="0.008" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_startup_duration_is_bounded" time="0.008" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_startup_eos_cleans_temporary_and_keeps_original_duration" time="0.012" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_startup_pause_does_not_advance_mouth_clock" time="0.013" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_startup_preserves_original_pcm_and_offsets_content_clock" time="0.016" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_gstreamer_audio.GstAudioTests" name="test_wrong_format_and_empty_cache_rejected" time="0.011" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_voice_barge_in" name="test_barge_monitor_only_arms_after_valid_transcript_and_not_during_enrollment" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_voice_barge_in" name="test_spoken_interrupt_stops_old_reply_keeps_pre_roll_and_same_conversation" time="0.002" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_voice_barge_in" name="test_late_old_completion_and_network_data_cannot_resume_or_commit" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_voice_barge_in" name="test_face_loss_closes_interrupt_monitor_without_cutting_accepted_reply" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_voice_barge_in" name="test_late_callback_from_closed_capture_cannot_interrupt_a_later_request" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_voice_barge_in" name="test_detection_to_stop_time_excludes_the_vad_onset_duration" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_voice_barge_in" name="test_explicit_pause_releases_both_capture_owners_and_never_rearms" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_voice_barge_in" name="test_normal_complete_answer_keeps_ack_tail_guard_and_releases_barge_capture" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_voice_barge_in" name="test_capture_keeps_the_new_utterance_preroll_after_echo_processing" time="0.002" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_voice_barge_in" name="test_capture_never_uses_raw_echo_or_unreferenced_energy_as_user_speech" time="0.002" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_voice_barge_in" name="test_real_speex_rejects_simulated_echo_and_keeps_near_end_speech" time="0.000"><skipped type="pytest.skip" message="Native SpeexDSP is a board dependency">E:\Win共享文件\语音共享文件\deliverables\2026-10-29_audio_animation_polish\effective_tests\tests\framework\test_voice_barge_in.py:172: Native SpeexDSP is a board dependency</skipped></testcase><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_partial_and_slightly_misrecognized_own_speech_is_echo[\u6211\u5c31\u5b89\u5b89\u9759\u9759\u5f85\u5728\u4f60\u624b\u8fb9]" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_partial_and_slightly_misrecognized_own_speech_is_echo[\u5b89\u5b89\u9759\u9759\u5f85\u5728\u4f60\u624b\u8fb9\u966a\u7740\u4f60]" time="0.000" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_partial_and_slightly_misrecognized_own_speech_is_echo[\u6211\u5c31\u5b89\u9759\u5f85\u5728\u4f60\u624b\u8fb9]" time="0.000" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_distinct_new_questions_and_stop_commands_are_preserved[\u5148\u505c\u4e00\u4e0b\uff0c\u4f60\u53eb\u4ec0\u4e48\u540d\u5b57]" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_distinct_new_questions_and_stop_commands_are_preserved[\u7b49\u4e00\u4e0b]" time="0.000" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_distinct_new_questions_and_stop_commands_are_preserved[\u505c]" time="0.000" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_distinct_new_questions_and_stop_commands_are_preserved[\u6211\u4eec\u660e\u5929\u7684\u8ba1\u5212\u662f\u4ec0\u4e48]" time="0.000" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_empty_filler_or_absent_reference_cannot_authorize_interrupt" time="0.000" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_verifier_uses_bounded_plain_asr_and_never_returns_transcript" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_residual_voice_without_new_speech_never_calls_interrupt[echo]" time="0.003" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_residual_voice_without_new_speech_never_calls_interrupt[unclear]" time="0.002" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_residual_voice_without_new_speech_never_calls_interrupt[unavailable]" time="0.002" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_confirmed_new_speech_keeps_original_preroll_and_entire_utterance" time="0.002" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_pending_echo_candidate_cannot_bypass_verification_at_ack_handoff" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_barge_verification" name="test_production_factory_binds_current_asr_and_reply_without_opening_microphone" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_channel_jobs" name="test_feedback_download_runs_off_the_ui_thread_and_error_is_visible" time="0.020" /><testcase classname="语音共享文件.deliverables.2026-10-29_audio_animation_polish.effective_tests.tests.framework.test_channel_jobs" name="test_failed_cache_can_recover_without_restart_and_config_change_refetches" time="0.003" /></testsuite></testsuites>

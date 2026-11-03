@@ -1,0 +1,81 @@
+整体串行延迟与固定27B的下一步（2026-10-31）
+
+建议先测板端小型真流式 ASR 的共存性能；27B 方面保留已上线 ABC。现读Windows7500F为6物理/12逻辑核，活动runner已自动采用6/6推理线程且加载Zen4后端，未见需要修复的线程误配。省恒空动作字段只保留为研究储备，不建议为预期几百毫秒另开一次重启。真流式ASR有机会少等数秒，但需要更换ASR权重并验证准确性和CPU余量。没有发现一个已被当前证据证明、保持所有约束不变就能把27B约4秒直接压到1秒的开关。线程实读细节见CPU线程只读复核_20261031.txt。
+
+一、当前数据支持什么
+
+来源为根任务已有回执，只提取数字，不导出正文、PCM、身份或生产库。NUMERIC_EVIDENCE.json 保存选取索引和源文件 SHA；analyze_metadata.py 可离线复算。轮次场景保持 UNLABELED，不因文件名 compact_human_round.json 就宣称全部是主动真人测试。以下三轮是根任务报告的短请求，对轮询重复快照不重复计数。
+
+             ASR        LLM RPC     TTS RPC     首包入队
+样本0        3338ms     3781ms      756ms       8442ms
+样本36       3903ms     4017ms      708ms       9368ms
+样本50       3591ms     4237ms      675ms       8992ms
+
+另一个已完成样本22为 ASR15808ms、LLM4592ms、首包21646ms；保留这一异常量级，不能凭元数据断定是背景讲话、长句还是资源争用。当前主线没有把此样本抹掉后声称全局 P95。
+
+三个短样本中，ASR 占首包等待约40%–42%。扣掉 ASR/LLM/TTS/context 后仍有约414–694ms未细分，可能含排队、控制检查、状态/传输等，不能全部归给权限 SQL。first_tts_ready/first_chunk_emitted 的计时起点为 prepare；first_audio_queued 起点为 job。chunk emitted 是整个回调返回时刻，回调内部已逐包入队，不能把两个时刻相减当成第一包又等待近1秒。源码依据为 streaming_candidate/after/board/runtime/board_dialogue.py 的 _prepare 与 instrumentation_candidate/after/board/runtime/audio/board_dialogue_jobs.py 的 reply_sink/emit。
+
+所有数值都是软件阶段及首包入队；speaker_first_audio_measured=false。它们不等于实际扬声器第一声、可懂首句或用户主观等待。
+
+二、最值得先测的路线：把ASR计算移到讲话期间
+
+小型中文真流式 Zipformer 在现有 sherpa-onnx 生态内有正式 ONNX 候选，具体先看 FIRST_ROUTE.txt。其作用是让本来句末才运行的整段计算随输入推进，并非缩短录音、忽略结尾或反复离线解码相同前缀。选择流式必须连模型的缓存状态、块长、右上下文、尾部补齐和 final 语义一起移植。帧接口短不代表算法延迟短。
+
+官方小模型列表面向资源受限系统；中文 small CTC int8 文件约25M。文档只声明中文。英文名、中英混说、数字/单位、否定、纠正、身份与记忆管理指令都需要公开测试集覆盖；纯中文速度通过不能当作原中英能力已保留。这个候选也不是现有离线 Paraformer 权重的同模型切换。模型选择、下载位置和正式替换需根任务另行决定；本研究没有下载或装载。
+
+官方源：
+https://k2-fsa.github.io/sherpa/onnx/pretrained_models/small-online-models.html
+https://k2-fsa.github.io/sherpa/onnx/pretrained_models/online-ctc/zipformer-ctc-models.html
+
+验证先看真实16k输入块节奏下的积压及句末 final，不用桌面跑完整 wav 的 RTF 代替。建议目标是共存 RTF<=0.5、结束后 final P95<=500ms；均是拟议验收线，模型块结构可能不支持，必须先核验。先一条公开音频单独运行，再保留 GTCRN/Silero/视觉负载做共存测试；不并行开第二条物理麦克风，不扩大原8帧采集队列，不降低视觉16fps目标来装作余量。保留原业务端点，关闭候选自身额外的静音端点，避免示例中1.2/2.4秒默认等待叠加。
+
+只给最终识别结果进入业务；未完成文本不能写记忆或启动管理操作。采集代次/取消/超时切换时清掉旧识别状态，不把上一轮缓存接到新轮。半双工、完整播放ACK后自动rearm、每包新鲜权限/更正/遗忘检查继续适用。环境讲话误触仍是独立问题，更快的 ASR 不会自动变成“只听对机器人说的话”。
+
+可见收益上限：三轮若把 ASR 全部消掉，首包算术剩余仍为5104/5465/5401ms；若尾部仍500ms，则5604/5965/5901ms。进一步假定整个 LLM RPC 都减半，才约3713/3956/3783ms。这是同轮阶段替换的理想算术，没有计入新 ASR 的并行争用，不能当作预测或实测提速。要达到2–3秒，单换流式 ASR 仍不够。
+
+三、27B的剩余瓶颈是解码
+
+根任务直接名字ABBA的 ABC 两轮：输出均28 tokens，12字回复，解码2857.29/2901.98ms，即9.80/9.65 tokens/s；提示处理867.72/576.87ms；load仅1.08/1.54ms。对应 canonical 为35 tokens、解码3615.32/3600.76ms。两组说法不完全相同，因此整体19%只是一组小样本模型阶段证据，不能把所有差值归因为字段语法。
+
+各轮无 thinking/尾空白；闭合JSON到done约109ms。再去尾空白、抢先在闭合花括号处返回、重复开启stream，都不是当前几秒瓶颈的依据。保留 done_reason=length 拒绝及全体结构校验。
+
+公开 compact 全链单轮显示未命中前缀时，prompt处理1335.20ms、29 tokens解码3026.03ms、LLM4503.95ms。直接对照中已缓存214–226个提示tokens仍需上述约0.6–0.9秒处理。提示缓存能改善prefill，不能替代每个新输出token的模型计算。已有缓存顺序候选只是历史研究，不能覆盖v14记忆代次修复；未证实本轮真实上下文都有相同命中率。
+
+Ollama官方定义区分load/prompt_eval/eval计数和耗时：
+https://docs.ollama.com/api/chat
+
+四、保持模型与完整交付时可做的小实验
+
+保留一个窄的第二阶段结构实验供以后已有必要的维护窗口选择：由 {a:台词,b:情绪,c:""} 改为 {a:台词,b:情绪}，完整校验成功后板端补回 avatar_action=""。当前固定schema已把动作限制为唯一空字符串，因此省去该常量并不削减可选动作；仍需新的明确能力协商，不能在旧ABC格式里偷偷接受缺c。情绪四种枚举、台词字数/内容约束、120-token预算、think=false、ctx2048、模型、声音及全套来源与ACK约束不改。普通用户/历史/记忆内容绝不做字段替换。此项不是当前建议打断业务去部署的主路线。
+
+若实测减少4–6个生成tokens，按现约102–104ms/token作一阶估算，仅约0.4–0.6秒；实际token边界和kernel/sampler开销必须测，不承诺该差值。这个估算是条件情景，不是已取得性能。实验计划见 EXPERIMENT_PLAN.json，未附自动执行/部署入口。后续把情绪换成数字只另省极少量，增加提示映射负担，不先做。
+
+不先改成tuple数组：Ollama0.40.13上游固定llama.cpp b11963；该版本GBNF说明明确列prefixItems有缺陷。现有对象schema路径较明确，不能按通用JSON Schema文档就假设异构数组可用。
+https://github.com/ollama/ollama/blob/v0.40.13/LLAMA_CPP_VERSION
+https://github.com/ggml-org/llama.cpp/blob/b11963/grammars/README.md
+
+num_thread 是可测但不保证收益的同模型参数。本轮补充现读已确认6核12线程、活动runner线程6/6、全12逻辑处理器亲和性和Zen4后端，自动值合理，当前不建议为线程实验重启。上游0.40.13把它定义为runner装载选项，未显式设置时交给llama-server自动探测。它不是能塞进现有“runner不变”ABBA里随请求切换的无扰参数。若以后已有维护窗口且CPU profile支持，再分别重建同一布局并平衡冷暖状态，才可比较CPU部分层的解码速度。num_batch主要涉及prefill；不把大batch当作单用户生成速度倍增。不能借此修改GPU层、fit、上下文或其他模型归属。
+https://github.com/ollama/ollama/blob/v0.40.13/api/types.go
+https://github.com/ollama/ollama/blob/v0.40.13/llm/llama_server.go
+
+53/66层GPU及16GB显存的布局限制已有 windows_decode_budget_review 详细审查；本次复用其结论，不重复采样GPU或给现状空闲显存做新承诺。小步多一层是否值得只有同条件A/B能回答，不能声称会把4秒减半。
+
+五、需要另议的更大路线
+
+1. 草稿解码：当前Ollama0.40.13确有draft_num_predict路径，llama.cpp b11963文档有普通draft、EAGLE-3、DFlash、MTP及无模型ngram等机制。但Ollama的appendDraftArgs在没有草稿类型/路径时直接不加草稿参数；仅填数字没有自动草稿。EAGLE/DFlash需要特定target的匹配，未找到本机27B abliteration权重的已核验配对。还要计入草稿显存/验证batch峰值及接受率，可能挤掉主模型GPU层。不同机制/采样配置的数值等价也不能笼统保证。其可行性与收益未实测，不新增下载、不直接改Modelfile或runner。
+https://github.com/ollama/ollama/blob/v0.40.13/docs/modelfile.mdx
+https://github.com/ollama/ollama/blob/v0.40.13/llm/llama_server.go
+https://github.com/ggml-org/llama.cpp/blob/b11963/docs/speculative.md
+
+无模型ngram是另一个分支，不要求新增草稿权重；上面的限制针对draft_num_predict路径，不能据此说整个引擎没有无模型推测能力。它依赖已出现文本的模式复用，短中文新回答及ABC结构未必有足够命中。本轮未核验它在项目实际启动命令/环境中的启用情况、采样行为或收益，故只列为后续独立runner研究，不作为现在可直接生效的API参数。
+
+2. 更低比特量化/更小LLM/更多显存使主模型更充分驻留，才可能改变当前混合CPU/GPU解码的量级；这些改变权重、质量或硬件，必须单列讨论。所有LLM权重和分段仍只能在项目外本地模型目录，不能放共享目录或建立入口联接。本研究没有作购买或换模型决定。
+
+3. 让LLM生成“可独立提交的完整首句记录”，后续再生成完整后续记录，可把TTS提早。现协议是等整个LLM回复done和JSON验证，再发TTS；现host只有一个模型worker。故这需要同时修改交付协议、记录完整性/来源/取消语义、worker调度和跨phase显存校准，不是网络stream=true。短至一小句的回复可重叠空间有限。未做协议实现，也不提前播放半成品JSON或先播泛化应答掩盖等待。
+
+本轮权限边界：只读项目公开源码、已有metadata回执和官方网络资料；新增文件仅在本目录。设备/生产/GPU/模型推理调用0，下载权重0。ASR具体仓库候选归github_comment；3/4线程Paraformer候选归runtime_completion；实际窗口与部署归根任务。冻结first_wait_candidate和direct_comparison_v2不修改。
+
+
+【追加实测证据：2026-10-31／1793445680498242800】
+原文以上为早先研究记录。根任务随后完成小型真流式CTC板端隔离实测：现sherpa1.13.8、1线程处理5.614625秒公开音频，四轮句末final残余354–436ms。尚未运行GTCRN/Silero，未提供gold，也未集成正式链路。单次decode P95约407–476ms，独立worker及完整前端共存仍待验证。
+详见本目录流式ASR隔离实测补充_20261031.txt与流式ASR隔离实测证据_20261031.json；原正式ASR保持3线程，未据此宣称生产整体提速。

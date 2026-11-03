@@ -1,0 +1,27 @@
+### 1) Downloads 交付物哈希校验
+清单项数=78
+通过=78  失败=0
+
+### 2) 摘要前 22 行
+# KV260 ResNet50 审计结果摘要（DeepSeek 版）
+
+> **作者：DeepSeek**（本文件与同目录 `REPORT.md` 均由 DeepSeek 完成：只读取证 + Vivado 只读对象查询 + 分析与判定）
+> 完成时间：2026-09-26 22:20（本机本地时间）
+> 完整版：`REPORT.md`（318 行）｜命令清单：`COMMANDS.txt`｜哈希清单：`SHA256SUMS.txt`（74 项，`sha256sum -c` 全通过）
+> 操作边界：全程只读。未修改源工程/BD/模型/镜像/设备树/驱动/板卡配置；未烧写、未加载 bitstream、未复位、未写寄存器；未下载镜像；串口仅做一次被动采样（**0 字节，未写入任何字节**）。
+
+---
+
+## 1. 一句话结论
+
+**你要求优先复核的 "routed DCP 里 DPU reset pin `IS_CONNECTED=0` 而 HWH 仍称已连接"，已被定位为"IP 交付物内部不使用该输入 → 无负载网在 `opt_design` 被清理"的既有现象，新（9/26）旧（9/19）两代实现逐名完全一致，不是本次重建引入的回归、也不是实现断线事故。但当前 bit/XSA 仍判定为不可上板，理由与 reset 无关（见第 5 节）。**
+
+---
+
+## 2. reset 差异：分阶段证据链（可直接复核）
+
+| 阶段 | 证据 | 观测 |
+|---|---|---|
+| IP 明文 wrapper RTL | `kv260_dpu.gen/…/ip/kv260_dpu_bd_dpu_0_0/synth/kv260_dpu_bd_dpu_0_0.sv:703,705` | `.dpu_2x_resetn(dpu_2x_resetn)`、`.m_axi_dpu_aresetn(m_axi_dpu_aresetn)` 传递正常 |
+| IP 核心 RTL | `hdl/DPUCZDX8G_v4_1_0_vl_top.sv`、`inc/arch_para.vh` | IEEE-1735 密文，**不可读**（这就是"IP 内部为何不用该 reset"无法确认的原因） |
+| BD 生成 HDL | `kv260_dpu.gen/…/synth/kv260_dpu_bd.v:689,691,819-832` | 两路 reset 接到 `rst_dpu_dsp`/`rst_dpu_clk` 输出（连接**存在**） |

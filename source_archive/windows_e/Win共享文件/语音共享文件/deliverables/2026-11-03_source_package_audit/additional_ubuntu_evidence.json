@@ -1,0 +1,328 @@
+{
+  "2026-11-02_pynq_skill/readme.md": "# 通用 PYNQ Skill：离线初版\n\n日期：2026-11-02。围绕用户“怎么做”的当前任务，在独立目录落实新 PYNQ 补充包；原 A/B/C 三包实现及设备任务未恢复。\n\n入口：[包的使用说明](skill/pynq-contract-testgen/readme.md)。包名 `pynq-contract-testgen`，不依赖 AURA 业务目录、PYNQ 安装或第三方 Python 包即可完成离线生成与模拟验证。\n\n交付：[离线初版 ZIP](pynq_contract_testgen_offline_v1.zip)，36,668 字节（约 36.7 KB），含 28 个源/说明/证据文件及校验清单；[打包回执](archive_report.json)。ZIP CRC、逐文件 SHA 和解压到新目录后两例复现均通过；[解压复现记录](validation/archive_reproduction.json)。\n\nZIP SHA256：`c6f2c56307677cc1f873910d30cae898ea138dc0e991fcf1b4802f2f07ae2ddc`。\n\n## 已实现\n\n- AXI4-Lite uint32 接口合同检查：实例、地址范围、寄存器偏移/位宽/权限、启动/完成和超时。\n- HWH 静态校验：严格区分 MATCHED、INCOMPLETE 和冲突；支持不同逻辑名/HWH 名及 XML 命名空间。\n- 生成 PYNQ 驱动、测试脚本、合同报告和使用入口，缺省只做软件模拟。\n- 加法器与 CRC32 两例使用同一生成器，改变实例、地址布局、命令位和读清除语义；参考实现与模拟模型分开。\n- 新目录复制复现、原始验证日志、代码/输入 SHA、ZIP 打包/CRC/清单校验。\n\n## 实际验证\n\nPython 3.8.10。15 项单元测试通过；生成后执行加法 36 例、CRC 37 例，共 73 例通过；在新的临时目录复制后再次通过，源码 SHA 一致。\n\n证据：[汇总](skill/pynq-contract-testgen/evidence/offline_validation.json)、[单元测试原始输出](skill/pynq-contract-testgen/evidence/unit_tests.log)、[生成与模拟输出](skill/pynq-contract-testgen/evidence/reproduction.log)。\n\n本次没有 PYNQ 导入/安装、固件加载、板卡访问或控制机构动作。真实 PYNQ、跨板、非作者复用均未验证。HWH 示例明确为合成解析样例；没有伪造位流或板测结果。\n\n## 使用\n\n进入 `skill/pynq-contract-testgen/`，执行：\n\n```bash\npython3 -B scripts/reproduce.py --out /tmp/pynq_demo_01\n```\n\n换成自己的 IP 时，替换合同、真实 HWH、向量和可选模拟模块，按包内 readme 重新生成。实际 PYNQ 验证须另备兼容环境与真实板卡工件，使用包内独立入口；本轮没有为此改变现役系统。\n\n当前初版用于审阅和离线复用，不能据此声称完成官方作品验收或已获 PYNQ 加分。最终提交前仍需队伍核对实际资料、真实问答记录、许可与对应验证范围。\n",
+  "2026-11-02_pynq_skill/validation/archive_reproduction.json": "{\n  \"status\": \"PASS\",\n  \"archive_sha256\": \"c6f2c56307677cc1f873910d30cae898ea138dc0e991fcf1b4802f2f07ae2ddc\",\n  \"archive_bytes\": 36668,\n  \"source_hashes_matched\": true,\n  \"extracted_directory_reproduction\": {\n    \"status\": \"PASS\",\n    \"validation_level\": \"offline_generated_code_with_mock_ip\",\n    \"python\": \"3.8.10\",\n    \"pynq_imported\": false,\n    \"board_verified\": false,\n    \"examples\": [\n      {\n        \"name\": \"adder\",\n        \"status\": \"PASS\",\n        \"returncode\": 0,\n        \"cases\": 36,\n        \"report\": \"adder/validation_report.json\"\n      },\n      {\n        \"name\": \"crc32\",\n        \"status\": \"PASS\",\n        \"returncode\": 0,\n        \"cases\": 37,\n        \"report\": \"crc32/validation_report.json\"\n      }\n    ],\n    \"generator_sha256\": \"df473c62e9da5a14b26ec995e2be9c7eb5b7588e94d922968894ba55a02a00dc\"\n  },\n  \"board_verified\": false\n}\n",
+  "2026-11-02_dual_reports/materials_to_prepare.md": "# AUAR·雪妃：报告定稿需要准备什么\n\n两份审阅稿已完成有证据部分的正文、图表和格式。下面列出把它们变成正式提交稿所需材料。P0优先；所有结果按实际版本记录，不为补表重写历史数据。\n\n## 一、你最先整理的六组材料\n\n| 优先级 | 材料 | 具体准备什么 | 建议文件名/形式 | 当前情况 |\n| --- | --- | --- | --- | --- |\n| P0 | 最终名称、范围与平台 | 名称已定AUAR·雪妃；补报名组别、最终启用功能、KV260/舵机/相机/屏幕型号，以及Windows GPU与实际运行版本 | project_facts.md | 名称已填；新桌面RTX5090尚无可核验迁移实测回执 |\n| P0 | 整机与开发板照片 | 正面全局、45°全局、开发板高清特写、单轴机构/固定方式；最终界面实屏照片另存 | front.jpg、angle45.jpg、board_detail.jpg、assembly.jpg、ui_live.jpg | 报告保留清楚标注的待补图位 |\n| P0 | 机械、电路原件 | 总装与关键尺寸/轴向/零点/限位；J2.3/E10→接口器件→舵机的线序、两侧电源/地、连接端子和保护；提供原始CAD/SCH或清晰实拍标注 | mechanical.pdf、wiring.pdf、pinout.csv | 已有信号示意；最终机械图与电气原理图待补 |\n| P0 | 同一最终release | 应用、相机、控制器、FPGA、Windows、模型、配置、启动方式分别列版本/SHA，收拢为一致发布清单 | release_manifest.json | 不能把较早通用aura树直接当现役最终源码 |\n| P0 | 原始AI开发问答 | FPGA、DPU、LLM输出、GPU协调、记忆等实际案例的原提示词、关键回答、纠错、人工决定、日期/工具版本与对应文件 | ai_collaboration/case_01/等 | 已有工程案例与索引；历史原始逐轮问答未齐 |\n| P0 | 工程复现输入 | 现脚本所需参考DCP、IP源码/仓库、平台输入、工具/模型版本、准备/构建/运行入口，实际在新目录执行记录 | reproduction.md、dependencies.json、logs/ | 参考DCP125,094,047B仍是输入；历史绝对路径未闭环 |\n\n照片中应能认出作品与板卡。不要用角色渲染图、框图或下载的开发板宣传图替代实物成果；现在插入的角色样例只作为归档软件输出。报告标题页和正文不填写学校或指导教师信息。\n\n## 二、需要补的验收证据\n\n本轮只制作文档，下面是后续安排；没有在本轮执行设备或模型实验。\n\n| 项目 | 最小记录内容 | 为什么需要 |\n| --- | --- | --- |\n| 音频与业务恢复 | 实际boot/版本、MCP01枚举、服务READY、完整录音→ASR→回答→播放/字幕、最终停止状态 | 最新保存的ec12是文件已应用但未READY |\n| 视觉与身份 | 模型SHA、有效帧、已登记/未知/多人场景、错误/拒绝结果与样本数 | 公开1000对结果不能代替现场完整质量 |\n| 单轴与停止 | 最终接线、位置参考、限定命令、外部PWM测量、实际方向/角度、失源/停止/恢复回执 | 宽脉宽能力不能代替±90°机械验收；最新异常需收尾 |\n| 记忆与摘要 | 同一合法会话、自然超过五分钟、原文/摘要状态、追问和真实回答 | 现有结果为STORAGE_PASS_RECALL_PENDING |\n| 冷启动与长稳 | 最终版本的启动日志、实屏、相机/音频恢复和持续并发观察 | 既有短窗不支持长期稳定性声明 |\n| 主机迁移 | 新GPU、显存、驱动/运行库、LLM/TTS版本、冷暖态和实际请求结果 | 旧主机与Laptop候选数据不能移作桌面5090成绩 |\n\n有原始数据但没有新实验的项目，可以保留历史阶段结果并写清范围。最终验收未完成时，把该项列为待验，不填目标值。\n\n## 三、优化对照怎样准备\n\n已有YuNet/SFace固定输入、两版FPGA资源及短字段模型阶段对照，本稿已引用。额外的整机或调度收益需要公平实验：固定同一release、相同输入和任务集合、相同主机/板卡、相同分辨率、目标人数与背景负载，交替执行基线和优化版；保存每次原始数据和失败样本。\n\n建议数据表字段：experiment_id、release_id、input_id、mode、sample_count、warmup、start_event、end_event、latency_ms、frame_age_ms、deadline_miss、discard_reason、cpu_percent、dpu_busy_percent。按相同定义汇总P50/P95/P99、有效结果频率和资源，不拿单例或不同台词硬算加速比。\n\n语音必须注明起点是发言结束、ASR完成还是服务请求；终点是首正文、首PCM、软件开始播放还是真实扬声器首声。若没有声学测量，保留软件事件名称。\n\n资源同时准备最终Vivado的utilization、clocks、timing、check_timing、route、DRC，必要时补CDC。CLB、LUT、DPU运行忙时、CPU和GPU是不同口径；内存总占用与GPU/XRT/CMA不能再次相加。\n\n## 四、AI与Skill附件怎样补\n\n每个历史AI案例使用“真实输入→关键回答→发现的问题→人工判断/实际修改→验证→最终版本”结构。现有五案例可继续复用，不把工程复盘改写为不存在的逐字对话。若拿不到某段原始记录，明确缺失并用真实源码、日志及时间支持可确认部分。\n\nPYNQ离线初版已有15项单元测试、加法36例/CRC37例及解压复现。保留合同、生成器、独立参考、反例、原始日志、适用范围和失效条件即可说明当前效果。真实PYNQ、跨板和非作者复用尚未完成；若申报相应加分，须另外补对应验证，不能仅凭两个软件示例认定。\n\n## 五、两份稿件的最后替换位置\n\n| 稿件 | 需要替换或更新的地方 |\n| --- | --- |\n| 赛事方稿 | 2.2.2机械图；3.1正面/45°照片；3.2.2板卡特写；3.2.3最终界面；3.3最终同版指标与状态 |\n| AMD稿 | 2.5范围；3.3最终电路；4.4严格调度收益（如已测）；4.8最终验收；5原始问答；6实际Skill复用；7最终依赖/运行/复现与release |\n| 两份都要更新 | 实际Windows主机、最终硬件SKU、版本日期、原始指标及引用、文内待补项、最终结论 |\n\n改完后在Word/WPS确认表格和图片分页，导出正式PDF，再复查所有数值在摘要、正文和表格中一致。PDF审阅版由同一Markdown独立排版，不是Word直接转换，最终投稿可用核对后的Word导出版本。\n\n## 六、上传材料与格式\n\n根据这次提供的《2026FPGA创新设计赛道作品上传要求.pdf》：\n\n| 材料 | 文件要求 |\n| --- | --- |\n| 作品介绍视频 | MP4，AVC(H.264)；建议3分钟内，文件300M内；以作品演示为重点 |\n| 作品设计报告 | PDF，50M以内；模板以作品上传页为准 |\n| 全部代码 | RAR，200M以内 |\n| 承诺及使用授权书 | 按官网下载中心提供的版本准备与签署 |\n| 项目工程链接 | 按企业指南准备GitHub/Gitee开源及许可；后台字段原文为github链接 |\n| 照片 | 作品全局和开发板高清特写 |\n| 海报 | 按企业要求；AMD决赛要求需按入围及后续通知核对 |\n| 截止时间 | PDF列2026年11月4日18时，未注明时区；不要按本机时区自行换算 |\n\n此前200MB说明使用ZIP举例；本次提供的正式上传原件明确写RAR，最终代码包按RAR要求处理，原体积与依赖分析仍可参考。现有报告目录不是最终工程RAR包，本轮没有打包全部源码或上传。\n\n上传前由队伍在后台确认实际赛道、组别、模板、字段和有效回执。若系统只有一个报告上传栏，不假设它支持第二附件；依据实际字段决定合并为“赛事模板正文＋AMD补充章节”或通过允许渠道提供第二份，并重新检查50M限制。\n",
+  "2026-11-02_project_structure/evidence/teacher_submission_guidance.txt": "来源：用户在本次对话中转述的赛事方老师补充说明。\n\n“学会把你需要表达的重点内容抽象出来，工程包如果只需要复现工程，脚本➕源代码就够了，不需要提交任何工程文件，日记和证据如果你抽象了关键点，很难超过系统提交的文件大小要求。”\n\n本次目录设计据此采用“完整源码＋重建脚本＋精简关键说明”的提交方式。\n生成的工程目录、综合实现中间物、预编译固件与全量开发日记不作为此源码包内容。\n约束、BD生成定义、自定义IP配置、初始化数据、依赖来源等必要设计输入仍须完整提供。\n",
+  "targeted_overlay_and_results": [
+    {
+      "path": "/home/ghmd/aura-pan-wide-20261028/validation/rtl/result.json",
+      "bytes": 1094
+    },
+    {
+      "path": "/home/ghmd/aura-pan-wide-20261028/validation/rtl_first_attempt/result.json",
+      "bytes": 822
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/nds32/boot/dts/ae3xx.dts",
+      "bytes": 1633
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/microblaze/boot/dts/system.dts",
+      "bytes": 10163
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/microblaze/boot/dts/Xilinx-KC705_SMP_4.dts",
+      "bytes": 25341
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/cavium/thunder2-99xx.dtsi",
+      "bytes": 3486
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/cavium/thunder-88xx.dtsi",
+      "bytes": 9795
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/cavium/thunder-88xx.dts",
+      "bytes": 2531
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/cavium/thunder2-99xx.dts",
+      "bytes": 587
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/socionext/uniphier-ld11-ref.dts",
+      "bytes": 1217
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/socionext/uniphier-pinctrl.dtsi",
+      "bytes": 37
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/socionext/uniphier-ref-daughter.dtsi",
+      "bytes": 42
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/socionext/uniphier-ld11-global.dts",
+      "bytes": 2981
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/socionext/uniphier-ld20-ref.dts",
+      "bytes": 1326
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/socionext/uniphier-pxs3-ref.dts",
+      "bytes": 1979
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/socionext/uniphier-ld20.dtsi",
+      "bytes": 22837
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/socionext/uniphier-pxs3.dtsi",
+      "bytes": 21021
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/socionext/uniphier-support-card.dtsi",
+      "bytes": 42
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/socionext/uniphier-ld20-akebi96.dts",
+      "bytes": 2840
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/socionext/uniphier-ld11.dtsi",
+      "bytes": 14810
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/socionext/uniphier-ld20-global.dts",
+      "bytes": 2850
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/apm/apm-mustang.dts",
+      "bytes": 1259
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/apm/apm-merlin.dts",
+      "bytes": 1191
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/apm/apm-storm.dtsi",
+      "bytes": 29256
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/apm/apm-shadowcat.dtsi",
+      "bytes": 20395
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mm-venice-gw73xx.dtsi",
+      "bytes": 8398
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mq-hummingboard-pulse.dts",
+      "bytes": 6084
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mm-icore-mx8mm-edimm2.2.dts",
+      "bytes": 1906
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mm-nitrogen-r2.dts",
+      "bytes": 16363
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mm-venice-gw72xx-0x.dts",
+      "bytes": 364
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/fsl-lx2160a-clearfog-itx.dtsi",
+      "bytes": 1903
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8-ss-lsio.dtsi",
+      "bytes": 8990
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/qoriq-bman-portals.dtsi",
+      "bytes": 1910
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mm-venice-gw72xx.dtsi",
+      "bytes": 7234
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mm-evk.dtsi",
+      "bytes": 10901
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8qxp-colibri-eval-v3.dtsi",
+      "bytes": 875
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mn.dtsi",
+      "bytes": 29962
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/fsl-ls1028a-kontron-sl28.dts",
+      "bytes": 5505
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/fsl-ls1088a.dtsi",
+      "bytes": 28198
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/fsl-ls1028a-kontron-sl28-var1.dts",
+      "bytes": 1524
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi",
+      "bytes": 33861
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mq-evk.dts",
+      "bytes": 13988
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/fsl-ls1028a-kontron-sl28-var3-ads2.dts",
+      "bytes": 2503
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/qoriq-fman3-0-1g-4.dtsi",
+      "bytes": 828
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/fsl-lx2160a-clearfog-cx.dts",
+      "bytes": 315
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mm-var-som.dtsi",
+      "bytes": 13401
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mq.dtsi",
+      "bytes": 45991
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mn-evk.dtsi",
+      "bytes": 10337
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/fsl-ls1028a-qds.dts",
+      "bytes": 5576
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mn-var-som-symphony.dts",
+      "bytes": 5306
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mp-evk.dts",
+      "bytes": 12071
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mm-ddr4-evk.dts",
+      "bytes": 1469
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mm-venice-gw73xx-0x.dts",
+      "bytes": 363
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/qoriq-fman3-0-10g-1.dtsi",
+      "bytes": 845
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/s32v234-evb.dts",
+      "bytes": 371
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mn-evk.dts",
+      "bytes": 2626
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8-ss-img.dtsi",
+      "bytes": 2554
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8qxp-ss-img.dtsi",
+      "bytes": 207
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/fsl-ls2080a-simu.dts",
+      "bytes": 542
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mq-thor96.dts",
+      "bytes": 13167
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mq-librem5-r4.dts",
+      "bytes": 629
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/fsl-ls2088a-rdb.dts",
+      "bytes": 2530
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mq-zii-ultra.dtsi",
+      "bytes": 18686
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/qoriq-fman3-0-1g-5.dtsi",
+      "bytes": 828
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/qoriq-fman3-0-1g-1.dtsi",
+      "bytes": 828
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/fsl-lx2162a-qds.dts",
+      "bytes": 5344
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mq-librem5-r2.dts",
+      "bytes": 561
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mq-mnt-reform2.dts",
+      "bytes": 4282
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mn-venice-gw7902.dts",
+      "bytes": 19290
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mq-librem5-r3.dts",
+      "bytes": 648
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mq-librem5-devkit.dts",
+      "bytes": 23825
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/qoriq-fman3-0-1g-2.dtsi",
+      "bytes": 828
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mm-venice-gw71xx.dtsi",
+      "bytes": 3898
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mq-zii-ultra-zest.dts",
+      "bytes": 1321
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8qxp-colibri.dtsi",
+      "bytes": 18611
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mm-beacon-baseboard.dtsi",
+      "bytes": 6424
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mm-kontron-n801x-som.dtsi",
+      "bytes": 6912
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mq-pico-pi.dts",
+      "bytes": 10257
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8-ss-adma.dtsi",
+      "bytes": 169
+    },
+    {
+      "path": "/home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/boot/dts/freescale/imx8mm-venice-gw700x.dtsi",
+      "bytes": 10293
+    }
+  ]
+}

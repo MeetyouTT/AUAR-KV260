@@ -1,0 +1,51 @@
+左侧触发后停止目标 .40，右侧保持 .45：原核心只读审查
+
+范围
+本次只审原实现的局部兼容改法，不改root候选或板端。触发左线现.05、右侧相机阈值约.806472、镜像方向+1、500..2500us、4us/20ms、原250/500ms期限及2s语义意图期限保持。白线/共享editor target_center_ratio仍.5；已发布的右侧CLI target .45保持。
+源码依据为之前已实读并封存的原core：continuous_face_control.py SHA79bd5380068fbf3729144ec0b7ab9607e16e24d492081d59bcd0c85a98429b81、continuous_session.py SHA2f805b17d39ede6518f8082f4553b0010cb59a28c395b006d0ec28def2793f03、hardware_slew_session.py SHAfb1dd76d2454f4c31e426105f93cd09ecc80501683d6c98f975b839f753b41f6。父代理提供的当前target45版本只改原入口，原24项保持，因此以下审查针对这些core。
+
+最小语义
+1. 在原配置增加一个可选左侧目标；未提供时继承原target_center_ratio，保持旧调用完全一致；本次显式传.40。右侧继续使用原target_center_ratio=.45。两个目标都经原finite/type/中心带位于触发线内的约束验证，容差不改.03。
+2. 新一轮由真实触发side锁存整轮target：左脸框越线candidate=-1取.40，右中心越线candidate=+1取.45。不能由当前脸中心、当前edge、recenter_direction或polarity逐帧改选；recenter_direction是运动方向，trigger_side是原越线来源，两者必须区分。
+3. 原recenter_decision的完成判断在新episode触发分支之前，需让本轮首次band/crossed判断就使用正确有效目标，同时保持原确认门槛。尤其大脸的左沿可能越.05而center已经在.40容差带内，此时应保持停止，不先按.45另动。
+4. 有效目标只作为语义状态保留。不得从语义恢复带回source authority、lease、reference_time、session/epoch、速度或已接受命令。原新鲜图/原anchor期限和post-ARM实际新图仍是唯一输出准入。
+
+需覆盖的引用
+continuous_face_control.py：
+- EdgeConfig L36及L62–68附近：新增可选左目标，原右目标和容差的验证仍保留；检查左右各自band均在合法触发范围内。
+- __init__ L124–127附近：语义锁存side/target的初始状态。
+- status L153：target_center/target_center_ratio应显示有效目标，另保留配置目标信息供审计，避免左轮日志仍写.45。
+- inherit_perception L157–175：与原recenter_active/completed/direction/phase一起复制锁存side/target；原boot/config/context/warmup验证保持。
+- observe L294–297：大跳pending_safe_zone使用锁存有效目标，不能仍用config右目标。
+- recenter_decision L372–404：band、两种crossed、非single-pass edge及raw/filtered距离全部使用同一有效目标。
+- single_pass_decision L426–429：锁方向与距离也使用有效目标；不要用它反过来推断原触发side。
+- stop()/语义清理：避免旧side/target残留到新context或新episode；freeze_at保留已完成目标供状态展示，不带回运动权限。
+continuous_session.py：
+- cache_recenter_intent L59–68：原context/source/expires/original_side/phase之外，保存真实trigger_side与已选择target。
+- restore_recenter_intent L69–91：通过原同boot、service/camera/track/generation/geometry、较新fid和stamp及原expires后，先恢复side/target，再走原observe重确认。意图清除原因（超期、boot/epoch不符、多脸、完整context不符、不可恢复STOP、operator close）同时释放旧目标。
+- ARM后fresh().inherit_perception路径 L264：不得丢锁存目标。
+- status L112：顶层target_center_ratio也不能固定显示右侧config目标。
+- stop_segment/disconnected：原fresh与intent路径不改输出保护；语义恢复仍不得续旧图或复活旧epoch。
+hardware_slew_session.py：
+- 没有直接读config.target_center_ratio，不需改硬件坡度、endpoint选择、COMMIT逻辑。
+- finish_visual_center原先保存previous对象，STOP后freeze_at再设completed；该previous应保留本轮side/target。若引入preserve_episode_from辅助函数，必须是同boot/config/context下只复制语义状态，不能复制source/lease/滤波速度来替代原inherit_perception。
+- stop_segment原先委托super再清latched_endpoint/last_ramp_source，保持原行为。
+
+可复用的本地纯测试
+已有入口：deliverables/2026-10-31_visual_axis_maintenance/baseline/controller/test_hardware_slew.py 的FrameSlewDevice/scene、test_wide_range.py 的wide_scene，以及tests/fixtures/test_recenter.py 的Scene/UnusedTrajectory。仅使用Python模拟寄存器与合成人脸包，不构成实板通过。root候选可放独立sys.path导入，不修改这些原测试文件。
+至少覆盖：
+1. 左触发.05、小脸中心递增：本轮有效目标.40，进入[.37,.43]或跨越.40停止，不等待旧.45；命令只有原负向endpoint，无反向目标。
+2. 右触发>原right，中心递减：有效目标始终.45，.50仍不能按左目标停止，进入[.42,.48]或跨越.45按原规则停止；原正向endpoint/期限相同。
+3. 左trigger但center已在.40容差内的大脸：无额外PWM；双方向触发确认计数不放宽。
+4. ARM重建controller后目标/side保留，但source为空且等待真实post-ARM图；预ARM旧包不能COMMIT。
+5. 同context短失脸/断流/原source expiry：原STOP，intent只保留原期限内的.40/side；恢复要求新fid/stamp和重确认，不退回.45。2s期满不恢复旧左目标。
+6. boot、service_epoch、camera_epoch、track_generation变化或多脸：清旧语义；原STOP且不自动采纳新目标。硬件epoch改变走原permission-lost，不重试ARM。
+7. 测量大跳到.40附近/跨越目标：pending_safe_zone使用.40，立即保持原停止保护，不用.45误判；乱序、重复、过期anchor不续租。
+8. 左轮经过另一侧位置或测量crossing时，目标不会因当前center而重选；原single-pass不反向。
+9. 左轮完成后真正新的右trigger可选择.45，反之亦然；旧目标不污染新episode。
+10. 缺左参数完全保持两边.45原行为；非法bool/string/NaN/inf/越界band拒绝。所有日志的本轮effective target与控制实际一致。
+
+数值解释
+白线仍.5、名义显示content x92宽400。左目标.40名义x252，较当前.45的x272左移20显示px；左容差[.37,.43]对应约x240..264。右目标.45及容差[.42,.48]、右侧行为保持。该目标只约束视觉停止判断，不保证机械位置或每次精确像素停点；原crossed/失源/硬件保护可以先停止。
+
+未执行板端读写、服务/信号、MMIO、模型或运动；未修改root候选源码。

@@ -1,0 +1,180 @@
+--- before/common/inference_output_contract.py
++++ after/common/inference_output_contract.py
+@@ -9,7 +9,7 @@
+ import math
+ 
+ 
+-FORMATS = frozenset({'json', 'dialogue_schema_v1', 'dialogue_abc_v1'})
++FORMATS = frozenset({'json', 'dialogue_schema_v1', 'dialogue_abc_v1', 'dialogue_ab_v1'})
+ FIELDS = {'a': 'reply_text', 'b': 'emotion', 'c': 'avatar_action'}
+ EXTRA_METRICS = frozenset({
+     'first_packet_ms', 'first_content_ms', 'first_json_closed_ms', 'backend_done_ms',
+@@ -26,13 +26,18 @@
+     pass
+ 
+ 
+-def dialogue_schema(*, compact=False):
++def dialogue_schema(*, compact=False, omit_action=False):
++    if type(omit_action) is not bool or omit_action and not compact:
++        raise OutputContractError('invalid_dialogue_schema')
+     names = ('a', 'b', 'c') if compact else ('reply_text', 'emotion', 'avatar_action')
+-    return {'type': 'object', 'properties': {
++    properties = {
+         names[0]: {'type': 'string'},
+         names[1]: {'type': 'string', 'enum': ['neutral', 'friendly', 'happy', 'sad']},
+-        names[2]: {'type': 'string', 'enum': ['']},
+-    }, 'required': list(names), 'additionalProperties': False}
++    }
++    if not omit_action:
++        properties[names[2]] = {'type': 'string', 'enum': ['']}
++    return {'type': 'object', 'properties': properties,
++            'required': list(names[:2] if omit_action else names), 'additionalProperties': False}
+ 
+ 
+ def build_body(base, payload):
+@@ -45,7 +50,8 @@
+     if mode != 'json' and (payload['task'] != 'dialogue' or options.get('think', False)):
+         raise OutputContractError('incompatible_output_format')
+     body.update(messages=copy.deepcopy(payload['messages']), stream=True,
+-                format=('json' if mode == 'json' else dialogue_schema(compact=mode == 'dialogue_abc_v1')),
++                format=('json' if mode == 'json' else dialogue_schema(compact=mode in ('dialogue_abc_v1', 'dialogue_ab_v1'),
++                                                                       omit_action=mode == 'dialogue_ab_v1')),
+                 keep_alive=-1, think=options.get('think', False))
+     body['options']['num_predict'] = options.get('num_predict', 512 if payload['task'] == 'summary' else 120)
+     return body
+@@ -60,8 +66,10 @@
+     return result
+ 
+ 
+-def canonicalize_compact(raw):
++def canonicalize_compact(raw, *, mode='dialogue_abc_v1'):
+     """Restore canonical keys only after a whole, bounded object was received."""
++    if mode not in ('dialogue_abc_v1', 'dialogue_ab_v1'):
++        raise OutputContractError('invalid_compact_mode')
+     if not isinstance(raw, str) or not raw:
+         raise OutputContractError('invalid_compact_output')
+     try:
+@@ -70,16 +78,18 @@
+         value = json.loads(raw, object_pairs_hook=_unique)
+     except (ValueError, TypeError, UnicodeError):
+         raise OutputContractError('invalid_compact_output') from None
+-    if not isinstance(value, dict) or set(value) != set(FIELDS):
++    expected = {'a', 'b'} if mode == 'dialogue_ab_v1' else set(FIELDS)
++    if not isinstance(value, dict) or set(value) != expected:
+         raise OutputContractError('invalid_compact_fields')
+     text = value['a']
+     if (not isinstance(text, str) or not 1 <= len(text.strip()) <= 500
+             or any(ord(char) < 32 or 0xD800 <= ord(char) <= 0xDFFF for char in text)
+             or '<think' in text.lower()
+             or not isinstance(value['b'], str) or value['b'] not in {'neutral', 'friendly', 'happy', 'sad'}
+-            or value['c'] != ''):
++            or mode == 'dialogue_abc_v1' and value['c'] != ''):
+         raise OutputContractError('invalid_compact_content')
+-    return json.dumps({FIELDS[key]: value[key] for key in FIELDS}, ensure_ascii=False, separators=(',', ':'))
++    canonical = dict(reply_text=text, emotion=value['b'], avatar_action='')
++    return json.dumps(canonical, ensure_ascii=False, separators=(',', ':'))
+ 
+ 
+ class StreamObservation:
+--- before/board/runtime/compact_request_adapter.py
++++ after/board/runtime/compact_request_adapter.py
+@@ -12,7 +12,7 @@
+ 
+ class CompactRequestAdapter:
+     def __init__(self, transport, *, system_prompt, capabilities, mode='dialogue_abc_v1'):
+-        if mode not in {'json', 'dialogue_schema_v1', 'dialogue_abc_v1'}:
++        if mode not in {'json', 'dialogue_schema_v1', 'dialogue_abc_v1', 'dialogue_ab_v1'}:
+             raise ValueError('invalid_adapter_mode')
+         if not isinstance(system_prompt, str) or not system_prompt.strip():
+             raise ValueError('require_exact_static_prompt')
+@@ -28,6 +28,12 @@
+             translated, count = re.subn(pattern, alias, translated)
+             if not count:
+                 raise ValueError('static_prompt_contract_missing')
++        if mode == 'dialogue_ab_v1':
++            # The selected board persona has exactly this fixed empty-action
++            # clause. Remove that redundant output obligation, never a policy.
++            if translated.count('c为空字符串') != 1:
++                raise ValueError('static_empty_action_contract_missing')
++            translated = translated.replace('c为空字符串', '不输出动作字段', 1)
+         self.translated_prompt = translated
+ 
+     def request(self, kind, payload, *, deadline, cancelled):
+@@ -40,17 +46,17 @@
+         if route:
+             sent = copy.deepcopy(original)
+             sent['options']['output_format'] = self.mode
+-            if self.mode == 'dialogue_abc_v1':
++            if self.mode in ('dialogue_abc_v1', 'dialogue_ab_v1'):
+                 sent['messages'][0]['content'] = self.translated_prompt
+             sent = validate_request(kind, sent)
+         response = self.transport.request(kind, sent, deadline=deadline, cancelled=cancelled)
+         checked = validate_response(response, Owner.from_dict(original), kind)
+-        if route and self.mode == 'dialogue_abc_v1' and checked['ok']:
++        if route and self.mode in ('dialogue_abc_v1', 'dialogue_ab_v1') and checked['ok']:
+             if cancelled():
+                 raise InterruptedError('cancelled_before_compact_decode')
+             # No fallback/retry model request on malformed compact output.
+             checked = copy.deepcopy(checked)
+-            checked['result']['text'] = canonicalize_compact(checked['result']['text'])
++            checked['result']['text'] = canonicalize_compact(checked['result']['text'], mode=self.mode)
+             checked = validate_response(checked, Owner.from_dict(original), kind)
+         return checked
+ 
+--- before/board/runtime/board_dialogue_client.py
++++ after/board/runtime/board_dialogue_client.py
+@@ -179,9 +179,9 @@
+             return None
+         version, formats = backend.get('format_contract_version'), backend.get('output_formats')
+         if (type(version) is not int or version != 1 or not isinstance(formats, list)
+-                or not 1 <= len(formats) <= 3
++                or not 1 <= len(formats) <= 4
+                 or any(not isinstance(item, str) or item not in
+-                       ('json', 'dialogue_schema_v1', 'dialogue_abc_v1') for item in formats)
++                       ('json', 'dialogue_schema_v1', 'dialogue_abc_v1', 'dialogue_ab_v1') for item in formats)
+                 or len(set(formats)) != len(formats) or 'json' not in formats):
+             return None
+         return dict(format_contract_version=1, output_formats=list(formats))
+--- before/tools/production_output_format.py
++++ after/tools/production_output_format.py
+@@ -9,7 +9,7 @@
+ 
+ 
+ def validate_dialogue_output_format(value):
+-    if not isinstance(value, str) or value not in ('json', 'dialogue_abc_v1'):
++    if not isinstance(value, str) or value not in ('json', 'dialogue_abc_v1', 'dialogue_ab_v1'):
+         raise ValueError('invalid_dialogue_output_format')
+     return value
+ 
+@@ -30,9 +30,9 @@
+                 or type(value.get('format_contract_version')) is not int
+                 or value['format_contract_version'] != 1
+                 or not isinstance(value.get('output_formats'), (list, tuple))
+-                or not 1 <= len(value['output_formats']) <= 3
++                or not 1 <= len(value['output_formats']) <= 4
+                 or any(not isinstance(item, str) or item not in
+-                       ('json', 'dialogue_schema_v1', 'dialogue_abc_v1')
++                       ('json', 'dialogue_schema_v1', 'dialogue_abc_v1', 'dialogue_ab_v1')
+                        for item in value['output_formats'])
+                 or len(set(value['output_formats'])) != len(value['output_formats'])
+                 or 'json' not in value['output_formats']):
+@@ -41,7 +41,7 @@
+ 
+     def public(self):
+         capabilities = self._capabilities()
+-        enabled = bool(self.mode == 'dialogue_abc_v1' and capabilities
++        enabled = bool(self.mode in ('dialogue_abc_v1', 'dialogue_ab_v1') and capabilities
+                        and self.mode in capabilities['output_formats'])
+         return dict(metadata_only=True, configured_format=self.mode,
+                     negotiated_dialogue_format=self.mode if enabled else 'json',
+--- before/tools/model_inference_host.py
++++ after/tools/model_inference_host.py
+@@ -729,7 +729,7 @@
+ 
+     def health(self):
+         return dict(model=self.model, tts='omnivoice', num_step=16,
+-                    format_contract_version=1, output_formats=['json', 'dialogue_schema_v1', 'dialogue_abc_v1'],
++                    format_contract_version=1, output_formats=['json', 'dialogue_schema_v1', 'dialogue_abc_v1', 'dialogue_ab_v1'],
+                     voice=self.voice.health(), tts_ready=self._tts_ready(),
+                     warmup_automatic=False, gpu_coordination=self.gpu.public())
+ 

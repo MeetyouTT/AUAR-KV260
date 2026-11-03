@@ -1,0 +1,34 @@
+第五轮：文档整理（执行 W17-06 + 补齐缺失 docx）· 落档校验报告
+生成时间：2026-09-26 23:34:00
+============================================================
+
+一、W17-06 双麦接线口径（已勾选并复核）
+  D2 六处改动：§1.2 占用 PL IO 3 根→**4 根**（BCLK/LRCLK/SD_L/SD_R）；§3.3 由“共用同一总线”改为“共用 BCLK/WS、各自独立 SD”并写明 Pmod 预算（双麦 4 + 舵机 3 = 7，余 1 备用）；
+  §4.1 引脚表 SD 行拆为 **SD_L（IO-3）/ SD_R（IO-7）**；PL 侧 IO 占用表 3 根→**4 根**并新增 `aud_sd_r`；§6.1 数据流图改为“SCK/WS 共用；SD_L/SD_R 独立”。
+  D2 = 63503 B / 831 行 / sha F192FE2A8FEB4299303838305C96F050808FD44DA50E9C156F5BE1EF0A6C0906；D5 = 122724 B / 1174 行 / sha 4E340F30FDDD3E524BF635744DA632FF1549ECD2B37310A72D4F0CAA577EA506。
+  备份：见同目录 `.bak_D2-W17-06_20260926_233355` / `.bak_D5-W17-06_20260926_233355`。
+
+二、补齐缺失 docx（W17-22 的一部分）
+
+  渲染 amd_kv260_plan_d_mic_array_implementation_v1_0.md          rc=0 docx=OK 段落 296 / 表格 42
+  渲染 amd_kv260_full_work_requirements_v3.md                     rc=0 docx=OK 段落 675 / 表格 20
+  渲染 amd_kv260_20day_3person_execution_plan_v2.md               rc=0 docx=OK 段落 279 / 表格 15
+  渲染 amd_kv260_integrated_innovation_and_execution_plan_v1_0.md rc=0 docx=OK 段落 240 / 表格 12
+  渲染 amd_kv260_plan_v1_0.md                                     rc=0 docx=OK 段落 283 / 表格 18
+  渲染 aura_plan_a_fpga_hardware_30days.md                        rc=0 docx=OK 段落 264 / 表格 1
+  渲染 aura_plan_b_vision_identity_30days.md                      rc=0 docx=OK 段落 265 / 表格 1
+  渲染 aura_plan_c_av_interaction_30days.md                       rc=0 docx=OK 段落 267 / 表格 2
+  渲染 deep-research-report (1).md                                rc=0 docx=OK 段落 873 / 表格 20
+  渲染 AURA_KV260_外设控制与采购规格_2026-09-26.md                         rc=0 docx=OK 段落 49 / 表格 2
+  渲染 fpga_framework.md                                          rc=0 docx=OK 段落 371 / 表格 19
+
+三、剩余未闭合（判据④）
+  仍缺 docx：见上“复核”行（若为 0 则本项完成）；无 md 的 docx：`000.docx`（外部分析件，不转 md）与 `111.docx`（D4，**先去重再落 md+docx**，属 W17-22 剩余工作）。
+
+说明：本轮只做文档层整理与已判定口径落实；未上板、未采购。
+
+四、第二次补丁与 README（同日）
+  D2 第 200 行（§3.3「接线最省」）与第 264 行（§4.1 前言「本方案只用 3 个 IO」）按行号整行替换：
+    → 均改为双麦 **4 个 IO**（BCLK/WS/SD_L/SD_R），并写明 Pmod 8 根信号中双麦 4 + 舵机 3 = 7、余 1 备用；
+    备份：`.bak_w17-06b_*`、`.bak_w17-06c_*`；残留复核：'3 个 PL IO'=0、'只用 3 个 IO'=0、'共 3 根'=0。
+  新增 `Docs\README.md`（+ docx）：文档索引与整理纪律。全库复核：md 27 份，**缺 docx 0 份**，无 md 的 docx 2 份（`000.docx`／`111.docx`），备份 17 个。

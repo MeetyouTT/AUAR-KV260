@@ -1,0 +1,29 @@
+v20 前端公开音频 ABBA 对照
+
+root 先完成 ASR 对照，再串行执行本包。保持用户已保存的暂停状态。
+先确认 Windows 推理服务空闲、当前没有摘要调用。测试期间保持现有相机与角色界面负载。
+
+准备目录
+/home/root/aura-public-frontend-v20-20261031/72bc7bbefd2d69d2
+root 将 PACKAGE_MANIFEST.json 以及 files 内的八份文件按原字节放入该目录，使用独立的 root 所有目录。
+既有公共 WAV、GTCRN、Silero、FFT 和 ASR 依赖沿用板端固定路径。
+
+本地或板端 dry 校验
+python3 -B /home/root/aura-public-frontend-v20-20261031/72bc7bbefd2d69d2/run_frontend_abba.py --package-sha256 72bc7bbefd2d69d2738ad01456963cb9f06d267d51f9d59f0b6fd2673e424cb1
+
+root 实机执行
+python3 -B /home/root/aura-public-frontend-v20-20261031/72bc7bbefd2d69d2/run_frontend_abba.py --package-sha256 72bc7bbefd2d69d2738ad01456963cb9f06d267d51f9d59f0b6fd2673e424cb1 --execute-root-only
+
+外层 SSH 等待预算设为 470 秒。runner 四槽总预算 420 秒，每槽独立自有子进程上限 90 秒，其中预留 8 秒用于本进程组的有界回收。
+A1、B1、B2、A2 串行执行，任一槽失败立即停止后续槽。输出保存为新的公开测量 JSON 文件。
+
+离线比较
+python E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\performance_review_newboot\frontend_budget_v20\compare_frontend_abba.py <本次公开测量JSON>
+
+测量包含原构造期 32 帧预热、每槽两次完整公开文件处理和一次原 8 帧输入队列的定时端点测试。
+一线程使用原默认 spinning，双线程只关闭该 GTCRN 会话的 intra_op spinning，Silero 继续一线程。
+比较包含公开输出哈希、VAD 决策、原连续端点 PCM、消费者与全进程 CPU、50 帧窗口及队列余量。
+通过公开筛选后，由 root 安排正常 IPC 入口与持续实机对话验证。
+
+当前配置与模型资源沿用 v90 的相同哈希。380 项实际来源、boot、supervisor、GTK、camera 身份以及 PAUSED 状态在加载模型前后核对。
+后台记忆计数或采集计数变化会阻止自动判定该对照适合实机验证。

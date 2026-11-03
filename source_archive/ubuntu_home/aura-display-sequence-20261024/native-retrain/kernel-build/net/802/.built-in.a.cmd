@@ -1,0 +1,1 @@
+cmd_net/802/built-in.a := echo >/dev/null; rm -f net/802/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST net/802/built-in.a net/802/p8022.o net/802/psnap.o net/802/stp.o

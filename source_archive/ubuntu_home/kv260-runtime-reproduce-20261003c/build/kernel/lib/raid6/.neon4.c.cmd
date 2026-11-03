@@ -1,0 +1,1 @@
+cmd_lib/raid6/neon4.c := awk -v N=4 -f /home/ghmd/kv260-runtime-reproduce-20261003c/sources/linux/lib/raid6/unroll.awk < /home/ghmd/kv260-runtime-reproduce-20261003c/sources/linux/lib/raid6/neon.uc > lib/raid6/neon4.c

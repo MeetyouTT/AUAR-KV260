@@ -1,0 +1,21 @@
+独立裁定：4a5e374e 正常停机 helper 的定向本地复核通过，未发现剩余代码阻塞；可以在设备维护权正式交回后进入 Linux 默认只读预检。尚未在板端执行，不能据此认定可立即 --stop。
+
+审查源：camera/normal_stop_current_owner.py
+SHA256: 4a5e374eacc825e16a22664dc6ef1137f5e0950be3dc8b3e477f791faf5e2e91
+旧591b2791已冻结保留，原问题证据见NORMAL_STOP_OWNER_EDGE.json。
+
+已修复的两类旧阻塞：
+1. 死亡判断不再比较全 owner 字典；同 PID+birth 换 exec 仍判存活。PID消失或birth变化才判死亡。现役camera仍要求完整PID/birth/cmd相等，birth输入要求正整数规范字符串。实际提取新owner函数的四场景模型通过，整数birth负例早拒。
+2. 停机前增加当前selected readback与原b77元数据_verify、实际owner run config、Native222全量闭包、op7、Cunit6/ABI2+7cf、lib704，以及camera systemd ExecStart/ExecStop/FragmentPath/DropInPaths精确属性和文件SHA。GUI停前和camera停后均扫描service cgroup无进程。
+
+默认dry-run在mkdir/create前返回。读取路径包含原systemctl show、HTTP GET、文件/proc元数据和钉死的metadata-only _verify；无明确文件写入，不实例化Native。--stop只提交一次原systemctl stop --no-block；无限等待/noKill的原unit合同仍强制检查。25秒仅是观察截止，不会强制结束camera。结果为PENDING时不得重复stop。
+
+intent通过O_EXCL写入并fsync，包含当前boot/source/startup、monotonic计时、primary/overrun与SFace/optional下界。落盘后再次核startup和完整camera owner，然后才提交原stop。全字段optional累计计数与recovery计数已在intent前类型预检；缺项不会默补。实际新boot API是否提供calls/native_completed等字段仍须fresh Linux dry-run确认，不能用last_report代替累计。
+
+停后必须unit正常成功、旧PID+birth已死且cgroup无进程，才读取原checkpoint固定路径；校验同boot/同owner、新于intent、准确final scope/purpose/kind、primary/overrun与SFace不回退、未消费且字节稳定。不改checkpoint/markers/登记数据库/配置。NEW_FINAL_PRESENT只表示轻量新final存在；完整Native原reader、全历史/数组/恢复与quiescence校验仍必需，不能当作已通过full validator。
+
+实际预检还需：当前设备权明确交回；新的boot/owner规范birth/cmd/startup及闭包pin；GUI正常停干净、聆听暂停、enrollment_sampling.stage严格idle，Native健康。历史a6d/1332/26pin本身不是新鲜证据。字段缺失、stage非idle、来源或unit不符时应HOLD。
+
+边界说明：systemctl提交CLI有8秒timeout，超时可能结束CLI辅助进程，不是kill camera。durable intent之后若CLI/观察/文件读取失败，可能只有intent没有result；应先只读协调现状，不能据无result盲重试。原operator wrapper会在内存迁移旧library/unit引用，因此不能擅自要求未动的磁盘run config直接写成704f/7cf。新boot archive-only属于原Native loader域；本helper仅处理当前同boot正常停出的新final，不重新bootstrap，也不混合旧/新计数域。
+
+本次证据：NORMAL_STOP_FIXED_OWNER_CHECK.json（通过）、NORMAL_STOP_OWNER_EDGE.json（旧版反例）。没有SSH、板端HTTP/systemctl/proc查询，没有Linux dry-run、stop、录音、推理或动作；未改helper/候选，未重跑未变的大套件。

@@ -1,0 +1,7 @@
+[
+  {
+    "id": "models_apps_inventory",
+    "command": "python3 -B -c 'import os,json; roots=[\"/usr/share/vitis_ai_library/models\",\"/home/root\",\"/usr/share/vitis_ai_library/samples\",\"/usr/share/vitis_ai_library/test\"]; entries=[];\nfor root in roots:\n for folder,ds,fs in os.walk(root):\n  ds[:]=[d for d in ds if d!=\".git\"]\n  for name in fs:\n   p=os.path.join(folder,name); s=os.stat(p); entries.append({\"path\":p,\"bytes\":s.st_size,\"mtime\":s.st_mtime,\"symlink\":os.path.islink(p)})\nprint(json.dumps(entries,sort_keys=True))'",
+    "timeout": 45
+  }
+]

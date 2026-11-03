@@ -1,0 +1,34 @@
+可以进入替换计划，当前保留原形象；新形象与人格作为同一版本候选。
+
+已有减负证据：人物对话完成的12轮配对渲染测试中，新方案渲染CPU约降低20.05%，PSS约减少189.24MiB；Mali占用约增加32.58MiB。整板CPU平均差异较小且不一致。这组结果支持继续规划，不能直接当作完整业务的性能保证。
+
+本轮完整候选：板端原生Yuki16fps、板端业务工厂和“雪妃”人格已一起运行。实际EGL画面、配对版本/提示词SHA、板端普通对话/记忆能力入口及静态反馈资源均就绪。没有启用Windows画面服务或8fps回退。真实用户库没有迁入，使用独立synthetic目录；没有开麦、实际播放或机械动作。
+
+完整候选的约30秒观测：空闲时整板约2.03核心、GUI进程组约0.72核心、GUI组PSS约628.9MiB，原生成功swap约15.83fps。另一次与公开音频探针同时运行时整板约3.16核心、GUI组约0.76核心、PSS约615.2MiB，约14.21fps。GUI组包含新板端业务，不能与上述纯渲染PSS直接相减；前后场景也不是旧本地16fps/新本地16fps的严格配对A/B。未测物理屏幕scanout或逐帧P95/P99。
+
+两次正常nice0、原8帧/160ms队列、原100ms相机配置的公开WAV处理均通过：降噪/VAD、完整连续PCM端点和Paraformer结果一致，队列峰值2和3，无溢出。单帧仍有超过20ms的长尾，缓冲通过不等于硬实时。第一次处理前后人物计数0→1，第二次0→0；不能声称有人持续出镜的长稳验证完成。独立探针额外构造了模型会话，不代表应用内单实例麦克风链路或实际听音验收。ASR解码约7.30/7.67秒仍是需要评估的交互延迟。
+
+人格候选：御笠雪妃，短称“雪妃”；项目互动风格为慢热、温和、努力表达，简短认真接话。完整提示词978字节，保持原三字段JSON、四种情绪、空动作和原权限规则。形象、名称、自我介绍、唤醒称呼、UI文案和人格按同一profile版本激活/回退；保留原“欸/哎”选项，不猜同音称呼。既有音色及声音参考保持，三条公开静态提示音已由现有OmniVoice16重新生成。其他新演示台词仍需按新文本实际生成，不能给旧音频改名。
+
+三组真实27B→OmniVoice16公开测试已通过，PCM校验后取消未播放：
+你叫什么名字？ → 我是雪妃，你的桌面伙伴。
+我今天有点累。 → 辛苦了，先歇会儿吧。
+没有提供画面时，你知道我穿什么衣服吗？ → 没看到画面，我不清楚哦。
+这些是公开测试回复，没有接入真实记忆，也不等同于长期人格一致性或听感验收。
+
+后续正式替换条件：同一份完整业务、同一输入/分辨率/16fps目标及动作、人物负载相当的旧本地16fps与新本地16fps配对测试；确认资源收益，并完成有人出镜、实际麦克风、播放/口型、取消恢复和长稳验证。当前同时处理音频约14.21fps，显示门槛尚未通过。通过后再将整套形象/人格版本切入正式入口。历史对话原话、用户姓名、身份key和权限不作全局替换，真实库迁移与五分钟清理另按已定方案验收。
+
+试验已收尾：首次直接启动遗漏旧exclusive HTTP端口等待而出现bind冲突，保留失败回执。第二轮使用新r3目录并复用原70秒端口等待，约49.8秒后启动成功；旧r2自动改写的UI设置保持，没有回滚。最终候选正常WM_DELETE退出，原r3-ubuntu入口及286份组件核验通过后恢复。原启动就绪超过辅助工具90秒等待，之后核验已健康，再仅移除本轮guard；没有重复重启或强杀。最后观测UI supervisor487238/GTK487470、相机260102，FAULT/null，监听、麦克风、播放和跟随关闭；这些PID仅属于本次boot，后续必须现读。
+
+证据入口（相对于本报告所在目录）：
+../integration/resume_ui_trial_round2/20261031T020939-actual-native-sample.json
+../integration/resume_ui_trial_round2/20261031T021339-actual-native-sample.json
+../integration/resume_yuki_pipe_capacity/actual_round2_run.json
+../integration/resume_yuki_pipe_capacity/actual_round2_run_repeat.json
+../integration/resume_ui_trial/actual_public_persona_chain.json
+../integration/resume_ui_trial_round2/actual_restore_finalized.json
+../integration/resume_yuki_run_assembly/actual_staged_r3.json
+
+冻结候选源码zip SHA：2c25b6a91a635a9bb70eef00cdc180829c503cdba3382135f8366c72e3242334。
+板端r3组装inspection：58d39ed8757f93c1780bf59408bf0fe15d42ffae4da5a2dbf97218925bedf7cf。
+正式生产入口、真实库迁移和生产正文清理均未切换。

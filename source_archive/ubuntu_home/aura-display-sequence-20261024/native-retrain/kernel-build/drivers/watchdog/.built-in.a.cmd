@@ -1,0 +1,1 @@
+cmd_drivers/watchdog/built-in.a := echo >/dev/null; rm -f drivers/watchdog/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/watchdog/built-in.a drivers/watchdog/watchdog_core.o drivers/watchdog/watchdog_dev.o drivers/watchdog/cadence_wdt.o drivers/watchdog/of_xilinx_wdt.o

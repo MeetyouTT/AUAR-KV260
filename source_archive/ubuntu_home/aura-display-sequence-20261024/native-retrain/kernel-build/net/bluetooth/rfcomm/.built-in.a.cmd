@@ -1,0 +1,1 @@
+cmd_net/bluetooth/rfcomm/built-in.a := echo >/dev/null; rm -f net/bluetooth/rfcomm/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST net/bluetooth/rfcomm/built-in.a net/bluetooth/rfcomm/core.o net/bluetooth/rfcomm/sock.o net/bluetooth/rfcomm/tty.o

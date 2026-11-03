@@ -1,0 +1,2 @@
+import os;from pathlib import Path;assert os.uname().machine=='aarch64';assert Path('/sys/block/mmcblk1/device/cid').read_text().strip()=='0353445345333247805558c00401a100';assert Path('/proc/sys/kernel/random/boot_id').read_text().strip()=='4365d744-ddef-4325-a264-e7bb57cc9bb8';
+exec(compile(Path('/home/root/aura-realtime-vision-20261007/releases/68bd0def762cc3cf/board_motion_launch.py').read_text(),"board_motion_launch.py","exec"))

@@ -1,0 +1,33 @@
+v90 ARM公开8例staging；仅重新绑定基线校验元数据，未部署。
+
+基线startup90f6c6c40f6501362aa77483235a7260a212de6e3357615311bdaa5cc193ebbe；
+manifest6d03c1d7aa95a9c5615f540606699f67c4ee7a44be1e50dcb2983c6c555e3637；
+mapping df6b26927ad60d6d3513429c697d70bd15c84cfdca6d16c5527e9992cb7b04e2。
+boot仍bebd3e7d-e984-4517-8cbb-211df7f1c6dc，379组件，配置5518b670...。
+
+真实UI可保持可见。入口无需真实UI关闭、暂停监听、mic-off或设备/服务停机。
+原因：只有只读379文件hash与独立进程中的合成Store/handler；数据库全在自建
+/dev/shm目录，Runtime和Store都是data_origin=synthetic，不获取生产writer lease、
+不打开真实私库。ASR/TTS/GUI/native-ready是进程内公开fixture，不建真实模型client，
+不打开相机/麦克风/扬声器，也不调用真实UI/聆听控制接口。
+--root-coordinated-slot仅标记root测试进程归属，不是硬件关闭或暂停门槛。
+
+产品源三份与冻结newboot包逐字节一致，冷启动482e工厂及合并b336保持。
+worker与旧版只差STARTUP/SOURCE_MANIFEST/MAPPING三个字符串常量；函数/测试AST
+不变。完整字节回退证明见REBIND_PROOF.json。原r2/newboot目录没有修改。
+
+九份stage文件及校验值见STAGING_MANIFEST.json：worker、candidate manifest、v90 mapping、
+after/三源、两个独立测试文件、冻结公共输入worker。无需上传343源快照、模型或环境。
+依赖仅Python>=3.9与现有OS时区库；不需要pytest/numpy/ONNX。
+
+命令（R=生产根，S=新的绝对stage目录，OUTPUT为新的绝对路径）：
+python3 -B S/arm_public_worker.py --runtime-root R/runtime/aura --startup-config R/startup/config.json --candidate-root S/after --mapping S/source_mapping.v90.json --candidate-manifest S/SOURCE_MANIFEST.json --candidate-manifest-sha256 cd462e0e26e5d41291afea66b8e598b7fcece0560ebe56257b2f79a132e7f820 --original-review S/test_delete_boundaries.py --independent-tests S/test_independent_boundaries.py --public-worker S/worker.py --root-coordinated-slot ROOT_SLOT --output S/NEW_RESULT.json
+可先--check-only另选输出；所有pin/boot/startup校验保留，失败不会进入用例。
+
+用例：独立原4例直接unittest；独立3函数体/断言AST原样执行（raises/patch仅用
+标准unittest适配）；第8例是真实paired路由→LocalHistoryDelete→原Store→完整ACK，
+同时测试少1样本ACK拒绝、派生值清除及production presentation提交通知。
+模拟播放消费不能作为物理听音/真人日期删除验收。
+
+本地新v90绑定8/8通过、临时库清除、线程残留0，未导入pytest/numpy/onnxruntime。
+尚未实际ARM运行，由root执行；不会实际安装M03或更改当前真实UI。

@@ -1,0 +1,34 @@
+--- aura/tools/barge_in_capture.py
++++ aura/tools/barge_in_capture.py
+@@ -31,6 +31,7 @@
+         except Exception:self._release_echo();raise
+ 
+     def _release_echo(self):
++        self._close_endpoint()
+         if self.unsubscribe:self.unsubscribe();self.unsubscribe=None
+         if self.echo:self.echo.close();self.echo=None
+         if self.verifier:self.verifier.close()
+@@ -43,10 +44,12 @@
+         return timer
+ 
+     def _new_endpoint(self):
+-        self.endpoint=SpeechEndpoint(self.max_seconds)
++        self._close_endpoint()
++        self.endpoint=self._endpoint()
+         # Longer onset rejects short echo remnants; retain the existing pre-roll.
+         self.endpoint.vad.config.min_speech_ms=240
+-        self.endpoint.start_frames=12;self.endpoint.ring=__import__('collections').deque(maxlen=22)
++        self.endpoint.start_frames=12
++        self.endpoint.ring=deque(maxlen=self.endpoint.pre_frames+12)
+     def _captured_start(self,started):
+         return super()._captured_start(started)+round(self.discarded_samples*1000/16000)
+ 
+@@ -71,7 +74,7 @@
+             return True
+ 
+     def _reject_candidate(self):
+-        prefix=list(self.confirm_ring)[-10:]
++        prefix=list(self.confirm_ring)[-self.endpoint.pre_frames:]
+         self.discarded_samples=max(0,self.input_samples-len(prefix)*320)
+         self._new_endpoint()
+         self.endpoint.ring.extend(prefix);self.endpoint.total_samples=len(prefix)*320

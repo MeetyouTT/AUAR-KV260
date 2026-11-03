@@ -1,0 +1,26 @@
+独立人脸/声纹登记入口：最终本地候选（2026-11-02，洛杉矶）
+
+用户已明确：先各自独立登记，之后再单独关联。本轮只交付两个独立入口与必要的同actor补名路由；不做新联合alias、不自动创建links、不按同名合并、不发私人记忆权限。原“记住我…”完整联合路径作为兼容保留；它继续受原清晰人脸/明确姓名/确认/三段/最终关联确认等约束。
+
+状态FINAL_LOCAL_CANDIDATE_NOT_DEPLOYED。仅本地源码/合成测试。设备权在CPU维护chat，未做SSH/板端GET/服务/轴/原私库操作。根发布应等CPU返还并对最新实际startup与3个before pin重新CAS，不能覆盖CPU GTK/相机改动或重放f507旧整份startup。
+
+唯一最终目录 candidate_runtime。三文件及完整before/after SHA见SOURCE_MANIFEST.json：
+common/binding_intent.py：显式整句face_only/voice_only。人脸支持“登记人脸，我叫…”、“帮我…”、“请帮我…”及裸命令；声纹复用原speaker_text语法，原“记住我…”正则/语义保留。
+board/runtime/board_business.py：原LocalIdentityReplies中在BindingHub之前分流。face-only与后续姓名/确认只进原VoiceEnrollment；voice-only与三段样本/最终确认只进原business.turn→SpeakerDevice，不调用_visual/_gallery/unified route/FaceExchange。入口mode不是采样FSM，不存名字/PCM或授予任何能力；同一原actor，受原FSM的状态/截止约束。
+board/runtime/audio/board_dialogue_jobs.py：精确01b27底座仅两处tuple改动。memory命令排除集合加face_only/voice_only；identity_enrollment集合仅加face_only，voice_only仍由原speaker_requested→speaker_identity能力进入同一个handler，保留原声纹缺handler错误类别。去掉两处新增kind后的文本与原01b27完全相等，ASR c514、typed NoSpeech映射和其余逻辑保持。
+
+使用与原状态边界：
+“登记人脸，我叫某某”仅原人脸流程，原“确认登记”后采样自动完成保存；完成不接声纹。现役已保存的face1/dbver3应保留，不要求用户再登记。
+“登记声纹，我叫某某”开启原180秒三段流程；开场PCM不计样本。三段不同录音仍须原长度/VAD/一致性/重复PCM/容量/碰撞门槛，最后必须“确认保存声纹”。“确认保存身份关联”“确认登记”等不会变成独立声纹的保存确认或采样。
+裸“登记人脸”沿原face name(active)状态，后续我叫…原样继续。裸“登记声纹”原Device只给补名提示、仍inactive；新mode只在先前显式barevoice、同actor/同session及原120s等名窗内把合法我叫…转成原具名start。只锁存入口，不在此期间采样、存名字或给权限。重复裸命令/普通轮询不延长120s；cancel/reset/换session/超时后裸名不启。
+public新增entry_mode/entry_name_pending两个标量，pending只表示待补名而不是原Device已开始采样。public轮询不清mode；新route入口在原FSM确已完成时清理旧非待名mode，保证face完成→首次voice、voice保存→首次face不被误报忙。
+另一登记活跃时新模态/显式联合请求给固定忙提示，不喂给另一声纹采样器，不静默覆盖或取消原流程。身份只读问句在独立voice期间走原声纹查询状态，不计样本、不证明说话者身份；原状态query保留。原取消/到期/真实故障处理保持。外部reset推进entry epoch；producer前current/epoch守卫及异常CAS清理防止已取消的barevoice复活待名。
+
+验证（全部合成公开数据；不等同真人识别/ARM验收）：
+SPLIT_AND_RACE_FINAL.xml：38项真实Jobs分派/原face+voice FSM/控制器取消/隔离/补名测试 + 原32项start发布竞态，70全过。含原_start_simple+guide完成注册后首次voice正常开启、原Device三段保存后首次face正常开启；不触已存face、不建links/grants、短音及重复PCM拒绝、状态/身份问句不采样、取消/超时/session隔离。
+独立GUI代理原声纹24契约已过；其入口黑盒最新回执见independent_voice_review，发布以前以实读最终8048/c01bb/43708三个SHA重核，旧V1取消反例保留。
+原Jobs/dialogue60项对照：baseline与候选均56通过/同4个旧汐蓝、西兰、唤醒及记忆fixture失败（不改断言）。旧人脸/采样38项36过/同2汐蓝fixture失败，与此前baseline一致。没有把这些标为全绿。初版voice能力分类差异已修复；早期本地Harness缺now_ms/config引出的失败不算产品根因，日志保留。
+
+已保持原文件SHA：face a9113ba4…、router85e415…、SpeakerDevice da9c1995…、identity_links e623e5…、ASR c51488…。未改阈值/质量/声线/模型/保存协议。旧SERVICE_ERROR及原联合AWAIT取消尚未宣称全部根治；新纯声纹仍需root发布后现场三段和完整提交读回验收。声纹保存不代表现场阈值已校准。
+
+CANDIDATE.diff、三文件最终源码和SOURCE_MANIFEST为本轮交付依据。build_candidate.py是初稿构造记录，后续取消/完成交接补丁已有本地迭代；它有existing目录拒绝守卫，不用于覆盖最终候选。不要按旧初稿SHA发布。

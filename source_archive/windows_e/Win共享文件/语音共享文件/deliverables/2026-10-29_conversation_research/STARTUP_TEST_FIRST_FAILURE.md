@@ -1,0 +1,1 @@
+首次锁测试失败记录（保留）：默认tempfile指向Codex沙箱的AppContainer Temp，TemporaryDirectory可返回路径，但随后os.open及目录清理被ACL拒绝。12项测试报3失败/18错误，均涉及该临时目录或后续清理；不能当锁实现通过。已把夹具临时目录显式放到本交付tests目录，校验解析路径确实位于该目录后才允许TemporaryDirectory清理。没有修改业务服务、申请提权或清理未知目录。

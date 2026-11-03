@@ -1,0 +1,62 @@
+====================================================================
+Version:    xcd v2022.2 (64-bit)
+Copyright:  Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+Created:    Thu Oct  1 08:09:22 2026
+====================================================================
+
+1. Kernel and compute unit information
+======================================
+
+Compute Unit: DPUCZDX8G_1
+Kernel: DPUCZDX8G
+Base Address: 0xa0010000
+Clock Pins: aclk, ap_clk_2
+Reset Pins: ap_rst_n_2, aresetn
+
+2. Interface Connections
+========================
+
+IP to Compute Unit
+------------------
+Source Pin: axi_ic_accel_ctrl/M01_AXI
+Destination Pin: DPUCZDX8G_1/S_AXI_CONTROL
+
+Compute Unit to IP
+------------------
+Source Pin: DPUCZDX8G_1/M_AXI_GP0
+Destination Pin: axi_ic_PS_0_S_AXI_HPC1_FPD/S00_AXI
+
+Source Pin: DPUCZDX8G_1/M_AXI_HP0
+Destination Pin: axi_ic_PS_0_S_AXI_HP1_FPD/S00_AXI
+
+Source Pin: DPUCZDX8G_1/M_AXI_HP2
+Destination Pin: axi_ic_PS_0_S_AXI_HP3_FPD/S00_AXI
+
+3. Clock Connections
+====================
+
+Compute Unit: DPUCZDX8G_1
+Source Pin: clk_wiz_0/clk_300M
+Destination Pin: DPUCZDX8G_1/aclk
+
+Compute Unit: DPUCZDX8G_1
+Source Pin: clk_wiz_0/clk_600M
+Destination Pin: DPUCZDX8G_1/ap_clk_2
+
+Clock Instance: clk_wiz_0
+Source Pin: PS_0/pl_clk0
+Destination Pin: clk_wiz_0/clk_in1
+
+4. Reset Connections
+====================
+
+Compute Unit: DPUCZDX8G_1
+Source Pin: proc_sys_reset_600MHz/peripheral_aresetn
+Destination Pin: DPUCZDX8G_1/ap_rst_n_2
+Associated Clock Pin: DPUCZDX8G_1/aclk
+
+Compute Unit: DPUCZDX8G_1
+Source Pin: proc_sys_reset_300MHz/peripheral_aresetn
+Destination Pin: DPUCZDX8G_1/aresetn
+Associated Clock Pin: DPUCZDX8G_1/aclk
+

@@ -1,0 +1,360 @@
+{
+  "scope": "side-path diagnostic inputs; original-engine unverified",
+  "v1_preserved": true,
+  "browser_executed": false,
+  "production_modified": false,
+  "models": {
+    "baseline_texture": {
+      "model": "/mesh-fixtures-v2/baseline_texture/model.psb",
+      "bytes": 20912,
+      "sha256": "92ccdf0392ba243cadd1362c20518847c49e6631881439fb3145c506bbb8171a",
+      "extra_lengths": [],
+      "resource_tags": {
+        "/source/tex/texture/pixel": {
+          "offset": 4369,
+          "tag": "0x19"
+        }
+      },
+      "motion_lastTime": 61,
+      "terminal_frames_retained": true
+    },
+    "blank_absolute": {
+      "model": "/mesh-fixtures-v2/blank_absolute/model.psb",
+      "bytes": 21904,
+      "sha256": "b3d61e6e2559dc21f919d3e54f893a97988d70087ece3b4756d1a33ecb5450a9",
+      "extra_lengths": [
+        384
+      ],
+      "resource_tags": {
+        "/object/test/motion/root/layer/0/meshCombinator/combinatorList/0/rawMeshList": {
+          "offset": 4778,
+          "tag": "0x22"
+        },
+        "/source/tex/texture/pixel": {
+          "offset": 4947,
+          "tag": "0x19"
+        }
+      },
+      "motion_lastTime": 61,
+      "terminal_frames_retained": true
+    },
+    "blank_absolute_delta": {
+      "model": "/mesh-fixtures-v2/blank_absolute_delta/model.psb",
+      "bytes": 22336,
+      "sha256": "57eb3b4debe10efc6d8351b8c8c41691c04a2256f1d5b59aee82764570905431",
+      "extra_lengths": [
+        384,
+        384
+      ],
+      "resource_tags": {
+        "/object/test/motion/root/layer/0/meshCombinator/combinatorList/0/rawMeshList": {
+          "offset": 4779,
+          "tag": "0x22"
+        },
+        "/object/test/motion/root/layer/0/meshCombinator/combinatorList/1/rawMeshList": {
+          "offset": 4821,
+          "tag": "0x22"
+        },
+        "/source/tex/texture/pixel": {
+          "offset": 4990,
+          "tag": "0x19"
+        }
+      },
+      "motion_lastTime": 61,
+      "terminal_frames_retained": true
+    },
+    "blank_conflicting_bp": {
+      "model": "/mesh-fixtures-v2/blank_conflicting_bp/model.psb",
+      "bytes": 21984,
+      "sha256": "f050f65f74118effbd41f66a97ee113d152647e25777a937253a365734641769",
+      "extra_lengths": [
+        384
+      ],
+      "resource_tags": {
+        "/object/test/motion/root/layer/0/meshCombinator/combinatorList/0/rawMeshList": {
+          "offset": 4862,
+          "tag": "0x22"
+        },
+        "/source/tex/texture/pixel": {
+          "offset": 5031,
+          "tag": "0x19"
+        }
+      },
+      "motion_lastTime": 61,
+      "terminal_frames_retained": true
+    },
+    "direct_null_bp": {
+      "model": "/mesh-fixtures-v2/direct_null_bp/model.psb",
+      "bytes": 21648,
+      "sha256": "b98f304a79fe0079569c44f20864d62c64e7892d9a389e73886c37c0d631f5e5",
+      "extra_lengths": [
+        384
+      ],
+      "resource_tags": {
+        "/object/test/motion/root/layer/0/meshCombinator/combinatorList/0/rawMeshList": {
+          "offset": 4565,
+          "tag": "0x22"
+        },
+        "/source/tex/texture/pixel": {
+          "offset": 4727,
+          "tag": "0x19"
+        }
+      },
+      "motion_lastTime": 61,
+      "terminal_frames_retained": true
+    }
+  },
+  "cases": [
+    {
+      "name": "baseline",
+      "mode": "baseline_texture",
+      "variables": {
+        "body_LR": 0,
+        "body_UD": 0
+      },
+      "rig": "/mesh-fixtures-v2/baseline-rig.json",
+      "expected_candidate_bounds": [
+        32,
+        32,
+        96,
+        96
+      ]
+    },
+    {
+      "name": "blank-neutral",
+      "mode": "blank_absolute",
+      "variables": {
+        "body_LR": 0,
+        "body_UD": 0
+      },
+      "rig": "/mesh-fixtures-v2/blank-neutral-rig.json",
+      "expected_candidate_bounds": [
+        32.0,
+        32,
+        96.0,
+        96
+      ]
+    },
+    {
+      "name": "blank-half",
+      "mode": "blank_absolute",
+      "variables": {
+        "body_LR": 15,
+        "body_UD": 0
+      },
+      "rig": "/mesh-fixtures-v2/blank-half-rig.json",
+      "expected_candidate_bounds": [
+        40.0,
+        32,
+        104.0,
+        96
+      ]
+    },
+    {
+      "name": "blank-left-end",
+      "mode": "blank_absolute",
+      "variables": {
+        "body_LR": -30,
+        "body_UD": 0
+      },
+      "rig": "/mesh-fixtures-v2/blank-left-end-rig.json",
+      "expected_candidate_bounds": [
+        16,
+        32,
+        80,
+        96
+      ]
+    },
+    {
+      "name": "blank-right-end",
+      "mode": "blank_absolute",
+      "variables": {
+        "body_LR": 30,
+        "body_UD": 0
+      },
+      "rig": "/mesh-fixtures-v2/blank-right-end-rig.json",
+      "expected_candidate_bounds": [
+        48,
+        32,
+        112,
+        96
+      ]
+    },
+    {
+      "name": "sum-neutral",
+      "mode": "blank_absolute_delta",
+      "variables": {
+        "body_LR": 0,
+        "body_UD": 0
+      },
+      "rig": "/mesh-fixtures-v2/sum-neutral-rig.json",
+      "expected_candidate_bounds": [
+        32.0,
+        32.0,
+        96.0,
+        96.0
+      ]
+    },
+    {
+      "name": "sum-delta-only",
+      "mode": "blank_absolute_delta",
+      "variables": {
+        "body_LR": 0,
+        "body_UD": 30
+      },
+      "rig": "/mesh-fixtures-v2/sum-delta-only-rig.json",
+      "expected_candidate_bounds": [
+        32.0,
+        48,
+        96.0,
+        112
+      ]
+    },
+    {
+      "name": "sum-half",
+      "mode": "blank_absolute_delta",
+      "variables": {
+        "body_LR": 15,
+        "body_UD": 15
+      },
+      "rig": "/mesh-fixtures-v2/sum-half-rig.json",
+      "expected_candidate_bounds": [
+        40.0,
+        40.0,
+        104.0,
+        104.0
+      ]
+    },
+    {
+      "name": "sum-ends",
+      "mode": "blank_absolute_delta",
+      "variables": {
+        "body_LR": 30,
+        "body_UD": 30
+      },
+      "rig": "/mesh-fixtures-v2/sum-ends-rig.json",
+      "expected_candidate_bounds": [
+        48,
+        48,
+        112,
+        112
+      ]
+    },
+    {
+      "name": "bp-neutral",
+      "mode": "blank_conflicting_bp",
+      "variables": {
+        "body_LR": 0,
+        "body_UD": 0
+      },
+      "rig": "/mesh-fixtures-v2/bp-neutral-rig.json",
+      "expected_candidate_bounds": [
+        32.0,
+        32,
+        96.0,
+        96
+      ]
+    },
+    {
+      "name": "bp-half",
+      "mode": "blank_conflicting_bp",
+      "variables": {
+        "body_LR": 15,
+        "body_UD": 0
+      },
+      "rig": "/mesh-fixtures-v2/bp-half-rig.json",
+      "expected_candidate_bounds": [
+        40.0,
+        32,
+        104.0,
+        96
+      ]
+    },
+    {
+      "name": "direct-neutral",
+      "mode": "direct_null_bp",
+      "variables": {
+        "body_LR": 0,
+        "body_UD": 0
+      },
+      "rig": "/mesh-fixtures-v2/direct-neutral-rig.json",
+      "expected_candidate_bounds": [
+        32.0,
+        32,
+        96.0,
+        96
+      ]
+    },
+    {
+      "name": "direct-half",
+      "mode": "direct_null_bp",
+      "variables": {
+        "body_LR": 15,
+        "body_UD": 0
+      },
+      "rig": "/mesh-fixtures-v2/direct-half-rig.json",
+      "expected_candidate_bounds": [
+        40.0,
+        32,
+        104.0,
+        96
+      ]
+    }
+  ],
+  "test_order": [
+    "baseline",
+    "blank-neutral",
+    "blank-half",
+    "sum-delta-only",
+    "sum-half",
+    "bp-neutral",
+    "bp-half",
+    "direct-neutral",
+    "direct-half"
+  ],
+  "hashes": {
+    "baseline-rig.json": "bba8d723008f3641b4bedc836b87d9cf75b56b27141c0aed2841aeacb1a89629",
+    "blank-half-rig.json": "6090da5aedd195b0f5ad594100d2362de604ed5a2f503c588e90cc81f4a0345c",
+    "blank-left-end-rig.json": "346a23639019a602491047bb395f6b9cdf79716f09ca7b08a24981c7deede717",
+    "blank-neutral-rig.json": "71966e7dbf73f5d363fc5758ceba3d14561c76b71b5dd20322fc6f6c8773e752",
+    "blank-right-end-rig.json": "93696a75852321c499e49c0952f8bf01bc34ae53d27404f2b5d6552dd2ea6db5",
+    "bp-half-rig.json": "82e0adbe3b9c3dbc193e94bfd75a6dc6168ef8943092ff8fbfe88e8a71ec4acd",
+    "bp-neutral-rig.json": "d82a8294d0c0695ba6a8f1ae9520ddc36b9287e20b7a19a7eede381e246840d4",
+    "direct-half-rig.json": "b72e3999e1d0b30f8f1d092d981745d0a23fb8ff6558d96d8057b46db7301445",
+    "direct-neutral-rig.json": "1a6afab5980f7c3a485ebc880bb083533ce1762b96d9c9e1e89478b3d896f300",
+    "sum-delta-only-rig.json": "4ddc32a4e9675d7155da9133e331bbb2f32ab04bb1cadccdc6b3c534f0f212a9",
+    "sum-ends-rig.json": "531947a13987f41a939a222b8e915038f6fb687299dfb01e93f561039866903d",
+    "sum-half-rig.json": "5aac5fc83f5144b3de24fc8f157b3124529d00b766863d6b5df98b9d27d21a0a",
+    "sum-neutral-rig.json": "625031194617e39baed4b4670af2133595ceaa95663259ef48cc3d77daef583b",
+    "baseline_texture/compile.log": "8c5dc79fdbbf6f8103c8bf768f165271ea1f9e375e18bb4c4d5a6a0b8bdeb5ce",
+    "baseline_texture/container-tags.json": "70831071595066de734ab261ea935ddf57b8720f7787ac76340c2a3526d61117",
+    "baseline_texture/model.json": "21e2f064569772617fdd1d182ea9be6b45b53d00f0e5185ffb7189aa71f27f10",
+    "baseline_texture/model.psb": "92ccdf0392ba243cadd1362c20518847c49e6631881439fb3145c506bbb8171a",
+    "baseline_texture/model.resx.json": "786256b7be4c30b57e76490d3afb8ad0ccd26b993a93ab566cb6658a37e4f200",
+    "baseline_texture/texture.png": "76a38ed9dae202a955df8fc29fdadb5bf2dadac3cae284686ef1080e8efa94ea",
+    "blank_absolute/compile.log": "c4262b360f653cdc053bb33c9143f852214cef7fc7b867d5cd99ee2df962b8ba",
+    "blank_absolute/container-tags.json": "01a42b2e5b4b7f4b9217c679edd2a17cd9052404d63622241bd8c3990a18c4ce",
+    "blank_absolute/model.json": "a7b098d54e4c8237bdb1712cd830f946fd7b4ce1bc25dae39496bd4026b0749b",
+    "blank_absolute/model.psb": "b3d61e6e2559dc21f919d3e54f893a97988d70087ece3b4756d1a33ecb5450a9",
+    "blank_absolute/model.resx.json": "6347aef34ba734e20d5fa25d6cc00e8c44c4d8354b234245749b83ae6ee5e643",
+    "blank_absolute/texture.png": "76a38ed9dae202a955df8fc29fdadb5bf2dadac3cae284686ef1080e8efa94ea",
+    "blank_absolute_delta/compile.log": "f2c36888aabef7ca05ed3832822fee8747700fe3d76779f44b9053b3fcdb7afe",
+    "blank_absolute_delta/container-tags.json": "33adc4d1543ad58d23a2123ef8560eafda0760dc056cb147d02cb75438006dee",
+    "blank_absolute_delta/model.json": "05da19fa8248d9223247834bc631da813802b5c51d6176e9d619763eda83295e",
+    "blank_absolute_delta/model.psb": "57eb3b4debe10efc6d8351b8c8c41691c04a2256f1d5b59aee82764570905431",
+    "blank_absolute_delta/model.resx.json": "30c411220cbd4ecdd914e6337de5f367b8e9aeb2009225fb0c02452c191fb6cb",
+    "blank_absolute_delta/texture.png": "76a38ed9dae202a955df8fc29fdadb5bf2dadac3cae284686ef1080e8efa94ea",
+    "blank_conflicting_bp/compile.log": "68a055f6ff1947009b0f2f42753a231c38b1c851640eaa3bd1006a368c1056d6",
+    "blank_conflicting_bp/container-tags.json": "324d18320fda8a967992eaa7b849772f93722dca1ac758fb703780419fb57b0e",
+    "blank_conflicting_bp/model.json": "85238c24726ad165cd80713c31d2cdf370b026d223380ccde3dd49cc1c0ac466",
+    "blank_conflicting_bp/model.psb": "f050f65f74118effbd41f66a97ee113d152647e25777a937253a365734641769",
+    "blank_conflicting_bp/model.resx.json": "6347aef34ba734e20d5fa25d6cc00e8c44c4d8354b234245749b83ae6ee5e643",
+    "blank_conflicting_bp/texture.png": "76a38ed9dae202a955df8fc29fdadb5bf2dadac3cae284686ef1080e8efa94ea",
+    "direct_null_bp/compile.log": "6d6e05d917584f7138d3bbbe8c1f889d9a7f4a6e1f5fa5e666f846541efd3949",
+    "direct_null_bp/container-tags.json": "760a69dbc44dd056807265dc518e873968308ccd1ff769f823bb8b08f09ca497",
+    "direct_null_bp/model.json": "a2be644c84914f1b0decfa9ebcd216e654f69401a9b081a2adda39f302e41bc3",
+    "direct_null_bp/model.psb": "b98f304a79fe0079569c44f20864d62c64e7892d9a389e73886c37c0d631f5e5",
+    "direct_null_bp/model.resx.json": "6347aef34ba734e20d5fa25d6cc00e8c44c4d8354b234245749b83ae6ee5e643",
+    "direct_null_bp/texture.png": "76a38ed9dae202a955df8fc29fdadb5bf2dadac3cae284686ef1080e8efa94ea"
+  }
+}

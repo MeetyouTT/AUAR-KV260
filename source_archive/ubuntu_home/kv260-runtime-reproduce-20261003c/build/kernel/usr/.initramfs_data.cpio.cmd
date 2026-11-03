@@ -1,0 +1,1 @@
+cmd_usr/initramfs_data.cpio := sh /home/ghmd/kv260-runtime-reproduce-20261003c/sources/linux/usr/gen_initramfs.sh -o usr/initramfs_data.cpio -l usr/.initramfs_data.cpio.d   /home/ghmd/kv260-runtime-reproduce-20261003c/sources/linux/usr/default_cpio_list

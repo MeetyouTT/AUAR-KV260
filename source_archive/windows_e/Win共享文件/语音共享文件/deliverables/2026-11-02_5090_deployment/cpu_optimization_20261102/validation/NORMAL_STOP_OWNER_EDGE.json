@@ -1,0 +1,54 @@
+{
+  "status": "ORIGINAL_STOPPED_OWNER_PREDICATES_CAN_ACCEPT_LIVE_SAME_BIRTH_PROCESS",
+  "source_sha256": "591b27912dad632f163886903568ad599661c2e22287ab8aa701d2035ab1271a",
+  "cases": [
+    {
+      "case": "same_process_original_command",
+      "original_gui_and_camera_stopped_predicates_pass": [
+        false,
+        false
+      ],
+      "same_pid_birth_still_alive": true,
+      "correct_stopped_result_by_lifetime": false
+    },
+    {
+      "case": "same_process_after_exec",
+      "original_gui_and_camera_stopped_predicates_pass": [
+        true,
+        true
+      ],
+      "same_pid_birth_still_alive": true,
+      "correct_stopped_result_by_lifetime": false
+    },
+    {
+      "case": "same_process_integer_birth_input",
+      "original_gui_and_camera_stopped_predicates_pass": [
+        true,
+        true
+      ],
+      "same_pid_birth_still_alive": true,
+      "correct_stopped_result_by_lifetime": false
+    },
+    {
+      "case": "pid_reused_by_different_process",
+      "original_gui_and_camera_stopped_predicates_pass": [
+        true,
+        true
+      ],
+      "same_pid_birth_still_alive": false,
+      "correct_stopped_result_by_lifetime": true
+    },
+    {
+      "case": "process_absent",
+      "original_gui_and_camera_stopped_predicates_pass": [
+        true,
+        true
+      ],
+      "same_pid_birth_still_alive": false,
+      "correct_stopped_result_by_lifetime": true
+    }
+  ],
+  "proposed_rule": "For death, absent PID or different birth only; for current active owner, keep full PID/birth/cmd pin equality.",
+  "actual_proc_or_board_or_network_called": false,
+  "source_modified": false
+}

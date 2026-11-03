@@ -1,0 +1,225 @@
+<!-- dialogue-current-20261031 -->
+v18 已在新boot恢复READY，并通过正常界面命令恢复自动聆听。SQLite启动恢复与GTK/X11减负已接入，现役379份组件。恢复后的被动采样约 4.30 次native完成/秒，物理FPS和新版真人对话仍待验收。记忆摘要正在推进，29次完成与1次否定信息保真拒绝属于本次进程。M03日期删除仍为未发布候选。
+
+采集出现CANCELLED后重新开启，原因仍在定位，持续采集验收尚未通过。
+
+详见[当前观测](E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/current_observation_v18.json)、[接续简记](E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/docs_state_v18/current_note.txt)和[状态](E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/STATUS.json)。
+<!-- /dialogue-current-20261031 -->
+
+<!-- archived-dialogue-current-20261031-pre-v17-677d6a150cb3 -->
+以下旧段完整原字节保留为历史，仅适用于其原startup。
+<!-- dialogue-current-20261031 -->
+现役 v16（378组件）已生产接入 Paraformer Small/3线程并 READY；保留用户手动 `PAUSED`，enabled=false、mic=false。公开16次 decode 均值5.789s→2.057s只作筛选；用户接受同音字，真人等待和v16连续采集尚未重新验收。
+
+早期记忆streak5/48s退避，后续29完成/18丢弃、error清空/streak0；原因和全库健康未确认。新进程capture计数0不证明旧故障修复。Windows27B/OmniVoice16及D盘权重不变；allocation/phasehold未部署。详见[当前观测](deliverables/2026-10-30_board_owner/integration/dialogue_repair/current_observation_v16.json)、[接续简记](deliverables/2026-10-30_board_owner/integration/dialogue_repair/docs_state_v16/current_note.txt)和[状态](deliverables/2026-10-30_board_owner/integration/dialogue_repair/STATUS.json)。旧正文按原字节归档。
+<!-- /dialogue-current-20261031 -->
+<!-- /archived-dialogue-current-20261031-pre-v17-677d6a150cb3 -->
+
+<!-- archived-dialogue-current-20261031-pre-v16-be4fa79857e6 -->
+以下旧段完整原字节保留为历史，仅适用于原startup。
+<!-- dialogue-current-20261031 -->
+现役v15（378组件）已恢复自动聆听；连续采集、优先级及暂停/恢复/取消控制通过。用户确认声音连续，但等待仍长，不能声称首声已改善。正式仍原Paraformer3线程、27B/OmniVoice16；两新ASR未上线。
+
+本版只减少重复idle音频IPC和旧字幕覆盖，保持16fps目标、视觉身份、原8帧与权限/完整ACK。两段8秒CPU83.98%→82.33%仅观察；native完成计数3.37→6.27次/秒不等于屏幕FPS。详见[当前观测](deliverables/2026-10-30_board_owner/integration/dialogue_repair/current_observation_v15.json)、[v15短报告](deliverables/2026-10-30_board_owner/integration/dialogue_repair/idle_cpu_integration/v15_current_note.txt)及[状态](deliverables/2026-10-30_board_owner/integration/dialogue_repair/STATUS.json)。旧v14段逐字归档，PID下次现读，权重仍D盘。
+<!-- /dialogue-current-20261031 -->
+<!-- /archived-dialogue-current-20261031-pre-v16-be4fa79857e6 -->
+
+<!-- archived-dialogue-current-20261031-v14-bb9887b852c2 -->
+以下旧v14当前段原文逐字保留为历史；仅适用于其原startup。
+
+现役v14（378组件）已在本轮公开试验后恢复自动聆听：保存回执为WAITING_SPEECH/mic=true、IDLE/no playing、GUI故障0；启动指纹未变。暂停/恢复/取消控制及优先级作用域通过，连续全quiet采集未通过，完整听音/首声及长稳仍未验收。正式ASR保持原3线程，新流式ASR仅为未上线候选；27B/OmniVoice16与板端业务存储归属不变。
+
+真人仍反馈等待太久，首音频入队不等于扬声器首声。以[当前观测](deliverables/2026-10-30_board_owner/integration/dialogue_repair/current_observation_v14.json)、[状态](deliverables/2026-10-30_board_owner/integration/dialogue_repair/STATUS.json)和[候选简记](deliverables/2026-10-30_board_owner/integration/dialogue_repair/docs_state_v14/current_note.txt)为准；此前版本及维护暂停记录保留为历史。权重仍在D盘。
+
+<!-- /archived-dialogue-current-20261031-v14-bb9887b852c2 -->
+
+<!-- archived-dialogue-current-20261031-v10-8b00903079ee -->
+以下为旧v10当前段的完整原文，已转为历史：
+
+当前正式业务已在板端运行：ASR、视觉、记忆管理与播放归板端，Windows 仅运行现有 27B 与 OmniVoice。无唤醒词，自动聆听；生成和播放期间暂停收音，播完自动恢复。当前部署为 v10：保留逐轮数据库连接复用和界面刷新减负，修复可空录音时长导致界面异常取消对话，并接回直接语音聆听时的屏幕保活。用户已确认 v7 一轮声音连续完整，不能将该反馈扩展为新版本全部场景或长期稳定验收。
+
+运行指纹与本轮结果见 [当前状态](deliverables/2026-10-30_board_owner/integration/dialogue_repair/STATUS.json)、[性能分配与优化计划](deliverables/2026-10-30_board_owner/integration/dialogue_repair/板端性能分配与优化计划.txt)。下文“尚未迁移”“监听关闭”等属于此前阶段，不能用旧入口覆盖当前部署；设备 PID 每次重新读取。
+
+<!-- /archived-dialogue-current-20261031-v10-8b00903079ee -->
+
+<!-- board-business-owner-20261030 -->
+[最新硬边界：板端业务主控与 Windows 模型接口](../语言模型分析/统一时间轴记忆与稳定性优先_20261030.md)：业务处理、调度与持久存储全部归板端，Windows只接收网线请求并运行现有27B与OmniVoice返回结果。五分钟记忆和摘要管理在板端，旧Windows权威库安排已被替代。当前部署尚未完成该迁移，Ubuntu提示词已同步，本次只修订方案。
+<!-- /board-business-owner-20261030 -->
+
+<!-- five-minute-summary-only-20261030 -->
+[最新方案：五分钟详细记忆与摘要检索](../语言模型分析/统一时间轴记忆与稳定性优先_20261030.md)：近五分钟详细记录，超时内容空闲标准压缩、核验保存后删原文，长期仅摘要及必要索引；对话优先，管理任务复用现有进程和模型。Ubuntu提示词已更新，新机制和原文清理未部署，迁库及ASR迁移后置。
+<!-- /five-minute-summary-only-20261030 -->
+
+<!-- timeline-stability-priority-20261030 -->
+[最新方向：统一时间轴记忆与稳定性优先](../语言模型分析/统一时间轴记忆与稳定性优先_20261030.md)：先复用现有权威库统一时间轴与记忆规则，稳定更正、遗忘、播放状态和权限隔离；板端迁库、ASR迁移及视觉扩展后置，Ubuntu接续提示词已更新。本次仅更新方案，运行状态仍以上次交接和实机核验为准。
+<!-- /timeline-stability-priority-20261030 -->
+
+<!-- board-vision-handoff-20261030 -->
+[当前：移除Qwen视觉模型与Ubuntu接续](deliverables/2026-10-30_visual_simplification/README.md)：Windows r12已READY，8810关闭，旧图片接口410；160回归和真实公开语音链通过，原记忆及声纹来源保持。板端停用上传器两次自动回退，当前原入口安全、监听关闭，交Ubuntu处理旧日志绝对路径；权重尚未删除，结构化事件落库与迁库未部署。下方r11等为历史。
+<!-- /board-vision-handoff-20261030 -->
+
+<!-- identity-gpu-r11-20261030 -->
+[当前：渐进身份关联与显存协调 r11](deliverables/2026-10-29_parallel_interaction/README.md)：代码已部署，637 合并回归、真实非缓存语音及 ARM 公开输入通道通过；最终采样最低空闲显存 1656 MiB，其他模型和原始记忆来源保持。a1/a2 临时代号、明确本人登记后的姓名/人脸/声纹关联及冲突/撤销已实现，现场声纹仍未标定。真实人脸 ID/模板指纹到 Windows 的网络验收被自动审批拦截，待用户具体授权，未冒作通过。当前 voice voice-identity-gpu-20261030-r11，板端286绑定；下方 r9/279pins 为历史。监听关闭，机械原 FAULT/null 保持，整机和真人验收仍未完成。
+<!-- /identity-gpu-r11-20261030 -->
+
+<!-- audio-animation-polish-20261029 -->
+[最新：句中断续与动作素材修复](deliverables/2026-10-29_audio_animation_polish/README.md)：已部署并通过自动验证。供音IPC阻塞路径修复，真实界面静音长句18.28ms/0欠载；恢复四套现有身体及短轮素材变化。其他模型、记忆、相机和机械保护保持。真人听感待集中复测，说话长帧与整机仍未最终验收；当前监听关闭。
+<!-- /audio-animation-polish-20261029 -->
+
+<!-- windows-services-recovered-20261029 -->
+[最新：Windows服务恢复与板卡环境核对](deliverables/2026-10-29_service_recovery/README.md)：现有r9七类服务恢复，两轮板端真实语音通过；原数据、模型与并行启动优化保留。转轴因boot/FDT/benchmark固件/VART与wide驱动不符保护停用，未复机。当前监听关闭，迁移暂缓；整机尚未最终验收。
+<!-- /windows-services-recovered-20261029 -->
+
+<!-- chat-memory-r9-20261029 -->
+[当前：对话/记忆分流与TTS空闲显存管理r9](deliverables/2026-10-29_chat_latency/README.md)：355回归、14步真实记忆、5项ARM检查通过。普通日期聊天不再误触历史，TTS首次就绪观测归还约2.71GiB空闲缓存且模型保持驻留。原数据/其他模型/板端保持，监听关闭、迁移暂缓；延迟长尾及整机仍未验收。
+<!-- /chat-memory-r9-20261029 -->
+
+<!-- voice-handoff-fixed-20261029 -->
+**当前Windows语音服务r6已修复识别后退回聆听的503交接路径。** [故障、修复与实机验证](deliverables/2026-10-29_listening_bounce/README.md)。285项相关回归、板端文字/TTS/PCM三种取消后立即接话及两项唤醒协议检查通过，原数据/其他模型/板端保持。r4记忆功能保留；用户已确认本次故障复测正常，监听已由用户重新开启。普通聊天长尾和真人同一句验收仍开放，迁移继续暂缓；下方r4为前一阶段记录。
+<!-- /voice-handoff-fixed-20261029 -->
+
+<!-- windows-dialogue-memory-polish-20261029 -->
+**当前：Windows对话与记忆r4已部署并完成本轮自动验收。** [实现、优化效果与接续](deliverables/2026-10-29_dialogue_memory_polish/README.md)。语音独立于视觉，视觉只作补充；本轮补齐自然明确事实直答、中文编号历史浏览和旧写入来源保护。267相关回归、12步实际记忆、7项语音功能及板端网线两轮通过；重复事实首PCM中位数2.656→0.110秒（后三次命中TTS缓存），普通聊天仍有长尾，未证明整体提速。保留其他模型、原数据与板端，迁移按用户要求暂缓。未开麦/实体播放，整机和跨天真人验收未完成；下方旧视觉绑定接话与旧进度按历史理解。
+<!-- /windows-dialogue-memory-polish-20261029 -->
+
+<!-- avatar-performance-20261020 -->
+> **2026-10-20 玩偶性能分析与首轮优化已完成部署，卡顿仍未彻底解决。** 本轮观测发布约3.9→6–7fps，UI CPU约145%→120–129%；并行测试可能影响短采样，尚非最终独占性能验收。当前免点击恢复版resume-049c88498ae0已保留6份动画源码及GUI性能块，后续勿用本任务旧候选覆盖它。113项回归、局部像素与真实GTK检查通过；更激进组合缩放候选画质失败未上线，动作调度仍未接通。[报告、实际版本与证据](deliverables/2026-10-20_avatar_audit/PERFORMANCE_REPORT.md)。
+<!-- /avatar-performance-20261020 -->
+## 最新：免点击对话接续修复（2026-10-20）
+
+正对汐蓝、等“看见你了”后直接开口，无需点击或叫名。已修复进入后轻微转头/短暂漏检立即中止及暂停不能跨重启保存的问题；106项电脑、174项板端回归、完整隐藏界面启动与活动源码核对通过。保留当前相机运动服务及身份库，实际新听音仍待用户反馈；声音打断和全双工尚未完成。[本轮交付与真实验收范围](deliverables/2026-10-19_handsfree_dialogue/resume-20261020/README.md)。
+
+<!-- threshold-050-active -->
+> **身份门槛已按用户要求改为0.50并加载：** 原身份库、模板、模型及0.1分差保持，界面已重连，无需重新登记。参数生效检查通过，真人识别和误认率仍需实测。[变更与验证](deliverables/2026-10-19_threshold_050/README.md)。
+<!-- /threshold-050-active -->
+
+## 新增：声纹身份独立原型（2026-10-20）
+
+已用板端MCP01可见点击采集4段10秒声音，前三段临时登记、第四段独立匹配0.8571通过事先固定的实验0.70门槛；1身份/1模板，仅同会话单次本人验证，未完成陌生人/跨天标定或接入正式“我是谁”。独立CPU环境与模型在D盘，原人脸库不关联。详见[声纹验证与板端界面](deliverables/2026-10-19_speaker_identity/README.md)。
+
+## 最新：长对话第一版已部署（2026-10-19）
+
+用户当前优先级：先做好长对话、记忆、实时交互及打断，降低延迟后置。持久会话、继续/新对话与有界上下文第一版已部署，原27B实际50轮文字五项指定检查通过，实际服务重启接续通过；真人长对话/听音待验收。通用个人记忆、遗忘与声音打断仍为后续阶段。详见[本轮交付说明](deliverables/2026-10-19_long_conversation/README.md)。
+
+<!-- identity-failure-audit-20261019 -->
+> **2026-10-19 身份失败详细审查完成：** 已确认未标定0.80门槛拒绝有效本人输入；单模板与同会话验证覆盖不足，检测吞吐及状态策略放大失败。已排查模板写入、颜色通道和对齐公式，未部署参数或模型变更。[详细分析与解决措施](deliverables/2026-10-19_identity_failure_audit/REPORT.md)。
+<!-- /identity-failure-audit-20261019 -->
+
+<!-- controlled-frontal-failure-20261019 -->
+> **2026-10-19 登记后本人正脸检查未通过：** 10秒6份有效输入最高0.643/门槛0.80，检测目标也不稳定。登记照片与模板已核对一致，照片保存通过；真人识别仍待修复。[本轮数值及定位范围](deliverables/2026-10-19_identity_capture_snapshot/controlled_front_check_review.md)。
+<!-- /controlled-frontal-failure-20261019 -->
+
+<!-- actual-enrollment-photos-20261019 -->
+> **2026-10-19 本轮真实登记照片已保存：** 25张人脸采样图，含最终模板和5张验证图，正式登记修订15及成功播报已确认。[全部照片](身份登记照片/c6c3fa6ebd4449ae93bd9ec316344d51/照片预览.md)，[实际证据](deliverables/2026-10-19_identity_capture_snapshot/photo_review.json)。后续身份查询仍UNKNOWN，识别稳定性未验收。
+<!-- /actual-enrollment-photos-20261019 -->
+
+<!-- identity-capture-snapshot-20261019 -->
+> **2026-10-19 登记入口修复已加载：** 已确认并修复取消字幕的显示标记导致录音起点人脸状态校验失败；原确认和身份门槛保持。Windows182/板端222项及真实快照预检通过，照片保存服务正常；新真人采样照片待取得。[本轮原因和证据](deliverables/2026-10-19_identity_capture_snapshot/README.md)。
+<!-- /identity-capture-snapshot-20261019 -->
+
+<!-- enrollment-photo-archive-20261019 -->
+> **2026-10-19 登记照片留档：已加载、真实新登记照片待采集。** 按用户要求仅保存112×112人脸，保留采集图、最终模板、最终5张验证图及失败轮次，导出后可看离线总览。Windows152/板端215项和真实模型预检通过；真实新照片尚未采集。[本轮状态和接续步骤](deliverables/2026-10-19_enrollment_photo_archive/README.md)。
+<!-- /enrollment-photo-archive-20261019 -->
+
+> **2026-10-19 正脸模板选择修复已加载：** 静止正脸彼此0.90～0.97、对旧模板0.71～0.75；现优先选清晰正脸，并取5份新正脸验证。Windows145/板端207项和原模型预检通过，原身份1条/修订14保留；需用户按原称呼确认更新一次，再验收识别。[本轮证据与回退](deliverables/2026-10-19_front_template_selection/README.md)。
+
+> **2026-10-19 称呼/身份问句入口修复已加载：** 上一查询版真人反馈失败；现补齐“夕蓝我是谁”“西兰我叫什么名字啊”及自然语气词，保留原ASR转写。Windows129/板端202项及隔离预检通过，库1条/修订14和0.80门槛保持；真人“我是谁呀”转写/路由已通过，同轮完整播放但仍未识别人脸，称呼声学尚未实测通过。[本轮证据与回退](deliverables/2026-10-19_identity_query_routing/README.md)。
+
+> **2026-10-19 登记成功并接入“我是谁”：** 真人0.80登记COMMITTED，当前1条/修订14。新查询读取当前有效人脸身份，报“镜头前识别到的是某某”；没认出/多人/过期不报旧名。PC107/Linux199及公开模型/语音预检通过，只切UI，相机/阈值/库保持；真人新查询和重返仍待验证。[本轮状态与回退](deliverables/2026-10-19_spoken_identity_query/README.md)。
+
+> **2026-10-19 0.80试用已生效：** 用户同意后，活动/本地人脸匹配阈值改0.80，保留0.1分差和5份连续新帧验证。公开模型/边界预检通过，当前库仍空（修订13）；设备重启后已复核配置并恢复原电脑语音/人脸服务，开始对话可用。真人登记和重返仍待验证。[本轮加载与回退](deliverables/2026-10-19_threshold_calibration/THRESHOLD_080.md)。
+
+> **2026-10-19 身份库已按用户要求清空：** 5条身份及模板全部删除，当前0条/修订13。最后24帧离线门槛对比：0.85通过3/24，0.80通过24/24；缺可靠不同人对照，尚非误认校准。正式阈值仍0.85，0.80仅候选。[删除回执与阈值分析](deliverables/2026-10-19_threshold_calibration/README.md)。
+
+> **2026-10-19 最新真人验证失败：** 77帧验证，16帧通过，61帧低于0.85，最长连续3帧/要求5帧，最终超时。CPU提速及提示已生效，匹配稳定性仍待解决；库5条/修订8未变。[实际失败分数与代码诊断](deliverables/2026-10-19_validation_score_failure/README.md)。
+
+<!-- windows-face-features-20261019 -->
+> **2026-10-19 人脸特征CPU提速与验证提示已部署：** 同一SFace转Windows CPU，板卡仍独立找脸/裁脸/比对/存库，只有112×112人脸走有线LAN。公开素材往返中位约18ms、两端输出一致；Windows74项/Linux188项及真实模型、原语音共存预检通过。补回选样后自动“看向镜头稍停”提示，无需回答或末尾确认。0.85/0.1及原DPU/ByteTrack/27B/OmniVoice16保持，库5条/修订8未变。上一版真人验证已失败，当前真人登记与重返仍待验收。[本轮状态与回退](deliverables/2026-10-19_windows_face_features/README.md)。
+<!-- /windows-face-features-20261019 -->
+
+> **2026-10-19 登记操作已简化：** 一句话说“帮我登记身份，我叫……”，玩偶复述后只在开头确认一次，之后自动选样、验证、保存并播报结果，末尾不再要求确认。保留0.85、明确更新确认及原视觉/语音模型。PC109项、Linux183项、真实模型和语音HTTP预检通过；部署身份库未变，真人反馈验证失败，采样达到10份后超时。[本轮流程、证据与回退](deliverables/2026-10-19_simple_face_enrollment/README.md)。
+
+> **2026-10-19 自然转头自动选样已部署：** 看着镜头慢慢自然转头，系统从至少15秒画面中自动选清晰人脸，取消固定左右姿势；最多24份RAM候选，后续5份独立画面仍须逐份达到0.85及0.1间隔。失脸保留窗口，新轨迹先与固定起始人脸核对0.85及身份间隔；确认时一帧不合格保留选样，明确确认后才写身份库。PC98项、Linux170项、真实模型/语音HTTP预检通过；部署库仍5条/修订8，真人自然转头、听音和重返识别待验证。[本轮状态与回退](deliverables/2026-10-19_natural_face_enrollment/README.md)。
+
+> **2026-10-19 多帧登记与独立验证已部署：** 正脸4份、左右各3份选样，再用5份新正脸验证；保留0.85，验证通过并明确确认后才保存。已有称呼更新需明确说“确认更新登记”，部署未改5条/修订8的身份库。PC80项、板端161项、公开素材模型和真实语音HTTP预检通过，真人采样、听音及重返仍待验证。[本轮状态与回退](deliverables/2026-10-19_multiframe_enrollment/README.md)。
+
+> **2026-10-19 人脸直接登记已部署：** 登记现在使用独立人脸目标，无需先选人体；窗口只显示112×112人脸，用户确认预览稳定。板端148项及真实模型预检通过；真人回来仍未识别，8次有效比对最高0.583–0.677，低于保留的0.85。[本轮状态、证据与回退](deliverables/2026-10-19_face_enrollment_ui/README.md)。下面旧UI/相机活动路径为历史。
+
+> **2026-10-18 原生流式语音独立验证完成：** 原27B/IQ4_XS保持。CosyVoice3 CUDA高精度缓存、关闭FlashAttention、25-token模式4条内容检查通过，首PCM约0.63–0.65秒，用户接受候选样本声线；与27B联动3.12–4.32秒（不含ASR和板端播放），尚未稳定3秒。明确思考样本首文字15.69秒且将58×3算成156，需要正确性校验；自由回复内容/数字读法仍待核对。正式OmniVoice16已恢复，候选未上线，5090未实测。详见[本轮实测](deliverables/2026-10-18_streaming_tts_validation/RESULTS.md)。
+
+<!-- identity-voice-20261018 -->
+> **2026-10-18 人脸身份与语音登记已接入：** 点一次开始对话，说“帮我登记身份”，再按提示说称呼和“确认登记”，无需屏幕输入姓名；成功播报以板端真实保存结果为准。PC83项/26子用例、板端124项及实际初始化预检通过，原27B、OmniVoice16和视觉DPU保持。真人登记与离场重返的最终状态以[本轮记录](deliverables/2026-10-18_identity_validation/README.md)为准，服务就绪不代表真人验收完成。
+<!-- /identity-voice-20261018 -->
+
+<!-- automatic-conversation-20261018 -->
+> **2026-10-18 自动轮流对话第一版：** 已通过真实自动接话、结束后重新开始仍记得绿色、用户听音和结束停止验收；原27B已验证颜色偏好超出四轮仍可召回。 点击一次开始、停顿自动提交、播完确认记忆后继续听，结束按钮取消整轮。原27B/OmniVoice16与视觉保持；不含声音打断和全双工。[实测、范围与回退](deliverables/2026-10-18_automatic_conversation/README.md)。最新活动板端目录以本轮部署记录为准。
+<!-- /automatic-conversation-20261018 -->
+> **2026-10-18 紧凑JSON通道已通过现场验收：** 原27B、声线与连续合成保持，普通聊天经同模型已验证runner生成无多余空白的三字段JSON；版本/身份不符时生成前退回原Ollama通道。150项回归、26子用例及真实模型记忆/防复述验证通过，新录音完整播放且用户确认“正常接话，连续自然”。本次软件开口4.095秒；同问题同台词、无音频缓存的4次通道对照首PCM中位数2.949→2.826秒，样本很小、不保证固定提速，未达1秒。[本轮测量、限制及回退](deliverables/2026-10-18_gpu_scheduling/README.md)。
+
+> **2026-10-18 防复述保护正常聊天现场验收通过：** 本轮新录音及匹配完整播放ACK通过，用户确认“正常接话，清楚自然”。无等待插播、整段1次TTS、纠正0次；本次软件开口5.726秒，台词准备2.813秒、TTS2.406秒，不能与不同台词HTTP探针直接作提速A/B。138项回归及26子用例通过，[最终记录](deliverables/2026-10-18_reply_quality/README.md)。已知整句复制有保护，完整根因仍开放。
+
+> **2026-10-18 普通聊天防复述保护已加载：** 复制问句在发出前拦截，最多纠正一次，普通回答仍单次27B推理；138项回归、26子用例及真实模型压力/四轮记忆/合法复述测试通过。两次实际语音HTTP正常，主机首PCM约3.62/3.93秒；本轮新录音听音以[本轮记录](deliverables/2026-10-18_reply_quality/README.md)最新证据为准。保护覆盖已知的整句复制模式，完整根因和泛化回复质量仍待完善。
+
+> **2026-10-18 多轮历史复用已部署并通过记忆听音验收：** 保留27B与OmniVoice16，完整播放后保留原始回复序列；118项回归及26个子用例通过。用户两轮新录音正确记住绿色并确认回答自然，第二轮软件开口约3.483秒。小样本模型对照台词准备中位数2.186→1.791秒，不等于固定整机提速；无历史探针发现的偶发复述仍未解决。[本轮记录、开放缺陷及回退](deliverables/2026-10-18_history_reuse/README.md)。
+
+> **2026-10-18 思考路由修复已验收：** “今天比较开心陪我聊聊”新录音保持chat、无等待插播并完成播放；用户确认“直接聊天，没有等待提示”。106项回归、26个语境子用例及实际复杂数学通过。[本轮验收记录](deliverables/2026-10-18_thinking_routing/README.md)。
+
+> **2026-10-18 思考误触发修复已部署：** “比较开心、比较喜欢”等普通语境保持闲聊，真正比较、计算及明确思考请求保留。106项回归与26个语境子用例通过，实际原27B数学HTTP仍正确算出174。[本轮验证与回退](deliverables/2026-10-18_thinking_routing/README.md)。
+
+> **2026-10-18 称呼误听修复已验收：** 用户现场确认“直接自然接话，不再纠名”，对应新录音与完整播放ACK通过；104项回归通过。已知“汐蓝→西兰”呼唤语境容错已生效，原始ASR保留。[验收及回退记录](deliverables/2026-10-18_speech_tolerance/README.md)。
+
+> **2026-10-18 称呼误听修复已加载：** 呼唤玩偶时将已知“西兰”等同音名按“汐蓝”理解，保留原始ASR与其他词；104项回归和真实录音HTTP通过，回复不再纠名。最新现场实录与听音结果见[本轮记录](deliverables/2026-10-18_speech_tolerance/README.md)。
+
+> **2026-10-18 本轮短字段优化已验收：** 用户新录音正式回答约4.595秒开始播放，并确认“连续自然，开头清楚”；无等待插播、匹配完整播放ACK通过。27B/IQ4_XS/OmniVoice16及板端视觉保持，75项回归通过。该耗时为单次软件记录，未达1秒；详见[本轮实测与回退记录](deliverables/2026-10-18_compact_reply_fields/README.md)。
+
+> **2026-10-18 继续优化：** 内部JSON字段已缩短，原27B/IQ4_XS及OmniVoice16保持；75项回归通过，8次对照中完整台词准备中位数2.763→2.288秒。当前真实HTTP主机首PCM4.444秒，正式界面验收见[本轮报告](deliverables/2026-10-18_compact_reply_fields/README.md)，不能当作固定整机延迟。
+
+> **2026-10-18 本轮听音通过：** 普通闲聊已取消突兀等待提示，用户确认“没有等待提示，回答自然”。新录音及匹配播放确认通过；本次正式回答约5.293秒开口（软件时间），尚未达到1秒。详见[本轮验收记录](deliverables/2026-10-18_latency_optimization/README.md)与resume证据。
+
+> **2026-10-18 复启更新：** 普通闲聊取消固定等待语音的修复已载入服务，真实模型通道验证无等待插播、单段TTS，主机首PCM约5.203秒。最新玩偶实录与听音结果见[优化记录](deliverables/2026-10-18_latency_optimization/README.md)的复启验证部分。
+
+> **关机前优化交接（2026-10-18）：** 电脑端已加入正文优先、台词字段闭合即合成及普通短回答连续合成，原27B/IQ4_XS/OmniVoice16保持，74项回归通过。首版用户反馈停顿不自然已保留并修正；最终听音与实录结果以[最新优化报告](deliverables/2026-10-18_latency_optimization/README.md)为准，不能用首版3.419秒主机PCM数字宣称最终板端延迟。源码备份、测试数据、下次启动与回退说明均已保存。
+
+> **2026-10-18 流式播放与思考提示已接入正式界面。** 保留27B和OmniVoice16，常驻播放、口型同步、复杂问题缓存提示、播完后提交记忆及中途取消已实现；69项回归、真实板端播放与用户新录音验收通过，用户确认“已听到完整回答”。新录音单次正式回答约6.102秒；复杂题约0.542秒开始缓存提示、26.658秒开始正式答案，尚未达到1秒有效作答。活动板端目录现为 `/home/root/aura-stream-playback-20261018/candidate-ec77f48a63de/runtime`，原目录保留回退。[本次实施与测试](deliverables/2026-10-18_stream_playback/README.md)。
+
+> **当前对话模型已切换为 Qwen3.8-27B Huihui破甲版 UD-IQ4_XS。** 实际8792健康接口与真实回答均报告 `aura-qwen3.8-27b-abliterated:iq4_xs`。权重SHA256、多轮记忆、历史录音完整HTTP链路及WAV校验通过，单次耗时7.187秒；未新增板端新录音听音验收。权重与分段在 `D:\AIModels\qwen3.8-27b-abliterated`，Ollama模型库在 `D:\AIModels\Ollama-AURA`，项目内只保留代码、路径配置与证据。旧4B/14B记录为历史，旧模型文件保留用于回退。证据：`deliverables/2026-10-18_board_dialogue/model_27b_verification.json`。
+
+> **大语言模型存储位置更新：** 用户要求LLM权重、下载分段及推理模型缓存放在项目外本地目录。27B位置为 `D:\AIModels\qwen3.8-27b-abliterated`，独立Ollama模型库为 `D:\AIModels\Ollama-AURA`；路径配置见 `aura/config/model_storage.local.json`。下方较早的项目内LLM存储说明已被本条取代。
+
+> **2026-10-18 对话模型升级：** 当前8792服务已切换本机现有 `huihui_ai/qwen3-abliterated:14b`（Qwen3 14B社区修改版），Ollama报告100% GPU、2048上下文。与OmniVoice16共存显存约15.4GB/16GB，余量约0.65GB。历史录音完整HTTP识别→14B回答→语音生成/音频校验通过，单次1.782秒；未新增板端实录听音验收，不能沿用旧4B耗时作为14B性能。证据：`deliverables/2026-10-18_board_dialogue/model_14b_verification.json`。下文4B记录为历史。
+
+> **2026-10-18 最新：板端开头丢字已修复并由用户确认。** MCP01输出冷启动导致起音受影响；原WAV清晰且传输SHA一致。300/500ms前置不足，现每次播放前增加1秒设备启动静音，原语音PCM、OmniVoice16和参考声线保持；内容时钟扣除预启动，口型不提前。14项本机/14项板端测试通过，正式实录33个播放采样、capture一致，用户确认“开头完整清楚”；相机PID976保持。代价是实际开口增加约1秒，修复后小样本约2.48/2.57秒，下方1.609秒为修复前历史结果。证据见 `deliverables/2026-10-18_voice_clarity/README.md` 和 `acceptance.json`。
+
+# 汐蓝语音共享项目
+
+当前工作根目录：`E:\Win共享文件\语音共享文件`。后续源码、配置、模型、运行日志、生成音频、测试和交接文件均保存于本目录。D盘原工程保留历史副本；旧文档中的D盘工作路径不再作为默认入口。
+
+当前链路已接通：板端MCP01录音 → 本机Paraformer识别 → Qwen3 4B回答 → OmniVoice 16步 → 板端播放和口型。此前单轮新录音已由用户确认听到自动回答，软件提交至实际开口约1.609秒。16步及“柔亮俏皮”参考保持。
+
+2026-10-18已完成本目录移植：4,468个文件、9,605,308,302字节逐文件SHA256校验；模型、参考和冻结包31项再次通过。8791/8792服务已切换至本目录源码和ASR/OmniVoice模型，日志与生成音频也写入本目录；板端访问与历史录音真实客户端探针通过，相机PID976保持。本次未新增实录播放验收。
+
+## 启动和接手
+
+在本目录打开PowerShell：
+
+```powershell
+.\start_voice.ps1
+```
+
+先等两个模型服务完成预热。Windows重启后需要重新启动；本项目未设置开机自启。换主机应按语音交接文档重建Python环境并导入项目内Ollama权重，再用 `.\start_voice.ps1 -VoicePython '<实际环境Python路径>'`。本机Python环境与SSH私钥属于主机配置，未复制进共享目录。
+
+- [本次移植、验证与限制](迁移记录/移植完成说明.md)
+- [最新板端语音链路及实录证据](deliverables/2026-10-18_board_dialogue/README.md)
+- [已接受音色、模型和其他主机接手步骤](deliverables/2026-10-11_voice_accepted/HANDOVER.md)
+- [迁移校验与运行切换记录](deliverables/2026-10-18_voice_migration/README.md)
+- [项目整体进度与未完成模块（10-17历史核查）](aura/report/project_status_20261017/REPORT.md)
+
+主要代码在 `aura/`，完整权重在 `aura/models/`，板端语音服务记录与缓存音频在 `deliverables/2026-10-18_board_dialogue/`。网线仍为Windows `192.168.50.1/24` → 板卡 `192.168.50.2`。
+
+身份识别、视觉说话人、机械联动、全框架收拢、多轮长稳及冷启动仍按各自证据推进；单轮语音通过不代表整机验收。早期整合记录见[迁移前入口归档](迁移记录/迁移前README.md)。本机保存完成不代表其他主机已同步完成。
+
+
+
+
+
+2026-10-18 关机前补记：连续回答已获用户确认；普通闲聊取消固定等待语音的代码已保存，75 项回归通过。该提示语策略尚未重启载入，下次启动生效，需再次试听。详见 deliverables/2026-10-18_latency_optimization/README.md。

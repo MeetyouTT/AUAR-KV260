@@ -1,0 +1,27 @@
+声音匹配query“辨别”同义词：极小两文件literal补丁
+
+现场root仅导出的固定COUNT形状证据表明，多次长query使用“辨别”，现役原speaker query和explicit_self_match均未匹配；没有导出原文。本地合成两种明确用法复现基线miss：
+你可以根据我的声音辨别我是谁吗
+辨别我的声音
+
+改动只在现役2ad13的common/feature_intents.py中四条识别query regex、现役f82的board/runtime/board_speaker_business.py._explicit_self_match中四条识别query regex，各追加一个“|辨别”。每文件仅增加28个UTF8字节，原行末保持。未加“分辨”或其他未确认词，不改登记解析、提示、缓存、TTL、采纳账本、方法结构、模型、质量门槛、阈值、授权或注册流程。
+
+payload在candidate_runtime：
+common/feature_intents.py
+before 2ad13c7a5a175a85dfb412182fca44a79229962ff742b18691a7b72ea75f15f2
+after  901c74d8de825bf6f22ac7cca608db3840ea7d39cc104ac4b5392dca3f7d8f6c
+board/runtime/board_speaker_business.py
+before f82bc71d00c355c164d43ca0b6a853ea6a32e67c84ffd228791d7070209b907e
+after  28d36d1f35ed173098df50e51b829a89b0f5d09c1f7281dc34381a3cedac6cfe
+
+基于冻结f82公开runtime的完整349文件独立复制；仅此2项改变，其他347项原字节保持。把这8个新增token删回后，两文件完整字节与AST都和基线全等。原注册helper和f82所有cache/TTL/ledger/cancel/health逻辑严格不变。SOURCE_MANIFEST.json与CANDIDATE.diff记录before/after和审计断言。
+
+验证：
+- BASELINE_ALIAS_MISS.xml：9项通过，其中两个正向输入明确断言原speaker_text=None、speaker_query_requested=false、explicit_self_match=false，真实Yuki路由普通LLM、probe IDLE，符合现场miss类别；另7项引用/否定/帮助/未请求别名与纯状态query不进probe。基线通过指复现预期miss，不是已支持新口令。
+- CANDIDATE_ALIAS_AND_REGRESSION.xml：新alias9项加冻结f82的34项probe、原66项登记、原24项独立声纹，原测试断言文件未改，组合133/133全部通过。两种新query都通过实际formal pair/Yuki绑定、LIR/controller、真实worker和原matcher；连续三次走1/2/3，每次只编码一次，第三次本地候选回话，无LLM，无links、无授权，field_calibrated保持false。
+- 同目录independent_review为独立审查所有者输出，本代理不修改其代码或证据。
+  独审正式PASS：15/15；independent_review/REVIEW_VERDICT.json SHA c3be3b7344628dbdd6ebb7159c640e04df0da53583cefbe9295dad10dea5944c，REVIEW.txt SHA 54c4424d0def44bad283be9071a6dd295646b5240967b0288d0cb3c4ab62b1cb。
+
+ASR/LLM/TTS/encoder/VAD及PCM仍全为合成替身，fresh三库；没有真实录音或正式模板访问，不声明真人匹配已成功或完整现场校准已完成。完整Runtime.__init__仍受公开快照缺无关history_delete限制，真实目标类及原Runtime attach/analysis方法按之前原顺序显式装配。沿用原f82所有限制与权限边界。
+
+本代理无SSH/GET/设备/GUI/服务/转轴/私库动作，不改现役或已冻结f82源。root按当前startup4b4d9849及最新380清单fresh CAS更新此2文件后正常验证；不重做登记，不操作人脸与声纹关联。

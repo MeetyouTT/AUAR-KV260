@@ -1,0 +1,320 @@
+{
+  "started_utc": "2026-10-03T07:00:35.472099+00:00",
+  "scope": "New host-only DFX build; candidate not promoted or deployed",
+  "commands": [
+    {
+      "name": "compiler",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-gcc",
+        "--version"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/compiler.log",
+      "sha256": "ee2c2cdcd3e65f25d3cc1bbdae6f9643bc678266cb809a5f91e1bfb429c32896",
+      "elapsed_seconds": 0.011
+    },
+    {
+      "name": "cmake-version",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/x86_64-petalinux-linux/usr/bin/cmake",
+        "--version"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/cmake-version.log",
+      "sha256": "fec59c7603b9f6ddcdbc2de6448e0025b5282c5e8a20012baa2e6f2f75a9bfac",
+      "elapsed_seconds": 0.009
+    },
+    {
+      "name": "configure",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/x86_64-petalinux-linux/usr/bin/cmake",
+        "-S",
+        "/home/ghmd/kv260-runtime-reproduce-20261003a/sources/dfx_mgr",
+        "-B",
+        "/home/ghmd/kv260-runtime-reproduce-20261003a/build/dfx",
+        "-G",
+        "Unix Makefiles",
+        "-DCMAKE_SYSTEM_NAME=Linux",
+        "-DCMAKE_SYSTEM_PROCESSOR=aarch64",
+        "-DCMAKE_C_COMPILER=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-gcc",
+        "-DCMAKE_ASM_COMPILER=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-gcc",
+        "-DCMAKE_SYSROOT=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/aarch64-xilinx-linux",
+        "-DCMAKE_INCLUDE_PATH=/home/ghmd/kv260-runtime-reproduce-20261003a/build_deps/include",
+        "-DCMAKE_LIBRARY_PATH=/home/ghmd/kv260-runtime-reproduce-20261003a/build_deps/lib",
+        "-D_deps=dfx",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DWITH_STATIC_LIB=ON",
+        "-DWITH_SHARED_LIB=OFF",
+        "-DCMAKE_C_FLAGS=-O2 -fPIC -fstack-protector-strong -D_FORTIFY_SOURCE=2 -mbranch-protection=standard",
+        "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-z,relro,-z,now"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/configure.log",
+      "sha256": "525a713d40269356646f00a56829f7d26739a888904680fa313ffcfbfba634ca",
+      "elapsed_seconds": 0.291
+    },
+    {
+      "name": "compile",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/x86_64-petalinux-linux/usr/bin/cmake",
+        "--build",
+        "/home/ghmd/kv260-runtime-reproduce-20261003a/build/dfx",
+        "--parallel",
+        "4",
+        "--target",
+        "dfx-mgrd-static",
+        "dfx-mgr-client-static"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/compile.log",
+      "sha256": "80776da4de757656170acf35b20dba52e7985b662bb3370db22840b7a1f25dd4",
+      "elapsed_seconds": 1.733
+    },
+    {
+      "name": "strip-dfx-mgrd",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-strip",
+        "--strip-debug",
+        "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgrd"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/strip-dfx-mgrd.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_seconds": 0.01
+    },
+    {
+      "name": "rpath-dfx-mgrd",
+      "argv": [
+        "/home/ghmd/petalinux/2022.2/components/yocto/buildtools_extended/sysroots/x86_64-petalinux-linux/usr/bin/chrpath",
+        "-d",
+        "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgrd"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/rpath-dfx-mgrd.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_seconds": 0.001
+    },
+    {
+      "name": "elf-dfx-mgrd",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "-h",
+        "-l",
+        "-d",
+        "-V",
+        "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgrd"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/elf-dfx-mgrd.log",
+      "sha256": "9645a909dfd2ed757f4d76b6c2b6ccbc9a29da98701e82ef01f01d76784a333b",
+      "elapsed_seconds": 0.009
+    },
+    {
+      "name": "strip-dfx-mgr-client",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-strip",
+        "--strip-debug",
+        "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgr-client"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/strip-dfx-mgr-client.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_seconds": 0.009
+    },
+    {
+      "name": "rpath-dfx-mgr-client",
+      "argv": [
+        "/home/ghmd/petalinux/2022.2/components/yocto/buildtools_extended/sysroots/x86_64-petalinux-linux/usr/bin/chrpath",
+        "-d",
+        "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgr-client"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/rpath-dfx-mgr-client.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_seconds": 0.001
+    },
+    {
+      "name": "elf-dfx-mgr-client",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "-h",
+        "-l",
+        "-d",
+        "-V",
+        "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgr-client"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/elf-dfx-mgr-client.log",
+      "sha256": "e0795e4c9fe406281494764ec5eba435c70ab7e3c859e099e545ffd68b64056c",
+      "elapsed_seconds": 0.008
+    },
+    {
+      "name": "runtime-symbols-libc.so.6",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "--dyn-syms",
+        "--wide",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T040248.123957Z-runtime-review/image-runtime/lib/libc.so.6"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/runtime-symbols-libc.so.6.log",
+      "sha256": "c7ae0a7d2438f9dcab49201cbed7a988c2ff2e1f753e01317544209c02dcfcdc",
+      "elapsed_seconds": 0.026
+    },
+    {
+      "name": "runtime-symbols-libpthread.so.0",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "--dyn-syms",
+        "--wide",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T040248.123957Z-runtime-review/image-runtime/lib/libpthread.so.0"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/runtime-symbols-libpthread.so.0.log",
+      "sha256": "15fff5a1a483aa1c7b3a5685c6a3488af640faed408039400b47020442b27374",
+      "elapsed_seconds": 0.008
+    },
+    {
+      "name": "runtime-symbols-ld-linux-aarch64.so.1",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "--dyn-syms",
+        "--wide",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T040248.123957Z-runtime-review/image-runtime/lib/ld-linux-aarch64.so.1"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/runtime-symbols-ld-linux-aarch64.so.1.log",
+      "sha256": "48326131043f679f37ff6b4c780dbbefa505f0f75a64065ffe89b1c820a5d984",
+      "elapsed_seconds": 0.009
+    },
+    {
+      "name": "runtime-symbols-libdfx.so.1.0",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "--dyn-syms",
+        "--wide",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T040248.123957Z-runtime-review/image-runtime/usr/lib/libdfx.so.1.0"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/runtime-symbols-libdfx.so.1.0.log",
+      "sha256": "fd840ed3be47bae8b5c2ea49d7002436b31f469572b413d64cfc42ba7c1a4396",
+      "elapsed_seconds": 0.008
+    },
+    {
+      "name": "imports-dfx-mgrd",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "--dyn-syms",
+        "--wide",
+        "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgrd"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/imports-dfx-mgrd.log",
+      "sha256": "cf981281233a8cf5b146fa4638f5ee5bcc7c80d97a1b984f5d9dce48fe3e99f6",
+      "elapsed_seconds": 0.008
+    },
+    {
+      "name": "loader-dfx-mgrd",
+      "argv": [
+        "/home/ghmd/petalinux/2022.2/components/yocto/buildtools_extended/sysroots/x86_64-petalinux-linux/usr/bin/qemu-aarch64",
+        "-L",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T040248.123957Z-runtime-review/image-runtime",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T040248.123957Z-runtime-review/image-runtime/lib/ld-linux-aarch64.so.1",
+        "--inhibit-cache",
+        "--library-path",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T040248.123957Z-runtime-review/image-runtime/usr/lib:/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T040248.123957Z-runtime-review/image-runtime/lib",
+        "--list",
+        "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgrd"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/loader-dfx-mgrd.log",
+      "sha256": "8777a47d79a956ee195b8e21eade13d8d87ed8acff624cdde2a170608e85336b",
+      "elapsed_seconds": 0.022
+    },
+    {
+      "name": "imports-dfx-mgr-client",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "--dyn-syms",
+        "--wide",
+        "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgr-client"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/imports-dfx-mgr-client.log",
+      "sha256": "5f00f8e96538e335cb19f3d001490f0b9fa2dacbdca648399b21320f42257da2",
+      "elapsed_seconds": 0.009
+    },
+    {
+      "name": "loader-dfx-mgr-client",
+      "argv": [
+        "/home/ghmd/petalinux/2022.2/components/yocto/buildtools_extended/sysroots/x86_64-petalinux-linux/usr/bin/qemu-aarch64",
+        "-L",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T040248.123957Z-runtime-review/image-runtime",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T040248.123957Z-runtime-review/image-runtime/lib/ld-linux-aarch64.so.1",
+        "--inhibit-cache",
+        "--library-path",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T040248.123957Z-runtime-review/image-runtime/usr/lib:/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T040248.123957Z-runtime-review/image-runtime/lib",
+        "--list",
+        "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgr-client"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/build_dfx/loader-dfx-mgr-client.log",
+      "sha256": "96b690fcd0c01ec26da67d7afcd2132700c2f83e2f310de8f2311584bfe2020c",
+      "elapsed_seconds": 0.022
+    }
+  ],
+  "passed": true,
+  "board_verified_this_run": false,
+  "artifacts": [
+    {
+      "path": "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgrd",
+      "bytes": 117488,
+      "sha256": "f8fa21f304c6df316758735d56ddcaa6124292e3c21bb57afb7d703d38f7aa3d",
+      "board_verified_this_run": false,
+      "dynamic_dependencies": [
+        "libdfx.so.1.0",
+        "libpthread.so.0",
+        "libc.so.6",
+        "ld-linux-aarch64.so.1"
+      ],
+      "strong_imports": 84,
+      "unresolved_strong_imports": [],
+      "original_image_loader_list_passed": true
+    },
+    {
+      "path": "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgr-client",
+      "bytes": 23200,
+      "sha256": "9bc8a01d4b28256731999d53a943ac21ecf064825c2573e9a5c3ca7cb662e23f",
+      "board_verified_this_run": false,
+      "dynamic_dependencies": [
+        "libdfx.so.1.0",
+        "libpthread.so.0",
+        "libc.so.6",
+        "ld-linux-aarch64.so.1"
+      ],
+      "strong_imports": 30,
+      "unresolved_strong_imports": [],
+      "original_image_loader_list_passed": true
+    }
+  ],
+  "offline_image_abi_checked": true,
+  "finished_utc": "2026-10-03T07:00:37.695577+00:00"
+}

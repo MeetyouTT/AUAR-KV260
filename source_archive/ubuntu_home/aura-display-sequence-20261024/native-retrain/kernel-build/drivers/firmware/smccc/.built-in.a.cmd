@@ -1,0 +1,1 @@
+cmd_drivers/firmware/smccc/built-in.a := echo >/dev/null; rm -f drivers/firmware/smccc/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/firmware/smccc/built-in.a drivers/firmware/smccc/smccc.o drivers/firmware/smccc/kvm_guest.o drivers/firmware/smccc/soc_id.o

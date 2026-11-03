@@ -1,0 +1,35 @@
+当前板端对话加速审阅（洛杉矶2026-11-01）
+
+结论：有继续加速的空间。当前首句等待以完整27B回复、板端ASR、OmniVoice首句合成为主；已启用的优化需要保留。下一步先补齐现有分段计时，再针对首句准备与合成衔接做小范围候选。尚无新优化的A/B结果，不能承诺某个秒数。
+
+两次真人实测（均有完整committed播放回执）：
+              第1轮     第2轮
+ASR           1.093s    1.395s
+上下文        0.026s    0.129s
+完整LLM RPC   1.940s    1.833s
+首句TTS RPC   0.766s    0.838s
+worker至PCM队列 4.328s  4.591s
+录音完成至软件SPEAKING约5.044s/5.285s。
+以上RPC含网络与服务等待，软件SPEAKING有约250ms观察粒度；未测真人末字和扬声器物理首声。不能把5.0秒称为精确末字到首声。
+
+当前实际链路及证据位置（基于已核SHA的生产快照，不打开真实身份或记忆库）：
+1. BoardDialogueJobs._execute先完成ASR，再做准入/路由/分析入队，再调用controller.prepare_text；见current_source/board/runtime/audio/board_dialogue_jobs.py:572、652、657。
+2. BoardDialogueController._prepare在523行等待完整LLM RPC，再校验三字段、反复述和业务scope；538行分句，546行generated记录，557行TTS，573行chunk_sink。故首句TTS在完整LLM返回之后启动。
+3. chunk_sink已生效（两轮streaming_enabled=true/streamed_chunks=1），完成一整句PCM就进原StreamingController；多句时后续句TTS可与正在播放的前句重叠。这是句级PCM流水，仍没有LLM首句与TTS重叠。两轮均一次TTS，单纯重开这个开关没有新的收益。
+4. Windows8797的LocalModelBackend._ollama确实接收Ollama token流，但model_inference_host.py:574等done才返回拼好的完整text；board_dialogue_client.py:350附近也完整读取application/json响应。InferenceHost.py（实际是tools/model_inference_host.py:54/75/180）只有一个执行lane；当前LLM没完成，另来的TTS会排队。只在板端增加并发线程不能实现GPU推理重叠。
+5. production_output_format.py:50明确complete_response_required=True。实际配置已是dialogue_abc_v1；主机支持该能力时协商启用，否则原json回退。当前没有每轮额外health请求。已是paraformer_small/ASR2线程、frontend combined/1线程/独立前端及捕获进程、capture nice -10；不能将这些已完成项当下一轮提速成果。
+6. voice_latency.json里的reply_first/early_sentence/coalesce_chat/first_sentence_chat属于旧host channel_frames/OllamaReplyStream。当前board_business._prepare及8797模型接口没有读取这些开关。可复用纯分句/转义处理思路，不能直接重新接回旧Windows8792业务。
+
+最小的下一步：
+A. 首先只增加/转接元数据，保持行为不变：当前主机已有first_content_ms、first_json_closed_ms、backend_done_ms等计时，板端普通dialogue未公开传出这些LLM细分值；再加首个安全句界的计时，就能知道完整LLM的1.8–1.9秒中有多少是首句之后的尾部。把ASR wall/thread CPU、首音频前的guard次数/耗时与录音关闭分开，避免误改。
+B. 在仍要求完整回复通过板端校验后才能播放的约束下，可以研究“原首句缓存器+提前在RAM合成”的候选：板端有界接收模型增量、识别完整自然首句，仅提前发TTS；完整模型结果和原三字段/反复述/scope/生成代数均通过后，确认首句原字相同才释放PCM。取消/过期/后续校验失败一律丢弃RAM结果，完整ACK继续原链。该选项需要显式模型only增量协议和原调度器的小范围适配；现有单执行lane必须解决，不能绕开GPU容量/唯一TTS约束。没有实测，不能当成已部署功能。
+C. B的条件理论收益上限为被隐藏的TTS时间，两轮最多约0.77/0.84秒，实际取决于“首句准备好→完整回复done”的剩余时长、并发争用和协议开销，可能很小。不能直接把整个LLM1.9秒删去。若要在完整回复校验前就播放首句，会改变当前整段校验保障，超出这一最小候选，需另立清晰的部分输出合同与失败处理。
+D. ASR是CPU OfflineRecognizer，完整录音后decode_stream；继续分析同模型的实现和调度开销，不能把它叫已具备流式ASR。保持现行模型/解码参数，后续候选需要同输入的合成/公开语音对照与现场连续性复验，不能无依据切线程、模型或把ASR搬回Windows。
+E. 原SpeechEndpoint固定静音阈值700ms（automatic_capture.py:20），其前端/捕获进程沿用此端点。它有可能贡献真人停话后的等待，但这两轮没有末字声学时间，现有5秒又从录音完成开始，不能从报告直接再减700ms。缩短阈值会影响自然停顿/软辅音，需要单独验证，当前只列待测。
+
+次要开销与边界：
+ASR+context+LLM+TTS相加和首PCM入队相差约504/396ms，这是算术余量，含准入、路由、本地I/O、校验、调度和首包投递，不是新的网络延迟测量。两轮上下文仅26/129ms，route约3ms，analysis_enqueue约24/26ms，当前证据不支持把身份协同或上下文当首要瓶颈。完整响应guard累计849/862ms跨许多后续音频事件并与播放重叠，不能全部从首声时间扣掉；逐包授权/忘记/撤销/取消检查也不能简单删除。两轮queue backpressure及本轮underrun均0，不先动播放缓冲。
+
+验证要求：先静态和合成数据覆盖转义/引号/名字数字不切断、反复述重试、取消/超时/撤销/忘记、三字段校验、序列和完整ACK，再只用公开文本做原27B/OmniVoice16模型探针，最后经正式板端新真人对话与物理听音复验。每轮分别记录首PCM、软件SPEAKING及声学首声，保留原模型、原采样/上下文/OmniVoice16/声线参数。不沿用旧8792或不同台词的历史成绩宣称当前收益。
+
+本轮仅本地只读分析并写本报告与PIPELINE_REVIEW.json；核16份实板快照及6份公开基线源码SHA，核当前主机model_inference_host SHA b4ea2359...7596be5。未更改生产、配置或代码，未调用模型/板卡、未打开真实身份或记忆库。

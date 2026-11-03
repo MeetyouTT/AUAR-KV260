@@ -1,0 +1,15 @@
+[
+  {
+    "id": "final-enabled",
+    "command": "systemctl is-enabled dfx-mgr.service"
+  },
+  {
+    "id": "final-packages",
+    "command": "xmutil listapps"
+  },
+  {
+    "id": "final-live-state",
+    "command": "python3 -B -c 'import sys,json,subprocess,pathlib; sys.path.insert(0,\"/home/root/kv260-dfx-state-boardtest-20261004/board\"); import validate_v5 as v; p=subprocess.run([\"systemctl\",\"show\",\"dfx-mgr.service\",\"-p\",\"MainPID\",\"-p\",\"ActiveState\",\"-p\",\"SubState\",\"-p\",\"Result\",\"-p\",\"ExecStart\",\"-p\",\"DropInPaths\",\"-p\",\"Requires\",\"-p\",\"After\"],check=True,stdout=subprocess.PIPE,text=True); props=dict(line.split(\"=\",1) for line in p.stdout.splitlines()); pid=int(props[\"MainPID\"]); state=v.watch_state(pid); boot=v.read(\"/proc/sys/kernel/random/boot_id\"); assert boot==\"01ca88c1-93b6-414f-9646-774482d4b2f0\"; assert props[\"ActiveState\"]==\"active\" and props[\"SubState\"]==\"running\" and props[\"Result\"]==\"success\"; assert str(pathlib.Path(\"/proc/%d/exe\"%pid).resolve())==str(v.NEW); assert v.sha(v.NEW)==v.NEW_SHA; assert v.read(\"/sys/block/mmcblk1/device/cid\")==v.CID; assert v.read(\"/sys/module/zocl/srcversion\")==v.ZOCL; assert v.read(\"/sys/module/zocl/parameters/enable_xgq_ert\")==\"1\"; assert v.PERSIST.read_text()==v.PERSIST_CONTENT and not v.TEMP.exists(); assert state[\"watch_count\"]==5 and state[\"inotify_fd_count\"]==1 and state[\"overlays\"]==[\"kv260-benchmark-b4096_image_1\"] and state[\"render_nodes\"]==[\"renderD128\"]; subprocess.run([\"sha256sum\",\"-c\",str(v.STOCK)],check=True); print(\"LIVE \"+json.dumps({\"boot_id\":boot,\"cid\":v.CID,\"manager_sha256\":v.sha(v.NEW),\"manager_bytes\":v.NEW.stat().st_size,\"persistent_dropin_sha256\":v.sha(v.PERSIST),\"zocl_srcversion\":v.ZOCL,\"properties\":props,\"state\":state}))'",
+    "timeout": 120
+  }
+]

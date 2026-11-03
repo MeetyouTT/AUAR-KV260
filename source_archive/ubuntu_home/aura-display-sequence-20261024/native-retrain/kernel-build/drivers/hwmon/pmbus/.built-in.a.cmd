@@ -1,0 +1,1 @@
+cmd_drivers/hwmon/pmbus/built-in.a := echo >/dev/null; rm -f drivers/hwmon/pmbus/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/hwmon/pmbus/built-in.a drivers/hwmon/pmbus/pmbus_core.o drivers/hwmon/pmbus/pmbus.o drivers/hwmon/pmbus/ir38064.o drivers/hwmon/pmbus/max20751.o

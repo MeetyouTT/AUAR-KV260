@@ -1,0 +1,27 @@
+{
+  "schema": "aura-platform-readonly-probe-preparation-notes-1",
+  "standalone_raw_failure_artifacts_produced": false,
+  "entries": [
+    {
+      "probe": "initial collect_platform_readonly.py attempt",
+      "outcome": "read-only error before JSON output",
+      "reason": "PermissionError reading write-only /sys/class/fpga_manager/fpga0/firmware",
+      "resolution": "Report unavailable sysfs reads and use public /proc/device-tree/fpga-full/firmware-name source",
+      "board_mutations": false
+    },
+    {
+      "probe": "initial collect_preflight_readonly.py attempt",
+      "outcome": "read-only error before JSON output",
+      "reason": "DroidSansFallbackFull.ttf exceeded initial 2 MiB public-file bound",
+      "resolution": "Raise bounded source-hashing limit to 64 MiB; retain strict no-symlink/no-database checks",
+      "board_mutations": false
+    }
+  ],
+  "subsequent_passes": [
+    "platform_readonly_01.json",
+    "preflight_readonly_01.json",
+    "preflight_readonly_02.json",
+    "preflight_readonly_03.json"
+  ],
+  "no_failed_result_relabelled_pass": true
+}

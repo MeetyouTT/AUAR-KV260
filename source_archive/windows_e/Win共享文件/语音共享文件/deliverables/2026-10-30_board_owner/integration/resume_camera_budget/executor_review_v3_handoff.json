@@ -1,0 +1,36 @@
+{
+  "schema_version": 3,
+  "status": "ACTUAL_FACE_TARGETS_SCHEMA_FIX_LOCAL_PASS_PARENT_OBSERVATION_ONLY",
+  "supersedes": "executor_review_v2_handoff.json (prior executor08348d...)",
+  "files": {
+    "serial_trial.py": "1e8aeee2a94b4fce674f2468ce48c77fbb88ef99bd9cb1ab66dd3bf20a0327f6",
+    "test_serial_trial.py": "c064dd067e7d67279212f294d02286357a0d3b26d67dcfd0ab911e84d00aa5ad",
+    "executor_review_v3_tests.xml": "3bebbd866ac40e4f1b42555f59def05784f3eb8e8d9a38196e587aec768895db"
+  },
+  "executor_change_from_v2": "Exactly one line: running_health reads identity.face_targets instead of the diagnostic projection alias identity.faces. All readiness, error, fault and source-age thresholds remain unchanged.",
+  "source_confirmation": {
+    "metadata_source": "../resume_camera_pin/actual_metadata_snapshot_v4.json",
+    "source_key": "files.actual_board/identity/face_targets.py.content",
+    "health_fields": ["ready", "error", "fault_latched", "source_age_ms"],
+    "source_age_rule": "None when stamp is absent, otherwise self.clock()-self.stamp",
+    "actual_runtime_projection": "actual_candidate_ready_projection.json confirms identity.face_targets is present and identity.faces is absent"
+  },
+  "tests": {
+    "passed": 88,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 0.31,
+    "new_case": "A faces-only diagnostic alias fails readiness; after restoring the real face_targets health schema, reloading the same STARTING journal approves the same sole owner without a second start request."
+  },
+  "parent_continuation": {
+    "journal": "Use the SAME existing private journal already in STARTING_CANDIDATE with start_issued=true",
+    "action": "Stage the new executor separately and invoke start-candidate only to observe the existing owner",
+    "do_not_repeat": ["prepare", "a fresh start request", "checkpoint consumption", "a second owner"]
+  },
+  "preserved": {
+    "candidate_manifest_and_protected_native_sources": true,
+    "all_v2_no_force_kill_checkpoint_restore_and_dropin_guards": true,
+    "no_device_calls_or_service_actions_by_this_subtask": true
+  }
+}

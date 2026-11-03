@@ -1,0 +1,125 @@
+{
+  "schema_version": "aura-sface-calibration-candidate-1",
+  "release_id": "AURA-SFACE-CALIBRATION-20261022-r1",
+  "generated_utc": "2026-10-22T08:12:24.880644+00:00",
+  "status": "SOFTWARE_ONLY_NOT_DEPLOYED",
+  "mode": "CALIBRATION_ONLY",
+  "model_id": "sface-int8-12b2ff5c7de15713",
+  "model_sha256": "12b2ff5c7de157133ebd5aa71665fc5ddcd1f65d9e30e2d6e965e0752e467f25",
+  "default_enabled": false,
+  "new_dpu_owner_created": false,
+  "new_dpu_runner_created": false,
+  "windows_identity_preserved": true,
+  "new_identity_database_opened": false,
+  "identity_decisions_published": 0,
+  "templates_written": 0,
+  "images_saved": 0,
+  "features_saved": 0,
+  "runtime_verified": false,
+  "field_threshold_validated": false,
+  "deployment_threshold_validated": false,
+  "general_accuracy_proven": false,
+  "formal_dpu_identity_migration_complete": false,
+  "gallery_policy": "frontal_medoid_v1_observed_top5_operator_labelled_capture",
+  "quality_source": "yunet_five_landmark_geometry_and_aligned_crop_laplacian_variance",
+  "sampling_policy_reference": {
+    "source": "/home/ghmd/aura-dpu-vision-20261021/live-source/board/identity/sampling.py",
+    "sha256": "29dcd8546fe1a57e1a3b757fbaa9b4459009d11f2324fcc0be27001c0580009a",
+    "selection_core_matched_in_software": true,
+    "full_enrollment_equivalence_proven": false,
+    "not_executed": [
+      "15-second collection window",
+      "post-selection consecutive validation",
+      "name confirmation",
+      "INT8 store enrollment",
+      "persistence/restart"
+    ]
+  },
+  "software_tests": {
+    "command": "python3 -B run_tests.py",
+    "passed": 46,
+    "baseline_shadow": 16,
+    "new_contracts": 30,
+    "environment": "Existing Vitis AI 3.0 CPU container, no network, read-only source mounts, synthetic inputs only"
+  },
+  "standard_library_check": {
+    "command": "python3 -B tools/calibration_contract_check.py --module /ABSOLUTE/sface_calibration.py --expected-sha256 SOURCE_SHA256",
+    "checks_passed": 8,
+    "status": "STANDARD_LIBRARY_SIMULATION_ONLY",
+    "runtime_verified": false
+  },
+  "source_files": [
+    {
+      "path": "candidate/aura/board/identity/calibration_http.py",
+      "sha256": "42159f8b5a37c8bd0a86628df035d959cfd8ce8558b3433bf6b7b9fd01cfb621",
+      "bytes": 4423,
+      "baseline_path": null,
+      "baseline_sha256": null,
+      "unchanged_from_baseline": false
+    },
+    {
+      "path": "candidate/aura/board/identity/camera_faces.py",
+      "sha256": "81758205d9e3e1f882146954a3da92d3014928603b3f88587ab8f180f9d3f88e",
+      "bytes": 13606,
+      "baseline_path": "/home/ghmd/aura-sface-shadow-candidate-20261021/candidate/aura/board/identity/camera_faces.py",
+      "baseline_sha256": "cbe56a648e41942b2c851fd1337cf48253305264c984580abdd65f24957c2210",
+      "unchanged_from_baseline": false
+    },
+    {
+      "path": "candidate/aura/board/identity/deferred.py",
+      "sha256": "99b4a88344c4552a2e231d06fc7485764d096e14190d22fc8f2c96133750c141",
+      "bytes": 204,
+      "baseline_path": "/home/ghmd/aura-sface-shadow-candidate-20261021/candidate/aura/board/identity/deferred.py",
+      "baseline_sha256": "99b4a88344c4552a2e231d06fc7485764d096e14190d22fc8f2c96133750c141",
+      "unchanged_from_baseline": true
+    },
+    {
+      "path": "candidate/aura/board/identity/live.py",
+      "sha256": "d6bc5093f372cafbd6609a1a7d1258abb05dfb09645ead95246032c5d05f1161",
+      "bytes": 18617,
+      "baseline_path": "/home/ghmd/aura-sface-shadow-candidate-20261021/candidate/aura/board/identity/live.py",
+      "baseline_sha256": "d6bc5093f372cafbd6609a1a7d1258abb05dfb09645ead95246032c5d05f1161",
+      "unchanged_from_baseline": true
+    },
+    {
+      "path": "candidate/aura/board/identity/model_store.py",
+      "sha256": "310b4f3290fdf9d07b47800477e8ceb4c7631fbb9e622fac0f8c547a0d1563da",
+      "bytes": 7965,
+      "baseline_path": "/home/ghmd/aura-sface-shadow-candidate-20261021/candidate/aura/board/identity/model_store.py",
+      "baseline_sha256": "310b4f3290fdf9d07b47800477e8ceb4c7631fbb9e622fac0f8c547a0d1563da",
+      "unchanged_from_baseline": true
+    },
+    {
+      "path": "candidate/aura/board/identity/sface_calibration.py",
+      "sha256": "23a5c619b483e65c7dd152e5a225df55763ac2936dbf5ae717c6ec998fb19e5c",
+      "bytes": 26245,
+      "baseline_path": null,
+      "baseline_sha256": null,
+      "unchanged_from_baseline": false
+    },
+    {
+      "path": "candidate/aura/board/identity/sface_shadow.py",
+      "sha256": "5ad5071f020d0914a1a153f6992c85d92b7a05580032697f5a1cee036aea88c5",
+      "bytes": 13918,
+      "baseline_path": "/home/ghmd/aura-sface-shadow-candidate-20261021/candidate/aura/board/identity/sface_shadow.py",
+      "baseline_sha256": "1421cb65fac3bc0d4db9eed52c7b0a76f414a6f2d13cdffeaa121744815691ad",
+      "unchanged_from_baseline": false
+    },
+    {
+      "path": "candidate/aura/board/vision/dpu_sface.py",
+      "sha256": "24e295040989ce600285f3d6ce9eabb7010008e59467206dc7a247335f748cfa",
+      "bytes": 4421,
+      "baseline_path": "/home/ghmd/aura-sface-shadow-candidate-20261021/candidate/aura/board/vision/dpu_sface.py",
+      "baseline_sha256": "24e295040989ce600285f3d6ce9eabb7010008e59467206dc7a247335f748cfa",
+      "unchanged_from_baseline": true
+    },
+    {
+      "path": "candidate/aura/board/vision/ui_camera_service.py",
+      "sha256": "04fe2ccf97e62dcc537cd445a26bcf49300bd284672b09d18c2f311afa40bf1d",
+      "bytes": 33788,
+      "baseline_path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/candidate/aura/board/vision/ui_camera_service.py",
+      "baseline_sha256": "890fea726de2c6d29581ab2ee4c36db5e36df52f3e84ee20cd634fc8961ec2ce",
+      "unchanged_from_baseline": false
+    }
+  ]
+}

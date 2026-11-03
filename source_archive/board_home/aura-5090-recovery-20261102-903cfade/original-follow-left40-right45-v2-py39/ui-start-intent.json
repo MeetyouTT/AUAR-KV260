@@ -1,0 +1,5389 @@
+{
+  "command": "pan_face_follow",
+  "once": true,
+  "before": {
+    "utc": "2026-11-02T08:45:28.514493+00:00",
+    "page": "vision",
+    "following": false,
+    "pan_state": "READY",
+    "pan_error": "",
+    "readback": {
+      "flags": 0,
+      "width_us": 1364,
+      "lease_left_ms": 0,
+      "session": 518638531,
+      "epoch": 165,
+      "reference_us": 1556,
+      "target_us": 500,
+      "ack_seq": 16,
+      "active": false,
+      "armed": false,
+      "referenced": false,
+      "bound": false,
+      "reason": 0
+    },
+    "backend_pid": 178035,
+    "face_follow": {
+      "state": "CONTINUOUS_FACE_ZONE_STOPPED",
+      "reason": "OPERATOR_STOP",
+      "commands_accepted": 157,
+      "elapsed_s": 33.726,
+      "final_flags": 0,
+      "report": "/home/root/aura-pan-wide-20261028/control-10282601-left40-right45-py39-14e598cf/runs/ui-30550914545020/trial.json",
+      "error": "",
+      "process_cleanup": {
+        "exit_confirmed": true,
+        "pid": 177246,
+        "returncode": 0,
+        "term_requested": false,
+        "kill_requested": false,
+        "errors": []
+      }
+    },
+    "report": "/home/root/aura-pan-wide-20261028/control-10282601-left40-right45-py39-14e598cf/runs/ui-30550914545020/trial.json",
+    "report_status": "CONTINUOUS_FACE_ZONE_STOPPED",
+    "report_error": null,
+    "consumer_manifest_sha256": "da3ecf2fd05f3146ab56c1c969090c9902d3b7af2d1b5753d5e41307f1e9afed",
+    "control_parameters": {
+      "prearm_confirmed_face": true,
+      "confirm_frames": 2,
+      "recenter_on_edge": true,
+      "target_center_ratio": 0.45,
+      "left_target_center_ratio": 0.4,
+      "smooth_recenter_stop": true,
+      "single_pass_recenter": true,
+      "single_pass_phases": {
+        "HARDWARE_CRUISE": 200,
+        "COMPLETE": 0
+      },
+      "single_pass_semantics": "lock direction and in-range endpoint; PL emits continuous 4us/20ms ramp; actual face center ends motion using QUIESCE, without a reverse target",
+      "hardware_slew_recenter": true,
+      "hardware_slew_us_s": 200,
+      "brief_face_gap": "STOP after current complete pulse; no PS braking path in this mode",
+      "center_tolerance_ratio": 0.03,
+      "recenter_intent_hold_ms": 2000,
+      "prearm_trigger_margin_ratio": 0.05,
+      "effective_one_euro": {
+        "min_cutoff_hz": 1.0,
+        "beta": 6.0,
+        "derivative_cutoff_hz": 1.0,
+        "width_beta": 2.0
+      },
+      "legacy_compatibility_fields": {
+        "filter_tau_ms": 80.0,
+        "velocity_filter_tau_ms": 100.0,
+        "median_window": 3,
+        "used_for_control": false
+      },
+      "velocity_gain_us": 0.0,
+      "minimum_speed_us_s": 0.0,
+      "base_speed_us_s": 0.0,
+      "maximum_speed_us_s": 200,
+      "maximum_acceleration_us_s2": null,
+      "maximum_step_us": 4,
+      "maximum_jerk_us_s3": null,
+      "step_scope": "emitted pulse width per 20ms FPGA frame, not target-register delta",
+      "source_displacement_bound": "at most 4us per hardware frame before original source expiry; replaces 4us/image PS budget",
+      "maximum_correction_per_outside_episode_us": null,
+      "correction_rearm_stable_inside_ms": 250,
+      "correction_rearm_minimum_distinct_images": 3,
+      "authority_deadline": "minimum of image source plus 250ms and detection anchor plus 500ms",
+      "fresh_image_low_lease_renewal": "every distinct admitted post-ARM actual face immediately renews the same endpoint using original source/anchor deadlines; ticks never renew",
+      "confirmed_edge_speed_floor_us_s": 6.0,
+      "initial_in_zone_pwm": "off; prepare ARM on confirmed face; no COMMIT until actual face-edge displacement",
+      "initial_equal_target_pwm": "off until a distinct trajectory target is ready",
+      "initial_pwm_minimum_lease_ms": 23,
+      "pwm_frame_ms": 20,
+      "initial_insufficient_budget": "no PWM; reset unexecuted trajectory; retain original deadline",
+      "shutdown_order": "verified motor STOP before HTTP reader cleanup",
+      "live_report_storage": "latest-only background filesystem writes; immutable JSON; final proof after STOP and writer exit",
+      "visual_loss_stop": "PL QUIESCE completes current pulse only; original hardware expiry remains",
+      "position_filter": "OneEuroFilter with large-jump admission gate",
+      "control_tick_ms": 20,
+      "trajectory_authority": "only new actual face images renew endpoint lease; original image/anchor deadline; no old-image tick renewal",
+      "zone_hold": "initial inside means no output; after center QUIESCE retains final emitted width and ends PWM",
+      "jerk_exceptions": [
+        "hardware slew profile has no explicit acceleration/jerk trajectory constraint"
+      ],
+      "feedback_reference": "current actual face center completes the latched hardware ramp; no face velocity correction, future prediction or fixed mechanical home"
+    },
+    "zone": {
+      "left_ratio": 0.05,
+      "right_ratio": 0.8064720153808593,
+      "reference": "face_center",
+      "content_rect": [
+        92.0,
+        112,
+        400.0,
+        300
+      ],
+      "screen_line_x": 414.58880615234375,
+      "screen_left_line_x": 112.0,
+      "left_reference": "face_box_left_edge_user_line",
+      "right_reference": "face_center"
+    },
+    "zone_settings_sha256": "815fb333ad60137c93d2147ab14574903556b551d15cad5621320ba94cdfd4e3",
+    "report_result": {
+      "state": "STOPPED",
+      "reason": "OPERATOR_STOP",
+      "active": false,
+      "fatal": false,
+      "pulse_us": 1364,
+      "target_us": 500,
+      "commands_accepted": 157,
+      "segments": 12,
+      "visual_center_completions": 7,
+      "target_center_ratio": 0.4,
+      "recenter_state": "AT_CENTER",
+      "recenter_intent_pending": false,
+      "motion_mode": "LATCHED_VISUAL_CENTER_HARDWARE_SLEW",
+      "readback": {
+        "flags": 0,
+        "width_us": 1364,
+        "lease_left_ms": 0,
+        "session": 518638531,
+        "epoch": 165,
+        "reference_us": 1556,
+        "target_us": 500,
+        "ack_seq": 16,
+        "active": false,
+        "armed": false,
+        "referenced": false,
+        "bound": false,
+        "reason": 0
+      },
+      "hardware_width_trace": [
+        {
+          "mono_ms": 30584462,
+          "width_us": 1416,
+          "target_us": 500,
+          "lease_left_ms": 99
+        },
+        {
+          "mono_ms": 30584473,
+          "width_us": 1412,
+          "target_us": 500,
+          "lease_left_ms": 146
+        },
+        {
+          "mono_ms": 30584490,
+          "width_us": 1408,
+          "target_us": 500,
+          "lease_left_ms": 128
+        },
+        {
+          "mono_ms": 30584503,
+          "width_us": 1408,
+          "target_us": 500,
+          "lease_left_ms": 116
+        },
+        {
+          "mono_ms": 30584528,
+          "width_us": 1404,
+          "target_us": 500,
+          "lease_left_ms": 91
+        },
+        {
+          "mono_ms": 30584535,
+          "width_us": 1400,
+          "target_us": 500,
+          "lease_left_ms": 133
+        },
+        {
+          "mono_ms": 30584548,
+          "width_us": 1400,
+          "target_us": 500,
+          "lease_left_ms": 122
+        },
+        {
+          "mono_ms": 30584555,
+          "width_us": 1396,
+          "target_us": 500,
+          "lease_left_ms": 183
+        },
+        {
+          "mono_ms": 30584578,
+          "width_us": 1392,
+          "target_us": 500,
+          "lease_left_ms": 160
+        },
+        {
+          "mono_ms": 30584594,
+          "width_us": 1388,
+          "target_us": 500,
+          "lease_left_ms": 144
+        },
+        {
+          "mono_ms": 30584605,
+          "width_us": 1388,
+          "target_us": 500,
+          "lease_left_ms": 167
+        },
+        {
+          "mono_ms": 30584627,
+          "width_us": 1384,
+          "target_us": 500,
+          "lease_left_ms": 144
+        },
+        {
+          "mono_ms": 30584648,
+          "width_us": 1380,
+          "target_us": 500,
+          "lease_left_ms": 124
+        },
+        {
+          "mono_ms": 30584674,
+          "width_us": 1372,
+          "target_us": 500,
+          "lease_left_ms": 98
+        },
+        {
+          "mono_ms": 30584691,
+          "width_us": 1368,
+          "target_us": 500,
+          "lease_left_ms": 81
+        },
+        {
+          "mono_ms": 30584715,
+          "width_us": 1364,
+          "target_us": 500,
+          "lease_left_ms": 56
+        }
+      ]
+    },
+    "controller": {
+      "recenter_trigger_side": -1,
+      "target_center_ratio": 0.4,
+      "configured_target_center_ratio": 0.45,
+      "configured_left_target_center_ratio": 0.4,
+      "recenter_active": false,
+      "recenter_direction": -1,
+      "recenter_phase": "COMPLETE",
+      "raw_center_ratio": 0.5350000619888305,
+      "raw_left_ratio": 0.40096044540405273,
+      "authority_deadline_mono_ms": 30586867
+    },
+    "observation_trace": [
+      {
+        "received_mono_ms": 30558956,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.48062496185302733,
+        "face_left_ratio": 0.3578153371810913,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 75,
+        "detection_age_ms": 296
+      },
+      {
+        "received_mono_ms": 30559003,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.47999995946884155,
+        "face_left_ratio": 0.354081392288208,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 44,
+        "detection_age_ms": 226
+      },
+      {
+        "received_mono_ms": 30559077,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.47999995946884155,
+        "face_left_ratio": 0.354081392288208,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 91,
+        "detection_age_ms": 300
+      },
+      {
+        "received_mono_ms": 30559146,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4806249737739563,
+        "face_left_ratio": 0.35627059936523436,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 103,
+        "detection_age_ms": 265
+      },
+      {
+        "received_mono_ms": 30559151,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4806249737739563,
+        "face_left_ratio": 0.35627059936523436,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 62,
+        "detection_age_ms": 270
+      },
+      {
+        "received_mono_ms": 30559233,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4668749809265137,
+        "face_left_ratio": 0.36687498092651366,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 100,
+        "detection_age_ms": 247
+      },
+      {
+        "received_mono_ms": 30559288,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.46374998092651365,
+        "face_left_ratio": 0.36374998092651367,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 85,
+        "detection_age_ms": 302
+      },
+      {
+        "received_mono_ms": 30559352,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.46062498092651366,
+        "face_left_ratio": 0.3606249809265137,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 113,
+        "detection_age_ms": 366
+      },
+      {
+        "received_mono_ms": 30559374,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4625,
+        "face_left_ratio": 0.33969037532806395,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 68,
+        "detection_age_ms": 241
+      },
+      {
+        "received_mono_ms": 30559435,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.45625,
+        "face_left_ratio": 0.333440375328064,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 55,
+        "detection_age_ms": 302
+      },
+      {
+        "received_mono_ms": 30559497,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.453125,
+        "face_left_ratio": 0.32401878833770753,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 68,
+        "detection_age_ms": 258
+      },
+      {
+        "received_mono_ms": 30559518,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.434375,
+        "face_left_ratio": 0.30526878833770754,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 38,
+        "detection_age_ms": 279
+      },
+      {
+        "received_mono_ms": 30559585,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.41999996900558473,
+        "face_left_ratio": 0.2940814018249512,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 58,
+        "detection_age_ms": 205
+      },
+      {
+        "received_mono_ms": 30559685,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4137499690055847,
+        "face_left_ratio": 0.28783140182495115,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 108,
+        "detection_age_ms": 305
+      },
+      {
+        "received_mono_ms": 30559740,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.40624998807907103,
+        "face_left_ratio": 0.2803314208984375,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 85,
+        "detection_age_ms": 213
+      },
+      {
+        "received_mono_ms": 30559830,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.39874998331069944,
+        "face_left_ratio": 0.27439560890197756,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 90,
+        "detection_age_ms": 253
+      },
+      {
+        "received_mono_ms": 30559867,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.37687498331069946,
+        "face_left_ratio": 0.25252060890197753,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 84,
+        "detection_age_ms": 290
+      },
+      {
+        "received_mono_ms": 30559917,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3581249833106995,
+        "face_left_ratio": 0.23377060890197754,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 56,
+        "detection_age_ms": 340
+      },
+      {
+        "received_mono_ms": 30559958,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.35187498331069944,
+        "face_left_ratio": 0.22752060890197753,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 49,
+        "detection_age_ms": 381
+      },
+      {
+        "received_mono_ms": 30560065,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3331250071525574,
+        "face_left_ratio": 0.20720643997192384,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 109,
+        "detection_age_ms": 282
+      },
+      {
+        "received_mono_ms": 30560104,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.32375000715255736,
+        "face_left_ratio": 0.19783143997192382,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 95,
+        "detection_age_ms": 321
+      },
+      {
+        "received_mono_ms": 30560141,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.30625001192092893,
+        "face_left_ratio": 0.17387547492980956,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 41,
+        "detection_age_ms": 232
+      },
+      {
+        "received_mono_ms": 30560237,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2993749976158142,
+        "face_left_ratio": 0.17345643043518066,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 92,
+        "detection_age_ms": 228
+      },
+      {
+        "received_mono_ms": 30560326,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2868749976158142,
+        "face_left_ratio": 0.16095643043518065,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 108,
+        "detection_age_ms": 317
+      },
+      {
+        "received_mono_ms": 30560384,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2837500095367432,
+        "face_left_ratio": 0.15464379787445068,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 98,
+        "detection_age_ms": 239
+      },
+      {
+        "received_mono_ms": 30560508,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.27437500953674315,
+        "face_left_ratio": 0.14200047254562378,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 170,
+        "detection_age_ms": 290
+      },
+      {
+        "received_mono_ms": 30560589,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2650000095367432,
+        "face_left_ratio": 0.1326254725456238,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 145,
+        "detection_age_ms": 371
+      },
+      {
+        "received_mono_ms": 30560600,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2581249952316284,
+        "face_left_ratio": 0.12739484310150145,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 73,
+        "detection_age_ms": 314
+      },
+      {
+        "received_mono_ms": 30560682,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.23624999523162843,
+        "face_left_ratio": 0.10387545824050903,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 101,
+        "detection_age_ms": 238
+      },
+      {
+        "received_mono_ms": 30560732,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2268749952316284,
+        "face_left_ratio": 0.09450045824050904,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 93,
+        "detection_age_ms": 288
+      },
+      {
+        "received_mono_ms": 30560762,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2174999952316284,
+        "face_left_ratio": 0.08512545824050903,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 74,
+        "detection_age_ms": 318
+      },
+      {
+        "received_mono_ms": 30560805,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.21437501907348633,
+        "face_left_ratio": 0.08364486694335938,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 52,
+        "detection_age_ms": 224
+      },
+      {
+        "received_mono_ms": 30560865,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.21125001907348634,
+        "face_left_ratio": 0.08051986694335937,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 51,
+        "detection_age_ms": 284
+      },
+      {
+        "received_mono_ms": 30560885,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.19875001907348633,
+        "face_left_ratio": 0.06801986694335938,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 33,
+        "detection_age_ms": 304
+      },
+      {
+        "received_mono_ms": 30560973,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.19937498569488527,
+        "face_left_ratio": 0.0686448335647583,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 83,
+        "detection_age_ms": 285
+      },
+      {
+        "received_mono_ms": 30560991,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.18687498569488525,
+        "face_left_ratio": 0.0561448335647583,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 28,
+        "detection_age_ms": 303
+      },
+      {
+        "received_mono_ms": 30561160,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.18000001907348634,
+        "face_left_ratio": 0.04926986694335937,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 167,
+        "detection_age_ms": 270
+      },
+      {
+        "received_mono_ms": 30561218,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.17250001430511475,
+        "face_left_ratio": 0.040125477313995364,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 138,
+        "detection_age_ms": 255
+      },
+      {
+        "received_mono_ms": 30561265,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.16625001430511474,
+        "face_left_ratio": 0.03387547731399536,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 83,
+        "detection_age_ms": 302
+      },
+      {
+        "received_mono_ms": 30561295,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.16625001430511474,
+        "face_left_ratio": 0.03387547731399536,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 113,
+        "detection_age_ms": 332
+      },
+      {
+        "received_mono_ms": 30561320,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.14000000953674316,
+        "face_left_ratio": 0.004274392127990722,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 73,
+        "detection_age_ms": 240
+      },
+      {
+        "received_mono_ms": 30561416,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1317073106765747,
+        "face_left_ratio": 0.0,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 97,
+        "detection_age_ms": 234
+      },
+      {
+        "received_mono_ms": 30561476,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1418750047683716,
+        "face_left_ratio": 0.00783538818359375,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 91,
+        "detection_age_ms": 294
+      },
+      {
+        "received_mono_ms": 30561533,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1693750023841858,
+        "face_left_ratio": 0.03533538579940796,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 112,
+        "detection_age_ms": 214
+      },
+      {
+        "received_mono_ms": 30561568,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1693750023841858,
+        "face_left_ratio": 0.03533538579940796,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 147,
+        "detection_age_ms": 249
+      },
+      {
+        "received_mono_ms": 30561593,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.18812500238418578,
+        "face_left_ratio": 0.054085385799407956,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 109,
+        "detection_age_ms": 274
+      },
+      {
+        "received_mono_ms": 30561611,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.19937500953674317,
+        "face_left_ratio": 0.06533539295196533,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 70,
+        "detection_age_ms": 190
+      },
+      {
+        "received_mono_ms": 30561648,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.21500000953674317,
+        "face_left_ratio": 0.08096039295196533,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 61,
+        "detection_age_ms": 227
+      },
+      {
+        "received_mono_ms": 30561657,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.21500000953674317,
+        "face_left_ratio": 0.08096039295196533,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 70,
+        "detection_age_ms": 236
+      },
+      {
+        "received_mono_ms": 30561729,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.24625000953674317,
+        "face_left_ratio": 0.11387547254562377,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 55,
+        "detection_age_ms": 188
+      },
+      {
+        "received_mono_ms": 30561802,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.24625000953674317,
+        "face_left_ratio": 0.11387547254562377,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 128,
+        "detection_age_ms": 261
+      },
+      {
+        "received_mono_ms": 30561849,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.253125,
+        "face_left_ratio": 0.11739938259124756,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 121,
+        "detection_age_ms": 262
+      },
+      {
+        "received_mono_ms": 30561924,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.275,
+        "face_left_ratio": 0.13927438259124755,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 118,
+        "detection_age_ms": 337
+      },
+      {
+        "received_mono_ms": 30561939,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.275,
+        "face_left_ratio": 0.13927438259124755,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 133,
+        "detection_age_ms": 352
+      },
+      {
+        "received_mono_ms": 30561970,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3,
+        "face_left_ratio": 0.16427438259124755,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 102,
+        "detection_age_ms": 383
+      },
+      {
+        "received_mono_ms": 30561979,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3456250190734863,
+        "face_left_ratio": 0.21325048208236694,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 82,
+        "detection_age_ms": 305
+      },
+      {
+        "received_mono_ms": 30562016,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3456250190734863,
+        "face_left_ratio": 0.21325048208236694,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 119,
+        "detection_age_ms": 342
+      },
+      {
+        "received_mono_ms": 30562029,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3706249952316284,
+        "face_left_ratio": 0.23989484310150147,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 43,
+        "detection_age_ms": 132
+      },
+      {
+        "received_mono_ms": 30562127,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3799999952316284,
+        "face_left_ratio": 0.24926984310150146,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 103,
+        "detection_age_ms": 230
+      },
+      {
+        "received_mono_ms": 30562220,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.403125011920929,
+        "face_left_ratio": 0.2707504749298096,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 124,
+        "detection_age_ms": 234
+      },
+      {
+        "received_mono_ms": 30562260,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.42812501192092894,
+        "face_left_ratio": 0.29575047492980955,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 75,
+        "detection_age_ms": 274
+      },
+      {
+        "received_mono_ms": 30562314,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4400000095367432,
+        "face_left_ratio": 0.3108937978744507,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 78,
+        "detection_age_ms": 218
+      },
+      {
+        "received_mono_ms": 30562340,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44312500953674316,
+        "face_left_ratio": 0.3140187978744507,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 66,
+        "detection_age_ms": 244
+      },
+      {
+        "received_mono_ms": 30562423,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44875001907348633,
+        "face_left_ratio": 0.31964380741119386,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 94,
+        "detection_age_ms": 187
+      },
+      {
+        "received_mono_ms": 30562544,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44625000953674315,
+        "face_left_ratio": 0.3155198574066162,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 132,
+        "detection_age_ms": 215
+      },
+      {
+        "received_mono_ms": 30562607,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44625000953674315,
+        "face_left_ratio": 0.3155198574066162,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 96,
+        "detection_age_ms": 278
+      },
+      {
+        "received_mono_ms": 30562670,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44625000953674315,
+        "face_left_ratio": 0.3155198574066162,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 82,
+        "detection_age_ms": 341
+      },
+      {
+        "received_mono_ms": 30562710,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44250001907348635,
+        "face_left_ratio": 0.3117698669433594,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 85,
+        "detection_age_ms": 298
+      },
+      {
+        "received_mono_ms": 30562793,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44562501907348634,
+        "face_left_ratio": 0.3148948669433594,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 125,
+        "detection_age_ms": 381
+      },
+      {
+        "received_mono_ms": 30562853,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44937500953674314,
+        "face_left_ratio": 0.3186448574066162,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 98,
+        "detection_age_ms": 265
+      },
+      {
+        "received_mono_ms": 30562935,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44937500953674314,
+        "face_left_ratio": 0.3186448574066162,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 102,
+        "detection_age_ms": 347
+      },
+      {
+        "received_mono_ms": 30562976,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44937500953674314,
+        "face_left_ratio": 0.3186448574066162,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 97,
+        "detection_age_ms": 308
+      },
+      {
+        "received_mono_ms": 30563040,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.45625001192092896,
+        "face_left_ratio": 0.32387547492980956,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 89,
+        "detection_age_ms": 207
+      },
+      {
+        "received_mono_ms": 30563060,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.45937501192092894,
+        "face_left_ratio": 0.32700047492980955,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 54,
+        "detection_age_ms": 227
+      },
+      {
+        "received_mono_ms": 30563141,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.45937501192092894,
+        "face_left_ratio": 0.32700047492980955,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 78,
+        "detection_age_ms": 190
+      },
+      {
+        "received_mono_ms": 30563222,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.46250001192092893,
+        "face_left_ratio": 0.3301254749298096,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 93,
+        "detection_age_ms": 271
+      },
+      {
+        "received_mono_ms": 30563264,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4737499713897705,
+        "face_left_ratio": 0.34301981925964353,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 60,
+        "detection_age_ms": 201
+      },
+      {
+        "received_mono_ms": 30563344,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.47687497138977053,
+        "face_left_ratio": 0.3461448192596436,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 79,
+        "detection_age_ms": 281
+      },
+      {
+        "received_mono_ms": 30563467,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.49375,
+        "face_left_ratio": 0.3646437883377075,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 141,
+        "detection_age_ms": 338
+      },
+      {
+        "received_mono_ms": 30563473,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.503125,
+        "face_left_ratio": 0.3740187883377075,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 91,
+        "detection_age_ms": 344
+      },
+      {
+        "received_mono_ms": 30563507,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5137499809265137,
+        "face_left_ratio": 0.38624756336212157,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 70,
+        "detection_age_ms": 181
+      },
+      {
+        "received_mono_ms": 30563588,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5356249809265137,
+        "face_left_ratio": 0.4081225633621216,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 70,
+        "detection_age_ms": 262
+      },
+      {
+        "received_mono_ms": 30563655,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5456250190734864,
+        "face_left_ratio": 0.41812260150909425,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 55,
+        "detection_age_ms": 273
+      },
+      {
+        "received_mono_ms": 30563709,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.574375057220459,
+        "face_left_ratio": 0.4452688455581665,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 57,
+        "detection_age_ms": 191
+      },
+      {
+        "received_mono_ms": 30563812,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.611875057220459,
+        "face_left_ratio": 0.4827688455581665,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 81,
+        "detection_age_ms": 294
+      },
+      {
+        "received_mono_ms": 30563890,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.634374988079071,
+        "face_left_ratio": 0.5084564208984375,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 85,
+        "detection_age_ms": 238
+      },
+      {
+        "received_mono_ms": 30563961,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.65625,
+        "face_left_ratio": 0.525519847869873,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 120,
+        "detection_age_ms": 230
+      },
+      {
+        "received_mono_ms": 30563983,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.684375,
+        "face_left_ratio": 0.553644847869873,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 64,
+        "detection_age_ms": 252
+      },
+      {
+        "received_mono_ms": 30564065,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.693749976158142,
+        "face_left_ratio": 0.56624755859375,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 88,
+        "detection_age_ms": 260
+      },
+      {
+        "received_mono_ms": 30564106,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7312499761581421,
+        "face_left_ratio": 0.60374755859375,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 91,
+        "detection_age_ms": 301
+      },
+      {
+        "received_mono_ms": 30564169,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7400000333786011,
+        "face_left_ratio": 0.612497615814209,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 38,
+        "detection_age_ms": 154
+      },
+      {
+        "received_mono_ms": 30564277,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.758750033378601,
+        "face_left_ratio": 0.631247615814209,
+        "decision": "FACE_CONFIRMED_PREARM_NO_PWM",
+        "source_age_ms": 105,
+        "detection_age_ms": 262
+      },
+      {
+        "received_mono_ms": 30564314,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7818750143051147,
+        "face_left_ratio": 0.6543725967407227,
+        "decision": "FACE_CONFIRMED_PREARM_NO_PWM",
+        "source_age_ms": 55,
+        "detection_age_ms": 183
+      },
+      {
+        "received_mono_ms": 30564403,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7881250143051147,
+        "face_left_ratio": 0.6606225967407227,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 70,
+        "detection_age_ms": 272
+      },
+      {
+        "received_mono_ms": 30564463,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8168750524520874,
+        "face_left_ratio": 0.6877688407897949,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 59,
+        "detection_age_ms": 204
+      },
+      {
+        "received_mono_ms": 30564491,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8168750524520874,
+        "face_left_ratio": 0.6877688407897949,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 87,
+        "detection_age_ms": 232
+      },
+      {
+        "received_mono_ms": 30564516,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8200000524520874,
+        "face_left_ratio": 0.6908938407897949,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 76,
+        "detection_age_ms": 257
+      },
+      {
+        "received_mono_ms": 30564592,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8200000524520874,
+        "face_left_ratio": 0.6908938407897949,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 152,
+        "detection_age_ms": 333
+      },
+      {
+        "received_mono_ms": 30564664,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8118750333786011,
+        "face_left_ratio": 0.674442195892334,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 154,
+        "detection_age_ms": 224
+      },
+      {
+        "received_mono_ms": 30564679,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8118750333786011,
+        "face_left_ratio": 0.674442195892334,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 169,
+        "detection_age_ms": 239
+      },
+      {
+        "received_mono_ms": 30564689,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8118750333786011,
+        "face_left_ratio": 0.674442195892334,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 62,
+        "detection_age_ms": 249
+      },
+      {
+        "received_mono_ms": 30564724,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8118750333786011,
+        "face_left_ratio": 0.674442195892334,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 97,
+        "detection_age_ms": 284
+      },
+      {
+        "received_mono_ms": 30564771,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8162500619888305,
+        "face_left_ratio": 0.6822104454040527,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 77,
+        "detection_age_ms": 261
+      },
+      {
+        "received_mono_ms": 30564812,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7756250619888305,
+        "face_left_ratio": 0.6415854454040527,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 58,
+        "detection_age_ms": 302
+      },
+      {
+        "received_mono_ms": 30564860,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7756250619888305,
+        "face_left_ratio": 0.6415854454040527,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 106,
+        "detection_age_ms": 350
+      },
+      {
+        "received_mono_ms": 30564893,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7350000619888306,
+        "face_left_ratio": 0.6009604454040527,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 87,
+        "detection_age_ms": 383
+      },
+      {
+        "received_mono_ms": 30564959,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7187500238418579,
+        "face_left_ratio": 0.5830244064331055,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 96,
+        "detection_age_ms": 265
+      },
+      {
+        "received_mono_ms": 30564975,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7187500238418579,
+        "face_left_ratio": 0.5830244064331055,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 112,
+        "detection_age_ms": 281
+      },
+      {
+        "received_mono_ms": 30565020,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.696875023841858,
+        "face_left_ratio": 0.5611494064331055,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 71,
+        "detection_age_ms": 326
+      },
+      {
+        "received_mono_ms": 30565052,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.696875023841858,
+        "face_left_ratio": 0.5611494064331055,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 103,
+        "detection_age_ms": 358
+      },
+      {
+        "received_mono_ms": 30565097,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6518749952316284,
+        "face_left_ratio": 0.5243725776672363,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 82,
+        "detection_age_ms": 291
+      },
+      {
+        "received_mono_ms": 30565158,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.63187495470047,
+        "face_left_ratio": 0.5075205802917481,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 72,
+        "detection_age_ms": 209
+      },
+      {
+        "received_mono_ms": 30565194,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.63187495470047,
+        "face_left_ratio": 0.5075205802917481,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 108,
+        "detection_age_ms": 245
+      },
+      {
+        "received_mono_ms": 30565202,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5949999809265136,
+        "face_left_ratio": 0.46426982879638673,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 64,
+        "detection_age_ms": 187
+      },
+      {
+        "received_mono_ms": 30565275,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5949999809265136,
+        "face_left_ratio": 0.46426982879638673,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 137,
+        "detection_age_ms": 260
+      },
+      {
+        "received_mono_ms": 30565320,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5668749809265137,
+        "face_left_ratio": 0.4361448287963867,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 130,
+        "detection_age_ms": 305
+      },
+      {
+        "received_mono_ms": 30565408,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5568750023841857,
+        "face_left_ratio": 0.43252062797546387,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 99,
+        "detection_age_ms": 270
+      },
+      {
+        "received_mono_ms": 30565421,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5568750023841857,
+        "face_left_ratio": 0.43252062797546387,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 112,
+        "detection_age_ms": 283
+      },
+      {
+        "received_mono_ms": 30565458,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.534375011920929,
+        "face_left_ratio": 0.410020637512207,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 89,
+        "detection_age_ms": 268
+      },
+      {
+        "received_mono_ms": 30565505,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5012500166893006,
+        "face_left_ratio": 0.3987185001373291,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 60,
+        "detection_age_ms": 136
+      },
+      {
+        "received_mono_ms": 30565559,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.47937501668930055,
+        "face_left_ratio": 0.3768435001373291,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 71,
+        "detection_age_ms": 190
+      },
+      {
+        "received_mono_ms": 30565639,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44812501668930055,
+        "face_left_ratio": 0.3455935001373291,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 101,
+        "detection_age_ms": 270
+      },
+      {
+        "received_mono_ms": 30565721,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.43937495946884153,
+        "face_left_ratio": 0.313456392288208,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 117,
+        "detection_age_ms": 233
+      },
+      {
+        "received_mono_ms": 30565735,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4268749594688416,
+        "face_left_ratio": 0.30095639228820803,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 66,
+        "detection_age_ms": 247
+      },
+      {
+        "received_mono_ms": 30565765,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4043749928474426,
+        "face_left_ratio": 0.3005537986755371,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 57,
+        "detection_age_ms": 227
+      },
+      {
+        "received_mono_ms": 30565844,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4012499928474426,
+        "face_left_ratio": 0.2974287986755371,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 76,
+        "detection_age_ms": 306
+      },
+      {
+        "received_mono_ms": 30565888,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.40249999761581423,
+        "face_left_ratio": 0.2765814304351807,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 62,
+        "detection_age_ms": 180
+      },
+      {
+        "received_mono_ms": 30566007,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4068750023841858,
+        "face_left_ratio": 0.28252062797546384,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 137,
+        "detection_age_ms": 239
+      },
+      {
+        "received_mono_ms": 30566051,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4068750023841858,
+        "face_left_ratio": 0.28252062797546384,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 85,
+        "detection_age_ms": 283
+      },
+      {
+        "received_mono_ms": 30566090,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3993750214576721,
+        "face_left_ratio": 0.2750206470489502,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 57,
+        "detection_age_ms": 220
+      },
+      {
+        "received_mono_ms": 30566134,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.39250003099441527,
+        "face_left_ratio": 0.26814565658569334,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 45,
+        "detection_age_ms": 168
+      },
+      {
+        "received_mono_ms": 30566191,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3862500309944153,
+        "face_left_ratio": 0.26189565658569336,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 37,
+        "detection_age_ms": 225
+      },
+      {
+        "received_mono_ms": 30566251,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.38625001907348633,
+        "face_left_ratio": 0.2634403944015503,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 47,
+        "detection_age_ms": 162
+      },
+      {
+        "received_mono_ms": 30566332,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.38000001907348635,
+        "face_left_ratio": 0.2571903944015503,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 92,
+        "detection_age_ms": 243
+      },
+      {
+        "received_mono_ms": 30566413,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.37500001192092897,
+        "face_left_ratio": 0.25064563751220703,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 112,
+        "detection_age_ms": 209
+      },
+      {
+        "received_mono_ms": 30566421,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.371875011920929,
+        "face_left_ratio": 0.24752063751220704,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 53,
+        "detection_age_ms": 217
+      },
+      {
+        "received_mono_ms": 30566467,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3606250166893005,
+        "face_left_ratio": 0.23470644950866698,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 58,
+        "detection_age_ms": 166
+      },
+      {
+        "received_mono_ms": 30566487,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3481250166893005,
+        "face_left_ratio": 0.222206449508667,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 53,
+        "detection_age_ms": 186
+      },
+      {
+        "received_mono_ms": 30566551,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.34187501668930054,
+        "face_left_ratio": 0.215956449508667,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 41,
+        "detection_age_ms": 250
+      },
+      {
+        "received_mono_ms": 30566631,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.32999998331069946,
+        "face_left_ratio": 0.22617878913879394,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 69,
+        "detection_age_ms": 197
+      },
+      {
+        "received_mono_ms": 30566672,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.31812502145767213,
+        "face_left_ratio": 0.2143038272857666,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 61,
+        "detection_age_ms": 162
+      },
+      {
+        "received_mono_ms": 30566714,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.29937502145767214,
+        "face_left_ratio": 0.1955538272857666,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 56,
+        "detection_age_ms": 204
+      },
+      {
+        "received_mono_ms": 30566835,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.29187498092651365,
+        "face_left_ratio": 0.16437256336212158,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 96,
+        "detection_age_ms": 224
+      },
+      {
+        "received_mono_ms": 30566895,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.27312502861022947,
+        "face_left_ratio": 0.1456226110458374,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 117,
+        "detection_age_ms": 156
+      },
+      {
+        "received_mono_ms": 30566915,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2543750286102295,
+        "face_left_ratio": 0.1268726110458374,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 58,
+        "detection_age_ms": 176
+      },
+      {
+        "received_mono_ms": 30566958,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2418750286102295,
+        "face_left_ratio": 0.1143726110458374,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 68,
+        "detection_age_ms": 219
+      },
+      {
+        "received_mono_ms": 30567056,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.21312499046325684,
+        "face_left_ratio": 0.08401877880096435,
+        "decision": "FACE_CONFIRMED_PREARM_NO_PWM",
+        "source_age_ms": 108,
+        "detection_age_ms": 199
+      },
+      {
+        "received_mono_ms": 30567100,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.203125,
+        "face_left_ratio": 0.07239484786987305,
+        "decision": "FACE_CONFIRMED_PREARM_NO_PWM",
+        "source_age_ms": 70,
+        "detection_age_ms": 152
+      },
+      {
+        "received_mono_ms": 30567147,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.18375000953674317,
+        "face_left_ratio": 0.05137547254562378,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 49,
+        "detection_age_ms": 117
+      },
+      {
+        "received_mono_ms": 30567190,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.16500000953674315,
+        "face_left_ratio": 0.03262547254562378,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 53,
+        "detection_age_ms": 160
+      },
+      {
+        "received_mono_ms": 30567230,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.14625000953674316,
+        "face_left_ratio": 0.013875472545623779,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 62,
+        "detection_age_ms": 200
+      },
+      {
+        "received_mono_ms": 30567266,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.14625000953674316,
+        "face_left_ratio": 0.013875472545623779,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 98,
+        "detection_age_ms": 236
+      },
+      {
+        "received_mono_ms": 30567293,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1350000023841858,
+        "face_left_ratio": 0.0026254653930664062,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 51,
+        "detection_age_ms": 125
+      },
+      {
+        "received_mono_ms": 30567330,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1350000023841858,
+        "face_left_ratio": 0.0026254653930664062,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 88,
+        "detection_age_ms": 162
+      },
+      {
+        "received_mono_ms": 30567375,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.12983230948448182,
+        "face_left_ratio": 0.0,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 94,
+        "detection_age_ms": 133
+      },
+      {
+        "received_mono_ms": 30567439,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.12983230948448182,
+        "face_left_ratio": 0.0,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 158,
+        "detection_age_ms": 197
+      },
+      {
+        "received_mono_ms": 30567497,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1251448094844818,
+        "face_left_ratio": 0.0,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 119,
+        "detection_age_ms": 255
+      },
+      {
+        "received_mono_ms": 30567515,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1251448094844818,
+        "face_left_ratio": 0.0,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 137,
+        "detection_age_ms": 273
+      },
+      {
+        "received_mono_ms": 30567567,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.130769807100296,
+        "face_left_ratio": 0.0,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 79,
+        "detection_age_ms": 286
+      },
+      {
+        "received_mono_ms": 30567585,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.15264480710029601,
+        "face_left_ratio": 0.021875,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 44,
+        "detection_age_ms": 304
+      },
+      {
+        "received_mono_ms": 30567598,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.15264480710029601,
+        "face_left_ratio": 0.021875,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 57,
+        "detection_age_ms": 317
+      },
+      {
+        "received_mono_ms": 30567689,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1803628146648407,
+        "face_left_ratio": 0.046875,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 94,
+        "detection_age_ms": 201
+      },
+      {
+        "received_mono_ms": 30567737,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2053628146648407,
+        "face_left_ratio": 0.071875,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 118,
+        "detection_age_ms": 249
+      },
+      {
+        "received_mono_ms": 30567770,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2053628146648407,
+        "face_left_ratio": 0.071875,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 151,
+        "detection_age_ms": 282
+      },
+      {
+        "received_mono_ms": 30567801,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.21187500953674315,
+        "face_left_ratio": 0.07950047254562378,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 103,
+        "detection_age_ms": 206
+      },
+      {
+        "received_mono_ms": 30567873,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.23062500953674317,
+        "face_left_ratio": 0.09825047254562377,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 93,
+        "detection_age_ms": 278
+      },
+      {
+        "received_mono_ms": 30567898,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.23062500953674317,
+        "face_left_ratio": 0.09825047254562377,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 118,
+        "detection_age_ms": 303
+      },
+      {
+        "received_mono_ms": 30567942,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.24125001430511475,
+        "face_left_ratio": 0.10721039772033691,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 113,
+        "detection_age_ms": 323
+      },
+      {
+        "received_mono_ms": 30567982,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.28937501907348634,
+        "face_left_ratio": 0.1842479109764099,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 89,
+        "detection_age_ms": 202
+      },
+      {
+        "received_mono_ms": 30568032,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3143750190734863,
+        "face_left_ratio": 0.2092479109764099,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 84,
+        "detection_age_ms": 252
+      },
+      {
+        "received_mono_ms": 30568038,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3143750190734863,
+        "face_left_ratio": 0.2092479109764099,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 90,
+        "detection_age_ms": 258
+      },
+      {
+        "received_mono_ms": 30568108,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3174999952316284,
+        "face_left_ratio": 0.18676984310150146,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 85,
+        "detection_age_ms": 215
+      },
+      {
+        "received_mono_ms": 30568142,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3174999952316284,
+        "face_left_ratio": 0.18676984310150146,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 119,
+        "detection_age_ms": 249
+      },
+      {
+        "received_mono_ms": 30568207,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.34562499523162843,
+        "face_left_ratio": 0.21489484310150148,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 107,
+        "detection_age_ms": 314
+      },
+      {
+        "received_mono_ms": 30568256,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3831249952316284,
+        "face_left_ratio": 0.25720642805099486,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 101,
+        "detection_age_ms": 233
+      },
+      {
+        "received_mono_ms": 30568270,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.42374999523162843,
+        "face_left_ratio": 0.2978314280509949,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 58,
+        "detection_age_ms": 247
+      },
+      {
+        "received_mono_ms": 30568358,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4381249904632568,
+        "face_left_ratio": 0.31062257289886475,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 89,
+        "detection_age_ms": 203
+      },
+      {
+        "received_mono_ms": 30568427,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44749999046325684,
+        "face_left_ratio": 0.31839377880096437,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 101,
+        "detection_age_ms": 158
+      },
+      {
+        "received_mono_ms": 30568483,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.47562499046325685,
+        "face_left_ratio": 0.3465187788009644,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 101,
+        "detection_age_ms": 214
+      },
+      {
+        "received_mono_ms": 30568520,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.490625,
+        "face_left_ratio": 0.3615187883377075,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 78,
+        "detection_age_ms": 194
+      },
+      {
+        "received_mono_ms": 30568556,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.49375,
+        "face_left_ratio": 0.3646437883377075,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 68,
+        "detection_age_ms": 230
+      },
+      {
+        "received_mono_ms": 30568589,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4981249809265137,
+        "face_left_ratio": 0.36901876926422117,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 47,
+        "detection_age_ms": 101
+      },
+      {
+        "received_mono_ms": 30568662,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5012499809265136,
+        "face_left_ratio": 0.3721437692642212,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 85,
+        "detection_age_ms": 174
+      },
+      {
+        "received_mono_ms": 30568706,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5043750286102295,
+        "face_left_ratio": 0.375268816947937,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 54,
+        "detection_age_ms": 129
+      },
+      {
+        "received_mono_ms": 30568811,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5075000286102295,
+        "face_left_ratio": 0.378393816947937,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 108,
+        "detection_age_ms": 234
+      },
+      {
+        "received_mono_ms": 30568851,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5112500190734863,
+        "face_left_ratio": 0.38214380741119386,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 79,
+        "detection_age_ms": 199
+      },
+      {
+        "received_mono_ms": 30568894,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5175000190734863,
+        "face_left_ratio": 0.38999760150909424,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 68,
+        "detection_age_ms": 191
+      },
+      {
+        "received_mono_ms": 30568914,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5300000190734864,
+        "face_left_ratio": 0.40249760150909425,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 48,
+        "detection_age_ms": 211
+      },
+      {
+        "received_mono_ms": 30568957,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5425000190734863,
+        "face_left_ratio": 0.41499760150909426,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 38,
+        "detection_age_ms": 254
+      },
+      {
+        "received_mono_ms": 30568995,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.549375057220459,
+        "face_left_ratio": 0.4202688455581665,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 39,
+        "detection_age_ms": 129
+      },
+      {
+        "received_mono_ms": 30569061,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.555625057220459,
+        "face_left_ratio": 0.4265188455581665,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 54,
+        "detection_age_ms": 195
+      },
+      {
+        "received_mono_ms": 30569157,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5618749618530273,
+        "face_left_ratio": 0.43114480972290037,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 85,
+        "detection_age_ms": 201
+      },
+      {
+        "received_mono_ms": 30569218,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5806249618530274,
+        "face_left_ratio": 0.4498948097229004,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 100,
+        "detection_age_ms": 262
+      },
+      {
+        "received_mono_ms": 30569325,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6056250333786011,
+        "face_left_ratio": 0.4765188217163086,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 95,
+        "detection_age_ms": 253
+      },
+      {
+        "received_mono_ms": 30569383,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6150000333786011,
+        "face_left_ratio": 0.487497615814209,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 79,
+        "detection_age_ms": 265
+      },
+      {
+        "received_mono_ms": 30569443,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6481250524520874,
+        "face_left_ratio": 0.5190188407897949,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 67,
+        "detection_age_ms": 139
+      },
+      {
+        "received_mono_ms": 30569463,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6825000524520874,
+        "face_left_ratio": 0.5533938407897949,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 47,
+        "detection_age_ms": 159
+      },
+      {
+        "received_mono_ms": 30569524,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7043750524520874,
+        "face_left_ratio": 0.5752688407897949,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 68,
+        "detection_age_ms": 220
+      },
+      {
+        "received_mono_ms": 30569584,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7274999499320984,
+        "face_left_ratio": 0.6015813827514649,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 44,
+        "detection_age_ms": 168
+      },
+      {
+        "received_mono_ms": 30569669,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7368749499320983,
+        "face_left_ratio": 0.6109563827514648,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 77,
+        "detection_age_ms": 253
+      },
+      {
+        "received_mono_ms": 30569709,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.756249976158142,
+        "face_left_ratio": 0.62874755859375,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 62,
+        "detection_age_ms": 253
+      },
+      {
+        "received_mono_ms": 30569758,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7624999761581421,
+        "face_left_ratio": 0.63499755859375,
+        "decision": "FACE_CONFIRMED_PREARM_NO_PWM",
+        "source_age_ms": 65,
+        "detection_age_ms": 302
+      },
+      {
+        "received_mono_ms": 30569856,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7812499761581421,
+        "face_left_ratio": 0.6521437644958497,
+        "decision": "FACE_CONFIRMED_PREARM_NO_PWM",
+        "source_age_ms": 111,
+        "detection_age_ms": 264
+      },
+      {
+        "received_mono_ms": 30569953,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7881250500679016,
+        "face_left_ratio": 0.6557505130767822,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 145,
+        "detection_age_ms": 260
+      },
+      {
+        "received_mono_ms": 30569971,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.8037500500679016,
+        "face_left_ratio": 0.6713755130767822,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 57,
+        "detection_age_ms": 278
+      },
+      {
+        "received_mono_ms": 30570071,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8256250143051147,
+        "face_left_ratio": 0.6965188026428223,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 108,
+        "detection_age_ms": 263
+      },
+      {
+        "received_mono_ms": 30570079,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8443750143051147,
+        "face_left_ratio": 0.7152688026428222,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 72,
+        "detection_age_ms": 271
+      },
+      {
+        "received_mono_ms": 30570114,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8443750143051147,
+        "face_left_ratio": 0.7152688026428222,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 107,
+        "detection_age_ms": 306
+      },
+      {
+        "received_mono_ms": 30570154,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8543750882148743,
+        "face_left_ratio": 0.7220005512237548,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 73,
+        "detection_age_ms": 191
+      },
+      {
+        "received_mono_ms": 30570190,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8543750882148743,
+        "face_left_ratio": 0.7220005512237548,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 109,
+        "detection_age_ms": 227
+      },
+      {
+        "received_mono_ms": 30570237,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8668750882148742,
+        "face_left_ratio": 0.7345005512237549,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 82,
+        "detection_age_ms": 274
+      },
+      {
+        "received_mono_ms": 30570297,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8731877565383911,
+        "face_left_ratio": 0.7463755130767822,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 101,
+        "detection_age_ms": 290
+      },
+      {
+        "received_mono_ms": 30570314,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8731877565383911,
+        "face_left_ratio": 0.7463755130767822,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 118,
+        "detection_age_ms": 307
+      },
+      {
+        "received_mono_ms": 30570340,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8747502565383911,
+        "face_left_ratio": 0.7495005130767822,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 67,
+        "detection_age_ms": 333
+      },
+      {
+        "received_mono_ms": 30570388,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8556249737739563,
+        "face_left_ratio": 0.723250436782837,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 59,
+        "detection_age_ms": 233
+      },
+      {
+        "received_mono_ms": 30570439,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8556249737739563,
+        "face_left_ratio": 0.723250436782837,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 110,
+        "detection_age_ms": 284
+      },
+      {
+        "received_mono_ms": 30570467,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7887500882148742,
+        "face_left_ratio": 0.6959757328033447,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 82,
+        "detection_age_ms": 194
+      },
+      {
+        "received_mono_ms": 30570480,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7887500882148742,
+        "face_left_ratio": 0.6959757328033447,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 95,
+        "detection_age_ms": 207
+      },
+      {
+        "received_mono_ms": 30570506,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.8062499761581421,
+        "face_left_ratio": 0.67874755859375,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 64,
+        "detection_age_ms": 121
+      },
+      {
+        "received_mono_ms": 30570603,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.8062499761581421,
+        "face_left_ratio": 0.67874755859375,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 161,
+        "detection_age_ms": 218
+      },
+      {
+        "received_mono_ms": 30570631,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7812499761581421,
+        "face_left_ratio": 0.65374755859375,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 111,
+        "detection_age_ms": 246
+      },
+      {
+        "received_mono_ms": 30570664,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7812499761581421,
+        "face_left_ratio": 0.65374755859375,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 144,
+        "detection_age_ms": 279
+      },
+      {
+        "received_mono_ms": 30570693,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7606250762939453,
+        "face_left_ratio": 0.6298949241638183,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 85,
+        "detection_age_ms": 251
+      },
+      {
+        "received_mono_ms": 30570730,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7606250762939453,
+        "face_left_ratio": 0.6298949241638183,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 122,
+        "detection_age_ms": 288
+      },
+      {
+        "received_mono_ms": 30570758,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7375000238418579,
+        "face_left_ratio": 0.6146903991699219,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 88,
+        "detection_age_ms": 238
+      },
+      {
+        "received_mono_ms": 30570788,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.696875023841858,
+        "face_left_ratio": 0.5740653991699218,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 79,
+        "detection_age_ms": 268
+      },
+      {
+        "received_mono_ms": 30570841,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.665625,
+        "face_left_ratio": 0.5348948478698731,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 68,
+        "detection_age_ms": 132
+      },
+      {
+        "received_mono_ms": 30570895,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.665625,
+        "face_left_ratio": 0.5348948478698731,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 122,
+        "detection_age_ms": 186
+      },
+      {
+        "received_mono_ms": 30570986,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.659375,
+        "face_left_ratio": 0.5286448478698731,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 132,
+        "detection_age_ms": 277
+      },
+      {
+        "received_mono_ms": 30571025,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.659375,
+        "face_left_ratio": 0.5286448478698731,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 171,
+        "detection_age_ms": 316
+      },
+      {
+        "received_mono_ms": 30571038,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6237500190734864,
+        "face_left_ratio": 0.49301986694335936,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 106,
+        "detection_age_ms": 265
+      },
+      {
+        "received_mono_ms": 30571077,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6137499570846557,
+        "face_left_ratio": 0.48464374542236327,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 78,
+        "detection_age_ms": 223
+      },
+      {
+        "received_mono_ms": 30571132,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5824999570846557,
+        "face_left_ratio": 0.45339374542236327,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 73,
+        "detection_age_ms": 278
+      },
+      {
+        "received_mono_ms": 30571175,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5824999570846557,
+        "face_left_ratio": 0.45339374542236327,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 116,
+        "detection_age_ms": 321
+      },
+      {
+        "received_mono_ms": 30571245,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5406249642372132,
+        "face_left_ratio": 0.4162705898284912,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 137,
+        "detection_age_ms": 246
+      },
+      {
+        "received_mono_ms": 30571251,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5406249642372132,
+        "face_left_ratio": 0.4162705898284912,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 143,
+        "detection_age_ms": 252
+      },
+      {
+        "received_mono_ms": 30571359,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5087499976158142,
+        "face_left_ratio": 0.4062184810638428,
+        "decision": "SOURCE_LEASE_EXPIRED",
+        "source_age_ms": 107,
+        "detection_age_ms": 251
+      },
+      {
+        "received_mono_ms": 30571465,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.490625,
+        "face_left_ratio": 0.38936715126037597,
+        "decision": "CONFIRMING_FACE",
+        "source_age_ms": 109,
+        "detection_age_ms": 269
+      },
+      {
+        "received_mono_ms": 30571480,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.475,
+        "face_left_ratio": 0.35219037532806396,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 72,
+        "detection_age_ms": 228
+      },
+      {
+        "received_mono_ms": 30571544,
+        "state": "UNCONFIRMED",
+        "position": "UNCONFIRMED",
+        "face_center_ratio": null,
+        "face_left_ratio": null,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": null,
+        "detection_age_ms": null
+      },
+      {
+        "received_mono_ms": 30571666,
+        "state": "UNCONFIRMED",
+        "position": "UNCONFIRMED",
+        "face_center_ratio": null,
+        "face_left_ratio": null,
+        "decision": "SOURCE_EXPIRED",
+        "source_age_ms": null,
+        "detection_age_ms": null
+      },
+      {
+        "received_mono_ms": 30571728,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.43874998688697814,
+        "face_left_ratio": 0.3412189960479736,
+        "decision": "CONFIRMING_FACE",
+        "source_age_ms": 162,
+        "detection_age_ms": 211
+      },
+      {
+        "received_mono_ms": 30571769,
+        "state": "UNCONFIRMED",
+        "position": "UNCONFIRMED",
+        "face_center_ratio": null,
+        "face_left_ratio": null,
+        "decision": "CONFIRMING_FACE",
+        "source_age_ms": null,
+        "detection_age_ms": null
+      },
+      {
+        "received_mono_ms": 30571852,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.36624999046325685,
+        "face_left_ratio": 0.24496593475341796,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 68,
+        "detection_age_ms": 219
+      },
+      {
+        "received_mono_ms": 30571993,
+        "state": "UNCONFIRMED",
+        "position": "UNCONFIRMED",
+        "face_center_ratio": null,
+        "face_left_ratio": null,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": null,
+        "detection_age_ms": null
+      },
+      {
+        "received_mono_ms": 30572053,
+        "state": "UNCONFIRMED",
+        "position": "UNCONFIRMED",
+        "face_center_ratio": null,
+        "face_left_ratio": null,
+        "decision": "SOURCE_EXPIRED",
+        "source_age_ms": null,
+        "detection_age_ms": null
+      },
+      {
+        "received_mono_ms": 30572056,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.29375,
+        "face_left_ratio": 0.19375,
+        "decision": "CONFIRMING_FACE",
+        "source_age_ms": 87,
+        "detection_age_ms": 213
+      },
+      {
+        "received_mono_ms": 30572095,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.259375,
+        "face_left_ratio": 0.159375,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 75,
+        "detection_age_ms": 252
+      },
+      {
+        "received_mono_ms": 30572099,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.221875,
+        "face_left_ratio": 0.121875,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 37,
+        "detection_age_ms": 256
+      },
+      {
+        "received_mono_ms": 30572202,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.20250000953674316,
+        "face_left_ratio": 0.07658144235610961,
+        "decision": "FACE_CONFIRMED_PREARM_NO_PWM",
+        "source_age_ms": 95,
+        "detection_age_ms": 233
+      },
+      {
+        "received_mono_ms": 30572269,
+        "state": "UNCONFIRMED",
+        "position": "UNCONFIRMED",
+        "face_center_ratio": null,
+        "face_left_ratio": null,
+        "decision": "SOURCE_UNCONFIRMED",
+        "source_age_ms": null,
+        "detection_age_ms": null
+      },
+      {
+        "received_mono_ms": 30572553,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.09484231472015381,
+        "face_left_ratio": 0.0,
+        "decision": "CONFIRMING_FACE",
+        "source_age_ms": 80,
+        "detection_age_ms": 243
+      },
+      {
+        "received_mono_ms": 30572713,
+        "state": "UNCONFIRMED",
+        "position": "UNCONFIRMED",
+        "face_center_ratio": null,
+        "face_left_ratio": null,
+        "decision": "CONFIRMING_FACE",
+        "source_age_ms": null,
+        "detection_age_ms": null
+      },
+      {
+        "received_mono_ms": 30572733,
+        "state": "UNCONFIRMED",
+        "position": "UNCONFIRMED",
+        "face_center_ratio": null,
+        "face_left_ratio": null,
+        "decision": "SOURCE_EXPIRED",
+        "source_age_ms": null,
+        "detection_age_ms": null
+      },
+      {
+        "received_mono_ms": 30573254,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.12466005980968475,
+        "face_left_ratio": 0.01875,
+        "decision": "CONFIRMING_FACE",
+        "source_age_ms": 67,
+        "detection_age_ms": 173
+      },
+      {
+        "received_mono_ms": 30573358,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.13091005980968476,
+        "face_left_ratio": 0.025,
+        "decision": "FACE_CONFIRMED_ARM_CURRENT_POSITION",
+        "source_age_ms": 124,
+        "detection_age_ms": 277
+      },
+      {
+        "received_mono_ms": 30573385,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.13238871693611146,
+        "face_left_ratio": 0.021875,
+        "decision": "FACE_CONFIRMED_ARM_CURRENT_POSITION",
+        "source_age_ms": 102,
+        "detection_age_ms": 198
+      },
+      {
+        "received_mono_ms": 30573491,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.12705310583114623,
+        "face_left_ratio": 0.00625,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 103,
+        "detection_age_ms": 208
+      },
+      {
+        "received_mono_ms": 30573536,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.12705310583114623,
+        "face_left_ratio": 0.00625,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 148,
+        "detection_age_ms": 253
+      },
+      {
+        "received_mono_ms": 30573552,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.13955310583114625,
+        "face_left_ratio": 0.01875,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 69,
+        "detection_age_ms": 269
+      },
+      {
+        "received_mono_ms": 30573584,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1445531129837036,
+        "face_left_ratio": 0.021875,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 69,
+        "detection_age_ms": 196
+      },
+      {
+        "received_mono_ms": 30573612,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1445531129837036,
+        "face_left_ratio": 0.021875,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 97,
+        "detection_age_ms": 224
+      },
+      {
+        "received_mono_ms": 30573639,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1664281129837036,
+        "face_left_ratio": 0.04375,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 60,
+        "detection_age_ms": 251
+      },
+      {
+        "received_mono_ms": 30573682,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1584878146648407,
+        "face_left_ratio": 0.025,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 59,
+        "detection_age_ms": 167
+      },
+      {
+        "received_mono_ms": 30573755,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1584878146648407,
+        "face_left_ratio": 0.025,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 132,
+        "detection_age_ms": 240
+      },
+      {
+        "received_mono_ms": 30573803,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.18812500238418578,
+        "face_left_ratio": 0.05239938497543335,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 101,
+        "detection_age_ms": 180
+      },
+      {
+        "received_mono_ms": 30573837,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.18812500238418578,
+        "face_left_ratio": 0.05239938497543335,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 135,
+        "detection_age_ms": 214
+      },
+      {
+        "received_mono_ms": 30573855,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2068750023841858,
+        "face_left_ratio": 0.07114938497543336,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 71,
+        "detection_age_ms": 232
+      },
+      {
+        "received_mono_ms": 30573912,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2068750023841858,
+        "face_left_ratio": 0.07114938497543336,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 128,
+        "detection_age_ms": 289
+      },
+      {
+        "received_mono_ms": 30573928,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.22125000953674318,
+        "face_left_ratio": 0.08721039295196534,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 85,
+        "detection_age_ms": 226
+      },
+      {
+        "received_mono_ms": 30573959,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.22125000953674318,
+        "face_left_ratio": 0.08721039295196534,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 116,
+        "detection_age_ms": 257
+      },
+      {
+        "received_mono_ms": 30573990,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.27124998569488523,
+        "face_left_ratio": 0.13381714820861818,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 106,
+        "detection_age_ms": 206
+      },
+      {
+        "received_mono_ms": 30574057,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.29937498569488524,
+        "face_left_ratio": 0.16194214820861816,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 120,
+        "detection_age_ms": 273
+      },
+      {
+        "received_mono_ms": 30574108,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.30874998569488527,
+        "face_left_ratio": 0.17131714820861815,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 128,
+        "detection_age_ms": 324
+      },
+      {
+        "received_mono_ms": 30574141,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.30874998569488527,
+        "face_left_ratio": 0.17131714820861815,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 161,
+        "detection_age_ms": 357
+      },
+      {
+        "received_mono_ms": 30574199,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3262500286102295,
+        "face_left_ratio": 0.19551987648010255,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 175,
+        "detection_age_ms": 262
+      },
+      {
+        "received_mono_ms": 30574230,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3325000286102295,
+        "face_left_ratio": 0.20176987648010253,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 122,
+        "detection_age_ms": 293
+      },
+      {
+        "received_mono_ms": 30574237,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3325000286102295,
+        "face_left_ratio": 0.20176987648010253,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 129,
+        "detection_age_ms": 300
+      },
+      {
+        "received_mono_ms": 30574249,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3456250190734863,
+        "face_left_ratio": 0.2115854024887085,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 76,
+        "detection_age_ms": 269
+      },
+      {
+        "received_mono_ms": 30574279,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3456250190734863,
+        "face_left_ratio": 0.2115854024887085,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 106,
+        "detection_age_ms": 299
+      },
+      {
+        "received_mono_ms": 30574333,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3756249904632568,
+        "face_left_ratio": 0.24651877880096434,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 94,
+        "detection_age_ms": 225
+      },
+      {
+        "received_mono_ms": 30574388,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.40062499046325684,
+        "face_left_ratio": 0.27151877880096437,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 100,
+        "detection_age_ms": 280
+      },
+      {
+        "received_mono_ms": 30574453,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.41312499046325685,
+        "face_left_ratio": 0.2823948383331299,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 121,
+        "detection_age_ms": 214
+      },
+      {
+        "received_mono_ms": 30574574,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4349999904632568,
+        "face_left_ratio": 0.30426983833312987,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 198,
+        "detection_age_ms": 335
+      },
+      {
+        "received_mono_ms": 30574622,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44749999046325684,
+        "face_left_ratio": 0.31839377880096437,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 146,
+        "detection_age_ms": 290
+      },
+      {
+        "received_mono_ms": 30574637,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4556250095367432,
+        "face_left_ratio": 0.3265187978744507,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 102,
+        "detection_age_ms": 161
+      },
+      {
+        "received_mono_ms": 30574677,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.45875000953674316,
+        "face_left_ratio": 0.3296437978744507,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 66,
+        "detection_age_ms": 201
+      },
+      {
+        "received_mono_ms": 30574717,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.45875000953674316,
+        "face_left_ratio": 0.3296437978744507,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 57,
+        "detection_age_ms": 241
+      },
+      {
+        "received_mono_ms": 30574819,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.46062498092651366,
+        "face_left_ratio": 0.32658536434173585,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 120,
+        "detection_age_ms": 284
+      },
+      {
+        "received_mono_ms": 30574840,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.46062498092651366,
+        "face_left_ratio": 0.32658536434173585,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 102,
+        "detection_age_ms": 305
+      },
+      {
+        "received_mono_ms": 30574905,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.46124997138977053,
+        "face_left_ratio": 0.3305198192596436,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 104,
+        "detection_age_ms": 206
+      },
+      {
+        "received_mono_ms": 30574926,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.46124997138977053,
+        "face_left_ratio": 0.3305198192596436,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 62,
+        "detection_age_ms": 227
+      },
+      {
+        "received_mono_ms": 30574951,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.46124997138977053,
+        "face_left_ratio": 0.3305198192596436,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 50,
+        "detection_age_ms": 252
+      },
+      {
+        "received_mono_ms": 30575026,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.46124997138977053,
+        "face_left_ratio": 0.3305198192596436,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 69,
+        "detection_age_ms": 225
+      },
+      {
+        "received_mono_ms": 30575149,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.46124997138977053,
+        "face_left_ratio": 0.3305198192596436,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 146,
+        "detection_age_ms": 348
+      },
+      {
+        "received_mono_ms": 30575230,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4543749809265137,
+        "face_left_ratio": 0.32364482879638673,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 98,
+        "detection_age_ms": 329
+      },
+      {
+        "received_mono_ms": 30575331,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.45812498331069945,
+        "face_left_ratio": 0.32575044631958006,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 125,
+        "detection_age_ms": 259
+      },
+      {
+        "received_mono_ms": 30575342,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.45499998331069946,
+        "face_left_ratio": 0.32262544631958007,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 58,
+        "detection_age_ms": 270
+      },
+      {
+        "received_mono_ms": 30575377,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44249998331069945,
+        "face_left_ratio": 0.31012544631958006,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 48,
+        "detection_age_ms": 305
+      },
+      {
+        "received_mono_ms": 30575483,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.42624999284744264,
+        "face_left_ratio": 0.29387545585632324,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 65,
+        "detection_age_ms": 277
+      },
+      {
+        "received_mono_ms": 30575602,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4125,
+        "face_left_ratio": 0.281769847869873,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 88,
+        "detection_age_ms": 184
+      },
+      {
+        "received_mono_ms": 30575644,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.39375,
+        "face_left_ratio": 0.26301984786987304,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 48,
+        "detection_age_ms": 226
+      },
+      {
+        "received_mono_ms": 30575703,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3587500095367432,
+        "face_left_ratio": 0.22471039295196532,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 59,
+        "detection_age_ms": 189
+      },
+      {
+        "received_mono_ms": 30575744,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.32125000953674315,
+        "face_left_ratio": 0.18721039295196534,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 59,
+        "detection_age_ms": 230
+      },
+      {
+        "received_mono_ms": 30575845,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.30875000953674314,
+        "face_left_ratio": 0.17471039295196533,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 89,
+        "detection_age_ms": 331
+      },
+      {
+        "received_mono_ms": 30575905,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2837500095367432,
+        "face_left_ratio": 0.14971039295196534,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 91,
+        "detection_age_ms": 391
+      },
+      {
+        "received_mono_ms": 30575965,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2918750047683716,
+        "face_left_ratio": 0.15783538818359374,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 92,
+        "detection_age_ms": 280
+      },
+      {
+        "received_mono_ms": 30576009,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2762500047683716,
+        "face_left_ratio": 0.14221038818359374,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 72,
+        "detection_age_ms": 324
+      },
+      {
+        "received_mono_ms": 30576069,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2662499904632568,
+        "face_left_ratio": 0.1305243730545044,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 73,
+        "detection_age_ms": 196
+      },
+      {
+        "received_mono_ms": 30576090,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2581249952316284,
+        "face_left_ratio": 0.12069215774536132,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 55,
+        "detection_age_ms": 94
+      },
+      {
+        "received_mono_ms": 30576127,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2581249952316284,
+        "face_left_ratio": 0.12069215774536132,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 47,
+        "detection_age_ms": 131
+      },
+      {
+        "received_mono_ms": 30576167,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2581249952316284,
+        "face_left_ratio": 0.12069215774536132,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 49,
+        "detection_age_ms": 171
+      },
+      {
+        "received_mono_ms": 30576187,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.25374999046325686,
+        "face_left_ratio": 0.11802437305450439,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 31,
+        "detection_age_ms": 107
+      },
+      {
+        "received_mono_ms": 30576268,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.25374999046325686,
+        "face_left_ratio": 0.11802437305450439,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 66,
+        "detection_age_ms": 188
+      },
+      {
+        "received_mono_ms": 30576308,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.25374999046325686,
+        "face_left_ratio": 0.11802437305450439,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 45,
+        "detection_age_ms": 228
+      },
+      {
+        "received_mono_ms": 30576392,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.25374999046325686,
+        "face_left_ratio": 0.11631715297698975,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 60,
+        "detection_age_ms": 236
+      },
+      {
+        "received_mono_ms": 30576469,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.25374999046325686,
+        "face_left_ratio": 0.11631715297698975,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 85,
+        "detection_age_ms": 313
+      },
+      {
+        "received_mono_ms": 30576510,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.25437498092651367,
+        "face_left_ratio": 0.11694214344024659,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 56,
+        "detection_age_ms": 247
+      },
+      {
+        "received_mono_ms": 30576591,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2512499809265137,
+        "face_left_ratio": 0.11381714344024658,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 81,
+        "detection_age_ms": 328
+      },
+      {
+        "received_mono_ms": 30576676,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.24437499046325684,
+        "face_left_ratio": 0.10694215297698975,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 66,
+        "detection_age_ms": 292
+      },
+      {
+        "received_mono_ms": 30576696,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.240625,
+        "face_left_ratio": 0.10489938259124756,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 36,
+        "detection_age_ms": 186
+      },
+      {
+        "received_mono_ms": 30576736,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2375,
+        "face_left_ratio": 0.10177438259124756,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 49,
+        "detection_age_ms": 226
+      },
+      {
+        "received_mono_ms": 30576792,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.23125,
+        "face_left_ratio": 0.09552438259124756,
+        "decision": "FACE_CONFIRMED_PREARM_NO_PWM",
+        "source_age_ms": 50,
+        "detection_age_ms": 282
+      },
+      {
+        "received_mono_ms": 30576843,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.22937500476837158,
+        "face_left_ratio": 0.09533538818359374,
+        "decision": "FACE_CONFIRMED_PREARM_NO_PWM",
+        "source_age_ms": 60,
+        "detection_age_ms": 156
+      },
+      {
+        "received_mono_ms": 30576926,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2200000047683716,
+        "face_left_ratio": 0.08596038818359375,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 73,
+        "detection_age_ms": 239
+      },
+      {
+        "received_mono_ms": 30577033,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.22562499046325685,
+        "face_left_ratio": 0.086463463306427,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 141,
+        "detection_age_ms": 250
+      },
+      {
+        "received_mono_ms": 30577096,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.21812498569488525,
+        "face_left_ratio": 0.07896345853805542,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 135,
+        "detection_age_ms": 243
+      },
+      {
+        "received_mono_ms": 30577135,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.21499998569488527,
+        "face_left_ratio": 0.07583845853805542,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 95,
+        "detection_age_ms": 282
+      },
+      {
+        "received_mono_ms": 30577185,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2174999952316284,
+        "face_left_ratio": 0.07658803462982178,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 98,
+        "detection_age_ms": 224
+      },
+      {
+        "received_mono_ms": 30577198,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.20812499523162842,
+        "face_left_ratio": 0.06721303462982178,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 48,
+        "detection_age_ms": 237
+      },
+      {
+        "received_mono_ms": 30577368,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.20374999046325684,
+        "face_left_ratio": 0.06283802986145019,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 133,
+        "detection_age_ms": 281
+      },
+      {
+        "received_mono_ms": 30577372,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.20249998569488525,
+        "face_left_ratio": 0.06333845853805542,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 62,
+        "detection_age_ms": 222
+      },
+      {
+        "received_mono_ms": 30577418,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.19624998569488525,
+        "face_left_ratio": 0.05708845853805542,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 71,
+        "detection_age_ms": 268
+      },
+      {
+        "received_mono_ms": 30577479,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.1956249952316284,
+        "face_left_ratio": 0.05819215774536133,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 70,
+        "detection_age_ms": 244
+      },
+      {
+        "received_mono_ms": 30577505,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.19249999523162842,
+        "face_left_ratio": 0.05506715774536133,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 55,
+        "detection_age_ms": 270
+      },
+      {
+        "received_mono_ms": 30577530,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.19562501907348634,
+        "face_left_ratio": 0.05819218158721924,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 49,
+        "detection_age_ms": 121
+      },
+      {
+        "received_mono_ms": 30577631,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.19562501907348634,
+        "face_left_ratio": 0.05819218158721924,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 68,
+        "detection_age_ms": 222
+      },
+      {
+        "received_mono_ms": 30577725,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.20250000953674316,
+        "face_left_ratio": 0.06677439212799072,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 111,
+        "detection_age_ms": 244
+      },
+      {
+        "received_mono_ms": 30577786,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.20250000953674316,
+        "face_left_ratio": 0.06677439212799072,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 97,
+        "detection_age_ms": 305
+      },
+      {
+        "received_mono_ms": 30577834,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.20187501907348632,
+        "face_left_ratio": 0.06444218158721923,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 46,
+        "detection_age_ms": 220
+      },
+      {
+        "received_mono_ms": 30577950,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.20187501907348632,
+        "face_left_ratio": 0.06444218158721923,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 102,
+        "detection_age_ms": 336
+      },
+      {
+        "received_mono_ms": 30577989,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.20812501907348632,
+        "face_left_ratio": 0.07239940166473388,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 85,
+        "detection_age_ms": 300
+      },
+      {
+        "received_mono_ms": 30578070,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.20500001907348633,
+        "face_left_ratio": 0.06927440166473389,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 141,
+        "detection_age_ms": 381
+      },
+      {
+        "received_mono_ms": 30578129,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.20187501907348632,
+        "face_left_ratio": 0.06614940166473389,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 165,
+        "detection_age_ms": 440
+      },
+      {
+        "received_mono_ms": 30578169,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.19250001907348632,
+        "face_left_ratio": 0.053338491916656496,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 94,
+        "detection_age_ms": 321
+      },
+      {
+        "received_mono_ms": 30578193,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.18937501907348633,
+        "face_left_ratio": 0.05021349191665649,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 74,
+        "detection_age_ms": 345
+      },
+      {
+        "received_mono_ms": 30578287,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.18250000476837158,
+        "face_left_ratio": 0.04333847761154175,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 117,
+        "detection_age_ms": 323
+      },
+      {
+        "received_mono_ms": 30578326,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.18250000476837158,
+        "face_left_ratio": 0.04333847761154175,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 156,
+        "detection_age_ms": 362
+      },
+      {
+        "received_mono_ms": 30578352,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.17000000476837157,
+        "face_left_ratio": 0.030838477611541747,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 101,
+        "detection_age_ms": 388
+      },
+      {
+        "received_mono_ms": 30578396,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.17000000476837157,
+        "face_left_ratio": 0.030838477611541747,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 145,
+        "detection_age_ms": 432
+      },
+      {
+        "received_mono_ms": 30578430,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.16812500953674317,
+        "face_left_ratio": 0.027213048934936524,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 128,
+        "detection_age_ms": 260
+      },
+      {
+        "received_mono_ms": 30578470,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1637500047683716,
+        "face_left_ratio": 0.01927083730697632,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 62,
+        "detection_age_ms": 219
+      },
+      {
+        "received_mono_ms": 30578509,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1637500047683716,
+        "face_left_ratio": 0.01927083730697632,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 101,
+        "detection_age_ms": 258
+      },
+      {
+        "received_mono_ms": 30578534,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.16312501430511475,
+        "face_left_ratio": 0.02044057846069336,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 65,
+        "detection_age_ms": 232
+      },
+      {
+        "received_mono_ms": 30578570,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.16312501430511475,
+        "face_left_ratio": 0.02044057846069336,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 101,
+        "detection_age_ms": 268
+      },
+      {
+        "received_mono_ms": 30578596,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.18812501430511475,
+        "face_left_ratio": 0.04544057846069336,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 53,
+        "detection_age_ms": 294
+      },
+      {
+        "received_mono_ms": 30578652,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.18812501430511475,
+        "face_left_ratio": 0.04544057846069336,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 109,
+        "detection_age_ms": 350
+      },
+      {
+        "received_mono_ms": 30578675,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.22125000953674318,
+        "face_left_ratio": 0.08033804893493653,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 83,
+        "detection_age_ms": 206
+      },
+      {
+        "received_mono_ms": 30578725,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.24625000953674317,
+        "face_left_ratio": 0.10533804893493652,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 71,
+        "detection_age_ms": 256
+      },
+      {
+        "received_mono_ms": 30578764,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.24625000953674317,
+        "face_left_ratio": 0.10533804893493652,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 110,
+        "detection_age_ms": 295
+      },
+      {
+        "received_mono_ms": 30578815,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2662499904632568,
+        "face_left_ratio": 0.12356555461883545,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 117,
+        "detection_age_ms": 223
+      },
+      {
+        "received_mono_ms": 30578835,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.27249999046325685,
+        "face_left_ratio": 0.12981555461883545,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 75,
+        "detection_age_ms": 243
+      },
+      {
+        "received_mono_ms": 30578861,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.27249999046325685,
+        "face_left_ratio": 0.12981555461883545,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 101,
+        "detection_age_ms": 269
+      },
+      {
+        "received_mono_ms": 30578907,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.30187501907348635,
+        "face_left_ratio": 0.16444218158721924,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 81,
+        "detection_age_ms": 253
+      },
+      {
+        "received_mono_ms": 30578962,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.30187501907348635,
+        "face_left_ratio": 0.16444218158721924,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 136,
+        "detection_age_ms": 308
+      },
+      {
+        "received_mono_ms": 30579007,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.32875001430511475,
+        "face_left_ratio": 0.1895884871482849,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 110,
+        "detection_age_ms": 247
+      },
+      {
+        "received_mono_ms": 30579032,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.32875001430511475,
+        "face_left_ratio": 0.1895884871482849,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 135,
+        "detection_age_ms": 272
+      },
+      {
+        "received_mono_ms": 30579055,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.33812501430511477,
+        "face_left_ratio": 0.1989634871482849,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 92,
+        "detection_age_ms": 295
+      },
+      {
+        "received_mono_ms": 30579133,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3681249856948853,
+        "face_left_ratio": 0.22896345853805541,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 116,
+        "detection_age_ms": 236
+      },
+      {
+        "received_mono_ms": 30579178,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3681249856948853,
+        "face_left_ratio": 0.22896345853805541,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 161,
+        "detection_age_ms": 281
+      },
+      {
+        "received_mono_ms": 30579224,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.38687500953674314,
+        "face_left_ratio": 0.24944217205047609,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 133,
+        "detection_age_ms": 207
+      },
+      {
+        "received_mono_ms": 30579260,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.41624999046325684,
+        "face_left_ratio": 0.2805243730545044,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 99,
+        "detection_age_ms": 169
+      },
+      {
+        "received_mono_ms": 30579321,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4381249904632568,
+        "face_left_ratio": 0.3023993730545044,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 91,
+        "detection_age_ms": 230
+      },
+      {
+        "received_mono_ms": 30579367,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4662499904632568,
+        "face_left_ratio": 0.3305243730545044,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 82,
+        "detection_age_ms": 276
+      },
+      {
+        "received_mono_ms": 30579427,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4981249809265137,
+        "face_left_ratio": 0.3606921434402466,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 86,
+        "detection_age_ms": 197
+      },
+      {
+        "received_mono_ms": 30579464,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.49437499046325684,
+        "face_left_ratio": 0.3569421529769897,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 73,
+        "detection_age_ms": 123
+      },
+      {
+        "received_mono_ms": 30579565,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5006249904632568,
+        "face_left_ratio": 0.36319215297698976,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 88,
+        "detection_age_ms": 224
+      },
+      {
+        "received_mono_ms": 30579605,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5081250190734863,
+        "face_left_ratio": 0.3740854024887085,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 85,
+        "detection_age_ms": 214
+      },
+      {
+        "received_mono_ms": 30579646,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5206250190734864,
+        "face_left_ratio": 0.3865854024887085,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 84,
+        "detection_age_ms": 255
+      },
+      {
+        "received_mono_ms": 30579748,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5175000190734863,
+        "face_left_ratio": 0.38006718158721925,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 112,
+        "detection_age_ms": 228
+      },
+      {
+        "received_mono_ms": 30579789,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5300000190734864,
+        "face_left_ratio": 0.39256718158721926,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 92,
+        "detection_age_ms": 153
+      },
+      {
+        "received_mono_ms": 30579870,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.552500057220459,
+        "face_left_ratio": 0.4150672197341919,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 100,
+        "detection_age_ms": 173
+      },
+      {
+        "received_mono_ms": 30579910,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.571250057220459,
+        "face_left_ratio": 0.4338172197341919,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 51,
+        "detection_age_ms": 213
+      },
+      {
+        "received_mono_ms": 30579957,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.580625057220459,
+        "face_left_ratio": 0.4431922197341919,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 58,
+        "detection_age_ms": 260
+      },
+      {
+        "received_mono_ms": 30580022,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.618125033378601,
+        "face_left_ratio": 0.480692195892334,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 62,
+        "detection_age_ms": 163
+      },
+      {
+        "received_mono_ms": 30580060,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6306250333786011,
+        "face_left_ratio": 0.493192195892334,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 69,
+        "detection_age_ms": 201
+      },
+      {
+        "received_mono_ms": 30580161,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6543750047683716,
+        "face_left_ratio": 0.5186493873596192,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 89,
+        "detection_age_ms": 201
+      },
+      {
+        "received_mono_ms": 30580203,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6637500047683715,
+        "face_left_ratio": 0.5280243873596191,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 74,
+        "detection_age_ms": 243
+      },
+      {
+        "received_mono_ms": 30580264,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6793749928474426,
+        "face_left_ratio": 0.5470004558563233,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 78,
+        "detection_age_ms": 135
+      },
+      {
+        "received_mono_ms": 30580325,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6981249928474427,
+        "face_left_ratio": 0.5657504558563232,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 62,
+        "detection_age_ms": 196
+      },
+      {
+        "received_mono_ms": 30580387,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7081249475479126,
+        "face_left_ratio": 0.5740853309631347,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 41,
+        "detection_age_ms": 124
+      },
+      {
+        "received_mono_ms": 30580426,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7331249475479126,
+        "face_left_ratio": 0.5990853309631348,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 36,
+        "detection_age_ms": 163
+      },
+      {
+        "received_mono_ms": 30580488,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7518749475479126,
+        "face_left_ratio": 0.6178353309631348,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 67,
+        "detection_age_ms": 225
+      },
+      {
+        "received_mono_ms": 30580564,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7581249475479126,
+        "face_left_ratio": 0.6240853309631348,
+        "decision": "FACE_CONFIRMED_PREARM_NO_PWM",
+        "source_age_ms": 79,
+        "detection_age_ms": 301
+      },
+      {
+        "received_mono_ms": 30580633,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7550000429153443,
+        "face_left_ratio": 0.6209604263305664,
+        "decision": "FACE_CONFIRMED_PREARM_NO_PWM",
+        "source_age_ms": 83,
+        "detection_age_ms": 243
+      },
+      {
+        "received_mono_ms": 30580678,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7687500238418579,
+        "face_left_ratio": 0.6347104072570801,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 96,
+        "detection_age_ms": 193
+      },
+      {
+        "received_mono_ms": 30580696,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7812500238418579,
+        "face_left_ratio": 0.6472104072570801,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 38,
+        "detection_age_ms": 211
+      },
+      {
+        "received_mono_ms": 30580778,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.787499976158142,
+        "face_left_ratio": 0.650067138671875,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 58,
+        "detection_age_ms": 196
+      },
+      {
+        "received_mono_ms": 30580878,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7937499761581421,
+        "face_left_ratio": 0.656317138671875,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 119,
+        "detection_age_ms": 296
+      },
+      {
+        "received_mono_ms": 30580963,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8131249666213989,
+        "face_left_ratio": 0.6773993492126464,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 138,
+        "detection_age_ms": 243
+      },
+      {
+        "received_mono_ms": 30581004,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8131249666213989,
+        "face_left_ratio": 0.6773993492126464,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 90,
+        "detection_age_ms": 284
+      },
+      {
+        "received_mono_ms": 30581044,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8112500429153442,
+        "face_left_ratio": 0.6755244255065918,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 76,
+        "detection_age_ms": 219
+      },
+      {
+        "received_mono_ms": 30581064,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8112500429153442,
+        "face_left_ratio": 0.6755244255065918,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 49,
+        "detection_age_ms": 239
+      },
+      {
+        "received_mono_ms": 30581100,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8112500429153442,
+        "face_left_ratio": 0.6755244255065918,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 85,
+        "detection_age_ms": 275
+      },
+      {
+        "received_mono_ms": 30581110,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8118750810623169,
+        "face_left_ratio": 0.6778354644775391,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 44,
+        "detection_age_ms": 142
+      },
+      {
+        "received_mono_ms": 30581217,
+        "state": "READY",
+        "position": "RIGHT",
+        "face_center_ratio": 0.8087500810623169,
+        "face_left_ratio": 0.674710464477539,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 104,
+        "detection_age_ms": 249
+      },
+      {
+        "received_mono_ms": 30581228,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7868750810623169,
+        "face_left_ratio": 0.652835464477539,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 79,
+        "detection_age_ms": 260
+      },
+      {
+        "received_mono_ms": 30581270,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7868750810623169,
+        "face_left_ratio": 0.652835464477539,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 121,
+        "detection_age_ms": 302
+      },
+      {
+        "received_mono_ms": 30581317,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7743750810623169,
+        "face_left_ratio": 0.6386494636535645,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 81,
+        "detection_age_ms": 251
+      },
+      {
+        "received_mono_ms": 30581359,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7693750143051148,
+        "face_left_ratio": 0.6402688026428223,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 75,
+        "detection_age_ms": 210
+      },
+      {
+        "received_mono_ms": 30581375,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7693750143051148,
+        "face_left_ratio": 0.6402688026428223,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 91,
+        "detection_age_ms": 226
+      },
+      {
+        "received_mono_ms": 30581441,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7200000047683716,
+        "face_left_ratio": 0.5842743873596191,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 79,
+        "detection_age_ms": 157
+      },
+      {
+        "received_mono_ms": 30581505,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.7012500047683716,
+        "face_left_ratio": 0.5655243873596192,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 108,
+        "detection_age_ms": 221
+      },
+      {
+        "received_mono_ms": 30581569,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6762500047683716,
+        "face_left_ratio": 0.5405243873596192,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 111,
+        "detection_age_ms": 285
+      },
+      {
+        "received_mono_ms": 30581586,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6762500047683716,
+        "face_left_ratio": 0.5405243873596192,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 128,
+        "detection_age_ms": 302
+      },
+      {
+        "received_mono_ms": 30581633,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6693750143051147,
+        "face_left_ratio": 0.5402688026428223,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 106,
+        "detection_age_ms": 236
+      },
+      {
+        "received_mono_ms": 30581692,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6499999761581421,
+        "face_left_ratio": 0.5208937644958496,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 80,
+        "detection_age_ms": 234
+      },
+      {
+        "received_mono_ms": 30581715,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6499999761581421,
+        "face_left_ratio": 0.5208937644958496,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 103,
+        "detection_age_ms": 257
+      },
+      {
+        "received_mono_ms": 30581753,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6281249761581421,
+        "face_left_ratio": 0.4990187644958496,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 86,
+        "detection_age_ms": 295
+      },
+      {
+        "received_mono_ms": 30581789,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.6281249761581421,
+        "face_left_ratio": 0.4990187644958496,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 122,
+        "detection_age_ms": 331
+      },
+      {
+        "received_mono_ms": 30581853,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5981249570846557,
+        "face_left_ratio": 0.46901874542236327,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 117,
+        "detection_age_ms": 326
+      },
+      {
+        "received_mono_ms": 30581895,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5862499713897705,
+        "face_left_ratio": 0.4555198192596436,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 100,
+        "detection_age_ms": 228
+      },
+      {
+        "received_mono_ms": 30581956,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5549999713897705,
+        "face_left_ratio": 0.4242698192596436,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 95,
+        "detection_age_ms": 289
+      },
+      {
+        "received_mono_ms": 30582004,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5468750715255737,
+        "face_left_ratio": 0.4193726539611816,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 92,
+        "detection_age_ms": 209
+      },
+      {
+        "received_mono_ms": 30582042,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5468750715255737,
+        "face_left_ratio": 0.4193726539611816,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 130,
+        "detection_age_ms": 247
+      },
+      {
+        "received_mono_ms": 30582147,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5056249618530273,
+        "face_left_ratio": 0.3748948097229004,
+        "decision": "SOURCE_LEASE_EXPIRED",
+        "source_age_ms": 142,
+        "detection_age_ms": 286
+      },
+      {
+        "received_mono_ms": 30582196,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4756250143051147,
+        "face_left_ratio": 0.34651880264282225,
+        "decision": "CONFIRMING_FACE",
+        "source_age_ms": 90,
+        "detection_age_ms": 284
+      },
+      {
+        "received_mono_ms": 30582261,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.44750003814697265,
+        "face_left_ratio": 0.3167698860168457,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 77,
+        "detection_age_ms": 256
+      },
+      {
+        "received_mono_ms": 30582297,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.42562503814697267,
+        "face_left_ratio": 0.2948948860168457,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 74,
+        "detection_age_ms": 292
+      },
+      {
+        "received_mono_ms": 30582338,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.39437503814697267,
+        "face_left_ratio": 0.2636448860168457,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 53,
+        "detection_age_ms": 333
+      },
+      {
+        "received_mono_ms": 30582398,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3893749713897705,
+        "face_left_ratio": 0.26026875972747804,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 46,
+        "detection_age_ms": 175
+      },
+      {
+        "received_mono_ms": 30582445,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3893749713897705,
+        "face_left_ratio": 0.26026875972747804,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 56,
+        "detection_age_ms": 222
+      },
+      {
+        "received_mono_ms": 30582501,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.384375,
+        "face_left_ratio": 0.2568725824356079,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 70,
+        "detection_age_ms": 216
+      },
+      {
+        "received_mono_ms": 30582541,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3912499904632568,
+        "face_left_ratio": 0.26374757289886475,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 67,
+        "detection_age_ms": 110
+      },
+      {
+        "received_mono_ms": 30582665,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3881249904632568,
+        "face_left_ratio": 0.26062257289886476,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 80,
+        "detection_age_ms": 234
+      },
+      {
+        "received_mono_ms": 30582759,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3881249904632568,
+        "face_left_ratio": 0.25739483833312987,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 104,
+        "detection_age_ms": 285
+      },
+      {
+        "received_mono_ms": 30582796,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.38125,
+        "face_left_ratio": 0.2537475824356079,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 63,
+        "detection_age_ms": 211
+      },
+      {
+        "received_mono_ms": 30582837,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.371875,
+        "face_left_ratio": 0.24437258243560792,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 51,
+        "detection_age_ms": 252
+      },
+      {
+        "received_mono_ms": 30582880,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.36499998569488523,
+        "face_left_ratio": 0.23589377403259276,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 47,
+        "detection_age_ms": 147
+      },
+      {
+        "received_mono_ms": 30582943,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.36187498569488524,
+        "face_left_ratio": 0.23276877403259277,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 62,
+        "detection_age_ms": 210
+      },
+      {
+        "received_mono_ms": 30583024,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.35000001192092894,
+        "face_left_ratio": 0.21762547492980958,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 94,
+        "detection_age_ms": 191
+      },
+      {
+        "received_mono_ms": 30583066,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.33125001192092896,
+        "face_left_ratio": 0.19887547492980956,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 69,
+        "detection_age_ms": 233
+      },
+      {
+        "received_mono_ms": 30583109,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.31875001192092894,
+        "face_left_ratio": 0.18637547492980958,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 56,
+        "detection_age_ms": 276
+      },
+      {
+        "received_mono_ms": 30583148,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.29874998331069946,
+        "face_left_ratio": 0.16637544631958007,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 55,
+        "detection_age_ms": 218
+      },
+      {
+        "received_mono_ms": 30583230,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.265625,
+        "face_left_ratio": 0.13489484786987305,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 61,
+        "detection_age_ms": 137
+      },
+      {
+        "received_mono_ms": 30583253,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.25,
+        "face_left_ratio": 0.11926984786987305,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 31,
+        "detection_age_ms": 160
+      },
+      {
+        "received_mono_ms": 30583392,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.23500001430511475,
+        "face_left_ratio": 0.10262547731399536,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 103,
+        "detection_age_ms": 223
+      },
+      {
+        "received_mono_ms": 30583429,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.21625001430511476,
+        "face_left_ratio": 0.08387547731399536,
+        "decision": "FACE_CONFIRMED_PREARM_NO_PWM",
+        "source_age_ms": 72,
+        "detection_age_ms": 260
+      },
+      {
+        "received_mono_ms": 30583475,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.19812498092651368,
+        "face_left_ratio": 0.06408536434173584,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 46,
+        "detection_age_ms": 253
+      },
+      {
+        "received_mono_ms": 30583538,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.18874998092651368,
+        "face_left_ratio": 0.05471036434173584,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 66,
+        "detection_age_ms": 316
+      },
+      {
+        "received_mono_ms": 30583581,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.19624998569488525,
+        "face_left_ratio": 0.062210369110107425,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 43,
+        "detection_age_ms": 224
+      },
+      {
+        "received_mono_ms": 30583663,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.18625001907348632,
+        "face_left_ratio": 0.05387548208236694,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 73,
+        "detection_age_ms": 191
+      },
+      {
+        "received_mono_ms": 30583751,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.18000001907348634,
+        "face_left_ratio": 0.04762548208236694,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 116,
+        "detection_age_ms": 279
+      },
+      {
+        "received_mono_ms": 30583786,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.18000001907348634,
+        "face_left_ratio": 0.04762548208236694,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 151,
+        "detection_age_ms": 314
+      },
+      {
+        "received_mono_ms": 30583838,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.18125,
+        "face_left_ratio": 0.04552438259124756,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 115,
+        "detection_age_ms": 248
+      },
+      {
+        "received_mono_ms": 30583874,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.18125,
+        "face_left_ratio": 0.04552438259124756,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 151,
+        "detection_age_ms": 284
+      },
+      {
+        "received_mono_ms": 30583887,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.175,
+        "face_left_ratio": 0.03927438259124756,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 116,
+        "detection_age_ms": 297
+      },
+      {
+        "received_mono_ms": 30583921,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.175,
+        "face_left_ratio": 0.03927438259124756,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 150,
+        "detection_age_ms": 331
+      },
+      {
+        "received_mono_ms": 30583931,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.17437500953674318,
+        "face_left_ratio": 0.03864939212799072,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 107,
+        "detection_age_ms": 296
+      },
+      {
+        "received_mono_ms": 30583961,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.17437500953674318,
+        "face_left_ratio": 0.03864939212799072,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 137,
+        "detection_age_ms": 326
+      },
+      {
+        "received_mono_ms": 30583997,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.16812500953674317,
+        "face_left_ratio": 0.03239939212799072,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 130,
+        "detection_age_ms": 362
+      },
+      {
+        "received_mono_ms": 30584012,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1625,
+        "face_left_ratio": 0.026774382591247557,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 64,
+        "detection_age_ms": 188
+      },
+      {
+        "received_mono_ms": 30584099,
+        "state": "READY",
+        "position": "LEFT",
+        "face_center_ratio": 0.1625,
+        "face_left_ratio": 0.026774382591247557,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 151,
+        "detection_age_ms": 275
+      },
+      {
+        "received_mono_ms": 30584141,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.1875,
+        "face_left_ratio": 0.05177438259124756,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 135,
+        "detection_age_ms": 317
+      },
+      {
+        "received_mono_ms": 30584181,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.20250000953674316,
+        "face_left_ratio": 0.06506717205047607,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 83,
+        "detection_age_ms": 314
+      },
+      {
+        "received_mono_ms": 30584218,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.20250000953674316,
+        "face_left_ratio": 0.06506717205047607,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 120,
+        "detection_age_ms": 351
+      },
+      {
+        "received_mono_ms": 30584257,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.22125000953674318,
+        "face_left_ratio": 0.08887547254562378,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 99,
+        "detection_age_ms": 159
+      },
+      {
+        "received_mono_ms": 30584286,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.22125000953674318,
+        "face_left_ratio": 0.08887547254562378,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 128,
+        "detection_age_ms": 188
+      },
+      {
+        "received_mono_ms": 30584320,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2525000095367432,
+        "face_left_ratio": 0.12012547254562378,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 82,
+        "detection_age_ms": 222
+      },
+      {
+        "received_mono_ms": 30584340,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.25999999046325684,
+        "face_left_ratio": 0.120838463306427,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 62,
+        "detection_age_ms": 182
+      },
+      {
+        "received_mono_ms": 30584406,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.25999999046325684,
+        "face_left_ratio": 0.120838463306427,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 128,
+        "detection_age_ms": 248
+      },
+      {
+        "received_mono_ms": 30584424,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.2974999904632568,
+        "face_left_ratio": 0.16006715297698976,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 94,
+        "detection_age_ms": 146
+      },
+      {
+        "received_mono_ms": 30584469,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.30687499046325684,
+        "face_left_ratio": 0.16944215297698975,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 81,
+        "detection_age_ms": 191
+      },
+      {
+        "received_mono_ms": 30584489,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.30687499046325684,
+        "face_left_ratio": 0.16944215297698975,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 101,
+        "detection_age_ms": 211
+      },
+      {
+        "received_mono_ms": 30584534,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.33187499046325686,
+        "face_left_ratio": 0.197835373878479,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 98,
+        "detection_age_ms": 146
+      },
+      {
+        "received_mono_ms": 30584554,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.35374999046325684,
+        "face_left_ratio": 0.219710373878479,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 48,
+        "detection_age_ms": 166
+      },
+      {
+        "received_mono_ms": 30584577,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.35374999046325684,
+        "face_left_ratio": 0.219710373878479,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 71,
+        "detection_age_ms": 189
+      },
+      {
+        "received_mono_ms": 30584602,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3656249761581421,
+        "face_left_ratio": 0.23158535957336426,
+        "decision": "EDGE_FOLLOW",
+        "source_age_ms": 61,
+        "detection_age_ms": 166
+      },
+      {
+        "received_mono_ms": 30584672,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3656249761581421,
+        "face_left_ratio": 0.23158535957336426,
+        "decision": "HARDWARE_CONTINUOUS_SLEW",
+        "source_age_ms": 131,
+        "detection_age_ms": 236
+      },
+      {
+        "received_mono_ms": 30584717,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.3937499761581421,
+        "face_left_ratio": 0.25971035957336425,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 106,
+        "detection_age_ms": 281
+      },
+      {
+        "received_mono_ms": 30584775,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.41187500953674316,
+        "face_left_ratio": 0.27783539295196535,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 87,
+        "detection_age_ms": 234
+      },
+      {
+        "received_mono_ms": 30584860,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4324999928474426,
+        "face_left_ratio": 0.3001254558563232,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 88,
+        "detection_age_ms": 172
+      },
+      {
+        "received_mono_ms": 30584900,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.46999999284744265,
+        "face_left_ratio": 0.33762545585632325,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 76,
+        "detection_age_ms": 212
+      },
+      {
+        "received_mono_ms": 30584904,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.48874999284744264,
+        "face_left_ratio": 0.35637545585632324,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 41,
+        "detection_age_ms": 216
+      },
+      {
+        "received_mono_ms": 30585022,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.4949999928474426,
+        "face_left_ratio": 0.3626254558563232,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 130,
+        "detection_age_ms": 334
+      },
+      {
+        "received_mono_ms": 30585026,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.496875011920929,
+        "face_left_ratio": 0.3645004749298096,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 73,
+        "detection_age_ms": 254
+      },
+      {
+        "received_mono_ms": 30585106,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5000000119209289,
+        "face_left_ratio": 0.36762547492980957,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 91,
+        "detection_age_ms": 334
+      },
+      {
+        "received_mono_ms": 30585230,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.496875011920929,
+        "face_left_ratio": 0.3645004749298096,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 172,
+        "detection_age_ms": 338
+      },
+      {
+        "received_mono_ms": 30585311,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5000000119209289,
+        "face_left_ratio": 0.36762547492980957,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 160,
+        "detection_age_ms": 419
+      },
+      {
+        "received_mono_ms": 30585352,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5037500023841858,
+        "face_left_ratio": 0.37137546539306643,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 152,
+        "detection_age_ms": 337
+      },
+      {
+        "received_mono_ms": 30585357,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5162500023841858,
+        "face_left_ratio": 0.3838754653930664,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 90,
+        "detection_age_ms": 342
+      },
+      {
+        "received_mono_ms": 30585415,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5306250095367432,
+        "face_left_ratio": 0.40151879787445066,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 66,
+        "detection_age_ms": 264
+      },
+      {
+        "received_mono_ms": 30585455,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5337500095367431,
+        "face_left_ratio": 0.4046437978744507,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 74,
+        "detection_age_ms": 304
+      },
+      {
+        "received_mono_ms": 30585496,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5481249809265136,
+        "face_left_ratio": 0.4190187692642212,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 49,
+        "detection_age_ms": 229
+      },
+      {
+        "received_mono_ms": 30585582,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5462500572204589,
+        "face_left_ratio": 0.4171438455581665,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 73,
+        "detection_age_ms": 201
+      },
+      {
+        "received_mono_ms": 30585602,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.555625057220459,
+        "face_left_ratio": 0.4265188455581665,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 33,
+        "detection_age_ms": 221
+      },
+      {
+        "received_mono_ms": 30585705,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5543749570846558,
+        "face_left_ratio": 0.42526874542236326,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 70,
+        "detection_age_ms": 196
+      },
+      {
+        "received_mono_ms": 30585747,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5631250381469727,
+        "face_left_ratio": 0.4323948860168457,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 50,
+        "detection_age_ms": 178
+      },
+      {
+        "received_mono_ms": 30585879,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5693750381469727,
+        "face_left_ratio": 0.4386448860168457,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 126,
+        "detection_age_ms": 310
+      },
+      {
+        "received_mono_ms": 30585943,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5675000190734864,
+        "face_left_ratio": 0.4367698669433594,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 116,
+        "detection_age_ms": 246
+      },
+      {
+        "received_mono_ms": 30585984,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5643750190734863,
+        "face_left_ratio": 0.43364486694335935,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 62,
+        "detection_age_ms": 287
+      },
+      {
+        "received_mono_ms": 30586024,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.565625011920929,
+        "face_left_ratio": 0.43325047492980956,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 75,
+        "detection_age_ms": 271
+      },
+      {
+        "received_mono_ms": 30586068,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5625,
+        "face_left_ratio": 0.43176984786987305,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 55,
+        "detection_age_ms": 146
+      },
+      {
+        "received_mono_ms": 30586129,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.559375,
+        "face_left_ratio": 0.42864484786987306,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 89,
+        "detection_age_ms": 207
+      },
+      {
+        "received_mono_ms": 30586232,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5468750238418579,
+        "face_left_ratio": 0.4111494064331055,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 111,
+        "detection_age_ms": 192
+      },
+      {
+        "received_mono_ms": 30586335,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5437500238418579,
+        "face_left_ratio": 0.40802440643310545,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 103,
+        "detection_age_ms": 295
+      },
+      {
+        "received_mono_ms": 30586392,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5406250119209289,
+        "face_left_ratio": 0.4082504749298096,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 109,
+        "detection_age_ms": 271
+      },
+      {
+        "received_mono_ms": 30586409,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.537500011920929,
+        "face_left_ratio": 0.40512547492980955,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 50,
+        "detection_age_ms": 288
+      },
+      {
+        "received_mono_ms": 30586490,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5337499856948853,
+        "face_left_ratio": 0.39971036911010743,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 98,
+        "detection_age_ms": 258
+      },
+      {
+        "received_mono_ms": 30586570,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5324999928474426,
+        "face_left_ratio": 0.40012545585632325,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 118,
+        "detection_age_ms": 211
+      },
+      {
+        "received_mono_ms": 30586651,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5324999928474426,
+        "face_left_ratio": 0.40012545585632325,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 140,
+        "detection_age_ms": 292
+      },
+      {
+        "received_mono_ms": 30586714,
+        "state": "READY",
+        "position": "INSIDE",
+        "face_center_ratio": 0.5350000619888305,
+        "face_left_ratio": 0.40096044540405273,
+        "decision": "SAFE_ZONE_HOLD",
+        "source_age_ms": 97,
+        "detection_age_ms": 262
+      }
+    ]
+  }
+}

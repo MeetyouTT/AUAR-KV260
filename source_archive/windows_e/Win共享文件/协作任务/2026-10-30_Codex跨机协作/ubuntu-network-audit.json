@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "status": "CORRELATED_WINDOWS_ATTEMPTS_NO_TCP22_AT_UBUNTU",
+  "ubuntu_host": "172.23.242.132",
+  "ubuntu_interface": "wlp0s20f3",
+  "ssh_port": 22,
+  "ssh_service_active": true,
+  "ssh_service_enabled": true,
+  "listening_addresses": [
+    "0.0.0.0:22",
+    "[::]:22"
+  ],
+  "local_authenticated_ssh": "PASS",
+  "sshd_config_syntax": "PASS",
+  "pubkey_authentication": true,
+  "effective_permit_root_login": "without-password",
+  "root_password_login_enabled": false,
+  "ufw_active": false,
+  "input_policy": "ACCEPT",
+  "firewall_modified": false,
+  "windows_wlan": {
+    "ipv4": "10.148.20.87",
+    "prefix_length": 17,
+    "gateway": "10.148.0.1",
+    "source": "user_report"
+  },
+  "windows_reported_route_to_ubuntu": "singbox_tun",
+  "ubuntu_return_route": "10.148.20.87 via 172.23.0.1 dev wlp0s20f3 src 172.23.242.132",
+  "icmp_probe": {
+    "sent": 2,
+    "received": 0,
+    "meaning": "ICMP silence does not establish TCP/22 reachability"
+  },
+  "passive_ssh_observation": {
+    "interface": "wlp0s20f3",
+    "duration_seconds": 45,
+    "filter": "tcp port 22 and host 172.23.242.132",
+    "packets": 0,
+    "payload_recorded": false,
+    "windows_probe_overlap_confirmed": false,
+    "meaning": "No matching traffic during this window; no conclusion about a Windows retry outside the window"
+  },
+  "routes_changed": false,
+  "app_server_lan_listener_created": false,
+  "board_modified": false,
+  "remaining_check": "Windows TUN forwarding and physical WLAN egress; distinguish local forwarding from upstream loss before Ubuntu",
+  "updated_at": "2026-10-30T11:41:58.862858+00:00",
+  "latest_tcp_observation": {
+    "capture_directory": "/home/ghmd/Win共享文件/协作任务/2026-10-30_Codex跨机协作/network-runs/20261030T113440507578Z",
+    "capture_started_utc": "2026-10-30T11:34:44.967347+00:00",
+    "capture_finished_utc": "2026-10-30T11:37:44.982084+00:00",
+    "windows_attempt_overlap_confirmed": true,
+    "total_captured_packets": 44,
+    "total_tcp22_packets": 0,
+    "capture_statistics": {
+      "packets_received_by_filter": 46,
+      "packets_dropped_by_kernel": 0
+    },
+    "non_ssh_traffic": {
+      "icmp_records": 44,
+      "udp_port_unreachable_ports": [
+        58080
+      ],
+      "note": "These ICMP records are not TCP/22 requests or SSH replies"
+    },
+    "conclusion": {
+      "code": "NO_WINDOWS_SSH_TRAFFIC_AT_UBUNTU_CAPTURE_POINT",
+      "requests_reached_ubuntu_capture_point": false,
+      "ubuntu_ssh_reply_observed": false,
+      "ubuntu_ssh_return_path_failure_demonstrated": false,
+      "scope": "Three timestamp-correlated Windows attempts; all Ubuntu interfaces for the stated IPv4 SSH endpoint",
+      "next_location": "Windows TUN forwarding and physical-interface egress, then upstream path before Ubuntu",
+      "exact_loss_hop_known": false,
+      "note": "Windows TCP Connected=true on 172.18.0.1 does not prove a connection to the real Ubuntu sshd; no SYN reached this capture point"
+    }
+  },
+  "return_routing": {
+    "exit_code": 0,
+    "output": "10.148.20.87 from 172.23.242.132 via 172.23.0.1 dev wlp0s20f3 uid 1000 \n    cache"
+  },
+  "ip_rules": {
+    "exit_code": 0,
+    "output": "0:\tfrom all lookup local\n32766:\tfrom all lookup main\n32767:\tfrom all lookup default"
+  },
+  "reverse_path_filter": {
+    "all": "2",
+    "wlp0s20f3": "2"
+  },
+  "local_verification_repeated": false,
+  "blocker_scope": "SSH_TCP_NETWORK_PATH_ONLY",
+  "paired_attempts": [
+    {
+      "index": 0,
+      "started_utc": "2026-10-30T11:35:35.0306763Z",
+      "finished_utc": "2026-10-30T11:35:40.0638566Z",
+      "windows_source_address": "172.18.0.1",
+      "windows_source_port": 65514,
+      "windows_tcp_connected": true,
+      "windows_banner": null,
+      "fully_inside_capture": true,
+      "ubuntu_exact_port_tcp_packets": 0,
+      "ubuntu_inbound_syn": 0,
+      "ubuntu_outbound_syn_ack": 0,
+      "ubuntu_exact_port_headers": []
+    },
+    {
+      "index": 1,
+      "started_utc": "2026-10-30T11:35:42.0739050Z",
+      "finished_utc": "2026-10-30T11:35:47.0816169Z",
+      "windows_source_address": "172.18.0.1",
+      "windows_source_port": 49213,
+      "windows_tcp_connected": true,
+      "windows_banner": null,
+      "fully_inside_capture": true,
+      "ubuntu_exact_port_tcp_packets": 0,
+      "ubuntu_inbound_syn": 0,
+      "ubuntu_outbound_syn_ack": 0,
+      "ubuntu_exact_port_headers": []
+    },
+    {
+      "index": 2,
+      "started_utc": "2026-10-30T11:35:49.0896590Z",
+      "finished_utc": "2026-10-30T11:35:54.1049204Z",
+      "windows_source_address": "172.18.0.1",
+      "windows_source_port": 49242,
+      "windows_tcp_connected": true,
+      "windows_banner": null,
+      "fully_inside_capture": true,
+      "ubuntu_exact_port_tcp_packets": 0,
+      "ubuntu_inbound_syn": 0,
+      "ubuntu_outbound_syn_ack": 0,
+      "ubuntu_exact_port_headers": []
+    }
+  ],
+  "windows_observed_route": [
+    {
+      "IPAddress": "172.18.0.1",
+      "InterfaceAlias": "singbox_tun",
+      "InterfaceIndex": 19,
+      "DestinationPrefix": null,
+      "NextHop": null,
+      "RouteMetric": null
+    },
+    {
+      "IPAddress": null,
+      "InterfaceAlias": "singbox_tun",
+      "InterfaceIndex": 19,
+      "DestinationPrefix": "0.0.0.0/0",
+      "NextHop": "172.18.0.2",
+      "RouteMetric": 0
+    }
+  ]
+}

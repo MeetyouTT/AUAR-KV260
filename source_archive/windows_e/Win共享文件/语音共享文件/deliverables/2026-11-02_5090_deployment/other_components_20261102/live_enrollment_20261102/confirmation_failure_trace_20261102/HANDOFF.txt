@@ -1,0 +1,18 @@
+确认失败固定诊断：离线备选封存（2026-11-02，洛杉矶）
+
+状态 FROZEN_OFFLINE_DIAGNOSTIC_ALTERNATIVE_NOT_DEPLOYED。Root本次优先独立发布已经由合成端到端证明的ASR空白→typed NoSpeech→原entry_rejected两文件行为修复；本目录4文件观测方案不并入这次生产，不宣称已部署或已经根治用户这次现场失败。
+
+唯一最终候选是candidate_runtime_v2。candidate_runtime早期草案保留，不使用。最终四文件SHA、原SHA与验证记录见SOURCE_MANIFEST.json；CANDIDATE.diff已按最终文件重算。router85e415d完整字节保持，未改任何阈值、身份门槛、原确认/采样时窗、真实数据库或原SQL调用。
+
+固定诊断沿原GET /api/state的board_business.dialogue.voice_enrollment.confirmation_trace读取：
+face：原VoiceEnrollment.handle实际门槛、固定reply_code、进入/退出phase；capture有无/actual、当前快照合法性、single/owner相等、两个capability，仅bool或None。独立reset字段保留来源INITIALIZE/INTERNAL/EXTERNAL、reset前stage、当时固定gate、内外/累计次数、曾有sampling仅bool。内部reset保留明确来源，外部无参reset_enrollment默认EXTERNAL；不保存sampling token、target或任一ID。原VoiceEnrollment.public仍只stage/active，避免扩大原小接口。
+unified：原IdentityLinkRegistry.confirm中实际达到的固定gate、phase、异常类别、visual.state/reason、context==本次meta、三种独立capture条件及五项guard比较，仅白名单枚举/bool。registry公开读取只读RAM，不触碰数据库；SQL调用序列和其他registry方法通过AST保持核验。
+这份trace是最后一次相关身份交互的锁存结果。reset不会擦掉失败，普通闲聊NOT_ENROLLMENT也不会覆盖；进入新的一次身份交互/身份查询会更新它。face和unified各自独立，不应把未更新的上次unified trace当作当前route的证明。本备选未加每轮capture ID或正文，因此跨轮关联仍应靠root观察窗口和固定reset计数变化。
+
+隐私边界：不留姓名、真实personID、owner值、target值、正文、PCM、照片、embedding、任意异常字符串。未知enum和非bool字段在写入和投影时过滤；trace字段为固定allowlist。新增字段只在现有public状态投影，不新开服务/端点，不改取消/授权语义。公开角色配置仅作为原测试显式依赖复制，未更改其中值；与用户身份数据分开。
+
+终版验证：33项新隐私/失败门槛/外部reset/普通闲聊锁存/原public投影 + 原32项start缓存竞态=65项全部通过（TRACE_AND_RACE_FINAL.xml）。现役a911 baseline与候选均38项原流程中36通过、2失败，失败都是此前既存汐蓝称呼fixture，名字和断言保持不改。此前37个原病例全部包含，本次多包含1个既有纯合成127.0.0.1 HTTP首段播放测试；它自建并关闭临时fixture HTTP、使用假模型，不涉及板卡/真实模型。BASELINE与候选包括POSIX camera的前轮都另有7个fcntl缺失失败，原报告保留、不列为ARM通过。原源码的_start_simple、guide等在去掉仅metadata reset_source关键字后AST与a911一致，2.5s/90s/ACK逻辑保持。
+
+先前15个registry分支合成复现位于../workflow_review/confirm_gate_review_20261102：同一清晰人脸提示覆盖visual无效、foreign capture、重复PCM/ID和锁忙；_guard不等走另一个FACE_LIFECYCLE_CHANGED分支。visual暂不可用时router本身保留active/AWAIT，可新capture继续；退出机制应另查上层reset。GUI生命周期代理已补出ASR空白导致_recording ERROR→_auto_fail→reset_enrollment→authorize丢失的合成链；不能从这些复现倒推用户历史每一轮的唯一原因。
+
+此目录没有部署器或板端写动作。若日后启用，应root对届时实际startup/四原文件pin重新审阅并串行操作，不能硬套本目录a6d4假设或覆盖正在发布的两文件NoSpeech修复。没有逐次现场固定诊断时，本备选不被称为最终用户验收。

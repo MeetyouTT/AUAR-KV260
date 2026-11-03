@@ -1,0 +1,42 @@
+[
+  {
+    "id": "identity",
+    "command": "id; uname -a; cat /etc/os-release; uptime; date -u; cat /proc/sys/kernel/random/boot_id; cat /proc/uptime",
+    "timeout": 35
+  },
+  {
+    "id": "live_dt_identity",
+    "command": "for f in /sys/firmware/devicetree/base/model /sys/firmware/devicetree/base/compatible /sys/firmware/devicetree/base/chosen/bootargs /sys/firmware/devicetree/base/chosen/stdout-path; do printf \"\\n%s\\n\" \"$f\"; tr \"\\000\" \"\\n\" < \"$f\"; done; cat /proc/cmdline",
+    "timeout": 35
+  },
+  {
+    "id": "storage",
+    "command": "lsblk -o NAME,MAJ:MIN,SIZE,TYPE,FSTYPE,LABEL,UUID,MOUNTPOINT; cat /proc/partitions; cat /proc/mtd; cat /proc/mounts; df -h; fdisk -l /dev/mmcblk1",
+    "timeout": 35
+  },
+  {
+    "id": "tool_sources",
+    "command": "command -v xmutil xlnx-bootfw xlnx_platformstats xbutil xdputil xclbinutil dtc python3 rpm opkg dnf lsusb v4l2-ctl media-ctl arecord aplay i2cdetect; cat /usr/bin/xmutil; head -n 100 /usr/bin/xdputil",
+    "timeout": 35
+  },
+  {
+    "id": "boot_files",
+    "command": "ls -la /boot; find /boot -maxdepth 3 -type f; ls -l /sys/firmware/zynqmp /sys/devices/platform/firmware:zynqmp-firmware",
+    "timeout": 35
+  },
+  {
+    "id": "kernel_log",
+    "command": "dmesg",
+    "timeout": 35
+  },
+  {
+    "id": "services",
+    "command": "systemctl --failed --no-pager -l; systemctl list-units --type=service --all --no-pager -l; ps -eo pid,comm",
+    "timeout": 35
+  },
+  {
+    "id": "network",
+    "command": "ip -br address; ip route; ip -6 route; cat /sys/class/net/eth0/carrier; networkctl status eth0 --no-pager -l; cat /lib/systemd/network/80-wired.network; cat /proc/net/tcp /proc/net/tcp6; journalctl -b -u systemd-networkd -u kria-dashboard.service --no-pager -n 80",
+    "timeout": 35
+  }
+]

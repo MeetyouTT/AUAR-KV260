@@ -1,0 +1,43 @@
+开机恢复候选 — 回退边界
+
+本包尚未部署。以下是交给原主窗口审查的未来操作说明，不是现在执行设备操作的授权。
+
+安装阶段
+
+manage_installation.py plan 只读本地候选并列出新增目标及 SHA。
+install 仅在当前 boot 与最新 capture 一致、所有 source/owner/原 unit 字节重读匹配时新增文件。
+所有目标必须原先不存在；现役源码、默认固件和原服务/drop-in 不覆盖。
+在 /var/lib/aura-boot-recovery/v1/installation-before 保存真实原 unit/drop-in 字节与索引，
+install-intent.json 在写入前 fsync；用目标 systemd-analyze verify 审查真实 unit/drop-in 依赖，
+通过后才生成 activation，随后只做 daemon-reload 和 merged 校验。
+无 stop/start/restart/reboot/enable/disable。安装失败可能留下仅属于本包的新增文件，需按回执核对，
+不递归清理、不删除陌生路径。若 merged 校验失败，删除本包自己的 activation，让 helper 保持拒绝执行。
+
+撤回启动屏障
+
+将来协调窗口内：python3 -B manage_installation.py withdraw
+入口取得本包操作锁，要求无进行中的 helper 或 DFX job；读取 installed.json，逐一核对所有本包
+systemd 文件和 activation 的 SHA，完整集合核对成功后才撤回。随后只 daemon-reload。
+不撤回或覆盖他人的配置；不停止当前相机、GUI 或模型。不删包目录与 /var/lib 审计状态，
+因为当前有效 selected binding 可以引用其中的新鲜只读来源文件。
+原 default_firmware 始终未改，因此撤回后原下次开机行为仍可能加载 benchmark；这不是修复完成。
+
+精确撤回某次来源绑定
+
+仅在原主窗口安排现有 GUI/相机正常停止、退出并保全最新 final/完整历史后使用：
+python3 -B manage_installation.py rollback-binding --binding-directory <本 boot 的实际绑定事务目录>
+要求当前 boot、contract、事务 before/after SHA、当前启动/UI字节和 active ledger 全部一致；
+拒绝较新身份/GTK/其他发布、未知备份字节、仍有硬件 owner、pending job 或不完整进程扫描。
+先核验全部回退对象，才执行各自已知字节 CAS。Native checkpoint/seed/counter/archive/marker 不改。
+回退后 GUI 留在正常停止状态；旧 binding 可能属于前一个 owner/boot，必须新鲜重新绑定后才可启动。
+修订版3在首次发布UI/startup/账本前即封存 active-source.after.json，并把其SHA写入intent。
+即使中断发生在账本已写、committed.json尚未写之间，回退也只比较该已知after字节，
+不把当前未知账本重新读取后当成可信expected；after备份有变化则拒绝回退。
+
+DFX、相机或 GUI 的结果不明
+
+不撤回硬件状态，不发送第二次原 client 操作，不强杀、不 restart、不切 PL、不改 marker。
+原 client 已交给唯一 systemd transient unit；用 boot_recovery.py --job <实际动作> observe-job
+仅观察已有 intent/同 InvocationID 的 job。没有该 intent 时该观察入口不能创建或提交任何动作。
+原 remove/load 的 stdout、stderr 原字节保留，退出状态、原回复与实际 overlay/ZOCL/render/VART 一起核验。
+恢复执行必须由原主窗口在维护权交还后显式继续同事务；Restart=no 不会自动重试。

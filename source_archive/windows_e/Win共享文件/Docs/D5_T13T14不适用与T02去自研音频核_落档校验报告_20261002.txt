@@ -1,0 +1,69 @@
+D5 第一子项落档校验报告
+=====================================================================
+项目：AMD 自主命题赛道（Kria KV260）/ FPGA-amd
+日期：2026-10-02
+范围：对齐登记 §4 落点「D5 上游三项」——T13／T14 本版不适用、T02 去自研音频核
+证据类型：本机实测（PowerShell + Word COM；本机无 Python）
+=====================================================================
+
+一、被校验文件（绝对路径，Docs 目录）
+  [1] amd_kv260_full_work_requirements_v3.md          137,313 B / 1,195 行
+      SHA256 E242258AC7DB5987082E7A0FD1FF1D257F8AC0B63F3A9E5C615AD9720ABFDCB4
+  [2] amd_kv260_full_work_requirements_v3.docx        139,762 B  16:01:31
+      SHA256 26A35409BD1088197C14BE6CDBC6DB1D68F4632DDF5B805D4D6DBE62D4380B43
+  [3] README.md                                        29,106 B / 131 行
+      SHA256 BF37F683490D29C6C431AFE34CBCFB9945B29761A22AE4C73713640B903C219D
+  [4] README.docx                                      39,072 B  16:06:05
+  [5] D5_T13T14不适用与T02去自研音频核_技术记录_v1_0.md   6,830 B / 88 行
+      SHA256 3FA512173C581EA79BE496E59244DDAC7C2F94418857F09E311DCD5AE461AD9D
+  [6] D5_T13T14不适用与T02去自研音频核_技术记录_v1_0.docx 21,858 B  16:02:59
+  [7] 备份 amd_kv260_full_work_requirements_v3.md.bak_20261002_t13t14（改动前副本）
+
+二、编码与结构判据
+  [PASS] 纯 LF：D5 md、README md、技术记录 md 的 CR 计数均为 0
+  [PASS] 无 BOM：三份 md 首字节非 EF BB BF
+  [PASS] 末尾有换行：三份 md 均以 LF 收尾（tailLF=True）
+  [PASS] 表格纪律：check_md_tables.ps1 输出
+         D5     tables=20 badRows=0
+         技术记录 tables=2  badRows=0
+  [PASS] 编号体系未变：D5 的 W00—W17、T01—T30 编号全部保留，仅加注与删除线替换
+
+三、md 与 docx 成对、回读
+  [PASS] D5.docx：paragraphs=1732 tables=20 inconsistentTables=0（20 张表逐表
+         rowsWithCellCountMismatch=0）；docx 时间 16:01:31 晚于 md 15:55:46
+  [PASS] README.docx：paragraphs=317 tables=5 inconsistentTables=0；16:06:05 晚于 md 16:04:58
+  [PASS] 技术记录.docx：paragraphs=129 tables=2 inconsistentTables=0；16:02:59 晚于 md 16:02:32
+  [PASS] 判据④复核：Docs 内 41 份 md / 43 份 docx，缺 docx 共 0 份；
+         仅 000.docx、111.docx 无同名 md（已知外部／历史件，不计为缺口）
+
+四、内容抽检（Word COM 抓 D5.docx 正文，共 62,232 字符）
+  [PASS] 本版范围调整（2026-10-02，无声源定位版）   命中 1 次
+  [PASS] 本版范围注记（2026-10-02）                 命中 1 次
+  [PASS] 本版不适用                                 命中 6 次
+  [PASS] 本版不实施                                 命中 3 次
+  [PASS] 不再自研音频核                             命中 1 次
+  [PASS] 本版（2026-10-02）不含自研音频核           命中 1 次
+  [PASS] 随之一并挂起、本版不取证                   命中 1 次
+  [PASS] 该取证要求随之不适用                       命中 1 次
+  [PASS] 原被替换语句仍以删除线保留：P1 完整版还必须含音频 IP   命中 1 次
+  [PASS] MCP01                                       命中 4 次（音响口径随本版范围同步）
+
+五、结论
+  本子项 8 处改动全部落档，并通过上述编码／结构／成对／回读／内容抽检判据；
+  D5 的历史判据与编号可追溯性未被破坏（未删原文，采用加注与等长替换）。
+  剩余落点（D5 内仍引用双麦／I2S／音频核的位置）尚未执行，清单见
+  README 第十六轮条目末段与技术记录 §6。
+  工具链提示：Word COM 渲染必须分离进程运行——本机实测，前台启动的渲染会被
+  下一条终端命令连带杀掉，进度丢失。
+
+六、复现命令（本机，无 Python，统一 PowerShell + Word COM）
+  渲染：powershell -NoProfile -ExecutionPolicy Bypass -File
+        「D:\share、\项目开发\b站评论成分分析工具\cline全局规则配置\scripts\render_docx.ps1」
+        -Md 「<md 绝对路径>」
+  回读：powershell -NoProfile -ExecutionPolicy Bypass -File
+        「D:\share、\项目开发\FPGA-amd自主命题赛道\tools\readback_docx.ps1」
+        -Docx 「<docx 绝对路径>」
+  表格：powershell -NoProfile -ExecutionPolicy Bypass -File
+        「<scratch>\check_md_tables.ps1」 -Path 「<md 绝对路径>」
+
+（本报告为纯文本证据件，不含同名 docx；正文纯 LF、无 BOM。）

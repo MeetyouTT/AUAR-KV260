@@ -1,0 +1,35 @@
+Correction to the scope described by REVIEW.txt and the names/comments of the
+18 earlier offline tests:
+
+Those tests explicitly invoked CandidateGuiBoardBusiness._attach_speaker.
+They proved that this particular implementation passes calibration.threshold
+0.35 to the real worker/device/store. They did not prove the active production
+GUI selects that class. Calling that class the actual selected production
+entry was an incorrect assumption in the review harness/documentation.
+
+The actual board_avatar_gtk.py character_pair branch imports
+tools.production_board_business_gui.prepare_board_business. This factory
+creates ProductionGuiBoardBusiness. That class overrides _attach_speaker and
+directly invokes BoardSpeakerBusiness.create, so it does not use either
+CandidateGuiBoardBusiness._attach_speaker or the base GuiBoardBusiness method.
+
+The unchanged production override b01f6edb9efe88cf95da60900e5ccc32eec93a24ef3f515ab08f51ae2ee6ada8
+has no calibration keyword. The real service therefore defaults to 0.8.
+Changing only the base GUI method to 9fefeab69856a0c4dcdfcfa166036eac6d0b61dfd2f8398c830aba0af7c0373e
+does not change this production override.
+
+This has been independently reproduced using the exact production factory
+and production override, a real BoardBusinessRuntime/worker/Device/Store/
+Provisional matcher, and synthetic IO/data only. All 3 counterexample tests
+passed, demonstrating actual device/store/public threshold 0.8 and rejection
+of three synthetic 0.5 queries. No physical device or real identity data was
+accessed.
+
+Evidence is preserved in sibling directory:
+voice_threshold_035_entry_v2_20261102/independent_review/
+  BASE_ONLY_COUNTEREXAMPLE.json
+  BASE_ONLY_LOADED_SOURCE_PINS.json
+  PRODUCTION_BASE_ONLY_COUNTEREXAMPLE.xml
+
+The original 18-test XML remains unchanged as evidence of its narrower scope.
+No final production-entry approval was sealed from those 18 tests.

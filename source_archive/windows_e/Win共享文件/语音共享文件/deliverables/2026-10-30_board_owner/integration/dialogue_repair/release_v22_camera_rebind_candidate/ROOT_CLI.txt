@@ -1,0 +1,44 @@
+Same-boot camera owner rebind. Root is the sole device executor.
+Run each command sequentially. Default modes are local dry validation.
+Replace every <ACTUAL_...> value only with the corresponding actual receipt.
+No public-fixture spec is a deployment input.
+
+Set-Location -LiteralPath 'E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v22_camera_rebind_candidate'
+
+1. Local public regression
+D:\py312\python.exe -B -X utf8 run_local_tests.py
+
+2. Before the camera trial, normal-close the actual v21 GUI using the original lifecycle
+D:\py312\python.exe -B -X utf8 publish_rebind.py guard --spec 'E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\asr2_display_evidence\spec.json' --spec-sha256 8dcd958d07de22f996d5f406ab399cdf51e252b1cbd209fac9fdbc6cae8d87a7 --execute-root-only
+D:\py312\python.exe -B -X utf8 publish_rebind.py window-inspect --spec 'E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\asr2_display_evidence\spec.json' --spec-sha256 8dcd958d07de22f996d5f406ab399cdf51e252b1cbd209fac9fdbc6cae8d87a7 --execute-root-only
+D:\py312\python.exe -B -X utf8 publish_rebind.py normal-close --spec 'E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\asr2_display_evidence\spec.json' --spec-sha256 8dcd958d07de22f996d5f406ab399cdf51e252b1cbd209fac9fdbc6cae8d87a7 --window-proof '<ACTUAL_WINDOW_INSPECTION_PATH>' --execute-root-only
+
+Require GTK_AND_SUPERVISOR_NATURALLY_EXITED. The no-force guard remains installed.
+Then use the independently frozen camera A/B/A package and its complete recovery flow.
+Require COMPLETE plus original A restored under a distinct live owner.
+Use restored_readback.py with reviewed exact authority, two matching prove results, then exclusive private write.
+Only the public authority JSON and written proof report are needed locally. Keep private journals and readback on board.
+
+3. Bind the new actual camera proof locally
+D:\py312\python.exe -B -X utf8 prepare_rebind.py --authority '<ACTUAL_AUTHORITY_LOCAL_PATH>' --authority-sha256 <ACTUAL_AUTHORITY_SHA256> --proof '<ACTUAL_WRITTEN_PROOF_LOCAL_PATH>' --proof-sha256 <ACTUAL_WRITTEN_PROOF_SHA256> --private-readback-path '<ACTUAL_PRIVATE_READBACK_BOARD_PATH>'
+
+4. Dry review then apply the same proposed spec
+D:\py312\python.exe -B -X utf8 apply_rebind_closed.py --spec '<ACTUAL_PROPOSED_SPEC_PATH>' --spec-sha256 <ACTUAL_PROPOSED_SPEC_SHA256>
+D:\py312\python.exe -B -X utf8 apply_rebind_closed.py --spec '<ACTUAL_PROPOSED_SPEC_PATH>' --spec-sha256 <ACTUAL_PROPOSED_SPEC_SHA256> --execute-root-only
+
+Require CAMERA_OWNER_REBOUND_UI_STOPPED. Save the actual install receipt and returned applied spec/hash.
+If apply is interrupted, preserve the guard and inspect the bounded receipt. Re-execute the same proposed spec.
+Only the same INTENT transaction and exact old/new combinations can roll forward. Do not restore the old1335 config.
+An APPLIED result lost in transport can be recovered by the same apply command while the GUI remains naturally closed.
+
+5. Original normal start and readiness with the actual applied spec
+D:\py312\python.exe -B -X utf8 publish_rebind.py start --spec '<ACTUAL_APPLIED_SPEC_PATH>' --spec-sha256 <ACTUAL_APPLIED_SPEC_SHA256> --execute-root-only
+D:\py312\python.exe -B -X utf8 publish_rebind.py ready --spec '<ACTUAL_APPLIED_SPEC_PATH>' --spec-sha256 <ACTUAL_APPLIED_SPEC_SHA256> --execute-root-only
+
+Require PRODUCTION_BOARD_BUSINESS_READY, saved listening false, state PAUSED, microphone false, guard removed.
+
+6. Verify live full380/source/COMPLETE proof and seal before canonical pointers advance
+D:\py312\python.exe -B -X utf8 seal_rebind.py --spec '<ACTUAL_APPLIED_SPEC_PATH>' --spec-sha256 <ACTUAL_APPLIED_SPEC_SHA256> --ready '<ACTUAL_READY_RECEIPT_PATH>' --ready-sha256 <ACTUAL_READY_RECEIPT_SHA256> --installed '<ACTUAL_INSTALL_RECEIPT_PATH>' --installed-sha256 <ACTUAL_INSTALL_RECEIPT_SHA256> --execute-root-only
+
+Require CAMERA_REBIND_EVIDENCE_SEALED_CANONICAL_COMMITTED.
+All generated actual reports use new filenames. Original v21 and camera packages remain unchanged.

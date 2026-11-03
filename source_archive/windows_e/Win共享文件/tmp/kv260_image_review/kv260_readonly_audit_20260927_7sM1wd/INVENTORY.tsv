@@ -1,0 +1,34 @@
+category	name	version	path_or_object	size_bytes	sha256	status	evidence
+system	Ubuntu	20.04.4 LTS / 5.15.0-139-generic	/	-	-	检查通过（抽样）	logs/host.txt;logs/package_verify.txt
+storage	/home/ghmd ext4	22 GB free / 94% used	/dev/nvme0n1p10	-	-	有风险但尚未证实损坏	logs/host.txt
+tool	Vivado	2022.2 SW 3671981 / IP 3669848	/home/ghmd/Xilinx/Vivado/2022.2	-	-	可启动；历史后置步骤失败	logs/vivado_version.txt;logs/xinstall_poststeps.txt
+tool	Vitis	2022.2 SW 3671529	/home/ghmd/Xilinx/Vitis/2022.2	-	-	版本可辨；CLI 标志退出 255	logs/vitis_version.txt
+tool	Vitis HLS	2022.2	/home/ghmd/Xilinx/Vitis_HLS/2022.2	-	-	存在；未独立运行	logs/tool_paths.txt
+tool	PetaLinux	2022.2	/home/ghmd/petalinux/2022.2	-	-	安装日志成功；当前 PATH 未加载	logs/tool_paths.txt
+project	原始 Vivado XPR	2022.2 / xck26	/home/ghmd/work/kv260_dpu/kv260_dpu.xpr	-	-	输入引用存在；历史对照	logs/source_refs.txt
+project	B2304/URAM Vivado XPR	2022.2 / DPU v4.1	/home/ghmd/work/kv260_dpu_b2304_uram/kv260_dpu.xpr	-	-	输入引用存在；历史候选	logs/source_refs.txt
+project	9/26 clockfix XPR	2022.2 / DPU v4.1	/home/ghmd/kv260_clockfix_rebuild_20260926/kv260_dpu.xpr	-	-	输入引用存在；未配套系统验收	logs/source_refs.txt
+project	PetaLinux KV260	2022.2 / xilinx-k26-kv	/home/ghmd/work/petalinux-kv260-dpu	-	-	曾构建成功；当前引用中期 XSA	logs/petalinux_build_excerpt.txt;logs/artifact_hashes.tsv
+source	Vitis AI extracted copy	3.0 label / commit unknown	/home/ghmd/work/vitis-ai-source/Vitis-AI-3.0	-	-	来源未验证	logs/vitis_ai_source_state.txt
+tool	Docker images	unknown	/var/run/docker.sock	-	-	未检查：避免启动服务	logs/docker_state.txt
+artifact	old bit	2022.2 / 100 MHz design	/home/ghmd/work/kv260_dpu_b2304_uram/output/kv260_dpu.bit	7797816	8216667789ea0261b04fd0e38de4c059e5882d1f6bb8b96d90b3e358c48f2fb1	历史对照	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	old XSA	2022.2	/home/ghmd/work/kv260_dpu_b2304_uram/output/kv260_dpu.xsa	4370850	a2fca98407e82950f9cd4f2416f3f046e071047ceab542d7ac306dc5eee74f2c	历史对照；ZIP 检查通过	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	intermediate clockfix XSA	2022.2	/home/ghmd/work/kv260_dpu_b2304_uram/output/kv260_dpu_clockfix.xsa	4375549	08abccc5df51ebcecdf09c52782e4d3ae96260a1625aa1fca9e16cd28637bdd0	当前 PetaLinux 硬件来源	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	intermediate clockfix XSA copy	2022.2	/home/ghmd/work/kv260_dpu_clockfix_hw/system.xsa	4375549	08abccc5df51ebcecdf09c52782e4d3ae96260a1625aa1fca9e16cd28637bdd0	等同中期 clockfix XSA	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	new 9/26 bit	2022.2	/home/ghmd/kv260_clockfix_rebuild_20260926/artifacts/kv260_dpu_clockfix_rebuilt.bit	7797816	d316ee9c33bae9547424b8820d188af1b3db2710a9a87586542a84dd7e3b385c	实现完成；未集成	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	new 9/26 XSA	2022.2	/home/ghmd/kv260_clockfix_rebuild_20260926/artifacts/kv260_dpu_clockfix_rebuilt.xsa	4470034	76e8d1056949999ef517cfc13912f41ade39a40c9304f3779ff69f545f92363b	ZIP 检查通过；未集成	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	PetaLinux imported XSA	2022.2	/home/ghmd/work/petalinux-kv260-dpu/project-spec/hw-description/system.xsa	4375549	08abccc5df51ebcecdf09c52782e4d3ae96260a1625aa1fca9e16cd28637bdd0	等同中期 clockfix XSA	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	PetaLinux hardware bit	2022.2	/home/ghmd/work/petalinux-kv260-dpu/project-spec/hw-description/kv260_dpu_clockfix.bit	7797816	6a75e223ba4f901b4f82eef7ccee185f5e8269dcffe92903680c74e3f0d4aba5	等同 XSA 内嵌 bit	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	current candidate system.bit	2022.2	/home/ghmd/work/petalinux-kv260-dpu/images/linux/system.bit	7797816	6a75e223ba4f901b4f82eef7ccee185f5e8269dcffe92903680c74e3f0d4aba5	等同中期 XSA 内嵌 bit	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	current DTB	Linux 2022.2	/home/ghmd/work/petalinux-kv260-dpu/images/linux/system.dtb	45086	f8f7b8749f943f28dbf94fb697bada594ff1c0677a8fabd51f400c30d068467f	等同 FIT 内嵌 DTB	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	current BOOT.BIN	bootgen 2022.2	/home/ghmd/work/petalinux-kv260-dpu/images/linux/BOOT.BIN	9526664	335fd6ec019ccbbc9d08ac518f1f02bfb67e64c60e0f6c5435556dfe6c05044d	成员列表可读；字节同源待证	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	current FIT image	Linux 2022.2	/home/ghmd/work/petalinux-kv260-dpu/images/linux/image.ub	130879552	3a452b9d3790f09710b017a82f9522cc48ed19ea601967aed966c735d05b8bb0	内嵌内核/DTB/ramdisk 核对通过	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	current ramdisk	PetaLinux 2022.2	/home/ghmd/work/petalinux-kv260-dpu/images/linux/rootfs.cpio.gz	121432090	434689057370d62a6a366612942749135a61d02e86a4503d55c786ef92c18f31	等同 FIT 内嵌 ramdisk	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	old compiled model	Vitis AI 3.0 label	/home/ghmd/work/models/resnet50-b2304/compiled/resnet50_b2304.xmodel	26843134	acf77c7fdb91ed875999c7d0e455aecb8f76d26e108f53ceb9cdf063ce4def7c	历史模型候选	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	9/26 compiled model	Vitis AI 3.0 label	/home/ghmd/kv260_resnet50_verified_rebuild_20260926/compiled/resnet50_b2304_verified.xmodel	26843066	330a654a6c54db486b9fa8f82a1e84c298b66829b7939eabb3635d88007434da	候选；板端未验收	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	DPU architecture file	fingerprint 0x101000056010405	/home/ghmd/work/kv260_dpu_b2304_uram/kv260_dpu.gen/sources_1/bd/kv260_dpu_bd/ip/kv260_dpu_bd_dpu_0_0/arch.json	36	ac3853f7a1c3d8a1974bfb4b3f87db74efc94657af6d84f581da988ecd687bdd	静态配置；板端未验	logs/artifact_hashes.tsv;logs/xsa_members.tsv
+artifact	old routed DCP	Vivado 2022.2	/home/ghmd/work/kv260_dpu_b2304_uram/kv260_dpu.runs/impl_1/kv260_dpu_bd_wrapper_routed.dcp	73480348	c04bc88110b232e73fd2788686266921e9742d02586c340dcbce3955fc2b867d	历史 reset 对照	logs/extra_hashes.txt
+artifact	new routed DCP	Vivado 2022.2	/home/ghmd/kv260_clockfix_rebuild_20260926/kv260_dpu.runs/impl_1/kv260_dpu_bd_wrapper_routed.dcp	73503245	23d166161b9efc33ea4a304dc7d96bb4ca032323629f8dc2e8ee9427fe689fbd	存在；reset 语义待证	logs/extra_hashes.txt
+source	DPU IP component.xml	v4.1.0	/home/ghmd/work/dpu/DPUCZDX8G_ip_repo_VAI_v3.0/DPUCZDX8G_v4_1_0/component.xml	1127022	0211da6d9cda21fc3ff19c8f1d8c7dbc780a37078023981c37a023cd4b55f3c3	本地引用齐全；重复副本相同	logs/extra_hashes.txt
+source	Vitis-AI-v3.0.zip	unknown	/home/ghmd/work/Vitis-AI-v3.0.zip	0	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	已确认不完整（0 字节）	logs/extra_hashes.txt
+image	AMD KV260 DPU 3.0.0 img.gz	2022.2 / Vitis AI 3.0 label	/home/ghmd/下载/xilinx-kv260-dpu-v2022.2-v3.0.0.img.gz	3503938277	a8599cc033920207953a3eb954be1b925465e77c3ca835b26ef1ccfa903441d0	gzip 检查通过；官方校验未完成	logs/official_image_sha256.txt;logs/official_image_static.txt

@@ -1,0 +1,701 @@
+{
+  "schema": "aura.record-streaming.read-only-feasibility.v1",
+  "created_utc": "2026-10-31T13:09:16.691355+00:00",
+  "status": "ANALYSIS_ONLY_NOT_IMPLEMENTED_NOT_RUN_NOT_DEPLOYED",
+  "activity": {
+    "model_requests": 0,
+    "device_operations": 0,
+    "production_source_changes": 0,
+    "protocol_changes": 0,
+    "production_database_accesses": 0,
+    "model_downloads": 0,
+    "writes": "Two analysis files only"
+  },
+  "basis": "Saved installed v14 sources plus v15 receipt; relevant v15 delta is presentation only. Host hashes checked against host_install_receipt; memory source hashes checked against revision.json. This is not a new runtime observation.",
+  "conclusion": "Per-sentence complete records may advance first useful speech for multi-sentence replies, but are not an existing switch. Response buffering, the single inference execution lane and whole-reply memory authorization must all be addressed. No speedup is measured.",
+  "blockers": [
+    {
+      "id": "FULL_RESPONSE",
+      "sources": [
+        "host.done_gate",
+        "output_contract.schema",
+        "negotiation.full_response"
+      ],
+      "finding": "Ollama stream=true is already active; host joins content and returns only at done. The board negotiates a single complete strict ABC object."
+    },
+    {
+      "id": "SINGLE_LANE",
+      "sources": [
+        "host.single_worker",
+        "host.backend_execution",
+        "host.llm_lease",
+        "host.tts_lease",
+        "gpu_admission"
+      ],
+      "finding": "One service worker executes both LLM and TTS. Earlier records alone do not start TTS before LLM completion. A bounded second lane must still obey original GPU admission; residency does not establish overlapping working-memory or audio-supply safety."
+    },
+    {
+      "id": "WHOLE_REPLY_MEMORY",
+      "sources": [
+        "controller.whole_reply",
+        "store.generated",
+        "store.conflict",
+        "store.all_source_guard",
+        "job_stream.chunk_guard"
+      ],
+      "finding": "generated fixes full reply hash and dependencies. A different appended answer conflicts. Prepared checks require awaiting_playback and a pending assistant event with valid full dependencies. The first sentence must not masquerade as a full reply. check_turn_current validates user source only and is not equivalent."
+    }
+  ],
+  "minimum_isolated_validation": [
+    "Define a new opt-in capability for independently complete bounded ABC sentence records. Retain all three fields, four emotion values, empty action, duplicate-key rejection and text bounds. Current one-object JSON schema is not NDJSON framing.",
+    "Transport owns original Owner/generation, monotonic sequence and terminal success/error frame. Model content cannot supply authority. Never send incomplete JSON, thinking or filler to speech.",
+    "First public model-only comparison: first fully valid record, full completion, token count, semantic/schema failures, original deadline. Same model/layers/context/sampling/persona rules. No TTS, Store or playback. No implementation or execution supplied in this report.",
+    "Only if meaningful first-record gain appears, test bounded concurrent LLM/TTS under existing GPU admission. Measure first PCM and continuity; record timing alone is insufficient.",
+    "Add explicit board-owned unsealed staging that authorizes all original sources and rechecks scope/forget/correction around record/audio acceptance. Final seal creates one whole generated reply and binds complete PCM token/hash/samples. A reviewed append-and-seal Store API is an alternative, not present functionality.",
+    "Retain one final PlaybackPlan, owner/generation/cancellation and complete playback ACK. Network end is not speaker completion. Only matching full ACK commits assistant_played; failed, revoked, stale or truncated turns remain incomplete."
+  ],
+  "risks": [
+    "An early spoken sentence cannot be retracted after later correction/failure; stop further audio and retain incomplete status.",
+    "Repeated record fields add tokens, limiting short single-sentence benefits.",
+    "GPU overlap may worsen audio supply or total generation time.",
+    "Bound record bytes/count/characters/sequence/deadline and parse UTF-8/escapes strictly.",
+    "Never retry and replay the whole answer after any part was spoken."
+  ],
+  "authorization": {
+    "explicit_user_ban_on_complete_record_protocol_found": false,
+    "scope": "Visible conversation and read project instructions; this subtask is analysis-only, not production deployment authorization.",
+    "keep": [
+      "Board business/storage ownership",
+      "Windows existing model inference",
+      "Stable continuous dialogue",
+      "Scope/source/correction/forgetting checks",
+      "Cancellation and complete playback ACK"
+    ],
+    "versioned_contract": "complete_response_required and whole-object handling are existing implementation contracts; do not weaken the old format.",
+    "historical_instruction": "AGENTS records prior rejection of omitting empty action and preservation of three fields; do not represent this as an additional explicit user prohibition on full-record streaming."
+  },
+  "same_model_options": {
+    "verdict": "No newly identified, evidenced low-impact switch substantially reduces the remaining roughly 4-second 27B stage under unchanged constraints.",
+    "already_active": [
+      "ABC short field names and strict schema",
+      "think=false",
+      "stream=true",
+      "keep_alive=-1",
+      "num_ctx=2048",
+      "num_predict=120 upper bound"
+    ],
+    "decode_evidence": "Name ABC trials B2/B3: 28 tokens, eval_duration 2857.29/2901.98 ms; prompt 867.72/576.87 ms and 214/226 cached prompt tokens. Cross-arm wording differs; overall A/B difference is not a pure grammar speedup.",
+    "cache": "Reuse is already measured. Installed v14 memory_policy:139 still orders system, notes, recent, current. Historical prefix-order candidate exists but is not installed and must not overwrite current memory/generation fixes. It requires controlled public comparison and correction/forgetting semantic review. It is not a new finding or an established multi-second gain. No stale prompt/body/reply reuse proposed.",
+    "grammar": "Strict ABC already installed. Existing measured thinking and trailing whitespace are zero; this audit does not claim no internal whitespace because raw replies were not saved. Further field omission/encoding changes require new negotiation, already appear in prior research, and are not recommended as an immediate switch.",
+    "cap": "Lowering num_predict does not accelerate the 28 emitted tokens. Cutting a needed reply produces length truncation, correctly rejected. Do not count truncation as faster answers.",
+    "done": "Observed complete-JSON-to-done interval is 94-110 ms in compact ABBA and 110 ms in public chain, not the several-second decode bottleneck. Retain terminal validation.",
+    "remaining_research": "Only if future public metadata shows dominant prefill after context/summary updates should the existing prefix-order proposal be revisited on current source. No new implementation or performance claim is justified here.",
+    "no_new_recommendation": [
+      "Re-enable already active options",
+      "Repeat canonical-to-ABC as if ABC were not live",
+      "Force lower token cap",
+      "Omit empty action under old format",
+      "Alter model weights/GPU layers/device ownership"
+    ],
+    "estimated_speedup_percent": null
+  },
+  "source_references": {
+    "host": {
+      "path": "E:\\Win共享文件\\语音共享文件\\aura\\tools\\model_inference_host.py",
+      "sha256": "fd4a8c334658f9720068fceeae664fd1771a8664e7aa02b0c0656f36619ebc65",
+      "bytes": 47303,
+      "points": {
+        "single_worker": {
+          "lines": [
+            75
+          ],
+          "anchor": "self.worker = threading.Thread(target=self._run"
+        },
+        "backend_execution": {
+          "lines": [
+            196
+          ],
+          "anchor": "result = getattr(self.backend, job.kind)"
+        },
+        "done_gate": {
+          "lines": [
+            574
+          ],
+          "anchor": "return {'text': ''.join(chunks), 'metrics': metrics}"
+        },
+        "llm_lease": {
+          "lines": [
+            439,
+            451
+          ],
+          "anchor": "with self.gpu.acquire('llm', deadline=deadline, cancelled=cancelled):"
+        },
+        "tts_lease": {
+          "lines": [
+            600
+          ],
+          "anchor": "with self.gpu.acquire('tts', deadline=deadline, cancelled=cancelled,"
+        }
+      }
+    },
+    "output_contract": {
+      "path": "E:\\Win共享文件\\语音共享文件\\aura\\common\\inference_output_contract.py",
+      "sha256": "e07936da0f3e333c4a448a2b36b70cdfecb76939449c8cdbefffe11b9244c631",
+      "bytes": 6922,
+      "points": {
+        "schema": {
+          "lines": [
+            29
+          ],
+          "anchor": "def dialogue_schema("
+        },
+        "body": {
+          "lines": [
+            38
+          ],
+          "anchor": "def build_body("
+        },
+        "stream_true": {
+          "lines": [
+            47
+          ],
+          "anchor": "stream=True,"
+        },
+        "token_cap": {
+          "lines": [
+            50
+          ],
+          "anchor": "body['options']['num_predict'] ="
+        },
+        "complete_validation": {
+          "lines": [
+            63
+          ],
+          "anchor": "def canonicalize_compact("
+        },
+        "reject_length": {
+          "lines": [
+            148
+          ],
+          "anchor": "if packet.get('done_reason') == 'length':"
+        }
+      }
+    },
+    "base_request": {
+      "path": "E:\\Win共享文件\\语音共享文件\\aura\\tools\\dialogue_host_ollama.py",
+      "sha256": "0ebd4a72b098cd7f6a2fc89aa97c55d89f5c724fd44f7f8287c59412fb66071f",
+      "bytes": 23880,
+      "points": {
+        "request": {
+          "lines": [
+            282
+          ],
+          "anchor": "def chat_body("
+        },
+        "ctx_cap": {
+          "lines": [
+            295
+          ],
+          "anchor": "body['options'].update(num_ctx=2048,num_predict=120)"
+        }
+      }
+    },
+    "negotiation": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\first_wait_integration\\after\\tools\\production_output_format.py",
+      "sha256": "0a0cc8c9fc3d0a29fbec5451603d8d6786b99e627e7c57c60c4049bb266f2463",
+      "bytes": 4485,
+      "points": {
+        "full_response": {
+          "lines": [
+            50
+          ],
+          "anchor": "complete_response_required=True)"
+        },
+        "mode": {
+          "lines": [
+            11
+          ],
+          "anchor": "def validate_dialogue_output_format("
+        },
+        "install": {
+          "lines": [
+            72
+          ],
+          "anchor": "def install_dialogue_output("
+        }
+      }
+    },
+    "controller": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\first_wait_integration\\before\\board\\runtime\\board_dialogue.py",
+      "sha256": "bce1f21962d083275d9e8a966f244d8c227d0d62e9a30314767453d04c05b475",
+      "bytes": 31766,
+      "points": {
+        "validate": {
+          "lines": [
+            50
+          ],
+          "anchor": "def validate_model_reply("
+        },
+        "interrupt": {
+          "lines": [
+            226
+          ],
+          "anchor": "def _interrupt("
+        },
+        "sources": {
+          "lines": [
+            413
+          ],
+          "anchor": "def _messages("
+        },
+        "llm": {
+          "lines": [
+            523
+          ],
+          "anchor": "result, _ = timed_request('llm', task='dialogue', messages=messages)"
+        },
+        "whole_reply": {
+          "lines": [
+            366,
+            546
+          ],
+          "anchor": "self.store.generated(turn.turn_id, reply.text, generation=turn.generation,"
+        },
+        "tts_loop": {
+          "lines": [
+            553
+          ],
+          "anchor": "for sentence in sentences:"
+        },
+        "ack": {
+          "lines": [
+            596
+          ],
+          "anchor": "def acknowledge(self, plan,"
+        }
+      }
+    },
+    "job_stream": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\guard_session_candidate\\after\\board\\runtime\\audio\\board_dialogue_jobs.py",
+      "sha256": "71fd1ac8e2ddb2e20eeb572063cc69e370e18f40af4a97fb65e2d8258bae45a0",
+      "bytes": 49157,
+      "points": {
+        "chunk_guard": {
+          "lines": [
+            598
+          ],
+          "anchor": "def reply_sink(chunk, reply, start_sample, token):"
+        },
+        "whole_audio": {
+          "lines": [
+            687
+          ],
+          "anchor": "raise ValueError('Local cue stream does not match its complete playback receipt')"
+        },
+        "ack": {
+          "lines": [
+            744
+          ],
+          "anchor": "def acknowledge(self, meta, result):"
+        }
+      }
+    },
+    "store": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\memory_health_collaboration\\v14_validation_candidate\\after\\common\\board_memory.py",
+      "sha256": "fe50db190aaafcb8841eaa132ed9ea218a80bc582efacb3c3c83e952bf985e9f",
+      "bytes": 101431,
+      "points": {
+        "generated": {
+          "lines": [
+            571
+          ],
+          "anchor": "def generated(self, turn_id, assistant_text,"
+        },
+        "conflict": {
+          "lines": [
+            591
+          ],
+          "anchor": "raise IdempotencyConflict(\"Turn already has a different generated reply\")"
+        },
+        "user_only_guard": {
+          "lines": [
+            601
+          ],
+          "anchor": "def check_turn_current("
+        },
+        "all_source_guard": {
+          "lines": [
+            638
+          ],
+          "anchor": "def _check_prepared_snapshot("
+        },
+        "audio_receipt": {
+          "lines": [
+            692
+          ],
+          "anchor": "def bind_audio_receipt("
+        },
+        "ack": {
+          "lines": [
+            714
+          ],
+          "anchor": "def ack_played("
+        }
+      }
+    },
+    "memory_policy": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\memory_health_collaboration\\v14_validation_candidate\\after\\board\\runtime\\board_memory_policy.py",
+      "sha256": "6050ed5e4dcfeb456c5d0969e257f624552f80ff722b3c3999a573f86cd933c2",
+      "bytes": 34811,
+      "points": {
+        "prompt_order": {
+          "lines": [
+            139
+          ],
+          "anchor": "messages = [system] + notes + recent + [current]"
+        }
+      }
+    },
+    "gpu_admission": {
+      "path": "E:\\Win共享文件\\语音共享文件\\aura\\common\\gpu_coordination.py",
+      "sha256": "41e3d6546e47ee6d3d49827c93e2267b88efea0d686460c26ceebd8a448617ae",
+      "bytes": 23304,
+      "points": {
+        "one_per_kind": {
+          "lines": [
+            232
+          ],
+          "anchor": "if any(v['kind']==kind for v in self.active.values()):return False,'same_phase_active'"
+        },
+        "serial": {
+          "lines": [
+            236
+          ],
+          "anchor": "if p.mode=='serial' and self.active:return False,'serialized_peak'"
+        },
+        "headroom": {
+          "lines": [
+            248
+          ],
+          "anchor": "if sample.free_mib<p.reserve_mib+extra+reserved:return False,'insufficient_headroom'"
+        }
+      }
+    },
+    "project_instructions": {
+      "path": "E:\\Win共享文件\\语音共享文件\\AGENTS.md",
+      "sha256": "ce263b20a7ad43185fa7f53f3a688c4bd81d8d9914ae3049e2daeeafa78e1e50",
+      "bytes": 159947,
+      "points": {
+        "v15": {
+          "lines": [
+            2
+          ],
+          "anchor": "- 现役v15："
+        },
+        "ownership": {
+          "lines": [
+            7
+          ],
+          "anchor": "- 正式保持原Paraformer3线程、combined前端1线程/capture nice-10、原8帧；"
+        },
+        "historical_compact": {
+          "lines": [
+            1020
+          ],
+          "anchor": "2026-10-18 紧凑JSON通道最终验收："
+        }
+      }
+    }
+  },
+  "installed_source_provenance": [
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\first_wait_integration\\host_install_receipt.json",
+      "sha256": "707b3f72f518eff6d8bedc7df9f8bd2fb242352f7e4aefb75ef81847ede041b5"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\first_wait_integration\\revision.json",
+      "sha256": "51e27f55e1ccad0c4ca79daee623d191cdde8ba682c1f9b5a42d42c46ac64bd2"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\first_wait_streaming_validation\\review\\source_provenance.json",
+      "sha256": "dafb13f8991c437e52ff7c02d211b3e2ad5c49d6828129c548d5580edf12ae79"
+    }
+  ],
+  "existing_public_measurements": {
+    "public_chain": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\first_wait_integration\\actual_public_compact_chain.json",
+      "sha256": "8d3e446793fc407326e847aecda4aca56a1954b7a80341386db4157f55f73c59",
+      "timings": {
+        "llm_ms": 4503.954125997552,
+        "tts_ms": 663.3182639998267,
+        "model_chain_ms": 5167.6441239978885,
+        "llm_metrics": {
+          "prompt_eval_count": 230,
+          "eval_count": 29,
+          "load_duration_ms": 1.54,
+          "prompt_eval_duration_ms": 1335.2,
+          "eval_duration_ms": 3026.03,
+          "total_duration_ms": 4369.63,
+          "thinking_characters": 0,
+          "content_characters": 50,
+          "trailing_whitespace_characters": 0,
+          "first_packet_ms": 1344.0000000009604,
+          "first_content_ms": 1344.0000000009604,
+          "first_json_closed_ms": 4250.0,
+          "backend_done_ms": 4360.000000000582,
+          "json_closed_to_done_ms": 110.00000000058208,
+          "prompt_eval_cached_count": 0
+        }
+      },
+      "complete_response_required": true,
+      "scope": "Existing one public Ethernet LLM/TTS chain; no ASR or speaker playback; not a controlled latency benchmark"
+    },
+    "compact_abba": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\realtime_dialogue_research\\first_wait_candidate\\benchmark_runs\\public_abba_a6525aa88e79.json",
+      "sha256": "3a50cb957eb5a7751e640f27f5f90834acdf9c7aff5cc89e969334ab2340a028",
+      "scope": "LLM-only public same-prompt experiment, not human or acoustic acceptance",
+      "audio_playback": false,
+      "trials": [
+        {
+          "trial_index": 1,
+          "arm": "A",
+          "complete_json": true,
+          "semantic_check": "PASS",
+          "error_code": "NONE",
+          "reply_characters": 4,
+          "metrics": {
+            "prompt_eval_count": 237,
+            "eval_count": 15,
+            "load_duration_ms": 1.82,
+            "prompt_eval_duration_ms": 1223.48,
+            "eval_duration_ms": 1537.06,
+            "total_duration_ms": 2897.02,
+            "thinking_characters": 0,
+            "content_characters": 33,
+            "trailing_whitespace_characters": 0,
+            "first_packet_ms": 1358.9999999967404,
+            "first_content_ms": 1358.9999999967404,
+            "first_json_closed_ms": 2780.9999999990396,
+            "backend_done_ms": 2890.9999999996217,
+            "json_closed_to_done_ms": 110.00000000058208,
+            "prompt_eval_cached_count": 0
+          },
+          "llm_wall_ms": 2953.000000001339
+        },
+        {
+          "trial_index": 2,
+          "arm": "B",
+          "complete_json": true,
+          "semantic_check": "PASS",
+          "error_code": "NONE",
+          "reply_characters": 4,
+          "metrics": {
+            "prompt_eval_count": 237,
+            "eval_count": 15,
+            "load_duration_ms": 1.23,
+            "prompt_eval_duration_ms": 528.48,
+            "eval_duration_ms": 1536.24,
+            "total_duration_ms": 2072.07,
+            "thinking_characters": 0,
+            "content_characters": 33,
+            "trailing_whitespace_characters": 0,
+            "first_packet_ms": 531.9999999992433,
+            "first_content_ms": 531.9999999992433,
+            "first_json_closed_ms": 1952.9999999977008,
+            "backend_done_ms": 2062.999999998283,
+            "json_closed_to_done_ms": 110.00000000058208,
+            "prompt_eval_cached_count": 233
+          },
+          "llm_wall_ms": 2140.9999999996217
+        },
+        {
+          "trial_index": 3,
+          "arm": "B",
+          "complete_json": true,
+          "semantic_check": "PASS",
+          "error_code": "NONE",
+          "reply_characters": 4,
+          "metrics": {
+            "prompt_eval_count": 237,
+            "eval_count": 15,
+            "load_duration_ms": 1.65,
+            "prompt_eval_duration_ms": 643.55,
+            "eval_duration_ms": 1506.99,
+            "total_duration_ms": 2158.03,
+            "thinking_characters": 0,
+            "content_characters": 33,
+            "trailing_whitespace_characters": 0,
+            "first_packet_ms": 671.9999999986612,
+            "first_content_ms": 671.9999999986612,
+            "first_json_closed_ms": 2078.000000001339,
+            "backend_done_ms": 2186.999999998079,
+            "json_closed_to_done_ms": 108.99999999674037,
+            "prompt_eval_cached_count": 233
+          },
+          "llm_wall_ms": 2233.9999999967404
+        },
+        {
+          "trial_index": 4,
+          "arm": "A",
+          "complete_json": true,
+          "semantic_check": "PASS",
+          "error_code": "NONE",
+          "reply_characters": 4,
+          "metrics": {
+            "prompt_eval_count": 237,
+            "eval_count": 15,
+            "load_duration_ms": 1.54,
+            "prompt_eval_duration_ms": 661.47,
+            "eval_duration_ms": 1469.34,
+            "total_duration_ms": 2138.95,
+            "thinking_characters": 0,
+            "content_characters": 33,
+            "trailing_whitespace_characters": 0,
+            "first_packet_ms": 655.9999999990396,
+            "first_content_ms": 655.9999999990396,
+            "first_json_closed_ms": 2030.9999999990396,
+            "backend_done_ms": 2125.0,
+            "json_closed_to_done_ms": 94.00000000096043,
+            "prompt_eval_cached_count": 233
+          },
+          "llm_wall_ms": 2188.000000001921
+        }
+      ]
+    },
+    "name_abba": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\realtime_dialogue_research\\direct_comparison_v2\\benchmark_runs\\direct_name_abba_8b8643d9d18b.json",
+      "sha256": "4c88768c849703fab5485c82db42b5b5a3754ddc1e97b78304b42be6ed170d41",
+      "scope": "LLM-only public same-prompt experiment, not human or acoustic acceptance",
+      "audio_playback": false,
+      "trials": [
+        {
+          "trial_index": 1,
+          "arm": "A",
+          "complete_json": true,
+          "semantic_check": "PASS",
+          "semantic_reason": "SELECTED_SELF_NAME",
+          "error_code": "NONE",
+          "reply_characters": 13,
+          "metrics": {
+            "prompt_eval_count": 232,
+            "eval_count": 35,
+            "load_duration_ms": 15.25,
+            "prompt_eval_duration_ms": 894.5,
+            "eval_duration_ms": 3615.32,
+            "total_duration_ms": 4740.99,
+            "thinking_characters": 0,
+            "content_characters": 83,
+            "trailing_whitespace_characters": 0,
+            "first_packet_ms": 1155.9999999990396,
+            "first_content_ms": 1155.9999999990396,
+            "first_json_closed_ms": 4655.99999999904,
+            "backend_done_ms": 4764.999999999418,
+            "json_closed_to_done_ms": 109.00000000037835,
+            "prompt_eval_cached_count": 216
+          },
+          "llm_wall_ms": 4827.999999997701
+        },
+        {
+          "trial_index": 2,
+          "arm": "B",
+          "complete_json": true,
+          "semantic_check": "PASS",
+          "semantic_reason": "SELECTED_SELF_NAME",
+          "error_code": "NONE",
+          "reply_characters": 12,
+          "metrics": {
+            "prompt_eval_count": 230,
+            "eval_count": 28,
+            "load_duration_ms": 1.08,
+            "prompt_eval_duration_ms": 867.72,
+            "eval_duration_ms": 2857.29,
+            "total_duration_ms": 3917.18,
+            "thinking_characters": 0,
+            "content_characters": 49,
+            "trailing_whitespace_characters": 0,
+            "first_packet_ms": 1062.9999999982829,
+            "first_content_ms": 1062.9999999982829,
+            "first_json_closed_ms": 3812.999999998283,
+            "backend_done_ms": 3921.999999998661,
+            "json_closed_to_done_ms": 109.00000000037835,
+            "prompt_eval_cached_count": 214
+          },
+          "llm_wall_ms": 3969.0000000009604
+        },
+        {
+          "trial_index": 3,
+          "arm": "B",
+          "complete_json": true,
+          "semantic_check": "PASS",
+          "semantic_reason": "SELECTED_SELF_NAME",
+          "error_code": "NONE",
+          "reply_characters": 12,
+          "metrics": {
+            "prompt_eval_count": 230,
+            "eval_count": 28,
+            "load_duration_ms": 1.54,
+            "prompt_eval_duration_ms": 576.87,
+            "eval_duration_ms": 2901.98,
+            "total_duration_ms": 3487.89,
+            "thinking_characters": 0,
+            "content_characters": 49,
+            "trailing_whitespace_characters": 0,
+            "first_packet_ms": 594.0000000009604,
+            "first_content_ms": 594.0000000009604,
+            "first_json_closed_ms": 3375.0,
+            "backend_done_ms": 3484.0000000003783,
+            "json_closed_to_done_ms": 109.00000000037835,
+            "prompt_eval_cached_count": 226
+          },
+          "llm_wall_ms": 3546.999999998661
+        },
+        {
+          "trial_index": 4,
+          "arm": "A",
+          "complete_json": true,
+          "semantic_check": "PASS",
+          "semantic_reason": "SELECTED_SELF_NAME",
+          "error_code": "NONE",
+          "reply_characters": 13,
+          "metrics": {
+            "prompt_eval_count": 232,
+            "eval_count": 35,
+            "load_duration_ms": 1.26,
+            "prompt_eval_duration_ms": 569.68,
+            "eval_duration_ms": 3600.76,
+            "total_duration_ms": 4365.61,
+            "thinking_characters": 0,
+            "content_characters": 83,
+            "trailing_whitespace_characters": 0,
+            "first_packet_ms": 781.0000000026776,
+            "first_content_ms": 781.0000000026776,
+            "first_json_closed_ms": 4281.000000002678,
+            "backend_done_ms": 4389.999999999418,
+            "json_closed_to_done_ms": 108.99999999674037,
+            "prompt_eval_cached_count": 228
+          },
+          "llm_wall_ms": 4452.999999997701
+        }
+      ],
+      "all_cross_arm_speech_identical": false
+    }
+  },
+  "prior_research_not_new_experiments": [
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\realtime_dialogue_research\\first_wait_candidate\\prefix_order_separate.patch",
+      "sha256": "7fed624c7a62b2ff75baf22faf931decc13266f4f5cc2f643b59035e436ee247"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\realtime_dialogue_research\\first_wait_candidate\\FREEZE_HANDOFF.json",
+      "sha256": "574a4eb70f30891fe74280e7b3b70309cfe7c31fb3cdbcec8497b41dec57c8d9"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\realtime_dialogue_research\\architecture_latency_v3\\整体延迟与固定27B后续建议_20261031.txt",
+      "sha256": "832334046d7ee2a42f65d7e5321211e71dd02716f0c56965af20bb26020ffadd"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\realtime_dialogue_research\\architecture_latency_v3\\EXPERIMENT_PLAN.json",
+      "sha256": "36623f5dfdae510c560d52314b6ed38ae13a33f1b681803613d1817a6cea3dbf"
+    }
+  ]
+}

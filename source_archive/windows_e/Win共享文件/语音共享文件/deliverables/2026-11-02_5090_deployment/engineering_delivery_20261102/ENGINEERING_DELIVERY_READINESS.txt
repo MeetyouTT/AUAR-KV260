@@ -1,0 +1,22 @@
+工程交付准备清单（2026-11-02）
+
+结论：可以开始准备提交用完整工程包。当前主要功能及性能证据具备整理条件；不能标为所有文件、全部功能均已最终验收。此清单不修改生产、不启动新硬件测试。
+
+需保留的验收边界：
+1. 视觉重影/闪动与自动跟随右转抖动后来再次报告，按用户要求暂缓，未按已修复关闭。
+2. R7开机恢复仅离线审查通过，未部署；断电冷启动整机恢复未验收。
+3. 全功能三分钟联合验收尚未完成；新完成的180秒是暂停监听、转轴停止条件下的DPU/模型性能测量。
+
+无需重新列为必做：人脸与声纹关联已取消；声纹保留CPU；记忆用户反馈基本正常；进一步延迟/视觉/转轴优化暂停。
+
+交付结构：
+01_source：Current selected software source and existing FPGA/Vivado source/build scripts; exclude abandoned candidates from default build
+02_configuration：Selected Windows/board runtime configuration and version identifiers; distinguish installed source from offline candidate
+03_environment：Python/OS/CUDA/Vitis/Vivado dependency and tool versions, model identifiers and external weight paths
+04_deployment：Actual deployment/start/stop instructions and rollback references; label cold-boot automation unverified
+05_acceptance：Human functional feedback, performance raw data/CSV/reviewed figures, acceptance scope and open-items list
+06_manifest：File list, SHA256 manifest and engineering package version
+
+下一步按现役版本筛选源码、配置与已有FPGA工程，核对可构建入口，生成文件与SHA256清单。新清单尚不是完整工程源码包，也不代表重新核验了板端所有文件。
+
+权重保持D:/AIModels外部路径；私钥、不可移植venv、身份私库/模板不进入提交包。

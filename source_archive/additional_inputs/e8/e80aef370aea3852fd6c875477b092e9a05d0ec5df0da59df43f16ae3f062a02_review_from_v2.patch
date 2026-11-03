@@ -1,0 +1,95 @@
+--- v2/board/runtime/board_speaker_business.py
++++ v3/board/runtime/board_speaker_business.py
+@@ -409,8 +409,10 @@
+                 self.counts['complete'] += 1
+             return value
+         except BaseException:
+-            if job['control'] and not self._current():
+-                self._cancel_actor(job['meta'])
++            if job['control']:
++                self._clear_status_receipt(job['meta'])
++                if not self._current():
++                    self._cancel_actor(job['meta'])
+             raise
+         finally:
+             raw = None
+@@ -425,12 +427,22 @@
+                     job['cancelled'].set(); job['pcm'] = None; future.cancel()
+                     raise InterruptedError('Speaker request cancelled or expired')
+                 try:
+-                    return future.result(timeout=min(.025,max(.001,job['deadline']-self.clock())))
++                    value=future.result(timeout=min(.025,max(.001,job['deadline']-self.clock())))
++                    if not self._job_current(job):
++                        raise InterruptedError('Speaker result cancelled before adoption')
++                    return value
+                 except FutureTimeout:
+                     if future.done():
+                         raise  # An operation's own timeout is not a poll timeout.
+         except BaseException:
+-            job['cancelled'].set(); job['pcm'] = None; raise
++            job['cancelled'].set(); job['pcm'] = None
++            if job['control']:
++                # A cancellation may win after _run's final ownership check.
++                # Serialize metadata invalidation after the original work, on
++                # its sole worker; never undo an already committed identity.
++                try:self.pool.submit(self._clear_status_receipt,job['meta'])
++                except RuntimeError:pass  # Closing service cannot admit a later query.
++            raise
+ 
+     def route(self,meta,text,pcm,*,visual=None,gallery_packet=None,**kwargs):
+         visual = validate_visual(visual,meta) if visual is not None else unavailable(meta)
+@@ -551,8 +563,16 @@
+         return LocalFaceExchange(self,meta,pcm,routed,bridge,capture_snapshot,text,
+                                  is_current=is_current,cancel_event=cancel_event,deadline=deadline)
+ 
++    def _clear_status_receipt(self,meta):
++        actor=meta['board_boot_id'],meta['session_id']
++        receipts=getattr(self.hub.speaker,'save_receipts',{}) if self.hub is not None else {}
++        receipt=receipts.get(actor)
++        if receipt is not None and receipt['generation']<=meta['generation']:
++            receipts.pop(actor,None)
++
+     def _cancel_actor(self,meta):
+         hub = self.hub; actor = meta['board_boot_id'],meta['session_id']
++        self._clear_status_receipt(meta)
+         hub.speaker.sessions.pop(actor,None)
+         if hub.binding is not None:
+             binding = hub.binding
+@@ -599,7 +619,9 @@
+                         pass
+                 binding.router.active.clear(); binding.router.name_waiting.clear()
+                 binding.speaker.sessions.clear(); binding.speaker.aliases.clear()
+-            hub.speaker.sessions.clear(); self._refresh_public()
++            hub.speaker.sessions.clear()
++            getattr(hub.speaker,'save_receipts',{}).clear()
++            self._refresh_public()
+         if not self.closing.is_set():
+             self.pool.submit(clear)
+ 
+--- v2/common/feature_intents.py
++++ v3/common/feature_intents.py
+@@ -43,6 +43,10 @@
+     if re.fullmatch(r'(?:你)?(?:现在|刚才)?(?:已经)?(?:帮我|给我|为我)?(?:把)?(?:我的)?声纹'
+                     r'(?:登记)?(?:保存|录入|登记)(?:成功|完成|好)?(?:了)?[吗呢]?', question):
+         return '查询声纹保存状态'
++    if re.fullmatch(r'(?:你)?(?:现在|刚才)?(?:有没有|是否|是不是)?(?:已经|还没|还没有)?'
++                    r'(?:帮我|给我|为我)?(?:保存|录入|登记)(?:成功|完成|好)?(?:了|过)?'
++                    r'(?:我的|本轮的|这次的)?(?:声纹|声音)(?:成功|完成)?(?:了)?[吗呢]?', question):
++        return '查询声纹保存状态'
+     endings = r'[吗呢么啊呀]?'
+     patterns = (
+         r'(?:现在)?(?:我的)?声纹(?:识别)?(?:现在)?(?:是否|能否)?(?:可用|能用|正常|就绪|有记录|已登记|登记过)'+endings,
+--- v2/tools/speaker_device.py
++++ v3/tools/speaker_device.py
+@@ -48,7 +48,10 @@
+         if rid in self.replies:
+             old,value=self.replies[rid]
+             if old!=fingerprint:raise ValueError('Request identity reused with different input')
+-            return value
++            from common.feature_intents import speaker_query_requested
++            if not speaker_query_requested(text):return value
++            # Status is a live read, even for an identical ownership retry.
++            # Keep the same fingerprint refusal and write-command idempotency.
+         reply=self._turn(meta,text,pcm)
+         self.replies[rid]=(fingerprint,reply)
+         while len(self.replies)>64:self.replies.pop(next(iter(self.replies)))

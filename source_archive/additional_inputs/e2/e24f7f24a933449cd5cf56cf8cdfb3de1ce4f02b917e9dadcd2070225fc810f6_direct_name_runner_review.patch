@@ -1,0 +1,178 @@
+--- a/first_wait_candidate/root_abba_benchmark.py
++++ b/direct_comparison_v2/root_direct_name_abba.py
+@@ -24,10 +24,10 @@
+ import uuid
+ 
+ ROOT = Path(__file__).resolve().parent
+-sys.path.insert(0, str(ROOT))
++BASE = ROOT.parent/'first_wait_candidate'
++sys.path[:0] = [str(ROOT),str(BASE)]
+ from build_candidate import AURA, PROJECT, SOURCES
+-
+-QUESTION = '请只给结果：六乘九等于多少？'
++from direct_logic import QUESTION, abba, model_messages
+ METRICS = frozenset({'prompt_eval_count','prompt_eval_cached_count','eval_count','load_duration_ms',
+     'prompt_eval_duration_ms','eval_duration_ms','total_duration_ms','first_packet_ms','first_content_ms',
+     'first_json_closed_ms','backend_done_ms','json_closed_to_done_ms','thinking_characters',
+@@ -37,50 +37,8 @@
+ class TrialError(RuntimeError): pass
+ 
+ 
+-def semantic_math(text):
+-    """Conservative public arithmetic whitelist; other valid prose = UNKNOWN."""
+-    compact = re.sub(r'[\s。！!，,：:；;]', '', text)
+-    if re.fullmatch(r'(?:(?:六乘九|6[乘×x*]9)(?:的)?(?:结果|答案)?)?(?:等于|结果是|结果为|答案是|答案为|是|为|=)?(?:54|五十四)', compact):
+-        return 'PASS'
+-    if re.search(r'(?:不是|不等于)(?:54|五十四)', compact):
+-        return 'FAIL'
+-    return 'UNKNOWN'
+-
+-
+-def abba(infer, guard, *, messages, candidate, validate_reply, decode_reply, cycles=1):
+-    if type(cycles) is not int or not 1 <= cycles <= 5:
+-        raise ValueError('invalid_cycle_count')
+-    immutable = copy.deepcopy(messages)
+-    rows = []
+-    for _ in range(cycles):
+-        for label in ('A', 'B', 'B', 'A'):
+-            guard()
+-            started = time.monotonic()
+-            row = {'trial_index':len(rows)+1,'arm':label,'complete_json':False,
+-                   'semantic_check':'NOT_RUN','error_code':'NONE'}
+-            try:
+-                # Exact same selected system/user messages in both arms.
+-                result = infer('json' if label == 'A' else candidate, copy.deepcopy(immutable))
+-                canonical = decode_reply(result['text'])
+-                reply = validate_reply(canonical, QUESTION)
+-                row.update(complete_json=True, semantic_check=semantic_math(reply.text),
+-                           reply_characters=len(reply.text),
+-                           metrics={key:value for key,value in result.get('metrics',{}).items()
+-                             if key in METRICS and type(value) in (int,float) and math.isfinite(value) and 0 <= value < 1e15})
+-            except TimeoutError:
+-                row['error_code'] = 'DEADLINE'
+-            except InterruptedError:
+-                row['error_code'] = 'CANCELLED'
+-            except Exception as exc:
+-                # All exceptions are mapped to a fixed code, no str(exc), no raw output.
+-                row['error_code'] = ('OUTPUT_TRUNCATED' if type(exc).__name__ == 'OutputTruncated'
+-                                     else 'INVALID_OR_FAILED_REPLY')
+-            row['llm_wall_ms'] = (time.monotonic()-started)*1000
+-            if messages != immutable:
+-                raise TrialError('PROMPT_MUTATED')
+-            guard()
+-            rows.append(row)
+-    return rows
++
++
+ 
+ 
+ def load(name, path):
+@@ -132,7 +90,7 @@
+         if target == 'board/runtime/board_memory_policy.py': continue
+         if hashlib.sha256((AURA/target).read_bytes()).hexdigest() != expected:
+             raise TrialError('LIVE_PUBLIC_SOURCE_CHANGED')
+-    dependencies = json.loads((ROOT/'BENCH_DEPENDENCY_PINS.json').read_text(encoding='utf-8'))
++    dependencies = json.loads((BASE/'BENCH_DEPENDENCY_PINS.json').read_text(encoding='utf-8'))
+     for target, expected in dependencies.items():
+         if hashlib.sha256((AURA/target).read_bytes()).hexdigest() != expected:
+             raise TrialError('BENCH_DEPENDENCY_CHANGED')
+@@ -140,12 +98,12 @@
+     sys.path.insert(0, str(AURA))
+     import common
+     import tools
+-    contract = load('common.inference_output_contract', ROOT/'candidate/inference_output_contract.py')
+-    wire = load('common.model_inference_wire', ROOT/'after/common/model_inference_wire.py')
+-    candidate_host = load('research_benchmark_host', ROOT/'after/tools/model_inference_host.py')
++    contract = load('common.inference_output_contract', BASE/'candidate/inference_output_contract.py')
++    wire = load('common.model_inference_wire', BASE/'after/common/model_inference_wire.py')
++    candidate_host = load('research_benchmark_host', BASE/'after/tools/model_inference_host.py')
+     native = load('research_native_metadata_only', AURA/'tools/native_grammar.py')
+     from common.gpu_coordination import GpuPolicy, GpuCoordinator, NvidiaMemoryProbe, OllamaResidencyProbe
+-    validator_path = ROOT.parents[2]/'response_latency/streaming_candidate/after/board/runtime/board_dialogue.py'
++    validator_path = BASE.parents[2]/'response_latency/streaming_candidate/after/board/runtime/board_dialogue.py'
+     if hashlib.sha256(validator_path.read_bytes()).hexdigest() != 'bce1f21962d083275d9e8a966f244d8c227d0d62e9a30314767453d04c05b475':
+         raise TrialError('REPLY_VALIDATOR_PIN_CHANGED')
+     validate_model_reply = load('research_abba_reply_validator',validator_path).validate_model_reply
+@@ -162,14 +120,12 @@
+     legacy.chat_body = seeded
+     sys.modules['tools.dialogue_host_ollama'] = legacy
+ 
+-    if args.family == 'compact_schema':
+-        adapter_module = load('research_benchmark_adapter', ROOT/'candidate/compact_request_adapter.py')
+-        prompt = adapter_module.CompactRequestAdapter(object(), system_prompt=prompt,
+-            capabilities={'format_contract_version':1,'output_formats':list(contract.FORMATS)}).translated_prompt
+-        candidate = 'dialogue_abc_v1'
+-        decoder = contract.canonicalize_compact
+-    else:
+-        candidate, decoder = 'dialogue_schema_v1', lambda text:text
++    adapter_module = load('research_benchmark_adapter', BASE/'candidate/compact_request_adapter.py')
++    compact_prompt = adapter_module.CompactRequestAdapter(object(), system_prompt=prompt,
++        capabilities={'format_contract_version':1,'output_formats':list(contract.FORMATS)}).translated_prompt
++    candidate = 'dialogue_abc_v1'
++    def decoder(text, arm):
++        return contract.canonicalize_compact(text) if arm == 'B' else text
+     messages = [{'role':'system','content':prompt},{'role':'user','content':QUESTION}]
+     policy = GpuPolicy.from_dict(json.loads((AURA/'config/gpu_runtime.local.json').read_text(encoding='utf-8-sig')))
+     gpu = GpuCoordinator(policy, NvidiaMemoryProbe(), llm_residency=OllamaResidencyProbe('http://127.0.0.1:11435',permit['model']))
+@@ -203,6 +159,7 @@
+     def infer(mode, selected_messages):
+         nonlocal count
+         count += 1
++        selected_messages = model_messages(mode, selected_messages, prompt, compact_prompt)
+         payload = wire.validate_request('llm', dict(protocol_version=1,request_id='public-abba-'+str(count),
+             board_boot_id='benchmark-only',session_id='benchmark-only',generation=count,
+             budget_ms=args.deadline_ms,task='dialogue',messages=selected_messages,
+@@ -212,20 +169,26 @@
+     # First pilot is EXACTLY FOUR complete generations: no extra warm-up,
+     # cache flush, model load/unload or hidden matrix.
+     warmup = []
+-    rows = abba(infer,guard,messages=messages,candidate=candidate,validate_reply=validate_model_reply,
++    study = abba(infer,guard,messages=messages,candidate=candidate,validate_reply=validate_model_reply,
+                 decode_reply=decoder,cycles=args.cycles)
+-    result = {'schema':'aura.first-wait.public-abba.v1','family':args.family,'seed':args.seed,
++    rows = study['trials']
++    result = {'schema':'aura.first-wait.direct-name-abba.v2','family':args.family,'seed':args.seed,
+         'num_predict':120,'num_ctx':2048,'think':False,'temperature':.6,
+-        'same_prompt_seed_budget_across_A_B':True,'same_as_current_production_prompt':args.family=='canonical_schema',
+-        'synthetic_public_question_code':'MUL_6_9_RESULT_ONLY','warmups':warmup,'trials':rows,
++        'same_prompt_seed_budget_across_A_B':False,
++        'same_question_seed_budget_and_sampling':True,'static_contract_names_only_changed':True,
++        'non_system_messages_identical':True,'A_uses_production_static_prompt':True,
++        'B_static_contract_names_rebound_to_abc':True,
++        'exact_speech_comparisons':study['speech_comparisons'],
++        'all_cross_arm_speech_identical':study['all_cross_arm_speech_identical'],
++        'synthetic_public_question_code':'SELF_NAME_DIRECT','warmups':warmup,'trials':rows,
+         'existing_runner_pid_unchanged':True,'resident_size_bytes':fingerprint[0],'resident_vram_bytes':fingerprint[1],
+         'root_window_assertions_required':True,'cross_process_atomic_model_lock_claimed':False,
+         'tts_requests':0,'audio_playback':False,'raw_prompt_reply_or_pcm_saved_by_script':False,
+         'scope':'LLM-only public same-prompt experiment, not human or acoustic acceptance'}
+     output_dir = ROOT/'benchmark_runs'; output_dir.mkdir(exist_ok=True)
+-    path = output_dir/('public_abba_'+uuid.uuid4().hex[:12]+'.json')
++    path = output_dir/('direct_name_abba_'+uuid.uuid4().hex[:12]+'.json')
+     path.write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
+-    return {'status':'ROOT_PUBLIC_ABBA_FINISHED','result_file':str(path),'trial_count':len(rows),
++    return {'status':'ROOT_DIRECT_NAME_ABBA_FINISHED','result_file':str(path),'trial_count':len(rows),
+             'warmup_count':len(warmup),'all_complete':all(row['complete_json'] for row in rows),
+             'all_semantic_checks_pass':all(row['semantic_check']=='PASS' for row in rows)}
+ 
+@@ -234,8 +197,8 @@
+     parser = argparse.ArgumentParser()
+     parser.add_argument('--execute',action='store_true')
+     parser.add_argument('--root-permit',type=Path)
+-    parser.add_argument('--family',choices=('canonical_schema','compact_schema'),default='canonical_schema')
+-    parser.add_argument('--cycles',type=int,choices=range(1,6),default=1)
++    parser.add_argument('--family',choices=('canonical_to_compact_name',),default='canonical_to_compact_name')
++    parser.add_argument('--cycles',type=int,choices=(1,),default=1)
+     parser.add_argument('--seed',type=int,default=8701)
+     parser.add_argument('--deadline-ms',type=int,default=30000)
+     parser.add_argument('--host-health-url',default='http://192.168.50.1:8797/health')
+@@ -244,7 +207,8 @@
+     if not args.execute:
+         print(json.dumps({'status':'PLAN_ONLY_NO_SERVICES_OR_MODELS_CONTACTED','family':args.family,
+             'order':'ABBA','warmups':0,'trials':4*args.cycles,'seed':args.seed,'num_predict':120,
+-            'same_prompt_across_A_B':True,'root_permit_required':True,'no_tts_playback_or_raw_text_logging':True}))
++            'same_prompt_across_A_B':False,'static_contract_names_only_changed':True,
++            'same_question_seed_budget_and_sampling':True,'root_permit_required':True,'no_tts_playback_or_raw_text_logging':True}))
+         return
+     print(json.dumps(execute(args)))
+ 

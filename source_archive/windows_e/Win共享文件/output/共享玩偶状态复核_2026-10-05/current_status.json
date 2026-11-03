@@ -1,0 +1,1286 @@
+{
+  "date": "2026-10-05",
+  "environment": "PC logic probes; actual StageApp methods with simulated widgets/clock/TTS; no physical UI, audio, LLM or KV260",
+  "source_before": {
+    "tools\\demo_stage.py": "2118b54ff81a5d650774bf2dc6d43bd830904d2278c19ade042ab2a8326a9913",
+    "board\\runtime\\fsm.py": "c630cfc3ad1a751bc2258b87d30862e6ffda0a0561f848c8f329cdb2ccac47a6",
+    "board\\interaction\\avatar_assets.py": "c93293644212aa7be4ccb094d6a6978c720a50327a752b8e9864b6f5ea5d0787",
+    "board\\interaction\\avatar_fsm.py": "d6005fc8c45508dae5b6bbb29dad20b68b6c804db09f4b17ff42a733b8eef384",
+    "board\\interaction\\avatar_timing.py": "b53170412355416d5b5b1ae1387b786406513705d35933651964a6359641b9bc",
+    "board\\interaction\\qt_widgets.py": "3a8024eab58beb4a4bfdc1475d37837853464df30fdca15756f81e893ab7d78c",
+    "board\\interaction\\avatar_lod.py": "3f5d10e63df79f454387b4e4c0c4160f3cb7bebb6c62feaf24802731d4d9be5e",
+    "ui\\ui_state.schema.json": "dd0ee97fd3b84591b86cd1ce7907b649c80cb7016e177f20b520c33ebd5b1aed",
+    "ui\\avatar_board_manifest.json": "b92aad6cd82d8c19d976ced588f274f829aa0843aaf801136efaacfac99b7053",
+    "requirements.txt": "712554e9f22693785dd9b6ce1c7ef02aa1d30cc9114488e36095601b71814761"
+  },
+  "assets": [
+    {
+      "asset": "ack_nod",
+      "frames": 22,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 7267137,
+      "issues": [],
+      "segments": null,
+      "rgb565_present": false
+    },
+    {
+      "asset": "deny_shake",
+      "frames": 22,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 7211695,
+      "issues": [],
+      "segments": null,
+      "rgb565_present": false
+    },
+    {
+      "asset": "emo_puzzled",
+      "frames": 39,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 12654540,
+      "issues": [],
+      "segments": {
+        "asset": "emo_puzzled",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          16
+        ],
+        "loop": [
+          16,
+          23
+        ],
+        "exit": [
+          23,
+          38
+        ],
+        "windows": [
+          [
+            16,
+            23
+          ],
+          [
+            8,
+            15
+          ],
+          [
+            24,
+            31
+          ]
+        ],
+        "loops_hint": 9,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 8,
+          "loop": [
+            16,
+            23
+          ],
+          "loop_frames": 8,
+          "windows": [
+            [
+              16,
+              23
+            ],
+            [
+              8,
+              15
+            ],
+            [
+              24,
+              31
+            ]
+          ],
+          "loop_mean_motion": 5.62,
+          "loop_pose_gap": 13.663,
+          "target_motion": 5.643,
+          "enter_frames": 17,
+          "exit_frames": 16
+        }
+      },
+      "rgb565_present": false
+    },
+    {
+      "asset": "emo_sad",
+      "frames": 39,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 12534477,
+      "issues": [],
+      "segments": {
+        "asset": "emo_sad",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          28
+        ],
+        "loop": [
+          28,
+          35
+        ],
+        "exit": [
+          35,
+          38
+        ],
+        "windows": [
+          [
+            28,
+            35
+          ],
+          [
+            10,
+            17
+          ],
+          [
+            20,
+            27
+          ]
+        ],
+        "loops_hint": 9,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 22,
+          "loop": [
+            28,
+            35
+          ],
+          "loop_frames": 8,
+          "windows": [
+            [
+              28,
+              35
+            ],
+            [
+              10,
+              17
+            ],
+            [
+              20,
+              27
+            ]
+          ],
+          "loop_mean_motion": 3.484,
+          "loop_pose_gap": 7.182,
+          "target_motion": 4.686,
+          "enter_frames": 29,
+          "exit_frames": 4
+        }
+      },
+      "rgb565_present": false
+    },
+    {
+      "asset": "emo_surprised",
+      "frames": 22,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 7303961,
+      "issues": [],
+      "segments": null,
+      "rgb565_present": false
+    },
+    {
+      "asset": "idle_listening",
+      "frames": 39,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 12821567,
+      "issues": [],
+      "segments": {
+        "asset": "idle_listening",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          14
+        ],
+        "loop": [
+          14,
+          21
+        ],
+        "exit": [
+          21,
+          38
+        ],
+        "windows": [
+          [
+            14,
+            21
+          ],
+          [
+            28,
+            35
+          ]
+        ],
+        "loops_hint": 9,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 26,
+          "loop": [
+            14,
+            21
+          ],
+          "loop_frames": 8,
+          "windows": [
+            [
+              14,
+              21
+            ],
+            [
+              28,
+              35
+            ]
+          ],
+          "loop_mean_motion": 5.159,
+          "loop_pose_gap": 10.174,
+          "target_motion": 3.238,
+          "enter_frames": 15,
+          "exit_frames": 18
+        }
+      },
+      "rgb565_present": false
+    },
+    {
+      "asset": "idle_normal",
+      "frames": 39,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 12808622,
+      "issues": [],
+      "segments": {
+        "asset": "idle_normal",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          28
+        ],
+        "loop": [
+          28,
+          35
+        ],
+        "exit": [
+          35,
+          38
+        ],
+        "windows": [
+          [
+            28,
+            35
+          ],
+          [
+            12,
+            19
+          ],
+          [
+            20,
+            27
+          ]
+        ],
+        "loops_hint": 9,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 22,
+          "loop": [
+            28,
+            35
+          ],
+          "loop_frames": 8,
+          "windows": [
+            [
+              28,
+              35
+            ],
+            [
+              12,
+              19
+            ],
+            [
+              20,
+              27
+            ]
+          ],
+          "loop_mean_motion": 3.564,
+          "loop_pose_gap": 7.608,
+          "target_motion": 2.523,
+          "enter_frames": 29,
+          "exit_frames": 4
+        }
+      },
+      "rgb565_present": false
+    },
+    {
+      "asset": "idle_offline",
+      "frames": 39,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 12684694,
+      "issues": [],
+      "segments": {
+        "asset": "idle_offline",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          18
+        ],
+        "loop": [
+          18,
+          25
+        ],
+        "exit": [
+          25,
+          38
+        ],
+        "windows": [
+          [
+            18,
+            25
+          ],
+          [
+            26,
+            33
+          ],
+          [
+            10,
+            17
+          ]
+        ],
+        "loops_hint": 9,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 30,
+          "loop": [
+            18,
+            25
+          ],
+          "loop_frames": 8,
+          "windows": [
+            [
+              18,
+              25
+            ],
+            [
+              26,
+              33
+            ],
+            [
+              10,
+              17
+            ]
+          ],
+          "loop_mean_motion": 5.341,
+          "loop_pose_gap": 12.623,
+          "target_motion": 2.867,
+          "enter_frames": 19,
+          "exit_frames": 14
+        }
+      },
+      "rgb565_present": false
+    },
+    {
+      "asset": "idle_present",
+      "frames": 39,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 12619725,
+      "issues": [],
+      "segments": {
+        "asset": "idle_present",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          13
+        ],
+        "loop": [
+          13,
+          20
+        ],
+        "exit": [
+          20,
+          38
+        ],
+        "windows": [
+          [
+            13,
+            20
+          ],
+          [
+            28,
+            35
+          ]
+        ],
+        "loops_hint": 9,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 26,
+          "loop": [
+            13,
+            20
+          ],
+          "loop_frames": 8,
+          "windows": [
+            [
+              13,
+              20
+            ],
+            [
+              28,
+              35
+            ]
+          ],
+          "loop_mean_motion": 4.279,
+          "loop_pose_gap": 8.655,
+          "target_motion": 2.585,
+          "enter_frames": 14,
+          "exit_frames": 19
+        }
+      },
+      "rgb565_present": false
+    },
+    {
+      "asset": "idle_thinking",
+      "frames": 39,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 12836830,
+      "issues": [],
+      "segments": {
+        "asset": "idle_thinking",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          28
+        ],
+        "loop": [
+          28,
+          35
+        ],
+        "exit": [
+          35,
+          38
+        ],
+        "windows": [
+          [
+            28,
+            35
+          ],
+          [
+            10,
+            17
+          ],
+          [
+            20,
+            27
+          ]
+        ],
+        "loops_hint": 9,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 5,
+          "loop": [
+            28,
+            35
+          ],
+          "loop_frames": 8,
+          "windows": [
+            [
+              28,
+              35
+            ],
+            [
+              10,
+              17
+            ],
+            [
+              20,
+              27
+            ]
+          ],
+          "loop_mean_motion": 5.292,
+          "loop_pose_gap": 11.437,
+          "target_motion": 2.984,
+          "enter_frames": 29,
+          "exit_frames": 4
+        }
+      },
+      "rgb565_present": false
+    },
+    {
+      "asset": "talking_low",
+      "frames": 39,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 12752431,
+      "issues": [],
+      "segments": {
+        "asset": "talking_low",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          28
+        ],
+        "loop": [
+          28,
+          35
+        ],
+        "exit": [
+          35,
+          38
+        ],
+        "windows": [
+          [
+            28,
+            35
+          ],
+          [
+            9,
+            16
+          ],
+          [
+            20,
+            27
+          ]
+        ],
+        "loops_hint": 9,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 22,
+          "loop": [
+            28,
+            35
+          ],
+          "loop_frames": 8,
+          "windows": [
+            [
+              28,
+              35
+            ],
+            [
+              9,
+              16
+            ],
+            [
+              20,
+              27
+            ]
+          ],
+          "loop_mean_motion": 4.159,
+          "loop_pose_gap": 8.194,
+          "target_motion": 3.114,
+          "enter_frames": 29,
+          "exit_frames": 4
+        }
+      },
+      "rgb565_present": false
+    },
+    {
+      "asset": "talking_neutral",
+      "frames": 39,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 12899446,
+      "issues": [],
+      "segments": {
+        "asset": "talking_neutral",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          28
+        ],
+        "loop": [
+          28,
+          35
+        ],
+        "exit": [
+          35,
+          38
+        ],
+        "windows": [
+          [
+            28,
+            35
+          ],
+          [
+            12,
+            19
+          ],
+          [
+            20,
+            27
+          ]
+        ],
+        "loops_hint": 9,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 9,
+          "loop": [
+            28,
+            35
+          ],
+          "loop_frames": 8,
+          "windows": [
+            [
+              28,
+              35
+            ],
+            [
+              12,
+              19
+            ],
+            [
+              20,
+              27
+            ]
+          ],
+          "loop_mean_motion": 3.673,
+          "loop_pose_gap": 7.3,
+          "target_motion": 2.707,
+          "enter_frames": 29,
+          "exit_frames": 4
+        }
+      },
+      "rgb565_present": false
+    },
+    {
+      "asset": "talking_neutral_b",
+      "frames": 39,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 12882718,
+      "issues": [],
+      "segments": {
+        "asset": "talking_neutral_b",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          12
+        ],
+        "loop": [
+          12,
+          19
+        ],
+        "exit": [
+          19,
+          38
+        ],
+        "windows": [
+          [
+            12,
+            19
+          ],
+          [
+            28,
+            35
+          ],
+          [
+            20,
+            27
+          ]
+        ],
+        "loops_hint": 9,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 25,
+          "loop": [
+            12,
+            19
+          ],
+          "loop_frames": 8,
+          "windows": [
+            [
+              12,
+              19
+            ],
+            [
+              28,
+              35
+            ],
+            [
+              20,
+              27
+            ]
+          ],
+          "loop_mean_motion": 7.679,
+          "loop_pose_gap": 16.168,
+          "target_motion": 4.876,
+          "enter_frames": 13,
+          "exit_frames": 20
+        }
+      },
+      "rgb565_present": false
+    },
+    {
+      "asset": "talking_neutral_c",
+      "frames": 39,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 12813061,
+      "issues": [],
+      "segments": {
+        "asset": "talking_neutral_c",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          13
+        ],
+        "loop": [
+          13,
+          20
+        ],
+        "exit": [
+          20,
+          38
+        ],
+        "windows": [
+          [
+            13,
+            20
+          ],
+          [
+            28,
+            35
+          ]
+        ],
+        "loops_hint": 9,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 26,
+          "loop": [
+            13,
+            20
+          ],
+          "loop_frames": 8,
+          "windows": [
+            [
+              13,
+              20
+            ],
+            [
+              28,
+              35
+            ]
+          ],
+          "loop_mean_motion": 4.458,
+          "loop_pose_gap": 7.959,
+          "target_motion": 3.657,
+          "enter_frames": 14,
+          "exit_frames": 19
+        }
+      },
+      "rgb565_present": false
+    },
+    {
+      "asset": "talking_normal",
+      "frames": 39,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 12848136,
+      "issues": [],
+      "segments": {
+        "asset": "talking_normal",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          12
+        ],
+        "loop": [
+          12,
+          19
+        ],
+        "exit": [
+          19,
+          38
+        ],
+        "windows": [
+          [
+            12,
+            19
+          ],
+          [
+            28,
+            35
+          ],
+          [
+            20,
+            27
+          ]
+        ],
+        "loops_hint": 9,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 26,
+          "loop": [
+            12,
+            19
+          ],
+          "loop_frames": 8,
+          "windows": [
+            [
+              12,
+              19
+            ],
+            [
+              28,
+              35
+            ],
+            [
+              20,
+              27
+            ]
+          ],
+          "loop_mean_motion": 8.025,
+          "loop_pose_gap": 17.102,
+          "target_motion": 4.421,
+          "enter_frames": 13,
+          "exit_frames": 20
+        }
+      },
+      "rgb565_present": false
+    },
+    {
+      "asset": "talking_normal_b",
+      "frames": 39,
+      "fps": 24.0,
+      "sizes": [
+        [
+          464,
+          480
+        ]
+      ],
+      "modes": [
+        "RGBA"
+      ],
+      "bytes": 12756380,
+      "issues": [],
+      "segments": {
+        "asset": "talking_normal_b",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          12
+        ],
+        "loop": [
+          12,
+          19
+        ],
+        "exit": [
+          19,
+          38
+        ],
+        "windows": [
+          [
+            12,
+            19
+          ],
+          [
+            28,
+            35
+          ],
+          [
+            20,
+            27
+          ]
+        ],
+        "loops_hint": 9,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 26,
+          "loop": [
+            12,
+            19
+          ],
+          "loop_frames": 8,
+          "windows": [
+            [
+              12,
+              19
+            ],
+            [
+              28,
+              35
+            ],
+            [
+              20,
+              27
+            ]
+          ],
+          "loop_mean_motion": 10.891,
+          "loop_pose_gap": 20.001,
+          "target_motion": 4.91,
+          "enter_frames": 13,
+          "exit_frames": 20
+        }
+      },
+      "rgb565_present": false
+    }
+  ],
+  "states": [
+    {
+      "state": "IDLE",
+      "available": true,
+      "asset": "idle_normal",
+      "indices": [
+        0,
+        12,
+        32
+      ]
+    },
+    {
+      "state": "PRESENT",
+      "available": true,
+      "asset": "idle_present",
+      "indices": [
+        0,
+        12,
+        18
+      ]
+    },
+    {
+      "state": "LISTENING",
+      "available": true,
+      "asset": "idle_listening",
+      "indices": [
+        0,
+        12,
+        20
+      ]
+    },
+    {
+      "state": "THINKING",
+      "available": true,
+      "asset": "idle_thinking",
+      "indices": [
+        0,
+        12,
+        31
+      ]
+    },
+    {
+      "state": "SPEAKING",
+      "available": true,
+      "asset": "talking_normal",
+      "indices": [
+        0,
+        12,
+        13
+      ]
+    },
+    {
+      "state": "SPEAKING_NEUTRAL",
+      "available": true,
+      "asset": "talking_neutral",
+      "indices": [
+        0,
+        12,
+        31
+      ]
+    },
+    {
+      "state": "SPEAKING_LOW",
+      "available": true,
+      "asset": "talking_low",
+      "indices": [
+        0,
+        12,
+        34
+      ]
+    },
+    {
+      "state": "AWAKE",
+      "available": true,
+      "asset": "emo_surprised",
+      "indices": [
+        0,
+        12,
+        21
+      ]
+    },
+    {
+      "state": "PUZZLED",
+      "available": true,
+      "asset": "emo_puzzled",
+      "indices": [
+        0,
+        12,
+        20
+      ]
+    },
+    {
+      "state": "ACK_NOD",
+      "available": true,
+      "asset": "ack_nod",
+      "indices": [
+        0,
+        12,
+        21
+      ]
+    },
+    {
+      "state": "DENY_SHAKE",
+      "available": true,
+      "asset": "deny_shake",
+      "indices": [
+        0,
+        12,
+        21
+      ]
+    },
+    {
+      "state": "CAMERA_LOST",
+      "available": true,
+      "asset": "idle_offline",
+      "indices": [
+        0,
+        12,
+        20
+      ]
+    },
+    {
+      "state": "NETWORK_LOST",
+      "available": true,
+      "asset": "idle_offline",
+      "indices": [
+        0,
+        12,
+        19
+      ]
+    },
+    {
+      "state": "CANCELLED",
+      "available": true,
+      "asset": "idle_normal",
+      "indices": [
+        0,
+        12,
+        34
+      ]
+    },
+    {
+      "state": "ERROR",
+      "available": true,
+      "asset": "emo_sad",
+      "indices": [
+        0,
+        12,
+        32
+      ]
+    }
+  ],
+  "tts_completion_actual_tick": {
+    "before": {
+      "state": "SPEAKING_NEUTRAL",
+      "stage": "loop"
+    },
+    "after": {
+      "state": "IDLE",
+      "stage": "enter",
+      "asset": "idle_normal",
+      "index": 0,
+      "exit_requested": false
+    },
+    "logs": [
+      "TTS 播报结束 → 三段式收尾（blend → exit）｜ audio.playback_stopped（IDLE）"
+    ]
+  },
+  "wake_animation_actual_tick_without_tts": {
+    "trace": [
+      {
+        "time": 1,
+        "state": "AWAKE",
+        "index": 21
+      },
+      {
+        "time": 1.2000000000000028,
+        "state": "AWAKE",
+        "index": 21
+      },
+      {
+        "time": 2,
+        "state": "AWAKE",
+        "index": 21
+      }
+    ],
+    "logs": [
+      "动作段播完（语音已停）→ 保持不回迁",
+      "动作段播完（语音已停）→ 保持不回迁",
+      "动作段播完（语音已停）→ 保持不回迁"
+    ]
+  },
+  "cancel_actual_callbacks": {
+    "state": "IDLE",
+    "tts_calls": [
+      "stop"
+    ],
+    "display": "",
+    "logs": [
+      "⛔ 已取消：TTS 停播 + 在途响应作废（代次 2）→ 状态 IDLE",
+      "⛔ 旧回复（代次 1 ≠ 2）已丢弃：取消后不再显示 / 播放"
+    ],
+    "passed": true
+  },
+  "formal_qt_source": {
+    "uses_fixed_segment_time": true,
+    "uses_pool_assets": false,
+    "uses_request_exit": false,
+    "uses_segment_stage_time": false
+  },
+  "dependencies_available": {
+    "pytest": false,
+    "PySide6": false,
+    "cv2": false,
+    "sounddevice": false,
+    "sherpa_onnx": false
+  },
+  "source_after": {
+    "tools\\demo_stage.py": "2118b54ff81a5d650774bf2dc6d43bd830904d2278c19ade042ab2a8326a9913",
+    "board\\runtime\\fsm.py": "c630cfc3ad1a751bc2258b87d30862e6ffda0a0561f848c8f329cdb2ccac47a6",
+    "board\\interaction\\avatar_assets.py": "c93293644212aa7be4ccb094d6a6978c720a50327a752b8e9864b6f5ea5d0787",
+    "board\\interaction\\avatar_fsm.py": "d6005fc8c45508dae5b6bbb29dad20b68b6c804db09f4b17ff42a733b8eef384",
+    "board\\interaction\\avatar_timing.py": "b53170412355416d5b5b1ae1387b786406513705d35933651964a6359641b9bc",
+    "board\\interaction\\qt_widgets.py": "3a8024eab58beb4a4bfdc1475d37837853464df30fdca15756f81e893ab7d78c",
+    "board\\interaction\\avatar_lod.py": "3f5d10e63df79f454387b4e4c0c4160f3cb7bebb6c62feaf24802731d4d9be5e",
+    "ui\\ui_state.schema.json": "dd0ee97fd3b84591b86cd1ce7907b649c80cb7016e177f20b520c33ebd5b1aed",
+    "ui\\avatar_board_manifest.json": "b92aad6cd82d8c19d976ced588f274f829aa0843aaf801136efaacfac99b7053",
+    "requirements.txt": "712554e9f22693785dd9b6ce1c7ef02aa1d30cc9114488e36095601b71814761"
+  },
+  "sources_unchanged_during_probe": true,
+  "summary": {
+    "asset_directories": 16,
+    "png_frames": 573,
+    "png_mib": 179.0,
+    "asset_integrity_issues": 0,
+    "states_available": 15
+  }
+}

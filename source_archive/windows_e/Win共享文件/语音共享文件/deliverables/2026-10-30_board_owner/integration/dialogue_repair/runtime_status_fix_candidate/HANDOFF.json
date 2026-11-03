@@ -1,0 +1,39 @@
+{
+  "schema": "aura.runtime-status-null-display.v1",
+  "status": "FROZEN_SOURCE_ONLY",
+  "source": {
+    "path": "after/tools/board_avatar_gtk.py",
+    "before_sha256": "4fa8b74b71c89f08fdf9b5d376fd065b02e02baea01603ed03299a9971552e61",
+    "sha256": "4c3e692acf23f78c9ce9c66f75f6f95f14c08b34ec371ff09842ffbdd911951a",
+    "line_endings": "LF"
+  },
+  "changes": [
+    "One display-only formatter accepts finite nonnegative int/float metadata; invalid/missing values return no numeric display.",
+    "READY recording result None/non-dict/missing duration displays 录音已完成; valid duration retains original rounding.",
+    "Active recording missing duration displays 正在录音.",
+    "READY transcription missing recognition_ms displays 转写完成; valid timing retains original rounding.",
+    "Missing/non-dict/invalid individual interaction timings display —; no zero or other measurement is invented."
+  ],
+  "preserved": {
+    "all_other_stage_methods_ast_equal": true,
+    "runtime_fault_helper_ast_equal": true,
+    "keep_awake_wiring_unchanged": true,
+    "cancel_recovery_unchanged": true,
+    "native_models_memory_queues_untouched": true
+  },
+  "tests": {
+    "passed": 8,
+    "subtests_passed": 18,
+    "seconds": 0.14,
+    "xml_sha256": "c8b12eb18266b8306c6891fa1000dddf1e62d2e85a374c1f26e07533f3541fe9",
+    "source_sha256": "acb4f6ac3853017cd4a9d09c4a61c6f114c592900b49f13faece496000e6618a",
+    "command": "\"C:\\Users\\35870\\.codex\\visualizations\\2026\\10\\09\\01a12110-3ba4-7651-b3d7-2e6560916eb6\\omnivoice-runtime-py310\\Scripts\\python.exe\" -B -m pytest -q -p no:cacheprovider \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\runtime_status_fix_candidate\\tests\\test_runtime_status.py\"",
+    "scope": "Full actual refresh_runtime executed inside actual tick AST with fake widgets/services. Reproduces original READY+None TypeError/cancel, then verifies corrected None/empty/valid durations, recognition None/valid, timing None/NaN/valid, no outer cancel, unchanged input metadata."
+  },
+  "boundaries": [
+    "No device/GTK/model/service started; root sole deployer.",
+    "Only display metadata is formatted; no business state, data or measurements are patched.",
+    "No plaintext or runtime fault history cache added.",
+    "Exact root-cause fix; live uninterrupted capture still requires parent verification."
+  ]
+}

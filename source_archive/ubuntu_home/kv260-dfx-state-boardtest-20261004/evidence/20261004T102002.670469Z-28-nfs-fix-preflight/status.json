@@ -1,0 +1,25 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/28-nfs-fix-preflight.json",
+  "manifest_sha256": "a2ab0d6521402fc9057dba2f2b9eba06b774d4982b9af5a7f590895afdb7f645",
+  "started_utc": "2026-10-04T10:20:02.670665+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "nfs-fix-preflight",
+      "started_utc": "2026-10-04T10:20:03.190201+00:00",
+      "entry": {
+        "id": "nfs-fix-preflight",
+        "command": "python3 -B -c 'import json,pathlib,subprocess,gzip,hashlib\nP=pathlib.Path\nassert P(\"/sys/block/mmcblk1/device/cid\").read_text().strip()==\"0353445345333247805558c00401a100\"\nout={\"boot_id\":P(\"/proc/sys/kernel/random/boot_id\").read_text().strip(),\"uid\":__import__(\"os\").geteuid(),\"nfsvfs\":P(\"/proc/filesystems\").read_text(),\"nfsd_sysfs_exists\":P(\"/sys/module/nfsd\").exists(),\"nfsd_proc_exists\":P(\"/proc/fs/nfsd\").exists(),\"existing_dropins\":[str(p) for p in P(\"/etc/systemd/system/proc-fs-nfsd.mount.d\").glob(\"*\")],\"commands\":[]}\nfor c in [[\"systemctl\",\"show\",\"dfx-mgr.service\",\"-p\",\"MainPID\",\"-p\",\"ActiveState\",\"-p\",\"SubState\",\"-p\",\"ExecStart\"],[\"systemctl\",\"show\",\"rpcbind.service\",\"rpcbind.socket\",\"nfs-statd.service\",\"nfs-idmapd.service\",\"-p\",\"Id\",\"-p\",\"UnitFileState\",\"-p\",\"ActiveState\",\"-p\",\"SubState\"],[\"systemctl\",\"--version\"],[\"systemctl\",\"--failed\",\"--no-pager\",\"--plain\"]]:\n r=subprocess.run(c,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,timeout=30)\n out[\"commands\"].append({\"argv\":c,\"rc\":r.returncode,\"stdout\":r.stdout,\"stderr\":r.stderr})\nprint(json.dumps(out,indent=2))'",
+        "timeout": 90
+      },
+      "exit_code": 0,
+      "output_sha256": "dfdd8f40f6c70284ad4692bd16b061b4a827f41826c6efa7b2e782ad031cd355",
+      "bytes": 2937,
+      "finished_utc": "2026-10-04T10:20:05.367763+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T10:20:05.416042+00:00"
+}

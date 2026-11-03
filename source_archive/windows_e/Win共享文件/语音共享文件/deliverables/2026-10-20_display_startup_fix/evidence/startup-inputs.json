@@ -1,0 +1,29 @@
+{
+  "boot_id": "567106f3-6d07-4476-b44a-11a6576ff14a",
+  "argv": [
+    "/usr/bin/python3",
+    "-B",
+    "/home/root/aura-render24-budget-20261020/e06409743174/startup/launcher.py",
+    "--config",
+    "/home/root/aura-render24-budget-20261020/e06409743174/startup/config.json",
+    ""
+  ],
+  "units": {
+    "xserver-nodm.service": {
+      "rc": 0,
+      "text": "# /lib/systemd/system/xserver-nodm.service\n[Unit]\nDescription=Xserver startup without a display manager\nStartLimitBurst=5\nStartLimitIntervalSec=100\n\n[Service]\nEnvironmentFile=/etc/default/xserver-nodm\nUser=root\nExecStart=/etc/xserver-nodm/Xserver\nRestart=always\n\n[Install]\nAlias=display-manager.service\n"
+    },
+    "aura-avatar-ui.service": {
+      "rc": 0,
+      "text": "# /etc/systemd/system/aura-avatar-ui.service\n[Unit]\nDescription=AURA cached avatar touchscreen interface\nWants=xserver-nodm.service systemd-modules-load.service\nAfter=local-fs.target xserver-nodm.service systemd-modules-load.service\nRequiresMountsFor=/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime\nStartLimitIntervalSec=300\nStartLimitBurst=5\n\n[Service]\nType=notify\nNotifyAccess=main\nUser=root\nEnvironment=DISPLAY=:0 PYTHONUNBUFFERED=1\nWorkingDirectory=/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime/aura\nExecStart=/usr/bin/python3 -B /home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/startup/launcher.py --config /home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/startup/config.json\nRestart=on-failure\nRestartSec=5\nTimeoutStartSec=240\nTimeoutStopSec=25\nKillMode=mixed\nStandardOutput=journal\nStandardError=journal\nSyslogIdentifier=aura-avatar-ui\n\n[Install]\nWantedBy=graphical.target\n\n# /etc/systemd/system/aura-avatar-ui.service.d/80-aura-pan-manual-20261020.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-pan-manual-ui-20261020/camera-fix-v3/startup/launcher.py --config /home/root/aura-pan-manual-ui-20261020/camera-fix-v3/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/99-aura-rgb565-trial.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-render24-rgb565-20261020/887c4b6b2b5d/startup/launcher.py --config /home/root/aura-render24-rgb565-20261020/887c4b6b2b5d/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zz-aura-listening-timing-20261020.conf\n[Unit]\nRequiresMountsFor=/home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/runtime\n[Service]\nWorkingDirectory=/home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/runtime/aura\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/startup/launcher.py --config /home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zz-aura-render-budget-trial.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-render24-budget-20261020/e06409743174/startup/launcher.py --config /home/root/aura-render24-budget-20261020/e06409743174/startup/config.json\n"
+    }
+  },
+  "xserver": {
+    "rc": 0,
+    "text": "MainPID=1056\nExecStart={ path=/etc/xserver-nodm/Xserver ; argv[]=/etc/xserver-nodm/Xserver ; ignore_errors=no ; start_time=[Fri 2021-11-19 09:19:33 PST] ; stop_time=[n/a] ; pid=1056 ; code=(null) ; status=0/0 }\nActiveState=active\n"
+  },
+  "xconfigs": {},
+  "display_commands_sent": 0,
+  "movement_commands_sent": 0,
+  "files_modified": 0
+}

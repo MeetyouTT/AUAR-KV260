@@ -1,0 +1,1837 @@
+# OFFLINE ADDITIONS ONLY. contract.json below is the INERT example; fresh capture is mandatory.
+# No original service, startup launcher, default firmware, Native source or private store is replaced.
+--- /dev/null
++++ b/etc/systemd/system/aura-avatar-ui.service.d/90-aura-boot-recovery.conf
+@@ -0,0 +1,12 @@
++[Unit]
++Requires=aura-original-wide-prepare.service aura-camera-ui.service
++After=aura-original-wide-prepare.service aura-camera-ui.service
++Wants=aura-boot-ready.service
++
++[Service]
++# Runs for EACH normal GUI start, including same-boot camera owner changes.
++ExecStartPre=/usr/bin/python3 -B /usr/local/lib/aura-boot-recovery/v1/boot_recovery.py bind-camera
++# Avoid an outer start timeout killing a source-binding helper. The original
++# launcher retains its own display/business READY checks and failure reporting.
++TimeoutStartSec=infinity
++Restart=no
+--- /dev/null
++++ b/etc/systemd/system/aura-boot-ready.service
+@@ -0,0 +1,15 @@
++[Unit]
++Description=Observe AURA original GUI and disabled axis after startup
++Requires=aura-avatar-ui.service aura-camera-ui.service
++After=aura-avatar-ui.service aura-camera-ui.service
++
++[Service]
++Type=oneshot
++# No RemainAfterExit: an explicit later start can re-observe, without restarting GUI.
++Restart=no
++TimeoutStartSec=infinity
++TimeoutStopSec=infinity
++KillMode=process
++SendSIGKILL=no
++UMask=0077
++ExecStart=/usr/bin/python3 -B /usr/local/lib/aura-boot-recovery/v1/boot_recovery.py verify-gui
+--- /dev/null
++++ b/etc/systemd/system/aura-camera-ui.service.d/90-aura-boot-recovery.conf
+@@ -0,0 +1,7 @@
++[Unit]
++Requires=aura-original-wide-prepare.service
++After=aura-original-wide-prepare.service
++
++[Service]
++# Appended check; all original entry/hash checks and ExecStart stay in place.
++ExecStartPre=/usr/bin/python3 -B /usr/local/lib/aura-boot-recovery/v1/boot_recovery.py camera-check
+--- /dev/null
++++ b/etc/systemd/system/aura-original-wide-prepare.service
+@@ -0,0 +1,19 @@
++# Offline candidate. Install only with a freshly sealed contract and activation.
++[Unit]
++Description=AURA original wide platform and ID STOP startup barrier
++Requires=dfx-mgr.service kv260-repaired-zocl.service
++After=local-fs.target dfx-mgr.service kv260-repaired-zocl.service dpu-auto-config.service
++# The saved unit inventory also lists this generated legacy startup helper.
++# Order after it if the existing boot pulls it in; do not enable/start it here.
++Before=aura-camera-ui.service
++
++[Service]
++Type=oneshot
++RemainAfterExit=yes
++Restart=no
++TimeoutStartSec=infinity
++TimeoutStopSec=infinity
++KillMode=process
++SendSIGKILL=no
++UMask=0077
++ExecStart=/usr/bin/python3 -B /usr/local/lib/aura-boot-recovery/v1/boot_recovery.py prepare
+--- /dev/null
++++ b/usr/local/lib/aura-boot-recovery/v1/boot_recovery.py
+@@ -0,0 +1,853 @@
++"""Cold-start barriers around ORIGINAL services. No reference, center or follow.
++
++Not activated by this offline package. A fresh main/axis/CPU handoff, exact source
++contract and separately installed activation receipt are mandatory. This entry
++never stops/restarts an existing owner and never writes Native state. The sole
++register operation is the unchanged, pinned original ID_STOP_ONLY program.
++"""
++import argparse
++import ast
++import copy
++try:
++    import fcntl
++except ImportError:  # Offline Windows tests can import metadata rules; execution is still Linux-only.
++    fcntl = None
++import http.client
++import json
++import os
++from pathlib import Path
++import platform
++import re
++import stat
++import subprocess
++import sys
++import time
++import uuid
++
++from recovery_rules import (APP, BENCHMARK, CAMERA, CLIENT, CLIENT_SHA, DAEMON_SHA,
++                            GUI, IDSTOP_SHA, MANIFEST_SHA, VERIFIER_SHA, Hold,
++                            config_patch, digest, encoded, gui_projection,
++                            loaded_app, make_binding, next_history_expected, require, require_no_owners,
++                            verify_final_pointer, verify_bootstrap_handoff, verify_idstop, verify_job,
++                            verify_platform, verify_ready, verify_unloaded)
++
++STATE_ROOT = Path('/var/lib/aura-boot-recovery/v1')
++PACKAGE_ROOT = Path('/usr/local/lib/aura-boot-recovery/v1')
++CHECKPOINT = Path('/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/state/native-protection-checkpoint.json')
++RELEASE = Path('/home/root/aura-pan-wide-20261028/release-6a4b645a5bbfd35c')
++PROPS = ('LoadState,MainPID,ControlPID,ActiveState,SubState,Job,Result,ExecMainStatus,ExecMainCode,'
++         'InvocationID,ExecMainPID,ExecMainStartTimestampMonotonic,ExecMainExitTimestampMonotonic,'
++         'ExecStart,ExecStartPre,ExecStartPost,Restart,KillMode,SendSIGKILL,TimeoutStartUSec,TimeoutStopUSec,FragmentPath,DropInPaths')
++
++
++def regular(path, limit=67108864):
++    path = Path(path)
++    require(path.is_absolute() and path.resolve() == path and not path.is_symlink(), 'REDIRECTED_METADATA_PATH')
++    require(path.suffix.lower() not in {'.db', '.sqlite', '.sqlite3', '.pem', '.key', '.wav', '.mp3', '.png', '.jpg'}, 'PRIVATE_OR_MEDIA_PATH_REFUSED')
++    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
++    with os.fdopen(fd, 'rb') as stream:
++        before = os.fstat(stream.fileno())
++        require(stat.S_ISREG(before.st_mode) and before.st_size <= limit, 'METADATA_FILE_SHAPE')
++        raw = stream.read(limit + 1)
++        after = os.fstat(stream.fileno())
++    require(len(raw) <= limit and (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
++            == (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns), 'METADATA_CHANGED_DURING_READ')
++    return raw
++
++
++def fsync_directory(path):
++    fd = os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
++    try:
++        os.fsync(fd)
++    finally:
++        os.close(fd)
++
++
++def create(path, raw):
++    path = Path(path)
++    require(path.parent.resolve() == path.parent and not path.parent.is_symlink(), 'REDIRECTED_OUTPUT_PARENT')
++    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
++    with os.fdopen(fd, 'wb') as stream:
++        stream.write(raw)
++        stream.flush()
++        os.fsync(stream.fileno())
++    fsync_directory(path.parent)
++
++
++def replace_known(path, before, after):
++    path = Path(path)
++    require(regular(path) == before, 'CAS_SOURCE_CHANGED')
++    mode = stat.S_IMODE(path.stat().st_mode)
++    temp = path.with_name(path.name + '.boot-recovery-' + str(os.getpid()))
++    create(temp, after)
++    os.chmod(temp, mode)
++    # All project writers must be frozen; recapture immediately before replace.
++    require(regular(path) == before, 'CAS_SOURCE_CHANGED_BEFORE_RENAME')
++    os.replace(temp, path)
++    fsync_directory(path.parent)
++    require(regular(path) == after, 'CAS_READBACK_MISMATCH')
++
++
++def command(argv, timeout=6):
++    return subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout, check=False)
++
++
++def unit(name):
++    result = command(['systemctl', 'show', name, '--property=' + PROPS])
++    require(result.returncode == 0, 'SYSTEMD_METADATA_UNAVAILABLE')
++    return dict(line.split('=', 1) for line in result.stdout.decode().splitlines() if '=' in line)
++
++
++def process(pid, executable=False):
++    path = Path('/proc') / str(pid)
++    tail = (path / 'stat').read_text().rsplit(')', 1)[1].split()
++    result = dict(pid=int(pid), birth_ticks=tail[19], command_sha256=digest((path / 'cmdline').read_bytes()))
++    if executable:
++        result['executable_sha256'] = digest(regular((path / 'exe').resolve()))
++    return result
++
++
++def owner_scan(motion_only=False):
++    result = dict(complete=True, owners=[], unreadable=[])
++    for path in Path('/proc').iterdir():
++        if not path.name.isdigit():
++            continue
++        try:
++            maps = (path / 'maps').read_text()
++            targets = []
++            for fd in (path / 'fd').iterdir():
++                try:
++                    targets.append(str(fd.readlink()))
++                except FileNotFoundError:
++                    continue
++            motion = 'libvsrv' in maps or '/dev/mem' in maps or '/dev/mem' in targets
++            native = any(name in maps for name in ('libvart', 'libaura_native_operator'))
++            device = any(name.startswith(('/dev/dri/renderD', '/dev/dpu')) for name in targets)
++            if motion or (not motion_only and (native or device)):
++                result['owners'].append(process(path.name))
++        except (FileNotFoundError, ProcessLookupError):
++            continue
++        except (PermissionError, OSError, ValueError, IndexError):
++            result['complete'] = False
++            result['unreadable'].append(int(path.name))
++    return result
++
++
++def platform_metadata():
++    firmware = Path('/proc/device-tree/fpga-full/firmware-name')
++    overlays = Path('/sys/kernel/config/device-tree/overlays')
++    require(overlays.is_dir(), 'OVERLAY_METADATA_UNAVAILABLE')
++    links, unexpected = [], []
++    for driver in Path('/sys/bus/platform/drivers').iterdir():
++        if 'zocl' not in driver.name.lower():
++            continue
++        for entry in driver.iterdir():
++            if not entry.is_symlink():
++                continue
++            target = str(entry.resolve())
++            if target.startswith('/sys/devices/'):
++                links.append(target)
++            elif entry.name != 'module' or not target.startswith('/sys/module/'):
++                unexpected.append(str(entry))
++    return dict(firmware=firmware.read_bytes().rstrip(b'\0').decode() if firmware.exists() else None,
++                fpga_state=Path('/sys/class/fpga_manager/fpga0/state').read_text().strip(),
++                vart=regular('/etc/vart.conf').decode(),
++                fdt_sha256=digest(Path('/sys/firmware/fdt').read_bytes()),
++                overlays=[dict(name=p.name, status=(p / 'status').read_text().strip()) for p in overlays.iterdir() if p.is_dir()],
++                render=[dict(name=p.name, device=str((p / 'device').resolve())) for p in Path('/sys/class/drm').glob('renderD*')],
++                zocl_links=links, unexpected_zocl_links=unexpected)
++
++
++def get_metadata(port, path):
++    connection = http.client.HTTPConnection('127.0.0.1', port, timeout=3)
++    try:
++        connection.request('GET', path)
++        response = connection.getresponse()
++        body = response.read(2097153)
++        require(response.status == 200 and len(body) <= 2097152, 'LOCAL_METADATA_RESPONSE')
++        return json.loads(body)
++    finally:
++        connection.close()
++
++
++def original_verify(aura, binding):
++    path = aura / 'board/runtime/audio/face_gallery_readback.py'
++    source = regular(path)
++    require(digest(source) == VERIFIER_SHA, 'ORIGINAL_VERIFIER_SOURCE_CHANGED')
++    tree = ast.parse(source)
++    klass = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'FaceGalleryReadback')
++    method = copy.deepcopy(next(n for n in klass.body if isinstance(n, ast.FunctionDef) and n.name == '_verify'))
++    method.decorator_list = []
++    scope = dict(Path=Path, hashlib=__import__('hashlib'), json=json)
++    exec(compile(ast.Module(body=[method], type_ignores=[]), str(path) + '::<original-metadata-only-_verify>', 'exec'), scope)
++    scope['_verify'](binding)  # Never construct FaceGalleryReadback or a store.
++
++
++class Recovery:
++    def __init__(self, contract_path):
++        require(platform.system() == 'Linux' and platform.machine() == 'aarch64' and os.geteuid() == 0
++                and sys.dont_write_bytecode, 'BOARD_ROOT_B_INTERPRETER_REQUIRED')
++        require(Path(contract_path) == PACKAGE_ROOT / 'contract.json', 'INSTALLED_CONTRACT_PATH_REQUIRED')
++        self.contract_raw = regular(contract_path)
++        self.contract = json.loads(self.contract_raw)
++        self.contract_sha = digest(self.contract_raw)
++        activation = json.loads(regular(PACKAGE_ROOT / 'activation.json'))
++        require(activation.get('schema') == 'aura-boot-recovery-activation-1' and activation.get('enabled') is True
++                and activation.get('contract_sha256') == self.contract_sha, 'CANDIDATE_NOT_ACTIVATED')
++        require(self.contract.get('schema') == 'aura-boot-recovery-contract-1'
++                and self.contract.get('fresh_handoff_approved') is True, 'FRESH_HANDOFF_CONTRACT_REQUIRED')
++        self.activation = activation
++        for path, pin in activation['installed_files'].items():
++            require(digest(regular(path)) == pin, 'INSTALLED_CANDIDATE_CHANGED')
++        self.boot = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
++        require(str(uuid.UUID(self.boot)) == self.boot, 'BOOT_UUID')
++        require(STATE_ROOT.resolve() == STATE_ROOT and STATE_ROOT.stat().st_uid == 0
++                and stat.S_IMODE(STATE_ROOT.stat().st_mode) == 0o700, 'STATE_DIRECTORY_OWNER')
++        self.lock = (STATE_ROOT / 'operation.lock').open('a+')
++        fcntl.flock(self.lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
++        self.tx = STATE_ROOT / 'boots' / self.boot
++        self.tx.mkdir(mode=0o700, parents=True, exist_ok=True)
++        require(self.tx.resolve() == self.tx and not self.tx.is_symlink(), 'TRANSACTION_PATH_REDIRECTED')
++
++    def pin(self, pin):
++        raw = regular(pin['path'])
++        require(digest(raw) == pin['sha256'], 'PUBLIC_SOURCE_PIN_CHANGED')
++        return raw
++
++    def source_snapshot(self):
++        for path, pin in self.activation['installed_files'].items():
++            require(digest(regular(path)) == pin, 'INSTALLED_CANDIDATE_CHANGED')
++        active_path = STATE_ROOT / 'active-source.json'
++        active_present = os.path.lexists(active_path)
++        active_raw = regular(active_path) if active_present else b'null\n'
++        active = json.loads(active_raw) if active_present else self.contract['initial_source_state']
++        require(active['contract_sha256'] == (self.contract_sha if active_present else 'INITIAL_CONTRACT'), 'SOURCE_STATE_CONTRACT_CHANGED')
++        startup_raw = regular(self.contract['startup_path'])
++        require(digest(startup_raw) == active['startup_sha256'], 'STARTUP_CHANGED_RESEAL_REQUIRED')
++        startup = json.loads(startup_raw)
++        aura = Path(startup['runtime']) / 'aura'
++        require(str(aura) == self.contract['runtime_aura'] and len(startup['component_sha256']) == self.contract['component_count'], 'RUNTIME_SOURCE_SET_CHANGED')
++        for relative, pin in startup['component_sha256'].items():
++            require(not Path(relative).is_absolute() and '..' not in Path(relative).parts, 'COMPONENT_PATH_ESCAPE')
++            require(digest(regular(aura / relative)) == pin, 'COMPONENT_SOURCE_CHANGED')
++        ui_path = aura / 'config/board_avatar_gtk.json'
++        ui_raw = regular(ui_path)
++        require(digest(ui_raw) == active['ui_sha256'], 'UI_SOURCE_CHANGED')
++        ui = json.loads(ui_raw)
++        require(ui['board_business']['face_readback'] == active['selected_pin'], 'SELECTED_SPEC_CHANGED')
++        selected = json.loads(self.pin(active['selected_pin']))
++        require(selected['source_sha256'] == active['selected_sources'], 'SELECTED_SOURCE_SET_CHANGED')
++        for path, pin in selected['source_sha256'].items():
++            require(digest(regular(path)) == pin, 'CAMERA_SELECTED_SOURCE_CHANGED')
++        for path, pin in self.contract['immutable_files'].items():
++            require(digest(regular(path)) == pin, 'APPROVED_CAMERA_OR_LAUNCHER_SOURCE_CHANGED')
++        for name, expected in self.contract['original_units'].items():
++            current = unit(name)
++            paths = {current['FragmentPath']} | set(current['DropInPaths'].split())
++            own = {p for p in self.activation['installed_files'] if p.startswith('/etc/systemd/system/' + name + '.d/')}
++            require(paths == set(expected['source_sha256']) | own, 'ORIGINAL_UNIT_SOURCE_SET_CHANGED')
++            for path, pin in expected['source_sha256'].items():
++                require(digest(regular(path)) == pin, 'ORIGINAL_UNIT_SOURCE_CHANGED')
++        for name in self.contract.get('absent_platform_units', []):
++            require(unit(name).get('LoadState') == 'not-found', 'UNREVIEWED_PLATFORM_STARTUP_UNIT_APPEARED')
++        return dict(active=active, active_source_raw=active_raw, active_source_present=active_present,
++                    startup=startup, startup_raw=startup_raw, ui=ui, ui_raw=ui_raw,
++                    ui_path=ui_path, aura=aura, selected=selected)
++
++    def quiet(self):
++        """Queued ordered start jobs are allowed; actual owner processes are not."""
++        pending = {}
++        for name in (CAMERA, GUI):
++            current = unit(name)
++            require(current['MainPID'] == '0' and current['ActiveState'] in {'inactive', 'activating'}
++                    and current['SubState'] in {'dead', 'start-pre'}, 'EXISTING_SERVICE_OWNER_NO_REPLACEMENT')
++            control = int(current.get('ControlPID', '0'))
++            require(control in {0, os.getpid()}, 'ANOTHER_START_HELPER_PRESENT')
++            if current.get('Job'):
++                pending[name] = current
++        # Pending loader work can have NO process yet. Inspect the whole job
++        # queue on every boundary, not only while camera/GUI have start jobs.
++        result = command(['systemctl', 'list-jobs', '--no-legend', '--no-pager', '--plain'])
++        require(result.returncode == 0, 'QUEUED_START_JOB_METADATA_UNAVAILABLE')
++        rows = [line.split() for line in result.stdout.decode().splitlines() if line.strip()]
++        require(all(len(row) == 4 and row[0].isdigit() for row in rows), 'SYSTEMD_JOB_QUEUE_SHAPE_UNKNOWN')
++        for name, current in pending.items():
++            matches = [row for row in rows if row[1] == name]
++            expected_state = 'running' if int(current.get('ControlPID', '0')) == os.getpid() else 'waiting'
++            require(len(matches) == 1 and matches[0][0] == current['Job'].split()[0]
++                    and matches[0][2:] == ['start', expected_state], 'PENDING_JOB_IS_NOT_OUR_ORDERED_START')
++        for _, name, job_type, job_state in rows:
++            if name in {CAMERA, GUI}:
++                require(name in pending, 'SERVICE_JOB_CHANGED_DURING_QUEUE_SCAN')
++                continue  # Individually checked above, including helper identity.
++            current = unit(name)
++            if name == 'aura-original-wide-prepare.service':
++                require(int(current.get('MainPID', '0')) == os.getpid() and job_type == 'start'
++                        and job_state == 'running', 'ANOTHER_PLATFORM_PREPARE_JOB_PENDING')
++                continue
++            entries = ' '.join(current.get(key, '') for key in ('ExecStart', 'ExecStartPre', 'ExecStartPost')).lower()
++            # Own Python ID_STOP_ONLY jobs also touch the platform. Pending
++            # actions block advancement; observe_job binds an existing action
++            # to its durable unit/InvocationID without another submission.
++            own_action_job = name.startswith('aura-boot-wide-')
++            loader_name = bool(re.search(r'dfx|xmutil|fpga|zocl|dpu-auto', name, flags=re.IGNORECASE))
++            loader_entry = ('dfx-mgr-client' in entries or 'dfx-mgrd' in entries
++                            or ('xmutil' in entries and ('loadapp' in entries or 'unloadapp' in entries)))
++            require(not own_action_job and not loader_name and not loader_entry, 'OTHER_PLATFORM_OR_DAEMON_JOB_PENDING_NO_DFX')
++        for path in Path('/proc').iterdir():
++            if not path.name.isdigit() or int(path.name) == os.getpid():
++                continue
++            try:
++                groups = (path / 'cgroup').read_text()
++                require(not any(name in groups for name in (CAMERA, GUI)), 'OLD_SERVICE_CGROUP_PROCESS_PRESENT')
++                argv = (path / 'cmdline').read_bytes().split(b'\0')
++                names = {part.rsplit(b'/', 1)[-1] for part in argv if part}
++                require(b'dfx-mgr-client' not in names
++                        and not (b'xmutil' in names and ({b'loadapp', b'unloadapp'} & set(argv))),
++                        'OTHER_OR_PENDING_ORIGINAL_DFX_CLIENT_OBSERVE_ONLY')
++            except (FileNotFoundError, ProcessLookupError):
++                continue
++        require_no_owners(owner_scan())
++
++    def daemon_owner(self):
++        state = unit('dfx-mgr.service')
++        require(state['ActiveState'] == 'active' and state['SubState'] == 'running' and int(state['MainPID']) > 0, 'DAEMON_NOT_RUNNING')
++        require(not state.get('Job'), 'DAEMON_JOB_PENDING_NO_DFX')
++        value = process(state['MainPID'], executable=True)
++        require(value['executable_sha256'] == DAEMON_SHA and digest(regular(CLIENT)) == CLIENT_SHA, 'ORIGINAL_DAEMON_CLIENT_CHANGED')
++        return value
++
++    def original_release(self):
++        raw = regular(RELEASE / 'candidate-manifest.json')
++        require(digest(raw) == MANIFEST_SHA, 'ORIGINAL_WIDE_MANIFEST_CHANGED')
++        manifest = json.loads(raw)
++        require(manifest['app'] == APP and manifest['abi'] == 2 and manifest['build_id'] == 0x10282601
++                and len(manifest['runtime_files']) == 4 and len(manifest['payload_files']) == 3, 'ORIGINAL_RELEASE_SHAPE')
++        for path, pin in manifest['runtime_files'].items():
++            require(digest(regular(path)) == pin, 'ORIGINAL_FIRMWARE_CHANGED')
++        for name, pin in manifest['payload_files'].items():
++            require(name in {'libvsrv.so', 'vsrv_driver.py', 'vsrv_transport.py'}
++                    and digest(regular(RELEASE / 'driver' / name)) == pin, 'ORIGINAL_DRIVER_CHANGED')
++        require(digest(regular(RELEASE / 'bench_identity_stop.py')) == IDSTOP_SHA, 'ORIGINAL_IDSTOP_CHANGED')
++
++    def kernel_marker_path(self):
++        policy = self.contract['native_boot_policy']
++        directory = Path(policy['new_boot_marker_directory'])
++        require(directory.is_absolute() and not directory.is_symlink() and directory.resolve() == directory,
++                'ORIGINAL_NEW_BOOT_MARKER_DIRECTORY_REDIRECTED')
++        return directory / ('kernel-boot-' + self.boot + '.consumed')
++
++    def current_domain_consumed(self):
++        marker = self.kernel_marker_path()
++        # lexists includes an original partial record, symlink or any other
++        # path object. Neither marker family is changed by this wrapper.
++        return os.path.lexists(marker)
++
++    def checkpoint_gate(self, snapshot, checkpoint):
++        policy = self.contract['native_boot_policy']
++        return verify_final_pointer(
++            checkpoint, os.path.lexists(str(CHECKPOINT) + '.native-consumed-' + digest(checkpoint)),
++            snapshot['active']['predecessor'], current_boot=self.boot,
++            allow_new_kernel_boot=policy['allow_new_kernel_boot'],
++            current_domain_consumed=self.current_domain_consumed())
++
++    def run_history_gate(self, kind, history, *, checkpoint_pin=None, predecessor=None,
++                         normal_expected_pin=None, normal_result_pin=None):
++        request = dict(schema='aura-original-history-gate-request-1', kind=kind, boot_id=self.boot,
++                       adapter_pin=self.contract['history_adapter_pin'], history_expected=history)
++        if checkpoint_pin is not None:
++            request.update(checkpoint_pin=checkpoint_pin, source_boot=predecessor['boot_id'],
++                           source_owner=predecessor['camera_owner'], source_manifest_sha256=self.contract['native_manifest']['sha256'],
++                           new_boot_marker_directory=self.contract['native_boot_policy']['new_boot_marker_directory'])
++        if normal_expected_pin is not None:
++            request['normal_stop_expected_pin'] = normal_expected_pin
++            request['normal_stop_complete_result_pin'] = normal_result_pin
++        raw = encoded(request)
++        request_sha = digest(raw)
++        request_path = self.tx / ('history-request-' + request_sha + '.json')
++        if request_path.exists():
++            require(regular(request_path) == raw, 'ORIGINAL_HISTORY_REQUEST_CHANGED')
++        else:
++            create(request_path, raw)
++        recipe = regular(PACKAGE_ROOT / 'original_history_gate.py')
++        result = subprocess.run(['/usr/bin/python3', '-B', '-I', '-S', '-', '--request', str(request_path),
++                                 '--request-sha256', request_sha], input=recipe, capture_output=True, timeout=25)
++        require(result.returncode == 0 and not result.stderr and len(result.stdout) <= 2097152,
++                'EXACT_FINAL_OR_ORIGINAL_COMPLETE_HISTORY_NOT_VERIFIED')
++        value = json.loads(result.stdout)
++        require(value.get('schema') == 'aura-original-history-gate-result-1' and value.get('request_sha256') == request_sha
++                and value.get('kind') == kind and value.get('boot_id') == self.boot
++                and value.get('adapter_sha256') == self.contract['history_adapter_pin']['sha256']
++                and value.get('checkpoint_pin') == checkpoint_pin and value.get('history_expected') == history
++                and value.get('complete_ordered_history_verified') is True and value.get('original_calls_only') is True
++                and value.get('checkpoint_or_marker_written') is False and value.get('native_context_created') is False
++                and value.get('model_or_device_opened') is False, 'ORIGINAL_HISTORY_RESULT_NOT_BOUND_TO_REQUEST')
++        result_path = self.tx / ('history-result-' + request_sha + '.json')
++        result_raw = encoded(value)
++        if result_path.exists():
++            require(regular(result_path) == result_raw, 'ORIGINAL_HISTORY_RESULT_CHANGED')
++        else:
++            create(result_path, result_raw)
++        return dict(request_pin=dict(path=str(request_path), sha256=request_sha),
++                    result_pin=dict(path=str(result_path), sha256=digest(result_raw)), history_expected=history)
++
++    def check_prestart_history(self, snapshot, checkpoint):
++        history = snapshot['active']['history_expected']
++        source = snapshot['active']['predecessor']
++        pin = dict(path=str(CHECKPOINT), sha256=digest(checkpoint))
++        if source['boot_id'] != self.boot:
++            require(type(history['archive_count']) is int and history['archive_count'] < 64,
++                    'NEW_BOOT_WOULD_EXCEED_ORIGINAL_COMPLETE_HISTORY_BOUND')
++            return self.run_history_gate('cold_predecessor', history, checkpoint_pin=pin, predecessor=source)
++        # This pin is supplied only by the existing CPU/main normal-stop flow.
++        # No stop intent, fresh final or approval boolean is fabricated here.
++        proof = json.loads(regular(STATE_ROOT / 'same-boot-history.proof.json'))
++        require(proof.get('schema') == 'aura-existing-cpu-same-boot-history-pins-1', 'GENUINE_CPU_SAME_BOOT_PROOF_PINS_REQUIRED')
++        return self.run_history_gate('same_boot_resume', history, checkpoint_pin=pin, predecessor=source,
++                                     normal_expected_pin=proof['expected_pin'], normal_result_pin=proof['complete_result_pin'])
++
++    def history_bytes_unchanged(self, proof):
++        self.pin(proof['request_pin'])
++        self.pin(proof['result_pin'])
++        expected = proof['history_expected']
++        for row in expected['archives']:
++            self.pin(dict(path=row['path'], sha256=row['sha256']))
++        self.pin(expected['legacy_pin'])
++
++    def verify_gate_history(self, gate):
++        proof = gate['history_proof']
++        request = json.loads(self.pin(proof['request_pin']))
++        result = json.loads(self.pin(proof['result_pin']))
++        checkpoint_pin = dict(path=str(CHECKPOINT), sha256=gate['checkpoint_sha256'])
++        expected_kind = 'same_boot_resume' if gate['predecessor']['boot_id'] == self.boot else 'cold_predecessor'
++        require(request['kind'] == result['kind'] == expected_kind and request['checkpoint_pin'] == result['checkpoint_pin'] == checkpoint_pin
++                and request['boot_id'] == result['boot_id'] == self.boot
++                and request['source_owner'] == gate['predecessor']['camera_owner']
++                and request['source_boot'] == gate['predecessor']['boot_id']
++                and request['adapter_pin'] == self.contract['history_adapter_pin']
++                and result['adapter_sha256'] == self.contract['history_adapter_pin']['sha256']
++                and request['history_expected'] == result['history_expected'] == proof['history_expected']
++                and result['request_sha256'] == proof['request_pin']['sha256'], 'CAMERA_GATE_HISTORY_PROOF_NOT_EXACT_FINAL')
++        self.pin(checkpoint_pin)
++        self.history_bytes_unchanged(proof)
++
++    def accepted_live_history(self, gate, handoff):
++        self.verify_gate_history(gate)
++        history = next_history_expected(gate['history_proof']['history_expected'], gate, handoff, self.boot)
++        if gate['predecessor']['boot_id'] == self.boot:
++            marker = str(CHECKPOINT) + '.native-consumed-' + gate['checkpoint_sha256']
++            require(regular(marker, 256) == (gate['checkpoint_sha256'] + '\n').encode(), 'ORIGINAL_SAME_BOOT_CONSUMPTION_NOT_PROVEN')
++        else:
++            marker = json.loads(regular(self.kernel_marker_path(), 262144))
++            require(marker.get('schema') == 'aura-native-current-kernel-consumption-1' and marker.get('boot') == self.boot
++                    and marker.get('source_checkpoint_sha256') == gate['checkpoint_sha256']
++                    and marker.get('archive_path') == history['head']['archive_path']
++                    and marker.get('archive_sha256') == history['head']['archive_sha256']
++                    and type(marker.get('captured_mono_ns')) is int and 0 < marker['captured_mono_ns'] <= time.monotonic_ns(),
++                    'ORIGINAL_CURRENT_BOOT_COMMIT_LINK_NOT_PROVEN')
++        proof = self.run_history_gate('running_archive_chain', history)
++        return history, proof
++
++    def once(self, action, argv, allow_submit=True):
++        """Durable once-only submission; reentry observes the SAME transient unit."""
++        unit_name = 'aura-boot-wide-' + self.boot + '-' + action + '.service'
++        intent_path = self.tx / (action + '-intent.json')
++        out_path, err_path = self.tx / (action + '.stdout.raw'), self.tx / (action + '.stderr.raw')
++        intent = dict(boot_id=self.boot, contract_sha256=self.contract_sha, unit=unit_name,
++                      argv=argv, daemon=self.daemon_owner(), startup_sha256=digest(regular(self.contract['startup_path'])))
++        if intent_path.exists():
++            require(json.loads(regular(intent_path)) == intent, 'EXISTING_INTENT_CONTEXT_CHANGED')
++        else:
++            require(allow_submit, 'NO_EXISTING_JOB_TO_OBSERVE')
++            require(unit(unit_name).get('LoadState') == 'not-found', 'UNEXPLAINED_EXISTING_OS_JOB')
++            create(out_path, b'')
++            create(err_path, b'')
++            create(intent_path, encoded(intent))  # fsync BEFORE any D-Bus dispatch.
++            args = ['systemd-run', '--unit=' + unit_name, '--no-block', '--service-type=exec', '--remain-after-exit',
++                    '--property=Restart=no', '--property=TimeoutStartSec=infinity', '--property=RuntimeMaxSec=infinity',
++                    '--property=TimeoutStopSec=infinity', '--property=KillMode=process', '--property=SendSIGKILL=no',
++                    '--property=StandardInput=null', '--property=StandardOutput=append:' + str(out_path),
++                    '--property=StandardError=append:' + str(err_path), '--property=UMask=0077'] + argv
++            try:
++                submitted = command(args, timeout=8)
++                receipt = dict(submit_returncode=submitted.returncode, completion_claimed=False)
++            except subprocess.TimeoutExpired:
++                receipt = dict(submission_outcome='UNKNOWN_OBSERVE_SAME_UNIT', completion_claimed=False)
++            create(self.tx / (action + '-submission.json'), encoded(receipt))
++        invocation_path = self.tx / (action + '-invocation.json')
++        deadline = time.monotonic() + 25
++        while True:
++            current = unit(unit_name)
++            invocation = current.get('InvocationID', '')
++            if invocation:
++                if invocation_path.exists():
++                    require(json.loads(regular(invocation_path)) == {'InvocationID': invocation}, 'OS_JOB_REPLACED')
++                else:
++                    create(invocation_path, encoded({'InvocationID': invocation}))
++            if current.get('SubState') == 'exited' or current.get('ActiveState') == 'failed':
++                break
++            require(time.monotonic() < deadline, 'UNKNOWN_OR_PENDING_OS_JOB_NO_RETRY')
++            time.sleep(.25)
++        out, err = regular(out_path, 65536), regular(err_path, 65536)
++        result = verify_job(current, invocation, out, err, action)
++        return result, current
++
++    def observe_job(self, action):
++        require(action in {'list', 'remove', 'load', 'idstop'}, 'UNKNOWN_ORIGINAL_ACTION')
++        self.source_snapshot()
++        path = self.tx / (action + '-intent.json')
++        require(path.exists(), 'NO_EXISTING_JOB_TO_OBSERVE')
++        intent = json.loads(regular(path))
++        value, state = self.once(action, intent['argv'], allow_submit=False)
++        # Observation never declares a loaded/unloaded platform from an OS exit alone.
++        metadata = platform_metadata()
++        if action == 'remove':
++            require(not (self.tx / 'load-intent.json').exists(), 'REMOVE_FINISHED_LOAD_STAGE_EXISTS_OBSERVE_LOAD')
++            verify_unloaded(metadata)
++        elif action == 'load':
++            verify_platform(metadata, APP)
++        elif action == 'idstop':
++            verify_platform(metadata, APP)
++            verify_idstop(json.loads(regular(self.tx / 'id-stop.json')), self.boot, MANIFEST_SHA)
++        return dict(status='EXISTING_ORIGINAL_JOB_OBSERVED_NO_SUBMISSION', action=action,
++                    InvocationID=state['InvocationID'], boot_id=self.boot, original_list_app=value)
++
++    def prepared(self):
++        result = json.loads(regular(self.tx / 'prepared.json'))
++        require(result['boot_id'] == self.boot and result['contract_sha256'] == self.contract_sha, 'PREPARED_CONTEXT_CHANGED')
++        value = platform_metadata()
++        verify_platform(value, APP)
++        require(value['fdt_sha256'] == result['context']['fdt_sha256'], 'PREPARED_FDT_CHANGED')
++        report = json.loads(regular(self.tx / 'id-stop.json'))
++        verify_idstop(report, self.boot, MANIFEST_SHA)
++        require(digest(regular(self.tx / 'id-stop.json')) == result['idstop_sha256'], 'IDSTOP_RECEIPT_CHANGED')
++        return result
++
++    def prepare(self):
++        snapshot = self.source_snapshot()
++        self.original_release()
++        if (self.tx / 'prepared.json').exists():
++            self.prepared()
++            require_no_owners(owner_scan(motion_only=True))
++            return dict(status='ALREADY_PREPARED_NO_DFX_RESUBMISSION', boot_id=self.boot)
++        require(self.boot != self.contract['installed_boot_id'], 'INSTALL_BOOT_REQUIRES_MANUAL_MAIN_AXIS_RECOVERY')
++        self.quiet()
++        cp = regular(CHECKPOINT, 262144)
++        cp_sha = self.checkpoint_gate(snapshot, cp)
++        require(json.loads(cp)['seed']['boot_id'] != self.boot, 'COLD_PREDECESSOR_BOOT_REQUIRED')
++        history_proof = self.check_prestart_history(snapshot, cp)
++        sealed = self.tx / ('predecessor-final-' + cp_sha + '.json')
++        if sealed.exists():
++            require(regular(sealed) == cp, 'SEALED_FINAL_CHANGED')
++        else:
++            create(sealed, cp)
++        daemon = self.daemon_owner()
++
++        def boundary():
++            now = self.source_snapshot()
++            require(now['startup_raw'] == snapshot['startup_raw'] and regular(CHECKPOINT, 262144) == cp, 'SOURCE_OR_FINAL_CHANGED_DURING_PREPARE')
++            require(self.checkpoint_gate(now, cp) == cp_sha, 'CHECKPOINT_ROUTE_CHANGED_DURING_PREPARE')
++            self.history_bytes_unchanged(history_proof)
++            require(self.daemon_owner() == daemon, 'DAEMON_OWNER_CHANGED')
++            self.quiet()
++
++        boundary()
++        initial_path = self.tx / 'initial-platform.json'
++        if initial_path.exists():
++            initial = json.loads(regular(initial_path))
++            require(initial['boot_id'] == self.boot and initial['contract_sha256'] == self.contract_sha
++                    and initial['checkpoint_sha256'] == cp_sha and initial['daemon'] == daemon
++                    and initial['startup_sha256'] == digest(snapshot['startup_raw']), 'INITIAL_PLATFORM_CONTEXT_CHANGED')
++            require(digest(regular(self.tx / 'list.stdout.raw', 65536)) == initial['list_stdout_sha256'], 'INITIAL_LIST_REPLY_CHANGED')
++            app = loaded_app(regular(self.tx / 'list.stdout.raw', 65536))
++            require(app == initial['app'], 'INITIAL_LIST_IDENTITY_CHANGED')
++            self.once('list', [CLIENT, '-listPackage'], allow_submit=False)
++        else:
++            app, _ = self.once('list', [CLIENT, '-listPackage'])
++            verify_platform(platform_metadata(), app)
++            initial = dict(boot_id=self.boot, contract_sha256=self.contract_sha, checkpoint_sha256=cp_sha,
++                           daemon=daemon, startup_sha256=digest(snapshot['startup_raw']), app=app,
++                           list_stdout_sha256=digest(regular(self.tx / 'list.stdout.raw', 65536)))
++            create(initial_path, encoded(initial))
++        if app == BENCHMARK:
++            boundary()
++            if not (self.tx / 'remove-intent.json').exists():
++                verify_platform(platform_metadata(), BENCHMARK)
++            self.once('remove', [CLIENT, '-remove', '0'])
++            # A prior successful load may already be present when explicitly resuming
++            # the same transaction. Never tear it down or resend either operation.
++            if not (self.tx / 'load-intent.json').exists():
++                verify_unloaded(platform_metadata())
++            boundary()
++            self.once('load', [CLIENT, '-load', APP])
++            verify_platform(platform_metadata(), APP)
++        boundary()
++        value = platform_metadata()
++        verify_platform(value, APP)
++        context = dict(boot_id=self.boot, fdt_sha256=value['fdt_sha256'], firmware_name=value['firmware'])
++        context_path = self.tx / 'wide-context.json'
++        if context_path.exists():
++            require(json.loads(regular(context_path)) == context, 'WIDE_CONTEXT_CHANGED')
++        else:
++            create(context_path, encoded(context))
++        argv = ['/usr/bin/python3', '-B', str(RELEASE / 'bench_identity_stop.py'), '--execute', '--confirmation', 'ID_STOP_ONLY',
++                '--manifest', str(RELEASE / 'candidate-manifest.json'), '--manifest-sha256', MANIFEST_SHA,
++                '--context', str(context_path), '--output', str(self.tx / 'id-stop.json')]
++        self.once('idstop', argv)
++        report_raw = regular(self.tx / 'id-stop.json')
++        verify_idstop(json.loads(report_raw), self.boot, MANIFEST_SHA)
++        expected_stdout = dict(identity_stop_passed=True, motion_tested=False, report=str(self.tx / 'id-stop.json'))
++        require(json.loads(regular(self.tx / 'idstop.stdout.raw', 65536)) == expected_stdout, 'ORIGINAL_IDSTOP_REPLY_CHANGED')
++        boundary()
++        verify_platform(platform_metadata(), APP)
++        receipt = dict(status='ORIGINAL_WIDE_READY_IDSTOP_ONLY', boot_id=self.boot, contract_sha256=self.contract_sha,
++                       context=context, predecessor_final_sha256=cp_sha, idstop_sha256=digest(report_raw),
++                       prestart_history=history_proof,
++                       reference_initialized=False, centered=False, follow_started=False,
++                       original_reader_and_camera_not_bypassed=True)
++        create(self.tx / 'prepared.json', encoded(receipt))
++        return receipt
++
++    def camera_check(self):
++        snapshot = self.source_snapshot()
++        self.original_release()
++        self.prepared()
++        self.quiet()
++        current = unit(CAMERA)
++        require(all(current.get(k) == v for k, v in {'Restart': 'no', 'KillMode': 'process', 'SendSIGKILL': 'no', 'TimeoutStopUSec': 'infinity'}.items()), 'NATIVE_NORMAL_STOP_PROTECTION_CHANGED')
++        checkpoint = regular(CHECKPOINT, 262144)
++        checkpoint_sha = self.checkpoint_gate(snapshot, checkpoint)
++        history_proof = self.check_prestart_history(snapshot, checkpoint)
++        gate = dict(boot_id=self.boot, contract_sha256=self.contract_sha, checkpoint_sha256=checkpoint_sha,
++                    startup_sha256=digest(snapshot['startup_raw']), predecessor=snapshot['active']['predecessor'],
++                    history_proof=history_proof,
++                    checked_mono_ns=time.monotonic_ns())
++        create(self.tx / ('camera-gate-' + str(os.getpid()) + '.json'), encoded(gate))
++        gate_path = self.tx / 'current-camera-gate.json'
++        if gate_path.exists():
++            replace_known(gate_path, regular(gate_path), encoded(gate))
++        else:
++            create(gate_path, encoded(gate))
++        return dict(status='ORIGINAL_CAMERA_MAY_START', boot_id=self.boot, checkpoint_seed_marker_modified=False)
++
++    def camera_samples(self):
++        deadline = time.monotonic() + 75
++        first = None
++        while True:
++            state = unit(CAMERA)
++            require(state['ActiveState'] != 'failed', 'ORIGINAL_CAMERA_START_FAILED')
++            require(state['ActiveState'] != 'deactivating' and not state.get('Job'), 'CAMERA_EXIT_OR_JOB_PENDING_NO_BINDING')
++            try:
++                require(state['ActiveState'] == 'active' and state['SubState'] == 'running'
++                        and state.get('ControlPID', '0') == '0', 'CAMERA_SERVICE_NOT_STABLY_RUNNING')
++                sample = get_metadata(8790, '/health')
++                pid = int(state['MainPID'])
++                require(pid > 0 and sample.get('pid') == pid and sample.get('board_boot_id') == self.boot, 'CAMERA_OWNER_NOT_READY')
++                current_owner = process(pid)
++                require(sample.get('motion_command_emitted') is False and sample.get('identity', {}).get('ready') is True
++                        and not any(sample.get(k) for k in ('camera_error', 'detector_error', 'preview_error'))
++                        and not sample.get('identity', {}).get('error'), 'CAMERA_NOT_HEALTHY')
++                schedule = sample.get('dpu_schedule') or {}
++                require(schedule.get('native_critical') is True and schedule.get('native_abi') == 2
++                        and schedule.get('owner_fenced') is False and schedule.get('quiesced') is False,
++                        'NATIVE_ORIGINAL_OWNER_NOT_HEALTHY')
++                if first and first[0] == current_owner:
++                    require(sample['capture_frames'] > first[1]['capture_frames'] and sample['detected_frames'] > first[1]['detected_frames'], 'CAMERA_NOT_ADVANCING')
++                    return current_owner, sample
++                first = current_owner, sample
++            except (OSError, ValueError, KeyError, Hold, http.client.HTTPException):
++                first = None
++            require(time.monotonic() < deadline, 'CAMERA_NOT_READY_NO_RESTART')
++            time.sleep(1)
++
++    def check_camera_live(self, expected_owner):
++        def lifecycle():
++            state = unit(CAMERA)
++            require(state['ActiveState'] == 'active' and state['SubState'] == 'running'
++                    and not state.get('Job') and state.get('ControlPID', '0') == '0'
++                    and state['MainPID'] == str(expected_owner['pid']), 'CAMERA_LIFECYCLE_CHANGED_NO_BINDING_OR_READY')
++            require(process(expected_owner['pid']) == expected_owner, 'CAMERA_OWNER_CHANGED_NO_BINDING_OR_READY')
++        lifecycle()
++        health = get_metadata(8790, '/health')
++        schedule = health.get('dpu_schedule') or {}
++        require(health.get('pid') == expected_owner['pid'] and health.get('board_boot_id') == self.boot
++                and health.get('motion_command_emitted') is False and health.get('identity', {}).get('ready') is True
++                and not any(health.get(key) for key in ('camera_error', 'detector_error', 'preview_error'))
++                and not health.get('identity', {}).get('error')
++                and schedule.get('native_critical') is True and schedule.get('native_abi') == 2
++                and schedule.get('owner_fenced') is False and schedule.get('quiesced') is False,
++                'CAMERA_NATIVE_STATE_CHANGED_NO_BINDING_OR_READY')
++        lifecycle()
++        return health
++
++    def bind_camera(self):
++        self.prepared()
++        snapshot = self.source_snapshot()
++        gui = unit(GUI)
++        require(gui['MainPID'] == '0' and gui['ActiveState'] == 'activating' and gui['SubState'] == 'start-pre'
++                and int(gui['ControlPID']) == os.getpid(), 'BINDING_REQUIRES_ORIGINAL_GUI_PRESTART')
++        current_owner, health = self.camera_samples()
++        ops = Path(self.contract['native_ops_root'])
++        run = ops / ('native-run-' + self.boot + '-' + str(current_owner['pid'])) / 'config.json'
++        run_raw = regular(run)
++        run_config = json.loads(run_raw)
++        native = run_config['native_execution']
++        require(native['source_manifest'] == self.contract['native_manifest']['path']
++                and native['source_manifest_sha256'] == self.contract['native_manifest']['sha256'], 'CURRENT_NATIVE_SOURCE_MANIFEST_CHANGED')
++        require(native['checkpoint_output'] == str(CHECKPOINT), 'ORIGINAL_CHECKPOINT_OUTPUT_CHANGED')
++        # Reading the original bootstrap's public handoff proves a new owner, not a fabricated seed.
++        handoff = health['dpu_schedule'].get('protection_handoff') or {}
++        gate = json.loads(regular(self.tx / 'current-camera-gate.json'))
++        verify_bootstrap_handoff(handoff, gate, self.boot, self.contract_sha)
++        accepted_history, live_history_proof = self.accepted_live_history(gate, handoff)
++        current_binding = snapshot['selected']
++        if (current_binding.get('board_boot_id') == self.boot and current_binding.get('camera_pid') == current_owner['pid']
++                and current_binding.get('camera_start_ticks') == current_owner['birth_ticks']):
++            require(current_binding.get('camera_config') == str(run)
++                    and current_binding['source_sha256'].get(str(run)) == digest(run_raw), 'CURRENT_OWNER_RUN_CONFIG_CHANGED')
++            original_verify(snapshot['aura'], current_binding)
++            require(snapshot['active']['history_expected'] == accepted_history, 'CURRENT_BINDING_HISTORY_LEDGER_DIFFERS')
++            return dict(status='BINDING_ALREADY_CURRENT_NO_WRITE', boot_id=self.boot, camera_owner=current_owner)
++        candidate = make_binding(current_binding, self.boot, current_owner,
++                                 dict(path=str(run), sha256=digest(run_raw)), snapshot['active']['selected_sources'])
++        original_verify(snapshot['aura'], candidate)
++        directory = self.tx / ('binding-' + str(current_owner['pid']) + '-' + current_owner['birth_ticks'])
++        require(not directory.exists(), 'BINDING_ATTEMPT_EXISTS_RECONCILE_NO_RETRY')
++        directory.mkdir(mode=0o700)
++        selected_path = directory / 'face_gallery_readback.local.json'
++        candidate_raw = encoded(candidate)
++        selected_pin = dict(path=str(selected_path), sha256=digest(candidate_raw))
++        new_ui, new_startup = config_patch(snapshot['startup'], snapshot['ui'], selected_pin)
++        create(directory / 'ui.before.json', snapshot['ui_raw'])
++        create(directory / 'startup.before.json', snapshot['startup_raw'])
++        create(directory / 'ui.after.json', new_ui)
++        create(directory / 'startup.after.json', new_startup)
++        create(selected_path, candidate_raw)
++        prior_active_raw = snapshot['active_source_raw']
++        prior_active_present = snapshot['active_source_present']
++        active = dict(contract_sha256=self.contract_sha, startup_sha256=digest(new_startup), ui_sha256=digest(new_ui),
++                      selected_pin=selected_pin, selected_sources=candidate['source_sha256'],
++                      predecessor=dict(boot_id=self.boot, camera_owner=current_owner), transaction=str(directory),
++                      history_expected=accepted_history, history_provenance=live_history_proof)
++        active_after_raw = encoded(active)
++        create(directory / 'active-source.after.json', active_after_raw)
++        intent = dict(boot_id=self.boot, contract_sha256=self.contract_sha, camera_owner=current_owner,
++                      startup_before_sha256=digest(snapshot['startup_raw']), startup_after_sha256=digest(new_startup),
++                      ui_before_sha256=digest(snapshot['ui_raw']), ui_after_sha256=digest(new_ui),
++                      active_before_sha256=digest(prior_active_raw),
++                      active_after_sha256=digest(active_after_raw),
++                      selected_pin=selected_pin, changed_components=['config/board_avatar_gtk.json'])
++        create(directory / 'intent.json', encoded(intent))
++        require(process(current_owner['pid']) == current_owner and regular(run) == run_raw, 'CAMERA_OWNER_CHANGED_BEFORE_CAS')
++        now = self.source_snapshot()  # FULL recapture immediately before the two known-byte changes.
++        require(now['startup_raw'] == snapshot['startup_raw'] and now['ui_raw'] == snapshot['ui_raw']
++                and now['active_source_present'] == prior_active_present
++                and now['active_source_raw'] == prior_active_raw, 'SOURCE_CHANGED_BEFORE_BINDING_CAS')
++        original_verify(snapshot['aura'], candidate)
++        create(directory / 'active-source.before.json', prior_active_raw)
++        self.check_camera_live(current_owner)
++        replace_known(snapshot['ui_path'], snapshot['ui_raw'], new_ui)
++        replace_known(self.contract['startup_path'], snapshot['startup_raw'], new_startup)
++        require(process(current_owner['pid']) == current_owner, 'CAMERA_OWNER_CHANGED_AFTER_CAS')
++        self.check_camera_live(current_owner)
++        original_verify(snapshot['aura'], candidate)
++        active_path = STATE_ROOT / 'active-source.json'
++        if prior_active_present:
++            replace_known(active_path, prior_active_raw, active_after_raw)
++        else:
++            require(not os.path.lexists(active_path), 'ACTIVE_LEDGER_APPEARED_DURING_BINDING')
++            create(active_path, active_after_raw)
++        final_snapshot = self.source_snapshot()
++        require(final_snapshot['active_source_present'] and final_snapshot['active_source_raw'] == active_after_raw,
++                'ACTIVE_LEDGER_CHANGED_AFTER_BINDING_CAS')
++        create(directory / 'committed.json', active_after_raw)
++        return dict(status='ORIGINAL_VERIFIER_CURRENT_BINDING_COMMITTED', boot_id=self.boot,
++                    camera_owner=current_owner, selected_source_count=len(candidate['source_sha256']),
++                    changed_components=['config/board_avatar_gtk.json'])
++
++    def verify_gui(self):
++        prepared = self.prepared()
++        snapshot = self.source_snapshot()
++        current_owner, camera_health = self.camera_samples()
++        gate = json.loads(regular(self.tx / 'current-camera-gate.json'))
++        handoff = camera_health['dpu_schedule'].get('protection_handoff') or {}
++        verify_bootstrap_handoff(handoff, gate, self.boot, self.contract_sha)
++        accepted_history, _ = self.accepted_live_history(gate, handoff)
++        require(snapshot['active']['history_expected'] == accepted_history, 'READY_COMPLETE_HISTORY_LEDGER_DIFFERS')
++        original_verify(snapshot['aura'], snapshot['selected'])
++        state = unit(GUI)
++        require(state['ActiveState'] == 'active' and state['SubState'] == 'running' and not state['Job'], 'ORIGINAL_GUI_NOT_RUNNING')
++        supervisor = process(state['MainPID'])
++        launch = json.loads(regular(Path(snapshot['startup']['runtime']) / 'launch.json'))
++        require(launch['boot_id'] == self.boot and launch['supervisor_pid'] == supervisor['pid'] and launch['service'] == GUI, 'GUI_LAUNCH_OWNER_CHANGED')
++        gtk = process(launch['pid'])
++        preference = json.loads(regular(self.contract['listening_preference_path']))
++        require(set(preference) == {'version', 'enabled'} and preference['version'] == 1 and type(preference['enabled']) is bool, 'ORIGINAL_LISTENING_PREFERENCE_SHAPE')
++        deadline = time.monotonic() + 90
++        first = None
++        while True:
++            try:
++                last = gui_projection(get_metadata(8783, '/api/state'))
++                if first is not None:
++                    verify_ready(first, last, preference['enabled'])
++                    break
++                first = last
++            except (OSError, ValueError, Hold, http.client.HTTPException):
++                first = None
++            require(time.monotonic() < deadline, 'GUI_NOT_READY_NO_RESTART')
++            time.sleep(1)
++        require_no_owners(owner_scan(motion_only=True))
++        require(process(supervisor['pid']) == supervisor and process(gtk['pid']) == gtk
++                and process(current_owner['pid']) == current_owner, 'READY_OWNER_CHANGED')
++        require(self.source_snapshot()['startup_raw'] == snapshot['startup_raw'], 'READY_SOURCE_CHANGED')
++        original_verify(snapshot['aura'], snapshot['selected'])
++        self.prepared()
++        final_gui = unit(GUI)
++        require(final_gui['MainPID'] == str(supervisor['pid']) and final_gui['ActiveState'] == 'active'
++                and final_gui['SubState'] == 'running' and not final_gui.get('Job')
++                and final_gui.get('ControlPID', '0') == '0', 'GUI_LIFECYCLE_CHANGED_BEFORE_READY')
++        self.check_camera_live(current_owner)
++        receipt = dict(schema='aura-boot-recovery-ready-1', status='GUI_SOFTWARE_READY_AXIS_OUTPUT_DISABLED',
++                       boot_id=self.boot, contract_sha256=self.contract_sha,
++                       startup_sha256=digest(snapshot['startup_raw']), camera_owner=current_owner,
++                       gui_supervisor=supervisor, gtk_owner=gtk, first=first, last=last,
++                       idstop_sha256=prepared['idstop_sha256'], axis_output_proof='Original this-boot ID_STOP_ONLY + same platform + no register owner + original UI remains mechanically locked',
++                       reference_initialized=False, centered=False, follow_started=False,
++                       physical_panel_observed=False, physical_direction_accepted=False)
++        ready_path = self.tx / 'ready.json'
++        if not ready_path.exists():
++            create(ready_path, encoded(receipt))
++        return receipt
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--contract', default=str(PACKAGE_ROOT / 'contract.json'))
++    parser.add_argument('--job', choices=['list', 'remove', 'load', 'idstop'])
++    parser.add_argument('action', choices=['prepare', 'camera-check', 'bind-camera', 'verify-gui', 'observe-job'])
++    args = parser.parse_args()
++    recovery = None
++    try:
++        recovery = Recovery(args.contract)
++        if args.action == 'observe-job':
++            require(args.job is not None, 'EXISTING_JOB_NAME_REQUIRED')
++            value = recovery.observe_job(args.job)
++        else:
++            value = getattr(recovery, args.action.replace('-', '_'))()
++        print(json.dumps(value, sort_keys=True))
++        return 0
++    except (Hold, OSError, ValueError, KeyError, subprocess.TimeoutExpired) as error:
++        # Never echo raw API documents, exception text from an original runtime, or identity data.
++        reason = str(error) if isinstance(error, Hold) else type(error).__name__
++        result = dict(status='HOLD_NO_RESTART_NO_OWNER_REPLACEMENT', action=args.action,
++                      reason=reason, board_mutation_rollback_attempted=False)
++        if recovery is not None:
++            path = recovery.tx / ('hold-' + args.action + '.json')
++            if not path.exists():
++                create(path, encoded(result))
++        print(json.dumps(result, sort_keys=True))
++        return 1
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+--- /dev/null
++++ b/usr/local/lib/aura-boot-recovery/v1/capture_contract.py
+@@ -0,0 +1,197 @@
++"""LATER read-only board capture. No service action, Native restore or store open.
++
++The current main owner supplies one fresh metadata handoff after identity returns
++maintenance rights and the main/axis/CPU windows finish original wide restoration.
++Do not run this offline candidate against a live device from this task.
++"""
++import argparse
++import json
++import os
++from pathlib import Path
++import platform
++import re
++import subprocess
++import sys
++
++from recovery_rules import (APP, CAMERA, CLIENT, CLIENT_SHA, DAEMON_SHA, GUI, Hold,
++                            digest, encoded, owner, require, verify_idstop, verify_platform)
++from boot_recovery import (CHECKPOINT, RELEASE, create, get_metadata, original_verify,
++                           platform_metadata, process, regular, unit)
++
++OPS = Path('/home/root/aura-native-live-20261024/ops/be72669aa53de735')
++
++
++def pinned(pin):
++    raw = regular(pin['path'])
++    require(digest(raw) == pin['sha256'], 'FRESH_HANDOFF_PIN_CHANGED')
++    return raw
++
++
++def capture(expected):
++    require(platform.system() == 'Linux' and platform.machine() == 'aarch64' and os.geteuid() == 0
++            and sys.dont_write_bytecode, 'BOARD_READONLY_CAPTURE_ONLY')
++    require(expected.get('schema') == 'aura-boot-install-handoff-1', 'FRESH_MAIN_HANDOFF_REQUIRED')
++    for name in ('identity_explicitly_returned_maintenance', 'main_axis_cpu_window_completed', 'all_other_writers_frozen',
++                 'auxiliary_loader_startup_reviewed'):
++        require(expected.get(name) is True, 'MAINTENANCE_RIGHTS_NOT_RETURNED')
++    boot = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
++    require(expected['boot_id'] == boot, 'CAPTURE_BOOT_CHANGED')
++    source = expected['startup_pin']
++    startup_raw = pinned(source)
++    startup = json.loads(startup_raw)
++    aura = Path(startup['runtime']) / 'aura'
++    require(len(startup['component_sha256']) == 380, 'FRESH_380_COMPONENT_CLOSURE_REQUIRED')
++    for relative, pin in startup['component_sha256'].items():
++        require(not Path(relative).is_absolute() and '..' not in Path(relative).parts
++                and digest(regular(aura / relative)) == pin, 'CURRENT_COMPONENT_DIFFERS')
++    camera = owner(expected['camera_owner'])
++    supervisor = owner(expected['gui_supervisor'])
++    gtk = owner(expected['gtk_owner'])
++    require(process(camera['pid']) == camera and process(supervisor['pid']) == supervisor
++            and process(gtk['pid']) == gtk, 'FRESH_OWNER_CHANGED')
++    require(int(unit(CAMERA)['MainPID']) == camera['pid'] and int(unit(GUI)['MainPID']) == supervisor['pid'], 'FRESH_SERVICE_OWNER_CHANGED')
++    verify_platform(platform_metadata(), APP)
++    manifest_raw = regular(RELEASE / 'candidate-manifest.json')
++    manifest_sha = digest(manifest_raw)
++    stop = json.loads(pinned(expected['idstop_report_pin']))
++    verify_idstop(stop, boot, manifest_sha)
++    history = json.loads(pinned(expected['fresh_history_receipt_pin']))
++    require(history.get('schema') == 'aura-fresh-final-history-validation-1'
++            and history.get('status') == 'ORIGINAL_CURRENT_FINAL_AND_COMPLETE_HISTORY_VERIFIED'
++            and history.get('boot_id') == boot
++            and history.get('original_load_business_checkpoint_called') is True
++            and history.get('complete_ordered_history_verified') is True
++            and history.get('all_required_current_boot_cumulative_lower_bounds_checked') is True
++            and history.get('checkpoint_or_marker_written') is False, 'CPU_ORIGINAL_FRESH_FULL_HISTORY_PROOF_REQUIRED')
++    history_expected_pin = expected['fresh_history_expected_pin']
++    original_expected = json.loads(pinned(history_expected_pin))
++    require(history_expected_pin['sha256'] == history['expected_sha256']
++            and original_expected['boot_id'] == boot and original_expected['checkpoint_pin'] == history['checkpoint_pin']
++            and original_expected['camera_owner'] == history['source_owner'], 'CAPTURE_HISTORY_RECEIPT_INPUT_NOT_BOUND')
++    accepted_history = {key: original_expected['history'][key] for key in ('head', 'archive_count', 'archives', 'legacy_pin')}
++    require(accepted_history['archives'] == history['archives'] and accepted_history['archive_count'] == history['archive_count']
++            and accepted_history['legacy_pin'] == history['legacy_pin'], 'CAPTURE_COMPLETE_ORDERED_HISTORY_DIFFERS')
++    # Reuse the CPU adapters by exact reference, without copying/reimplementing them.
++    references = json.loads(regular(Path(__file__).resolve().parent / 'cpu_adapters.reference.json'))['adapters']
++    for role in ('normal_stop_adapter_pin', 'full_history_adapter_pin'):
++        reference = references[role]
++        require(Path(expected[role]['path']).name == reference['filename']
++                and expected[role]['sha256'] == reference['sha256'], 'CPU_ADAPTER_REVIEW_VERSION_CHANGED_REVIEW_PACKAGE')
++        pinned(expected[role])
++    health = get_metadata(8790, '/health')
++    require(health.get('pid') == camera['pid'] and health.get('board_boot_id') == boot
++            and health.get('motion_command_emitted') is False, 'CURRENT_CAMERA_PROVENANCE')
++    handoff = (health.get('dpu_schedule') or {}).get('protection_handoff') or {}
++    require(handoff.get('mode') == 'native_exact_same_boot'
++            and handoff.get('seed_sha256') == history['checkpoint_pin']['sha256'], 'CURRENT_CAMERA_MUST_CONSUME_REVIEWED_FRESH_FINAL')
++    require(handoff.get('previous_kernel_history') == accepted_history['head'], 'LIVE_HISTORY_HEAD_DIFFERS_FROM_ACCEPTED_PROVENANCE')
++    ui_path = aura / 'config/board_avatar_gtk.json'
++    ui_raw = regular(ui_path)
++    ui = json.loads(ui_raw)
++    selected_pin = ui['board_business']['face_readback']
++    selected = json.loads(pinned(selected_pin))
++    original_verify(aura, selected)
++    require(selected['board_boot_id'] == boot and selected['camera_pid'] == camera['pid']
++            and selected['camera_start_ticks'] == camera['birth_ticks'], 'CURRENT_SELECTED_OWNER_REQUIRED')
++    run = OPS / ('native-run-' + boot + '-' + str(camera['pid'])) / 'config.json'
++    require(selected['camera_config'] == str(run), 'CURRENT_RUN_CONFIG_REQUIRED')
++    config = json.loads(regular(run))
++    native = config['native_execution']
++    require(native['checkpoint_output'] == str(CHECKPOINT) and native.get('allow_new_kernel_boot') is True, 'ORIGINAL_NEW_BOOT_MECHANISM_REQUIRED')
++    files = {}
++
++    def keep(path, pin=None):
++        value = digest(regular(path))
++        require(pin is None or value == pin, 'CAMERA_PUBLIC_SOURCE_PIN_CHANGED')
++        files[str(path)] = value
++
++    for path, pin in selected['source_sha256'].items():
++        keep(path, pin)
++    for pin in (history_expected_pin, expected['fresh_history_receipt_pin'], expected['full_history_adapter_pin']):
++        keep(pin['path'], pin['sha256'])
++    native_manifest = dict(path=native['source_manifest'], sha256=native['source_manifest_sha256'])
++    python_manifest = json.loads(pinned(native_manifest))
++    python_root = Path(native_manifest['path']).parent / 'aura'
++    actual = {str(p.relative_to(python_root)): digest(regular(p)) for p in python_root.rglob('*.py')}
++    require(actual == python_manifest['files'], 'FULL_NATIVE_PYTHON_SOURCE_SET_CHANGED')
++    for relative, pin in actual.items():
++        keep(python_root / relative, pin)
++    keep(native_manifest['path'], native_manifest['sha256'])
++    operator = OPS / 'pan-face-edge-v5/native-operator-v1'
++    for name in ('runtime-manifest.json', 'source-manifest.json'):
++        raw = regular(operator / name)
++        keep(operator / name)
++        for path, pin in json.loads(raw)['files'].items():
++            keep(Path(path) if Path(path).is_absolute() else operator / path, pin)
++    meta = json.loads(regular(OPS / 'meta.json'))
++    for path, pin in meta['source_pins'].items():
++        keep(OPS / path, pin)
++    for path in (OPS / 'meta.json', OPS / 'state.json', Path(source['path']).with_name('launcher.py'),
++                 Path('/etc/dfx-mgrd/daemon.conf'), Path('/etc/dfx-mgrd/default_firmware'), Path('/usr/bin/xlnx-firmware-detect'),
++                 Path('/usr/local/lib/kv260-runtime-repair/load-repaired-zocl.sh')):
++        keep(path)
++    require(json.loads(regular(OPS / 'state.json'))['phase'] in {'NATIVE_READY', 'OBSERVING', 'ACCEPTED'}, 'OLD_RESCUE_STATE_MUST_NOT_RESTORE_OWNERS')
++    require(digest(regular(CLIENT)) == CLIENT_SHA, 'ORIGINAL_CLIENT_CHANGED')
++    daemon = unit('dfx-mgr.service')
++    require(process(daemon['MainPID'], executable=True)['executable_sha256'] == DAEMON_SHA, 'ORIGINAL_REPAIRED_DAEMON_CHANGED')
++    units = {}
++    for name in (CAMERA, GUI, 'dfx-mgr.service', 'kv260-repaired-zocl.service'):
++        current = unit(name)
++        paths = {current['FragmentPath']} | set(current['DropInPaths'].split())
++        require('' not in paths, 'ORIGINAL_UNIT_SOURCE_MISSING')
++        units[name] = dict(source_sha256={p: digest(regular(p)) for p in paths})
++        if name in {CAMERA, GUI, 'dfx-mgr.service'}:
++            result = subprocess.run(['systemctl', 'is-enabled', name], capture_output=True, timeout=5)
++            require(result.returncode == 0 and result.stdout.strip() == b'enabled', 'ORIGINAL_BOOT_SERVICE_NOT_ENABLED')
++    absent_units = []
++    auxiliary = unit('dpu-auto-config.service')
++    if auxiliary.get('LoadState') == 'not-found':
++        absent_units.append('dpu-auto-config.service')
++    else:
++        paths = {auxiliary['FragmentPath']} | set(auxiliary['DropInPaths'].split())
++        require('' not in paths and expected.get('auxiliary_loader_source_pins'), 'GENERATED_LOADER_PUBLIC_SOURCE_METADATA_REQUIRED')
++        units['dpu-auto-config.service'] = dict(source_sha256={p: digest(regular(p)) for p in paths})
++        for pin in expected['auxiliary_loader_source_pins']:
++            keep(pin['path'], pin['sha256'])
++    contract = dict(schema='aura-boot-recovery-contract-1', fresh_handoff_approved=True, installed_boot_id=boot,
++                    startup_path=source['path'], runtime_aura=str(aura), component_count=len(startup['component_sha256']),
++                    native_ops_root=str(OPS), native_manifest=native_manifest,
++                    native_boot_policy={key: native[key] for key in ('allow_new_kernel_boot', 'new_boot_marker_directory')},
++                    history_adapter_pin=expected['full_history_adapter_pin'],
++                    listening_preference_path='/home/root/.local/share/aura-board-business/listening_preference.json',
++                    immutable_files=files, original_units=units, absent_platform_units=absent_units,
++                    installation_handoff=copy_handoff(expected),
++                    initial_source_state=dict(contract_sha256='INITIAL_CONTRACT', startup_sha256=digest(startup_raw),
++                                              ui_sha256=digest(ui_raw), selected_pin=selected_pin,
++                                              selected_sources=selected['source_sha256'],
++                                              history_expected=accepted_history,
++                                              history_provenance=dict(expected_pin=history_expected_pin,
++                                                                      result_pin=expected['fresh_history_receipt_pin']),
++                                              predecessor=dict(boot_id=boot, camera_owner=camera)))
++    require(pinned(source) == startup_raw and process(camera['pid']) == camera and process(supervisor['pid']) == supervisor
++            and process(gtk['pid']) == gtk, 'SOURCE_OR_OWNER_CHANGED_DURING_CAPTURE')
++    return contract
++
++
++def copy_handoff(expected):
++    # Only explicit metadata keys; never copy arbitrary text or API documents.
++    keys = ('boot_id', 'camera_owner', 'gui_supervisor', 'gtk_owner', 'startup_pin', 'idstop_report_pin',
++            'fresh_history_receipt_pin', 'fresh_history_expected_pin', 'normal_stop_adapter_pin', 'full_history_adapter_pin')
++    return {key: expected[key] for key in keys}
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--handoff', type=Path, required=True)
++    parser.add_argument('--handoff-sha256', required=True)
++    parser.add_argument('--output', type=Path, required=True)
++    args = parser.parse_args()
++    value = json.loads(pinned(dict(path=str(args.handoff), sha256=args.handoff_sha256)))
++    contract = capture(value)
++    create(args.output, encoded(contract))
++    print(json.dumps(dict(status='FRESH_READONLY_CONTRACT_CAPTURED_NOT_INSTALLED', contract_sha256=digest(encoded(contract)),
++                          original_components_verified=contract['component_count'], board_mutations=False)))
++
++
++if __name__ == '__main__':
++    main()
+--- /dev/null
++++ b/usr/local/lib/aura-boot-recovery/v1/contract.json
+@@ -0,0 +1,17 @@
++{
++  "schema": "aura-boot-recovery-contract-1",
++  "fresh_handoff_approved": false,
++  "installed_boot_id": null,
++  "startup_path": "/home/root/aura-board-business-20261030/production-5259eab11e42af13/startup/config.json",
++  "runtime_aura": null,
++  "component_count": null,
++  "native_ops_root": "/home/root/aura-native-live-20261024/ops/be72669aa53de735",
++  "native_manifest": null,
++  "native_boot_policy": null,
++  "history_adapter_pin": null,
++  "listening_preference_path": "/home/root/.local/share/aura-board-business/listening_preference.json",
++  "immutable_files": {},
++  "original_units": {},
++  "initial_source_state": null,
++  "note": "INERT EXAMPLE. Never fill with 735bf/old boot/PID/c6c8. Use capture_contract.py with the fresh main/axis/CPU handoff."
++}
+--- /dev/null
++++ b/usr/local/lib/aura-boot-recovery/v1/cpu_adapters.reference.json
+@@ -0,0 +1,15 @@
++{
++  "schema": "aura-boot-recovery-existing-cpu-adapter-reference-1",
++  "copied_reimplemented_or_executed": false,
++  "adapters": {
++    "normal_stop_adapter_pin": {
++      "filename": "normal_stop_current_owner.py",
++      "sha256": "4a5e374eacc825e16a22664dc6ef1137f5e0950be3dc8b3e477f791faf5e2e91"
++    },
++    "full_history_adapter_pin": {
++      "filename": "validate_fresh_final_history_readonly.py",
++      "sha256": "5ca99d4231c686de0f89dac5792299bec13af517a5c6e2b8f73c4cc66b9285c9"
++    }
++  },
++  "note": "Board staging path is supplied by the main/CPU owner after the explicit handoff. A changed reviewed adapter needs a revised reviewed reference, never an invented current hash."
++}
+--- /dev/null
++++ b/usr/local/lib/aura-boot-recovery/v1/manage_installation.py
+@@ -0,0 +1,288 @@
++"""Review, install or withdraw ONLY this package. Default command is a plan.
++
++No SSH, stop/start/restart/reboot, enable/disable, DFX or Native-state operation.
++Installation and rollback use one daemon-reload; no running entry is replaced.
++"""
++import argparse
++import json
++import os
++from pathlib import Path
++import platform
++import subprocess
++import sys
++import time
++
++from recovery_rules import (CAMERA, GUI, Hold, digest, encoded, require, require_no_owners)
++from boot_recovery import (PACKAGE_ROOT, STATE_ROOT, Recovery, create, fcntl, fsync_directory,
++                           owner_scan, process, regular, replace_known, unit)
++
++HERE = Path(__file__).resolve().parent
++PYTHON_FILES = ('recovery_rules.py', 'boot_recovery.py', 'capture_contract.py', 'manage_installation.py', 'original_history_gate.py')
++
++
++def payload(contract_raw):
++    result = {(PACKAGE_ROOT / name).as_posix(): (HERE / name).read_bytes() for name in PYTHON_FILES}
++    result[(PACKAGE_ROOT / 'contract.json').as_posix()] = contract_raw
++    result[(PACKAGE_ROOT / 'cpu_adapters.reference.json').as_posix()] = (HERE / 'cpu_adapters.reference.json').read_bytes()
++    for path in (HERE / 'systemd').rglob('*'):
++        if path.is_file():
++            result['/etc/systemd/system/' + path.relative_to(HERE / 'systemd').as_posix()] = path.read_bytes()
++    return result
++
++
++def board_only():
++    require(platform.system() == 'Linux' and platform.machine() == 'aarch64'
++            and os.geteuid() == 0 and sys.dont_write_bytecode, 'LATER_BOARD_ROOT_INSTALL_ONLY')
++
++
++def source_recheck(contract):
++    require(contract.get('schema') == 'aura-boot-recovery-contract-1'
++            and contract.get('fresh_handoff_approved') is True, 'INERT_OR_UNREVIEWED_CONTRACT')
++    boot = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
++    require(contract['installed_boot_id'] == boot, 'INSTALL_REQUIRES_FRESH_SAME_BOOT_CAPTURE')
++    probe = object.__new__(Recovery)
++    probe.contract = contract
++    probe.contract_sha = digest(encoded(contract))
++    probe.activation = {'installed_files': {}}
++    probe.source_snapshot()
++    probe.original_release()
++    handoff = contract['installation_handoff']
++    for role in ('camera_owner', 'gui_supervisor', 'gtk_owner'):
++        require(process(handoff[role]['pid']) == handoff[role], 'INSTALL_OWNER_CHANGED_RECAPTURE')
++    require(int(unit(CAMERA)['MainPID']) == handoff['camera_owner']['pid']
++            and int(unit(GUI)['MainPID']) == handoff['gui_supervisor']['pid'], 'INSTALL_RUNNING_ENTRY_CHANGED')
++    for role in ('idstop_report_pin', 'fresh_history_receipt_pin', 'fresh_history_expected_pin', 'normal_stop_adapter_pin', 'full_history_adapter_pin'):
++        pin = handoff[role]
++        require(digest(regular(pin['path'])) == pin['sha256'], 'INSTALL_REVIEWED_EVIDENCE_CHANGED')
++
++
++def fresh_directory(path):
++    require(not os.path.lexists(path) and path.parent.resolve() == path.parent, 'INSTALL_PATH_EXISTS_OR_REDIRECTS')
++    path.mkdir(mode=0o700)
++    fsync_directory(path.parent)
++
++
++def ensure_parent(path):
++    path = Path(path)
++    missing = []
++    while not path.exists():
++        missing.append(path)
++        path = path.parent
++    require(path.resolve() == path and not path.is_symlink(), 'INSTALL_PARENT_REDIRECTED')
++    for parent in reversed(missing):
++        parent.mkdir(mode=0o755)
++        fsync_directory(parent.parent)
++
++
++def reload_and_verify():
++    result = subprocess.run(['systemctl', 'daemon-reload'], capture_output=True, timeout=15)
++    require(result.returncode == 0, 'DAEMON_RELOAD_FAILED_NO_RESTART')
++    for name, helper, dependency in ((CAMERA, 'camera-check', 'aura-original-wide-prepare.service'),
++                                     (GUI, 'bind-camera', CAMERA)):
++        props = unit(name)
++        extra = subprocess.run(['systemctl', 'show', name, '--property=ExecStartPre,Requires,After'], capture_output=True, timeout=5)
++        require(extra.returncode == 0, 'NEW_EFFECTIVE_DEPENDENCIES_UNAVAILABLE')
++        merged = dict(line.split('=', 1) for line in extra.stdout.decode().splitlines() if '=' in line)
++        require(str(PACKAGE_ROOT / 'boot_recovery.py') + ' ' + helper in merged.get('ExecStartPre', '')
++                and dependency in merged.get('Requires', '').split()
++                and dependency in merged.get('After', '').split(), 'LATER_DROPIN_MASKED_NEW_BARRIER')
++        if name == CAMERA:
++            require(all(props.get(k) == v for k, v in {'Restart': 'no', 'KillMode': 'process', 'SendSIGKILL': 'no', 'TimeoutStopUSec': 'infinity'}.items()), 'NATIVE_STOP_BOUNDARY_CHANGED')
++        else:
++            require(props.get('TimeoutStartUSec') == 'infinity', 'OUTER_GUI_START_TIMEOUT_MAY_KILL_BINDING_HELPER')
++
++
++def verify_unit_graph():
++    # Reads unit definitions only. Run against the ACTUAL target version and
++    # all retained drop-ins, before writing any activation receipt.
++    paths = ['/etc/systemd/system/aura-original-wide-prepare.service', '/etc/systemd/system/aura-boot-ready.service',
++             unit(CAMERA)['FragmentPath'], unit(GUI)['FragmentPath']]
++    require(all(paths), 'ORIGINAL_UNIT_FRAGMENT_UNAVAILABLE_FOR_VERIFY')
++    result = subprocess.run(['systemd-analyze', 'verify', '--man=no'] + paths, capture_output=True, timeout=25)
++    require(result.returncode == 0, 'TARGET_SYSTEMD_UNIT_GRAPH_NOT_VERIFIED_NO_ACTIVATION')
++
++
++def install(contract_raw):
++    board_only()
++    contract = json.loads(contract_raw)
++    require(encoded(contract) == contract_raw, 'CANONICAL_CAPTURE_CONTRACT_REQUIRED')
++    source_recheck(contract)
++    files = payload(contract_raw)
++    require(not PACKAGE_ROOT.exists() and not STATE_ROOT.exists(), 'PREVIOUS_INSTALLATION_RECONCILE_FIRST')
++    for target in files:
++        require(not os.path.lexists(target), 'REFUSE_OVERWRITING_ANY_EXISTING_FILE')
++    ensure_parent(PACKAGE_ROOT.parent)
++    ensure_parent(STATE_ROOT.parent)
++    fresh_directory(PACKAGE_ROOT)
++    fresh_directory(STATE_ROOT)
++    before = STATE_ROOT / 'installation-before'
++    before.mkdir(mode=0o700)
++    for name, sources in contract['original_units'].items():
++        directory = before / name
++        directory.mkdir(mode=0o700)
++        index = {}
++        for number, (path, pin) in enumerate(sorted(sources['source_sha256'].items())):
++            raw = regular(path)
++            require(digest(raw) == pin, 'PREINSTALL_BACKUP_SOURCE_CHANGED')
++            filename = str(number) + '.original.raw'
++            create(directory / filename, raw)
++            index[path] = dict(sha256=pin, original_bytes_file=filename)
++        create(directory / 'index.json', encoded(index))
++    intent = dict(schema='aura-boot-install-intent-1', boot_id=contract['installed_boot_id'],
++                  contract_sha256=digest(contract_raw), monotonic_ns=time.monotonic_ns(),
++                  added_files={p: digest(raw) for p, raw in files.items()}, overwritten_files=[], service_restart_requested=False)
++    create(STATE_ROOT / 'install-intent.json', encoded(intent))
++    source_recheck(contract)  # Capture and compare every original source again before writes.
++    for target, raw in files.items():
++        path = Path(target)
++        ensure_parent(path.parent)
++        create(path, raw)
++    source_recheck(contract)
++    verify_unit_graph()
++    activation = dict(schema='aura-boot-recovery-activation-1', enabled=True,
++                      contract_sha256=digest(contract_raw), installed_files=intent['added_files'])
++    create(PACKAGE_ROOT / 'activation.json', encoded(activation))
++    try:
++        reload_and_verify()
++    except BaseException:
++        # Disable this package only. Leave all sources, services and jobs untouched.
++        require(regular(PACKAGE_ROOT / 'activation.json') == encoded(activation), 'ACTIVATION_CHANGED_DURING_INSTALL')
++        (PACKAGE_ROOT / 'activation.json').unlink()
++        fsync_directory(PACKAGE_ROOT)
++        raise
++    receipt = dict(schema='aura-boot-recovery-installation-1', status='INSTALLED_FOR_NEXT_BOOT_NOT_COLD_BOOT_ACCEPTED',
++                   boot_id=contract['installed_boot_id'], contract_sha256=digest(contract_raw), added_files=intent['added_files'],
++                   activation_sha256=digest(encoded(activation)), stopped_started_restarted_or_rebooted=False,
++                   original_default_firmware_changed=False, original_sources_overwritten=False,
++                   cold_boot_accepted=False)
++    create(STATE_ROOT / 'installed.json', encoded(receipt))
++    return receipt
++
++
++def no_live_helpers_or_loader_jobs():
++    for name in (CAMERA, GUI):
++        require(unit(name).get('ControlPID', '0') == '0', 'ORIGINAL_SERVICE_PRESTART_HELPER_ACTIVE')
++    for name in ('aura-original-wide-prepare.service', 'aura-boot-ready.service'):
++        current = unit(name)
++        require(current.get('MainPID', '0') == '0' and current.get('ControlPID', '0') == '0' and not current.get('Job'), 'BOOT_HELPER_STILL_ACTIVE')
++    jobs = subprocess.run(['systemctl', 'list-units', '--all', '--no-legend', '--no-pager', 'aura-boot-wide-*.service'], capture_output=True, timeout=5)
++    require(jobs.returncode == 0, 'CANNOT_AUDIT_EXISTING_DFX_JOBS')
++    for line in jobs.stdout.decode().splitlines():
++        parts = line.split()
++        if not parts:
++            continue
++        name = next((p for p in parts if p.startswith('aura-boot-wide-') and p.endswith('.service')), None)
++        require(name is not None, 'UNKNOWN_DFX_UNIT_LIST_SHAPE')
++        current = unit(name)
++        require(current.get('MainPID', '0') == '0' and not current.get('Job')
++                and current.get('SubState') in {'dead', 'exited', 'failed'}, 'DFX_JOB_PENDING_OR_UNKNOWN_NO_ROLLBACK')
++
++
++def lock_state():
++    path = STATE_ROOT / 'operation.lock'
++    require(path.parent.resolve() == path.parent and not path.is_symlink(), 'STATE_LOCK_REDIRECTED')
++    handle = path.open('a+')
++    fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
++    return handle
++
++
++def withdraw():
++    board_only()
++    operation_lock = lock_state()
++    no_live_helpers_or_loader_jobs()
++    receipt = json.loads(regular(STATE_ROOT / 'installed.json'))
++    activation = PACKAGE_ROOT / 'activation.json'
++    require(digest(regular(activation)) == receipt['activation_sha256'], 'OWN_ACTIVATION_CHANGED')
++    targets = {p: pin for p, pin in receipt['added_files'].items() if p.startswith('/etc/systemd/system/')}
++    for path, pin in targets.items():
++        require(digest(regular(path)) == pin, 'OWN_SYSTEMD_FILE_CHANGED_REFUSE_WITHDRAWAL')
++    # Review and validate the ENTIRE withdrawal set before changing the first byte.
++    activation.unlink()
++    fsync_directory(activation.parent)
++    for path, pin in targets.items():
++        require(digest(regular(path)) == pin, 'WITHDRAWAL_CAS_CHANGED')
++        Path(path).unlink()
++        fsync_directory(Path(path).parent)
++    result = subprocess.run(['systemctl', 'daemon-reload'], capture_output=True, timeout=15)
++    require(result.returncode == 0, 'WITHDRAWAL_RELOAD_FAILED_NO_RESTART')
++    value = dict(status='OWN_STARTUP_BARRIERS_WITHDRAWN_NO_SERVICE_ACTION', startup_ui_and_selected_binding_retained=True,
++                 package_and_state_retained_for_provenance=True, default_firmware_restored_by_no_change=True,
++                 next_original_boot_may_load_benchmark=True)
++    create(STATE_ROOT / 'withdrawn.json', encoded(value))
++    return value
++
++
++def rollback_binding(directory):
++    board_only()
++    operation_lock = lock_state()
++    no_live_helpers_or_loader_jobs()
++    directory = Path(directory)
++    require(directory.resolve() == directory and STATE_ROOT / 'boots' in directory.parents, 'BINDING_ROLLBACK_PATH')
++    intent = json.loads(regular(directory / 'intent.json'))
++    require(intent['contract_sha256'] == digest(regular(PACKAGE_ROOT / 'contract.json')), 'BINDING_ROLLBACK_CONTRACT_CHANGED')
++    require(intent['boot_id'] == Path('/proc/sys/kernel/random/boot_id').read_text().strip(), 'BINDING_ROLLBACK_BOOT_CHANGED')
++    for name in (CAMERA, GUI):
++        current = unit(name)
++        require(current['MainPID'] == '0' and current['ActiveState'] == 'inactive'
++                and current['SubState'] == 'dead' and not current['Job'] and current['Result'] == 'success', 'NORMAL_SERVICE_SHUTDOWN_REQUIRED')
++    require_no_owners(owner_scan())
++    contract = json.loads(regular(PACKAGE_ROOT / 'contract.json'))
++    startup_path = Path(contract['startup_path'])
++    ui_path = Path(contract['runtime_aura']) / 'config/board_avatar_gtk.json'
++    pairs = [(ui_path, regular(directory / 'ui.before.json'), regular(directory / 'ui.after.json')),
++             (startup_path, regular(directory / 'startup.before.json'), regular(directory / 'startup.after.json'))]
++    for (path, before, after), prefix in zip(pairs, ('ui', 'startup')):
++        require(digest(before) == intent[prefix + '_before_sha256'] and digest(after) == intent[prefix + '_after_sha256'], 'BINDING_ROLLBACK_SEALED_BYTES_CHANGED')
++        require(regular(path) in {before, after}, 'NEWER_SOURCE_CONFLICT_NO_BINDING_ROLLBACK')
++    active_path = STATE_ROOT / 'active-source.json'
++    prior_active = regular(directory / 'active-source.before.json')
++    require(digest(prior_active) == intent['active_before_sha256'], 'BEFORE_ACTIVE_LEDGER_BYTES_CHANGED')
++    current_active = regular(active_path) if active_path.exists() else b'null\n'
++    committed_path = directory / 'committed.json'
++    committed = regular(committed_path) if committed_path.exists() else None
++    sealed_after = regular(directory / 'active-source.after.json')
++    require(digest(sealed_after) == intent['active_after_sha256'], 'AFTER_ACTIVE_LEDGER_SEALED_BYTES_CHANGED')
++    require(committed is None or committed == sealed_after, 'COMMITTED_LEDGER_DIFFERS_FROM_SEALED_AFTER')
++    require(current_active == prior_active or current_active == sealed_after, 'NEWER_ACTIVE_LEDGER_CONFLICT')
++    for path, before, after in pairs:
++        if regular(path) == after:
++            replace_known(path, after, before)
++    if current_active != prior_active:
++        if prior_active == b'null\n':
++            require(regular(active_path) == sealed_after, 'ACTIVE_LEDGER_CHANGED')
++            active_path.unlink()
++            fsync_directory(active_path.parent)
++        else:
++            replace_known(active_path, sealed_after, prior_active)
++    return dict(status='EXACT_BINDING_BYTES_RESTORED_GUI_LEFT_STOPPED', original_camera_reader_state_untouched=True,
++                fresh_binding_required_before_next_gui_start=True, service_action_requested=False)
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('action', nargs='?', default='plan', choices=['plan', 'install', 'withdraw', 'rollback-binding'])
++    parser.add_argument('--contract', type=Path, default=HERE / 'contract.example.json')
++    parser.add_argument('--binding-directory', type=Path)
++    args = parser.parse_args()
++    if args.action == 'plan':
++        raw = args.contract.read_bytes()
++        value = dict(status='LOCAL_REVIEW_PLAN_ONLY', candidate_activated=False,
++                     fresh_contract=bool(json.loads(raw).get('fresh_handoff_approved')),
++                     add_files={p: digest(data) for p, data in payload(raw).items()}, replace_existing_files=[],
++                     startup_order=['original repaired ZOCL', 'original repaired DFX daemon/default',
++                                    'original client list/remove/load + ID_STOP_ONLY', 'original Native camera',
++                                    'fresh selected binding + original verifier', 'original GUI launcher', 'READY observer'],
++                     rollback='withdraw own systemd files only; optional exact binding rollback requires normal shutdown',
++                     service_or_hardware_action_requested=False)
++    elif args.action == 'install':
++        value = install(regular(args.contract))
++    elif args.action == 'withdraw':
++        value = withdraw()
++    else:
++        require(args.binding_directory is not None, 'BINDING_DIRECTORY_REQUIRED')
++        value = rollback_binding(args.binding_directory)
++    print(json.dumps(value, sort_keys=True))
++
++
++if __name__ == '__main__':
++    main()
+--- /dev/null
++++ b/usr/local/lib/aura-boot-recovery/v1/original_history_gate.py
+@@ -0,0 +1,134 @@
++"""Isolated metadata call-through to the EXISTING reviewed CPU history adapter.
++
++No archive traversal, Native restore, marker commit, service control or new
++counter implementation lives here. Cold/live-chain checks call its unchanged
++original_modules/_sealed_source/validate_chain APIs. Same-boot checks require its
++genuine pre-start complete result and reuse unchanged validate_inputs/current/
++chain APIs; the owning helper separately verifies its ordered start state.
++"""
++import argparse
++import hashlib
++import json
++import os
++from pathlib import Path
++import platform
++import stat
++import sys
++import types
++
++ADAPTER_SHA = '5ca99d4231c686de0f89dac5792299bec13af517a5c6e2b8f73c4cc66b9285c9'
++
++
++def require(value, message):
++    if not value:
++        raise ValueError(message)
++
++
++def digest(raw):
++    return hashlib.sha256(raw).hexdigest()
++
++
++def read_pin(pin):
++    path = Path(pin['path'])
++    require(path.is_absolute() and not path.is_symlink() and path.resolve() == path, 'Pinned public path redirects')
++    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
++    with os.fdopen(fd, 'rb') as stream:
++        before = os.fstat(stream.fileno())
++        require(stat.S_ISREG(before.st_mode) and before.st_size <= 1048576, 'Public input shape')
++        raw = stream.read(1048577)
++        after = os.fstat(stream.fileno())
++    require((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
++            == (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
++            and digest(raw) == pin['sha256'], 'Pinned public input changed')
++    return raw
++
++
++def execute_request(adapter, request, request_sha, actual_boot):
++    """Metadata orchestration only; adapter is the exact separately pinned CPU source."""
++    require(request['schema'] == 'aura-original-history-gate-request-1'
++            and request['boot_id'] == actual_boot, 'History request/current boot differs')
++    kind = request['kind']
++    history = request['history_expected']
++    snapshot = adapter.Snapshot()
++    if kind == 'same_boot_resume':
++        expected_pin = request['normal_stop_expected_pin']
++        expected = snapshot.pinned(expected_pin)
++        original = snapshot.pinned(request['normal_stop_complete_result_pin'])
++        expected_history = {key: expected['history'][key] for key in ('head', 'archive_count', 'archives', 'legacy_pin')}
++        require(expected['boot_id'] == actual_boot and expected['checkpoint_pin'] == request['checkpoint_pin']
++                and expected['camera_owner'] == request['source_owner'] and expected_history == history,
++                'Same-boot proof is not bound to the exact final/owner/history')
++        require(original['schema'] == 'aura-fresh-final-history-validation-1'
++                and original['status'] == 'ORIGINAL_CURRENT_FINAL_AND_COMPLETE_HISTORY_VERIFIED'
++                and original['checkpoint_pin'] == request['checkpoint_pin']
++                and original['source_owner'] == request['source_owner']
++                and original['expected_sha256'] == expected_pin['sha256']
++                and original['original_load_business_checkpoint_called'] is True
++                and original['complete_ordered_history_verified'] is True
++                and original['all_required_current_boot_cumulative_lower_bounds_checked'] is True,
++                'Original complete same-boot validation did not succeed')
++        # The original full main() result was produced while both services were
++        # normally stopped. Its guard must not be lied to while this known
++        # ExecStartPre is running. Recheck its exact semantic APIs here, while
++        # the caller's quiet() admits only that helper and no old/live owners.
++        intent, stop_result = adapter.validate_inputs(expected, snapshot)
++        protection, boot_module = adapter.original_modules(snapshot)
++        document, marker = adapter.validate_current(expected, intent, stop_result, snapshot, protection, boot_module)
++        records = adapter.validate_chain(document, history, snapshot, protection, boot_module)
++        require(not os.path.lexists(marker), 'Same-boot final consumed during validation')
++        require(original['archives'] == records, 'Prior complete result differs from revalidated ordered history')
++    else:
++        require(kind in {'cold_predecessor', 'running_archive_chain'}, 'Unknown history route')
++        protection, boot_module = adapter.original_modules(snapshot)
++        if kind == 'cold_predecessor':
++            pin = request['checkpoint_pin']
++            require(Path(pin['path']) == adapter.CHECKPOINT, 'Original checkpoint path differs')
++            document = snapshot.pinned(pin)
++            seed, auxiliary = boot_module._sealed_source(document)
++            adapter.optional_shape(auxiliary, protection)
++            source = request['source_owner']
++            require(seed['boot_id'] == request['source_boot'] != actual_boot
++                    and seed['source_pid'] == source['pid'] and seed['source_birth_ticks'] == int(source['birth_ticks'])
++                    and seed['source_manifest_sha256'] == request['source_manifest_sha256']
++                    and document['source_unit_sha256'] == adapter.SOURCE_UNIT, 'Original cold predecessor provenance differs')
++            _, marker = boot_module.marker_paths(request['new_boot_marker_directory'], actual_boot)
++            require(not os.path.lexists(marker), 'Current kernel domain is already consumed')
++        else:
++            # validate_chain consumes only this actual boot/head metadata. This
++            # is NOT a checkpoint/seed, is never persisted as one, and is never
++            # passed to any Native restoration or counter-construction API.
++            document = {'seed': {'boot_id': actual_boot}, 'previous_kernel_history': history['head']}
++        records = adapter.validate_chain(document, history, snapshot, protection, boot_module)
++        original = None
++    snapshot.unchanged()
++    require(records == history['archives'] and len(records) == history['archive_count'], 'Original complete ordered history differs')
++    return dict(schema='aura-original-history-gate-result-1', request_sha256=request_sha, kind=kind,
++                boot_id=actual_boot, adapter_sha256=ADAPTER_SHA, checkpoint_pin=request.get('checkpoint_pin'),
++                history_expected=history, complete_ordered_history_verified=True, original_calls_only=True,
++                original_same_boot_result=original, checkpoint_or_marker_written=False,
++                native_context_created=False, model_or_device_opened=False)
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--request', required=True)
++    parser.add_argument('--request-sha256', required=True)
++    args = parser.parse_args()
++    require(platform.system() == 'Linux' and platform.machine() == 'aarch64' and os.geteuid() == 0
++            and sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode, 'Fresh board -B -I -S process required')
++    request_pin = dict(path=args.request, sha256=args.request_sha256)
++    request_raw = read_pin(request_pin)
++    request = json.loads(request_raw)
++    adapter_pin = request['adapter_pin']
++    require(adapter_pin['sha256'] == ADAPTER_SHA, 'Reviewed CPU adapter revision differs')
++    source = read_pin(adapter_pin)
++    namespace = dict(__name__='existing_cpu_readonly_history_adapter', __file__=adapter_pin['path'])
++    exec(compile(source, adapter_pin['path'], 'exec', dont_inherit=True), namespace)
++    result = execute_request(types.SimpleNamespace(**namespace), request, args.request_sha256,
++                             Path('/proc/sys/kernel/random/boot_id').read_text().strip())
++    require(read_pin(request_pin) == request_raw and read_pin(adapter_pin) == source, 'History call inputs changed')
++    print(json.dumps(result, sort_keys=True))
++
++
++if __name__ == '__main__':
++    main()
+--- /dev/null
++++ b/usr/local/lib/aura-boot-recovery/v1/recovery_rules.py
+@@ -0,0 +1,245 @@
++"""Small metadata rules around the original DFX, camera and GUI mechanisms.
++
++No devices, networks, models, stores or project runtime modules are opened here.
++"""
++import copy
++import hashlib
++import json
++import re
++
++APP = 'aura-visual-servo-b4096-wide-v1'
++BENCHMARK = 'kv260-benchmark-b4096'
++CLIENT = '/usr/bin/dfx-mgr-client'
++CLIENT_SHA = 'a37d8449c3362a509d459f9e57aa3711314602369354f7d98ca60c3e51607ad7'
++DAEMON_SHA = '369c7fb0ddd023a7cf7af14896a7fda6036219a36f4980c73640889720c95dfd'
++MANIFEST_SHA = '6a4b645a5bbfd35c9107976edf27886cf8e0c91e40f48be6f052a95e1172c1cf'
++IDSTOP_SHA = 'c9e91f74336c1e73d7c60408739abc8537b80066eb666a1a79e32b81d7d267aa'
++VERIFIER_SHA = 'b77c32b3863b9464006ac1bb7f16c8f767113925d9142d77e4755f1ce365527e'
++FORBIDDEN_OLD_FINAL = 'c6c8baab1de423e27740137330f8315796a7778e36735c93a0c87f2a56029471'
++REPLIES = {
++    'remove': b'remove from slot 0 returns: 0 (Ok)\n',
++    'load': (APP + ': loaded to slot 0\n').encode(),
++}
++CAMERA = 'aura-camera-ui.service'
++GUI = 'aura-avatar-ui.service'
++
++
++class Hold(RuntimeError):
++    """An unproved state: stop advancing, keep the original owner and evidence."""
++
++
++def require(value, code):
++    if not value:
++        raise Hold(code)
++
++
++def digest(raw):
++    return hashlib.sha256(raw).hexdigest()
++
++
++def encoded(value):
++    return (json.dumps(value, sort_keys=True, indent=2, ensure_ascii=True) + '\n').encode()
++
++
++def sha(value):
++    require(isinstance(value, str) and re.fullmatch('[0-9a-f]{64}', value), 'INVALID_SHA256')
++    return value
++
++
++def owner(value):
++    require(isinstance(value, dict) and set(value) == {'pid', 'birth_ticks', 'command_sha256'}, 'OWNER_SHAPE')
++    require(type(value['pid']) is int and value['pid'] > 0, 'OWNER_PID')
++    require(isinstance(value['birth_ticks'], str) and re.fullmatch('[1-9][0-9]*', value['birth_ticks']), 'OWNER_BIRTH')
++    sha(value['command_sha256'])
++    return value
++
++
++def require_no_owners(scan):
++    require(scan['complete'] is True and not scan['unreadable'], 'OWNER_SCAN_INCOMPLETE')
++    require(not scan['owners'], 'HARDWARE_OWNER_PRESENT')
++
++
++def loaded_app(raw):
++    """Parse the unchanged original client's six-column package table."""
++    require(len(raw) <= 65536, 'PACKAGE_REPLY_OVERSIZE')
++    lines = raw.decode('ascii', 'strict').splitlines()
++    header = False
++    names = set()
++    active = []
++    for line in lines:
++        if not line.strip():
++            continue
++        if line.split()[0] == 'Accelerator':
++            require(not header and line.split()[-1] == 'Active_slot', 'PACKAGE_HEADER')
++            header = True
++            continue
++        fields = line.split()
++        require(header and len(fields) == 6 and fields[0] not in names, 'PACKAGE_ROW')
++        names.add(fields[0])
++        require(fields[1] in {'PL_FLAT', 'XRT_FLAT', 'SIHA_PL_DFX', 'XRT_PL_DFX', 'XRT_AIE_DFX'}, 'PACKAGE_TYPE')
++        slot = fields[-1]
++        require(slot == '-1' or slot == '0,', 'UNEXPECTED_ACTIVE_SLOT')
++        if slot == '0,':
++            active.append(fields[0])
++    require(header and APP in names and BENCHMARK in names and len(active) == 1, 'PACKAGE_ACTIVE_AMBIGUOUS')
++    require(active[0] in {APP, BENCHMARK}, 'UNAPPROVED_LOADED_APP')
++    return active[0]
++
++
++def verify_platform(value, app):
++    """Use dynamic overlay identity and a paired ZOCL parent/child tree."""
++    require(value['firmware'] == app + '.bit.bin', 'FIRMWARE_IDENTITY')
++    require(value['fpga_state'] == 'operating', 'FPGA_NOT_OPERATING')
++    require(value['vart'] == 'firmware: /lib/firmware/xilinx/' + app + '/' + app + '.xclbin\n', 'VART_PAIRING')
++    overlays = value['overlays']
++    require(len(overlays) == 1 and overlays[0]['name'].startswith(app + '_image_')
++            and overlays[0]['status'] == 'applied', 'DYNAMIC_OVERLAY_PAIRING')
++    render, links = value['render'], value['zocl_links']
++    require(len(render) == 1 and links and not value['unexpected_zocl_links'], 'ZOCL_RENDER_SHAPE')
++    device = render[0]['device']
++    require(device.startswith('/sys/devices/') and sum(p == device for p in links) == 1
++            and all(p == device or p.startswith(device + '/') for p in links), 'ZOCL_PARENT_CHILD_PAIRING')
++    sha(value['fdt_sha256'])  # Measured actual value; no old hash or required hash change.
++
++
++def verify_unloaded(value):
++    require(value['firmware'] is None and not value['overlays'] and not value['render']
++            and not value['zocl_links'] and not value['unexpected_zocl_links'], 'PLATFORM_NOT_UNLOADED')
++
++
++def verify_job(state, invocation, stdout, stderr, action):
++    require(bool(re.fullmatch('[0-9a-f]{32}', invocation)) and state.get('InvocationID') == invocation, 'JOB_INVOCATION_CHANGED')
++    needed = {'MainPID': '0', 'ActiveState': 'active', 'SubState': 'exited', 'Job': '',
++              'ExecMainCode': '1', 'ExecMainStatus': '0', 'Result': 'success'}
++    require(all(state.get(k) == v for k, v in needed.items()), 'JOB_NOT_CONFIRMED_SUCCESS')
++    require(int(state.get('ExecMainPID', '0')) > 0
++            and int(state.get('ExecMainExitTimestampMonotonic', '0')) > int(state.get('ExecMainStartTimestampMonotonic', '0')) > 0,
++            'JOB_COMPLETION_TIMESTAMPS')
++    require(len(stdout) <= 65536 and not stderr, 'JOB_STDERR_OR_OVERSIZE')
++    if action in REPLIES:
++        require(stdout == REPLIES[action], 'ORIGINAL_REPLY_NOT_EXACT')
++    elif action == 'list':
++        return loaded_app(stdout)
++
++
++def verify_idstop(report, boot, manifest_sha):
++    require(report.get('boot_id') == boot and report.get('manifest_sha256') == manifest_sha
++            and report.get('identity_stop_passed') is True, 'IDSTOP_REPORT_PROVENANCE')
++    require(all(report.get(k) is False for k in ('ARM_sent', 'COMMIT_sent', 'BIND_sent', 'REFERENCE_sent')), 'IDSTOP_MOTION_REQUEST')
++    after = report.get('after_stop') or {}
++    require(type(after.get('flags')) is int and after['flags'] == 0
++            and type(after.get('lease_left_ms')) is int and after['lease_left_ms'] == 0, 'IDSTOP_OUTPUT_NOT_DISABLED')
++
++
++def verify_final_pointer(raw, consumed, predecessor, *, current_boot=None,
++                         allow_new_kernel_boot=False, current_domain_consumed=None):
++    """Gate the original route; never load, restore or consume a Native seed.
++
++    Same-boot exact resume refuses a consumed checkpoint. Different-boot input is
++    archive-only: its prior checkpoint marker is preserved, and eligibility comes
++    from the absence of the configured CURRENT-kernel domain marker.
++    """
++    require(digest(raw) != FORBIDDEN_OLD_FINAL, 'CONSUMED_C6C8_FINAL_FORBIDDEN')
++    doc = json.loads(raw)
++    seed = doc.get('seed') or {}
++    require(doc.get('schema') == 'aura-native-protection-checkpoint-2'
++            and doc.get('scope') == 'final_quiescent_before_native_owner_close'
++            and seed.get('purpose') == 'final_quiescent_business_checkpoint'
++            and seed.get('checkpoint_kind') == 1 and seed.get('fenced') == 0, 'ORIGINAL_FINAL_REQUIRED')
++    prior = predecessor['camera_owner']
++    owner(prior)
++    require(seed.get('boot_id') == predecessor['boot_id'] and seed.get('source_pid') == prior['pid']
++            and seed.get('source_birth_ticks') == int(prior['birth_ticks']), 'FINAL_POINTER_WRONG_PREDECESSOR')
++    if current_boot is not None and seed['boot_id'] != current_boot:
++        require(allow_new_kernel_boot is True, 'ORIGINAL_NEW_KERNEL_OPT_IN_REQUIRED')
++        require(current_domain_consumed is False, 'CURRENT_KERNEL_DOMAIN_ALREADY_CONSUMED_OR_UNKNOWN')
++    else:
++        require(not consumed, 'CONSUMED_FINAL_POINTER')
++    return digest(raw)
++
++
++def verify_bootstrap_handoff(handoff, gate, boot, contract_sha):
++    mode = 'native_exact_same_boot' if gate['predecessor']['boot_id'] == boot else 'native_new_kernel_boot'
++    require(handoff.get('mode') == mode, 'ORIGINAL_BOOTSTRAP_MODE_DIFFERS_FROM_ACTUAL_BOOT_ROUTE')
++    require(gate['boot_id'] == boot and gate['contract_sha256'] == contract_sha
++            and handoff.get('seed_sha256') == gate['checkpoint_sha256'], 'ORIGINAL_CAMERA_USED_DIFFERENT_FINAL')
++    prior = gate['predecessor']['camera_owner']
++    require(handoff.get('source_pid') == prior['pid']
++            and str(handoff.get('source_birth_ticks')) == prior['birth_ticks'], 'ORIGINAL_BOOTSTRAP_SOURCE_OWNER_CHANGED')
++    if mode == 'native_new_kernel_boot':
++        require(handoff.get('current_boot') == boot and handoff.get('source_boot') == gate['predecessor']['boot_id'], 'ORIGINAL_NEW_BOOT_ARCHIVE_PROVENANCE')
++
++
++def next_history_expected(previous, gate, handoff, boot):
++    """Extend only the actual original commit edge; never synthesize a Native final."""
++    head = handoff.get('previous_kernel_history')
++    if gate['predecessor']['boot_id'] == boot:
++        require(head == previous['head'], 'SAME_BOOT_HISTORY_HEAD_CHANGED')
++        return copy.deepcopy(previous)
++    require(isinstance(head, dict) and head.get('archive_path') == handoff.get('archive_path')
++            and head.get('archive_sha256') == handoff.get('archive_sha256')
++            and head.get('source_boot') == gate['predecessor']['boot_id']
++            and head.get('source_checkpoint_sha256') == gate['checkpoint_sha256']
++            and head.get('history_is_lower_bound') is False, 'ORIGINAL_CURRENT_BOOT_ARCHIVE_EDGE_DIFFERS')
++    count = previous['archive_count'] + 1
++    require(count <= 64, 'COMPLETE_HISTORY_ORIGINAL_DEPTH_BOUND')
++    row = dict(path=head['archive_path'], sha256=head['archive_sha256'], current_boot=boot,
++               source_boot=head['source_boot'], source_checkpoint_sha256=head['source_checkpoint_sha256'],
++               history_is_lower_bound=False)
++    return dict(head=copy.deepcopy(head), archive_count=count, archives=[row] + copy.deepcopy(previous['archives']),
++                legacy_pin=copy.deepcopy(previous['legacy_pin']))
++
++
++def make_binding(selected, boot, current_owner, run_pin, approved_sources):
++    owner(current_owner)
++    require(selected['source_sha256'] == approved_sources, 'SELECTED_SOURCE_MAP_CHANGED')
++    result = copy.deepcopy(selected)
++    result.update(board_boot_id=boot, camera_pid=current_owner['pid'], camera_start_ticks=current_owner['birth_ticks'],
++                  camera_cmdline_sha256=current_owner['command_sha256'], camera_config=run_pin['path'])
++    existing = result['source_sha256'].get(run_pin['path'])
++    require(existing is None or existing == run_pin['sha256'], 'RUN_CONFIG_PIN_CONFLICT')
++    result['source_sha256'][run_pin['path']] = sha(run_pin['sha256'])
++    return result
++
++
++def config_patch(startup, ui, binding_pin):
++    """Only the selected spec and its existing startup component pin may change."""
++    changed_ui = copy.deepcopy(ui)
++    changed_ui['board_business']['face_readback'] = dict(binding_pin)
++    ui_bytes = encoded(changed_ui)
++    changed_startup = copy.deepcopy(startup)
++    require('config/board_avatar_gtk.json' in startup['component_sha256'], 'UI_PIN_MISSING')
++    changed_startup['component_sha256']['config/board_avatar_gtk.json'] = digest(ui_bytes)
++    return ui_bytes, encoded(changed_startup)
++
++
++def gui_projection(state):
++    """Export fixed booleans/counters only; discard all names, text and IDs."""
++    pair, display = state.get('character_pair') or {}, state.get('avatar_display') or {}
++    hf, pan, biz = (state.get('handsfree_dialogue') or {}, state.get('manual_pan') or {}, state.get('board_business') or {})
++    clock = biz.get('clock') or {}
++    return dict(sequence=state.get('sequence'), main=state.get('ui_page') == 'main', idle=state.get('phase') == 'IDLE',
++                playing=state.get('playing'), pair_ready=pair.get('state') == 'READY',
++                production_selected=pair.get('production_selected'), fallback_allowed=pair.get('fallback_allowed'),
++                visible=display.get('visible'), frames=display.get('frames'),
++                listening=hf.get('enabled'), microphone=hf.get('microphone_open'), listening_state=hf.get('state'),
++                started=biz.get('started'), closed=biz.get('closed'), writer=(biz.get('writer') or {}).get('held'),
++                clock_anchored=clock.get('anchored'), clock_same_boot=clock.get('same_boot'),
++                faults=(state.get('runtime_faults') or {}).get('count'), following=pan.get('automatic_following'),
++                pan_locked=pan.get('state') in {'FAULT', 'UNAVAILABLE'} and pan.get('readback') is None and pan.get('pulse_us') is None)
++
++
++def verify_ready(first, last, listening_enabled):
++    require(type(listening_enabled) is bool, 'LISTENING_PREFERENCE_SHAPE')
++    for value in (first, last):
++        require(all(value.get(k) is True for k in ('main', 'idle', 'pair_ready', 'production_selected', 'visible',
++                                                  'started', 'writer', 'clock_anchored', 'clock_same_boot', 'pan_locked')), 'GUI_NOT_READY_OR_AXIS_NOT_LOCKED')
++        require(all(value.get(k) is False for k in ('playing', 'fallback_allowed', 'closed', 'following')), 'GUI_UNSAFE_STATE')
++        require(type(value.get('faults')) is int and value['faults'] == 0, 'GUI_RUNTIME_FAULT')
++        require(value.get('listening') is listening_enabled, 'LISTENING_PREFERENCE_NOT_PRESERVED')
++        if not listening_enabled:
++            require(value.get('microphone') is False and value.get('listening_state') == 'PAUSED', 'GUI_NOT_PAUSED')
++        else:
++            require(value.get('listening_state') in {'WAITING_SERVICE', 'WAITING_SPEECH', 'COOLDOWN'}, 'GUI_LISTENING_NOT_IDLE')
++    require(type(first.get('sequence')) is int and type(last.get('sequence')) is int and last['sequence'] > first['sequence'], 'GUI_API_NOT_ADVANCING')
++    require(type(first.get('frames')) is int and type(last.get('frames')) is int and last['frames'] > first['frames'], 'AVATAR_NOT_ADVANCING')

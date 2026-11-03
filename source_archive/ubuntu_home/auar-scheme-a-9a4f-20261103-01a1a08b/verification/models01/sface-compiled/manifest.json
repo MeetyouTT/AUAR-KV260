@@ -1,0 +1,228 @@
+{
+  "scope": "COMPILED_CANDIDATE_NOT_PRODUCTION_ACCEPTED",
+  "kind": "sface",
+  "file": "sface_public_int8.xmodel",
+  "bytes": 10796375,
+  "sha256": "d37b5a806bbec5660253de78162f07d451c32534bfc67348901dc54598da3664",
+  "partitions": [
+    {
+      "name": "subgraph_Sequential__input_0",
+      "device": "USER",
+      "fingerprint": null,
+      "ops": {
+        "data-fix": 1
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Sequential__input_0_fix",
+          "dims": [
+            1,
+            112,
+            112,
+            3
+          ],
+          "dtype": "xint8",
+          "fix_point": 7
+        }
+      ]
+    },
+    {
+      "name": "subgraph_Sequential__Sequential_BatchNorm2d_bn1__input_273_transfer_to_depthwise_conv2d",
+      "device": "DPU",
+      "fingerprint": "0x101000056010407",
+      "ops": {
+        "depthwise-conv2d-fix": 68,
+        "const-fix": 170,
+        "eltwise-fix": 27,
+        "conv2d-fix": 17,
+        "strided_slice-fix": 2,
+        "concat-fix": 1,
+        "reshape-fix": 1,
+        "download": 1,
+        "upload": 1
+      },
+      "inputs": [
+        {
+          "name": "Sequential__input_0_fix",
+          "dims": [
+            1,
+            112,
+            112,
+            3
+          ],
+          "dtype": "xint8",
+          "fix_point": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Sequential__Sequential_Flatten_output_flatten__7678_fix",
+          "dims": [
+            1,
+            128
+          ],
+          "dtype": "xint8",
+          "fix_point": 5
+        }
+      ]
+    },
+    {
+      "name": "subgraph_Sequential__Sequential_Flatten_output_flatten__7678_fix_",
+      "device": "CPU",
+      "fingerprint": null,
+      "ops": {
+        "fix2float": 1
+      },
+      "inputs": [
+        {
+          "name": "Sequential__Sequential_Flatten_output_flatten__7678_fix",
+          "dims": [
+            1,
+            128
+          ],
+          "dtype": "xint8",
+          "fix_point": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Sequential__Sequential_Flatten_output_flatten__7678_fix_",
+          "dims": [
+            1,
+            128
+          ],
+          "dtype": "float32",
+          "fix_point": null
+        }
+      ]
+    }
+  ],
+  "public_simulation": {
+    "scope": "PUBLIC_LFW_HELD_OUT_PTQ_SIMULATION_NOT_BOARD_OR_FIELD_ACCEPTANCE",
+    "dataset": {
+      "scope": "PUBLIC_LFW_DEVELOPMENT_SPLITS_NOT_DEPLOYMENT_ACCEPTANCE",
+      "detector_threshold": 0.6,
+      "face_selection": "closest_to_image_center",
+      "calibration_images": 256,
+      "calibration_identities": 256,
+      "calibration_eval_identity_overlap": 0,
+      "train_test_identity_overlap": 0,
+      "splits": {
+        "train": {
+          "pairs_total": 2200,
+          "pairs_evaluable": 2200,
+          "positive_evaluable": 1100,
+          "negative_evaluable": 1100,
+          "images_total": 3443,
+          "images_missing_detection": 0,
+          "images_evaluable": 3443,
+          "identities": 2132
+        },
+        "test": {
+          "pairs_total": 1000,
+          "pairs_evaluable": 1000,
+          "positive_evaluable": 500,
+          "negative_evaluable": 500,
+          "images_total": 1549,
+          "images_missing_detection": 0,
+          "images_evaluable": 1549,
+          "identities": 963
+        }
+      },
+      "images_redistributed": false,
+      "preparation_counters": {
+        "multiple_faces": 1086,
+        "missing_faces": 0,
+        "calibration_attempts": 256
+      }
+    },
+    "models": {
+      "fp32": {
+        "train_selected_balanced_accuracy": {
+          "threshold": 0.38091579830248473,
+          "accuracy": 0.9959090909090909,
+          "balanced_accuracy": 0.9959090909090909,
+          "true_accept_rate": 0.9918181818181818,
+          "false_accept_rate": 0.0,
+          "false_accepts": 0,
+          "negative_pairs": 1100,
+          "false_rejects": 9,
+          "positive_pairs": 1100
+        },
+        "held_out_at_train_selected_threshold": {
+          "threshold": 0.38091579830248473,
+          "accuracy": 0.988,
+          "balanced_accuracy": 0.988,
+          "true_accept_rate": 0.976,
+          "false_accept_rate": 0.0,
+          "false_accepts": 0,
+          "negative_pairs": 500,
+          "false_rejects": 12,
+          "positive_pairs": 500
+        },
+        "held_out_at_train_far_1pct_threshold": {
+          "threshold": 0.3163970490018137,
+          "accuracy": 0.986,
+          "balanced_accuracy": 0.986,
+          "true_accept_rate": 0.988,
+          "false_accept_rate": 0.016,
+          "false_accepts": 8,
+          "negative_pairs": 500,
+          "false_rejects": 6,
+          "positive_pairs": 500
+        }
+      },
+      "int8_simulation": {
+        "train_selected_balanced_accuracy": {
+          "threshold": 0.36647344896602485,
+          "accuracy": 0.9968181818181818,
+          "balanced_accuracy": 0.9968181818181818,
+          "true_accept_rate": 0.9936363636363637,
+          "false_accept_rate": 0.0,
+          "false_accepts": 0,
+          "negative_pairs": 1100,
+          "false_rejects": 7,
+          "positive_pairs": 1100
+        },
+        "held_out_at_train_selected_threshold": {
+          "threshold": 0.36647344896602485,
+          "accuracy": 0.988,
+          "balanced_accuracy": 0.988,
+          "true_accept_rate": 0.978,
+          "false_accept_rate": 0.002,
+          "false_accepts": 1,
+          "negative_pairs": 500,
+          "false_rejects": 11,
+          "positive_pairs": 500
+        },
+        "held_out_at_train_far_1pct_threshold": {
+          "threshold": 0.3275596994493126,
+          "accuracy": 0.99,
+          "balanced_accuracy": 0.99,
+          "true_accept_rate": 0.986,
+          "false_accept_rate": 0.006,
+          "false_accepts": 3,
+          "negative_pairs": 500,
+          "false_rejects": 7,
+          "positive_pairs": 500
+        }
+      }
+    },
+    "same_image_fp32_int8_cosine": {
+      "minimum": 0.9358090979878952,
+      "p05": 0.9728572478967068,
+      "median": 0.9824243379233425,
+      "p95": 0.9883164025925444
+    },
+    "engineering_quality_gate": {
+      "criteria": "balanced accuracy loss <= 0.02; median feature cosine >= 0.95; p05 >= 0.85",
+      "passed": true,
+      "balanced_accuracy_loss": 0.0,
+      "field_identity_acceptance": false
+    },
+    "deployment_export": "export_sface_batch_one.py in a fresh process"
+  },
+  "board_tested": false,
+  "field_accepted": false
+}

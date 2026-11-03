@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "status": "SOURCE_ONLY_PLAN_NO_TARGET_ACCESSED",
+  "utc": "2026-10-31T01:41:33.117750+00:00",
+  "endpoint": "http://127.0.0.1:8783/api/state",
+  "future_publisher": "root only",
+  "duration_seconds": 30,
+  "interval_seconds": 0.5,
+  "sample_cli": "python3 -B <board-private reviewed read_only_state_sampler.py> --sample --seconds 30 --interval 0.5",
+  "no_sample_without_explicit_flag": true,
+  "evidence_fields": {
+    "first_successful_swap": [
+      "avatar_display.kind=native_yuki_egl",
+      "avatar_display.frames>=1",
+      "avatar_display.paint_at numeric; native_yuki.py fills latest_stats only after egl.swap succeeds",
+      "character_pair.state=READY and portrait_offload.ready=true"
+    ],
+    "paired_activation": [
+      "character_pair.profile_version equals xuefei-yuki-board-v1-candidate and prompt_sha256 equals the frozen978B persona digest",
+      "character_pair.fallback_allowed=false, portrait_offload.mode=native, target_fps=16",
+      "Source trace: swap observer→pair READY→one-shot callback→board_business.activate; failure changes pair to FAILED and cancels owners before subsequent successful publish",
+      "API has no direct BoardBusinessRuntime.started/worker-thread-start flag. Do not claim activation from service.enabled alone."
+    ],
+    "configured_board_business": [
+      "local_transcription.service.enabled/conversation/streaming/board_owned/feedback_ready all true",
+      "local_transcription.service.capabilities ordinary_dialogue/explicit_memory/history_routing true",
+      "feedback_error/cleanup_error and state.error should be empty; sampler outputs only their presence booleans",
+      "These fields establish local configuration/capabilities, not live ASR/LLM/TTS inference or calibrated speaker identity."
+    ],
+    "visible_native_performance": [
+      "Only visible=true and frame_scheduling_active=true spans; hidden page intentionally pauses GL while audio is allowed to continue",
+      "FPS is delta avatar_display.frames / delta avatar_display.paint_at over successive successful-swap samples",
+      "age_ms measures last swap freshness; stale_frames/rejected_controls/elapsed_dropped_seconds use deltas, not initial absolute values. First swap before the control mailbox becomes ready can contribute one initial stale frame",
+      "native_call_ms/evaluate_ms/submit_ms/egl_bind_ms/egl_swap_ms/gtk_callback_ms are sampled last-frame timings. Coarse0.5s API snapshots cannot supply all-frame P95/P99",
+      "portrait_offload.pending<=1, inflight_limit=1; offered/replaced are control mailbox statistics, not native presentation drops",
+      "avatar_renderer.sequence and top-level sequence measure worker/publication cadence, not native EGL fps"
+    ],
+    "mic_listening_false": [
+      "handsfree_dialogue.enabled=false and microphone_open=false",
+      "voice_barge_in.listening=false and continuation_listening=false",
+      "automatic_conversation.enabled=false; local_recording.state not RECORDING, sample_count=0",
+      "playing=false, paused=false, phase=IDLE; do not treat missing fields as false"
+    ],
+    "mechanical_protection": [
+      "Top-level manual_pan.state=FAULT, pulse_us explicitly null, target_us explicitly null, automatic_following=false",
+      "Fields must be present: absence is unknown, not null/false. If pan shell was not composed and manual_pan missing, no mechanical confirmation can be claimed from this endpoint",
+      "ui_runtime.snapshot.modules.motion.state is an auxiliary state only; never retain the rest of snapshot (identity/target data)"
+    ]
+  },
+  "cpu_pss_plan": {
+    "not_in_api_state": true,
+    "sampler_does_not_read_proc_or_discover_processes": true,
+    "pairing": "Root can run the existing explicitly PID+birth-pinned resource sampler in the same board monotonic interval. Retain role/CPU ticks or percent/PSS/RSS/counts only; no cmdline, environment, maps, IDs or content. Do not launch another model/load generator.",
+    "correlation": "Helper emits started_monotonic/ended_monotonic and each sample elapsed time; pair these with existing resource sample monotonic times.",
+    "limits": "Aggregate CPU0..100 and per-process one-core percent are different normalizations; preserve the original resource tool definition. PSS is not video/thermal/power proof."
+  },
+  "privacy": {
+    "allowlist_only": true,
+    "raw_api_response_not_saved": true,
+    "no_api_frame_or_post": true,
+    "no_identity_ids_templates_images_or_transcript": true,
+    "unknown_error_strings_not_saved": true
+  },
+  "local_verification": {
+    "command": "D:\\AIModels\\speaker-identity\\venv\\Scripts\\python.exe -B E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_ui_trial\\test_state_sampler.py",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "no_network_or_proc_access": true,
+    "scope": [
+      "Private content allowlist exclusion",
+      "Missing mechanical field vs present null distinction",
+      "Hidden-page intervals excluded from native delta-frame FPS"
+    ]
+  },
+  "helper_sha256": "634049541e448dfdf99d96c5356ab479418bcbba435eb7a8a738fb81b6175f76",
+  "test_sha256": "312d8669b0a19b37c161f9cf6ad3556c06a7f693123bc93f5af33db3912a9fae"
+}

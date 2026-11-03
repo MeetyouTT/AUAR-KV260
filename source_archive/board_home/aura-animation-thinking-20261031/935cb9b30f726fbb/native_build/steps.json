@@ -1,0 +1,123 @@
+[
+  {
+    "label": "compile_candidate_host",
+    "argv": [
+      "nice",
+      "-n",
+      "15",
+      "/usr/bin/c++",
+      "-std=gnu++20",
+      "-O2",
+      "-DNDEBUG",
+      "-I/home/root/aura-animation-thinking-20261031/935cb9b30f726fbb/candidate/native",
+      "-I/home/root/aura-yuki-validation-20261030/native_integration/host",
+      "-I/home/root/aura-yuki-validation-20261030/native_integration/candidate_core/include",
+      "-isystem",
+      "/home/root/aura-yuki-validation-20261030/deps/json",
+      "-isystem",
+      "/usr/include/libpng16",
+      "-fPIC",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-c",
+      "/home/root/aura-animation-thinking-20261031/935cb9b30f726fbb/candidate/native/yuki_host.cpp",
+      "-o",
+      "/home/root/aura-animation-thinking-20261031/935cb9b30f726fbb/native_build/yuki_host.cpp.o"
+    ],
+    "returncode": 0,
+    "elapsed_seconds": 53.101,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "label": "link_candidate_library",
+    "argv": [
+      "nice",
+      "-n",
+      "15",
+      "/usr/bin/c++",
+      "-fPIC",
+      "-shared",
+      "-Wl,-soname,libaura_yuki.so",
+      "-o",
+      "/home/root/aura-animation-thinking-20261031/935cb9b30f726fbb/native_build/libaura_yuki.so",
+      "/home/root/aura-animation-thinking-20261031/935cb9b30f726fbb/native_build/yuki_host.cpp.o",
+      "/home/root/aura-yuki-validation-20261030/native_integration/build_host/CMakeFiles/aura_yuki.dir/gles2_renderer.cpp.o",
+      "/home/root/aura-yuki-validation-20261030/native_integration/build_host/CMakeFiles/aura_yuki.dir/diagnostic_api.cpp.o",
+      "/home/root/aura-yuki-validation-20261030/native_integration/build_host/libyuki_core.a",
+      "/usr/lib/libGLESv2.so",
+      "/usr/lib/libpng16.so",
+      "/usr/lib/libz.so"
+    ],
+    "returncode": 0,
+    "elapsed_seconds": 0.734,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "label": "compile_cpu_only_policy_test",
+    "argv": [
+      "nice",
+      "-n",
+      "15",
+      "/usr/bin/c++",
+      "-std=gnu++20",
+      "-O2",
+      "-DNDEBUG",
+      "-I/home/root/aura-animation-thinking-20261031/935cb9b30f726fbb/candidate/native",
+      "-I/home/root/aura-yuki-validation-20261030/native_integration/host",
+      "-I/home/root/aura-yuki-validation-20261030/native_integration/candidate_core/include",
+      "-isystem",
+      "/home/root/aura-yuki-validation-20261030/deps/json",
+      "-isystem",
+      "/usr/include/libpng16",
+      "/home/root/aura-animation-thinking-20261031/935cb9b30f726fbb/tests/native_eye_gate.cpp",
+      "/home/root/aura-yuki-validation-20261030/native_integration/build_host/libyuki_core.a",
+      "-o",
+      "/home/root/aura-animation-thinking-20261031/935cb9b30f726fbb/native_build/native_eye_gate"
+    ],
+    "returncode": 0,
+    "elapsed_seconds": 58.251,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "label": "run_cpu_only_policy_test",
+    "argv": [
+      "/home/root/aura-animation-thinking-20261031/935cb9b30f726fbb/native_build/native_eye_gate",
+      "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki/model.runtime.json",
+      "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki/yuk_0.ems.resx.json",
+      "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki"
+    ],
+    "returncode": 0,
+    "elapsed_seconds": 2.299,
+    "stdout": "{\"status\":\"PASS\",\"thinking_frames\":640,\"answer_frames\":64,\"idle_frames\":640,\"native_host_executed\":true,\"gpu_or_audio_device_opened\":false,\"physical_fps_measured\":false,\"visual_preview_passed\":false}\n",
+    "stderr": ""
+  },
+  {
+    "label": "exports",
+    "argv": [
+      "nm",
+      "-D",
+      "--defined-only",
+      "/home/root/aura-animation-thinking-20261031/935cb9b30f726fbb/native_build/libaura_yuki.so"
+    ],
+    "returncode": 0,
+    "elapsed_seconds": 0.015,
+    "stdout": "17__normal_iteratorIPjS1_EEmRKj\n00000000000369c0 W _ZNSt6vectorIjSaIjEE17_M_default_appendEm\n00000000000528b0 W _ZNSt6vectorIjSaIjEE17_M_realloc_insertIJRKjEEEvN9__gnu_cxx17__normal_iteratorIPjS1_EEDpOT_\n000000000003f1f0 W _ZNSt6vectorIjSaIjEE17_M_realloc_insertIJjEEEvN9__gnu_cxx17__normal_iteratorIPjS1_EEDpOT_\n000000000005f9e0 W _ZNSt6vectorImSaImEE17_M_realloc_insertIJmEEEvN9__gnu_cxx17__normal_iteratorIPmS1_EEDpOT_\n000000000005ec30 W _ZNSt6vectorImSaImEE7reserveEm\n0000000000036b60 W _ZNSt6vectorItSaItEE17_M_default_appendEm\n0000000000023e60 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE10_M_disposeEv\n00000000000246d0 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE10_M_replaceEmmPKcm\n0000000000023a50 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE12_M_constructEmc\n0000000000077944 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE12_M_constructIPKcEEvT_S8_St20forward_iterator_tag\n000000000007f310 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE12_M_constructIPcEEvT_S7_St20forward_iterator_tag\n0000000000036040 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE4swapERS4_\n00000000000260c0 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE6appendEPKc\n000000000007dfd8 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE6resizeEmc\n0000000000023e90 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE7reserveEm\n0000000000024140 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_appendEPKcm\n000000000003d470 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_assignERKS4_\n00000000000778e0 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_createERmm\n0000000000024000 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_mutateEmmPKcm\n0000000000024640 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9push_backEc\n0000000000077a38 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEC1IS3_EEPKcRKS3_\n0000000000077a38 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEC2IS3_EEPKcRKS3_\n0000000000023570 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEED1Ev\n0000000000023570 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEED2Ev\n0000000000076c78 W _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEaSEOS4_\n0000000000023b20 W _ZNSt7__cxx119to_stringEi\n0000000000035be0 W _ZNSt7__cxx119to_stringEj\n0000000000023c50 W _ZNSt7__cxx119to_stringEm\n000000000007f3bc W _ZNSt8_Rb_treeINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES5_St9_IdentityIS5_ESt4lessIS5_ESaIS5_EE10_M_insert_IRKS5_NSB_11_Alloc_nodeEEESt17_Rb_tree_iteratorIS5_EPSt18_Rb_tree_node_baseSJ_OT_RT0_\n000000000007de1c W _ZNSt8_Rb_treeINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES5_St9_IdentityIS5_ESt4lessIS5_ESaIS5_EE24_M_get_insert_unique_posERKS5_\n0000000000077858 W _ZNSt8_Rb_treeINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES5_St9_IdentityIS5_ESt4lessIS5_ESaIS5_EE8_M_eraseEPSt13_Rb_tree_nodeIS5_E\n000000000007fc70 W _ZNSt8_Rb_treeINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESt4pairIKS5_N8nlohmann16json_abi_v3_11_310basic_jsonISt3mapSt6vectorS5_blmdSaNS9_14adl_serializerESC_IhSaIhEEvEEESt10_Select1stISH_ESt4lessIvESaISH_EE14_M_lower_boundEPSt13_Rb_tree_nodeISH_EPSt18_Rb_tree_node_baseRS7_\n0000000000084800 W _ZNSt8_Rb_treeINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESt4pairIKS5_N8nlohmann16json_abi_v3_11_310basic_jsonISt3mapSt6vectorS5_blmdSaNS9_14adl_serializerESC_IhSaIhEEvEEESt10_Select1stISH_ESt4lessIvESaISH_EE22_M_emplace_hint_uniqueIJRKSt21piecewise_construct_tSt5tupleIJRS7_EESS_IJEEEEESt17_Rb_tree_iteratorISH_ESt23_Rb_tree_const_iteratorISH_EDpOT_\n000000000002bbe0 W _ZNSt8_Rb_treeINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESt4pairIKS5_N8nlohmann16json_abi_v3_11_310basic_jsonISt3mapSt6vectorS5_blmdSaNS9_14adl_serializerESC_IhSaIhEEvEEESt10_Select1stISH_ESt4lessIvESaISH_EE24_M_get_insert_unique_posERS7_\n000000000002bd50 W _ZNSt8_Rb_treeINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESt4pairIKS5_N8nlohmann16json_abi_v3_11_310basic_jsonISt3mapSt6vectorS5_blmdSaNS9_14adl_serializerESC_IhSaIhEEvEEESt10_Select1stISH_ESt4lessIvESaISH_EE29_M_get_insert_hint_unique_posESt23_Rb_tree_const_iteratorISH_ERS7_\n000000000007fd20 W _ZNSt8_Rb_treeINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESt4pairIKS5_N8nlohmann16json_abi_v3_11_310basic_jsonISt3mapSt6vectorS5_blmdSaNS9_14adl_serializerESC_IhSaIhEEvEEESt10_Select1stISH_ESt4lessIvESaISH_EE4findERS7_\n0000000000084a00 W _ZNSt8_Rb_treeINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESt4pairIKS5_N8nlohmann16json_abi_v3_11_310basic_jsonISt3mapSt6vectorS5_blmdSaNS9_14adl_serializerESC_IhSaIhEEvEEESt10_Select1stISH_ESt4lessIvESaISH_EE7_M_copyILb0ENSN_11_Alloc_nodeEEEPSt13_Rb_tree_nodeISH_ESS_PSt18_Rb_tree_node_baseRT0_\n00000000000824d4 W _ZNSt8_Rb_treeINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESt4pairIKS5_N8nlohmann16json_abi_v3_11_310basic_jsonISt3mapSt6vectorS5_blmdSaNS9_14adl_serializerESC_IhSaIhEEvEEESt10_Select1stISH_ESt4lessIvESaISH_EE8_M_eraseEPSt13_Rb_tree_nodeISH_E\n0000000000053e80 W _ZNSt8_Rb_treeISt4pairIjjES0_IKS1_N8nekomote2IdINS3_7MaskTagEEEESt10_Select1stIS7_ESt4lessIS1_ESaIS7_EE24_M_get_insert_unique_posERS2_\n0000000000053f90 W _ZNSt8_Rb_treeISt4pairIjjES0_IKS1_N8nekomote2IdINS3_7MaskTagEEEESt10_Select1stIS7_ESt4lessIS1_ESaIS7_EE29_M_get_insert_hint_unique_posESt23_Rb_tree_const_iteratorIS7_ERS2_\n000000000008a7c4 W _ZNSt8__detail16_Hashtable_allocISaINS_10_Hash_nodeINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEELb1EEEEE18_M_deallocate_nodeEPS8_\n00000000000814f4 W _ZNSt8__detail16_Hashtable_allocISaINS_10_Hash_nodeISt4pairIKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEN8nekomote5model8IconRectEELb1EEEEE16_M_allocate_nodeIJS8_RSC_EEEPSE_DpOT_\n00000000000800fc W _ZNSt8__detail16_Hashtable_allocISaINS_10_Hash_nodeISt4pairIKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEN8nekomote5model8IconRectEELb1EEEEE18_M_deallocate_nodeEPSE_\n0000000000080ad4 W _ZNSt8__detail16_Hashtable_allocISaINS_10_Hash_nodeISt4pairIKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEiELb1EEEEE18_M_deallocate_nodeEPSB_\n0000000000023910 W _ZNSt8__detail18__to_chars_10_implIjEEvPcjT_\n0000000000076bcc W _ZNSt8__detail18__to_chars_10_implImEEvPcjT_\n0000000000037190 W _ZSt14__partial_sortIN9__gnu_cxx17__normal_iteratorIPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESt6vectorIS7_SaIS7_EEEENS0_5__ops15_Iter_less_iterEEvT_SF_SF_T0_\n0000000000096f70 u _ZSt19piecewise_construct\n0000000000077234 W _ZSteqIcEN9__gnu_cxx11__enable_ifIXsrSt9__is_charIT_E7__valueEbE6__typeERKNSt7__cxx1112basic_stringIS3_St11char_traitsIS3_ESaIS3_EEESE_\n0000000000024380 W _ZStplIcSt11char_traitsIcESaIcEENSt7__cxx1112basic_stringIT_T0_T1_EEOS8_PKS5_\n00000000000249a0 W _ZStplIcSt11char_traitsIcESaIcEENSt7__cxx1112basic_stringIT_T0_T1_EEOS8_S9_\n000000000007f278 W _ZStplIcSt11char_traitsIcESaIcEENSt7__cxx1112basic_stringIT_T0_T1_EEPKS5_OS8_\n00000000000242c0 W _ZStplIcSt11char_traitsIcESaIcEENSt7__cxx1112basic_stringIT_T0_T1_EEPKS5_RKS8_\n000000000004f490 W _ZStplIcSt11char_traitsIcESaIcEENSt7__cxx1112basic_stringIT_T0_T1_EERKS8_PKS5_\n0000000000082738 W _ZStssIcSt11char_traitsIcESaIcEEDTcl21__char_traits_cmp_catIT0_ELi0EEERKNSt7__cxx1112basic_stringIT_S3_T1_EEPKS7_\n00000000000b8ad8 V _ZTIN8nekomote8asset_io20AssetValidationErrorE\n00000000000b8990 V _ZTIN8nlohmann16json_abi_v3_11_36detail10type_errorE\n00000000000b8ab0 V _ZTIN8nlohmann16json_abi_v3_11_36detail11other_errorE\n00000000000b8960 V _ZTIN8nlohmann16json_abi_v3_11_36detail11parse_errorE\n00000000000b89a8 V _ZTIN8nlohmann16json_abi_v3_11_36detail12out_of_rangeE\n00000000000b8978 V _ZTIN8nlohmann16json_abi_v3_11_36detail16invalid_iteratorE\n00000000000b8af0 V _ZTIN8nlohmann16json_abi_v3_11_36detail21output_string_adapterIcNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEEE\n00000000000b8ac8 V _ZTIN8nlohmann16json_abi_v3_11_36detail23output_adapter_protocolIcEE\n00000000000b8948 V _ZTIN8nlohmann16json_abi_v3_11_36detail9exceptionE\n00000000000b8a88 V _ZTISt11_Mutex_baseILN9__gnu_cxx12_Lock_policyE2EE\n00000000000b8a98 V _ZTISt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EE\n00000000000b8b08 V _ZTISt23_Sp_counted_ptr_inplaceIN8nlohmann16json_abi_v3_11_36detail21output_string_adapterIcNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEEESaISA_ELN9__gnu_cxx12_Lock_policyE2EE\n0000000000096528 V _ZTSN8nekomote8asset_io20AssetValidationErrorE\n00000000000908a0 V _ZTSN8nlohmann16json_abi_v3_11_36detail10type_errorE\n00000000000964a8 V _ZTSN8nlohmann16json_abi_v3_11_36detail11other_errorE\n0000000000090830 V _ZTSN8nlohmann16json_abi_v3_11_36detail11parse_errorE\n00000000000908d8 V _ZTSN8nlohmann16json_abi_v3_11_36detail12out_of_rangeE\n0000000000090868 V _ZTSN8nlohmann16json_abi_v3_11_36detail16invalid_iteratorE\n0000000000096558 V _ZTSN8nlohmann16json_abi_v3_11_36detail21output_string_adapterIcNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEEE\n00000000000964e0 V _ZTSN8nlohmann16json_abi_v3_11_36detail23output_adapter_protocolIcEE\n0000000000090800 V _ZTSN8nlohmann16json_abi_v3_11_36detail9exceptionE\n0000000000096428 V _ZTSSt11_Mutex_baseILN9__gnu_cxx12_Lock_policyE2EE\n0000000000096470 V _ZTSSt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EE\n0000000000096458 V _ZTSSt19_Sp_make_shared_tag\n00000000000965d0 V _ZTSSt23_Sp_counted_ptr_inplaceIN8nlohmann16json_abi_v3_11_36detail21output_string_adapterIcNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEEESaISA_ELN9__gnu_cxx12_Lock_policyE2EE\n00000000000b8b48 V _ZTVN8nekomote8asset_io20AssetValidationErrorE\n00000000000b8a38 V _ZTVN8nlohmann16json_abi_v3_11_36detail10type_errorE\n00000000000b8b20 V _ZTVN8nlohmann16json_abi_v3_11_36detail11other_errorE\n00000000000b89e8 V _ZTVN8nlohmann16json_abi_v3_11_36detail11parse_errorE\n00000000000b8a60 V _ZTVN8nlohmann16json_abi_v3_11_36detail12out_of_rangeE\n00000000000b8a10 V _ZTVN8nlohmann16json_abi_v3_11_36detail16invalid_iteratorE\n00000000000b8b70 V _ZTVN8nlohmann16json_abi_v3_11_36detail21output_string_adapterIcNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEEE\n00000000000b89c0 V _ZTVN8nlohmann16json_abi_v3_11_36detail9exceptionE\n00000000000b8ba0 V _ZTVSt23_Sp_counted_ptr_inplaceIN8nlohmann16json_abi_v3_11_36detail21output_string_adapterIcNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEEESaISA_ELN9__gnu_cxx12_Lock_policyE2EE\n00000000000ba1a0 u _ZZN10fast_float6detail17rounds_to_nearestEvE4fmin\n00000000000969a8 u _ZZN8nlohmann16json_abi_v3_11_36detail10serializerINS0_10basic_jsonISt3mapSt6vectorNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEblmdSaNS0_14adl_serializerES5_IhSaIhEEvEEE12dump_integerIhLi0EEEvT_E12digits_to_99\n0000000000096818 u _ZZN8nlohmann16json_abi_v3_11_36detail10serializerINS0_10basic_jsonISt3mapSt6vectorNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEblmdSaNS0_14adl_serializerES5_IhSaIhEEvEEE12dump_integerIlLi0EEEvT_E12digits_to_99\n00000000000968e0 u _ZZN8nlohmann16json_abi_v3_11_36detail10serializerINS0_10basic_jsonISt3mapSt6vectorNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEblmdSaNS0_14adl_serializerES5_IhSaIhEEvEEE12dump_integerImLi0EEEvT_E12digits_to_99\n0000000000096688 u _ZZN8nlohmann16json_abi_v3_11_36detail10serializerINS0_10basic_jsonISt3mapSt6vectorNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEblmdSaNS0_14adl_serializerES5_IhSaIhEEvEEE6decodeERhRjhE5utf8d\n0000000000096a70 u _ZZN8nlohmann16json_abi_v3_11_36detail9dtoa_impl36get_cached_power_for_binary_exponentEiE13kCachedPowers\n0000000000096f60 u _ZZNSt19_Sp_make_shared_tag5_S_tiEvE5__tag\n00000000000909e0 u _ZZNSt8__detail18__to_chars_10_implIjEEvPcjT_E8__digits\n0000000000090910 u _ZZNSt8__detail18__to_chars_10_implImEEvPcjT_E8__digits\n0000000000021080 T yuki_capture\n0000000000020cb0 T yuki_control\n0000000000020bf0 T yuki_control_features\n0000000000022fe4 T yuki_create\n0000000000020e40 T yuki_destroy\n0000000000039120 T yuki_diagnostic_error\n000000000003b3c0 T yuki_diagnostic_frames\n000000000003a2c0 T yuki_diagnostic_geometry\n000000000003a940 T yuki_diagnostic_parameters\n0000000000020c00 T yuki_error\n0000000000021cf0 T yuki_render\n",
+    "stderr": ""
+  },
+  {
+    "label": "dependencies",
+    "argv": [
+      "readelf",
+      "-d",
+      "/home/root/aura-animation-thinking-20261031/935cb9b30f726fbb/native_build/libaura_yuki.so"
+    ],
+    "returncode": 0,
+    "elapsed_seconds": 0.021,
+    "stdout": "\nDynamic section at offset 0xa8bd8 contains 34 entries:\n  Tag        Type                         Name/Value\n 0x0000000000000001 (NEEDED)             Shared library: [libMali.so.9]\n 0x0000000000000001 (NEEDED)             Shared library: [libpng16.so.16]\n 0x0000000000000001 (NEEDED)             Shared library: [libz.so.1]\n 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]\n 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]\n 0x000000000000000e (SONAME)             Library soname: [libaura_yuki.so]\n 0x000000000000000c (INIT)               0x1c920\n 0x000000000000000d (FINI)               0x8f230\n 0x0000000000000019 (INIT_ARRAY)         0xb8890\n 0x000000000000001b (INIT_ARRAYSZ)       16 (bytes)\n 0x000000000000001a (FINI_ARRAY)         0xb88a0\n 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)\n 0x000000006ffffef5 (GNU_HASH)           0x2b8\n 0x0000000000000005 (STRTAB)             0x5fd0\n 0x0000000000000006 (SYMTAB)             0x1680\n 0x000000000000000a (STRSZ)              73634 (bytes)\n 0x000000000000000b (SYMENT)             24 (bytes)\n 0x0000000000000003 (PLTGOT)             0xb8fe8\n 0x0000000000000002 (PLTRELSZ)           13272 (bytes)\n 0x0000000000000014 (PLTREL)             RELA\n 0x0000000000000017 (JMPREL)             0x19548\n 0x000000006ffffef6 (TLSDESC_PLT)        0x1ebb0\n 0x000000006ffffef7 (TLSDESC_GOT)        0xb8fe0\n 0x0000000000000007 (RELA)               0x18720\n 0x0000000000000008 (RELASZ)             3624 (bytes)\n 0x0000000000000009 (RELAENT)            24 (bytes)\n 0x0000000070000001 (AARCH64_BTI_PLT)    \n 0x000000006ffffffe (VERNEED)            0x18590\n 0x000000006fffffff (VERNEEDNUM)         5\n 0x000000006ffffff0 (VERSYM)             0x17f72\n 0x000000006ffffff9 (RELACOUNT)          20\n 0x0000000000000000 (NULL)               0x0\n",
+    "stderr": ""
+  }
+]

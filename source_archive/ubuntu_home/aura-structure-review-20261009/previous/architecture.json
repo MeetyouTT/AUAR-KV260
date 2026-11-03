@@ -1,0 +1,2644 @@
+{
+  "schema_version": "aura-junior-architecture-1",
+  "updated": "2026-10-09",
+  "project": "AURA·汐蓝",
+  "track": "AMD 自主选题初级组",
+  "scope": "FULL_TARGET_ARCHITECTURE_WITH_CURRENT_EVIDENCE",
+  "official_guide": {
+    "zip": "/home/ghmd/下载/项目.zip",
+    "entry": "项目/参赛资料/全国大学生嵌入式芯片与系统设计竞赛'2026FPGA赛道选题指南-AMD.pdf",
+    "pdf_pages": [
+      22,
+      23,
+      24,
+      25,
+      28
+    ],
+    "sections": [
+      "3.3.1",
+      "3.3.2",
+      "3.3.3",
+      "3.3.4",
+      "3.3.5",
+      "3.3.6"
+    ],
+    "online_entry": "https://gitee.com/Vickyiii/fpgachina26-amd",
+    "online_full_guide_status": "blob_not_accessible_no_new_upload_rules_assumed"
+  },
+  "groups": [
+    {
+      "id": "M1",
+      "name": "平台与设备底座",
+      "owner": "A"
+    },
+    {
+      "id": "M2",
+      "name": "人体感知与跟踪",
+      "owner": "B"
+    },
+    {
+      "id": "M3",
+      "name": "人脸身份与记忆",
+      "owner": "B / C"
+    },
+    {
+      "id": "M4",
+      "name": "时效与共享推理调度",
+      "owner": "B / A"
+    },
+    {
+      "id": "M5",
+      "name": "运动生成与 FPGA 监督",
+      "owner": "A / B"
+    },
+    {
+      "id": "M6",
+      "name": "语音与看图问答",
+      "owner": "C"
+    },
+    {
+      "id": "M7",
+      "name": "说话人建议与汐蓝 UI",
+      "owner": "C / B"
+    },
+    {
+      "id": "M8",
+      "name": "评测、技能与发布",
+      "owner": "A / B / C"
+    },
+    {
+      "id": "EXT",
+      "name": "历史候选与后续扩展",
+      "owner": "按瓶颈决定"
+    }
+  ],
+  "statuses": {
+    "BOARD": {
+      "label": "已有有限板测",
+      "color": "#dbeafe",
+      "border": "#2563eb",
+      "note": "引用既有实测；不是本次新板测或最终整机验收"
+    },
+    "PC": {
+      "label": "已有 PC 成果",
+      "color": "#dcfce7",
+      "border": "#15803d",
+      "note": "引用 Windows/PC 交付记录；不能替代 KV260 验收"
+    },
+    "SW": {
+      "label": "软件联调通过",
+      "color": "#ede9fe",
+      "border": "#7c3aed",
+      "note": "当前标准库框架测试；真实设备/模型另验"
+    },
+    "PORT": {
+      "label": "接口或部分实现",
+      "color": "#fef3c7",
+      "border": "#b45309",
+      "note": "已有入口/参考；完整目标尚未完成"
+    },
+    "PLAN": {
+      "label": "待实现或待实验",
+      "color": "#f1f5f9",
+      "border": "#64748b",
+      "note": "框图与目录占位，不计为完成功能"
+    },
+    "WAIT": {
+      "label": "等待机构",
+      "color": "#ffe4e6",
+      "border": "#be123c",
+      "note": "等待 3D 模型与标定，当前不执行物理动作"
+    }
+  },
+  "modules": [
+    {
+      "id": "platform",
+      "group": "M1",
+      "name": "Linux / 驱动 / SDK / 平台指纹",
+      "owner": "A",
+      "placement": "KV260 PS",
+      "status": "BOARD",
+      "existing": [
+        "config/toolchain_lock.json",
+        "hardware/platform/platform_manifest.json",
+        "/home/ghmd/kv260-reference-2022.2-20260930/DEPLOYMENT_REVIEW.md"
+      ],
+      "planned_path": "board/firmware/platform",
+      "input": "硬件包与系统版本",
+      "output": "可核验运行环境",
+      "remaining": "最终镜像、精确器件型号、DPU 指纹与统一发布待冻结",
+      "tests": [
+        "T01",
+        "T02",
+        "T28"
+      ]
+    },
+    {
+      "id": "dpu",
+      "group": "M1",
+      "name": "PL 官方 DPU：单 CU B4096",
+      "owner": "A / B",
+      "placement": "KV260 PL",
+      "status": "BOARD",
+      "existing": [
+        "/home/ghmd/kv260-visual-servo-20261007/BOARD_TEST_REPORT.md"
+      ],
+      "planned_path": "src/rtl/dpu_platform",
+      "input": "模型张量 / DDR",
+      "output": "神经网络输出",
+      "remaining": "历史分类与共存板测已有；项目检测/身份共享负载待验",
+      "tests": [
+        "T02",
+        "T04",
+        "T05"
+      ]
+    },
+    {
+      "id": "devices",
+      "group": "M1",
+      "name": "外设枚举 / 时间 / 启动自检",
+      "owner": "A / C",
+      "placement": "KV260 PS",
+      "status": "PORT",
+      "existing": [
+        "tools/aura_project.py",
+        "board/vision/capture.py"
+      ],
+      "planned_path": "board/scripts/device_diagnostics",
+      "input": "相机 / USB 音频 / HDMI / IP 身份",
+      "output": "设备状态与明确降级",
+      "remaining": "MCP01 实测、统一启动、时基映射与失联恢复待接",
+      "tests": [
+        "T26",
+        "T28"
+      ]
+    },
+    {
+      "id": "camera",
+      "group": "M2",
+      "name": "USB 相机：唯一来源与最新帧槽",
+      "owner": "B",
+      "placement": "KV260 PS",
+      "status": "BOARD",
+      "existing": [
+        "board/vision/capture.py",
+        "board/vision/frames.py",
+        "/home/ghmd/kv260-realtime-vision-20261007/realtime_vision.py"
+      ],
+      "planned_path": "src/ps/vision/capture",
+      "input": "实际帧与采集元数据",
+      "output": "FrameRef + 最新图像",
+      "remaining": "原 CPU 相机链已有板测；新框架采集适配未开设备，曝光时间语义待校准",
+      "tests": [
+        "T05",
+        "T06",
+        "T24"
+      ]
+    },
+    {
+      "id": "cpu_vision",
+      "group": "M2",
+      "name": "CPU YuNet / IoU 参考链",
+      "owner": "B",
+      "placement": "KV260 PS CPU",
+      "status": "BOARD",
+      "existing": [
+        "board/vision/reference_core.py",
+        "board/vision/reference_faces.py",
+        "/home/ghmd/kv260-realtime-vision-20261007/REALTIME_REPORT.md"
+      ],
+      "planned_path": "src/ps/vision/cpu_reference",
+      "input": "人脸图像",
+      "output": "参考框 / 轨迹",
+      "remaining": "它是人脸与 IoU 参考，不能当作人体 DPU 或 ByteTrack 完成",
+      "tests": [
+        "T04",
+        "T05",
+        "T08"
+      ]
+    },
+    {
+      "id": "person",
+      "group": "M2",
+      "name": "项目人体模型量化 / 编译 / 前后处理",
+      "owner": "B",
+      "placement": "DPU + PS",
+      "status": "PORT",
+      "existing": [
+        "board/vision/backends.py",
+        "config/model_manifest.json"
+      ],
+      "planned_path": "src/ps/vision/person_dpu",
+      "input": "真实图像 / 模型工件",
+      "output": "原图人体框与质量",
+      "remaining": "冻结权重、INT8 校准、arch 指纹、专用解码器与精度验证",
+      "tests": [
+        "T03",
+        "T04",
+        "T05"
+      ]
+    },
+    {
+      "id": "tracking",
+      "group": "M2",
+      "name": "ByteTrack / 轨迹代次 / 人员事件",
+      "owner": "B",
+      "placement": "KV260 PS",
+      "status": "PORT",
+      "existing": [
+        "board/vision/tracking.py",
+        "common/contracts.py"
+      ],
+      "planned_path": "src/ps/vision/tracking",
+      "input": "高低分检测 / 空帧 / 源时间",
+      "output": "TrackKey / 生命周期 / 人员事件",
+      "remaining": "IoU 运行接入已验证；ByteTrack 依赖、实际视频与交叉遮挡待验",
+      "tests": [
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "id": "target",
+      "group": "M2",
+      "name": "当前目标与手动 / 建议复核",
+      "owner": "B",
+      "placement": "KV260 PS",
+      "status": "SW",
+      "existing": [
+        "board/fusion/targets.py",
+        "board/runtime/application.py"
+      ],
+      "planned_path": "src/ps/fusion/target_manager",
+      "input": "当前轨迹 / 用户选择 / ASD 建议",
+      "output": "唯一目标 key 或 UNKNOWN",
+      "remaining": "真实多人规则、身份称呼与轨迹切换整机验收",
+      "tests": [
+        "T09",
+        "T15",
+        "T22"
+      ]
+    },
+    {
+      "id": "snapshot",
+      "group": "M2",
+      "name": "本轮图像与连续人脸片段",
+      "owner": "B / C",
+      "placement": "KV260 PS",
+      "status": "PORT",
+      "existing": [
+        "board/runtime/media_session.py",
+        "common/contracts.py"
+      ],
+      "planned_path": "src/ps/vision/media_windows",
+      "input": "帧引用 / 轨迹 / 同期音频窗口",
+      "output": "ImageRef / 连续脸片段",
+      "remaining": "图像引用门已有；真实编码、连续裁剪、声画归属待接",
+      "tests": [
+        "T15",
+        "T24"
+      ]
+    },
+    {
+      "id": "face",
+      "group": "M3",
+      "name": "人脸归属 / 质量 / 五点对齐",
+      "owner": "B",
+      "placement": "KV260 PS",
+      "status": "PORT",
+      "existing": [
+        "board/identity/backends.py",
+        "board/vision/reference_faces.py"
+      ],
+      "planned_path": "src/ps/identity/quality_alignment",
+      "input": "人体 ROI / 人脸框 / 关键点",
+      "output": "合格对齐人脸或拒绝",
+      "remaining": "CPU 对齐参考已有；多脸归属、姿态/模糊/遮挡质量门待完善",
+      "tests": [
+        "T20",
+        "T21",
+        "T22"
+      ]
+    },
+    {
+      "id": "id_cpu",
+      "group": "M3",
+      "name": "SFace 128 维 CPU 图片参考",
+      "owner": "B",
+      "placement": "KV260 PS CPU",
+      "status": "BOARD",
+      "existing": [
+        "models/vision/sface_2021dec.onnx",
+        "/home/ghmd/kv260-adaptation-check-20261006/ADAPTATION_REPORT.md"
+      ],
+      "planned_path": "src/ps/identity/cpu_reference",
+      "input": "对齐人脸",
+      "output": "归一化特征",
+      "remaining": "既有板端静态图片参考；实时身份应用未验收",
+      "tests": [
+        "T21",
+        "T22"
+      ]
+    },
+    {
+      "id": "id_dpu",
+      "group": "M3",
+      "name": "项目身份模型 / 共享 DPU 特征",
+      "owner": "B",
+      "placement": "DPU + PS",
+      "status": "PLAN",
+      "existing": [
+        "config/model_manifest.json"
+      ],
+      "planned_path": "src/ps/identity/dpu_embedding",
+      "input": "合格人脸 / 编译工件",
+      "output": "模型专属特征",
+      "remaining": "MobileFaceNet 等候选尚未冻结；量化、算子分界和共享成本待验",
+      "tests": [
+        "T04",
+        "T21"
+      ]
+    },
+    {
+      "id": "identity",
+      "group": "M3",
+      "name": "SQLite 模板 / 匹配 / 删除失效",
+      "owner": "B",
+      "placement": "KV260 PS",
+      "status": "SW",
+      "existing": [
+        "board/identity/store.py",
+        "board/runtime/application.py"
+      ],
+      "planned_path": "src/ps/identity/store",
+      "input": "特征 / 登记与删除操作",
+      "output": "KNOWN / UNKNOWN / AMBIGUOUS",
+      "remaining": "数据库逻辑已测；真人阈值、重返、实时板端持久化待验",
+      "tests": [
+        "T20",
+        "T21",
+        "T22",
+        "T23"
+      ]
+    },
+    {
+      "id": "enrollment",
+      "group": "M3",
+      "name": "授权登记 / 纠错 / 偏好界面",
+      "owner": "B / C",
+      "placement": "KV260 PS + UI",
+      "status": "PLAN",
+      "existing": [
+        "board/identity/store.py"
+      ],
+      "planned_path": "src/ui/enrollment_memory",
+      "input": "用户明确操作 / 当前唯一轨迹",
+      "output": "登记事务 / 删除 / 偏好",
+      "remaining": "显式同意 API 已有；完整操作页、多样本事务、在途个性化失效待接",
+      "tests": [
+        "T20",
+        "T23"
+      ]
+    },
+    {
+      "id": "freshness",
+      "group": "M4",
+      "name": "固定 / 候选可变源有效期",
+      "owner": "B / A",
+      "placement": "KV260 PS",
+      "status": "SW",
+      "existing": [
+        "board/fusion/freshness.py",
+        "config/runtime.experiment.sim.json"
+      ],
+      "planned_path": "src/ps/fusion/freshness",
+      "input": "真实观测 / 速度 / 误差参数",
+      "output": "不可延长的源期限",
+      "remaining": "示例模型软件通过；独立标定、急变/遮挡失配与真实收益待验",
+      "tests": [
+        "T06",
+        "T07",
+        "T12"
+      ]
+    },
+    {
+      "id": "scheduler",
+      "group": "M4",
+      "name": "单 CU 不可抢占任务准入",
+      "owner": "B",
+      "placement": "KV260 PS",
+      "status": "SW",
+      "existing": [
+        "board/fusion/scheduler.py"
+      ],
+      "planned_path": "src/ps/fusion/scheduler",
+      "input": "源期限 / 检测与身份成本",
+      "output": "检测刷新或身份准入",
+      "remaining": "软件执行锁已测；两个实际 DPU 模型、并发成本和身份等待待测",
+      "tests": [
+        "T05",
+        "T06",
+        "T21"
+      ]
+    },
+    {
+      "id": "calibration",
+      "group": "M4",
+      "name": "误差界 / 相对运动 / 成本标定",
+      "owner": "B / A",
+      "placement": "开发机 + KV260",
+      "status": "PLAN",
+      "existing": [
+        "data/calibration_manifest.json"
+      ],
+      "planned_path": "data/calibration",
+      "input": "独立标定轨迹 / 负载日志",
+      "output": "冻结参数 / 适用范围",
+      "remaining": "当前清单为空；相机随动引入的运动及单位需独立校准",
+      "tests": [
+        "T03",
+        "T06",
+        "T07"
+      ]
+    },
+    {
+      "id": "clock_map",
+      "group": "M4",
+      "name": "PS ↔ PL 保守时钟与代次映射",
+      "owner": "A / B",
+      "placement": "PS + PL",
+      "status": "PLAN",
+      "existing": [
+        "common/clock.py"
+      ],
+      "planned_path": "src/ps/fusion/pl_time_mapping",
+      "input": "时钟快照 / 源时间 / 余量",
+      "output": "PL 期限与计时代次",
+      "remaining": "软件时钟域已有；硬件快照、映射误差、回绕和复位合同待实现",
+      "tests": [
+        "T06",
+        "T12"
+      ]
+    },
+    {
+      "id": "motion",
+      "group": "M5",
+      "name": "唯一视觉运动服务 / 平滑 / 限制",
+      "owner": "B",
+      "placement": "KV260 PS",
+      "status": "PORT",
+      "existing": [
+        "board/motion/service.py",
+        "/home/ghmd/kv260-visual-servo-20261007/physical_motion_service.py"
+      ],
+      "planned_path": "src/ps/motion/service",
+      "input": "当前目标 / 有效位置 / 标定",
+      "output": "有来源的唯一命令",
+      "remaining": "虚拟归一化命令与旧有限随动已有；正式角度/极性/滤波与机构待验",
+      "tests": [
+        "T07",
+        "T09",
+        "T12"
+      ]
+    },
+    {
+      "id": "vsrv",
+      "group": "M5",
+      "name": "既有 VSRV：相对租约 / PWM / STOP",
+      "owner": "A",
+      "placement": "KV260 PL",
+      "status": "BOARD",
+      "existing": [
+        "hardware/rtl/visual_servo.sv",
+        "board/motion/vsrv_driver.py",
+        "/home/ghmd/kv260-visual-servo-20261007/BOARD_TEST_REPORT.md"
+      ],
+      "planned_path": "src/rtl/vsrv_reference",
+      "input": "影子字段 / COMMIT / STOP",
+      "output": "有限许可 / 受限 PWM / 状态",
+      "remaining": "有限板测已有；不是新的绝对源期限监督，数字引脚波形仍需测",
+      "tests": [
+        "T02",
+        "T10",
+        "T11",
+        "T12"
+      ]
+    },
+    {
+      "id": "guard_model",
+      "group": "M5",
+      "name": "软件监督合同模型",
+      "owner": "A / B",
+      "placement": "PC / PS 模拟",
+      "status": "SW",
+      "existing": [
+        "board/motion/guard.py"
+      ],
+      "planned_path": "sim/software_guard",
+      "input": "命令 / 源证据 / 时钟",
+      "output": "接受、拒绝、到期状态",
+      "remaining": "需 tick/poll；不能证明 PS 暂停时 FPGA 独立停止",
+      "tests": [
+        "T12"
+      ]
+    },
+    {
+      "id": "axi_commit",
+      "group": "M5",
+      "name": "新监督：AXI-Lite / 原子 COMMIT",
+      "owner": "A",
+      "placement": "KV260 PL",
+      "status": "PLAN",
+      "existing": [
+        "hardware/README.md"
+      ],
+      "planned_path": "src/rtl/motion_guard/axi_commit",
+      "input": "影子字段 / 字节写掩码 / 提交",
+      "output": "完整命令快照",
+      "remaining": "在参考基础实现新字段，冻结 ABI；背压/半写/冲突仿真待做",
+      "tests": [
+        "T12"
+      ]
+    },
+    {
+      "id": "source_guard",
+      "group": "M5",
+      "name": "新监督：绝对源期限 / 防旧源续期",
+      "owner": "A",
+      "placement": "KV260 PL",
+      "status": "PLAN",
+      "existing": [
+        "hardware/platform/platform_manifest.json"
+      ],
+      "planned_path": "src/rtl/motion_guard/source_deadline",
+      "input": "目标/源代次 / PL 绝对期限",
+      "output": "许可截止与拒绝原因",
+      "remaining": "新 RTL 未实现；同源不续期、PS 暂停、期限边界待仿真和板测",
+      "tests": [
+        "T12"
+      ]
+    },
+    {
+      "id": "output_gate",
+      "group": "M5",
+      "name": "输出门控 / 限幅限速 / 停止恢复",
+      "owner": "A",
+      "placement": "KV260 PL",
+      "status": "PORT",
+      "existing": [
+        "hardware/rtl/visual_servo.sv"
+      ],
+      "planned_path": "src/rtl/motion_guard/output_gate",
+      "input": "有效命令 / 实体停止 / 复位",
+      "output": "PWM 数字输出与状态",
+      "remaining": "参考逻辑已有；新 ABI 优先级、真实停止输入与示波器验收待做",
+      "tests": [
+        "T10",
+        "T11",
+        "T12"
+      ]
+    },
+    {
+      "id": "servo",
+      "group": "M5",
+      "name": "单轴供电 / 限位 / 3D 机构与标定",
+      "owner": "A / B",
+      "placement": "物理装置",
+      "status": "WAIT",
+      "existing": [
+        "config/servo_calibration.json",
+        "/home/ghmd/AMD_Smart/logs/daily/2026-10-08-SERVO-VISIBLE-TEST.md"
+      ],
+      "planned_path": "board/calibration/mechanics",
+      "input": "PWM / 动力 / 实际机构",
+      "output": "方向、范围、位置与真实随动",
+      "remaining": "既有带电有限动作记录；机构、角度和机械停止验收等 3D 模型",
+      "tests": [
+        "T07",
+        "T10",
+        "T11",
+        "T28"
+      ]
+    },
+    {
+      "id": "mcp_capture",
+      "group": "M6",
+      "name": "MCP01 USB 采集 / 实际样本时钟",
+      "owner": "C",
+      "placement": "KV260 PS",
+      "status": "PLAN",
+      "existing": [
+        "host/model_service/protocol.py"
+      ],
+      "planned_path": "src/ps/audio/mcp01_capture",
+      "input": "实际 USB 音频 / 按键",
+      "output": "PCM + AudioRef / 样本时间",
+      "remaining": "设备身份、实际格式、录音转换、xrun 与并发未实测",
+      "tests": [
+        "T16",
+        "T18",
+        "T26"
+      ]
+    },
+    {
+      "id": "media_session",
+      "group": "M6",
+      "name": "会话 / 图像绑定 / 取消 / 回复校验",
+      "owner": "C / B",
+      "placement": "KV260 PS",
+      "status": "SW",
+      "existing": [
+        "board/runtime/session.py",
+        "board/runtime/media_session.py"
+      ],
+      "planned_path": "src/ps/runtime/session",
+      "input": "录音与本轮图 / 当前目标",
+      "output": "有效请求 token / 交付结果",
+      "remaining": "逻辑与 fixture 通过；真实数据传输和播放消费待接",
+      "tests": [
+        "T19",
+        "T24"
+      ]
+    },
+    {
+      "id": "transport",
+      "group": "M6",
+      "name": "板端 ↔ Windows 媒体传输 / 重连",
+      "owner": "C",
+      "placement": "LAN / 两端",
+      "status": "PORT",
+      "existing": [
+        "host/model_service/client.py",
+        "board/runtime/dialogue_client/ws_client.py"
+      ],
+      "planned_path": "src/host/media_transport",
+      "input": "音频、图像、请求、段流",
+      "output": "带归属回复 / 失败 / 重连",
+      "remaining": "文字 1.0 客户端与同进程媒体接口已有；跨机媒体通道未接",
+      "tests": [
+        "T18",
+        "T19",
+        "T26"
+      ]
+    },
+    {
+      "id": "asr",
+      "group": "M6",
+      "name": "常驻中文 ASR / 准备探针",
+      "owner": "C",
+      "placement": "Windows 模型主机",
+      "status": "PORT",
+      "existing": [
+        "board/runtime/audio/asr.py",
+        "host/model_service/backends.py"
+      ],
+      "planned_path": "src/host/asr",
+      "input": "真实 PCM",
+      "output": "中文转写与阶段耗时",
+      "remaining": "旧后端代码与 fixture 已有；当前项目真实输入的模型验收待做",
+      "tests": [
+        "T16",
+        "T18"
+      ]
+    },
+    {
+      "id": "vlm",
+      "group": "M6",
+      "name": "当前图 VLM / 对话与人设",
+      "owner": "C",
+      "placement": "Windows 模型主机",
+      "status": "PORT",
+      "existing": [
+        "tools/dialogue_host_ollama.py",
+        "board/runtime/character.py",
+        "host/model_service/pipeline.py"
+      ],
+      "planned_path": "src/host/vlm",
+      "input": "当前图 / 提问 / 允许上下文",
+      "output": "有依据回答 / 情绪与动作建议",
+      "remaining": "汐蓝人设与文字接口已有；真实看图模型与整机证据待验",
+      "tests": [
+        "T17",
+        "T24"
+      ]
+    },
+    {
+      "id": "tts",
+      "group": "M6",
+      "name": "汐蓝选定声线：Qwen3-TTS",
+      "owner": "C",
+      "placement": "Windows 模型主机",
+      "status": "PC",
+      "existing": [
+        "tools/selected_voice_service.py",
+        "board/runtime/audio/selected_voice.py"
+      ],
+      "planned_path": "src/host/tts",
+      "input": "回答文本 / 已选声线",
+      "output": "明确格式 PCM",
+      "remaining": "Windows 声线/音强口型已有记录；真实管线和 KV260 播放待接",
+      "tests": [
+        "T18",
+        "T19"
+      ]
+    },
+    {
+      "id": "mcp_play",
+      "group": "M6",
+      "name": "MCP01 播放 / 真实停声 / 半双工",
+      "owner": "C",
+      "placement": "KV260 PS",
+      "status": "PLAN",
+      "existing": [
+        "board/runtime/audio/tts.py",
+        "board/runtime/media_session.py"
+      ],
+      "planned_path": "src/ps/audio/mcp01_playback",
+      "input": "有效 PCM 段 / cancel",
+      "output": "真实样本进度 / 静音与结束事件",
+      "remaining": "逻辑 token 有效；声卡取消、缓冲清理、首声与半双工待验",
+      "tests": [
+        "T18",
+        "T19"
+      ]
+    },
+    {
+      "id": "av_sync",
+      "group": "M7",
+      "name": "音视频同步 / 有界同窗裁剪",
+      "owner": "B / C",
+      "placement": "KV260 + Windows",
+      "status": "PLAN",
+      "existing": [
+        "board/runtime/application.py"
+      ],
+      "planned_path": "src/ps/fusion/av_windows",
+      "input": "帧时刻 / 样本锚点 / 校准",
+      "output": "连续同窗音频与人脸序列",
+      "remaining": "窗口登记已有；真实偏移/漂移、缺帧与重采样映射待实现",
+      "tests": [
+        "T15",
+        "T24"
+      ]
+    },
+    {
+      "id": "asd",
+      "group": "M7",
+      "name": "Windows Light-ASD / 有限上下文",
+      "owner": "C",
+      "placement": "Windows 模型主机",
+      "status": "PLAN",
+      "existing": [
+        "config/model_manifest.json"
+      ],
+      "planned_path": "src/host/asd",
+      "input": "同期录音 / 每人连续脸片段",
+      "output": "每人分数 / 模型与窗口归属",
+      "remaining": "模型与作者样例、真实同窗输入和两人测试未接",
+      "tests": [
+        "T15"
+      ]
+    },
+    {
+      "id": "speaker",
+      "group": "M7",
+      "name": "说话人建议 / 阈值 / 板端复核",
+      "owner": "B / C",
+      "placement": "KV260 PS",
+      "status": "PORT",
+      "existing": [
+        "board/fusion/speaker.py",
+        "board/runtime/application.py"
+      ],
+      "planned_path": "src/ps/fusion/speaker_context",
+      "input": "ASD 结果 / 当前轨迹 / 证据窗",
+      "output": "可靠选人建议或拒判",
+      "remaining": "当前窗口归属门已测；持续条件、重叠证据与自动切换整机待做",
+      "tests": [
+        "T15",
+        "T22"
+      ]
+    },
+    {
+      "id": "avatar",
+      "group": "M7",
+      "name": "汐蓝素材 / 眨眼 / 音强口型 / 动作",
+      "owner": "C",
+      "placement": "PC 基线 → KV260",
+      "status": "PC",
+      "existing": [
+        "assets",
+        "tools/realtime_facials.py",
+        "tools/realtime_stage.py",
+        "board/interaction/avatar_player.py"
+      ],
+      "planned_path": "src/ui/avatar",
+      "input": "实际播放与会话事件",
+      "output": "角色动画与口型",
+      "remaining": "既有 Windows 成果；正式板端帧预算和真实样本同步待验",
+      "tests": [
+        "T19",
+        "T25"
+      ]
+    },
+    {
+      "id": "ui",
+      "group": "M7",
+      "name": "正式 UI / 字幕 / 对象 / 错误反馈",
+      "owner": "C",
+      "placement": "KV260 PS / HDMI",
+      "status": "PORT",
+      "existing": [
+        "board/interaction/qt_app.py",
+        "board/interaction/ui_state.py",
+        "ui/ui_state.schema.json"
+      ],
+      "planned_path": "src/ui/views",
+      "input": "会话 / 目标 / 身份 / 硬件状态",
+      "output": "正常页 / 调试页 / 字幕",
+      "remaining": "Qt/UI 状态接入已有；实屏完整交互及登记界面待验",
+      "tests": [
+        "T23",
+        "T25"
+      ]
+    },
+    {
+      "id": "fsm",
+      "group": "M7",
+      "name": "单一 EventBus / 交互状态机",
+      "owner": "C / B",
+      "placement": "KV260 PS",
+      "status": "SW",
+      "existing": [
+        "board/runtime/event_bus.py",
+        "board/runtime/fsm.py",
+        "board/runtime/application.py"
+      ],
+      "planned_path": "src/ps/runtime/state_machine",
+      "input": "真实事件 / 取消 / 故障",
+      "output": "角色与会话状态 / 诊断",
+      "remaining": "软件已测；真实异步媒体、失联恢复和整机长测待验",
+      "tests": [
+        "T19",
+        "T26",
+        "T27"
+      ]
+    },
+    {
+      "id": "hdmi",
+      "group": "M7",
+      "name": "HDMI 1024×600 显示参考",
+      "owner": "A / C",
+      "placement": "KV260 PS + 显示链",
+      "status": "BOARD",
+      "existing": [
+        "/home/ghmd/kv260-hdmi-display-check-20261004/DISPLAY_CHECK_REPORT.md"
+      ],
+      "planned_path": "board/scripts/display",
+      "input": "板端显示帧",
+      "output": "真实屏幕画面",
+      "remaining": "基础桌面/视觉屏幕已有；汐蓝实屏、裁剪与操作待验",
+      "tests": [
+        "T25"
+      ]
+    },
+    {
+      "id": "rtl_verify",
+      "group": "M8",
+      "name": "RTL 正反例 / AXI / PWM / 到期仿真",
+      "owner": "A",
+      "placement": "Ubuntu 仿真",
+      "status": "PORT",
+      "existing": [
+        "/home/ghmd/kv260-visual-servo-20261007/tests/tb_servo.sv",
+        "/home/ghmd/kv260-visual-servo-20261007/scripts/run_sim.py"
+      ],
+      "planned_path": "sim/rtl",
+      "input": "冻结合同 / 时钟 / 正反例",
+      "output": "波形 / 自检查结果",
+      "remaining": "参考仿真代码已有；新绝对期限与完整边界仿真待做",
+      "tests": [
+        "T10",
+        "T11",
+        "T12"
+      ]
+    },
+    {
+      "id": "software_verify",
+      "group": "M8",
+      "name": "框架联调 / 媒体交付 / 异常测试",
+      "owner": "A / B / C",
+      "placement": "PC 软件",
+      "status": "SW",
+      "existing": [
+        "tests/framework",
+        "metrics/raw/framework-validation-20261009/validation.json"
+      ],
+      "planned_path": "sim/software",
+      "input": "合成帧 / 乱序 / 取消 / 身份库",
+      "output": "41 项测试与联调记录",
+      "remaining": "不能替代设备、真实模型或整机验收",
+      "tests": [
+        "T09",
+        "T19",
+        "T23",
+        "T24"
+      ]
+    },
+    {
+      "id": "hardware_build",
+      "group": "M8",
+      "name": "Vivado / Vitis / PetaLinux 构建",
+      "owner": "A",
+      "placement": "Ubuntu 构建机",
+      "status": "BOARD",
+      "existing": [
+        "/home/ghmd/kv260-visual-servo-20261007/scripts/implement_source_platform.py",
+        "/home/ghmd/kv260-visual-servo-20261007/SOURCE_PLATFORM_REPORT.md"
+      ],
+      "planned_path": "build/scripts/hardware",
+      "input": "平台 / RTL / XDC / 固定工具",
+      "output": "配套硬件包 / 报告 / SHA",
+      "remaining": "旧源共存工程有构建与板测；最终新监督整体构建和外部约束待补",
+      "tests": [
+        "T01",
+        "T02"
+      ]
+    },
+    {
+      "id": "model_build",
+      "group": "M8",
+      "name": "Vitis AI 模型锁 / 校准 / 编译",
+      "owner": "B",
+      "placement": "Ubuntu 模型构建环境",
+      "status": "PORT",
+      "existing": [
+        "config/model_manifest.json"
+      ],
+      "planned_path": "build/scripts/models",
+      "input": "来源权重 / arch / 校准集",
+      "output": "xmodel / 模型卡 / 精度对照",
+      "remaining": "项目检测和身份最终工件未冻结；不拿 ResNet18 当人体结果",
+      "tests": [
+        "T03",
+        "T04"
+      ]
+    },
+    {
+      "id": "implementation",
+      "group": "M8",
+      "name": "最终资源 / 时序 / DRC / CDC 报告",
+      "owner": "A",
+      "placement": "Ubuntu + KV260",
+      "status": "PORT",
+      "existing": [
+        "/home/ghmd/kv260-visual-servo-20261007/SOURCE_PLATFORM_REPORT.md"
+      ],
+      "planned_path": "build/reports",
+      "input": "最终同片设计",
+      "output": "LUT/FF/BRAM/DSP / WNS/TNS / 时钟",
+      "remaining": "历史报告已有；新的绝对源期限联合设计报告待生成",
+      "tests": [
+        "T02"
+      ]
+    },
+    {
+      "id": "datasets",
+      "group": "M8",
+      "name": "标定 / 独立测试 / 黄金参考",
+      "owner": "B / C",
+      "placement": "数据与开发机",
+      "status": "PORT",
+      "existing": [
+        "data/golden/framework_frames.jsonl",
+        "data/calibration_manifest.json",
+        "data/test_manifest.json"
+      ],
+      "planned_path": "data/reference",
+      "input": "真实场景 / 独立标注 / 版本",
+      "output": "分离数据集 / 参考输出",
+      "remaining": "合成小样已有；真人视频、身份/ASD/语音与标注集待采集",
+      "tests": [
+        "T03",
+        "T04",
+        "T15",
+        "T16",
+        "T17",
+        "T21"
+      ]
+    },
+    {
+      "id": "experiments",
+      "group": "M8",
+      "name": "G0–G5 六组公平对照",
+      "owner": "A / B / C",
+      "placement": "相同 KV260 与输入",
+      "status": "PLAN",
+      "existing": [
+        "config/experiments.json"
+      ],
+      "planned_path": "data/metrics/experiments",
+      "input": "共同模型 / 硬件 / 误差判据",
+      "output": "误差、覆盖、帧龄、身份等待",
+      "remaining": "当前仅配置与模拟策略联调；六组真实实验未执行",
+      "tests": [
+        "T05",
+        "T06",
+        "T07",
+        "T12",
+        "T21"
+      ]
+    },
+    {
+      "id": "g0",
+      "group": "M8",
+      "name": "G0 固定期限 / 检测优先 / 软件监督",
+      "owner": "B",
+      "placement": "实验组",
+      "status": "PLAN",
+      "existing": [
+        "config/experiments.json"
+      ],
+      "planned_path": "data/metrics/experiments/g0",
+      "input": "共同输入 / 校准最佳固定期限",
+      "output": "强软件基线",
+      "remaining": "不是默认模拟 250ms 已完成真实实验",
+      "tests": [
+        "T06"
+      ]
+    },
+    {
+      "id": "g1",
+      "group": "M8",
+      "name": "G1 固定期限 / 检测优先 / PL 监督",
+      "owner": "A / B",
+      "placement": "实验组",
+      "status": "PLAN",
+      "existing": [
+        "config/experiments.json"
+      ],
+      "planned_path": "data/metrics/experiments/g1",
+      "input": "相同固定期限 / 新 PL",
+      "output": "硬件监督对照",
+      "remaining": "新 PL 未完成，实验未执行",
+      "tests": [
+        "T12"
+      ]
+    },
+    {
+      "id": "g2",
+      "group": "M8",
+      "name": "G2 可变期限 / 检测优先 / PL 监督",
+      "owner": "A / B",
+      "placement": "实验组",
+      "status": "PLAN",
+      "existing": [
+        "config/experiments.json"
+      ],
+      "planned_path": "data/metrics/experiments/g2",
+      "input": "经标定期限 / 新 PL",
+      "output": "有效期模型消融",
+      "remaining": "实验未执行",
+      "tests": [
+        "T06"
+      ]
+    },
+    {
+      "id": "g3",
+      "group": "M8",
+      "name": "G3 固定期限 / 准入 / PL 监督",
+      "owner": "A / B",
+      "placement": "实验组",
+      "status": "PLAN",
+      "existing": [
+        "config/experiments.json"
+      ],
+      "planned_path": "data/metrics/experiments/g3",
+      "input": "固定期限 / 实测任务成本",
+      "output": "调度消融",
+      "remaining": "实验未执行",
+      "tests": [
+        "T06",
+        "T21"
+      ]
+    },
+    {
+      "id": "g4",
+      "group": "M8",
+      "name": "G4 可变期限 / 准入 / 软件监督",
+      "owner": "B",
+      "placement": "实验组",
+      "status": "PLAN",
+      "existing": [
+        "config/experiments.json"
+      ],
+      "planned_path": "data/metrics/experiments/g4",
+      "input": "经标定期限 / 实测任务成本",
+      "output": "最终执行位置对照",
+      "remaining": "仅对应策略的合成联调已有，不是真实 G4 实验",
+      "tests": [
+        "T06",
+        "T21"
+      ]
+    },
+    {
+      "id": "g5",
+      "group": "M8",
+      "name": "G5 可变期限 / 准入 / PL 监督",
+      "owner": "A / B",
+      "placement": "实验组",
+      "status": "PLAN",
+      "existing": [
+        "config/experiments.json"
+      ],
+      "planned_path": "data/metrics/experiments/g5",
+      "input": "最终同片版本 / 同一输入",
+      "output": "完整方案结果",
+      "remaining": "实验未执行，不能预填增益",
+      "tests": [
+        "T06",
+        "T07",
+        "T12",
+        "T21"
+      ]
+    },
+    {
+      "id": "board_verify",
+      "group": "M8",
+      "name": "同板验收 / 数字输出 / 冷启动 / 长测",
+      "owner": "A / B / C",
+      "placement": "KV260 实机",
+      "status": "PORT",
+      "existing": [
+        "/home/ghmd/AMD_Smart/logs/daily/2026-10-08-SERVO-VISIBLE-TEST.md"
+      ],
+      "planned_path": "board/results",
+      "input": "统一 release / 仪器 / 故障输入",
+      "output": "真实输出与参考比对",
+      "remaining": "有限模块板测已有；最终两小时、冷启动、媒体和完整流程待验",
+      "tests": [
+        "T10",
+        "T11",
+        "T26",
+        "T27",
+        "T28",
+        "T29"
+      ]
+    },
+    {
+      "id": "ai_records",
+      "group": "M8",
+      "name": "真实 AI 协作 / 判断 / 自我纠错记录",
+      "owner": "全队",
+      "placement": "研发过程",
+      "status": "PORT",
+      "existing": [
+        "/home/ghmd/AMD_Smart/logs/daily"
+      ],
+      "planned_path": "report/llm_collaboration",
+      "input": "真实可见提问/回答 / 修正 / 验证",
+      "output": "有来源的案例与链接",
+      "remaining": "工程日志已有；原始可见对话归档和完整关联需整理，不补造内部推理",
+      "tests": [
+        "T30"
+      ]
+    },
+    {
+      "id": "skill_a",
+      "group": "M8",
+      "name": "Skill A：命令监督验证",
+      "owner": "A",
+      "placement": "可复用技能包",
+      "status": "PLAN",
+      "existing": [
+        "board/motion/guard.py",
+        "tests/framework/test_project.py"
+      ],
+      "planned_path": "skill/command-guard-validation",
+      "input": "可替换合同 / 用例 / 波形",
+      "output": "边界验证与迁移说明",
+      "remaining": "正式技能说明骨架本次建立；参数化硬件入口、真实失败和外队复用待补",
+      "tests": [
+        "T12",
+        "T30"
+      ]
+    },
+    {
+      "id": "skill_b",
+      "group": "M8",
+      "name": "Skill B：感知时效评测",
+      "owner": "B",
+      "placement": "可复用技能包",
+      "status": "PLAN",
+      "existing": [
+        "board/runtime/project_log.py",
+        "config/experiments.json"
+      ],
+      "planned_path": "skill/perception-freshness-benchmark",
+      "input": "有源归属日志 / 独立参考",
+      "output": "误差、覆盖、等待评测",
+      "remaining": "框架日志可作基础；独立分析入口、真实数据和非作者复用待补",
+      "tests": [
+        "T03",
+        "T06",
+        "T30"
+      ]
+    },
+    {
+      "id": "skill_c",
+      "group": "M8",
+      "name": "Skill C：异步结果与取消验证",
+      "owner": "C",
+      "placement": "可复用技能包",
+      "status": "PLAN",
+      "existing": [
+        "board/runtime/media_session.py",
+        "tests/framework/test_media.py"
+      ],
+      "planned_path": "skill/async-result-validation",
+      "input": "协议 / 迟到、重放、取消样例",
+      "output": "结果归属与消费检查",
+      "remaining": "逻辑测试已有；独立包装、替换协议样例、真实停声证据待补",
+      "tests": [
+        "T19",
+        "T30"
+      ]
+    },
+    {
+      "id": "design_report",
+      "group": "M8",
+      "name": "设计报告 / 框图 / 软硬件接口",
+      "owner": "全队",
+      "placement": "正式报告",
+      "status": "PORT",
+      "existing": [
+        "docs/PROJECT_FRAMEWORK.md"
+      ],
+      "planned_path": "report/design_report",
+      "input": "全部模块与最终证据",
+      "output": "报告正文 / 图 / 结果表",
+      "remaining": "本次搭建完整报告框架；最终结论和性能/资源数据待填",
+      "tests": [
+        "T30"
+      ]
+    },
+    {
+      "id": "reproduction",
+      "group": "M8",
+      "name": "从零复现 / 清洁环境 / 非作者执行",
+      "owner": "全队",
+      "placement": "开发与交付",
+      "status": "PORT",
+      "existing": [
+        "scripts/package_project.py",
+        "metrics/raw/framework-validation-20261009/package_validation.json"
+      ],
+      "planned_path": "report/reproduction",
+      "input": "版本锁 / 源包 / 步骤",
+      "output": "他人实际复现与缺步修正",
+      "remaining": "软件源包新目录通过；最终硬件/模型/设备复现和非作者验收待做",
+      "tests": [
+        "T01",
+        "T28",
+        "T30"
+      ]
+    },
+    {
+      "id": "release",
+      "group": "M8",
+      "name": "统一工程包 / 许可 / 开源 / 演示",
+      "owner": "全队",
+      "placement": "最终交付",
+      "status": "PORT",
+      "existing": [
+        "config/source_import_manifest.json",
+        "docs/LICENSE_MATRIX.md",
+        "artifacts/releases"
+      ],
+      "planned_path": "report/release",
+      "input": "源码 / 验证 / 工件 / 模型 / 数据 / Skill",
+      "output": "英文目录的完整参赛包",
+      "remaining": "本次是框架材料；最终工件、许可选择、公开视频、GitHub/Gitee 发布待完成",
+      "tests": [
+        "T29",
+        "T30"
+      ]
+    },
+    {
+      "id": "observation",
+      "group": "EXT",
+      "name": "可选：历史观察 / 物品记忆 / 主动复查",
+      "owner": "后续决定",
+      "placement": "PS + 主机 + UI",
+      "status": "PLAN",
+      "existing": [],
+      "planned_path": "src/ps/extensions/observation_memory",
+      "input": "已绑定观察与用户授权",
+      "output": "有来源的历史卡片 / 有限复查",
+      "remaining": "历史 P2/P3 扩展，仅画预留接口，不升级为当前必交",
+      "tests": []
+    },
+    {
+      "id": "audio_ext",
+      "group": "EXT",
+      "name": "可选：KWS / VAD / AEC / 流式全双工",
+      "owner": "C 后续",
+      "placement": "PS + Windows",
+      "status": "PORT",
+      "existing": [
+        "board/runtime/audio/kws.py",
+        "board/runtime/audio/vad.py"
+      ],
+      "planned_path": "src/ps/extensions/streaming_audio",
+      "input": "真实音频 / 自播音 / 取消",
+      "output": "语音唤醒或流式交互",
+      "remaining": "旧 KWS/VAD 代码已有；本期先按键半双工，AEC/全双工待评估",
+      "tests": []
+    },
+    {
+      "id": "vision_ext",
+      "group": "EXT",
+      "name": "可选：运动补偿 / 高级质量 / 上下文 ASD",
+      "owner": "B / C 后续",
+      "placement": "PS + 主机",
+      "status": "PLAN",
+      "existing": [],
+      "planned_path": "src/ps/extensions/vision_context",
+      "input": "相机相对运动 / 质量 / 历史分数",
+      "output": "改进关联或选人",
+      "remaining": "BoT-SORT/MagFace/LoCoNet 仅后续对照；不能把规则当论文复现",
+      "tests": []
+    },
+    {
+      "id": "accel_ext",
+      "group": "EXT",
+      "name": "可选：HLS 预处理 / 定制加速优化",
+      "owner": "A / B 后续",
+      "placement": "PL / 模型构建",
+      "status": "PLAN",
+      "existing": [],
+      "planned_path": "src/rtl/extensions/hls_acceleration",
+      "input": "测得瓶颈 / 固定算法",
+      "output": "额外核与前后对照",
+      "remaining": "剪枝、SATAY/TAPA/FILM-QNN/NAF/H2PIPE 作为论文候选，不列当前主创新必做",
+      "tests": []
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "01_system_overview",
+      "title": "全项目总体功能框图",
+      "subtitle": "M1–M8 总体目标：感知、身份、调度、执行、交互与竞赛交付；细节见其余分图",
+      "direction": "TB",
+      "column_layout": false,
+      "node_overrides": {
+        "platform": {
+          "name": "平台底座 / Linux / PL 官方 DPU",
+          "placement": "KV260 PS + PL"
+        },
+        "person": {
+          "name": "人体感知 / 跟踪 / 目标管理",
+          "placement": "KV260 DPU + PS",
+          "status": "PORT"
+        },
+        "identity": {
+          "name": "人脸质量 / 身份 / 授权记忆",
+          "placement": "KV260 DPU + PS",
+          "status": "PORT"
+        },
+        "freshness": {
+          "name": "源有效期 / 单 CU 任务准入",
+          "placement": "KV260 PS",
+          "status": "SW"
+        },
+        "motion": {
+          "name": "唯一运动服务 / 命令合同",
+          "placement": "KV260 PS",
+          "status": "PORT"
+        },
+        "media_session": {
+          "name": "录音看图问答 / Windows ASR+VLM+TTS",
+          "placement": "KV260 PS ↔ Windows",
+          "status": "PORT"
+        },
+        "ui": {
+          "name": "ASD 建议复核 / 汐蓝 UI / 字幕",
+          "placement": "Windows ASD + KV260 UI",
+          "status": "PORT"
+        },
+        "release": {
+          "name": "评测 / Skill / 报告 / 复现 / 工程发布",
+          "placement": "全作品交付",
+          "status": "PORT"
+        }
+      },
+      "clusters": [
+        {
+          "title": "设备与平台",
+          "nodes": [
+            "platform",
+            "camera",
+            "mcp_capture"
+          ]
+        },
+        {
+          "title": "板端感知与核心算法",
+          "nodes": [
+            "person",
+            "identity",
+            "freshness"
+          ]
+        },
+        {
+          "title": "运动执行闭环",
+          "nodes": [
+            "motion",
+            "source_guard",
+            "servo"
+          ]
+        },
+        {
+          "title": "交互与反馈闭环",
+          "nodes": [
+            "media_session",
+            "tts",
+            "ui",
+            "mcp_play",
+            "hdmi"
+          ]
+        },
+        {
+          "title": "贯穿研发与提交",
+          "nodes": [
+            "release"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "platform",
+          "to": "camera",
+          "label": "平台 / 采集",
+          "kind": "data"
+        },
+        {
+          "from": "camera",
+          "to": "person",
+          "label": "真实源帧",
+          "kind": "data"
+        },
+        {
+          "from": "person",
+          "to": "identity",
+          "label": "合格人脸 / 轨迹",
+          "kind": "data"
+        },
+        {
+          "from": "person",
+          "to": "freshness",
+          "label": "真实位置 / 源时间",
+          "kind": "data"
+        },
+        {
+          "from": "freshness",
+          "to": "motion",
+          "label": "剩余期限 / 唯一目标",
+          "kind": "data"
+        },
+        {
+          "from": "motion",
+          "to": "source_guard",
+          "label": "原子命令 / 源绝对期限",
+          "kind": "data"
+        },
+        {
+          "from": "source_guard",
+          "to": "servo",
+          "label": "获准 PWM",
+          "kind": "data"
+        },
+        {
+          "from": "servo",
+          "to": "camera",
+          "label": "改变视向",
+          "kind": "feedback"
+        },
+        {
+          "from": "camera",
+          "to": "media_session",
+          "label": "本轮图像",
+          "kind": "data"
+        },
+        {
+          "from": "mcp_capture",
+          "to": "media_session",
+          "label": "真实录音",
+          "kind": "data"
+        },
+        {
+          "from": "tts",
+          "to": "media_session",
+          "label": "复用已选声线",
+          "kind": "reference"
+        },
+        {
+          "from": "media_session",
+          "to": "mcp_play",
+          "label": "有效 PCM 段",
+          "kind": "data"
+        },
+        {
+          "from": "media_session",
+          "to": "ui",
+          "label": "有效回复 / 播放 / 取消",
+          "kind": "data"
+        },
+        {
+          "from": "identity",
+          "to": "ui",
+          "label": "对象 / 登记 / 记忆",
+          "kind": "data"
+        },
+        {
+          "from": "ui",
+          "to": "hdmi",
+          "label": "字幕与角色",
+          "kind": "data"
+        },
+        {
+          "from": "ui",
+          "to": "person",
+          "label": "经复核选人建议",
+          "kind": "planned"
+        },
+        {
+          "from": "source_guard",
+          "to": "release",
+          "label": "波形 / 故障 / 实现报告",
+          "kind": "reference"
+        },
+        {
+          "from": "media_session",
+          "to": "release",
+          "label": "实测 / 取消 / 复现",
+          "kind": "reference"
+        },
+        {
+          "from": "freshness",
+          "to": "release",
+          "label": "G0–G5 / 误差 / 等待",
+          "kind": "reference"
+        }
+      ]
+    },
+    {
+      "id": "02_ps_pl_hardware",
+      "title": "软硬件划分与 FPGA 执行路径",
+      "subtitle": "官方 DPU 与既有相对租约已有有限板测；新的绝对源期限链路全部明确留位",
+      "direction": "TB",
+      "column_layout": true,
+      "clusters": [
+        {
+          "title": "PS / Linux / 运行时",
+          "nodes": [
+            "platform",
+            "devices",
+            "person",
+            "id_dpu",
+            "scheduler",
+            "clock_map",
+            "motion"
+          ]
+        },
+        {
+          "title": "PL / 既有基础",
+          "nodes": [
+            "dpu",
+            "vsrv"
+          ]
+        },
+        {
+          "title": "PL / 拟实现的新监督核",
+          "nodes": [
+            "axi_commit",
+            "source_guard",
+            "output_gate"
+          ]
+        },
+        {
+          "title": "外设与独立验证",
+          "nodes": [
+            "servo",
+            "hdmi",
+            "hardware_build",
+            "implementation",
+            "rtl_verify",
+            "board_verify"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "platform",
+          "to": "person",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "platform",
+          "to": "motion",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "scheduler",
+          "to": "person",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "scheduler",
+          "to": "id_dpu",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "person",
+          "to": "dpu",
+          "label": "DDR 张量 / 运行时",
+          "kind": "data"
+        },
+        {
+          "from": "id_dpu",
+          "to": "dpu",
+          "label": "同一 CU",
+          "kind": "data"
+        },
+        {
+          "from": "motion",
+          "to": "clock_map",
+          "label": "源绝对期限",
+          "kind": "data"
+        },
+        {
+          "from": "clock_map",
+          "to": "axi_commit",
+          "label": "保守换算 / epoch",
+          "kind": "data"
+        },
+        {
+          "from": "axi_commit",
+          "to": "source_guard",
+          "label": "完整快照",
+          "kind": "data"
+        },
+        {
+          "from": "source_guard",
+          "to": "output_gate",
+          "label": "期限 / 重放 / 代次",
+          "kind": "data"
+        },
+        {
+          "from": "output_gate",
+          "to": "servo",
+          "label": "PWM / STOP",
+          "kind": "data"
+        },
+        {
+          "from": "vsrv",
+          "to": "axi_commit",
+          "label": "参考接口 / 版本演进",
+          "kind": "reference"
+        },
+        {
+          "from": "hardware_build",
+          "to": "implementation",
+          "label": "最终同片报告",
+          "kind": "data"
+        },
+        {
+          "from": "rtl_verify",
+          "to": "board_verify",
+          "label": "同语义用例",
+          "kind": "data"
+        },
+        {
+          "from": "implementation",
+          "to": "board_verify",
+          "label": "匹配工件",
+          "kind": "data"
+        }
+      ]
+    },
+    {
+      "id": "03_vision_identity",
+      "title": "视觉、目标、身份与记忆算法框图",
+      "subtitle": "CPU 参考、IoU、可选 ByteTrack 和最终 DPU 目标分别画出",
+      "direction": "TB",
+      "column_layout": true,
+      "clusters": [
+        {
+          "title": "M2：采集与人体感知",
+          "nodes": [
+            "camera",
+            "cpu_vision",
+            "person",
+            "tracking",
+            "target",
+            "snapshot"
+          ]
+        },
+        {
+          "title": "M3：人脸与身份",
+          "nodes": [
+            "face",
+            "id_cpu",
+            "id_dpu",
+            "identity",
+            "enrollment"
+          ]
+        },
+        {
+          "title": "质量、调度与消费",
+          "nodes": [
+            "datasets",
+            "scheduler",
+            "freshness",
+            "motion"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "camera",
+          "to": "cpu_vision",
+          "label": "参考支路",
+          "kind": "data"
+        },
+        {
+          "from": "camera",
+          "to": "person",
+          "label": "最终项目支路",
+          "kind": "data"
+        },
+        {
+          "from": "person",
+          "to": "tracking",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "cpu_vision",
+          "to": "tracking",
+          "label": "仅 IoU 参考",
+          "kind": "reference"
+        },
+        {
+          "from": "tracking",
+          "to": "target",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "target",
+          "to": "snapshot",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "snapshot",
+          "to": "face",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "face",
+          "to": "id_cpu",
+          "label": "CPU 对照",
+          "kind": "data"
+        },
+        {
+          "from": "face",
+          "to": "id_dpu",
+          "label": "最终特征支路",
+          "kind": "planned"
+        },
+        {
+          "from": "id_cpu",
+          "to": "identity",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "id_dpu",
+          "to": "identity",
+          "label": "模型 ID / 维度",
+          "kind": "planned"
+        },
+        {
+          "from": "enrollment",
+          "to": "identity",
+          "label": "显式同意 / 登记删除",
+          "kind": "data"
+        },
+        {
+          "from": "target",
+          "to": "freshness",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "freshness",
+          "to": "motion",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "scheduler",
+          "to": "id_dpu",
+          "label": "质量与剩余预算",
+          "kind": "data"
+        },
+        {
+          "from": "datasets",
+          "to": "face",
+          "label": "质量 / 阈值标定",
+          "kind": "data"
+        }
+      ]
+    },
+    {
+      "id": "04_freshness_admission_guard",
+      "title": "核心创新：源期限 → 任务准入 → PL 监督",
+      "subtitle": "软件模型已联调；校准与新的 PL 独立期限执行仍待完成",
+      "direction": "TB",
+      "column_layout": true,
+      "clusters": [
+        {
+          "title": "可追溯的真实观测",
+          "nodes": [
+            "camera",
+            "tracking",
+            "target"
+          ]
+        },
+        {
+          "title": "PS：误差与任务预算",
+          "nodes": [
+            "calibration",
+            "freshness",
+            "scheduler",
+            "person",
+            "id_dpu"
+          ]
+        },
+        {
+          "title": "PS → PL：执行许可",
+          "nodes": [
+            "motion",
+            "clock_map",
+            "axi_commit",
+            "source_guard",
+            "output_gate"
+          ]
+        },
+        {
+          "title": "软件参考与同条件实验",
+          "nodes": [
+            "guard_model",
+            "experiments"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "camera",
+          "to": "tracking",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "tracking",
+          "to": "target",
+          "label": "帧 / track / generation",
+          "kind": "data"
+        },
+        {
+          "from": "target",
+          "to": "freshness",
+          "label": "真实位置与速度",
+          "kind": "data"
+        },
+        {
+          "from": "calibration",
+          "to": "freshness",
+          "label": "u0 / Δv / a / e_allow",
+          "kind": "data"
+        },
+        {
+          "from": "freshness",
+          "to": "scheduler",
+          "label": "deadline - now",
+          "kind": "data"
+        },
+        {
+          "from": "scheduler",
+          "to": "person",
+          "label": "刷新检测",
+          "kind": "data"
+        },
+        {
+          "from": "scheduler",
+          "to": "id_dpu",
+          "label": "预算允许才启动",
+          "kind": "data"
+        },
+        {
+          "from": "freshness",
+          "to": "motion",
+          "label": "同源期限不得延长",
+          "kind": "data"
+        },
+        {
+          "from": "motion",
+          "to": "clock_map",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "clock_map",
+          "to": "axi_commit",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "axi_commit",
+          "to": "source_guard",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "source_guard",
+          "to": "output_gate",
+          "label": "到期撤销许可",
+          "kind": "data"
+        },
+        {
+          "from": "freshness",
+          "to": "guard_model",
+          "label": "合同模型",
+          "kind": "reference"
+        },
+        {
+          "from": "guard_model",
+          "to": "experiments",
+          "label": "软件组",
+          "kind": "data"
+        },
+        {
+          "from": "output_gate",
+          "to": "experiments",
+          "label": "PL 组与数字输出",
+          "kind": "planned"
+        }
+      ]
+    },
+    {
+      "id": "05_audio_speaker_avatar",
+      "title": "录音、看图问答、说话人和汐蓝交互框图",
+      "subtitle": "复用已选声线与动画；真实 MCP01、跨机媒体、ASD 同步链明确待接",
+      "direction": "TB",
+      "column_layout": true,
+      "clusters": [
+        {
+          "title": "板端媒体来源",
+          "nodes": [
+            "mcp_capture",
+            "camera",
+            "snapshot",
+            "av_sync"
+          ]
+        },
+        {
+          "title": "Windows 模型服务",
+          "nodes": [
+            "asr",
+            "vlm",
+            "tts",
+            "asd",
+            "transport"
+          ]
+        },
+        {
+          "title": "板端归属与目标校验",
+          "nodes": [
+            "media_session",
+            "speaker",
+            "target",
+            "fsm"
+          ]
+        },
+        {
+          "title": "屏幕 / 声音 / 身份操作",
+          "nodes": [
+            "mcp_play",
+            "avatar",
+            "ui",
+            "hdmi",
+            "enrollment"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "mcp_capture",
+          "to": "media_session",
+          "label": "AudioRef / 样本",
+          "kind": "data"
+        },
+        {
+          "from": "camera",
+          "to": "snapshot",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "snapshot",
+          "to": "media_session",
+          "label": "本轮 ImageRef / SHA",
+          "kind": "data"
+        },
+        {
+          "from": "media_session",
+          "to": "transport",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "transport",
+          "to": "asr",
+          "label": "LAN 媒体",
+          "kind": "data"
+        },
+        {
+          "from": "asr",
+          "to": "vlm",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "snapshot",
+          "to": "vlm",
+          "label": "当前图",
+          "kind": "planned"
+        },
+        {
+          "from": "vlm",
+          "to": "tts",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "tts",
+          "to": "media_session",
+          "label": "PCM / token / 段序",
+          "kind": "data"
+        },
+        {
+          "from": "media_session",
+          "to": "mcp_play",
+          "label": "交付前最终检查",
+          "kind": "data"
+        },
+        {
+          "from": "media_session",
+          "to": "fsm",
+          "label": "回复 / 取消 / 故障",
+          "kind": "data"
+        },
+        {
+          "from": "fsm",
+          "to": "ui",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "mcp_play",
+          "to": "avatar",
+          "label": "实际样本进度",
+          "kind": "planned"
+        },
+        {
+          "from": "avatar",
+          "to": "ui",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "ui",
+          "to": "hdmi",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "ui",
+          "to": "enrollment",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "mcp_capture",
+          "to": "av_sync",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "snapshot",
+          "to": "av_sync",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "av_sync",
+          "to": "asd",
+          "label": "真实同窗序列",
+          "kind": "data"
+        },
+        {
+          "from": "asd",
+          "to": "speaker",
+          "label": "窗 / 分数 / 目标代次",
+          "kind": "data"
+        },
+        {
+          "from": "speaker",
+          "to": "target",
+          "label": "复核后建议",
+          "kind": "data"
+        },
+        {
+          "from": "target",
+          "to": "media_session",
+          "label": "对象上下文",
+          "kind": "data"
+        }
+      ]
+    },
+    {
+      "id": "06_submission_evidence",
+      "title": "官方提交物与工程成果对应框图",
+      "subtitle": "工程包 + Skill + 设计报告；七个推荐目录都留出可核验材料位置",
+      "direction": "TB",
+      "column_layout": true,
+      "clusters": [
+        {
+          "title": "src：实际采用的设计",
+          "nodes": [
+            "vsrv",
+            "person",
+            "identity",
+            "motion",
+            "media_session",
+            "ui"
+          ]
+        },
+        {
+          "title": "sim / data：验证与参考",
+          "nodes": [
+            "rtl_verify",
+            "software_verify",
+            "datasets",
+            "calibration",
+            "experiments"
+          ]
+        },
+        {
+          "title": "build / board：实现与实测",
+          "nodes": [
+            "hardware_build",
+            "model_build",
+            "implementation",
+            "board_verify"
+          ]
+        },
+        {
+          "title": "skill：从真实失败沉淀",
+          "nodes": [
+            "ai_records",
+            "skill_a",
+            "skill_b",
+            "skill_c"
+          ]
+        },
+        {
+          "title": "report：评审与复现",
+          "nodes": [
+            "design_report",
+            "reproduction",
+            "release"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "vsrv",
+          "to": "rtl_verify",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "person",
+          "to": "software_verify",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "media_session",
+          "to": "software_verify",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "datasets",
+          "to": "experiments",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "calibration",
+          "to": "experiments",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "rtl_verify",
+          "to": "hardware_build",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "hardware_build",
+          "to": "implementation",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "model_build",
+          "to": "board_verify",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "implementation",
+          "to": "board_verify",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "ai_records",
+          "to": "skill_a",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "ai_records",
+          "to": "skill_b",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "ai_records",
+          "to": "skill_c",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "board_verify",
+          "to": "design_report",
+          "label": "真实结果 / 参考对比",
+          "kind": "data"
+        },
+        {
+          "from": "experiments",
+          "to": "design_report",
+          "label": "性能与资源前后比较",
+          "kind": "data"
+        },
+        {
+          "from": "skill_a",
+          "to": "design_report",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "skill_b",
+          "to": "design_report",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "skill_c",
+          "to": "design_report",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "design_report",
+          "to": "reproduction",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "reproduction",
+          "to": "release",
+          "label": "从零步骤 / 非作者记录",
+          "kind": "data"
+        }
+      ]
+    },
+    {
+      "id": "07_ablation_and_acceptance",
+      "title": "六组对照、共同指标与整机验收框图",
+      "subtitle": "G0–G5 全部属于待做真实实验；已有模拟联调不能抵扣这些实验",
+      "direction": "TB",
+      "column_layout": true,
+      "clusters": [
+        {
+          "title": "相同输入 / 模型 / 平台与判据",
+          "nodes": [
+            "datasets",
+            "calibration",
+            "person",
+            "id_dpu",
+            "dpu"
+          ]
+        },
+        {
+          "title": "六组待执行对照",
+          "nodes": [
+            "g0",
+            "g1",
+            "g2",
+            "g3",
+            "g4",
+            "g5"
+          ]
+        },
+        {
+          "title": "完整度、资源与复现",
+          "nodes": [
+            "experiments",
+            "implementation",
+            "board_verify",
+            "design_report",
+            "reproduction"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "datasets",
+          "to": "calibration",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "calibration",
+          "to": "g0",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "calibration",
+          "to": "g1",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "calibration",
+          "to": "g2",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "calibration",
+          "to": "g3",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "calibration",
+          "to": "g4",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "calibration",
+          "to": "g5",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "g0",
+          "to": "experiments",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "g1",
+          "to": "experiments",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "g2",
+          "to": "experiments",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "g3",
+          "to": "experiments",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "g4",
+          "to": "experiments",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "g5",
+          "to": "experiments",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "experiments",
+          "to": "design_report",
+          "label": "误差 / 覆盖 / 帧龄 / 身份等待",
+          "kind": "data"
+        },
+        {
+          "from": "implementation",
+          "to": "design_report",
+          "label": "LUT / FF / BRAM / DSP / WNS",
+          "kind": "data"
+        },
+        {
+          "from": "board_verify",
+          "to": "design_report",
+          "label": "T01–T30 / 故障 / 长测",
+          "kind": "data"
+        },
+        {
+          "from": "design_report",
+          "to": "reproduction",
+          "label": "",
+          "kind": "data"
+        }
+      ]
+    },
+    {
+      "id": "08_future_extensions",
+      "title": "尚未开展的扩展与现有模块接口",
+      "subtitle": "扩展只预留结构，不变成当前必交；I2S 双麦 / DOA 仍为已取消范围",
+      "direction": "TB",
+      "column_layout": true,
+      "clusters": [
+        {
+          "title": "已有主链入口",
+          "nodes": [
+            "snapshot",
+            "identity",
+            "motion",
+            "mcp_capture",
+            "person",
+            "scheduler",
+            "speaker"
+          ]
+        },
+        {
+          "title": "后续可选扩展",
+          "nodes": [
+            "observation",
+            "audio_ext",
+            "vision_ext",
+            "accel_ext"
+          ]
+        },
+        {
+          "title": "必须配套的验证",
+          "nodes": [
+            "datasets",
+            "experiments",
+            "implementation",
+            "design_report"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "snapshot",
+          "to": "observation",
+          "label": "有来源观察",
+          "kind": "data"
+        },
+        {
+          "from": "identity",
+          "to": "observation",
+          "label": "授权记忆",
+          "kind": "data"
+        },
+        {
+          "from": "observation",
+          "to": "motion",
+          "label": "有限复查建议",
+          "kind": "planned"
+        },
+        {
+          "from": "mcp_capture",
+          "to": "audio_ext",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "person",
+          "to": "vision_ext",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "speaker",
+          "to": "vision_ext",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "scheduler",
+          "to": "accel_ext",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "datasets",
+          "to": "observation",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "datasets",
+          "to": "vision_ext",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "audio_ext",
+          "to": "experiments",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "vision_ext",
+          "to": "experiments",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "accel_ext",
+          "to": "implementation",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "experiments",
+          "to": "design_report",
+          "label": "",
+          "kind": "data"
+        },
+        {
+          "from": "implementation",
+          "to": "design_report",
+          "label": "",
+          "kind": "data"
+        }
+      ]
+    }
+  ],
+  "excluded": [
+    {
+      "name": "双 I2S / 声源定位 / audio_doa_ip",
+      "reason": "2026-09-30 当前方案按用户决定删除；T13/T14 标为不适用"
+    },
+    {
+      "name": "PYNQ 平台迁移",
+      "reason": "推荐方式与通用 Skill 可选加分，不作为当前 Linux/DPU 路线的新增必做"
+    },
+    {
+      "name": "Ryzen AI PC / AI Engine 强制要求",
+      "reason": "不把其他赛道设备要求套入自主选题初级组"
+    }
+  ],
+  "physical_actuation_enabled": false
+}

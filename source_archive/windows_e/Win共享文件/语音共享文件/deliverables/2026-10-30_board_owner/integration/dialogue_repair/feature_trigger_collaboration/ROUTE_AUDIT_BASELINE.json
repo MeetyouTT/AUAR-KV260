@@ -1,0 +1,356 @@
+{
+  "schema": "aura.feature-route-audit.v1",
+  "level": "code_or_fake_verified",
+  "source": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\guard_session_candidate\\after\\board\\runtime\\audio\\board_dialogue_jobs.py",
+  "source_sha256": "71fd1ac8e2ddb2e20eeb572063cc69e370e18f40af4a97fb65e2d8258bae45a0",
+  "route_ast_sha256": "1480fac3b20388155aa33c9d7949e5860517241dbe4b52aaa02661f94e234d04",
+  "effects": {
+    "devices": false,
+    "network": false,
+    "models": false,
+    "user_store": false
+  },
+  "cases": [
+    {
+      "id": "vision_current",
+      "synthetic_text": "你现在看到了什么",
+      "expected_route": "structured_visual_query",
+      "observed": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "current_person_count"
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "vision_count",
+      "synthetic_text": "现在镜头前有几个人",
+      "expected_route": "structured_visual_query",
+      "observed": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "current_person_count"
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "vision_count_plain",
+      "synthetic_text": "这里有几个人",
+      "expected_route": "structured_visual_query",
+      "observed": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "current_person_count"
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "vision_can_see_me",
+      "synthetic_text": "你能看见我吗",
+      "expected_route": "structured_visual_query",
+      "observed": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": false
+    },
+    {
+      "id": "vision_position_plain",
+      "synthetic_text": "我左边有几个人",
+      "expected_route": "structured_visual_query",
+      "observed": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": false
+    },
+    {
+      "id": "vision_position_explicit",
+      "synthetic_text": "镜头左边有几个人",
+      "expected_route": "structured_visual_query",
+      "observed": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "current_person_count"
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "vision_history",
+      "synthetic_text": "刚才看到几个人",
+      "expected_route": "structured_visual_query",
+      "observed": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "historical_person_count"
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "vision_history_events",
+      "synthetic_text": "查询昨天的视觉记录",
+      "expected_route": "structured_visual_query",
+      "observed": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "unsupported_visual"
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "vision_unsupported",
+      "synthetic_text": "我手里是什么颜色的杯子",
+      "expected_route": "structured_visual_query",
+      "observed": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "unsupported_visual"
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "identity_current",
+      "synthetic_text": "我是谁呀",
+      "expected_route": "identity_query",
+      "observed": {
+        "route": "identity_query",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "identity_known_status",
+      "synthetic_text": "我登记过身份吗",
+      "expected_route": "identity_query",
+      "observed": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": false
+    },
+    {
+      "id": "face_enroll",
+      "synthetic_text": "帮我登记身份，我叫测试甲",
+      "expected_route": "identity_enrollment",
+      "observed": {
+        "route": "identity_enrollment",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "face_update",
+      "synthetic_text": "确认更新登记",
+      "expected_route": "identity_enrollment",
+      "observed": {
+        "route": "identity_enrollment",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "face_cancel",
+      "synthetic_text": "取消登记",
+      "expected_route": "identity_enrollment",
+      "observed": {
+        "route": "identity_enrollment",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "speaker_status",
+      "synthetic_text": "声纹现在可用吗",
+      "expected_route": "speaker_identity",
+      "observed": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": false
+    },
+    {
+      "id": "speaker_registered",
+      "synthetic_text": "我登记过声纹吗",
+      "expected_route": "speaker_identity",
+      "observed": {
+        "route": "speaker_identity",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "speaker_identify",
+      "synthetic_text": "听声音知道我是谁吗",
+      "expected_route": "speaker_identity",
+      "observed": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": false
+    },
+    {
+      "id": "speaker_recognize",
+      "synthetic_text": "请识别我的声纹",
+      "expected_route": "speaker_identity",
+      "observed": {
+        "route": "speaker_identity",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "speaker_enroll",
+      "synthetic_text": "登记我的声纹，我叫测试甲",
+      "expected_route": "speaker_identity",
+      "observed": {
+        "route": "speaker_identity",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "speaker_remember",
+      "synthetic_text": "记住我的声音，我叫测试甲",
+      "expected_route": "speaker_identity",
+      "observed": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": false
+    },
+    {
+      "id": "speaker_delete",
+      "synthetic_text": "删除声纹，名字是测试甲",
+      "expected_route": "speaker_identity",
+      "observed": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": false
+    },
+    {
+      "id": "speaker_cancel",
+      "synthetic_text": "取消声纹登记",
+      "expected_route": "speaker_identity",
+      "observed": {
+        "route": "speaker_identity",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "speaker_confirm",
+      "synthetic_text": "确认保存声纹",
+      "expected_route": "speaker_identity",
+      "observed": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": false
+    },
+    {
+      "id": "ordinary_chat",
+      "synthetic_text": "今天比较开心，陪我聊聊",
+      "expected_route": "ordinary_or_memory",
+      "observed": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "ordinary_people",
+      "synthetic_text": "项目有几个人参加",
+      "expected_route": "ordinary_or_memory",
+      "observed": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "ordinary_quote",
+      "synthetic_text": "解释一下“登记我的声纹”是什么意思",
+      "expected_route": "ordinary_or_memory",
+      "observed": {
+        "route": "speaker_identity",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": false
+    },
+    {
+      "id": "ordinary_denial",
+      "synthetic_text": "不要识别我的声纹",
+      "expected_route": "ordinary_or_memory",
+      "observed": {
+        "route": "speaker_identity",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": false
+    },
+    {
+      "id": "ordinary_voice",
+      "synthetic_text": "这首歌的声音很好听",
+      "expected_route": "ordinary_or_memory",
+      "observed": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "memory_set",
+      "synthetic_text": "记住我喜欢蓝色",
+      "expected_route": "ordinary_or_memory",
+      "observed": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "memory_forget",
+      "synthetic_text": "忘记我喜欢的颜色",
+      "expected_route": "ordinary_or_memory",
+      "observed": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    },
+    {
+      "id": "history_conversation",
+      "synthetic_text": "我们昨天聊了什么",
+      "expected_route": "history",
+      "observed": {
+        "route": "history",
+        "error": null,
+        "visual_kind": null
+      },
+      "matched_expectation": true
+    }
+  ]
+}

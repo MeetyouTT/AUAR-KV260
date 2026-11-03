@@ -1,0 +1,47 @@
+原板端转轴下一步：只读源码复核（2026-11-01 洛杉矶）
+
+范围：本报告只读已保存的原源码和 root 的实际板端回执；未执行 SSH、服务操作、原 bench、原诊断、MMIO、推理、录音或动作。没有修改现役配置、控制器、固件、驱动或历史证据。
+
+当前可引用的实际状态
+maintenance_original_axis_20261101/gui_ready25_observed_01.json 的板端时点为 2026-11-02T07:18:30.982992+00:00：boot 903cfade-b93c-48fa-804e-379be1967313，wide 固件已就绪，相机 79866、GUI supervisor 82126/GTK 82130，GUI 主页面/原角色 READY，mic=false/PAUSED，无播放、无运行 fault。manual_pan.state=FAULT、automatic_following=false、pulse_us=null、无 readback，native_register_map_owners=[]。本报告没有再次假定此快照永久有效；动作前仍需 root 新鲜核对。
+当前 startup SHA 3f5e81abc20ce5169ac91ae302611cba8958175a6a2bdb615fd9b858353120d5，UI SHA fc98455a5586cc4f1896f5472ec9b204bd7ff2b0c5be2798ba5cab1788b9b959，selected binding SHA 9ab2533d2c3000d61095f54de2e8199f53461ac085e2f58230ab36149be6af1f，25 pins。后续四项转轴配置交易必须从此 startup 开始，保留身份查询补丁和当前相机绑定。
+用户确认：安装未动、可观察、空间和线缆余量足；转轴动力已经断开。相机/板卡供电保持。1500us 是 ID/STOP 后寄存器复位值，不能宣称是实测机构中点。
+
+精确原入口与能力
+1. /home/root/aura-axis-priority-20261101-3c94e7a0/bench_finite_step_deadline_fix.py
+   SHA f23952abb189e2e826db7f78ff81296a81a4b57c17684258499227d215dc6dc4
+   支持新 --manifest、--manifest-sha256、--context、--output；执行还要求 --execute --confirmation OBSERVED_FINITE_2S --initial-us <现场选定> --target-us <现场选定>。
+   initial、target 必须整数，1400..1600，差值 1..5us。总时长 2s（先 initial 1s，再 target 1s），100ms lease，25ms 提交预算，无自动重试；完成 QUIESCE/finish 后 finally STOP。新输出 O_EXCL。需原 release 根作为 PYTHONPATH，以解析原 bench_identity_stop；不可使用旧 Windows 固定 boot 的 run_step.py。
+   关键限制：最大 5us 指两段指令的差值，不限制从未知实体位置上电到 initial 的位移。源码 PLAN 明确 initialization_may_move_from_unknown_actual_position=true。因此应先让现场人员选初始指令/观察姿态，不能把 reset1500 当作实体参考直接启用自动跟随。
+2. /home/root/aura-axis-priority-20261101-3c94e7a0/bench_observed_80us_6s.py
+   SHA 3538bef649574da5607aa54ffbfdee5e103fc4f1db1ebb468eade239500b876c
+   支持新 --context/--expected-state；执行还要求 --execute --confirmation OBSERVED_80US_RETURN_6S。expected 文档是本 boot 的 {boot_id,registers}，完整停止寄存器必须在开动作前逐项相等。
+   当前 width 为 origin 且 flags=lease=0，origin>=1400、origin+80<=1600（即 origin<=1520）。6s 为 origin 1s、origin+80 3s、origin 2s。源码状态标签误写 20US_RETURN，实际字段 user_requested_excursion_us、excursion_us 和事件均为80，报告必须如实描述。若初始化后的 stopped origin>1520，不改原脚本去绕范围，重新选择合理初始化或使用其他已有合适原入口。
+3. /home/root/aura-pan-wide-20261028/control-10282601/run_face_motion.py
+   SHA 9ebf21a1bcbc37992398e8d59f459141d7cc49163dcf400e768ea129f4e8be94
+   --manifest <原candidate-manifest> --manifest-sha256 6a4b645a5bbfd35c9107976edf27886cf8e0c91e40f48be6f052a95e1172c1cf --context <本boot真实wide-context> --app-root <现役aura> --output <新结果> --direction-evidence <本boot真实方向> --human-evidence <本boot现场> --zone-settings <本boot几何> --confirmation FACE_ZONE_CONTINUOUS --duration 25。
+   入口允许 duration0..300；正式 GUI 当前0表示持续，建议真实初验先25s。保留原25文件/固件/driver、4us/20ms硬件斜率、250ms源图/500ms检测锚、2源帧、目标锁和 STOP。KNOWN 不是跟随必要条件。
+4. 原 run_input_diagnostics.py SHA e273e800d722b09cf034fc53d21be121f5cacf6f5939577366546c8042493f00：只读 face-stream，无 driver/MMIO。参数 --settings <本boot合法zone> --output <独占新结果> --duration 1..30，PYTHONPATH 指现役 aura。可在动力断开时由 root 执行，须先基于实际显示/相机几何建立本boot zone，不盲改旧UUID。内部1450只是纯软件参考。
+
+原资格检查的边界
+原 manual_vsrv.load_release 接受的分支包括 QUALIFIED、OBSERVED_MANUAL、USER_BOUNDED_MANUAL、USER_RATED_RANGE、CURRENT_REFERENCE_CONNECTION。当前 GUI 选的旧 release 是 USER_RATED_RANGE_VSRV2，范围500..2500，机械零点/实体范围/外部波形均未宣称实测。rated_range_bounds 要求本 boot 的 authorization 与 ID_STOP platform_proof；不能只把旧 release 的 boot 改名或把原记录当本次观察。
+是否沿用用户此前原额定范围授权由 root 依据完整会话判断，源码要求产生真实 current-boot 说明及其哈希。记录可以透明引用此前有效授权和本次安装未动/空间足等反馈，不能发明用户新引述或称本轮已观察完整行程。
+原 observed_bounds 仅接受实际20us往返、恰好20us的已观察范围及 HUMAN_OBSERVED_20US_RETURN_CONFIRMED。80us脚本的误写状态标签不能让它符合20us资格，不可伪装 excursion_us/events 来通过。
+原 current_reference_release.qualified_reference_stop 的固定试验分支硬编码 reference1420、15us/5s及背景测量完整证据；continuity分支硬编码旧1400、既定用户quote与前驱STOP。新的2s/5us或80us报告不直接满足这两个分支，不能拿模板套字段。
+
+独占所有权与 GUI 是否要停止
+07:18快照说明当前 manual 子进程虽存在，旧 context 在 verify_platform 阶段阻止了 NativeRegisters，因此无 native motion 映射。保留这个状态、禁止现场点重连时，外部原bench可不停止整个GUI，但 root 在每个动作前须核 fresh owner/映射，原 native 独占 flock 仍必须生效；遇忙立即退出，不杀 owner、不删除锁、不重放动作。
+一旦新manual配置有效并成功重连，ManualPan.work 会长期保持 with hardware 直到 close；此时外部bench必须先通过原正常关闭路径释放锁。直接 GUI pan_stop 只停止输出，不释放持锁句柄。
+GUI 原 FacePanProcess.work 已实现 manual.close → Popen原follow → 确认follow退出 → 重建manual 的锁交接，原入口可正常配合视觉/语音页面。不需新写控制器或新后台常驻服务。
+原 manual_live_config.current_config 要求磁盘 boot_id/fdt_sha256/face_follow_config/enabled 与进程初始base一致。当前 GUI 的 base 还是旧bebd，更新为903c后仅点“重新连接”会被此guard拒绝。完成真实参考/方向后，应一次更新转轴配置+startup并正常重启GUI，让新base生效；保留聆听false、跟随false，核新PID/birth/cmd以及380 pins，再执行原GUI有限跟随。
+
+最小合法执行顺序（root唯一板端执行者）
+1. 动力继续OFF：核原wide/currentcontext、候选manifest4固件+3driver、原25source、GUI380和25pin、相机DPU前进/无错误；整理只读几何诊断输入；准备独占新输出/意图/OS监督回执。已通过的ID_STOP和相机恢复不重复执行。
+2. 现场确认姿态和操作者选定initial/target，root在动作前核无运动owner；仅在准备就绪时安排接回动力，执行原2s有限初始化一次。核ACK、finish/finalSTOP和用户实际观察。未观测实体时机械观察保持PENDING。
+3. 从本次停止寄存器生成 fresh expected-state；执行原80us/6s往返一次。用户面对相机说明增脉宽阶段朝哪侧、是否返回并停止。把真实反馈/本次trialSHA/boot写新方向与human证据，无法看清则保持未通过。不能仅凭安装未动复制旧+1为本次方向通过。
+4. 基于相同显示640x480/mirror/viewport实读和原用户线，保存本bootzone来源；原camera_zone纯函数核几何。左0.1/屏幕右0.7158253629442671只在实际布局保持时复用，明确geometry_reused_from+SHA；保持原edge/center语义。
+5. 按真实原授权范围、ID_STOP和参考/方向证据生成独立新release/config文件，离线运行原纯验证函数；原据保持。更新pan_manual、pan_face、pan_direction、zone引用和对应startup pins，正常重启GUI一次，核所有组件、新owners、micfalse、followfalse、manualREADY且停止。若新release或资格不满足，保持锁，不修改guard。
+6. 用原GUI/原入口执行25s有限跟随；现场缓慢左右移动并试一次丢脸停止。核报告 input_timing/reader_queue/decisions/visual_center_completions/max_control_turn_ms、原STOP收据和用户实体观测。API pan_face_follow为toggle，不盲重试；明确停止发 pan_stop。
+7. 只有实际诊断证明边界/源龄问题时才调整已有对应参数；不扩大lease/源TTL，不改4us/20ms硬件斜率，不给方向/零点/角度/冷启动做超出证据的声明。
+
+本次结论：固件、DPU和GUI已经由root恢复，但还没有本boot实体方向/参考/跟随验收；尚不能把3min拍摄称为已验收的完整机械协作。无需重写转轴链路。

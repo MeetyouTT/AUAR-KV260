@@ -1,0 +1,39 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/19-safe-shutdown.json",
+  "manifest_sha256": "8b7819e0b8575c4c75496851507ca83281308abd19ec05c58a304a82bee29995",
+  "started_utc": "2026-10-04T08:27:05.497781+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "prepare-coldboot",
+      "started_utc": "2026-10-04T08:27:06.001752+00:00",
+      "entry": {
+        "id": "prepare-coldboot",
+        "command": "python3 -B -c 'import sys; sys.path.insert(0,\"/home/root/kv260-dfx-state-boardtest-20261004/board\"); import validate_v5 as v; e=v.Evidence(\"prepare-coldboot\"); v.guard(e); v.require_phase(e,\"persist\"); v.manager(e,v.NEW); e.check(\"persistent_config_exact\",v.PERSIST.read_text()==v.PERSIST_CONTENT and not v.TEMP.exists()); e.check(\"candidate_hash_exact\",v.sha(v.NEW)==v.NEW_SHA); v.stock(e); v.unload(e,\"unload-before-poweroff\"); v.stop(e); e.run(\"kernel-before-poweroff\",[\"dmesg\"]); e.run(\"flush-before-poweroff\",[\"sync\"]); e.finish()'",
+        "timeout": 180
+      },
+      "exit_code": 0,
+      "output_sha256": "3316f69e5e464057423cbb639288b62f2642329a34a6db3afd05ea397b9f3ef8",
+      "bytes": 1193,
+      "finished_utc": "2026-10-04T08:27:09.010920+00:00"
+    },
+    {
+      "id": "clean-poweroff",
+      "started_utc": "2026-10-04T08:27:09.011205+00:00",
+      "entry": {
+        "id": "clean-poweroff",
+        "type": "poweroff"
+      },
+      "powerdown_confirmed": true,
+      "command": "systemctl --no-block poweroff",
+      "elapsed_seconds": 2.3202753640071023,
+      "console_echo_restored_before_shutdown": true,
+      "exit_code": 0,
+      "finished_utc": "2026-10-04T08:27:11.393822+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T08:27:11.395239+00:00"
+}

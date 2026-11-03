@@ -1,0 +1,1 @@
+cmd_usr/initramfs_data.cpio := sh /home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/usr/gen_initramfs.sh -o usr/initramfs_data.cpio -l usr/.initramfs_data.cpio.d   /home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/usr/default_cpio_list

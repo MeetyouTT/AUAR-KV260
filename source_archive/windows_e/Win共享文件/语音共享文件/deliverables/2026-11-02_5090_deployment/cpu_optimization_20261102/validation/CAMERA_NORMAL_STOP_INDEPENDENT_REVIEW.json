@@ -1,0 +1,60 @@
+{
+  "schema": "aura-camera-normal-stop-independent-review-1",
+  "status": "PASS_LOCAL_TARGETED_REVIEW_FRESH_LINUX_DRY_RUN_REQUIRED",
+  "reviewed_source": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\camera\\normal_stop_current_owner.py",
+  "source_sha256": "4a5e374eacc825e16a22664dc6ef1137f5e0950be3dc8b3e477f791faf5e2e91",
+  "old_source_sha256": "591b27912dad632f163886903568ad599661c2e22287ab8aa701d2035ab1271a",
+  "blocking_code_findings_remaining": [],
+  "old_findings": [
+    {
+      "id": "STOP-DEATH-OWNER",
+      "severity": "blocking_in_591",
+      "finding": "Old equality of full owner dictionaries could accept a live same-PID/birth process after exec, or canonical type mismatch, as dead.",
+      "fixed_in_current": true,
+      "current_rule": "Death uses absent PID or different birth only. Current active camera still requires exact PID/birth/cmd pin equality. Canonical positive digit-string birth and lowercase SHA pin required."
+    },
+    {
+      "id": "STOP-SOURCE-CLOSURE",
+      "severity": "blocking_in_591",
+      "finding": "Old preflight did not bind selected original reader/run config/Native source and operator closure/systemd entry to the actual active camera.",
+      "fixed_in_current": true,
+      "current_rule": "Fresh selected reader and original pinned metadata-only _verify, current owner config, full Native 222 manifest, operator 7, C-unit 6+ABI2, approved library, systemd properties and exact unit/drop-in paths+SHA are checked before stop."
+    }
+  ],
+  "checks": {
+    "default_read_only": "Default returns before tx.mkdir/create and calls only reads, metadata-only pinned _verify, original systemctl show and HTTP GET metadata. No explicit evidence/stage/checkpoint/marker/data write.",
+    "gui_and_owner": "Normally stopped GUI unit, nonempty prior GUI lifetimes dead, no GUI service cgroup processes; active camera unit and full owner match. Post-stop same lifetime must be absent and camera cgroup empty.",
+    "stop_once": "Only one subprocess argv is systemctl stop --no-block aura-camera-ui.service. No automatic retry or camera signal/kill/terminate.",
+    "infinite_no_kill": "Preflight requires Restart=no, SendSIGKILL=no, KillMode=process, TimeoutStopUSec=infinity. Local 25s observation does not change the unit timeout or force the camera.",
+    "intent_and_preflight": "Durable O_EXCL+fsync intent records fresh boot/source owner/startup/current monotonic lower bounds, SFace seven counters and complete optional state. Startup+active owner rechecked immediately before original stop submission.",
+    "early_counter_hold": "Before intent creation, optional yunet/sface each require nonnegative int calls/native_completed/native_failures/not_submitted/overruns; recovery faults/attempts/recoveries/probe_successes and bool history_opaque required. Missing key/type raises before directory/intent/stop.",
+    "fresh_final": "Original fixed checkpoint is read only after normal unit success, predecessor lifetime dead and cgroup empty. Exact final scope/purpose/kind, current boot/PID/birth, captured>=intent, primary/overrun+SFace lower bounds, no consumed marker and stable same bytes are required.",
+    "markers_and_business_data": "No write operation targets checkpoint, consumed marker, Native source/config, model, enrollment database, listening preference or GUI data."
+  },
+  "targeted_evidence": [
+    "NORMAL_STOP_OWNER_EDGE.json",
+    "NORMAL_STOP_FIXED_OWNER_CHECK.json"
+  ],
+  "fresh_linux_prerequisites": [
+    "After explicit device handoff, acquire fresh current boot/owner canonical birth/cmd/startup and all closure pins. Historical a6d/1332/26pin observations are not fresh proof.",
+    "GUI must normally stop with no surviving prior lifetime/cgroup process, listening preference paused, enrollment_sampling.stage exactly idle and Native/camera healthy in original running domain.",
+    "Fresh actual API must provide all required optional and recovery cumulative fields. Do not fill missing calls/native_completed with zero or substitute last_report for a cumulative count.",
+    "Full Native original readback/history validation and required history anchor remain separate mandatory steps after fresh final; NEW_FINAL_PRESENT is not a full-reader pass."
+  ],
+  "operational_notes": [
+    "An 8s subprocess.run timeout can terminate its systemctl CLI helper, not the camera service process. A failure after durable intent can leave intent without result. Reconcile read-only using that intent; do not blindly submit a second stop.",
+    "The helper does not itself prove every Native array, recovery/history chain, auxiliary quiescence or source header. Its fresh final result explicitly requires the full original validator.",
+    "The original operator wrapper migrates predecessor disk library/unit references in memory. Do not add a rule forcing the untouched original owner run config to directly name final 704f/7cf values.",
+    "New-boot archive-only loading belongs to the original Native loader domain. This same-boot normal-stop helper neither redoes bootstrap nor merges historical and fresh counter domains."
+  ],
+  "test_scope": {
+    "actual_extracted_owner_functions_with_fake_proc": true,
+    "static_ast_boundaries": true,
+    "unchanged_large_suites_reexecuted": false,
+    "board_ssh_or_http_or_systemctl_or_proc_access": false,
+    "linux_dry_run": false,
+    "board_stop": false,
+    "candidate_modified": false
+  },
+  "ready_for": "Fresh Linux default dry-run only after current device owner explicitly hands back maintenance rights; --stop readiness depends on that successful fresh dry-run and planned full-reader/history adapter."
+}

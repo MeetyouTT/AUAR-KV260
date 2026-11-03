@@ -1,0 +1,175 @@
+{
+  "schema": "aura.same-request-latency-review.v1",
+  "status": "MEASUREMENT_REVIEW_COMPLETE_FINAL_LISTENING_FOLLOWUP_CONFIRMED",
+  "created_utc": "2026-11-01T02:11:06.833Z",
+  "analyst_thread": "01a191ec-d0c3-77d0-904f-86e6cc9b2cb3",
+  "sole_device_operator_thread": "01a18bcd-1167-71a0-ba0b-d809148d39d9",
+  "runtime": {
+    "startup_sha256": "90f6c6c40f6501362aa77483235a7260a212de6e3357615311bdaa5cc193ebbe",
+    "boot_id": "bebd3e7d-e984-4517-8cbb-211df7f1c6dc",
+    "unchanged_through_window": true
+  },
+  "evidence": {
+    "path": "round2/metadata_1793498566051101000.jsonl",
+    "sha256": "7b295cd5f3bbe2b14480255d008965f2a3a13f2fccb54faafabe3773a2887731",
+    "samples": 181,
+    "observer_exit_code": 0,
+    "sample_interval_seconds": 1
+  },
+  "user_feedback": {
+    "first_window": "回答完整但有卡顿；用户确认周围还有说话或播放声",
+    "second_window_environment": "用户确认环境已安静",
+    "second_window_result": "已答完，声音连续",
+    "waiting_satisfaction": null
+  },
+  "selected_request": {
+    "token_sha256": "99d05d31bcbf83143712a7e48cdaefcbe93ecc7efa5b5be757f5035740633acf",
+    "selection": "First new complete request following the quiet-window instruction, with a matching full-playback ACK. It was the sole new request observed when the user feedback arrived; later requests remain separate.",
+    "first_observed_mono": 14476.209383891,
+    "last_observed_mono": 14487.214973335,
+    "request_derived_from_live_asr": true,
+    "matching_playback_ack_observed_mono": 14487.214973335,
+    "waiting_speech_microphone_open_observed_mono": 14488.238913226,
+    "exact_script_text_verified": false,
+    "script_match_limitation": "The observer compares local_transcription.text, but its exported character count was zero throughout. The false script flag is not evidence that the user spoke a different sentence.",
+    "later_requests_in_same_window": [
+      "7b7144e813eaee334e210cd4704bb94479f65a953a807bb1429a3d17931d3f40",
+      "acd29baca98573402e3eaf2efe689cb9544efaf68025563809716eef4f9481e3"
+    ]
+  },
+  "measured_stage_ms": {
+    "asr": 2785.288266999487,
+    "admission": 37.343633999626036,
+    "route": 36.228762999598985,
+    "analysis_enqueue": 32.39992399903713,
+    "context": 89.26840299864125,
+    "llm_complete_rpc": 3955.1117880000675,
+    "tts_complete_rpc": 701.1176220003108,
+    "local_reply": 0.8811890002107248,
+    "tts_calls": 1,
+    "first_tts_ready_relative_to_prepare_start": 5100.3330209987325,
+    "first_chunk_emit_callback_completed_relative_to_prepare_start": 6503.006079999977,
+    "prepare_total": 6607.542694999211,
+    "worker_start_to_first_audio_queued": 8418.424378000054,
+    "worker_total": 9820.701663000364,
+    "arithmetic_residual_after_asr_context_llm_tts": 887.6382980015478
+  },
+  "timing_interpretation": [
+    "The 8418.424 ms total starts at foreground job execution and ends at first audio queued. Physical end-of-speech and acoustic first-sound timestamps are unavailable.",
+    "LLM and TTS RPC durations include transport, host dispatch and inference; same-request host prefill/decode and pure network RTT were not exposed.",
+    "The 887.638 ms difference is an arithmetic residual after four named stages, not an independently instrumented network or scheduling measurement. Admission, route and analysis enqueue are parts of remaining work.",
+    "first_chunk_emitted_ms is an emission-callback completion marker and is not used as acoustic playback onset.",
+    "Observed state transitions, full ACK and rearming are 1 Hz samples. Their difference is not an exact playback-finish-to-microphone latency.",
+    "This is one reviewed foreground request under metadata observation; no stable percentile or before/after speed claim."
+  ],
+  "selected_audio": {
+    "user_reported_continuous": true,
+    "software_underrun_packets": 23,
+    "max_output_poll_gap_ms": 15.35,
+    "software_metric_definition": "GStreamer code adds zero PCM and increments this counter when active, ready, not paused, not final, and content queue empty. Its position within speech versus leading/trailing waiting is not determined by this probe.",
+    "audible_dropout_count": null,
+    "full_playback_ack_matched": true
+  },
+  "selected_stream": {
+    "producer": {
+      "guard_calls": 118,
+      "guard_total_ms": 1297.2607650081045,
+      "guard_thread_cpu_total_ms": 127.57171399993439,
+      "guard_thread_cpu_max_ms": 4.299045999999862,
+      "progress_wait_ms": 0,
+      "progress_wait_peak_ms": 0,
+      "progress_queue_peak": 75
+    },
+    "consumer": {
+      "drain_calls": 270,
+      "audio_packets": 114,
+      "max_drain_gap_ms": 177.15597099959268,
+      "channel_event_calls": 119,
+      "channel_event_total_ms": 661.0329630038905,
+      "channel_event_max_ms": 75.69006700032332
+    }
+  },
+  "window_health": {
+    "renderer_faults_before": 2,
+    "renderer_faults_after": 6,
+    "new_renderer_faults": 4,
+    "renderer_last_fault": {
+      "error_class": {
+        "present": true,
+        "code": "ValueError",
+        "length": 10
+      },
+      "frames": [
+        {
+          "file": "board_avatar_worker.py",
+          "function": "work",
+          "line": 298
+        },
+        {
+          "file": "production_memory_presentation.py",
+          "function": "tick",
+          "line": 270
+        },
+        {
+          "file": "voice_first_recording.py",
+          "function": "tick",
+          "line": 225
+        },
+        {
+          "file": "voice_first_recording.py",
+          "function": "_social_tick",
+          "line": 217
+        },
+        {
+          "file": "realtime_controller.py",
+          "function": "submit_generated",
+          "line": 60
+        },
+        {
+          "file": "selected_voice_service.py",
+          "function": "import_generated",
+          "line": 130
+        }
+      ],
+      "frames_truncated": false
+    },
+    "capture_failures_before": 6,
+    "capture_failures_after": 7,
+    "new_capture_failures": 1,
+    "software_underrun_before": 275,
+    "software_underrun_after": 303,
+    "runtime_faults_after": 0,
+    "last_sample_mono": 14610.374582613,
+    "last_sample_listening": {
+      "enabled": true,
+      "state": "WAITING_SPEECH",
+      "conversation_entered": false,
+      "entry_mode": "direct_speech",
+      "wake_word_required": false,
+      "microphone_open": false,
+      "conversation_mode": "half_duplex",
+      "voice_barge_in": false
+    },
+    "requested_owner_followup": "Completed in round2/FINAL_STATE.json. Later observation mono15163.075213721 confirmed enabled=true, WAITING_SPEECH and microphone_open=true on the same startup and boot. Target-request rearming was also independently observed true at 14488.239.",
+    "later_owner_followup": {
+      "path": "round2/FINAL_STATE.json",
+      "observed_mono": 15163.075213721,
+      "phase": "IDLE",
+      "enabled": true,
+      "state": "WAITING_SPEECH",
+      "microphone_open": true,
+      "renderer_faults_cumulative": 13,
+      "capture_failures_cumulative": 9,
+      "scope": "Later followup, not part of the 180-second observation window. Its cumulative counters do not replace the window increments."
+    },
+    "whole_system_stability_accepted": false
+  },
+  "privacy": {
+    "real_audio_exported": false,
+    "transcript_or_reply_exported": false,
+    "private_database_exported": false,
+    "request_identifiers_hashed": true
+  },
+  "analyst_hardware_access": false,
+  "followup": "The device owner received the new renderer ValueError stack and capture overflow for diagnosis. This report completes the latency review and does not certify an error-free whole window."
+}

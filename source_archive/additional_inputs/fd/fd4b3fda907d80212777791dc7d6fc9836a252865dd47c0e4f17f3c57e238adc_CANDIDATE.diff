@@ -1,0 +1,211 @@
+--- a/common/binding_intent.py
++++ b/common/binding_intent.py
+@@ -6,6 +6,16 @@
+ def binding_intent(text):
+     if not isinstance(text,str) or len(text)>160:return {'kind':'ordinary','name':None}
+     value=strip_character_address(text.strip(' \t\r\n。！!？?'))
++    # Explicit standalone commands are not combined enrollment consent.
++    found=re.fullmatch(r'(?:请)?(?:帮我)?登记(?:我的)?人脸[，, ]*(?:(?:我叫|我的名字是|叫我)(.+))?',value)
++    if found:
++        name=found.group(1);name=name.strip() if name is not None else None
++        return {'kind':'face_only','name':name} if name is None or valid_name(name) else {'kind':'invalid_name','name':None}
++    from common.feature_intents import speaker_text
++    voice=speaker_text(text)
++    if voice=='登记我的声纹':return {'kind':'voice_only','name':None}
++    prefix='登记我的声纹，我叫'
++    if isinstance(voice,str) and voice.startswith(prefix):return {'kind':'voice_only','name':voice[len(prefix):]}
+     for pattern in (r'(?:请)?记住我[，, ]*(?:(?:我叫|我的名字是|叫我)(.+))?',
+        r'(?:我叫|我的名字是)(.+?)[，, ]*(?:请)?记住我',
+        r'(?:请)?(?:帮我)?(?:登记|关联)(?:我的)?身份[，, ]*(?:我叫|我的名字是)(.+)'):
+@@ -20,7 +30,7 @@
+ def face_enrollment_text(text,*,active=False):
+     """Only inside an authorized identity_request branch, never ordinary chat."""
+     intent=binding_intent(text)
+-    if intent['kind']=='remember_self':
++    if intent['kind'] in ('remember_self','face_only'):
+         return '帮我登记身份' if intent['name'] is None else '帮我登记身份，我叫'+intent['name']
+     if intent['kind']=='name_hint' and not active:return '帮我登记身份，我叫'+intent['name']
+     return text
+--- a/board/runtime/board_business.py
++++ b/board/runtime/board_business.py
+@@ -148,6 +148,8 @@
+         self.snapshot, self.clock = snapshot, clock
+         self.original_command = command
+         self.business = self.bridge = None
++        self._standalone_entry = None
++        self._standalone_epoch = 0
+         self.flow = (enrollment_factory or VoiceEnrollment)(boot_id, snapshot, command,
+             simple=True, clock=clock, now_ms=now_ms or millis)
+ 
+@@ -161,16 +163,45 @@
+         self.flow.snapshot, self.flow.command = self.bridge.snapshot, self.bridge.command
+ 
+     def reset(self):
+-        self.flow.reset()
++        with self.flow.lock:
++            self._standalone_entry = None
++            self._standalone_epoch = getattr(self, '_standalone_epoch', 0) + 1
++            self.flow.reset()
+         if self.business is not None:
+             self.business.reset()
+ 
+     def public(self):
+         state = self.flow.public()
++        entry = getattr(self, '_standalone_entry', None)
++        pending = bool(entry and entry['awaiting_name'] and self.clock() < entry['until'])
++        # Polling never mutates routing ownership or the original biometric FSM.
++        state.update(entry_mode=entry['mode'] if entry else None, entry_name_pending=pending)
++        state['active'] = state['active'] or pending
+         if self.business is not None:
+             state = dict(state, active=state['active'] or self.business.public()['active'],
+                          speaker=self.business.public())
+         return state
++
++    def _entry_for(self, meta):
++        entry = getattr(self, '_standalone_entry', None)
++        finished = bool(entry and not entry['awaiting_name'] and (
++            entry['mode'] == 'face' and not self.flow.public()['active'] or
++            entry['mode'] == 'voice' and (self.business is None or not self.business.public()['active'])))
++        if entry is not None and (entry['actor'] != (meta['board_boot_id'], meta['session_id'])
++                or entry['awaiting_name'] and self.clock() >= entry['until'] or finished):
++            self._standalone_entry = None
++            return None
++        return entry
++
++    def _new_entry(self, meta, mode, *, awaiting_name=False, epoch, is_current):
++        # Only route the already requested original FSM. No name/sample/grant.
++        entry = dict(mode=mode, actor=(meta['board_boot_id'], meta['session_id']),
++                     awaiting_name=awaiting_name, until=self.clock()+120 if awaiting_name else None)
++        with self.flow.lock:
++            if epoch != getattr(self, '_standalone_epoch', 0) or not is_current():
++                raise StaleGeneration('Standalone entry no longer owns this turn')
++            self._standalone_entry = entry
++        return entry
+ 
+     def _visual(self, job):
+         from common.speaker_visual import build_visual, unavailable
+@@ -222,14 +253,81 @@
+                      dict(evidence='statement'))
+         if reply_sink is None:
+             raise BoardCapabilityNotReady('owned_identity_cue_stream')
++        with self.flow.lock:entry_epoch = getattr(self, '_standalone_epoch', 0)
+         def produce(emit):
+             from contextlib import nullcontext
+             from common.binding_api import response as binding_response
+             from common.voice_enrollment import enrollment_requested, identity_query_requested
+             exchange = None
+             board_text = None
++            entry = None
+             try:
+-                if self.business is not None:
++                with self.flow.lock:
++                    if entry_epoch != getattr(self, '_standalone_epoch', 0) or not current():
++                        raise StaleGeneration('Standalone routing no longer owns this turn')
++                    entry = self._entry_for(job.meta)
++                from common.feature_intents import speaker_requested, speaker_query_requested
++                from tools.provisional_voice import query_reply
++                intent = binding_intent(text)
++                requested = {'face_only':'face', 'voice_only':'voice'}.get(intent['kind'])
++                if entry is not None and (requested is not None and requested != entry['mode']
++                        or intent['kind'] == 'remember_self'):
++                    emit(BoardReply('当前已有登记正在进行。请先完成或取消本次登记，再选择另一种入口。', 'friendly'), final_cue=True)
++                    return
++                if requested is not None and entry is None:
++                    if self.flow.public()['active'] or self.business is not None and self.business.public()['active']:
++                        emit(BoardReply('当前已有登记正在进行。请先完成或取消本次登记，再选择另一种入口。', 'friendly'), final_cue=True)
++                        return
++                    entry = self._new_entry(job.meta, requested,
++                        awaiting_name=requested == 'voice' and intent['name'] is None,
++                        epoch=entry_epoch, is_current=current)
++                if intent['kind'] == 'invalid_name':
++                    emit(BoardReply(render(result('bad_name')), 'friendly'), final_cue=True)
++                    return
++                if entry is not None and entry['mode'] == 'voice':
++                    if self.business is None:
++                        raise BoardCapabilityNotReady('speaker_identity')
++                    compact = text.strip(' 。！!？?')
++                    cancel = compact in ('取消', '取消登记', '不保存', '取消声纹登记',
++                        '停止声纹登记', '不登记声纹了', '不要保存声纹')
++                    if compact == '确认保存身份关联':
++                        emit(BoardReply('当前是单独声纹登记。请按提示完成三段录音，最后说“确认保存声纹”。', 'friendly'), final_cue=True)
++                        return
++                    from common.voice_enrollment import confirmed, update_confirmed
++                    if confirmed(text) or update_confirmed(text):
++                        emit(BoardReply('当前是单独声纹登记。最后的保存口令是“确认保存声纹”。', 'friendly'), final_cue=True)
++                        return
++                    interpreted = text
++                    if requested == 'voice':
++                        if not entry['awaiting_name'] and self.business.public()['active']:
++                            emit(BoardReply('本轮声纹登记仍在进行，请继续按提示采样或取消后重新开始。', 'friendly'), final_cue=True)
++                            return
++                        interpreted = ('登记我的声纹' if intent['name'] is None else
++                                       '登记我的声纹，我叫' + intent['name'])
++                        if intent['name'] is not None:entry['awaiting_name'] = False
++                    elif entry['awaiting_name'] and not cancel:
++                        if intent['kind'] == 'name_hint' and not self.business.public()['active']:
++                            interpreted = '登记我的声纹，我叫' + intent['name']
++                            entry['awaiting_name'] = False
++                        elif speaker_query_requested(text) or query_reply(text, {'state':'UNKNOWN'}) is not None:
++                            interpreted = '查询我的声纹'
++                        else:
++                            interpreted = '登记我的声纹'
++                    elif query_reply(text, {'state':'UNKNOWN'}) is not None:
++                        interpreted = '查询我的声纹'
++                    spoken = self.business.turn(job.meta, interpreted, job.pcm,
++                        is_current=current, cancel_event=cancel_event, deadline=job.deadline)
++                    if cancel:self._standalone_entry = None
++                    if spoken is None:return DIALOGUE_ROUTE
++                    emit(BoardReply(spoken, 'friendly'), final_cue=True)
++                    return
++                if entry is not None and entry['mode'] == 'face':
++                    if speaker_requested(text):
++                        emit(BoardReply('当前是人脸登记。请先完成或取消本次登记，再开始声纹登记。', 'friendly'), final_cue=True)
++                        return
++                    board_text = ('取消登记' if text.strip(' 。！!？?') in ('取消','不保存') else
++                                  face_enrollment_text(text, active=self.flow.public()['active']))
++                if self.business is not None and entry is None:
+                     options = dict(is_current=current, cancel_event=cancel_event, deadline=job.deadline)
+                     from common.feature_intents import speaker_query_requested
+                     if speaker_query_requested(text):
+@@ -275,9 +373,21 @@
+                     deliver(value, not guiding)
+                     if guiding:
+                         self.flow.guide(deliver, is_current=current)
++            except BaseException:
++                if entry is not None and self._standalone_entry is entry:
++                    self._standalone_entry = None
++                raise
+             finally:
+                 if exchange is not None:
+                     exchange.cancel()
++                if entry is not None and self._standalone_entry is entry:
++                    if entry_epoch != getattr(self, '_standalone_epoch', 0) or not current():
++                        self._standalone_entry = None
++                    elif entry['mode'] == 'face' and not self.flow.public()['active']:
++                        self._standalone_entry = None
++                    elif (entry['mode'] == 'voice' and not entry['awaiting_name']
++                            and (self.business is None or not self.business.public()['active'])):
++                        self._standalone_entry = None
+         return controller.prepare_local_sequence(text, produce, reply_sink, **kwargs)
+ 
+ 
+--- a/board/runtime/audio/board_dialogue_jobs.py
++++ b/board/runtime/audio/board_dialogue_jobs.py
+@@ -480,7 +480,7 @@
+         command_text = re.sub(r'^\s*' + re.escape(CHARACTER_NAME) + r'[\s，,：:]*', '', intent_text, count=1)
+         command, _ = scoped_command(command_text, job.scope.get('kind') == 'profile')
+         if (command is not None and not speaker_requested_by_policy
+-                and binding['kind'] not in ('remember_self', 'name_hint', 'invalid_name')):
++                and binding['kind'] not in ('remember_self', 'name_hint', 'invalid_name', 'face_only', 'voice_only')):
+             if self.controller.command_handler is None:
+                 raise BoardCapabilityNotReady('explicit_memory_commands')
+             return None, None
+@@ -490,7 +490,7 @@
+             capability = 'speaker_identity'
+         elif (self._enrollment_state().get('active') or enrollment_requested(text)
+                 or cancelled(text) or confirmed(text) or update_confirmed(text)
+-                or binding['kind'] in ('remember_self', 'name_hint', 'invalid_name')):
++                or binding['kind'] in ('remember_self', 'name_hint', 'invalid_name', 'face_only')):
+             capability = 'identity_enrollment'
+         elif identity_query_requested(text):
+             capability = 'identity_query'

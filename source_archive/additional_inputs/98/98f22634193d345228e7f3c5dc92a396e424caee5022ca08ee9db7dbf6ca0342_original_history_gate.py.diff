@@ -1,0 +1,58 @@
+--- R5/original_history_gate.py
++++ R6/original_history_gate.py
+@@ -2,13 +2,12 @@
+ 
+ No archive traversal, Native restore, marker commit, service control or new
+ counter implementation lives here. Cold/live-chain checks call its unchanged
+-original_modules/_sealed_source/validate_chain APIs. Same-boot checks call its
+-unchanged complete main() with a genuine CPU normal-stop expected pin.
++original_modules/_sealed_source/validate_chain APIs. Same-boot checks require its
++genuine pre-start complete result and reuse unchanged validate_inputs/current/
++chain APIs; the owning helper separately verifies its ordered start state.
+ """
+ import argparse
+-import contextlib
+ import hashlib
+-import io
+ import json
+ import os
+ from pathlib import Path
+@@ -54,19 +53,11 @@
+     if kind == 'same_boot_resume':
+         expected_pin = request['normal_stop_expected_pin']
+         expected = snapshot.pinned(expected_pin)
++        original = snapshot.pinned(request['normal_stop_complete_result_pin'])
+         expected_history = {key: expected['history'][key] for key in ('head', 'archive_count', 'archives', 'legacy_pin')}
+         require(expected['boot_id'] == actual_boot and expected['checkpoint_pin'] == request['checkpoint_pin']
+                 and expected['camera_owner'] == request['source_owner'] and expected_history == history,
+                 'Same-boot proof is not bound to the exact final/owner/history')
+-        previous_argv = sys.argv
+-        output = io.StringIO()
+-        try:
+-            sys.argv = ['original_cpu_full_history', '--expected', expected_pin['path'], '--expected-sha256', expected_pin['sha256']]
+-            with contextlib.redirect_stdout(output):
+-                adapter.main()  # Existing real stop/bounds/source/reader/archive guard, unchanged.
+-        finally:
+-            sys.argv = previous_argv
+-        original = json.loads(output.getvalue())
+         require(original['schema'] == 'aura-fresh-final-history-validation-1'
+                 and original['status'] == 'ORIGINAL_CURRENT_FINAL_AND_COMPLETE_HISTORY_VERIFIED'
+                 and original['checkpoint_pin'] == request['checkpoint_pin']
+@@ -76,7 +67,16 @@
+                 and original['complete_ordered_history_verified'] is True
+                 and original['all_required_current_boot_cumulative_lower_bounds_checked'] is True,
+                 'Original complete same-boot validation did not succeed')
+-        records = original['archives']
++        # The original full main() result was produced while both services were
++        # normally stopped. Its guard must not be lied to while this known
++        # ExecStartPre is running. Recheck its exact semantic APIs here, while
++        # the caller's quiet() admits only that helper and no old/live owners.
++        intent, stop_result = adapter.validate_inputs(expected, snapshot)
++        protection, boot_module = adapter.original_modules(snapshot)
++        document, marker = adapter.validate_current(expected, intent, stop_result, snapshot, protection, boot_module)
++        records = adapter.validate_chain(document, history, snapshot, protection, boot_module)
++        require(not os.path.lexists(marker), 'Same-boot final consumed during validation')
++        require(original['archives'] == records, 'Prior complete result differs from revalidated ordered history')
+     else:
+         require(kind in {'cold_predecessor', 'running_archive_chain'}, 'Unknown history route')
+         protection, boot_module = adapter.original_modules(snapshot)

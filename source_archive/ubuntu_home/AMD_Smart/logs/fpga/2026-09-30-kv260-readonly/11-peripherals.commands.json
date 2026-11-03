@@ -1,0 +1,7 @@
+[
+  {
+    "id": "peripheral_nodes",
+    "command": "lsusb; lsusb -t; ls -l /dev/video* /dev/media* /dev/v4l-subdev* /dev/snd /dev/fb* /dev/dri /dev/i2c-* /dev/spidev* /dev/gpiochip* /dev/pwm*; cat /proc/asound/cards /proc/asound/pcm; arecord -l; aplay -l; v4l2-ctl --list-devices; for d in /sys/class/drm/card*-*; do printf \"\\n%s\\n\" \"$d\"; cat \"$d/status\" \"$d/enabled\" \"$d/modes\"; done; for d in /sys/class/pwm/pwmchip*; do printf \"\\n%s\\n\" \"$d\"; readlink -f \"$d/device\"; cat \"$d/npwm\"; ls \"$d\"; done; ls -l /sys/bus/i2c/devices",
+    "timeout": 45
+  }
+]

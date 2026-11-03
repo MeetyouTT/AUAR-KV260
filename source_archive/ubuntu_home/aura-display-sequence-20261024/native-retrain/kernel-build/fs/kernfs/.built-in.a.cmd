@@ -1,0 +1,1 @@
+cmd_fs/kernfs/built-in.a := echo >/dev/null; rm -f fs/kernfs/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST fs/kernfs/built-in.a fs/kernfs/mount.o fs/kernfs/inode.o fs/kernfs/dir.o fs/kernfs/file.o fs/kernfs/symlink.o

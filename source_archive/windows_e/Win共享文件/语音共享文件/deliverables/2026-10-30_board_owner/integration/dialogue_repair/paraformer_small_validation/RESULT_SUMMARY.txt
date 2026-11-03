@@ -1,0 +1,33 @@
+Paraformer Small公开结果交接：值得可回退接入验证，非正式接受。
+
+现役v15 startup67d03ca40d709d22d761706bfca51a55e352adf86763ced7fb5eb5a688123a55及配置未改，原ASR三线程/27B/OmniVoice16未替换。用户已明确手动暂停，最终维持PAUSED/麦克风关闭，是保留原偏好，不写自动聆听已恢复。
+
+成功PAIR SHA5f410d86f45772765f0fe030fe56e3bd1f4a0e1b52f7f8d3e48248015446079c；原结果SHA50314e1aa54b0a127e94432aa59540347dbe10c5508ffcde5c860fa57e756709；Small结果SHA34bb777265fbbb64967e34bd07eb55b8c486f04c717585299875d409b3f2913b；独立REVIEW SHA6a10c5c0437576b793ca82a0db097017886147ad21c605efa3ec49389cf2e55b。首PAIR SHAa8899aa564f3c3a09d9030b74089d176cef85f71e0964e3523653aaa95e091ab为0slot停止：入口已暂停，随后保留偏好完成比较，不能当模型加载失败。
+
+共同条件：同8段公开合成WAV（2.28–3.72秒）、每模型2轮共16次、3线程/nice0、一模型构造、无隐藏warmup，worker均退出0且UI/camera owners保持；两边后台活动均变化。
+
+16次decode：原总92616.407ms/均5788.525ms、CPU151184.784ms、峰RSS421408KiB；Small总32904.016ms/均2056.501ms、CPU51562.003ms、峰RSS199012KiB。16/16配对均更短；观察性wall/CPU/RSS差约64.47%/65.89%/52.77%，仅筛选，不认精确因果或保证整机收益。
+首次加载单列：原验证894.022ms（hash813.788）/import957.076/constructor14298.135（factory13526.527）；Small验证357.561（hash319.448）/import1164.514/constructor12980.084（factory12979.654）。子项重叠不重复加。首个decode S01原5144.116ms/Small1613.946ms。
+
+round总/平均ms：
+paraformer R1: 45398.936/5674.867; CPU74930.913ms
+paraformer R2: 47217.471/5902.184; CPU76253.871ms
+paraformer_small R1: 15899.746/1987.468; CPU25932.543ms
+paraformer_small R2: 17004.270/2125.534; CPU25629.460ms
+
+逐句decode ms（原轮1/轮2；Small轮1/轮2）：
+S01: 5144.116/5290.390; 1613.946/1866.210
+S02: 5376.981/5163.289; 1493.914/1810.775
+S03: 7071.275/7725.742; 2590.419/2565.836
+S04: 4566.631/4765.023; 1593.640/1706.274
+S05: 6478.529/6934.560; 3024.984/3053.515
+S06: 6424.951/7191.101; 2274.603/2272.178
+S07: 4849.279/4887.417; 1692.837/1987.011
+S08: 5487.174/5259.949; 1615.403/1742.471
+
+公开意图非人工gold：6/214 vs4/214；实际是107字重复两轮。S02姓名林悦两边都成林月；原还保留“喜喜悦的悦”，Small变“喜悦的月”，字形解释退化，不能用总编辑差较低宣称名字准确。其余S01/S03–S08仅本公开筛选关键语义保留。
+
+最终真实mono55106.622：IDLE、PAUSED、enabled=false/mic=false、无播放、GUI faults0、capture failures3。probe没发pause/resume；用户原偏好保持，原source/config未更换。
+
+建议：进入显式可回退的接线和真人完整闭环验证，保留原模型/源码/资源及回退路径；先验姓名字形、最终文本代次/取消/超时、原权限记忆/完整ACK/rearm，未通过前不正式接受。此报告不开发actor、不操作板端。
+所有原证据SHA见RESULT_HANDOFF.json；PAIR/actual/REVIEW及既有handoff/worker/当前AGENTS、README不改。

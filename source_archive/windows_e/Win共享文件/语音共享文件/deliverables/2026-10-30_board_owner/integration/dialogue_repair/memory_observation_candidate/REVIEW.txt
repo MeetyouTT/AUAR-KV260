@@ -1,0 +1,18 @@
+视觉来源摘要保留：最小候选
+
+已复现问题
+structured_camera_counts只接受现有精确的人数producer协议；它没有遗漏字段或错误放宽。legacy.visual_observation来自已授权旧库导入：camera_observed、host_received、legacy_vlm_history/current=false，自由文字描述不属于当前人数协议，按设计走文本摘要。混合来源也必须保持混合，不能强行变成人数结论。
+公开合成legacy事件“摄像头历史记录：桌旁有1把椅子。”经fakeLLM输出“桌旁有1把椅子。”：现役before会在full_source_validation仅因observation_evidence_missing拒绝，源正文仍在。候选同一次fake输出由板端保留已存在的来源分类后，原Store完整commit、claims与source_refs保持，源正文在成功摘要事务后才删除。
+
+最小修改
+只改board/runtime/board_memory_policy.py。来源evidence是板端已校验的结构化事实，不依赖模型记忆：存在visual_observation且模型没保留任何视觉来源字样时，纯camera来源加“历史视觉观察摘要：”；混合来源加“混合历史记录（含视觉观察来源）：”。这是说明记录来源，并非断言混合摘要每句都是摄像头实证。未知旧描述不会套用structured_camera_counts。非视觉摘要、已有视觉来源字样、严格人数协议均维持原路径。
+防止标签中的词恰好等于protected name：添加标签前，原validator对原模型叙述先校验全部非evidence保护项，source正文/数字/姓名/否定/状态不变。仅在这份前置验证副本不重复要求evidence；最终仍用所有原始source完整metadata执行原validate_compaction_text。模型没保留“历史/视觉/观察/来源”等受保护名字也不能靠固定标签蒙混通过。
+fragment显式evidence annotation和最终摘要都保留来源分类；所有标签计入现有384/最终配置UTF8上限。标签装不下即拒绝并保留源，不截断、不重叫模型。正常单段复现仍为1次fake调用；原structured人数路径仍0调用。大段原有拆分/归并路径及全部source字节覆盖不变。
+
+保留的边界
+Store、worker、schema、权限、租约、原子先摘要后删、源revision/claims校验完全不变。合法缺失保护项仍应拒绝，不能为了清积压删除源；此候选只修复已知来源分类遗漏，不承诺把全部discarded变成成功。最新8完成/23丢弃且已恢复，不证明23次均为这一类，也不能倒推此前other16的原因。
+没有机械校验能证明全部语义无损；自由摘要中的未标注事实仍受原实现限制。这次不增加模型、不调用真实推理、不读真实正文，不声称生产吞吐/等待/积压收益已实测。
+
+验证
+13个unittest测试方法通过（含6类其它保护、3类源失效、4类标签姓名碰撞subcase）。使用原Store和新的合成临时SQLite：原入口拒绝复现；候选同输入1次fake调用成功并保存完整来源；混合来源标为混合；非视觉不改；现有来源字样不重复；原字节预算拒绝不截断；数字42变41继续拒绝且原正文完整保留；multipart全部字节覆盖后才commit；forget/租约过期/新turn均无摘要发布；当前结构化人数仍0模型调用。18个实际导入依赖逐项匹配v17真实pin。
+部署仅由root进行，必要时替换这一个源pin并重封manifest/startup；本候选没有运行设备、模型、私库或发布。

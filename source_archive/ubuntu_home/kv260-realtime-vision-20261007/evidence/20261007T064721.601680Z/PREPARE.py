@@ -1,0 +1,2 @@
+import os;from pathlib import Path;assert os.uname().machine=='aarch64';assert Path('/sys/block/mmcblk1/device/cid').read_text().strip()=='0353445345333247805558c00401a100';
+p=Path('/home/root/aura-realtime-vision-20261007/bundle-4ffe392685dbfad1854fe0375b9d3d681d855c5636aadf33df6f98f255a1f691.upload');p.parent.mkdir(parents=True,exist_ok=True);assert not p.exists();p.write_bytes(b"")

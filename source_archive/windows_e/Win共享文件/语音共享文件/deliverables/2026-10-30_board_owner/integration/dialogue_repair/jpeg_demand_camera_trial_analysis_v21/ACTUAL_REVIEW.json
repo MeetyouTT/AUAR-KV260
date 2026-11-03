@@ -1,0 +1,170 @@
+{
+  "A1_repeat_reason_reported_by_root": "People count changed during the earlier A1 window. Both A1 receipts remain included.",
+  "A1_repeated": true,
+  "analysis_scope": "Read saved numeric metadata only. No service, device, model, private database or image access.",
+  "candidate_permanent_adoption_by_this_analysis": false,
+  "causal_JPEG_CPU_savings_established": false,
+  "confounding": [
+    "A1 selected includes 21 zero-person and 10 one-person samples. B has 31 zero-person samples. A2 has 31 one-person samples.",
+    "B capture and preview completion rates are 17.95 percent below A2, while detector completion rates are approximately 9.97 per second in all arms.",
+    "The original-code A2 process uses 17.92 percent more CPU than the selected original-code A1 process.",
+    "RSS differs across a long-running A1 process and newly started B/A2 processes. B peak RSS is approximately 7.50 MiB above restarted A2.",
+    "The earlier A1 has 25 zero-person and 6 one-person samples. Its person-distribution distance is below the comparator descriptive threshold but still represents a different workload from B."
+  ],
+  "descriptive_B_comparisons": [
+    {
+      "B_compared_with": "earlier_A1",
+      "CPU_per_capture_relative_change_percent": -22.125181950509454,
+      "camera_CPU_relative_change_percent": -22.158714622668207,
+      "capture_completion_rate_relative_change_percent": -0.043059711725357275,
+      "peak_RSS_difference_MiB": -6.96875
+    },
+    {
+      "B_compared_with": "A1",
+      "CPU_per_capture_relative_change_percent": -22.714800580661986,
+      "camera_CPU_relative_change_percent": -22.83254631105358,
+      "capture_completion_rate_relative_change_percent": -0.15235223726693947,
+      "peak_RSS_difference_MiB": -6.96875
+    },
+    {
+      "B_compared_with": "A2",
+      "CPU_per_capture_relative_change_percent": -20.240538181295065,
+      "camera_CPU_relative_change_percent": -34.5569722124126,
+      "capture_completion_rate_relative_change_percent": -17.949511825517472,
+      "peak_RSS_difference_MiB": 7.50390625
+    }
+  ],
+  "limitations": [
+    "Three selected arms each contain about 30 seconds and 31 metadata samples. No confidence interval or statistical causal claim is provided.",
+    "CPU per capture completion contains detector, identity, raw publication and process overhead. Different scene content remains relevant after division by frame count.",
+    "Face-source age is a freshness metric. Face recognition accuracy and actual user interaction were not measured.",
+    "All arms have GUI closed. Zero JPEG requests refers only to the sampler, with other client traffic unmeasured.",
+    "Physical display FPS and conversational latency are not measured."
+  ],
+  "per_capture_normalization_removes_all_confounding": false,
+  "receipt_checks": [
+    {
+      "file": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\jpeg_demand_camera_trial_v21\\ACTUAL_sample-A1_1793508615652733100.json",
+      "label": "A1 earlier",
+      "outer_inner_journal_digest_matches": true,
+      "returncode": 0,
+      "sha256": "4378459e1c3505c4fc7a8ca73d17f98e9f85df357bbde6a78bffc13ca4b8af7d",
+      "stderr_bytes": 0
+    },
+    {
+      "file": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\jpeg_demand_camera_trial_v21\\ACTUAL_sample-A1_1793508696300958100.json",
+      "label": "A1 selected",
+      "outer_inner_journal_digest_matches": true,
+      "returncode": 0,
+      "sha256": "1b0ed315659f42678339eadf1597581d8589c19677a44ed7ec273451d1a0c8ca",
+      "stderr_bytes": 0
+    },
+    {
+      "file": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\jpeg_demand_camera_trial_v21\\ACTUAL_sample-B_1793508797049823300.json",
+      "label": "B",
+      "outer_inner_journal_digest_matches": true,
+      "returncode": 0,
+      "sha256": "35d89cf8e611b1d7b1b5949bd5749631a938143bbef34b721df417b5969e1111",
+      "stderr_bytes": 0
+    },
+    {
+      "file": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\jpeg_demand_camera_trial_v21\\ACTUAL_sample-A2_1793508960264603600.json",
+      "label": "A2",
+      "outer_inner_journal_digest_matches": true,
+      "returncode": 0,
+      "sha256": "55859431d898d8e56ffc2a8a74a3f598413620212b74377fa55ca52fde3aa5ec",
+      "stderr_bytes": 0
+    }
+  ],
+  "references": {
+    "ACTUAL_COMPARISON_01.json": "c57cf19883365049e14a28b0a9ad9a08d7921d36002ee2edb91457f3abae7577",
+    "ACTUAL_COMPARISON_EARLIER_A1.json": "3031dd65009c32ad91c51fff56fc80a8560d0d5deab9558b991300de422da703",
+    "PUBLIC_TEST_RESULT.json": "114d06d6c6fbecd61fff22e76e7fad1bb49a461bf293e0e0af9eb6a31cedf5f8",
+    "compare_aba.py": "4af0c217279e0525d90762937f753e7322945dd68ed01442ef8b44f16d2ab2ae",
+    "test_compare_aba.py": "0ed441391329af1d2ebf105135ffc2d943e54d7aed92fb1140718c8132a59d96"
+  },
+  "root_reported_after_trial": {
+    "B_normally_exited": true,
+    "GUI_recovery": "In progress when root requested this analysis. Completion is outside these sampler receipts.",
+    "finalize": "COMPLETE",
+    "new_checkpoint_consumed": true,
+    "original_A_restored_pid": 229296
+  },
+  "status": "ACTUAL_ABA_COMPLETED_WITH_SCENE_AND_THROUGHPUT_CONFOUNDING",
+  "table": [
+    {
+      "CPU_ms_per_capture_completion": 55.106951871657756,
+      "RSS_peak_MiB": 175.5625,
+      "camera_cpu_cores": 1.3751522132239462,
+      "camera_pid": 1335,
+      "capture_completions_per_second": 24.954242006101694,
+      "detect_completions_per_second": 9.975024545219794,
+      "face_source_age_max_ms": 215,
+      "face_source_age_median_ms": 131,
+      "face_source_age_p95_ms": 160,
+      "label": "A1 earlier",
+      "person_count_samples": {
+        "0": 25,
+        "1": 6
+      },
+      "preview_completions_per_second": 24.987603292206106,
+      "seconds": 29.974863585001003,
+      "whole_system_busy_cores": 1.4358697539339798
+    },
+    {
+      "CPU_ms_per_capture_completion": 55.52736982643525,
+      "RSS_peak_MiB": 175.5625,
+      "camera_cpu_cores": 1.3871601400548441,
+      "camera_pid": 1335,
+      "capture_completions_per_second": 24.981556742031213,
+      "detect_completions_per_second": 9.972610768848241,
+      "face_source_age_max_ms": 167,
+      "face_source_age_median_ms": 110,
+      "face_source_age_p95_ms": 166,
+      "label": "A1 selected",
+      "person_count_samples": {
+        "0": 21,
+        "1": 10
+      },
+      "preview_completions_per_second": 24.981556742031213,
+      "seconds": 29.982118717998674,
+      "whole_system_busy_cores": 1.4682084483100322
+    },
+    {
+      "CPU_ms_per_capture_completion": 42.914438502673804,
+      "RSS_peak_MiB": 168.59375,
+      "camera_cpu_cores": 1.0704361586683462,
+      "camera_pid": 228914,
+      "capture_completions_per_second": 24.943496781430618,
+      "detect_completions_per_second": 9.97072932840609,
+      "face_source_age_max_ms": 148,
+      "face_source_age_median_ms": 83,
+      "face_source_age_p95_ms": 144,
+      "label": "B",
+      "person_count_samples": {
+        "0": 31
+      },
+      "preview_completions_per_second": 24.943496781430618,
+      "seconds": 29.987776235000638,
+      "whole_system_busy_cores": 1.186149973951186
+    },
+    {
+      "CPU_ms_per_capture_completion": 53.80482456140351,
+      "RSS_peak_MiB": 161.08984375,
+      "camera_cpu_cores": 1.6356763964875358,
+      "camera_pid": 229296,
+      "capture_completions_per_second": 30.40018083547244,
+      "detect_completions_per_second": 9.966725953734935,
+      "face_source_age_max_ms": 185,
+      "face_source_age_median_ms": 111,
+      "face_source_age_p95_ms": 175,
+      "label": "A2",
+      "person_count_samples": {
+        "1": 31
+      },
+      "preview_completions_per_second": 30.40018083547244,
+      "seconds": 29.999821545003215,
+      "whole_system_busy_cores": 1.8310108917680934
+    }
+  ]
+}

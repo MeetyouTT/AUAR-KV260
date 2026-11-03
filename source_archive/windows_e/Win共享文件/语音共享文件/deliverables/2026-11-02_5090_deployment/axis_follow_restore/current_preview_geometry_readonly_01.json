@@ -1,0 +1,247 @@
+{
+  "read_only": true,
+  "utc": "2026-11-02T07:31:09.242643+00:00",
+  "boot_id": "903cfade-b93c-48fa-804e-379be1967313",
+  "files": {
+    "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/ui/board_touch_layout.json": {
+      "sha256": "9c3aa3372d038f024caf60985f61553e6a6eb60c8b5aaebb0881af6eae04e92e",
+      "geometry": {
+        "/canvas/width": 1024,
+        "/canvas/height": 600,
+        "/layer_switch/width": 52,
+        "/layer_switch/height": 40,
+        "/navigation/height": 48,
+        "/page/width": 569,
+        "/page/height": 432,
+        "/main/status/height": 32,
+        "/main/hint/height": 28,
+        "/main/transcript_title/height": 24,
+        "/main/transcript/height": 52,
+        "/main/reply_title/height": 24,
+        "/main/reply/height": 144,
+        "/main/actions/height": 56,
+        "/vision/preview/height": 300,
+        "/vision/preview/image_width": 400,
+        "/vision/preview/image_height": 300,
+        "/vision/note/height": 50,
+        "/vision/actions/height": 56
+      },
+      "layout": {
+        "schema_version": "aura-touch-layout-2",
+        "canvas": {
+          "width": 1024,
+          "height": 600
+        },
+        "pages": [
+          "main",
+          "vision",
+          "demo",
+          "devices",
+          "connection",
+          "settings"
+        ],
+        "layers": {
+          "presentation": [
+            "main",
+            "vision"
+          ],
+          "debug": [
+            "demo",
+            "devices",
+            "connection",
+            "settings"
+          ]
+        },
+        "layer_switch": {
+          "x": 964,
+          "y": 558,
+          "width": 52,
+          "height": 40
+        },
+        "navigation": {
+          "y": 58,
+          "height": 48,
+          "gap": 6
+        },
+        "page": {
+          "x": 8,
+          "y": 112,
+          "width": 569,
+          "height": 432
+        },
+        "main": {
+          "status": {
+            "y": 0,
+            "height": 32
+          },
+          "hint": {
+            "y": 38,
+            "height": 28
+          },
+          "transcript_title": {
+            "y": 84,
+            "height": 24
+          },
+          "transcript": {
+            "y": 112,
+            "height": 52
+          },
+          "reply_title": {
+            "y": 182,
+            "height": 24
+          },
+          "reply": {
+            "y": 214,
+            "height": 144
+          },
+          "actions": {
+            "y": 376,
+            "height": 56
+          }
+        },
+        "vision": {
+          "preview": {
+            "y": 0,
+            "height": 300,
+            "image_width": 400,
+            "image_height": 300
+          },
+          "note": {
+            "y": 308,
+            "height": 50
+          },
+          "actions": {
+            "y": 376,
+            "height": 56
+          }
+        },
+        "minimum_touch_height": 48,
+        "avatar_layout_source": "ui_layout_spec.json",
+        "avatar_overlay_content": "empty"
+      }
+    },
+    "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/config/board_avatar_gtk.json": {
+      "sha256": "fc98455a5586cc4f1896f5472ec9b204bd7ff2b0c5be2798ba5cab1788b9b959",
+      "geometry": {}
+    },
+    "/home/root/aura-native-live-20261024/ops/be72669aa53de735/native-run-903cfade-b93c-48fa-804e-379be1967313-79866/config.json": {
+      "sha256": "c8df0795664d21d52eab3a4f1cf55e0d1a721577d547c512e83ee1931d80871d",
+      "geometry": {}
+    },
+    "/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/tools/board_camera_preview.py": {
+      "sha256": "6e697c16f7ae264dff56b6b35f38da4b531ea13026b69a7c8bdbfb1960a6afcd",
+      "source_lines": [
+        {
+          "line": 31,
+          "text": "        pipeline=gst.parse_launch('appsrc name=input is-live=true format=time block=false max-bytes=921600 '"
+        },
+        {
+          "line": 32,
+          "text": "            'caps=\"video/x-raw,format=BGR,width=640,height=480,framerate=0/1,pixel-aspect-ratio=1/1\" ! '"
+        },
+        {
+          "line": 33,
+          "text": "            'queue max-size-buffers=1 max-size-bytes=0 max-size-time=0 leaky=downstream ! '"
+        },
+        {
+          "line": 177,
+          "text": "                            if source.width>1920 or source.height>1080:raise ValueError('Preview dimensions exceeded')"
+        },
+        {
+          "line": 178,
+          "text": "                            if source.size!=(640,480):source=source.resize((640,480))"
+        },
+        {
+          "line": 179,
+          "text": "                            pixels=source.convert('RGB').tobytes('raw','BGR')"
+        }
+      ]
+    },
+    "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura/board/vision/local_preview.py": {
+      "sha256": "f40212f3ebe7645cb7b55ecc9846882ec7d02c38a6a2703b98f934d7703d8f11",
+      "source_lines": [
+        {
+          "line": 14,
+          "text": "PREFIX = struct.Struct('!8sH')"
+        },
+        {
+          "line": 15,
+          "text": "PIXELS = 640*480*3"
+        },
+        {
+          "line": 16,
+          "text": "MAX_HEADER = 1024"
+        },
+        {
+          "line": 49,
+          "text": "    def publish(self, fid, stamp, pixels):"
+        },
+        {
+          "line": 50,
+          "text": "        if len(pixels)!=PIXELS:raise ValueError('Expected contiguous 640x480 BGR')"
+        },
+        {
+          "line": 51,
+          "text": "        header=json.dumps(dict(self.owner,frame_id=fid,captured_mono_ms=stamp),separators=(',',':')).encode()"
+        }
+      ]
+    }
+  },
+  "/health": {
+    "http": 200,
+    "top_keys": [
+      "board_boot_id",
+      "camera_epoch",
+      "camera_error",
+      "capture_age_ms",
+      "capture_frames",
+      "capture_hz",
+      "detected_frames",
+      "detection_hz",
+      "detector",
+      "detector_error",
+      "device",
+      "dpu_schedule",
+      "identity",
+      "identity_recognition",
+      "last_inference_ms",
+      "mirror_horizontal",
+      "motion_command_emitted",
+      "native_primary_deferred",
+      "observation_age_ms",
+      "observation_frame_id",
+      "people_count",
+      "pid",
+      "pipeline_metrics",
+      "preview_buffers",
+      "preview_error",
+      "preview_frames",
+      "preview_hz",
+      "role",
+      "service_epoch",
+      "timestamp_kind"
+    ],
+    "geometry": {
+      "/mirror_horizontal": true
+    },
+    "pid": 79866
+  },
+  "/v1/ui/status": {
+    "http": 200,
+    "top_keys": [
+      "board_boot_id",
+      "capabilities",
+      "context",
+      "modules",
+      "observed_mono_ms",
+      "preview",
+      "protocol_version",
+      "sequence",
+      "service_epoch",
+      "source_kind",
+      "ttl_ms"
+    ],
+    "geometry": {},
+    "pid": null
+  }
+}

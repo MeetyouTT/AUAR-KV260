@@ -1,0 +1,196 @@
+--- a/aura/tools/face_pan_controls.py
++++ b/aura/tools/face_pan_controls.py
+@@ -3,6 +3,8 @@
+ from pathlib import Path
+ from tools.pan_controls import stage_type as manual_stage_type
+ from tools.follow_process_cleanup import terminate_follow_child,describe
++
++FOLLOW_REPORT_TTL_MS=1500
+ 
+ 
+ class FacePanProcess:
+@@ -33,11 +35,23 @@
+                 message=('人脸越界，正在平滑跟随' if phase=='FOLLOWING' else
+                     '已到本次转动范围，等待人脸回到区域内' if phase=='HOLD_AT_LIMIT' else
+                     '人脸在边界内，转轴保持' if reason in ('SAFE_ZONE_HOLD','SAFE_ZONE_REACHED') else '监测中，等待清晰单张人脸')
++                heartbeat=self.result.get('heartbeat_mono_ms')
++                age=(time.monotonic()*1000-heartbeat if type(heartbeat) in (int,float)
++                     and math.isfinite(heartbeat) else None)
++                fresh=(self.result.get('state')=='CONTINUOUS_FACE_ZONE_RUNNING'
++                       and age is not None and -1<=age<FOLLOW_REPORT_TTL_MS)
++                self.result.update(report_fresh=fresh,report_age_ms=None if age is None else round(age))
++                if not fresh:message='跟随状态暂不可用，可点击停止'
+                 if self.cleanup_pending:message='停止尚未确认，可再次点击停止'
+-                value.update(state='MOVING',automatic_following=True,
+-                    message=message,error='')
+-                if self.result.get('pulse_us') is not None:value['pulse_us']=self.result['pulse_us']
+-                if self.result.get('readback') is not None:value['readback']=copy.deepcopy(self.result['readback'])
++                # The former manual owner has released its lock. Its last pulse
++                # is historical, and a stale follow report is not current feedback.
++                value.update(state='STOPPING' if self.cleanup_pending else 'MOVING' if fresh else 'UNAVAILABLE',
++                    automatic_following=True,message=message,error='',
++                    pulse_us=None,target_us=None,readback=None)
++                readback=self.result.get('readback');pulse=self.result.get('pulse_us')
++                if (fresh and not self.cleanup_pending and isinstance(readback,dict)
++                        and type(pulse) is int and 500<=pulse<=2500 and readback.get('width_us')==pulse):
++                    value.update(pulse_us=pulse,target_us=readback.get('target_us'),readback=copy.deepcopy(readback))
+             value['face_follow']=copy.deepcopy(self.result)
+             return value
+ 
+@@ -244,6 +258,14 @@
+             if self.face_toolbar is not None:
+                 value=state['manual_pan'];self.face_toggle.set_label('停止人脸跟随' if value.get('automatic_following') else '开始人脸跟随')
+                 self.face_status.set_text(value['message'] if value.get('automatic_following') else '人脸跟随未开启')
++        def refresh_pan_dialog(self):
++            result=super().refresh_pan_dialog()
++            if self.pan_dialog is not None and self.pan.running:
++                # An unavailable report is not proof the motor owner exited.
++                # Keep its dedicated STOP usable and do not offer reconnection.
++                self.pan_buttons['stop'].set_sensitive(True)
++                self.pan_reconnect.set_sensitive(False)
++            return result
+         def command(self,data):
+             if data.get('type')=='pan_face_follow':return self.pan.stop() if self.pan.running else self.pan.start()
+             return super().command(data)
+--- a/controller/continuous_session.py
++++ b/controller/continuous_session.py
+@@ -4,12 +4,14 @@
+ from continuous_face_control import FaceEdgeController
+ from common.motion_observation import validate,ObservationError
+ from boundary_rearm import BoundaryRearm
++from session_target_lock import SessionTargetLock
+ from pwm_budget import (INITIAL_PWM_MINIMUM_LEASE_MS, SUBMISSION_MARGIN_MS,
+                         COMMIT_PREFLIGHT_RESERVE_MS)
+ 
+ VISUAL_REASONS={'SOURCE_NO_TARGET','SOURCE_UNCONFIRMED','SOURCE_EXPIRED','SOURCE_MULTIPLE_FACES',
+  'FACE_CONTEXT_CHANGED','SOURCE_GAP','SOURCE_FACE_ERROR','SOURCE_FACE_UNAVAILABLE',
+- 'SOURCE_INCONSISTENT_FACE_SOURCE','FACE_QUALITY','FACE_TOO_LARGE'}
++ 'SOURCE_INCONSISTENT_FACE_SOURCE','FACE_QUALITY','FACE_TOO_LARGE',
++ 'SESSION_FACE_CONTEXT_CHANGED','SESSION_FACE_TARGET_CHANGED'}
+ RECENTER_INTENT_HOLD_MS=2000
+ RECENTER_RESUMABLE_REASONS={'SOURCE_NO_TARGET','SOURCE_UNCONFIRMED','SOURCE_EXPIRED','SOURCE_GAP',
+  'SOURCE_HORIZON_ENDED','SOURCE_LEASE_EXPIRED','SOURCE_SUBMISSION_EXPIRED',
+@@ -27,6 +29,7 @@
+         self.trajectory,self.clock,self.allow_fixture=trajectory,clock,allow_fixture
+         self.started=self.last_tick=clock();self.active=self.fatal=False
+         self.current=device.status();self.require_stopped(self.current)
++        self.target_lock=SessionTargetLock()
+         self.controller=self.fresh();self.pva=[float(self.current['width_us']),0.,0.]
+         self.minimum=self.maximum=self.current['width_us'];self.segments=self.acks=0
+         self.hold_renewals=self.motion_updates=self.trajectory_ticks=0
+@@ -102,6 +105,7 @@
+          range_us=[self.minimum,self.maximum],authorized_range_us=[self.config.minimum_us,self.config.maximum_us],
+          elapsed_s=round(self.clock()-self.started,3),heartbeat_mono_ms=round(self.clock()*1000),control=control,
+          readback=self.current,events=list(self.events),command_trace=list(self.command_trace),
++         target_lock=self.target_lock.status(),
+          correction_limit_us=self.config.maximum_correction_us,
+          motion_mode='CONTINUOUS_FACE_FOLLOW' if self.config.maximum_correction_us is None else 'BOUNDED_DIAGNOSTIC',correction_remaining_us=remaining,
+          full_pulse_visual_stops=self.full_pulse_visual_stops,
+@@ -126,7 +130,7 @@
+                     and readback['session']==self.device.session and readback['epoch']==self.device.epoch
+                     and readback['ack_seq']==self.device.ack_seq and readback['target_us']==self.device.accepted_target_us):
+                 # QUIESCE never starts another PWM pulse, completes at most
+-                # the current <=1.6ms pulse, and still obeys hardware expiry.
++                # the current <=2.5ms pulse, and still obeys hardware expiry.
+                 # Unknown protocol/hardware faults retain immediate STOP.
+                 normal=True;self.full_pulse_visual_stops+=1
+         self.current=self.device.finish() if normal else self.device.stop();self.require_stopped(self.current)
+@@ -196,6 +200,15 @@
+         if self.fatal:return self.status()
+         now=self.clock();stamp=packet.get('source_mono_ms') if isinstance(packet,dict) else None
+         if isinstance(packet,dict) and packet.get('target_kind')!='face':return self.fail('FACE_SOURCE_REQUIRED')
++        reason,duplicate=self.target_lock.check(packet,self.boot,int(now*1000),allow_fixture=self.allow_fixture)
++        if reason:return self.fail(reason)
++        if duplicate and self.controller.source!=self.target_lock.source:
++            # A stopped/ARM-reset controller must not count an old image again.
++            # This supplies neither a new measurement nor a lease renewal.
++            self.controller.new_source=False
++            return self.status()
++        # Ordinary duplicates still pass through observe() below, including
++        # its original clock rollback, anchor-expiry and no-renewal checks.
+         if self.restore_recenter_intent(packet,round(now*1000)) is False:return self.status()
+         if self.active and type(stamp) is int and stamp/1000.<=self.device.reference_time:
+             # Old capture packets never grant output, but still have to pass
+@@ -234,6 +247,7 @@
+                 self.pva=[float(self.current['width_us']),0.,0.]
+                 self.state='HOLDING';self.reason='SAFE_ZONE_HOLD_PENDING_CONFIRMATION'
+             return self.status()
++        self.target_lock.commit(packet)
+         if self.brief_face_gap:
+             self.brief_face_gap=False;self.brief_face_recoveries+=1
+             self.note('BRIEF_FACE_GAP_RECOVERED')
+--- /dev/null
++++ b/controller/session_target_lock.py
+@@ -0,0 +1,72 @@
++"""Anonymous face ownership survives stopped segments; this grants no motion.
++
++The image controller remains responsible for quality and source authority. This
++guard only rejects a changed owner/context or replay across controller resets.
++Only constructing a new operator-requested session releases its target lock.
++"""
++from common.motion_observation import ObservationError, validate
++
++
++class SessionTargetLock:
++    def __init__(self):
++        self.context = self.source = self.payload = None
++
++    @staticmethod
++    def context_of(packet):
++        target = packet['target']
++        return (packet['board_boot_id'], packet['service_epoch'], packet['camera_epoch'],
++                packet['frame_width'], packet['frame_height'], packet['mirror_horizontal'],
++                target['track_id'], target['track_generation'])
++
++    @classmethod
++    def payload_of(cls, packet):
++        target = packet['target']
++        return (packet['source_kind'], packet['target_kind'], cls.context_of(packet),
++                tuple(target['box']), target['score'], packet.get('face_detection_mono_ms'))
++
++    def check(self, packet, boot, now_ms, *, allow_fixture=False):
++        """Return (failure reason, duplicate); never grant/extend image authority."""
++        if self.context is None:
++            return None, False
++        if isinstance(packet, dict):
++            # Preserve the original immediate-STOP fault classes. Only a
++            # same-board visual owner change may use full-pulse QUIESCE.
++            if packet.get('board_boot_id') != self.context[0]:
++                return 'BOOT_CHANGED', False
++            if packet.get('mirror_horizontal') is not True:
++                return 'UNREVIEWED_ORIENTATION', False
++            if (packet.get('frame_width'), packet.get('frame_height')) != self.context[3:5]:
++                return 'FACE_GEOMETRY_CHANGED', False
++            if (packet.get('service_epoch'), packet.get('camera_epoch')) != self.context[1:3]:
++                return 'SESSION_FACE_CONTEXT_CHANGED', False
++        try:
++            checked = validate(packet, boot, now_ms, allow_fixture=allow_fixture)
++        except ObservationError:
++            # Preserve all existing malformed/lost/expired-source STOP paths.
++            return None, False
++        if self.context_of(checked) != self.context:
++            return 'SESSION_FACE_TARGET_CHANGED', False
++        source = (checked['source_frame_id'], checked['source_mono_ms'])
++        if source == self.source:
++            if self.payload_of(checked) != self.payload:
++                return 'SESSION_SOURCE_MUTATED', False
++            anchor = checked.get('face_detection_mono_ms')
++            if type(anchor) is int and now_ms >= anchor + 500:
++                return None, False  # The controller must execute its expiry STOP.
++            return None, True
++        if source[0] <= self.source[0] or source[1] <= self.source[1]:
++            return 'SESSION_SOURCE_REORDERED', False
++        return None, False
++
++    def commit(self, packet):
++        """Called only after the existing controller admits a new actual image."""
++        self.context = self.context_of(packet)
++        self.source = (packet['source_frame_id'], packet['source_mono_ms'])
++        self.payload = self.payload_of(packet)
++
++    def status(self):
++        return dict(locked=self.context is not None,
++            track_id=None if self.context is None else self.context[6],
++            track_generation=None if self.context is None else self.context[7],
++            reset_requires_new_session=True, identity_authenticated=False,
++            personal_memory_authorized=False)

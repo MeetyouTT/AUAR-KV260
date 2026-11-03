@@ -1,0 +1,1 @@
+cmd_lib/lzo/built-in.a := echo >/dev/null; rm -f lib/lzo/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST lib/lzo/built-in.a lib/lzo/lzo1x_compress.o lib/lzo/lzo1x_decompress_safe.o

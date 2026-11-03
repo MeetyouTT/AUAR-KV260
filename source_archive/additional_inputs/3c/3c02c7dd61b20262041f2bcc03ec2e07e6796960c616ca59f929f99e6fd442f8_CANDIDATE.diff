@@ -1,0 +1,53 @@
+--- before/board/runtime/board_speaker_business.py
++++ after/board/runtime/board_speaker_business.py
+@@ -241,8 +241,8 @@
+         if (c.get('field_calibrated',False) is not False or
+                 any(type(c.get(key,default)) not in (int,float) or not math.isfinite(c.get(key,default))
+                     or not floor <= c.get(key,default) <= 1 for key,default,floor in
+-                    (('threshold',.8,.8),('margin',.1,.1),('consistency',.6,.6)))):
+-            raise ValueError('Keep the original uncalibrated operating policy')
++                    (('threshold',.8,.35),('margin',.1,.1),('consistency',.6,.6)))):
++            raise ValueError('Keep the configured uncalibrated operating policy')
+         config = dict(anonymous_config or {'enabled':False})
+         if (set(config)-{'enabled','threshold','margin','retention_seconds','max_clusters'}
+                 or type(config.get('enabled')) is not bool):
+@@ -358,6 +358,9 @@
+         value = dict(ready=hub is not None,active=bool(hub and (hub.speaker.sessions or binding and
+                     (binding.router.active or binding.router.name_waiting))),speaker_calibrated=False,
+                     automatic_profile_access=False,pcm_persisted=False,single_cpu_worker=True,
++                    identity_match_threshold=hub.speaker.threshold if hub is not None else None,
++                    identity_ambiguity_margin=hub.speaker.margin if hub is not None else None,
++                    enrollment_consistency=hub.speaker.consistency if hub is not None else None,
+                     self_match_probe=copy.deepcopy(self._probe_view))
+         with self.lock:
+             self.public_state = value
+@@ -607,7 +610,7 @@
+         binding = self.hub.binding; analyzer = self.hub.progressive_speaker; device = self.hub.speaker
+         actor = meta['board_boot_id'],meta['session_id']; key = (*actor,meta['request_id'])
+         if (binding is None or analyzer is None or self._probe_matcher() is None
+-                or device.threshold < .8 or device.margin < .1
++                or device.threshold < .35 or device.margin < .1
+                 or device.store.threshold != device.threshold or device.store.ambiguity_margin != device.margin):
+             self._probe_publish(meta,'UNAVAILABLE',0);return original_reply
+         if (device.store.model_id != device.encoder.model_id or device.store.dimension != device.encoder.dimension):
+--- before/tools/provisional_voice.py
++++ after/tools/provisional_voice.py
+@@ -16,7 +16,7 @@
+     def observe(self,meta,vector,*,is_current=lambda:True):
+         meta=context(meta);device=self.device;actor=(meta['board_boot_id'],meta['session_id']);now=self.clock()
+         self.results.pop(self.key(meta),None)
+-        if device.calibrated or device.threshold<.8 or device.margin<.1 or not is_current():return None
++        if device.calibrated or device.threshold<.35 or device.margin<.1 or not is_current():return None
+         revision=device.store.revision;matched=device.store.match(vector)
+         if matched.state!='KNOWN' or device.store.revision!=revision or matched.revision!=revision or not is_current():
+             self.streaks.pop(actor,None);return None
+--- before/tools/yuki_business_gui.py
++++ after/tools/yuki_business_gui.py
+@@ -85,6 +85,7 @@
+                         expected_manifest_sha256=fingerprint, threads=1),
+             board_boot_id=boot_id, quality=voiced_pcm, expected_model_id=value['expected_model_id'],
+             anonymous_config=value['anonymous_config'], wall_clock=self.runtime.timeline.event_time,
++            calibration={'threshold':.35,'margin':.1,'consistency':.6,'field_calibrated':False},
+             clock=self.runtime.clock, data_origin=self.runtime.config.data_origin)
+         try:
+             self.runtime.attach_speaker_business(service, face_readback=readback)

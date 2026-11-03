@@ -1,0 +1,14 @@
+--- manage.before.py
++++ manage.py
+@@ -155,6 +155,11 @@
+         if decision.get('control_id')==request['control_id'] and decision.get('status')=='REJECTED':
+             raise RuntimeError('control_rejected_'+decision.get('reason','unknown'))
+         if not same_owner(record):
++            final_record,final_state=latest()
++            if (final_record!=record or not final_state
++                    or final_state.get('session_id')!=record['session_id']):
++                raise RuntimeError('stop_owner_record_changed')
++            state=final_state
+             if state and state.get('status')=='CLOSED' and state.get('owned_tts_closed',True):
+                 return dict(status='CLOSED',session_id=record['session_id'],state=state,forced_action=False)
+             raise RuntimeError('owner_exit_not_confirmed_clean')

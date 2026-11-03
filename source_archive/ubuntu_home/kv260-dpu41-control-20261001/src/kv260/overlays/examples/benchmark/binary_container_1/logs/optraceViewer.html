@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+
+<html>
+<!-- Styles -->
+<style>
+    #chartdiv {
+      width: 100%;
+      height: 1000px;
+    }
+</style>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>OPTraceViewer</title>
+  <script src="https://www.amcharts.com/lib/3/amcharts.js">
+  </script>
+  <script src="https://www.amcharts.com/lib/3/serial.js">
+  </script>
+  <script src="https://www.amcharts.com/lib/3/gantt.js">
+  </script>
+  <script src="https://www.amcharts.com/lib/3/themes/light.js">
+  </script>
+  <script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js">
+  </script>
+  <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all"/>
+
+  <form name="userInputForm" action="javascript:userInputFormCallback()">
+    <fieldset>
+    <legend>Graph Filters:</legend>
+    <table style="width:100%">
+      <col width="50"></col>
+      <col width="20"></col>
+      <col width="60"></col>
+      <tr>
+        <td style="text-align: center"; colspan="3"><input type="number" name="userDurationFilterSecInput" id="userDurationFilterSecInput" value="2" min="0" max="6000" step="1"> sec</td>
+        <td>Filter out run durations lower than this value</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td style="text-align: center"><input type="checkbox" name="userGroupPidSortSelected" id="userGroupPidSortSelected"></td>
+        <td>Group sort by process ID</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td bgcolor="#0099ff"></td>
+        <td style="text-align: center"><input type="checkbox" name="userRollupSelected" id="userRollupSelected"></td>
+        <td>Show rollup entries</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td bgcolor="#8dc49f"></td>
+        <td style="text-align: center"><input type="checkbox" name="userIndividualEntrySelected" id="userIndividualEntrySelected"></td>
+        <td>Show individual entries</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td bgcolor="#cd82ad"></td>
+        <td style="text-align: center"><input type="checkbox" name="userCheckpointEntrySelected" id="userCheckpointEntrySelected"></td>
+        <td>Show checkpoints entry</td>
+      </tr>
+       <tr>
+        <td></td>
+        <td bgcolor="#b9783f"></td>
+        <td style="text-align: center"><input type="checkbox" name="userReportEntrySelected" id="userReportEntrySelected"></td>
+        <td>Show report entry</td>
+      </tr>
+
+    </table>
+    <br>
+    <input name="Submit" type="submit" value="Update Graph">
+    </fieldset>
+  </form> 
+
+  <div id="chartdiv">
+  </div>
+
+  <script>
+  </script>
+
+</head>
+
+
+<body>
+<table id="myDynamicTable" cellpadding="2" cellspacing="2" border="1" onclick="tester()">
+  <tr>
+  <td>Task</td>
+  <td>Start</td>
+  <td>Duration</td>
+  </tr>
+</table>
+<script>
+  // Default User Selected variables
+  var m_secondFilter = 1;
+  var m_groupPidSort = true;
+  var m_showRollup = true;
+  var m_showIndividualEntry = false;
+  var m_showCheckpointEntry = false;
+  var m_showReportEntry = false;
+
+  function SetDefaultUserValues()
+  {
+    document.getElementById("userDurationFilterSecInput").value = m_secondFilter;
+    document.getElementById("userGroupPidSortSelected").checked = m_groupPidSort;
+    document.getElementById("userRollupSelected").checked = m_showRollup;
+    document.getElementById("userIndividualEntrySelected").checked = m_showIndividualEntry;
+    document.getElementById("userCheckpointEntrySelected").checked = m_showCheckpointEntry;
+    document.getElementById("userReportEntrySelected").checked = m_showReportEntry;
+  }
+
+  window.onload = function(){
+    SetDefaultUserValues();
+  }
+
+
+
+
+  // Header
+  var header = "Keyword|pid|Entry|SrcFile|Catagory|TimeStampMSec|Action|Task|Tags|Misc";
+                         
+  // Insert Raw Data Here
+  // Note: Do not change the following signature. 
+  var csvData =    [
+      "[OPTRACE]|143132|10|run|cpp|1790859491108|START|OCL_LINK|",
+      "[OPTRACE]|143132|11|setupBinaryForLink|cpp|1790859491119|START|Create Binary|",
+      "[OPTRACE]|143132|12||cpp|1790859491120|END|Create Binary|",
+      "[OPTRACE]|143132|13|setupBinaryForLink|cpp|1790859491120|START|Extract Kernels|",
+      "[OPTRACE]|143132|14||cpp|1790859491171|END|Extract Kernels|",
+      "[OPTRACE]|143132|15|launchStep_|cpp|1790859491281|START|Launch Step: system_link|",
+      "[OPTRACE]|143132|16||cpp|1790859521107|END|Launch Step: system_link|",
+      "[OPTRACE]|143132|17|launchStep_|cpp|1790859521107|START|Launch Step: cf2sw|",
+      "[OPTRACE]|143132|18||cpp|1790859522229|END|Launch Step: cf2sw|",
+      "[OPTRACE]|143132|19|launchStep_|cpp|1790859522230|START|Launch Step: rtd2_system_diagram|",
+      "[OPTRACE]|143132|1|main|cpp|1790859479038|START|v++|ROLLUP_0",
+      "[OPTRACE]|143132|20||cpp|1790859522299|END|Launch Step: rtd2_system_diagram|",
+      "[OPTRACE]|143132|21|launchStep_|cpp|1790859522300|START|Launch Step: vpl|",
+      "[OPTRACE]|143132|2|run|cpp|1790859479038|START|Validate Kernels|",
+      "[OPTRACE]|143132|348||cpp|1790867360969|END|Launch Step: vpl|",
+      "[OPTRACE]|143132|349|launchStep_|cpp|1790867360970|START|Launch Step: rtdgen|",
+      "[OPTRACE]|143132|350|launchCf2sw_|cpp|1790867360972|START|Launch cf2sw|",
+      "[OPTRACE]|143132|351||cpp|1790867362120|END|Launch cf2sw|",
+      "[OPTRACE]|143132|352|writeSystemDiagram|cpp|1790867362120|START|writeSystemDiagram|",
+      "[OPTRACE]|143132|353||cpp|1790867362124|END|writeSystemDiagram|",
+      "[OPTRACE]|143132|354|writeAutomationSummary|cpp|1790867362124|START|writeAutomationSummary|",
+      "[OPTRACE]|143132|355||cpp|1790867362125|END|writeAutomationSummary|",
+      "[OPTRACE]|143132|356||cpp|1790867362125|END|Launch Step: rtdgen|",
+      "[OPTRACE]|143132|357|launchStep_|cpp|1790867362126|START|Launch Step: xclbinutil|",
+      "[OPTRACE]|143132|358||cpp|1790867363293|END|Launch Step: xclbinutil|",
+      "[OPTRACE]|143132|359|launchStep_|cpp|1790867363293|START|Launch Step: xclbinutilinfo|",
+      "[OPTRACE]|143132|360||cpp|1790867364079|END|Launch Step: xclbinutilinfo|",
+      "[OPTRACE]|143132|361|launchStep_|cpp|1790867364079|START|Launch Step: generate_sc_driver|",
+      "[OPTRACE]|143132|362||cpp|1790867364084|END|Launch Step: generate_sc_driver|",
+      "[OPTRACE]|143132|363||cpp|1790867364087|END|OCL_LINK|",
+      "[OPTRACE]|143132|364||cpp|1790867365020|END|v++|",
+      "[OPTRACE]|143132|3||cpp|1790859479110|END|Validate Kernels|",
+      "[OPTRACE]|143132|4|prepareProject|cpp|1790859479133|START|Create Solution|",
+      "[OPTRACE]|143132|5||cpp|1790859489469|END|Create Solution|",
+      "[OPTRACE]|143132|6|prepareProject|cpp|1790859489470|START|Add Device|",
+      "[OPTRACE]|143132|7|addDevice|cpp|1790859489470|START|Find & Load Device|",
+      "[OPTRACE]|143132|8||cpp|1790859489538|END|Find & Load Device|",
+      "[OPTRACE]|143132|9||cpp|1790859491094|END|Add Device|",
+      "[OPTRACE]|143481|22|main|cpp|1790859523128|START|vpl|",
+      "[OPTRACE]|143481|23|runPlatformLinker|cpp|1790859523142|START|runPlatformLinker|",
+      "[OPTRACE]|143481|24|setupBinaryForLink|cpp|1790859523142|START|Create Solution|",
+      "[OPTRACE]|143481|25||cpp|1790859523145|END|Create Solution|",
+      "[OPTRACE]|143481|26|setupBinaryForLink|cpp|1790859523145|START|Add platform|",
+      "[OPTRACE]|143481|27||cpp|1790859524822|END|Add platform|",
+      "[OPTRACE]|143481|28|setupBinaryForLink|cpp|1790859524822|START|Create Binary|",
+      "[OPTRACE]|143481|29||cpp|1790859524823|END|Create Binary|",
+      "[OPTRACE]|143481|30|setupBinaryForLink|cpp|1790859524823|START|Create Kernels|",
+      "[OPTRACE]|143481|31||cpp|1790859524824|END|Create Kernels|",
+      "[OPTRACE]|143481|32|runPlatformLinker|cpp|1790859524833|START|Process Kernels|",
+      "[OPTRACE]|143481|33|runPlatformLinker|cpp|1790859524834|START|Set Board Repo Paths and Connections|",
+      "[OPTRACE]|143481|344|runPlatformLinker|cpp|1790867360940|START|Generate Resource Availability Report|",
+      "[OPTRACE]|143481|345||cpp|1790867360940|END|Generate Resource Availability Report|",
+      "[OPTRACE]|143481|346||cpp|1790867360940|END|runPlatformLinker|",
+      "[OPTRACE]|143481|347||cpp|1790867360957|END|vpl|",
+      "[OPTRACE]|143481|34||cpp|1790859524834|END|Set Board Repo Paths and Connections|",
+      "[OPTRACE]|143481|35|runPlatformLinker|cpp|1790859524834|START|Process Kernel Profiles|",
+      "[OPTRACE]|143481|36||cpp|1790859524835|END|Process Kernel Profiles|",
+      "[OPTRACE]|143481|37|runPlatformLinker|cpp|1790859524835|START|Process Trace Memory|",
+      "[OPTRACE]|143481|38||cpp|1790859524835|END|Process Trace Memory|",
+      "[OPTRACE]|143481|39|runPlatformLinker|cpp|1790859524835|START|Process AIE Trace|",
+      "[OPTRACE]|143481|40||cpp|1790859524835|END|Process AIE Trace|",
+      "[OPTRACE]|143481|41||cpp|1790859524836|END|Process Kernels|",
+      "[OPTRACE]|143481|42|runPlatformLinker|cpp|1790859524836|START|Process Kernel Debug|",
+      "[OPTRACE]|143481|43||cpp|1790859524836|END|Process Kernel Debug|",
+      "[OPTRACE]|143481|44|runPlatformLinker|cpp|1790859524836|START|Set Kernel Debug|",
+      "[OPTRACE]|143481|45||cpp|1790859524836|END|Set Kernel Debug|",
+      "[OPTRACE]|143481|46|runPlatformLinker|cpp|1790859524836|START|Set Miscellaneous|",
+      "[OPTRACE]|143481|47||cpp|1790859524836|END|Set Miscellaneous|",
+      "[OPTRACE]|143481|48|run|cpp|1790859524837|START|Extract Platform|",
+      "[OPTRACE]|143481|49||cpp|1790859526101|END|Extract Platform|",
+      "[OPTRACE]|143564|236|ipirun.tcl|vpl|1790860491528|END|Synthesis|",
+      "[OPTRACE]|143564|343|ipirun.tcl|vpl|1790867360564|END|Implementation|",
+      "[OPTRACE]|143564|50|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/vpl.tcl|vivado_impl|1790859533321|START|Implementation|ROLLUP_1",
+      "[OPTRACE]|143564|51|ipirun.tcl|vpl|1790859533347|START|ipirun|ROLLUP_0",
+      "[OPTRACE]|143564|52|ipirun.tcl|vpl|1790859533348|END|ipirun|",
+      "[OPTRACE]|143564|53|ipirun.tcl|vpl|1790859533372|START|Create project|",
+      "[OPTRACE]|143564|54|ipirun.tcl|vpl|1790859550101|END|Create project|",
+      "[OPTRACE]|143564|55|ipirun.tcl|vpl|1790859550104|START|Create IP caching environment|",
+      "[OPTRACE]|143564|56|ipirun.tcl|vpl|1790859550220|END|Create IP caching environment|",
+      "[OPTRACE]|143564|57|ipirun.tcl|vpl|1790859550221|START|Import/add dynamic BD|",
+      "[OPTRACE]|143564|58|ipirun.tcl|vpl|1790859550225|END|Import/add dynamic BD|",
+      "[OPTRACE]|143564|59|ipirun.tcl|vpl|1790859550230|START|Open BD and insert kernels|",
+      "[OPTRACE]|143564|60|ipirun.tcl|vpl|1790859565281|END|Open BD and insert kernels|",
+      "[OPTRACE]|143564|61|ipirun.tcl|vpl|1790859565284|START|Add debug/profiling support|",
+      "[OPTRACE]|143564|62|ipirun.tcl|vpl|1790859565340|END|Add debug/profiling support|",
+      "[OPTRACE]|143564|63|ipirun.tcl|vpl|1790859565340|START|IPI address assignments|",
+      "[OPTRACE]|143564|64|ipirun.tcl|vpl|1790859565420|END|IPI address assignments|",
+      "[OPTRACE]|143564|65|ipirun.tcl|vpl|1790859565426|START|Create address map and debug IP profile files|",
+      "[OPTRACE]|143564|66|ipirun.tcl|vpl|1790859565449|END|Create address map and debug IP profile files|",
+      "[OPTRACE]|143564|67|ipirun.tcl|vpl|1790859565450|START|Collect BD interface connectivity and write automation summary report|",
+      "[OPTRACE]|143564|68|ipirun.tcl|vpl|1790859565468|END|Collect BD interface connectivity and write automation summary report|",
+      "[OPTRACE]|143564|69|ipirun.tcl|vpl|1790859565685|START|Generate output products|",
+      "[OPTRACE]|143564|70|ipirun.tcl|vpl|1790859677120|END|Generate output products|",
+      "[OPTRACE]|143564|71|ipirun.tcl|vpl|1790859677126|START|Source report_commands_tcl|",
+      "[OPTRACE]|143564|72|ipirun.tcl|vpl|1790859677240|END|Source report_commands_tcl|",
+      "[OPTRACE]|143564|73|ipirun.tcl|vpl|1790859677241|START|Source synth_props_tcl|",
+      "[OPTRACE]|143564|74|ipirun.tcl|vpl|1790859679967|END|Source synth_props_tcl|",
+      "[OPTRACE]|143564|75|ipirun.tcl|vpl|1790859679977|START|Source impl_props_tcl|",
+      "[OPTRACE]|143564|76|ipirun.tcl|vpl|1790859680125|END|Source impl_props_tcl|",
+      "[OPTRACE]|143564|77|ipirun.tcl|vpl|1790859680129|START|Synthesis|ROLLUP_1,SYNTH",
+      "[OPTRACE]|144108|108|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859738459|END|synth_design|",
+      "[OPTRACE]|144108|109|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859738459|START|Write IP Cache|",
+      "[OPTRACE]|144108|110|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859739512|END|Write IP Cache|",
+      "[OPTRACE]|144108|111|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859739512|START|write_checkpoint|CHECKPOINT",
+      "[OPTRACE]|144108|112|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859739799|END|write_checkpoint|",
+      "[OPTRACE]|144108|113|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859739800|START|synth reports|REPORT",
+      "[OPTRACE]|144108|114|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859739924|END|synth reports|",
+      "[OPTRACE]|144108|115|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859740601|END|kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1|",
+      "[OPTRACE]|144108|82|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859687384|START|kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1|ROLLUP_AUTO",
+      "[OPTRACE]|144108|83|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859687384|START|Creating in-memory project|",
+      "[OPTRACE]|144108|90|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859692885|END|Creating in-memory project|",
+      "[OPTRACE]|144108|91|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859692885|START|Adding files|",
+      "[OPTRACE]|144108|92|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859693486|END|Adding files|",
+      "[OPTRACE]|144108|93|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859693487|START|Configure IP Cache|",
+      "[OPTRACE]|144108|94|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859693490|END|Configure IP Cache|",
+      "[OPTRACE]|144108|95|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_PS_0_0_synth_1/kv260_ispMipiRx_vcu_DP_PS_0_0.tcl|vivado_synth|1790859693490|START|synth_design|",
+      "[OPTRACE]|144109|104|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859697096|END|Adding files|",
+      "[OPTRACE]|144109|105|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859697097|START|Configure IP Cache|",
+      "[OPTRACE]|144109|106|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859697130|END|Configure IP Cache|",
+      "[OPTRACE]|144109|107|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859697131|START|synth_design|",
+      "[OPTRACE]|144109|116|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859752685|END|synth_design|",
+      "[OPTRACE]|144109|117|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859752686|START|Write IP Cache|",
+      "[OPTRACE]|144109|118|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859753594|END|Write IP Cache|",
+      "[OPTRACE]|144109|119|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859753595|START|write_checkpoint|CHECKPOINT",
+      "[OPTRACE]|144109|120|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859753859|END|write_checkpoint|",
+      "[OPTRACE]|144109|121|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859753859|START|synth reports|REPORT",
+      "[OPTRACE]|144109|122|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859753983|END|synth reports|",
+      "[OPTRACE]|144109|123|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859754552|END|kv260_ispMipiRx_vcu_DP_xbar_4_synth_1|",
+      "[OPTRACE]|144109|84|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859689897|START|kv260_ispMipiRx_vcu_DP_xbar_4_synth_1|ROLLUP_AUTO",
+      "[OPTRACE]|144109|85|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859689899|START|Creating in-memory project|",
+      "[OPTRACE]|144109|98|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859696485|END|Creating in-memory project|",
+      "[OPTRACE]|144109|99|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_4_synth_1/kv260_ispMipiRx_vcu_DP_xbar_4.tcl|vivado_synth|1790859696485|START|Adding files|",
+      "[OPTRACE]|144110|126|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790859767668|END|compile_c|",
+      "[OPTRACE]|144110|127|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790859767669|START|Configure IP Cache|",
+      "[OPTRACE]|144110|128|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790859767748|END|Configure IP Cache|",
+      "[OPTRACE]|144110|129|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790859767749|END|kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1|",
+      "[OPTRACE]|144110|78|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790859686948|START|kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1|ROLLUP_AUTO",
+      "[OPTRACE]|144110|79|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790859686949|START|Creating in-memory project|",
+      "[OPTRACE]|144110|86|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790859690420|END|Creating in-memory project|",
+      "[OPTRACE]|144110|87|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790859690420|START|Adding files|",
+      "[OPTRACE]|144110|88|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790859690638|END|Adding files|",
+      "[OPTRACE]|144110|89|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790859690639|START|compile_c|",
+      "[OPTRACE]|144111|100|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859696835|END|Adding files|",
+      "[OPTRACE]|144111|101|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859696838|START|Configure IP Cache|",
+      "[OPTRACE]|144111|102|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859696889|END|Configure IP Cache|",
+      "[OPTRACE]|144111|103|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859696889|START|synth_design|",
+      "[OPTRACE]|144111|152|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859850381|END|synth_design|",
+      "[OPTRACE]|144111|153|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859850381|START|Write IP Cache|",
+      "[OPTRACE]|144111|154|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859851377|END|Write IP Cache|",
+      "[OPTRACE]|144111|155|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859851379|START|write_checkpoint|CHECKPOINT",
+      "[OPTRACE]|144111|156|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859851732|END|write_checkpoint|",
+      "[OPTRACE]|144111|157|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859851733|START|synth reports|REPORT",
+      "[OPTRACE]|144111|158|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859851859|END|synth reports|",
+      "[OPTRACE]|144111|159|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859852464|END|kv260_ispMipiRx_vcu_DP_xbar_6_synth_1|",
+      "[OPTRACE]|144111|80|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859687051|START|kv260_ispMipiRx_vcu_DP_xbar_6_synth_1|ROLLUP_AUTO",
+      "[OPTRACE]|144111|81|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859687052|START|Creating in-memory project|",
+      "[OPTRACE]|144111|96|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859695863|END|Creating in-memory project|",
+      "[OPTRACE]|144111|97|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_6_synth_1/kv260_ispMipiRx_vcu_DP_xbar_6.tcl|vivado_synth|1790859695864|START|Adding files|",
+      "[OPTRACE]|144520|124|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790859759639|START|kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1|ROLLUP_AUTO",
+      "[OPTRACE]|144520|125|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790859759640|START|Creating in-memory project|",
+      "[OPTRACE]|144520|130|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790859767810|END|Creating in-memory project|",
+      "[OPTRACE]|144520|131|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790859767811|START|Adding files|",
+      "[OPTRACE]|144520|132|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790859768069|END|Adding files|",
+      "[OPTRACE]|144520|133|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790859768070|START|Configure IP Cache|",
+      "[OPTRACE]|144520|134|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790859768071|END|Configure IP Cache|",
+      "[OPTRACE]|144520|135|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790859768071|START|synth_design|",
+      "[OPTRACE]|144520|216|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790860314940|END|synth_design|",
+      "[OPTRACE]|144520|217|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790860314940|START|Write IP Cache|",
+      "[OPTRACE]|144520|218|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790860346653|END|Write IP Cache|",
+      "[OPTRACE]|144520|219|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790860346723|START|write_checkpoint|CHECKPOINT",
+      "[OPTRACE]|144520|220|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790860379004|END|write_checkpoint|",
+      "[OPTRACE]|144520|221|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790860379004|START|synth reports|REPORT",
+      "[OPTRACE]|144520|222|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790860380260|END|synth reports|",
+      "[OPTRACE]|144520|223|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0.tcl|vivado_synth|1790860381188|END|kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0_synth_1|",
+      "[OPTRACE]|144627|136|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859773285|START|kv260_ispMipiRx_vcu_DP_xbar_8_synth_1|ROLLUP_AUTO",
+      "[OPTRACE]|144627|137|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859773286|START|Creating in-memory project|",
+      "[OPTRACE]|144627|138|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859780772|END|Creating in-memory project|",
+      "[OPTRACE]|144627|139|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859780772|START|Adding files|",
+      "[OPTRACE]|144627|140|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859781193|END|Adding files|",
+      "[OPTRACE]|144627|141|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859781194|START|Configure IP Cache|",
+      "[OPTRACE]|144627|142|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859781233|END|Configure IP Cache|",
+      "[OPTRACE]|144627|143|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859781233|START|synth_design|",
+      "[OPTRACE]|144627|176|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859890204|END|synth_design|",
+      "[OPTRACE]|144627|177|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859890204|START|Write IP Cache|",
+      "[OPTRACE]|144627|178|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859891412|END|Write IP Cache|",
+      "[OPTRACE]|144627|179|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859891414|START|write_checkpoint|CHECKPOINT",
+      "[OPTRACE]|144627|180|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859891817|END|write_checkpoint|",
+      "[OPTRACE]|144627|181|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859891818|START|synth reports|REPORT",
+      "[OPTRACE]|144627|182|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859891978|END|synth reports|",
+      "[OPTRACE]|144627|183|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_8_synth_1/kv260_ispMipiRx_vcu_DP_xbar_8.tcl|vivado_synth|1790859892723|END|kv260_ispMipiRx_vcu_DP_xbar_8_synth_1|",
+      "[OPTRACE]|144720|144|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859786542|START|kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1|ROLLUP_AUTO",
+      "[OPTRACE]|144720|145|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859786543|START|Creating in-memory project|",
+      "[OPTRACE]|144720|146|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859797098|END|Creating in-memory project|",
+      "[OPTRACE]|144720|147|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859797099|START|Adding files|",
+      "[OPTRACE]|144720|148|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859797682|END|Adding files|",
+      "[OPTRACE]|144720|149|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859797686|START|Configure IP Cache|",
+      "[OPTRACE]|144720|150|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859797791|END|Configure IP Cache|",
+      "[OPTRACE]|144720|151|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859797791|START|synth_design|",
+      "[OPTRACE]|144720|162|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859874705|END|synth_design|",
+      "[OPTRACE]|144720|163|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859874705|START|Write IP Cache|",
+      "[OPTRACE]|144720|164|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859875472|END|Write IP Cache|",
+      "[OPTRACE]|144720|165|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859875473|START|write_checkpoint|CHECKPOINT",
+      "[OPTRACE]|144720|166|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859875683|END|write_checkpoint|",
+      "[OPTRACE]|144720|167|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859875683|START|synth reports|REPORT",
+      "[OPTRACE]|144720|168|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859875803|END|synth reports|",
+      "[OPTRACE]|144720|169|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1/kv260_ispMipiRx_vcu_DP_auto_pc_0.tcl|vivado_synth|1790859876348|END|kv260_ispMipiRx_vcu_DP_auto_pc_0_synth_1|",
+      "[OPTRACE]|144959|160|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_7_synth_1/kv260_ispMipiRx_vcu_DP_xbar_7.tcl|vivado_synth|1790859872187|START|kv260_ispMipiRx_vcu_DP_xbar_7_synth_1|ROLLUP_AUTO",
+      "[OPTRACE]|144959|161|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_7_synth_1/kv260_ispMipiRx_vcu_DP_xbar_7.tcl|vivado_synth|1790859872189|START|Creating in-memory project|",
+      "[OPTRACE]|144959|170|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_7_synth_1/kv260_ispMipiRx_vcu_DP_xbar_7.tcl|vivado_synth|1790859888170|END|Creating in-memory project|",
+      "[OPTRACE]|144959|171|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_7_synth_1/kv260_ispMipiRx_vcu_DP_xbar_7.tcl|vivado_synth|1790859888170|START|Adding files|",
+      "[OPTRACE]|144959|172|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_7_synth_1/kv260_ispMipiRx_vcu_DP_xbar_7.tcl|vivado_synth|1790859888609|END|Adding files|",
+      "[OPTRACE]|144959|173|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_7_synth_1/kv260_ispMipiRx_vcu_DP_xbar_7.tcl|vivado_synth|1790859888610|START|Configure IP Cache|",
+      "[OPTRACE]|144959|174|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_7_synth_1/kv260_ispMipiRx_vcu_DP_xbar_7.tcl|vivado_synth|1790859888773|END|Configure IP Cache|",
+      "[OPTRACE]|144959|175|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_xbar_7_synth_1/kv260_ispMipiRx_vcu_DP_xbar_7.tcl|vivado_synth|1790859888774|END|kv260_ispMipiRx_vcu_DP_xbar_7_synth_1|",
+      "[OPTRACE]|145042|184|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859894393|START|kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1|ROLLUP_AUTO",
+      "[OPTRACE]|145042|185|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859894395|START|Creating in-memory project|",
+      "[OPTRACE]|145042|186|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859901606|END|Creating in-memory project|",
+      "[OPTRACE]|145042|187|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859901606|START|Adding files|",
+      "[OPTRACE]|145042|188|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859901852|END|Adding files|",
+      "[OPTRACE]|145042|189|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859901853|START|Configure IP Cache|",
+      "[OPTRACE]|145042|190|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859901855|END|Configure IP Cache|",
+      "[OPTRACE]|145042|191|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859901855|START|synth_design|",
+      "[OPTRACE]|145042|208|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859973826|END|synth_design|",
+      "[OPTRACE]|145042|209|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859973827|START|Write IP Cache|",
+      "[OPTRACE]|145042|210|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859974590|END|Write IP Cache|",
+      "[OPTRACE]|145042|211|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859974592|START|write_checkpoint|CHECKPOINT",
+      "[OPTRACE]|145042|212|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859974781|END|write_checkpoint|",
+      "[OPTRACE]|145042|213|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859974782|START|synth reports|REPORT",
+      "[OPTRACE]|145042|214|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859974930|END|synth reports|",
+      "[OPTRACE]|145042|215|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1/kv260_ispMipiRx_vcu_DP_m01_regslice_0.tcl|vivado_synth|1790859975425|END|kv260_ispMipiRx_vcu_DP_m01_regslice_0_synth_1|",
+      "[OPTRACE]|145125|192|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859906920|START|kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1|ROLLUP_AUTO",
+      "[OPTRACE]|145125|193|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859906921|START|Creating in-memory project|",
+      "[OPTRACE]|145125|194|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859911728|END|Creating in-memory project|",
+      "[OPTRACE]|145125|195|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859911728|START|Adding files|",
+      "[OPTRACE]|145125|196|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859912047|END|Adding files|",
+      "[OPTRACE]|145125|197|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859912048|START|Configure IP Cache|",
+      "[OPTRACE]|145125|198|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859912112|END|Configure IP Cache|",
+      "[OPTRACE]|145125|199|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859912113|START|synth_design|",
+      "[OPTRACE]|145125|200|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859963732|END|synth_design|",
+      "[OPTRACE]|145125|201|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859963733|START|Write IP Cache|",
+      "[OPTRACE]|145125|202|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859964589|END|Write IP Cache|",
+      "[OPTRACE]|145125|203|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859964591|START|write_checkpoint|CHECKPOINT",
+      "[OPTRACE]|145125|204|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859964836|END|write_checkpoint|",
+      "[OPTRACE]|145125|205|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859964836|START|synth reports|REPORT",
+      "[OPTRACE]|145125|206|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859964960|END|synth reports|",
+      "[OPTRACE]|145125|207|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1/kv260_ispMipiRx_vcu_DP_auto_us_3.tcl|vivado_synth|1790859965513|END|kv260_ispMipiRx_vcu_DP_auto_us_3_synth_1|",
+      "[OPTRACE]|147093|224|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/synth_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_synth|1790860399338|START|synth_1|ROLLUP_AUTO",
+      "[OPTRACE]|147093|225|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/synth_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_synth|1790860399340|START|Creating in-memory project|",
+      "[OPTRACE]|147093|226|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/synth_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_synth|1790860407059|END|Creating in-memory project|",
+      "[OPTRACE]|147093|227|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/synth_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_synth|1790860407060|START|Adding files|",
+      "[OPTRACE]|147093|228|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/synth_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_synth|1790860413105|END|Adding files|",
+      "[OPTRACE]|147093|229|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/synth_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_synth|1790860413124|START|synth_design|",
+      "[OPTRACE]|147093|230|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/synth_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_synth|1790860479684|END|synth_design|",
+      "[OPTRACE]|147093|231|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/synth_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_synth|1790860479684|START|write_checkpoint|CHECKPOINT",
+      "[OPTRACE]|147093|232|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/synth_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_synth|1790860480485|END|write_checkpoint|",
+      "[OPTRACE]|147093|233|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/synth_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_synth|1790860480485|START|synth reports|REPORT",
+      "[OPTRACE]|147093|234|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/synth_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_synth|1790860480486|END|synth reports|",
+      "[OPTRACE]|147093|235|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/synth_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_synth|1790860480486|END|synth_1|",
+      "[OPTRACE]|147448|237|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790860501139|START|kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1|ROLLUP_AUTO",
+      "[OPTRACE]|147448|238|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790860501140|START|Creating in-memory project|",
+      "[OPTRACE]|147448|239|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790860508689|END|Creating in-memory project|",
+      "[OPTRACE]|147448|240|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790860508690|START|Adding files|",
+      "[OPTRACE]|147448|241|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790860509115|END|Adding files|",
+      "[OPTRACE]|147448|242|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790860509118|START|compile_c|",
+      "[OPTRACE]|147448|243|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790860600318|END|compile_c|",
+      "[OPTRACE]|147448|244|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790860600319|START|Configure IP Cache|",
+      "[OPTRACE]|147448|245|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790860600381|END|Configure IP Cache|",
+      "[OPTRACE]|147448|246|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1/kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0.tcl|vivado_synth|1790860600383|END|kv260_ispMipiRx_vcu_DP_v_frmbuf_wr_0_0_synth_1|",
+      "[OPTRACE]|148269|247|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860616426|START|impl_1|ROLLUP_1",
+      "[OPTRACE]|148269|248|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860616426|START|Phase: Init Design|ROLLUP_AUTO",
+      "[OPTRACE]|148269|249|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860616428|START|Design Initialization: pre hook|",
+      "[OPTRACE]|148269|250|ipirun.tcl|vpl|1790860616453|START|ipirun|ROLLUP_0",
+      "[OPTRACE]|148269|251|ipirun.tcl|vpl|1790860616454|END|ipirun|",
+      "[OPTRACE]|148269|252|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860616456|END|Design Initialization: pre hook|",
+      "[OPTRACE]|148269|253|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860616457|START|create in-memory project|",
+      "[OPTRACE]|148269|254|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860622711|END|create in-memory project|",
+      "[OPTRACE]|148269|255|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860622711|START|set parameters|",
+      "[OPTRACE]|148269|256|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860624282|END|set parameters|",
+      "[OPTRACE]|148269|257|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860624283|START|add files|",
+      "[OPTRACE]|148269|258|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860630198|START|read constraints: implementation|",
+      "[OPTRACE]|148269|259|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860630201|END|read constraints: implementation|",
+      "[OPTRACE]|148269|260|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860630202|END|add files|",
+      "[OPTRACE]|148269|261|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860630202|START|link_design|",
+      "[OPTRACE]|148269|262|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860761828|END|link_design|",
+      "[OPTRACE]|148269|263|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860761829|START|gray box cells|",
+      "[OPTRACE]|148269|264|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860761830|END|gray box cells|",
+      "[OPTRACE]|148269|265|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860761830|START|Design Initialization: post hook|",
+      "[OPTRACE]|148269|266|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860761891|END|Design Initialization: post hook|",
+      "[OPTRACE]|148269|267|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860761892|START|init_design_reports|REPORT",
+      "[OPTRACE]|148269|268|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860761892|END|init_design_reports|",
+      "[OPTRACE]|148269|269|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860761892|START|init_design_write_hwdef|",
+      "[OPTRACE]|148269|270|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860761892|END|init_design_write_hwdef|",
+      "[OPTRACE]|148269|271|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860761894|END|Phase: Init Design|",
+      "[OPTRACE]|148269|272|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860761894|START|Phase: Opt Design|ROLLUP_AUTO",
+      "[OPTRACE]|148269|273|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860761895|START|Opt Design: pre hook|",
+      "[OPTRACE]|148269|274|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860769571|END|Opt Design: pre hook|",
+      "[OPTRACE]|148269|275|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860769572|START|read constraints: opt_design|",
+      "[OPTRACE]|148269|276|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860769572|END|read constraints: opt_design|",
+      "[OPTRACE]|148269|277|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860769572|START|opt_design|",
+      "[OPTRACE]|148269|278|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851531|END|opt_design|",
+      "[OPTRACE]|148269|279|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851532|START|read constraints: opt_design_post|",
+      "[OPTRACE]|148269|280|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851532|END|read constraints: opt_design_post|",
+      "[OPTRACE]|148269|281|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851532|START|Opt Design: post hook|",
+      "[OPTRACE]|148269|282|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851533|END|Opt Design: post hook|",
+      "[OPTRACE]|148269|283|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851534|START|opt_design reports|REPORT",
+      "[OPTRACE]|148269|284|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851534|END|opt_design reports|",
+      "[OPTRACE]|148269|285|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851535|END|Phase: Opt Design|",
+      "[OPTRACE]|148269|286|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851536|START|Phase: Place Design|ROLLUP_AUTO",
+      "[OPTRACE]|148269|287|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851536|START|Place Design: pre hook|",
+      "[OPTRACE]|148269|288|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851571|END|Place Design: pre hook|",
+      "[OPTRACE]|148269|289|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851571|START|read constraints: place_design|",
+      "[OPTRACE]|148269|290|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851571|END|read constraints: place_design|",
+      "[OPTRACE]|148269|291|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790860851572|START|place_design|",
+      "[OPTRACE]|148269|292|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862157088|END|place_design|",
+      "[OPTRACE]|148269|293|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862157089|START|read constraints: place_design_post|",
+      "[OPTRACE]|148269|294|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862157089|END|read constraints: place_design_post|",
+      "[OPTRACE]|148269|295|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862157089|START|Place Design: post hook|",
+      "[OPTRACE]|148269|296|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862175408|END|Place Design: post hook|",
+      "[OPTRACE]|148269|297|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862175409|START|place_design reports|REPORT",
+      "[OPTRACE]|148269|298|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862175409|END|place_design reports|",
+      "[OPTRACE]|148269|299|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862175410|END|Phase: Place Design|",
+      "[OPTRACE]|148269|300|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862175410|START|Phase: Physical Opt Design|ROLLUP_AUTO",
+      "[OPTRACE]|148269|301|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862175411|START|read constraints: phys_opt_design|",
+      "[OPTRACE]|148269|302|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862175412|END|read constraints: phys_opt_design|",
+      "[OPTRACE]|148269|303|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862175412|START|phys_opt_design|",
+      "[OPTRACE]|148269|304|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862414127|END|phys_opt_design|",
+      "[OPTRACE]|148269|305|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862414127|START|read constraints: phys_opt_design_post|",
+      "[OPTRACE]|148269|306|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862414128|END|read constraints: phys_opt_design_post|",
+      "[OPTRACE]|148269|307|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862414128|START|phys_opt_design report|REPORT",
+      "[OPTRACE]|148269|308|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862414128|END|phys_opt_design report|",
+      "[OPTRACE]|148269|309|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862414129|END|Phase: Physical Opt Design|",
+      "[OPTRACE]|148269|310|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862414129|START|Phase: Route Design|ROLLUP_AUTO",
+      "[OPTRACE]|148269|311|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862414130|START|read constraints: route_design|",
+      "[OPTRACE]|148269|312|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862414130|END|read constraints: route_design|",
+      "[OPTRACE]|148269|313|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790862414130|START|route_design|",
+      "[OPTRACE]|148269|314|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867026743|END|route_design|",
+      "[OPTRACE]|148269|315|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867026743|START|read constraints: route_design_post|",
+      "[OPTRACE]|148269|316|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867026744|END|read constraints: route_design_post|",
+      "[OPTRACE]|148269|317|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867026744|START|Route Design: post hook|",
+      "[OPTRACE]|148269|318|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867067537|END|Route Design: post hook|",
+      "[OPTRACE]|148269|319|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867067537|START|Route Design: write_checkpoint|CHECKPOINT",
+      "[OPTRACE]|148269|320|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867119424|END|Route Design: write_checkpoint|",
+      "[OPTRACE]|148269|321|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867119424|START|route_design reports|REPORT",
+      "[OPTRACE]|148269|322|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867140211|END|route_design reports|",
+      "[OPTRACE]|148269|323|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867140211|START|route_design misc|",
+      "[OPTRACE]|148269|324|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867140212|END|route_design misc|",
+      "[OPTRACE]|148269|325|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867140212|END|Phase: Route Design|",
+      "[OPTRACE]|148269|326|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867140213|START|Phase: Write Bitstream|ROLLUP_AUTO",
+      "[OPTRACE]|148269|327|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867140213|START|write_bitstream setup|",
+      "[OPTRACE]|148269|328|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867140213|START|Write Bitstream: pre hook|",
+      "[OPTRACE]|148269|329|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867141960|END|Write Bitstream: pre hook|",
+      "[OPTRACE]|148269|330|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867141961|START|read constraints: write_bitstream|",
+      "[OPTRACE]|148269|331|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867141961|END|read constraints: write_bitstream|",
+      "[OPTRACE]|148269|332|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867142841|END|write_bitstream setup|",
+      "[OPTRACE]|148269|333|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867142842|START|write_bitstream|",
+      "[OPTRACE]|148269|334|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867218184|END|write_bitstream|",
+      "[OPTRACE]|148269|335|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867218184|START|write_bitstream misc|",
+      "[OPTRACE]|148269|336|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867218185|START|read constraints: write_bitstream_post|",
+      "[OPTRACE]|148269|337|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867218185|END|read constraints: write_bitstream_post|",
+      "[OPTRACE]|148269|338|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867218185|START|Write Bitstream: post hook|",
+      "[OPTRACE]|148269|339|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867354290|END|Write Bitstream: post hook|",
+      "[OPTRACE]|148269|340|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867354309|END|write_bitstream misc|",
+      "[OPTRACE]|148269|341|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867354309|END|Phase: Write Bitstream|",
+      "[OPTRACE]|148269|342|/home/ghmd/kv260-dpu41-control-20261001/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.runs/impl_1/kv260_ispMipiRx_vcu_DP_wrapper.tcl|vivado_impl|1790867354309|END|impl_1|"
+      ];
+
+  var legendData = [
+  { "title": "Report Generation",
+    "color": "#b9783f"
+  }, {
+    "title": "Write Checkpoint",
+    "color": "#cd82ad"
+  },
+  {
+    "title": "Incomplete Data",
+    "color": "#cc4748"
+  } ];
+
+  // -- Convert Raw data into something we can use ---------------------------
+  console.log("Convert log data (%s entries) to Javascript 'JSON' objects...", csvData.length);
+  var jsonData = csvArrayToJSON(header, csvData, "|");
+
+  // -- Clean up the JSON objects --------------------------------------------
+  for (var i = 0; i < jsonData.length; i++) {
+    jsonData[i].Action = jsonData[i].Action.toUpperCase();
+    jsonData[i].Tags = jsonData[i].Tags.toUpperCase();
+    jsonData[i].Tags = jsonData[i].Tags.trim();
+    jsonData[i].TimeStampMSec = parseInt(jsonData[i].TimeStampMSec, 10);
+    jsonData[i].pid = parseInt(jsonData[i].pid, 10);
+  }
+
+  // -- Sort JSON array ------------------------------------------------------
+  console.log("Sorting JSON objects (%s objects) according to timestamps...", jsonData.length);
+  jsonData.sort(compareByTimeStamp);
+
+  // Record the PID grouping order
+  var pidOrder = new Map();
+  for (var i = 0; i < jsonData.length; i++) {
+    if (pidOrder.has(jsonData[i].pid) == false) {
+      pidOrder.set(jsonData[i].pid, i);    // Simple ordering (lower is first)
+    }
+  }
+
+  // -- Create secondary data array for the chart data array -----------------
+  console.log("Preparing graph data...");
+
+  // Task limits
+  var m_startTS = 0;      // Earliest Timestamp
+  var m_endTS = 0;        // Latest Timestamp
+
+  if (jsonData.length > 0) {
+    m_startTS = jsonData[0].TimeStampMSec;
+    m_endTS = jsonData[jsonData.length - 1].TimeStampMSec;
+  }
+
+
+  var chartData = [ ];   // Empty JSON array
+
+
+  populateChartData();
+  tableCreate( chartData );
+
+  filterChartEntries();
+
+  // -- Search for "holes"
+  // -- Sort by common PID
+  // -- Create groupings by process
+
+  console.log("done");
+
+  var chart = AmCharts.makeChart("chartdiv", {
+    "type": "gantt",
+    "theme": "light",
+    "titles": [
+    { "text": "OPTrace", "size": 15}],
+    "marginRight": 70,
+    "period": "fff",                                     // X-Axis
+    "balloonDateFormat": "JJ:NN:SS",
+    "columnWidth": 0.5,                                 // Bar thickness
+    "valueAxis": {
+      "type": "numeric",
+      "title": "Time [HH:MM:SS]",
+      "duration": "ss",
+      "durationUnits": { DD: 'd. ', hh: ':', mm: ':', ss: '' },
+    },
+    "brightnessStep": 10,
+    "graph": {
+      "fillAlphas": 1,
+      "labelFunction": barLabelCallBack,
+      "labelText": " ",
+      "labelPosition": "right",
+      "balloonFunction": ballonLabelCallBack,
+      "balloonText": "<p align='left'> Task: [[task]]<br/>Start:[[start]]<br/>End:[[end]]<br/>Duration:[[duration]]</p>",
+      "bulletField": "bullet",
+      "bulletSize": 8
+    },
+    "rotate": true,
+    "categoryField": "category",
+    "segmentsField": "segments",
+    "colorField": "color",
+    "startDate": "2015-01-01 00:00:00",
+    "startField": "start",
+    "endField": "end",
+    "durationField": "duration",
+    "dataProvider": chartData,
+    "valueScrollbar": {
+      "autoGridCount": true
+    },
+    "chartScrollbar": {
+      "enable": true
+    },
+    "chartCursor": {
+      "cursorColor": "#55bb76",
+      "valueBalloonsEnabled": false,
+      "cursorAlpha": 0.1,
+      "valueLineAlpha": 0.5,
+      "valueLineBalloonEnabled": true,
+      "valueLineEnabled": true,
+      "zoomable": true,
+      "valueZoomable": true,
+      "fullWidth": true
+    },
+    "legend": {
+      "data": legendData,
+    },
+    "export": {
+      "enabled": true
+    }
+  });
+
+  // =========================================================================
+  // Call back methods
+  // =========================================================================
+function ballonLabelCallBack( _graphDataItem )
+{
+  var start = _graphDataItem.values.open;
+  var end = _graphDataItem.values.value;
+  var duration = end - start;
+
+  var result = "<p align='left'>Task: " + _graphDataItem.category + "<br/>Start: " + secondsToHHMMSS(start) + "<br/>End: " + secondsToHHMMSS( end ) + "<br/>Duration: " + secondsToHHMMSS( duration ) + "</p>";
+  return result;
+}
+
+
+function barLabelCallBack( _graphDataItem )
+{
+   var duration = _graphDataItem.values.value - _graphDataItem.values.open;
+
+   return secondsToHHMMSS( duration);
+}
+
+
+function userInputFormCallback()
+{
+  // Second filter
+  m_secondFilter = document.getElementById("userDurationFilterSecInput").value;
+  console.log("Setting second filter to: " + m_secondFilter + " seconds");
+
+  // Group PID Sort
+  m_groupPidSort = document.getElementById("userGroupPidSortSelected").checked;
+  console.log("Group PID filter is set to: " + m_groupPidSort);
+
+  // Rollup filter
+  m_showRollup = document.getElementById("userRollupSelected").checked;
+  console.log("Rollup filter is set to: " + m_showRollup);
+
+  // Individual filter
+  m_showIndividualEntry = document.getElementById("userIndividualEntrySelected").checked;
+  console.log("Individual filter is set to: " + m_showIndividualEntry);
+
+  // Checkpoint Report Entries filter
+  m_showCheckpointEntry = document.getElementById("userCheckpointEntrySelected").checked;
+  console.log("Checkpoint Entry filter is set to: " + m_showCheckpointEntry);
+
+  // Checkpoint Report Entries filter
+  m_showReportEntry = document.getElementById("userReportEntrySelected").checked;
+  console.log("Report Entry filter is set to: " + m_showReportEntry);
+
+  populateChartData();
+  filterChartEntries()
+  chart.dataProvider = chartData;
+  chart.validateData();
+}
+
+  // =========================================================================
+  // Utilities
+  // =========================================================================
+
+
+function populateChartData()
+{
+  chartData = [ ];
+  if (m_groupPidSort == false) {
+    jsonData.sort(compareByTimeStamp);
+  } else {
+    jsonData.sort(compareByGroupTimeStamp);
+  }
+
+  for (var i = 0; i < jsonData.length; i++) {
+    var timestamp = parseInt(jsonData[0].TimeStampMSec, 10);
+
+    if (m_startTS > timestamp) m_startTS = timestamp;
+    if (m_endTS < timestamp) m_endTS = timestamp;
+
+    for (var i = 0; i < jsonData.length; i++) {
+      switch (jsonData[i].Action) {
+      case "START":
+        var categoryEntry = { };
+        categoryEntry["category"] = jsonData[i].Task;
+        categoryEntry["pid"] = jsonData[i].pid;
+
+        var segmentEntry = { };
+        // Normalize entry and convert to seconds
+        segmentEntry["start"] = (jsonData[i].TimeStampMSec - m_startTS) / 1000;
+        segmentEntry["color"] = getTaskBarColor(jsonData[i].Tags)
+        segmentEntry["task"] = jsonData[i].Task;
+        segmentEntry["tags"] = jsonData[i].Tags;
+        segmentEntry["duration"] = -1;
+
+        categoryEntry["segments"] = [ ];
+        categoryEntry["segments"].push(segmentEntry);
+        chartData.push(categoryEntry);
+        break;
+
+      case "END":
+        var catagory = findCatagory(jsonData[i].pid, jsonData[i].Task, chartData);
+        if (catagory != null) {
+          var segmentsEntry = catagory.segments[0];
+          segmentsEntry["end"] = (jsonData[i].TimeStampMSec - m_startTS) / 1000;
+          segmentsEntry["duration"] = segmentsEntry.end - segmentsEntry.start;
+        } else {
+          console.log("Null entry found: pid:%s, Task: %s", jsonData[i].pid, jsonData[i].Task);
+        }
+
+        break;
+
+      default:
+        console.log("Default");
+        break;
+      }
+    }
+  }
+}
+
+function filterChartEntries()
+{
+  for(var i = chartData.length - 1; i >= 0; i--) {
+    var segment = chartData[i].segments[0];
+
+    // -- Remove entries less than 1 seconds
+    if ( segment["duration"] == -1) {
+      segment["bullet"] = "xError";
+      segment["color"] = "#cc4748";
+      segment["duration"] = ((m_endTS - m_startTS) / 1000) - segment["start"];
+    } else if (segment["duration"] <  m_secondFilter) {
+      chartData.splice(i, 1);
+      continue;
+    }
+  
+
+    // Filter by tags
+    var bHasRollup = false;
+    var bHasCheckpoint = false;
+    var bHasReport = false;
+
+    var tags = segment["tags"];
+    console.log("Tag: " + tags);
+    if (tags.search(/ROLLUP_/i) != -1) { bHasRollup = true; }
+    if (tags.search(/CHECKPOINT/i) != -1) { bHasCheckpoint = true; }
+    if (tags.search(/REPORT/i) != -1) { bHasReport = true; }
+
+    var bRemoveEntry = false;
+
+    // Remove rollups
+    if ((m_showRollup == false) && (bHasRollup == true)) {
+      bRemoveEntry = true;
+    }
+    
+    // Remove checkpoints    
+    if ((m_showCheckpointEntry == false) && (bHasCheckpoint == true)) {
+      bRemoveEntry = true;
+    }
+
+    // Remove reports
+    if ((m_showReportEntry == false) && (bHasReport == true)) {
+      bRemoveEntry = true;
+    }
+
+    // Remove individual entry
+    if (((m_showIndividualEntry == false) && 
+         ((bHasRollup == false) &&
+          (bHasCheckpoint == false) &&
+          (bHasReport == false)))) {
+      bRemoveEntry = true;
+    }
+
+    if (bRemoveEntry == true) {
+      chartData.splice(i, 1);
+      continue;
+    }
+  }
+
+  console.log("ChartData.length: " + chartData.length);
+}
+
+
+function getTaskBarColor( _tags )
+{
+  if (_tags == null)
+    return "#8dc49f";
+
+  if (_tags.search(/ROLLUP_AUTO/i) != -1){ return "#0099ff"; }
+  if (_tags.search(/ROLLUP_0/i) != -1)   { return "#006699"; }
+  if (_tags.search(/ROLLUP_1/i) != -1)   { return "#009933"; }
+  if (_tags.search(/ROLLUP_2/i) != -1)   { return "#66ccff"; }
+  if (_tags.search(/REPORT/i) != -1)     { return "#b9783f"; }
+  if (_tags.search(/CHECKPOINT/i) != -1) { return "#cd82ad"; }
+
+  return "#8dc49f"
+}
+
+
+function tableCreate( _chartData ){
+    var myTableDiv = document.getElementById("myDynamicTable");
+
+
+    for ( var i = 0; i < _chartData.length; i++) {
+      var tr = myTableDiv.insertRow();
+
+      var td_task = tr.insertCell();
+      td_task.appendChild(document.createTextNode( _chartData[i].category ));
+
+      var segmentEntry = _chartData[i].segments;
+      var td_start = tr.insertCell();
+      td_start.appendChild(document.createTextNode( secondsToHHMMSS(segmentEntry[0].start) ));
+
+      var td_duration = tr.insertCell();
+      td_duration.appendChild(document.createTextNode( secondsToHHMMSS(segmentEntry[0].duration) ));
+
+    }
+}
+
+function secondsToHHMMSS( _seconds )
+{
+  var hours = Math.floor(_seconds / 3600);
+  var minutes = Math.floor(_seconds % 3600 / 60);
+  var seconds = Math.floor(_seconds % 3600 % 60);
+
+  var result = hours + ":" + (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds; 
+
+  return result;
+}
+
+
+  function findCatagory(_pid, _category, _catagoryArray) {
+    for (var i = (_catagoryArray.length - 1); i >= 0; i--) {
+      if (_pid == _catagoryArray[i].pid) {
+        if (_catagoryArray[i].category == _category) {
+          return  _catagoryArray[i];
+        }
+      }
+    }
+    return null;
+  }
+
+
+  // Compares the timestamps between to JSON objects
+  function compareByTimeStamp(_a, _b) {
+    if (_a.TimeStampMSec < _b.TimeStampMSec) return -1;
+    if (_a.TimeStampMSec > _b.TimeStampMSec) return 1;
+
+    if (_a.pid == _b.pid) {
+      if ((_a.Action == "START") && (_b.Action == "END")) return -1;
+      if ((_a.Action == "END") && (_b.Action == "START")) return 1;
+
+      if(_a.Entry < _b.Entry) return -1;
+      if(_a.Entry > _b.Entry) return 1;
+    }
+
+    return 0;
+  }
+
+
+  // Compares the timestamps between to JSON objects
+  function compareByGroupTimeStamp(_a, _b) {
+    if (pidOrder.get(_a.pid) < pidOrder.get(_b.pid)) return -1;
+
+    if (pidOrder.get(_a.pid) > pidOrder.get(_b.pid)) return 1;
+
+    return compareByTimeStamp(_a, _b);
+  }
+
+
+  // Return array of string values, or NULL if CSV string not well formed.
+  function CSVtoArray(_text, _sep) {
+    // Regex expressions
+    var re_valid_default = /^\s*(?:'[^'\\]*(?:\\[\S\s][^'\\]*)*'|"[^"\\]*(?:\\[\S\s][^"\\]*)*"|[^,'"\s\\]*(?:\s+[^,'"\s\\]+)*)\s*(?:,\s*(?:'[^'\\]*(?:\\[\S\s][^'\\]*)*'|"[^"\\]*(?:\\[\S\s][^"\\]*)*"|[^,'"\s\\]*(?:\s+[^,'"\s\\]+)*)\s*)*$/;
+    var re_value_default = /(?!\s*$)\s*(?:'([^'\\]*(?:\\[\S\s][^'\\]*)*)'|"([^"\\]*(?:\\[\S\s][^"\\]*)*)"|([^,'"\s\\]*(?:\s+[^,'"\s\\]+)*))\s*(?:,|$)/g;
+    var re_special_default = /,\s*$/;
+
+    // Algorithm:
+    //   1) Convert regex expression to a string.
+    //   2) Remove leading regex escape character (e.g., '\')
+    //   3) Remove training regex escape character(s) (e.g., '\' or "\g")
+    //   4) Replace the comma (',') character witht he new delimiter character
+    //   5) Build the regex command
+
+    // Check delimiter, if special insert escapes
+    if (_sep == "|") _sep = "\\|";
+
+    var re_valid = new RegExp(re_valid_default.toString().substr(1).slice(0, -1).replace(/,/g, _sep));
+    var re_value = new RegExp(re_value_default.toString().substr(1).slice(0, -2).replace(/,/g, _sep), 'g');
+    var re_special = new RegExp(re_special_default.toString().substr(1).slice(0, -1).replace(/,/g, _sep));
+
+    // Validate the input string to determine if it is well formed
+    if (!re_valid.test(_text)) return null;
+
+    var a = [ ];                     // Initialize array to receive values.
+    _text.replace(re_value,           // "Walk" the string using replace with callback.
+                  function(m0, m1, m2, m3) {
+                      // Remove backslash from \' in single quoted values.
+                      if      (m1 !== undefined) a.push(m1.replace(/\\'/g, "'"));
+                      // Remove backslash from \" in double quoted values.
+                      else if (m2 !== undefined) a.push(m2.replace(/\\"/g, '"'));
+                      else if (m3 !== undefined) a.push(m3);
+                      return ''; // Return empty string.
+                  });
+
+    // Handle special case of empty last value.
+    if (re_special.test(_text)) a.push('');
+
+    return a;
+  };
+
+
+  // Converts the given CSV array & header into a JSON array
+  function csvArrayToJSON(_header, _csvArray, _sep) {
+    var result = [ ];
+    var headers = CSVtoArray(_header, _sep);
+
+    for (var i = 0; i < _csvArray.length; i++) {
+
+      var obj = { };
+      var currentline = CSVtoArray(_csvArray[i], _sep);
+
+      for (var j = 0; j < headers.length; j++) {
+        obj[headers[j]] = currentline[j];
+      }
+
+      result.push(obj);
+
+    }
+
+    return result; //JavaScript object
+  }
+
+
+</script>
+</body>
+
+</html>
+

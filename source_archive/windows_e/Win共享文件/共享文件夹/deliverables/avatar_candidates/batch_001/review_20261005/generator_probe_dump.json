@@ -1,0 +1,510 @@
+{
+  "MiniMaxH3AddGuide": {
+    "api_node": false,
+    "category": "model/conditioning/minimax",
+    "deprecated": false,
+    "description": "Anchor an image, a short clip, audio, or a clip with its soundtrack at any frame of a MiniMax H3 video. Chain several nodes to anchor several frames.",
+    "dev_only": false,
+    "display_name": "Add Guide for MiniMax H3",
+    "essentials_category": null,
+    "experimental": false,
+    "has_intermediate_output": false,
+    "input": {
+      "optional": {
+        "audio": [
+          "AUDIO",
+          {
+            "tooltip": "Soundtrack to anchor starting at the same frame index, cropped to the video's remaining duration."
+          }
+        ],
+        "audio_vae": [
+          "VAE",
+          {
+            "tooltip": "Audio VAE, needed when an audio is connected."
+          }
+        ],
+        "image": [
+          "IMAGE",
+          {
+            "tooltip": "Image or video frames to anchor. Multi-frame batches are anchored as a clip and cropped down to the model's valid clip lengths: 5, 22, 39... (17k + 5) frames. Batches shorter than 5 frames use only the first image."
+          }
+        ],
+        "vae": [
+          "VAE",
+          {
+            "tooltip": "Video VAE, needed when an image is connected."
+          }
+        ]
+      },
+      "required": {
+        "frame_idx": [
+          "INT",
+          {
+            "default": 0,
+            "max": 9999,
+            "min": -9999,
+            "tooltip": "Frame index to anchor the image or the clip's first frame at. Negative values are counted from the end of the video."
+          }
+        ],
+        "latent": [
+          "LATENT",
+          {}
+        ],
+        "positive": [
+          "CONDITIONING",
+          {}
+        ]
+      }
+    },
+    "input_order": {
+      "optional": [
+        "vae",
+        "audio_vae",
+        "image",
+        "audio"
+      ],
+      "required": [
+        "positive",
+        "latent",
+        "frame_idx"
+      ]
+    },
+    "is_input_list": false,
+    "name": "MiniMaxH3AddGuide",
+    "output": [
+      "CONDITIONING"
+    ],
+    "output_is_list": [
+      false
+    ],
+    "output_matchtypes": null,
+    "output_name": [
+      "positive"
+    ],
+    "output_node": false,
+    "output_tooltips": [
+      null
+    ],
+    "price_badge": null,
+    "python_module": "comfy_extras.nodes_minimax_h3",
+    "search_aliases": null
+  },
+  "MiniMaxH3FunControlNetApply": {
+    "api_node": false,
+    "category": "model/patch/minimax",
+    "deprecated": false,
+    "description": "Apply a MiniMax H3 Fun ControlNet to a text-to-video model as a model patch.",
+    "dev_only": false,
+    "display_name": "Apply MiniMax H3 Fun ControlNet",
+    "essentials_category": null,
+    "experimental": false,
+    "has_intermediate_output": false,
+    "input": {
+      "optional": {
+        "control_video": [
+          "IMAGE",
+          {}
+        ],
+        "mask": [
+          "MASK",
+          {
+            "tooltip": "1 marks the regions to regenerate."
+          }
+        ],
+        "source_video": [
+          "IMAGE",
+          {
+            "tooltip": "Video behind the mask; only read when a mask is given."
+          }
+        ]
+      },
+      "required": {
+        "end_percent": [
+          "FLOAT",
+          {
+            "advanced": true,
+            "default": 1.0,
+            "max": 1.0,
+            "min": 0.0,
+            "step": 0.001
+          }
+        ],
+        "model": [
+          "MODEL",
+          {}
+        ],
+        "model_patch": [
+          "MODEL_PATCH",
+          {}
+        ],
+        "start_percent": [
+          "FLOAT",
+          {
+            "advanced": true,
+            "default": 0.0,
+            "max": 1.0,
+            "min": 0.0,
+            "step": 0.001
+          }
+        ],
+        "strength": [
+          "FLOAT",
+          {
+            "default": 1.0,
+            "max": 10.0,
+            "min": 0.0,
+            "step": 0.01
+          }
+        ],
+        "vae": [
+          "VAE",
+          {}
+        ]
+      }
+    },
+    "input_order": {
+      "optional": [
+        "control_video",
+        "mask",
+        "source_video"
+      ],
+      "required": [
+        "model",
+        "model_patch",
+        "vae",
+        "strength",
+        "start_percent",
+        "end_percent"
+      ]
+    },
+    "is_input_list": false,
+    "name": "MiniMaxH3FunControlNetApply",
+    "output": [
+      "MODEL"
+    ],
+    "output_is_list": [
+      false
+    ],
+    "output_matchtypes": null,
+    "output_name": [
+      "MODEL"
+    ],
+    "output_node": false,
+    "output_tooltips": [
+      null
+    ],
+    "price_badge": null,
+    "python_module": "comfy_extras.nodes_minimax_h3",
+    "search_aliases": [
+      "minimax controlnet",
+      "h3 controlnet",
+      "video inpaint controlnet"
+    ]
+  },
+  "MiniMaxH3ImageToVideo": {
+    "api_node": false,
+    "category": "model/conditioning/minimax",
+    "deprecated": false,
+    "description": "",
+    "dev_only": false,
+    "display_name": "MiniMax H3 Image to Video",
+    "essentials_category": null,
+    "experimental": false,
+    "has_intermediate_output": false,
+    "input": {
+      "optional": {
+        "first_frame": [
+          "IMAGE",
+          {}
+        ],
+        "last_frame": [
+          "IMAGE",
+          {}
+        ]
+      },
+      "required": {
+        "clip": [
+          "CLIP",
+          {}
+        ],
+        "height": [
+          "INT",
+          {
+            "default": 768,
+            "max": 16384,
+            "min": 32,
+            "step": 32
+          }
+        ],
+        "length": [
+          "INT",
+          {
+            "default": 124,
+            "max": 3600,
+            "min": 5,
+            "step": 17,
+            "tooltip": "Frame count at 24 fps, snapped up to the model's 17k+5 grid (124 = ~5s; trained range is ~124-362, longer is untested)"
+          }
+        ],
+        "prompt": [
+          "STRING",
+          {
+            "dynamicPrompts": true,
+            "multiline": true
+          }
+        ],
+        "vae": [
+          "VAE",
+          {}
+        ],
+        "width": [
+          "INT",
+          {
+            "default": 1344,
+            "max": 16384,
+            "min": 32,
+            "step": 32
+          }
+        ]
+      }
+    },
+    "input_order": {
+      "optional": [
+        "first_frame",
+        "last_frame"
+      ],
+      "required": [
+        "clip",
+        "vae",
+        "prompt",
+        "width",
+        "height",
+        "length"
+      ]
+    },
+    "is_input_list": false,
+    "name": "MiniMaxH3ImageToVideo",
+    "output": [
+      "CONDITIONING",
+      "LATENT"
+    ],
+    "output_is_list": [
+      false,
+      false
+    ],
+    "output_matchtypes": null,
+    "output_name": [
+      "positive",
+      "LATENT"
+    ],
+    "output_node": false,
+    "output_tooltips": [
+      null,
+      null
+    ],
+    "price_badge": null,
+    "python_module": "comfy_extras.nodes_minimax_h3",
+    "search_aliases": null
+  },
+  "MiniMaxH3ReferenceToVideo": {
+    "api_node": false,
+    "category": "model/conditioning/minimax",
+    "deprecated": false,
+    "description": "<Picture i> / <Video k> / <Audio j> reference conditioning for MiniMax H3. Use the same tags when prompting.",
+    "dev_only": false,
+    "display_name": "MiniMax H3 Reference to Video",
+    "essentials_category": null,
+    "experimental": false,
+    "has_intermediate_output": false,
+    "input": {
+      "optional": {
+        "audio_vae": [
+          "VAE",
+          {
+            "tooltip": "Audio VAE. Without it reference audio only conditions the text encoder."
+          }
+        ],
+        "ref_audios": [
+          "COMFY_AUTOGROW_V3",
+          {
+            "template": {
+              "input": {
+                "required": {
+                  "ref_audio": [
+                    "AUDIO",
+                    {
+                      "tooltip": "Standalone reference audio"
+                    }
+                  ]
+                }
+              },
+              "max": 3,
+              "min": 0,
+              "prefix": "ref_audio_"
+            }
+          }
+        ],
+        "ref_images": [
+          "COMFY_AUTOGROW_V3",
+          {
+            "template": {
+              "input": {
+                "required": {
+                  "ref_image": [
+                    "IMAGE",
+                    {
+                      "tooltip": "Reference image (downscaled to 2048 short edge if larger, never upscaled)"
+                    }
+                  ]
+                }
+              },
+              "max": 9,
+              "min": 0,
+              "prefix": "ref_image_"
+            }
+          }
+        ],
+        "ref_video_audios": [
+          "COMFY_AUTOGROW_V3",
+          {
+            "template": {
+              "input": {
+                "required": {
+                  "ref_video_audio": [
+                    "AUDIO",
+                    {
+                      "tooltip": "Soundtrack of the same-numbered reference video"
+                    }
+                  ]
+                }
+              },
+              "max": 3,
+              "min": 0,
+              "prefix": "ref_video_audio_"
+            }
+          }
+        ],
+        "ref_videos": [
+          "COMFY_AUTOGROW_V3",
+          {
+            "template": {
+              "input": {
+                "required": {
+                  "ref_video": [
+                    "IMAGE",
+                    {
+                      "tooltip": "Reference video frames at 24 fps (2-15s)"
+                    }
+                  ]
+                }
+              },
+              "max": 3,
+              "min": 0,
+              "prefix": "ref_video_"
+            }
+          }
+        ],
+        "vae": [
+          "VAE",
+          {
+            "tooltip": "Video VAE. Without it reference images/videos only condition the text encoder."
+          }
+        ]
+      },
+      "required": {
+        "clip": [
+          "CLIP",
+          {}
+        ],
+        "height": [
+          "INT",
+          {
+            "default": 768,
+            "max": 16384,
+            "min": 32,
+            "step": 32
+          }
+        ],
+        "length": [
+          "INT",
+          {
+            "default": 124,
+            "max": 3600,
+            "min": 5,
+            "step": 17,
+            "tooltip": "Frame count at 24 fps, (124 = ~5s, trained range is ~124-362)"
+          }
+        ],
+        "prompt": [
+          "STRING",
+          {
+            "dynamicPrompts": true,
+            "multiline": true
+          }
+        ],
+        "ref_image_size": [
+          "COMBO",
+          {
+            "default": "match",
+            "multiselect": false,
+            "options": [
+              "match",
+              "max"
+            ],
+            "tooltip": "Reference image sizing. 'match' scales each ref (down only, keeping aspect) to the generation's pixel area; 'max' uses the reference pipeline's 2048px short edge for best identity fidelity. Reference tokens ride through every sampling step, so 'max' can be several times slower."
+          }
+        ],
+        "width": [
+          "INT",
+          {
+            "default": 1344,
+            "max": 16384,
+            "min": 32,
+            "step": 32
+          }
+        ]
+      }
+    },
+    "input_order": {
+      "optional": [
+        "vae",
+        "audio_vae",
+        "ref_images",
+        "ref_videos",
+        "ref_video_audios",
+        "ref_audios"
+      ],
+      "required": [
+        "clip",
+        "prompt",
+        "width",
+        "height",
+        "length",
+        "ref_image_size"
+      ]
+    },
+    "is_input_list": false,
+    "name": "MiniMaxH3ReferenceToVideo",
+    "output": [
+      "CONDITIONING",
+      "LATENT"
+    ],
+    "output_is_list": [
+      false,
+      false
+    ],
+    "output_matchtypes": null,
+    "output_name": [
+      "positive",
+      "LATENT"
+    ],
+    "output_node": false,
+    "output_tooltips": [
+      null,
+      null
+    ],
+    "price_badge": null,
+    "python_module": "comfy_extras.nodes_minimax_h3",
+    "search_aliases": null
+  }
+}

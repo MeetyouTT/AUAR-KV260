@@ -1,0 +1,246 @@
+{
+  "boot_id": "01ca88c1-93b6-414f-9646-774482d4b2f0",
+  "manager_pid": 999,
+  "states": {
+    "proc-fs-nfsd.mount": {
+      "Result": "exit-code",
+      "ExecMount": "{ path=/bin/mount ; argv[]=/bin/mount nfsd /proc/fs/nfsd -t nfsd ; ignore_errors=no ; start_time=[Fri 2021-11-19 09:19:31 PST] ; stop_time=[Fri 2021-11-19 09:19:31 PST] ; pid=696 ; code=exited ; status=32 }",
+      "Id": "proc-fs-nfsd.mount",
+      "Requires": "-.slice -.mount",
+      "After": "systemd-modules-load.service -.slice systemd-journald.socket -.mount",
+      "LoadState": "loaded",
+      "ActiveState": "failed",
+      "SubState": "failed",
+      "DropInPaths": "",
+      "UnitFileState": "static",
+      "ConditionResult": "yes",
+      "ConditionTimestampMonotonic": "11538391",
+      "Conditions": "[unprintable]"
+    },
+    "nfs-server.service": {
+      "MainPID": "0",
+      "Result": "success",
+      "Id": "nfs-server.service",
+      "Requires": "proc-fs-nfsd.mount system.slice nfs-mountd.service network.target",
+      "After": "system.slice nfs-mountd.service network.target local-fs.target rpcbind.service proc-fs-nfsd.mount systemd-journald.socket",
+      "LoadState": "loaded",
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "DropInPaths": "",
+      "UnitFileState": "enabled",
+      "ConditionResult": "no",
+      "ConditionTimestampMonotonic": "0",
+      "Conditions": "[unprintable]"
+    },
+    "nfs-mountd.service": {
+      "MainPID": "0",
+      "Result": "success",
+      "Id": "nfs-mountd.service",
+      "Requires": "proc-fs-nfsd.mount system.slice",
+      "After": "systemd-journald.socket system.slice proc-fs-nfsd.mount network.target rpcbind.socket local-fs.target",
+      "LoadState": "loaded",
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "DropInPaths": "",
+      "UnitFileState": "enabled",
+      "ConditionResult": "no",
+      "ConditionTimestampMonotonic": "0",
+      "Conditions": "[unprintable]"
+    },
+    "rpcbind.service": {
+      "MainPID": "479",
+      "Result": "success",
+      "Id": "rpcbind.service",
+      "Requires": "-.mount rpcbind.socket system.slice",
+      "After": "-.mount rpcbind.socket systemd-journald.socket system.slice",
+      "LoadState": "loaded",
+      "ActiveState": "active",
+      "SubState": "running",
+      "DropInPaths": "",
+      "UnitFileState": "enabled",
+      "ConditionResult": "yes",
+      "ConditionTimestampMonotonic": "9980238",
+      "Conditions": "[unprintable]"
+    },
+    "rpcbind.socket": {
+      "Result": "success",
+      "Id": "rpcbind.socket",
+      "Requires": "-.mount system.slice",
+      "After": "-.mount system.slice",
+      "LoadState": "loaded",
+      "ActiveState": "active",
+      "SubState": "running",
+      "DropInPaths": "",
+      "UnitFileState": "enabled",
+      "ConditionResult": "yes",
+      "ConditionTimestampMonotonic": "9568131",
+      "Conditions": "[unprintable]"
+    },
+    "nfs-statd.service": {
+      "MainPID": "1187",
+      "Result": "success",
+      "Id": "nfs-statd.service",
+      "Requires": "nss-lookup.target system.slice rpcbind.service",
+      "After": "rpcbind.service systemd-journald.socket network.target nss-lookup.target system.slice",
+      "LoadState": "loaded",
+      "ActiveState": "active",
+      "SubState": "running",
+      "DropInPaths": "",
+      "UnitFileState": "enabled",
+      "ConditionResult": "yes",
+      "ConditionTimestampMonotonic": "15583868",
+      "Conditions": "[unprintable]"
+    },
+    "nfs-idmapd.service": {
+      "MainPID": "0",
+      "Result": "success",
+      "Id": "nfs-idmapd.service",
+      "Requires": "",
+      "After": "",
+      "LoadState": "not-found",
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "DropInPaths": "",
+      "UnitFileState": "",
+      "ConditionResult": "no",
+      "ConditionTimestampMonotonic": "0",
+      "Conditions": "[unprintable]"
+    }
+  },
+  "protected": {
+    "/lib/systemd/system/proc-fs-nfsd.mount": {
+      "kind": "file",
+      "bytes": 133,
+      "sha256": "3927acf5cf773bf0dfc8374c4820da775f7343568552ece64cc1ae8d589802cf"
+    },
+    "/lib/systemd/system/nfs-server.service": {
+      "kind": "file",
+      "bytes": 629,
+      "sha256": "7c66001c42ed994f93ba8f8070b7016dd81f55ea96dbb4aea38f9b9aea3e2304"
+    },
+    "/lib/systemd/system/nfs-mountd.service": {
+      "kind": "file",
+      "bytes": 380,
+      "sha256": "711b5a855d91ebee40f831827900b7c1f6dbe3d7ee78efe60727b53dba8d3140"
+    },
+    "/lib/systemd/system/rpcbind.service": {
+      "kind": "file",
+      "bytes": 414,
+      "sha256": "10087695acbf08790fe0f0dc19fcbcc573f8ad2a2be8abec849047897e9ed42a"
+    },
+    "/lib/systemd/system/rpcbind.socket": {
+      "kind": "file",
+      "bytes": 368,
+      "sha256": "174137d2148fd3a6127b5e9019ab8cf1b73ea7e406bc82c980b9304e9fcd7d2e"
+    },
+    "/lib/systemd/system/nfs-statd.service": {
+      "kind": "file",
+      "bytes": 352,
+      "sha256": "4ba660d71609780e2a0c30ada7ba61c6fb96554836a1e82c5c34d2c312b7fdcf"
+    },
+    "/lib/systemd/system/nfs-idmapd.service": {
+      "kind": "absent"
+    },
+    "/lib/systemd/system/sysinit.target.wants/proc-fs-nfsd.mount": {
+      "kind": "symlink",
+      "target": "../proc-fs-nfsd.mount"
+    },
+    "/etc/systemd/system/multi-user.target.wants/nfs-statd.service": {
+      "kind": "symlink",
+      "target": "/lib/systemd/system/nfs-statd.service"
+    },
+    "/etc/systemd/system/multi-user.target.wants/rpcbind.service": {
+      "kind": "symlink",
+      "target": "/lib/systemd/system/rpcbind.service"
+    },
+    "/etc/systemd/system/sockets.target.wants/rpcbind.socket": {
+      "kind": "symlink",
+      "target": "/lib/systemd/system/rpcbind.socket"
+    },
+    "/etc/systemd/system/nfsserver.service": {
+      "kind": "symlink",
+      "target": "/dev/null"
+    },
+    "/etc/systemd/system/mountnfs.service": {
+      "kind": "symlink",
+      "target": "/dev/null"
+    },
+    "/etc/systemd/system/nfscommon.service": {
+      "kind": "symlink",
+      "target": "/dev/null"
+    },
+    "/etc/fstab": {
+      "kind": "file",
+      "bytes": 702,
+      "sha256": "580d18ee47a5dbe98b86ccec7670518c00fe8bc7b58990e186a00d9f559329f0"
+    },
+    "/etc/exports": {
+      "kind": "absent"
+    },
+    "/usr/local/lib/kv260-dfx-state-repair-20261003/dfx-mgrd": {
+      "kind": "file",
+      "bytes": 117856,
+      "sha256": "369c7fb0ddd023a7cf7af14896a7fda6036219a36f4980c73640889720c95dfd"
+    },
+    "/usr/local/lib/kv260-runtime-repair/dfx-mgrd": {
+      "kind": "file",
+      "bytes": 117488,
+      "sha256": "db9c25f09f1178177884b1114c57f32c076f1e7f9cdd0d12b7a896039038a46c"
+    },
+    "/etc/systemd/system/dfx-mgr.service.d/20-kv260-dfx-state-repaired.conf": {
+      "kind": "file",
+      "bytes": 163,
+      "sha256": "b46fd13058a791972516355663ff64da8c0692628ea2467e5627476aa9a5ce16"
+    },
+    "/etc/systemd/system/dfx-mgr.service.d/10-kv260-repaired.conf": {
+      "kind": "file",
+      "bytes": 239,
+      "sha256": "32dcc98eaffba6eba4f0ccf9109961a5227cf220e76fa22635659190a1d2dd4d"
+    },
+    "/etc/systemd/system/kv260-repaired-zocl.service": {
+      "kind": "file",
+      "bytes": 509,
+      "sha256": "c2f10513e2e13a65770aa6cc4aff07a99ddba0ac18ddb190d9f95686e01ada4a"
+    },
+    "/usr/local/lib/kv260-runtime-repair/zocl.ko": {
+      "kind": "file",
+      "bytes": 339600,
+      "sha256": "5cef5e0eba083419b3ece6fd4829a9f3112e3f0daaee513e1617d60ed1f7f412"
+    },
+    "/usr/local/lib/kv260-runtime-repair/load-repaired-zocl.sh": {
+      "kind": "file",
+      "bytes": 1137,
+      "sha256": "821461a00209bbc6e2fc01f17c790328eec73e9b619b1fcc6f115338e46995ae"
+    }
+  },
+  "enable_links": {
+    "/etc/systemd/system/multi-user.target.wants/nfs-server.service": {
+      "kind": "symlink",
+      "target": "/lib/systemd/system/nfs-server.service"
+    },
+    "/etc/systemd/system/multi-user.target.wants/nfs-mountd.service": {
+      "kind": "symlink",
+      "target": "/lib/systemd/system/nfs-mountd.service"
+    }
+  },
+  "configuration": {
+    "path": "/etc/systemd/system/proc-fs-nfsd.mount.d/20-kv260-nfs-capability.conf",
+    "content": "# KV260: the current kernel has CONFIG_NFSD unset; NFS clients remain enabled.\n# If NFS server support is introduced, review this guard and restore the server services.\n[Unit]\nConditionPathExists=/sys/module/nfsd\n"
+  },
+  "watch_state": {
+    "pid": 999,
+    "watch_count": 5,
+    "inotify_fd_count": 1,
+    "fd_count": 7,
+    "fdinfo": {
+      "3": "pos:\t0\nflags:\t02000000\nmnt_id:\t13\nino:\t7302\ninotify wd:5 ino:fcc23 sdev:b300002 mask:fff ignored_mask:0 fhandle-bytes:8 fhandle-type:1 f_handle:23cc0f001546b880\ninotify wd:4 ino:928 sdev:b300002 mask:fff ignored_mask:0 fhandle-bytes:8 fhandle-type:1 f_handle:2809000000000000\ninotify wd:3 ino:fcc6f sdev:b300002 mask:fff ignored_mask:0 fhandle-bytes:8 fhandle-type:1 f_handle:6fcc0f00c66cbb47\ninotify wd:2 ino:92c sdev:b300002 mask:fff ignored_mask:0 fhandle-bytes:8 fhandle-type:1 f_handle:2c09000000000000\ninotify wd:1 ino:927 sdev:b300002 mask:fff ignored_mask:0 fhandle-bytes:8 fhandle-type:1 f_handle:2709000000000000\n"
+    },
+    "proc_status": "Name:\tdfx-mgrd\nUmask:\t0022\nState:\tS (sleeping)\nTgid:\t999\nNgid:\t0\nPid:\t999\nPPid:\t1\nTracerPid:\t0\nUid:\t0\t0\t0\t0\nGid:\t0\t0\t0\t0\nFDSize:\t128\nGroups:\t \nNStgid:\t999\nNSpid:\t999\nNSpgid:\t999\nNSsid:\t999\nVmPeak:\t  141748 kB\nVmSize:\t   90588 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   11456 kB\nVmRSS:\t   11452 kB\nRssAnon:\t    2464 kB\nRssFile:\t    8988 kB\nRssShmem:\t       0 kB\nVmData:\t   15304 kB\nVmStk:\t     132 kB\nVmExe:\t      96 kB\nVmLib:\t    1736 kB\nVmPTE:\t      76 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nThreads:\t2\nSigQ:\t1/9467\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000001000\nSigCgt:\t0000000100000002\nCapInh:\t0000000000000000\nCapPrm:\t000001ffffffffff\nCapEff:\t000001ffffffffff\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tnot vulnerable\nSpeculationIndirectBranch:\tunknown\nCpus_allowed:\tf\nCpus_allowed_list:\t0-3\nMems_allowed:\t1\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t53\nnonvoluntary_ctxt_switches:\t20",
+    "overlays": [
+      "kv260-benchmark-b4096_image_1"
+    ],
+    "render_nodes": [
+      "renderD128"
+    ]
+  }
+}

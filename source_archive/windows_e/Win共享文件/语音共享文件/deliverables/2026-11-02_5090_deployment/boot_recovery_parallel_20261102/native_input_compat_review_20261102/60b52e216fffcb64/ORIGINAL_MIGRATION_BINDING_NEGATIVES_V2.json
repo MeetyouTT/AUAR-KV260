@@ -1,0 +1,49 @@
+{
+  "schema": "aura-migration-input-local-rejection-probes-1",
+  "candidate_sha256": "60b52e216fffcb64cd7860447d2a62d4bf1b39556532a6af819e85d7760f0d7f",
+  "cases": [
+    {
+      "case": "missing_migration_evidence",
+      "result": "HOLD",
+      "error_type": "KeyError"
+    },
+    {
+      "case": "unknown_config_unit",
+      "result": "HOLD",
+      "error_type": "ValueError"
+    },
+    {
+      "case": "conflicting_original_owner",
+      "result": "HOLD",
+      "error_type": "ValueError"
+    },
+    {
+      "case": "conflicting_run_config_pin",
+      "result": "HOLD",
+      "error_type": "ValueError"
+    },
+    {
+      "case": "post_intent_observation",
+      "result": "HOLD",
+      "error_type": "ValueError"
+    },
+    {
+      "case": "forged_operator_manifest_pin",
+      "result": "HOLD",
+      "error_type": "ValueError"
+    },
+    {
+      "case": "wrong_observation_schema",
+      "result": "HOLD",
+      "error_type": "ValueError"
+    },
+    {
+      "case": "original_current_unit_path_unchanged",
+      "result": "ACCEPT_ORIGINAL_PATH_NO_MIGRATION_LOOKUP"
+    }
+  ],
+  "all_expected": true,
+  "scope": "Only new semantic input binding with trusted Snapshot abstraction. Does not validate fabricated bytes, cryptographic pins, original Native readers, real service lifecycle or physical migration; those remain separately checked on actual sources and genuine stop inputs.",
+  "original_reader_or_Native_or_model_or_board_executed": false,
+  "files_written": "this local probe report only"
+}

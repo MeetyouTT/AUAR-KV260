@@ -1,0 +1,17 @@
+原Native最终检查点与历史链只读核验候选
+
+最终候选 validate_final_chain_readonly.py
+SHA256 16f1bc01bf5a164764d9db6281c80a4d27603680d54865953e5fe92a5774cdd0
+
+精确调用：/usr/bin/python3 -B -I -S - --checkpoint-sha256 <正常stop后实读新SHA> --stop-intent-mono-ns <本次真实intent mono ns> --minimum-primary-calls <最新下界> --minimum-primary-overruns <最新下界> --minimum-sface-completed <最新下界>
+通过严格SSH将候选字节传stdin，不安装或修改板端代码。任何未知不重试服务或PL。
+
+本代理只执行了现存18个archive的链分支；当前full final校验主入口尚未运行。它要求相机与GUI均正常inactive/dead/MainPID0/noJob、原1333/birth2359已退出、完整proc maps/fd没有DPU/MMIOowner，且原服务无限正常stop保护保持。原始checkpoint路径必须固定、SHA新且与本次stop intent时间相符，无消费marker路径对象。
+
+完整原Python load_business_checkpoint、make_native_seed 和原native_boot._legacy_source分别用于当前final、每层v2元数据、终端legacy下界验证。只执行同SHA源码定义，不创建NativeContext，不执行C.CDLL或任何库/模型/设备/私库操作。ctypes结构分配和Python _ctypes本身不等于加载AURA/VART设备库。
+
+18层归档：17个v2精确checkpoint，1个legacy健康前缀下界。每层archive原SHA/路径/命名/boot来源/嵌入checkpoint的原canonical SHA均核；禁止重复boot、路径循环、缺失/重定向、提前终止、越界root和64层上限截断。legacy必须读原文件原字节ecda…，不可拿重序列化1433…冒充原SHA；原_payload/manifest SHA、计数、两个恢复策略及fault-event完整性由原_legacy_source验证。旧boot计数不与新boot累计混算，legacy unknown_tail/lower_bound=true保持。
+
+主入口校验完整seed/auxiliary及inherited_optional两个任务、六项累计数组、七项SFace及两份独立恢复结构；CLI直接比较的单调下界只有primary_calls、primary_period_overruns和SFace completed三项，root若保存了更多最新累计字段，需要逐项再比较（不可把未执行比较写成true）。Native C层恢复、exact_seed audit和真正消费marker仍须实际相机恢复证明。
+
+真实归档分支证据 ARCHIVE_ONLY_VALIDATION.json（full current final validator_called=false）；existing_history_structure.json、historical_optional_shapes.json为先前只读形状观察。新主入口已做语法compile；完整板卡post-stop尚未执行，不能称作恢复通过。

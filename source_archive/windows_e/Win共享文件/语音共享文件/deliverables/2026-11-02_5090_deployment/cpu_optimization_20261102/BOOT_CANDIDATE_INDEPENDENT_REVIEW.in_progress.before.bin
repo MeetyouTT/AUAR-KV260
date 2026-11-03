@@ -1,0 +1,161 @@
+{
+  "schema": "aura-boot-candidate-independent-review-1",
+  "verdict": "BLOCKED_OFFLINE_REVISION",
+  "review_complete": false,
+  "updated_host_utc": "2026-11-02T16:11:22.354893+00:00",
+  "review_target": "Frozen observed revision2; original65 ZIP revision retained separately",
+  "reviewed_candidate_files": {
+    "candidate/boot_recovery.py": {
+      "sha256": "15e4f53f981603dff3d10bb1c53272c479a9b97d557f539f8f9a31ffa6b601d7",
+      "bytes": 40134
+    },
+    "candidate/capture_contract.py": {
+      "sha256": "8d06945ef34021119c4e0e9e0fae6c1dc2abdedbcbf1116ab75c5b3b362b94f2",
+      "bytes": 11104
+    },
+    "candidate/contract.example.json": {
+      "sha256": "e06f67eafb83bde19a4fcdf747a760d515e32d2c2659f49b5d90e82e17fc6bac",
+      "bytes": 727
+    },
+    "candidate/cpu_adapters.reference.json": {
+      "sha256": "52170cb207412e89c8a05498a2dcdf0b8aef1d4e2a281739b6bdc2c18ed4b2d0",
+      "bytes": 683
+    },
+    "candidate/manage_installation.py": {
+      "sha256": "de31f75b2aac3296861cbdb80a075dd5f3762eff93d885a8c6b9af95462ad975",
+      "bytes": 15701
+    },
+    "candidate/recovery_rules.py": {
+      "sha256": "72492c2d50c746b2f26b3292beff189bd76d7d39be04515baab13dbc881c7284",
+      "bytes": 12251
+    },
+    "candidate/systemd/aura-boot-ready.service": {
+      "sha256": "c5bdc5ddb67a680ef088c04f173fcf7bada0546a765f598d42e7c4b91a1a354a",
+      "bytes": 492
+    },
+    "candidate/systemd/aura-original-wide-prepare.service": {
+      "sha256": "058d1f9bcf5511affcb522f4c91726caabd74b51076d186a8d51ef5681a988dc",
+      "bytes": 724
+    },
+    "candidate/systemd/aura-avatar-ui.service.d/90-aura-boot-recovery.conf": {
+      "sha256": "f8de5dd60bc6ab9c9062050d1ec40c38da337faacb75977559bc13ba6b278cb0",
+      "bytes": 547
+    },
+    "candidate/systemd/aura-camera-ui.service.d/90-aura-boot-recovery.conf": {
+      "sha256": "570557a58250dfbd76f197681e9a75450833942e875234aa311316a0facda317",
+      "bytes": 281
+    }
+  },
+  "snapshots": {
+    "initial": "BOOT_CANDIDATE_REVIEW_SNAPSHOT.json",
+    "version_drift": "BOOT_CANDIDATE_VERSION_DRIFT.json",
+    "archive65": "boot_review_inputs/archive65",
+    "revision2": "boot_review_inputs/observed_revision2/SNAPSHOT.json"
+  },
+  "candidate_summary": "Original client/systemd barriers around original wide/camera/GUI; original ID_STOP_ONLY; truthful selected-source rebinding; add-only installation and exact-byte rollback. No auto reference/center/follow.",
+  "blocking_findings": [
+    {
+      "id": "B01_RELEVANT_QUEUED_PLATFORM_JOBS",
+      "file": "candidate/boot_recovery.py",
+      "sha256": "15e4f53f981603dff3d10bb1c53272c479a9b97d557f539f8f9a31ffa6b601d7",
+      "lines": [
+        [
+          254,
+          287
+        ],
+        [
+          289,
+          294
+        ]
+      ],
+      "finding": "quiet() ignores relevant queued DFX jobs with no current process; it does not inspect any job queue if camera/GUI Job fields are empty. daemon_owner() accepts pending lifecycle Job.",
+      "evidence": "validation/BOOT_RUNTIME_JOB_NEGATIVES_15e4.json",
+      "minimal_fix": "Always inspect the bounded relevant platform job set at advancing boundaries, permit only exact owned ordered-start/continuation jobs, and require daemon Job empty; unknown/pending -> HOLD or observe the same durable attempt, never resubmit."
+    },
+    {
+      "id": "B02_CAMERA_EXITING_OR_QUIESCED_USED_FOR_BINDING",
+      "file": "candidate/boot_recovery.py",
+      "sha256": "15e4f53f981603dff3d10bb1c53272c479a9b97d557f539f8f9a31ffa6b601d7",
+      "lines": [
+        [
+          505,
+          529
+        ],
+        [
+          536,
+          540
+        ],
+        [
+          579,
+          586
+        ]
+      ],
+      "finding": "camera_samples() only rejects ActiveState=failed. Actual method AST accepts deactivating/stop-sigterm/Job=123 with advancing frames, and accepts Native quiesced=true. bind_camera then uses this owner to prepare source changes without a camera lifecycle recheck.",
+      "evidence": "validation/BOOT_CAMERA_LIFECYCLE_NEGATIVES.json",
+      "minimal_fix": "Require exact active/running/no-job/no unexpected ControlPID and native quiesced=false, plus unchanged PID/birth/cmd. Recheck the lifecycle immediately before binding CAS and before READY. Pending/exit/quiescence must not become a binding owner."
+    },
+    {
+      "id": "B03_ACTIVE_LEDGER_EXPECTED_BYTES_DRIFT",
+      "file": "candidate/boot_recovery.py",
+      "sha256": "15e4f53f981603dff3d10bb1c53272c479a9b97d557f539f8f9a31ffa6b601d7",
+      "lines": [
+        [
+          572,
+          583
+        ],
+        [
+          591,
+          596
+        ]
+      ],
+      "finding": "Intent captures prior_active_raw, but final replace_known uses a newly read active_path value as expected. A newer source-consistent ledger can be overwritten despite differing from the sealed intent.",
+      "evidence": "gtk/BOOT_ACTIVE_LEDGER_CAS_NEGATIVE_CURRENT.json",
+      "minimal_fix": "Bind initial ledger bytes and existence; require unchanged state before the first UI/startup write and use the same captured bytes for final CAS. Originally absent requires continued absence plus O_EXCL; appeared/disappeared/changed -> HOLD."
+    }
+  ],
+  "nonblocking_recovery_limits": [
+    {
+      "id": "L01_ACTIVE_AFTER_BEFORE_COMMITTED",
+      "file": "candidate/manage_installation.py",
+      "lines": [
+        [
+          237,
+          253
+        ]
+      ],
+      "finding": "A crash after active-source write but before committed receipt leads to safe HOLD during rollback; already-current bind does not complete the receipt.",
+      "evidence": "gtk/BOOT_BINDING_COMMIT_GAP_CASE.json",
+      "recommendation": "Document manual reconciliation or preseal after-ledger bytes and SHA before publication; do not infer trusted after evidence from the current ledger."
+    }
+  ],
+  "subreviews": {
+    "runtime": "validation/BOOT_CANDIDATE_RUNTIME_SUBREVIEW.json",
+    "CAS": "gtk/BOOT_CANDIDATE_CAS_SUBREVIEW.json",
+    "native": "REQUIRED_PENDING_LOCAL_SUBREVIEW"
+  },
+  "required_live_gates": [
+    "Explicit identity PAUSED/idle handoff and main/axis/CPU serialization; current voice registration is saved1, association cancelled.",
+    "Fresh actual boot/owners/source380/selected-count, preserving latest identity/worker/clock/GTK release; no historical PID/hash backfill.",
+    "dpu-auto-config actual generated unit/init/helper sources and merged dependencies or proven absence; saved unit inventory alone is insufficient.",
+    "Actual target systemd-analyze verify, effective ExecStartPre/Requires/After/no-kill infinite camera protection, and actual list-jobs shape.",
+    "Original normal-stop and full-history/Native bootstrap evidence for the actual route; no counter/seed/marker edits.",
+    "Actual new-boot original wide/camera/GUI READY and original disabled-output receipt. User-accepted axis smoothness does not substitute for MMIO/source evidence; do not repeat human tuning/direction acceptance."
+  ],
+  "validation_scope": {
+    "existing65_suite_reexecuted": false,
+    "old65_results_cover_latest_revision": false,
+    "declared_old_zip_hashes_verified_locally": true,
+    "new_tests": "Only concrete targeted pure AST/RAM negatives; no live runner or Native validation",
+    "real_Native_evidence_created": false
+  },
+  "actions": {
+    "candidate_files_modified": false,
+    "global_or_production_files_modified": false,
+    "SSH_calls": 0,
+    "board_HTTP_calls": 0,
+    "model_or_hardware_operations": 0,
+    "real_database_audio_image_or_key_access": false,
+    "deployment_or_activation_authorized": false,
+    "cold_boot_pass_claimed": false
+  }
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "restored_dpu_query",
+    "command": "env XLNX_VART_FIRMWARE=/lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.xclbin xdputil query",
+    "timeout": 40
+  },
+  {
+    "id": "restored_metadata",
+    "command": "dfx-mgr-client -listPackage; cat /sys/block/mmcblk1/device/cid; cat /sys/class/fpga_manager/fpga0/state; tr -d '\\0' </proc/device-tree/fpga-full/firmware-name; echo; cat /etc/vart.conf; sha256sum /lib/firmware/xilinx/kv260-benchmark-b4096/* /lib/firmware/xilinx/kv260-benchmark-b4096-dpu41/* /usr/share/vitis_ai_library/models/resnet18/resnet18.* /home/root/kv260-test-20261001/pytorch-resnet-dog.jpg /home/root/kv260-test-20261001/samoyed.list; ip -4 addr show eth0",
+    "timeout": 45
+  },
+  {
+    "id": "restored_classification",
+    "command": "cd /home/root/kv260-test-20261001 && env XLNX_VART_FIRMWARE=/lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.xclbin /home/root/Vitis-AI/examples/vai_library/samples/classification/test_jpeg_classification resnet18 /home/root/kv260-test-20261001/pytorch-resnet-dog.jpg",
+    "timeout": 45
+  },
+  {
+    "id": "kernel_after_restore",
+    "command": "dmesg",
+    "timeout": 60
+  }
+]

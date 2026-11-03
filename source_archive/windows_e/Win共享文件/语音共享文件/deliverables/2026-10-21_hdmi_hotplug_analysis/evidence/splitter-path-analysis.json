@@ -1,0 +1,66 @@
+{
+  "carrier_fru": {
+    "product": "SCK-KV-G",
+    "part_number": "5066-01",
+    "revision": "2",
+    "checksums_valid": true,
+    "full_structure_parser_complete": false
+  },
+  "schematic_reference": {
+    "local_file": "/home/ghmd/Win共享文件/tmp/j2_pinout_sources/kv260_b03.pdf",
+    "sha256": "f152a6f8fa8a909106837605404de110fd69aeb20b03bbbf41503583217c8640",
+    "title": "ML Starter Kit Carrier Card",
+    "revision": "B03",
+    "exact_match_to_fru_revision_proven": false,
+    "host_i2c_7bit_address_label": "0x73",
+    "hdmi_controls": [
+      "STDP4320_GPIO5_HDMI_OE_B",
+      "STDP4320_GPIO6_HDMI_DDC_EN",
+      "STDP4320_GPIO7_HDMI_PWR_ON",
+      "STDP4320_GPIO8_HDMI_PWR_FLT_B"
+    ],
+    "external_spi_flash": [
+      "U31",
+      "SST25VF020B"
+    ],
+    "scope": "design reference; not board-revision proof"
+  },
+  "official_linux_source": {
+    "carrier_overlay": "revB includes rev2/rev1 compatible and leaves STDP4320 as a comment, not an I2C client",
+    "som_dts_legacy_firmware_addresses": [
+      "0x5C",
+      "0x5D",
+      "0x70",
+      "0x72",
+      "0x76"
+    ],
+    "expected_fixed_firmware_address": "0x73",
+    "source": "https://github.com/Xilinx/linux-xlnx/blob/master/arch/arm64/boot/dts/xilinx/zynqmp-sm-k26-revA.dts"
+  },
+  "chip_documentation": {
+    "host_interface_registers_exist": true,
+    "register_map_available_in_public_datasheet": false,
+    "firmware_stored_in_external_spi_flash": true,
+    "isp_supported_transport": [
+      "UART",
+      "I2C",
+      "DisplayPort AUX",
+      "HDMI DDC"
+    ],
+    "isp_tool": "GProbe required; vendor procedure/tool requested",
+    "uart_identity_can_be_read_without_reset_measured": true,
+    "source": "https://www.mouser.com/datasheet/2/936/STDP4320_03c-3105399.pdf"
+  },
+  "current_runtime": {
+    "registered_0x73_i2c_client": false,
+    "splitter_bus_probe_or_read": false,
+    "splitter_register_write": false,
+    "spi_flash_read_or_write": false,
+    "gpio_write": false,
+    "gprobe_uart_interface": "02",
+    "gprobe_identity_replies_valid": true,
+    "application_firmware_version_confirmed": false
+  },
+  "conclusion": "Physical hotplug likely changes STDP4320 downstream HPD/DDC/HDMI enable or power state without necessarily changing the upstream DP mode. This is an inference supported by the historical same-boot recovery and design path; actual pin transitions and internal firmware state were not captured.",
+  "next_safe_gate": "UART identity communication is now verified without vendor tooling or reset. Obtain the matching status/control register map or a documented HDMI control command before writing anything; continue the independent-screen-power field comparison separately."
+}

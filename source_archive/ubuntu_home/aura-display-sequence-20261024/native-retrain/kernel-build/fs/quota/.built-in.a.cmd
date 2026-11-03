@@ -1,0 +1,1 @@
+cmd_fs/quota/built-in.a := echo >/dev/null; rm -f fs/quota/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST fs/quota/built-in.a fs/quota/dquot.o fs/quota/quota_v2.o fs/quota/quota_tree.o fs/quota/quota.o fs/quota/kqid.o

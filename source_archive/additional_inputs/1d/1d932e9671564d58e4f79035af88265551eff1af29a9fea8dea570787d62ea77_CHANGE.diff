@@ -1,0 +1,101 @@
+--- before/tools/voice_first_recording.py
++++ after/tools/voice_first_recording.py
+@@ -18,6 +18,7 @@
+         self.barge_enabled = bool(barge_enabled)
+         self.voice_first = True
+         self.wake_rearm = False
++        self._pause_resume = None
+         self.monitor_state = self._waiting_state() if self.monitor_enabled else 'PAUSED'
+         self.monitor_reason = 'AUDIO_WAKE_WORD' if self.wake_word_required else 'DIRECT_SPEECH'
+         self.last_voice_activity = self.clock()
+@@ -28,6 +29,43 @@
+         if device_observer:
+             from board.runtime.device_observer import DeviceObserver
+             self.observer=DeviceObserver(self.attention_gate.boot_id)
++
++    def _conversation_resume_binding(self):
++        jobs = self.transcriber
++        condition = getattr(jobs, 'condition', None)
++        if condition is None:
++            return None
++        with condition:
++            selection = getattr(jobs, 'conversation_selection', None)
++            cid = getattr(selection, 'active', None)
++            session = getattr(jobs, 'session_id', None)
++            if (getattr(jobs, 'closed', True) or getattr(jobs, 'profile_selection', None) is not None
++                    or getattr(jobs, 'scope_provider', None) is not None
++                    or getattr(jobs, 'boot_id', None) != self.attention_gate.boot_id
++                    or not isinstance(session, str) or not session
++                    or not isinstance(cid, str) or len(cid) != 32
++                    or any(char not in '0123456789abcdef' for char in cid)
++                    or getattr(selection, 'saved', None) != cid):
++                return None
++            return jobs, selection, cid, session, jobs.boot_id
++
++    @staticmethod
++    def _same_resume_binding(left, right):
++        return bool(left is not None and right is not None and left[0] is right[0]
++                    and left[1] is right[1] and left[2:] == right[2:])
++
++    def _select_listening_conversation(self):
++        # Only an explicit continue can create this one-use RAM credential.
++        # Keep the original selector, generation invalidation and grant guards.
++        marker, self._pause_resume = self._pause_resume, None
++        jobs = self.transcriber
++        condition = getattr(jobs, 'condition', None)
++        if marker and marker[0] == 'pending' and condition is not None:
++            with condition:
++                resume = self._same_resume_binding(marker[1], self._conversation_resume_binding())
++                jobs.select_conversation(resume=resume)
++        else:
++            jobs.select_conversation(resume=False)
+ 
+     def _waiting_state(self):
+         return 'WAITING_WAKE' if self.wake_word_required and not self.monitor_entered else 'WAITING_SPEECH'
+@@ -95,21 +133,37 @@
+         self.wake_rearm = True
+ 
+     def _finish_session(self, *args, **kwargs):
++        self._pause_resume = None
+         self.wake_rearm = False
+         self.social_active=False;self.social_opened=False
+         return super()._finish_session(*args, **kwargs)
+ 
+     def cancel(self):
++        self._pause_resume = None
+         self.wake_rearm = False
+         self.social_active=False;self.social_opened=False
+         if getattr(self,'observer',None):self.observer.enabled=False
+         return super().cancel()
+ 
+     def handsfree_toggle(self):
++        was_enabled = self.monitor_enabled
++        previous = self._pause_resume
++        binding = self._conversation_resume_binding()
++        pausing_current = self.monitor_owned or bool(previous and previous[0] == 'pending'
++            and self._same_resume_binding(previous[1], binding))
++        self._pause_resume = None
+         result = super().handsfree_toggle()
+         if self.monitor_enabled:
+             self.monitor_state = self._waiting_state()
+             self.monitor_reason = 'AUDIO_WAKE_WORD' if self.wake_word_required else 'DIRECT_SPEECH'
++        current = self._conversation_resume_binding()
++        if was_enabled and not self.monitor_enabled and pausing_current:
++            if self._same_resume_binding(binding, current):
++                self._pause_resume = ('paused', current)
++        elif not was_enabled and self.monitor_enabled and previous and previous[0] == 'paused':
++            if (self._same_resume_binding(previous[1], binding)
++                    and self._same_resume_binding(binding, current)):
++                self._pause_resume = ('pending', current)
+         return result
+ 
+     def _arm_barge(self):
+@@ -168,7 +222,7 @@
+         try:
+             # Automatic audio sessions start anonymous, independently of vision.
+             # Explicit profile selection continues to use the existing token.
+-            self.transcriber.select_conversation(resume=False)
++            self._select_listening_conversation()
+             self.monitor_owned = True
+             self.monitor_key = ('audio', self.attention_gate.boot_id, uuid.uuid4().hex)
+             self.monitor_entered = False

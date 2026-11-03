@@ -1,0 +1,315 @@
+{
+  "schema": "aura.public-production-class-integration.v17.1",
+  "status": "FAIL",
+  "execution_host": "local_windows",
+  "coordinated_slot": null,
+  "verification": {
+    "runtime_root": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\local_runtime_v17",
+    "startup_sha256": "0cbc191b4bf9029b15a65ef15797e43e15459e06b88381025d28a2c9b573dd2a",
+    "source_manifest_sha256": "38a267a4f8d504803587c8be353452b146f1e232e926ac4e061a5e2832b33620",
+    "mapping_sha256": "348c435302e4e855d9bf4ef354f0b26d56ef9dfac64438a4fb11f70b5f6e63af",
+    "components": 379,
+    "verified_public_files": 343,
+    "boot_id": "public-local-v17",
+    "utc_bounds": [
+      1793300000.0,
+      1793500000.0
+    ],
+    "live_startup_checked": false
+  },
+  "worker_sha256": "30d704cde5cd31f38ac9851616c5dfb06a57ec19d6d12dfce642f89059e460e3",
+  "cases": [
+    {
+      "id": "V01_current_fresh_stable_count",
+      "status": "PASS",
+      "evidence": {
+        "input": "雪妃，现在镜头里有几个人？",
+        "reply": "这次画面取样稳定检测到2个人体目标。",
+        "routes": [
+          "structured_visual_query"
+        ],
+        "full_ack": true,
+        "partial_ack_rejected": true,
+        "pcm_sha256": "50b6224697c94c1f6982e779bb7f418d88f91aba4a560a729979e64f51545e9b",
+        "samples": 2400,
+        "model_rpc_kinds": [
+          "tts"
+        ],
+        "profile_grants": 0
+      }
+    },
+    {
+      "id": "V02_spatial_unsupported",
+      "status": "PASS",
+      "evidence": {
+        "input": "雪妃，左边有几个人？",
+        "reply": "我目前仅记录镜头人体目标数量，无法判断方位、物品、颜色或说话者身份。",
+        "routes": [
+          "structured_visual_query"
+        ],
+        "full_ack": true,
+        "partial_ack_rejected": false,
+        "pcm_sha256": "50b6224697c94c1f6982e779bb7f418d88f91aba4a560a729979e64f51545e9b",
+        "samples": 2400,
+        "model_rpc_kinds": [
+          "tts"
+        ],
+        "profile_grants": 0
+      }
+    },
+    {
+      "id": "V03_object_unsupported",
+      "status": "PASS",
+      "evidence": {
+        "input": "雪妃，我手里是什么物品？",
+        "reply": "我目前仅记录镜头人体目标数量，无法判断方位、物品、颜色或说话者身份。",
+        "routes": [
+          "structured_visual_query"
+        ],
+        "full_ack": true,
+        "partial_ack_rejected": false,
+        "pcm_sha256": "50b6224697c94c1f6982e779bb7f418d88f91aba4a560a729979e64f51545e9b",
+        "samples": 2400,
+        "model_rpc_kinds": [
+          "tts"
+        ],
+        "profile_grants": 0
+      }
+    },
+    {
+      "id": "V04_zero_is_not_absence",
+      "status": "PASS",
+      "evidence": {
+        "input": "雪妃，现在镜头里有人吗？",
+        "reply": "这次画面取样未检测到人体目标，不能据此断定没人。",
+        "routes": [
+          "structured_visual_query"
+        ],
+        "full_ack": true,
+        "partial_ack_rejected": false,
+        "pcm_sha256": "50b6224697c94c1f6982e779bb7f418d88f91aba4a560a729979e64f51545e9b",
+        "samples": 2400,
+        "model_rpc_kinds": [
+          "tts"
+        ],
+        "profile_grants": 0
+      }
+    },
+    {
+      "id": "V05_camera_unavailable",
+      "status": "PASS",
+      "evidence": {
+        "input": "雪妃，现在镜头里有几个人？",
+        "reply": "现在无法取得新鲜、稳定的人数观察，暂时不能判断。",
+        "routes": [
+          "structured_visual_query"
+        ],
+        "full_ack": true,
+        "partial_ack_rejected": false,
+        "pcm_sha256": "50b6224697c94c1f6982e779bb7f418d88f91aba4a560a729979e64f51545e9b",
+        "samples": 2400,
+        "model_rpc_kinds": [
+          "tts"
+        ],
+        "profile_grants": 0
+      }
+    },
+    {
+      "id": "V06_history_count",
+      "status": "PASS",
+      "evidence": {
+        "input": "雪妃，最近5分钟镜头里有几个人？",
+        "reply": "所选观察记录的目标数为0至2。",
+        "routes": [
+          "structured_visual_query"
+        ],
+        "full_ack": true,
+        "partial_ack_rejected": false,
+        "pcm_sha256": "50b6224697c94c1f6982e779bb7f418d88f91aba4a560a729979e64f51545e9b",
+        "samples": 2400,
+        "model_rpc_kinds": [
+          "tts"
+        ],
+        "profile_grants": 0
+      }
+    },
+    {
+      "id": "S01_readonly_no_receipt",
+      "status": "FAIL",
+      "error_class": "AttributeError",
+      "error": "'SpeakerDevice' object has no attribute 'save_receipts'",
+      "public_test_traceback": "Traceback (most recent call last):\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 305, in case\n    row['evidence'] = fn()\n                      ^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 330, in missing_receipt\n    before = h.speaker_state()\n             ^^^^^^^^^^^^^^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 233, in speaker_state\n    return self.service.pool.submit(inspect).result(3)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\py312\\Lib\\concurrent\\futures\\_base.py\", line 456, in result\n    return self.__get_result()\n           ^^^^^^^^^^^^^^^^^^^\n  File \"D:\\py312\\Lib\\concurrent\\futures\\_base.py\", line 401, in __get_result\n    raise self._exception\nAttributeError: 'SpeakerDevice' object has no attribute 'save_receipts'\n"
+    },
+    {
+      "id": "S02_explicit_start",
+      "status": "FAIL",
+      "error_class": "AssertionError",
+      "error": "wrong_route:['speaker_identity']",
+      "public_test_traceback": "Traceback (most recent call last):\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 305, in case\n    row['evidence'] = fn()\n                      ^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 335, in <lambda>\n    case('S02_explicit_start', lambda: h.say('雪妃，登记我的声纹，我叫公开测试甲', route='identity_enrollment', contains='分三次'))\n                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 285, in say\n    require(route in actual_routes, 'wrong_route:'+repr(actual_routes))\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 44, in require\n    raise AssertionError(code)\nAssertionError: wrong_route:['speaker_identity']\n"
+    },
+    {
+      "id": "S03_readonly_during_enrollment",
+      "status": "FAIL",
+      "error_class": "AttributeError",
+      "error": "'SpeakerDevice' object has no attribute 'save_receipts'",
+      "public_test_traceback": "Traceback (most recent call last):\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 305, in case\n    row['evidence'] = fn()\n                      ^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 337, in during\n    before = h.speaker_state()\n             ^^^^^^^^^^^^^^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 233, in speaker_state\n    return self.service.pool.submit(inspect).result(3)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\py312\\Lib\\concurrent\\futures\\_base.py\", line 456, in result\n    return self.__get_result()\n           ^^^^^^^^^^^^^^^^^^^\n  File \"D:\\py312\\Lib\\concurrent\\futures\\_base.py\", line 401, in __get_result\n    raise self._exception\nAttributeError: 'SpeakerDevice' object has no attribute 'save_receipts'\n"
+    },
+    {
+      "id": "S04_sample_1",
+      "status": "FAIL",
+      "error_class": "AssertionError",
+      "error": "wrong_route:[]",
+      "public_test_traceback": "Traceback (most recent call last):\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 305, in case\n    row['evidence'] = fn()\n                      ^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 343, in <lambda>\n    case('S04_sample_'+str(index+1), lambda index=index: h.say('雪妃，第'+str(index+1)+'段公开合成测试语音。',\n                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 285, in say\n    require(route in actual_routes, 'wrong_route:'+repr(actual_routes))\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 44, in require\n    raise AssertionError(code)\nAssertionError: wrong_route:[]\n"
+    },
+    {
+      "id": "S04_sample_2",
+      "status": "FAIL",
+      "error_class": "AssertionError",
+      "error": "wrong_route:[]",
+      "public_test_traceback": "Traceback (most recent call last):\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 305, in case\n    row['evidence'] = fn()\n                      ^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 343, in <lambda>\n    case('S04_sample_'+str(index+1), lambda index=index: h.say('雪妃，第'+str(index+1)+'段公开合成测试语音。',\n                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 285, in say\n    require(route in actual_routes, 'wrong_route:'+repr(actual_routes))\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 44, in require\n    raise AssertionError(code)\nAssertionError: wrong_route:[]\n"
+    },
+    {
+      "id": "S04_sample_3",
+      "status": "FAIL",
+      "error_class": "AssertionError",
+      "error": "wrong_route:[]",
+      "public_test_traceback": "Traceback (most recent call last):\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 305, in case\n    row['evidence'] = fn()\n                      ^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 343, in <lambda>\n    case('S04_sample_'+str(index+1), lambda index=index: h.say('雪妃，第'+str(index+1)+'段公开合成测试语音。',\n                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 285, in say\n    require(route in actual_routes, 'wrong_route:'+repr(actual_routes))\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 44, in require\n    raise AssertionError(code)\nAssertionError: wrong_route:[]\n"
+    },
+    {
+      "id": "S05_store_commit_final_consent",
+      "status": "FAIL",
+      "error_class": "AttributeError",
+      "error": "'SpeakerDevice' object has no attribute 'save_receipts'",
+      "public_test_traceback": "Traceback (most recent call last):\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 305, in case\n    row['evidence'] = fn()\n                      ^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 346, in consent\n    require(h.speaker_state()['people'] == 0, 'saved_before_consent')\n            ^^^^^^^^^^^^^^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 233, in speaker_state\n    return self.service.pool.submit(inspect).result(3)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\py312\\Lib\\concurrent\\futures\\_base.py\", line 456, in result\n    return self.__get_result()\n           ^^^^^^^^^^^^^^^^^^^\n  File \"D:\\py312\\Lib\\concurrent\\futures\\_base.py\", line 401, in __get_result\n    raise self._exception\nAttributeError: 'SpeakerDevice' object has no attribute 'save_receipts'\n"
+    },
+    {
+      "id": "S06_receipt_next_turn",
+      "status": "FAIL",
+      "error_class": "AssertionError",
+      "error": "wrong_public_reply:本轮声纹仍在采样，尚未提交保存。",
+      "public_test_traceback": "Traceback (most recent call last):\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 305, in case\n    row['evidence'] = fn()\n                      ^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 351, in <lambda>\n    case('S06_receipt_next_turn', lambda: h.say('雪妃，我的声纹保存成功了吗？', route='speaker_identity', contains='已收到声纹保存提交回执'))\n                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 287, in say\n    require(contains in spoken, 'wrong_public_reply:'+spoken)\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 44, in require\n    raise AssertionError(code)\nAssertionError: wrong_public_reply:本轮声纹仍在采样，尚未提交保存。\n"
+    },
+    {
+      "id": "S07_receipt_ttl_does_not_delete",
+      "status": "FAIL",
+      "error_class": "AssertionError",
+      "error": "wrong_public_reply:本轮声纹仍在采样，尚未提交保存。",
+      "public_test_traceback": "Traceback (most recent call last):\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 305, in case\n    row['evidence'] = fn()\n                      ^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 354, in expired\n    answer = h.say('雪妃，我的声纹保存成功了吗？', route='speaker_identity', contains='不能判断')\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 287, in say\n    require(contains in spoken, 'wrong_public_reply:'+spoken)\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 44, in require\n    raise AssertionError(code)\nAssertionError: wrong_public_reply:本轮声纹仍在采样，尚未提交保存。\n"
+    },
+    {
+      "id": "M01_remember",
+      "status": "PASS",
+      "evidence": {
+        "input": "雪妃，记住：项目是海风。",
+        "reply": "已记住：项目是海风。",
+        "routes": [],
+        "full_ack": true,
+        "partial_ack_rejected": false,
+        "pcm_sha256": "50b6224697c94c1f6982e779bb7f418d88f91aba4a560a729979e64f51545e9b",
+        "samples": 2400,
+        "model_rpc_kinds": [
+          "tts"
+        ],
+        "profile_grants": 0
+      }
+    },
+    {
+      "id": "M02_correct",
+      "status": "FAIL",
+      "error_class": "AssertionError",
+      "error": "wrong_public_reply:只依据本次返回的公开历史回答。",
+      "public_test_traceback": "Traceback (most recent call last):\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 305, in case\n    row['evidence'] = fn()\n                      ^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 364, in memory_correct\n    answer = h.say('雪妃，更正：项目是晨星。', contains='已记住')\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 287, in say\n    require(contains in spoken, 'wrong_public_reply:'+spoken)\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 44, in require\n    raise AssertionError(code)\nAssertionError: wrong_public_reply:只依据本次返回的公开历史回答。\n"
+    },
+    {
+      "id": "M03_current_fact",
+      "status": "FAIL",
+      "error_class": "AssertionError",
+      "error": "wrong_public_reply:只依据本次返回的公开历史回答。",
+      "public_test_traceback": "Traceback (most recent call last):\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 305, in case\n    row['evidence'] = fn()\n                      ^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 369, in <lambda>\n    case('M03_current_fact', lambda: h.say('雪妃，项目是什么？', contains='晨星'))\n                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 287, in say\n    require(contains in spoken, 'wrong_public_reply:'+spoken)\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 44, in require\n    raise AssertionError(code)\nAssertionError: wrong_public_reply:只依据本次返回的公开历史回答。\n"
+    },
+    {
+      "id": "M04_forget",
+      "status": "PASS",
+      "evidence": {
+        "input": "雪妃，忘记项目。",
+        "reply": "已忘记这个范围内关于项目的记忆。",
+        "routes": [],
+        "full_ack": true,
+        "partial_ack_rejected": false,
+        "pcm_sha256": "50b6224697c94c1f6982e779bb7f418d88f91aba4a560a729979e64f51545e9b",
+        "samples": 2400,
+        "model_rpc_kinds": [
+          "tts"
+        ],
+        "profile_grants": 0
+      }
+    },
+    {
+      "id": "H01_bounded_history_retrieval",
+      "status": "FAIL",
+      "error_class": "AssertionError",
+      "error": "history_not_in_model_context",
+      "public_test_traceback": "Traceback (most recent call last):\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 305, in case\n    row['evidence'] = fn()\n                      ^^^^\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 379, in history\n    require(requests and any('公开历史标记' in m['content'] for m in requests[-1]['messages']), 'history_not_in_model_context')\n  File \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\board_integration_v17\\worker.py\", line 44, in require\n    raise AssertionError(code)\nAssertionError: history_not_in_model_context\n"
+    },
+    {
+      "id": "M05_personal_without_grant",
+      "status": "PASS",
+      "evidence": {
+        "input": "雪妃，长期记住：项目是秘密。",
+        "reply": "请先选择并授权个人档案，再操作个人记忆。",
+        "routes": [],
+        "full_ack": true,
+        "partial_ack_rejected": false,
+        "pcm_sha256": "50b6224697c94c1f6982e779bb7f418d88f91aba4a560a729979e64f51545e9b",
+        "samples": 2400,
+        "model_rpc_kinds": [
+          "tts"
+        ],
+        "profile_grants": 0
+      }
+    },
+    {
+      "id": "G01_date_delete_current_gap",
+      "status": "PASS",
+      "evidence": {
+        "input": "雪妃，删除昨天的对话记录",
+        "expected_capability_error": "history_delete_preview",
+        "error_observed": true,
+        "full_ack": false,
+        "routes": []
+      }
+    },
+    {
+      "id": "G02_reasoning_current_gap",
+      "status": "PASS",
+      "evidence": {
+        "input": "雪妃，帮我计算17乘以23",
+        "expected_capability_error": "reasoning_dialogue",
+        "error_observed": true,
+        "full_ack": false,
+        "routes": []
+      }
+    }
+  ],
+  "limits": {
+    "public_synthetic_only": true,
+    "production_classes": true,
+    "production_private_store_opened": false,
+    "production_factory_started": false,
+    "physical_devices_opened": false,
+    "real_models_called": false,
+    "real_asr": false,
+    "real_speaker_embedding": false,
+    "native_readiness": "explicit_fixture",
+    "camera_health": "explicit_fixture",
+    "utc_clock": "explicit_synthetic",
+    "playback": "simulated_complete_consumption_with_real_receipt_validation",
+    "physical_playback_verified": false,
+    "profile_grants_issued": false,
+    "production_controls_changed": false
+  },
+  "workers_closed": true,
+  "owned_temporary_database_removed": true,
+  "passed": 11,
+  "failed": 12
+}

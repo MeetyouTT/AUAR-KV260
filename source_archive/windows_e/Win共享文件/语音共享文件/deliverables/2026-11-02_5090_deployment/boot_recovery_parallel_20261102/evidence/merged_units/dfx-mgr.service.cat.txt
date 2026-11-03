@@ -1,0 +1,33 @@
+# /lib/systemd/system/dfx-mgr.service
+# SPDX-License-Identifier: MIT
+#
+# DFX manager daemon is used to demonstrate Dynamic Function eXchange (DFX)
+# or partial reconfiguration feature on Xilinx Zynq UltraScale+ and newer.
+# See: UG909 "Vivado Design Suite User Guide Dynamic Function eXchange"
+
+[Unit]
+Description=dfx-mgrd Dynamic Function eXchange
+Documentation=https://github.com/Xilinx/dfx-mgr
+
+[Service]
+ExecStartPre=-/usr/bin/xlnx-firmware-detect
+ExecStart=/usr/bin/dfx-mgrd
+
+[Install]
+WantedBy=multi-user.target
+
+# /etc/systemd/system/dfx-mgr.service.d/10-kv260-repaired.conf
+# PROPOSAL ONLY. Keep the vendor unit intact; install only after review and backup.
+[Unit]
+Requires=kv260-repaired-zocl.service
+After=kv260-repaired-zocl.service
+
+[Service]
+ExecStart=
+ExecStart=/usr/local/lib/kv260-runtime-repair/dfx-mgrd
+
+# /etc/systemd/system/dfx-mgr.service.d/20-kv260-dfx-state-repaired.conf
+# Board-verified state lifecycle fix; previous runtime drop-in is retained.
+[Service]
+ExecStart=
+ExecStart=/usr/local/lib/kv260-dfx-state-repair-20261003/dfx-mgrd

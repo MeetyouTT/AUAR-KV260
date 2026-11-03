@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "status": "SOURCE_REVIEW_ONE_PROVENANCE_FIX_BEFORE_VOICE_TRIAL",
+  "utc": "2026-10-31T00:53:24.621254+00:00",
+  "reviewed_frozen_source_zip_sha256": "b173201489b561219366a3d048ec7a68a41b3afa2b23e61738785cc5e4694f7e",
+  "reviewed_frozen_manifest_sha256": "4da2894d8f1c598cc2e2f66a36e94044dd687921d09cea25287c01930ee71e9e",
+  "findings": [
+    {
+      "id": "YUKI-RAW-SPECIAL-01",
+      "priority": "P2",
+      "title": "Private user_said special handlers persist stripped intent instead of raw ASR",
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\yuki_jobs_candidate.py",
+      "line": 51,
+      "dispatch_line": 90,
+      "trigger": "An ordinary non-wake captured utterance such as 雪妃，登记声纹 routes to identity/speaker special handler. The UI transcript is emitted before routing and remains full ASR text.",
+      "source_trace": [
+        "BoardDialogueJobs._execute emits transcript(text) with original _admit_text result.",
+        "Candidate _route overwrites text with strip_address(text) before special handler dispatch.",
+        "LocalIdentityReplies.__call__ receives stripped text and ends with controller.prepare_local_sequence(text,...).",
+        "BoardDialogueController._prepare/store.begin_turn consequently records the stripped text as the user event, while UI reports the raw transcript. Ordinary prepare_text and PairedMemoryCommands paths retain raw input."
+      ],
+      "store_call_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\board\\runtime\\board_business.py",
+      "store_call_line": 261,
+      "impact": "Private five-minute user_said timeline loses the original character-address prefix on identity/speaker local replies. UI transcript and persisted source differ. This finding excludes visual device_event canonical records, which intentionally must not contain the raw private ASR.",
+      "minimal_fix": "Keep immutable raw record_text separate from intent_text. For private user_said prepare_local_reply/prepare_local_sequence only, verify original scope exactly matches job.scope then pass original record_text to the record entrance. Preserve producer intent text. Explicit device_event or device-scope calls stay normalized; do not apply a blanket raw proxy across scopes.",
+      "existing_test_gap": "test_stream_packets_raw_asr_and_full_pcm_ack_are_original checks only ordinary controller.prepare_text. Current special fake store checks explicit memory source IDs, not actual raw special user_event text.",
+      "coordinated_to": [
+        "root",
+        "win_inference"
+      ],
+      "frozen_files_modified": false
+    }
+  ],
+  "additional_semantics_to_decide": [
+    {
+      "id": "YUKI-HIDDEN-READINESS",
+      "not_classified_as_crash": true,
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\native_yuki.py",
+      "line": 203,
+      "trace": "GTK show_page(vision) calls portrait.set_visible(False), emitting unmap. on_unmapped stops the GL frame timer but does not clear mailbox.ready/pair READY. Returning to a visible page restarts rendering; actual paint_at age is exposed.",
+      "consequence": "If ready means allocated renderer after first successful swap, this can be intentional hidden-page behavior. If ready must mean currently presenting, business can continue while avatar is hidden/stale. Specify hidden vs lost readiness rather than treating normal page switching as permanent GL failure.",
+      "status": "RESOLVED_BY_ROOT_NOT_A_BLOCKER",
+      "root_decision": "Normal camera/settings-page hiding is allowed to continue audio. READY means the context is still usable after first successful swap. Context loss/unrealize must fail closed; hidden/visible metrics may clarify stale FPS without cancelling normal paging."
+    }
+  ],
+  "traced_paths_without_found_source_defect": [
+    "NativeLogicCore inherits AvatarPlayer.__init__/send/apply_response/new_turn/cancel/reset_playback/burst_completion; constructor sets idle_gain/generation/cache/state fields. Its pool returns empty, so inherited seed_speaking_materials does not load old PNGs.",
+    "NativeStreamingController manually restores exactly stream=None/completed_streams=[] from original StreamingController.__init__, then clones RealtimeController.__init__ with only RealtimeFacials replaced by NumericFacials. All attributes read by source start/text/control/audio/end/pause/cancel/completion methods are initialized.",
+    "NumericFacials retains begin/stop/values and existing sample-clock interpolate; inherited streaming and realtime paths invoke apply only on nonremote images, which StrictLocalPortrait never returns.",
+    "StrictLocalPortrait returns _portrait_wait before first draw, preventing old display_frame fallback. GL create marks only prepared; observer after egl.swap sets drawn/READY and triggers one-shot board_business.activate.",
+    "Renderer failed()/unrealize clears readiness and pair.fail invalidates jobs immediately, revokes candidate RAM microphone choice, and queues the existing RecordingController/stream cancellation. Board job generation invalidation clears waiting/playback/progress before a queued late ACK can pass its current check; player completion remains original full PCM receipt path.",
+    "Pair identity metadata remains separate from user profile catalogue/profile_selection/ProfileAccess grants. bind_runtime_pair changes only named per-instance methods/guards/context wrappers before workers start.",
+    "Private context/memory function namespaces copy globals before replacing speech preparation and CHARACTER_NAME; shared default modules and raw literal names/numbers/negations are not rewritten.",
+    "Handsfree constructor reads CandidateMonitorChoice false; its later GL-ready transition does not turn the choice on. Capture factories are created lazily; microphone startup is not armed by the pair-ready callback. Manual future record commands still require an explicit operator action.",
+    "GUI candidate owns one EGL widget; native_pixels/native_video stay None on this branch, worker does not allocate a second pixel sink or compose old PNGs, and fixed_native path requests16 rather than fallback8."
+  ],
+  "live_still_required": [
+    "Actual GTK/PyGObject/EGL/Mali creation, first mapped swap, source hashes and full nonPython resource binding.",
+    "Real sink/PCM pause-resume/cancel and renderer error/unrealize timing versus ACK; source trace and existing fakes are not hardware acceptance.",
+    "Whole-board person-present/absent ASR/camera/identity/memory workload at actual16fps and full original queue capacities.",
+    "Explicitly chosen microphone activation and new display-name pronunciation/wake behavior, only after the source provenance fix."
+  ],
+  "operations": {
+    "read_only_source_and_public_metadata": true,
+    "ast_parse_only": true,
+    "candidate_constructors_executed": false,
+    "board": false,
+    "model": false,
+    "gui": false,
+    "private_database": false,
+    "frozen_source_changes": false
+  },
+  "source_evidence": [
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\yuki_business_candidate.py",
+      "sha256": "67b601ea08376a1cd7b4619b938849e37c65a963fabc6b72d9b26a192c7dddb5",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\native_yuki_candidate.py",
+      "sha256": "f97f0f8955340b119762d11737c25340edfceb3e54f4e2d1f17d55201c9c29c2",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\yuki_jobs_candidate.py",
+      "sha256": "292e675d59ad5c6a144e1581c49924bbba35939cdc3179d9117fccc91c0be92f",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\yuki_business_gui.py",
+      "sha256": "f10f3d9e41bf48761428d39f850fd797640348f8723884590596e99475ee5e94",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\streaming_controller.py",
+      "sha256": "4b76e137d49994f01ae43a7a608e0b9feb13b9eff66cc981346823bace576899",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\realtime_controller.py",
+      "sha256": "0c4f77bdd5f639ec8efc174ba186ca9c6d8fc63ba811c9d66c35c1d204009a4d",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\board_avatar_worker.py",
+      "sha256": "e2699071104e61ad78e904ea5e8339cfcff4e53c70b1116a03cd82c64439c4cd",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\board_avatar_gtk.py",
+      "sha256": "2792c2828b8553171c2dac81a55fb7ac19dade5305e8debd81c7cb02671d4f5e",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\voice_first_recording.py",
+      "sha256": "4004d087b54b162fe9534bb3563b9c6f800554ff68b723373ed88c18f311d254",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\handsfree_recording.py",
+      "sha256": "a7e1a55e797e97fa605725ad7423e80704612c3ed4a703db177345ca4fe6a924",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\board_recording.py",
+      "sha256": "a194a026bc224df4f153ff14ce4a228e111778bc39e6f86a09d472d61adde277",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\board\\runtime\\audio\\board_dialogue_jobs.py",
+      "sha256": "f94efcdb1d1c8ec36be0d9c61467b6c27d32de72a042b832e9706613d20ba884",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\board\\runtime\\board_business.py",
+      "sha256": "5b5fe61959c19a3ea4eccf8401ebf8e3772e4135ff985ddd3a4a9979687448b7",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\tools\\native_yuki.py",
+      "sha256": "b5193b8766bb3bfe58f748affefbb0cebda9da6e33703dbef41833dfd789e8a4",
+      "ast_valid": true
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_yuki_business_candidate\\candidate\\aura\\board\\interaction\\avatar_player.py",
+      "sha256": "50de7f7f1151340774310383bb98725f92f26fcea94bfd75b70f80cde2062f27",
+      "ast_valid": true
+    }
+  ],
+  "visual_device_event_guard": {
+    "path": "candidate/aura/board/runtime/visual_policy.py",
+    "line": 233,
+    "behavior": "prepare_local_reply(normalized, scope=configured device scope, input_source=device_event, topic=ANSWER_TOPIC, metadata=device_confirmed+normalized_visual_query claims). The raw question belongs only to private RAM channel transcript. v2 source fix must not replace this normalized text or copy personal scope."
+  },
+  "followup": {
+    "owner": "win_inference",
+    "candidate": "resume_yuki_business_candidate_v2",
+    "status": "Root assigned narrow source-provenance fix; v1 frozen retained",
+    "suggested_regressions": [
+      "Real LocalIdentityReplies with non-wake addressed speaker/face request; actual Store.begin_turn receives raw sentence while business/flow intent receives stripped text.",
+      "Visual device_event call retains exact normalized text, device scope/topic/source/claims and no raw private question.",
+      "Bare self-name path returning DIALOGUE_ROUTE records the original raw input once, without a second begin_turn."
+    ]
+  },
+  "frozen_utc": "2026-10-31T00:54:12.622825+00:00"
+}

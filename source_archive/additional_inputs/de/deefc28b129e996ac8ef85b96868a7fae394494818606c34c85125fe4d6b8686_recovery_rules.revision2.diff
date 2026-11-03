@@ -1,0 +1,33 @@
+--- archive65/candidate/recovery_rules.py
++++ observed_revision2/candidate/recovery_rules.py
+@@ -131,10 +131,15 @@
+             and type(after.get('lease_left_ms')) is int and after['lease_left_ms'] == 0, 'IDSTOP_OUTPUT_NOT_DISABLED')
+ 
+ 
+-def verify_final_pointer(raw, consumed, predecessor):
+-    """A pointer gate only. The original reader/bootstrap still validates/restores it."""
++def verify_final_pointer(raw, consumed, predecessor, *, current_boot=None,
++                         allow_new_kernel_boot=False, current_domain_consumed=None):
++    """Gate the original route; never load, restore or consume a Native seed.
++
++    Same-boot exact resume refuses a consumed checkpoint. Different-boot input is
++    archive-only: its prior checkpoint marker is preserved, and eligibility comes
++    from the absence of the configured CURRENT-kernel domain marker.
++    """
+     require(digest(raw) != FORBIDDEN_OLD_FINAL, 'CONSUMED_C6C8_FINAL_FORBIDDEN')
+-    require(not consumed, 'CONSUMED_FINAL_POINTER')
+     doc = json.loads(raw)
+     seed = doc.get('seed') or {}
+     require(doc.get('schema') == 'aura-native-protection-checkpoint-2'
+@@ -145,6 +150,11 @@
+     owner(prior)
+     require(seed.get('boot_id') == predecessor['boot_id'] and seed.get('source_pid') == prior['pid']
+             and seed.get('source_birth_ticks') == int(prior['birth_ticks']), 'FINAL_POINTER_WRONG_PREDECESSOR')
++    if current_boot is not None and seed['boot_id'] != current_boot:
++        require(allow_new_kernel_boot is True, 'ORIGINAL_NEW_KERNEL_OPT_IN_REQUIRED')
++        require(current_domain_consumed is False, 'CURRENT_KERNEL_DOMAIN_ALREADY_CONSUMED_OR_UNKNOWN')
++    else:
++        require(not consumed, 'CONSUMED_FINAL_POINTER')
+     return digest(raw)
+ 
+ 

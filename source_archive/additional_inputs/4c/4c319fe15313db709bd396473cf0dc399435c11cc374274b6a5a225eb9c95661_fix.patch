@@ -1,0 +1,105 @@
+diff --git a/src/runtime_src/core/edge/drm/zocl/cu.c b/src/runtime_src/core/edge/drm/zocl/cu.c
+index e2c171e..f010123 100644
+--- a/src/runtime_src/core/edge/drm/zocl/cu.c
++++ b/src/runtime_src/core/edge/drm/zocl/cu.c
+@@ -307,7 +307,7 @@ static int user_manage_irq(struct xrt_cu *xcu, bool user_manage)
+ 		ret = zocl_ert_intc_add(intc, xcu->info.intr_id, cu_isr, zcu);
+ 	if (ret) {
+ 		DRM_INFO("%s: request_irq() failed\n", __func__);
+-		return ret;
++		goto out_put;
+ 	}
+ 
+ 	if (user_manage) {
+@@ -316,7 +316,9 @@ static int user_manage_irq(struct xrt_cu *xcu, bool user_manage)
+ 		zocl_ert_intc_config(intc, xcu->info.intr_id, false); // disable irq
+ 	}
+ 
+-	return 0;
++out_put:
++	platform_device_put(intc);
++	return ret;
+ }
+ 
+ static int configure_irq(struct xrt_cu *xcu, bool enable)
+@@ -339,6 +341,7 @@ static int configure_irq(struct xrt_cu *xcu, bool enable)
+ 			zocl_ert_intc_config(intc, xcu->info.intr_id, false); // disable irq
+ 	}
+ 
++	platform_device_put(intc);
+ 	return 0;
+ }
+ 
+@@ -398,8 +401,10 @@ static int cu_probe(struct platform_device *pdev)
+ 
+ 	if (info->intr_enable) {
+ 		intc = zocl_find_pdev(ERT_CU_INTC_DEV_NAME);
+-		if (intc)
++		if (intc) {
+ 			err = zocl_ert_intc_add(intc, info->intr_id, cu_isr, zcu);
++			platform_device_put(intc);
++		}
+ 		if (!intc || err) {
+ 			DRM_WARN("Failed to initial CU interrupt. "
+ 				 "Fall back to polling\n");
+@@ -469,8 +474,10 @@ static int cu_remove(struct platform_device *pdev)
+ 
+ 	if (info->intr_enable) {
+ 		intc = zocl_find_pdev(ERT_CU_INTC_DEV_NAME);
+-		if (intc)
++		if (intc) {
+ 			zocl_ert_intc_remove(intc, info->intr_id);
++			platform_device_put(intc);
++		}
+ 	}
+ 
+ 	zdev = zocl_get_zdev();
+diff --git a/src/runtime_src/core/edge/drm/zocl/include/zocl_drv.h b/src/runtime_src/core/edge/drm/zocl/include/zocl_drv.h
+index 104d5ed..52fda20 100644
+--- a/src/runtime_src/core/edge/drm/zocl/include/zocl_drv.h
++++ b/src/runtime_src/core/edge/drm/zocl/include/zocl_drv.h
+@@ -25,6 +25,7 @@
+ #include <drm/drm_gem_cma_helper.h>
+ #include <linux/version.h>
+ #include <linux/poll.h>
++#include <linux/platform_device.h>
+ #include "zocl_util.h"
+ #include "zocl_ioctl.h"
+ #include "zocl_ert.h"
+@@ -291,15 +292,21 @@ int zocl_command_ioctl(struct drm_zocl_dev *zdev, void *data,
+ 		       struct drm_file *filp);
+ int zocl_context_ioctl(struct drm_zocl_dev *zdev, void *data,
+ 		       struct drm_file *filp);
++/* A successful lookup owns a reference; release it with platform_device_put(). */
+ struct platform_device *zocl_find_pdev(char *name);
+ 
++/* Return borrowed driver data. Callers must serialize against ZOCL removal. */
+ static inline struct drm_zocl_dev *
+ zocl_get_zdev(void)
+ {
+ 	struct platform_device *pdev = zocl_find_pdev("zyxclmm_drm");
++	struct drm_zocl_dev *zdev;
++
+ 	if(!pdev)
+ 		return NULL;
+-	return platform_get_drvdata(pdev);
++	zdev = platform_get_drvdata(pdev);
++	platform_device_put(pdev);
++	return zdev;
+ }
+ int get_apt_index_by_addr(struct drm_zocl_dev *zdev, phys_addr_t addr);
+ int get_apt_index_by_cu_idx(struct drm_zocl_dev *zdev, int cu_idx);
+diff --git a/src/runtime_src/core/edge/drm/zocl/zocl_drv.c b/src/runtime_src/core/edge/drm/zocl/zocl_drv.c
+index b62e645..7525e39 100644
+--- a/src/runtime_src/core/edge/drm/zocl/zocl_drv.c
++++ b/src/runtime_src/core/edge/drm/zocl/zocl_drv.c
+@@ -280,7 +280,8 @@ static int get_reserved_mem_region(struct device *dev, struct resource *res)
+  *
+  * @param	name: device name
+  *
+- * Returns a platform device. Returns NULL if not found.
++ * Returns a referenced platform device. Release it with platform_device_put().
++ * Returns NULL if not found.
+  */
+ struct platform_device *zocl_find_pdev(char *name)
+ {

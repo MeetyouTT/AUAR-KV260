@@ -1,0 +1,375 @@
+{
+  "scope": "offline source inspection only; no production mutation, browser or board operation",
+  "conclusion": "freeze=0 equality does not prove meshCombinator is unused, and its mismatch with immediate direct GeometryInstance is not yet a mesh formula failure. Native and original may be at different evaluation phases; 37 public variables also omit internal geometry drivers.",
+  "received_evidence": {
+    "original_controlled_vs_rebuilt_combo_freeze0": "pixel-exact equal, parent lossless export",
+    "rebuilt_combo_vs_rebuilt_no_combo_freeze0": "pixel-exact equal, parent lossless export",
+    "native_direct_geometry_vs_freeze0": {
+      "reported_mae": 6.245,
+      "reported_different_pixels": 47747
+    },
+    "claim_boundary": "These image comparison values were supplied by parent; not rerun here."
+  },
+  "native_phases": [
+    {
+      "operation": "GeometryInstance::set_parameter + evaluate + build_frame",
+      "behavior": "set_parameter stores and invalidates. evaluate copies inputs, clamps, samples every active frame and meshCombinator immediately. No author tick or elapsed time is required.",
+      "evidence": [
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\geometry_scene.cpp",
+          "line": 908,
+          "symbol": "GeometryStatus GeometryInstance::set_parameter",
+          "sha256": "95ecbe8351e63b6239422c539581915c67899cc25cef0abc4328a342662af209"
+        },
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\geometry_scene.cpp",
+          "line": 946,
+          "symbol": "GeometryStatus GeometryInstance::evaluate()",
+          "sha256": "95ecbe8351e63b6239422c539581915c67899cc25cef0abc4328a342662af209"
+        },
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\geometry_scene.cpp",
+          "line": 1018,
+          "symbol": "!sample_combinators(n.combinators",
+          "sha256": "95ecbe8351e63b6239422c539581915c67899cc25cef0abc4328a342662af209"
+        }
+      ]
+    },
+    {
+      "operation": "PlaybackInstance::play",
+      "behavior": "Animation play dispatches timeline events at time0 immediately and composes numeric output; the clip starts sampled=false. Playback then composes and dirties its final output.",
+      "evidence": [
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\animation.cpp",
+          "line": 975,
+          "symbol": "AnimationStatus AnimationInstance::play",
+          "sha256": "a97c3db7ae7f45e5d2233ffe22081b76ebc8e61f62bb0c85a945ca1a8aae2200"
+        },
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\playback.cpp",
+          "line": 139,
+          "symbol": "PlaybackStatus PlaybackInstance::play",
+          "sha256": "d455bf36e4f6b04a9b0053b7458a0df178d570876030961893c2962ff1c3b003"
+        }
+      ]
+    },
+    {
+      "operation": "PlaybackInstance::transition(frames=0)",
+      "behavior": "Ordinary zero-duration and Immediate requests assign immediately. Mouth and Selector controller requests can defer until an author step; selector output weights initialize/update only in update_selectors. Additive clips are excluded from composition until sampled by step.",
+      "evidence": [
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\animation.cpp",
+          "line": 302,
+          "symbol": "bool request(const Controller&",
+          "sha256": "a97c3db7ae7f45e5d2233ffe22081b76ebc8e61f62bb0c85a945ca1a8aae2200"
+        },
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\animation.cpp",
+          "line": 318,
+          "symbol": "state.deferred =",
+          "sha256": "a97c3db7ae7f45e5d2233ffe22081b76ebc8e61f62bb0c85a945ca1a8aae2200"
+        },
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\animation.cpp",
+          "line": 798,
+          "symbol": "void update_selectors()",
+          "sha256": "a97c3db7ae7f45e5d2233ffe22081b76ebc8e61f62bb0c85a945ca1a8aae2200"
+        },
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\animation.cpp",
+          "line": 882,
+          "symbol": "!state.playing || !state.additive || !state.sampled",
+          "sha256": "a97c3db7ae7f45e5d2233ffe22081b76ebc8e61f62bb0c85a945ca1a8aae2200"
+        }
+      ]
+    },
+    {
+      "operation": "PlaybackInstance::prepare_frame",
+      "behavior": "Uses composed output to set geometry parameters, evaluate and build; performs no animation step or physics step. A prepare at tick0 is a distinct phase from step()+prepare.",
+      "evidence": [
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\playback.cpp",
+          "line": 359,
+          "symbol": "PlaybackStatus PlaybackInstance::prepare_frame()",
+          "sha256": "d455bf36e4f6b04a9b0053b7458a0df178d570876030961893c2962ff1c3b003"
+        }
+      ]
+    },
+    {
+      "operation": "PlaybackInstance::step",
+      "behavior": "Animation step increments timeline time, dispatches events and updates controllers/selectors/blink. Playback binds animated parameters, evaluates anchors, advances physics once if enabled, composes output, increments tick. prepare_frame evaluates final output separately.",
+      "evidence": [
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\animation.cpp",
+          "line": 1065,
+          "symbol": "AnimationStatus AnimationInstance::step()",
+          "sha256": "a97c3db7ae7f45e5d2233ffe22081b76ebc8e61f62bb0c85a945ca1a8aae2200"
+        },
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\playback.cpp",
+          "line": 243,
+          "symbol": "PlaybackStatus PlaybackInstance::step_tick",
+          "sha256": "d455bf36e4f6b04a9b0053b7458a0df178d570876030961893c2962ff1c3b003"
+        }
+      ]
+    },
+    {
+      "operation": "PlaybackInstance::advance(1.0)",
+      "behavior": "Catch-up is clamped to .25 seconds/15 author ticks per call. For exactly1 second use60 step calls or60 advance(1/60) calls, not a single advance(1).",
+      "evidence": [
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\playback.cpp",
+          "line": 14,
+          "symbol": "constexpr std::uint32_t kMaximumCatchUpTicks = 15",
+          "sha256": "d455bf36e4f6b04a9b0053b7458a0df178d570876030961893c2962ff1c3b003"
+        },
+        {
+          "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\candidate_core\\src\\runtime\\playback.cpp",
+          "line": 308,
+          "symbol": "PlaybackStatus PlaybackInstance::advance",
+          "sha256": "d455bf36e4f6b04a9b0053b7458a0df178d570876030961893c2962ff1c3b003"
+        }
+      ]
+    }
+  ],
+  "source_wrapper_phases": [
+    {
+      "operation": "freeze setup",
+      "behavior": "applyPose/main timeline and expressions run; explicit EmotePlayer_Update(playerId, freezeSeconds*60) runs once, then stepUpdate=true marks modified. freeze0 therefore initially passes Update(0), freeze1/60 passes Update(1).",
+      "evidence": [
+        {
+          "path": "D:\\share、\\项目开发\\美冬本地女友项目\\web\\tachie\\emote-stage.js",
+          "line": 223,
+          "symbol": "applyPose();\n    applyExpression();",
+          "sha256": "aee3938e05b864d99b7bedc2ed66998a721ebbefc904274119585f6a87a64c93"
+        },
+        {
+          "path": "D:\\share、\\项目开发\\美冬本地女友项目\\web\\tachie\\emote-stage.js",
+          "line": 227,
+          "symbol": "if (state.freeze) EmotePlayer_Update(player.playerId, state.time * 60);",
+          "sha256": "aee3938e05b864d99b7bedc2ed66998a721ebbefc904274119585f6a87a64c93"
+        }
+      ]
+    },
+    {
+      "operation": "first frozen render",
+      "behavior": "onUpdate precedes core evaluation. With stepUpdate && modified, wrapper calls EmotePlayer_Step then Update(0), clears modified, then DrawToTexture2. Thus freeze0 is not literally an absence of core calls; Step/Update0 is nevertheless not evidence of a positive-time Update.",
+      "evidence": [
+        {
+          "path": "D:\\share、\\项目开发\\美冬本地女友项目\\web\\vendor\\freemote\\emoteplayer.js",
+          "line": 296,
+          "symbol": "player.onUpdate();",
+          "sha256": "807e5c6a4d58d99c1e876f4155dd73d096ef92a5650c1c2a314be665dfdb9eba"
+        },
+        {
+          "path": "D:\\share、\\项目开发\\美冬本地女友项目\\web\\vendor\\freemote\\emoteplayer.js",
+          "line": 309,
+          "symbol": "if (player.stepUpdate) {",
+          "sha256": "807e5c6a4d58d99c1e876f4155dd73d096ef92a5650c1c2a314be665dfdb9eba"
+        },
+        {
+          "path": "D:\\share、\\项目开发\\美冬本地女友项目\\web\\vendor\\freemote\\emoteplayer.js",
+          "line": 324,
+          "symbol": "EmotePlayer_DrawToTexture2(player.playerId",
+          "sha256": "807e5c6a4d58d99c1e876f4155dd73d096ef92a5650c1c2a314be665dfdb9eba"
+        }
+      ]
+    },
+    {
+      "operation": "current DOM parameters instrumentation",
+      "behavior": "reference_server injects parameter queries into showState. showState is called by onUpdate before wrapper Step/Update/Draw. Cached DOM values can therefore describe the preceding update phase; capture queries should be after the matching core update.",
+      "evidence": [
+        {
+          "path": "D:\\share、\\项目开发\\美冬本地女友项目\\web\\tachie\\emote-stage.js",
+          "line": 89,
+          "symbol": "function showState()",
+          "sha256": "aee3938e05b864d99b7bedc2ed66998a721ebbefc904274119585f6a87a64c93"
+        },
+        {
+          "path": "D:\\share、\\项目开发\\美冬本地女友项目\\web\\tachie\\emote-stage.js",
+          "line": 104,
+          "symbol": "function update()",
+          "sha256": "aee3938e05b864d99b7bedc2ed66998a721ebbefc904274119585f6a87a64c93"
+        }
+      ]
+    }
+  ],
+  "parameter_coverage": {
+    "scope": "additional direct getVariable queries; do not assume zero defaults",
+    "existing_parameter_count": 37,
+    "combinator_variables": [
+      "act_sp2",
+      "act_sp3",
+      "body_LR",
+      "body_UD",
+      "body_slant",
+      "face_eye_LR",
+      "face_eye_UD",
+      "hair_LR",
+      "hair_LR_M",
+      "hair_LR_M_front",
+      "hair_LR_M_sideL",
+      "hair_LR_M_sideR",
+      "hair_LR_front",
+      "hair_LR_sideL",
+      "hair_LR_sideR",
+      "hair_UD",
+      "hair_UD_front",
+      "hair_UD_sideL",
+      "hair_UD_sideR",
+      "head_LR",
+      "head_UD",
+      "head_slant",
+      "quake_LR",
+      "quake_LR_M",
+      "quake_UD"
+    ],
+    "selector_output_variables": [
+      "fade_a",
+      "fade_b",
+      "fade_c",
+      "fade_d",
+      "fade_e"
+    ],
+    "motion_parameter_variables": [
+      "act_sp",
+      "body_slant",
+      "face_cheek",
+      "face_eye_hi",
+      "face_eye_open",
+      "face_eye_sp",
+      "face_eyebrow",
+      "face_eyebrow_sp",
+      "face_hitomi_sp",
+      "face_mouth",
+      "face_mouth_sp",
+      "face_talk",
+      "face_tears",
+      "fade_a",
+      "fade_b",
+      "hair_UD",
+      "hair_UD_front",
+      "hair_UD_sideL",
+      "hair_UD_sideR",
+      "head_LR",
+      "head_slant",
+      "move_LR",
+      "move_UD"
+    ],
+    "additional_query_keys": [
+      "fade_a",
+      "fade_b",
+      "fade_c",
+      "fade_d",
+      "fade_e",
+      "hair_LR",
+      "hair_LR_M",
+      "hair_LR_M_front",
+      "hair_LR_M_sideL",
+      "hair_LR_M_sideR",
+      "hair_LR_front",
+      "hair_LR_sideL",
+      "hair_LR_sideR",
+      "hair_UD",
+      "hair_UD_front",
+      "hair_UD_sideL",
+      "hair_UD_sideR",
+      "quake_LR",
+      "quake_LR_M",
+      "quake_UD"
+    ],
+    "union_query_keys": [
+      "act_sp",
+      "act_sp2",
+      "act_sp3",
+      "arm_type",
+      "body_LR",
+      "body_UD",
+      "body_slant",
+      "face_cheek",
+      "face_eye_LR",
+      "face_eye_UD",
+      "face_eye_hi",
+      "face_eye_open",
+      "face_eye_sp",
+      "face_eyebrow",
+      "face_eyebrow_sp",
+      "face_hitomi_sp",
+      "face_mouth",
+      "face_mouth_sp",
+      "face_talk",
+      "face_tears",
+      "fade_a",
+      "fade_b",
+      "fade_c",
+      "fade_d",
+      "fade_e",
+      "fade_q",
+      "fade_r",
+      "fade_s",
+      "fade_t",
+      "fade_u",
+      "fade_v",
+      "fade_w",
+      "fade_x",
+      "fade_y",
+      "fade_z",
+      "hair_LR",
+      "hair_LR_M",
+      "hair_LR_M_front",
+      "hair_LR_M_sideL",
+      "hair_LR_M_sideR",
+      "hair_LR_front",
+      "hair_LR_sideL",
+      "hair_LR_sideR",
+      "hair_UD",
+      "hair_UD_front",
+      "hair_UD_sideL",
+      "hair_UD_sideR",
+      "head_LR",
+      "head_UD",
+      "head_slant",
+      "move_LR",
+      "move_UD",
+      "quake_LR",
+      "quake_LR_M",
+      "quake_UD",
+      "vr_LR",
+      "vr_UD"
+    ],
+    "minimum_missing_for_combinator_and_selector": [
+      "fade_a",
+      "fade_b",
+      "fade_c",
+      "fade_d",
+      "fade_e",
+      "hair_LR",
+      "hair_LR_M",
+      "hair_LR_M_front",
+      "hair_LR_M_sideL",
+      "hair_LR_M_sideR",
+      "hair_LR_front",
+      "hair_LR_sideL",
+      "hair_LR_sideR",
+      "hair_UD",
+      "hair_UD_front",
+      "hair_UD_sideL",
+      "hair_UD_sideR",
+      "quake_LR",
+      "quake_LR_M",
+      "quake_UD"
+    ],
+    "observation_phase": "after core Step/Update, before or immediately after the corresponding Draw; not cached showState before Update"
+  },
+  "recommended_discriminating_observations": [
+    "Keep separate fresh instances for combo/no_combo at freeze0, positive1 author frame, and60 frames. Export lossless pixels and post-update full variable union for each image.",
+    "Compare combo/no_combo first, then compare native direct Geometry using the complete same post-update values. Preserve projection, dimensions, texture and the existing diagnostic disable flags.",
+    "Record bulk Update(60) separately from60 successive Update(1) calls; they need not be equivalent when internal update phases/controllers are involved.",
+    "Do not derive physics correctness from controlled models whose physical controllers are disabled; production native playback physics remains enabled.",
+    "If positive-time combo/no_combo still equal, further isolated original-engine evidence is needed before declaring fields unused; do not silently remove the candidate combinators."
+  ],
+  "no_runtime_claim": true,
+  "production_changed": false,
+  "browser_used": false,
+  "board_connected": false
+}

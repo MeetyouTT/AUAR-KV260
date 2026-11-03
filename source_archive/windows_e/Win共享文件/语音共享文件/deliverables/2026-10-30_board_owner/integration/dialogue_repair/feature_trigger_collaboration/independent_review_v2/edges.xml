@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="1.272" timestamp="2026-10-31T07:30:18.432515-07:00" hostname="zhenghang"><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.dialogue_repair.feature_trigger_collaboration.independent_review_v2.test_review_edges" name="test_same_current_speaker_request_rechecks_status_after_receipt_invalidated[expired]" time="0.552"><failure message="ValueError: Speaker request belongs to another boot">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/feature_trigger_collaboration/independent_review_v2/tmp_edges/test_same_current_speaker_requ0')
+change = 'expired'
+
+    @pytest.mark.parametrize('change', ['expired', 'revision'])
+    def test_same_current_speaker_request_rechecks_status_after_receipt_invalidated(tmp_path, change):
+        from board.runtime.board_speaker_business import BoardSpeakerBusiness
+        from tests.framework.test_board_business import Clock
+        from tests.framework.test_board_speaker_business import Encoder, MODEL, quality, capture
+        clock = Clock()
+        service = BoardSpeakerBusiness.create(tmp_path/'public-speaker', encoder_factory=Encoder,
+            board_boot_id='test-boot', quality=quality, expected_model_id=MODEL,
+            anonymous_config={'enabled': True}, wall_clock=lambda: 1793400000.,
+            clock=clock, data_origin='synthetic')
+        def say(n, text):
+            meta, pcm = capture(n); meta['budget_ms'] = 120000
+            return service.turn(meta, text, pcm, deadline=clock()+120, is_current=lambda: True)
+        try:
+&gt;           say(1, '登记我的声纹，我叫测试甲')
+
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\feature_trigger_collaboration\independent_review_v2\test_review_edges.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\feature_trigger_collaboration\independent_review_v2\test_review_edges.py:26: in say
+    return service.turn(meta, text, pcm, deadline=clock()+120, is_current=lambda: True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\feature_trigger_collaboration\runtime_v16\board\runtime\board_speaker_business.py:455: in turn
+    return self._call(work,meta,pcm,**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\feature_trigger_collaboration\runtime_v16\board\runtime\board_speaker_business.py:421: in _call
+    future,job = self._submit(operation,meta,pcm,**kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;board.runtime.board_speaker_business.BoardSpeakerBusiness object at 0x0000023A4EC75520&gt;
+operation = &lt;function BoardSpeakerBusiness.turn.&lt;locals&gt;.work at 0x0000023A67BC4540&gt;
+meta = {'board_boot_id': 'public-synthetic-boot', 'budget_ms': 120000, 'capture_id': 'capture-1', 'generation': 1, ...}
+pcm = b'\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01...01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00'
+
+    def _submit(self, operation, meta, pcm, *, deadline=None, is_current=lambda:True, cancel_event=None, cid=None, control=True):
+        meta = context(meta,pcm)
+        if meta['board_boot_id'] != self.boot:
+&gt;           raise ValueError('Speaker request belongs to another boot')
+E           ValueError: Speaker request belongs to another boot
+
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\feature_trigger_collaboration\runtime_v16\board\runtime\board_speaker_business.py:365: ValueError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.dialogue_repair.feature_trigger_collaboration.independent_review_v2.test_review_edges" name="test_same_current_speaker_request_rechecks_status_after_receipt_invalidated[revision]" time="0.149"><failure message="ValueError: Speaker request belongs to another boot">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/feature_trigger_collaboration/independent_review_v2/tmp_edges/test_same_current_speaker_requ1')
+change = 'revision'
+
+    @pytest.mark.parametrize('change', ['expired', 'revision'])
+    def test_same_current_speaker_request_rechecks_status_after_receipt_invalidated(tmp_path, change):
+        from board.runtime.board_speaker_business import BoardSpeakerBusiness
+        from tests.framework.test_board_business import Clock
+        from tests.framework.test_board_speaker_business import Encoder, MODEL, quality, capture
+        clock = Clock()
+        service = BoardSpeakerBusiness.create(tmp_path/'public-speaker', encoder_factory=Encoder,
+            board_boot_id='test-boot', quality=quality, expected_model_id=MODEL,
+            anonymous_config={'enabled': True}, wall_clock=lambda: 1793400000.,
+            clock=clock, data_origin='synthetic')
+        def say(n, text):
+            meta, pcm = capture(n); meta['budget_ms'] = 120000
+            return service.turn(meta, text, pcm, deadline=clock()+120, is_current=lambda: True)
+        try:
+&gt;           say(1, '登记我的声纹，我叫测试甲')
+
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\feature_trigger_collaboration\independent_review_v2\test_review_edges.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\feature_trigger_collaboration\independent_review_v2\test_review_edges.py:26: in say
+    return service.turn(meta, text, pcm, deadline=clock()+120, is_current=lambda: True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\feature_trigger_collaboration\runtime_v16\board\runtime\board_speaker_business.py:455: in turn
+    return self._call(work,meta,pcm,**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\feature_trigger_collaboration\runtime_v16\board\runtime\board_speaker_business.py:421: in _call
+    future,job = self._submit(operation,meta,pcm,**kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;board.runtime.board_speaker_business.BoardSpeakerBusiness object at 0x0000023A67A9F080&gt;
+operation = &lt;function BoardSpeakerBusiness.turn.&lt;locals&gt;.work at 0x0000023A67D0AFC0&gt;
+meta = {'board_boot_id': 'public-synthetic-boot', 'budget_ms': 120000, 'capture_id': 'capture-1', 'generation': 1, ...}
+pcm = b'\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01...01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00'
+
+    def _submit(self, operation, meta, pcm, *, deadline=None, is_current=lambda:True, cancel_event=None, cid=None, control=True):
+        meta = context(meta,pcm)
+        if meta['board_boot_id'] != self.boot:
+&gt;           raise ValueError('Speaker request belongs to another boot')
+E           ValueError: Speaker request belongs to another boot
+
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\feature_trigger_collaboration\runtime_v16\board\runtime\board_speaker_business.py:365: ValueError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.dialogue_repair.feature_trigger_collaboration.independent_review_v2.test_review_edges" name="test_unmatched_natural_status_question_during_enrollment_does_not_sample" time="0.408"><failure message="AssertionError: {'ack_committed': True, 'private_store_accessed': False, 'profile_grants': 0, 'query_matched': False, ...}&#10;assert 1 == 0">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/feature_trigger_collaboration/independent_review_v2/tmp_edges/test_unmatched_natural_status_0')
+
+    def test_unmatched_natural_status_question_during_enrollment_does_not_sample(tmp_path):
+        from board.runtime.board_business import BoardBusinessConfig, BoardBusinessRuntime
+        from board.runtime.board_speaker_business import BoardSpeakerBusiness
+        from common.conversation_selection import ConversationSelection
+        from tests.framework.test_board_business import Clock, Timeline, Client, Asr, drain
+        from tests.framework.test_board_speaker_business import Encoder, MODEL, quality
+        from tools.yuki_business_candidate import bind_runtime_pair
+        from common.feature_intents import speaker_query_requested
+        source = FEATURE.parent.parent/'resume_yuki_business_candidate_v2/test_candidate_contracts.py'
+        spec = importlib.util.spec_from_file_location('independent_v2_pair', source)
+        module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+        pair, _, _ = module.pair_ready()
+        clock, timeline, client = Clock(), Timeline(), Client()
+        bundle = BoardBusinessRuntime(BoardBusinessConfig(str(tmp_path/'public-business'),
+            (1793300000., 1793500000.)), 'test-boot', asr=Asr(), system_prompt=pair.selected_prompt,
+            conversation_selection=ConversationSelection(tmp_path/'public-selection.json'),
+            timeline=timeline, client=client, clock=clock, capture_idle=lambda: True,
+            identity_snapshot=lambda: None, identity_command=lambda command: None)
+        bind_runtime_pair(bundle, pair)
+        business = BoardSpeakerBusiness.create(tmp_path/'public-speaker', encoder_factory=Encoder,
+            board_boot_id='test-boot', quality=quality, expected_model_id=MODEL,
+            anonymous_config={'enabled': True}, wall_clock=timeline.event_time,
+            clock=clock, data_origin='synthetic')
+        bundle.attach_speaker_business(business); bundle.jobs.select_conversation(resume=False)
+        def say(n, text):
+            bundle.jobs.asr.text = text
+            pcm = struct.pack('&lt;h', n*1000)*48000
+            meta = bundle.jobs.submit(type('Clip', (), dict(capture_id='review-'+str(n),
+                audio=type('Audio', (), dict(sample_count=48000))(), pcm=pcm))())
+            assert bundle.jobs.run_next()
+            values = drain(bundle.jobs)
+            assert not any('error' in row for row in values), values
+            complete = next(row['network_complete'] for row in values if 'network_complete' in row)
+            bundle.jobs.acknowledge(meta, complete); bundle.jobs.drain_actions()
+            assert bundle.jobs.last_ack['committed']
+            return meta
+        def samples(meta):
+            def read():
+                row = business.hub.speaker.sessions.get(business.hub.speaker.key(meta))
+                return len(row['vectors']) if row and 'vectors' in row else None
+            return business.pool.submit(read).result(1)
+        try:
+            meta = say(1, '雪妃，登记我的声纹，我叫测试乙')
+            before = samples(meta); assert before == 0
+            text = '你有没有保存我的声纹？'
+            meta = say(2, text)
+            after = samples(meta)
+            facts = dict(query_matched=speaker_query_requested(text), samples_before=before,
+                samples_after=after, ack_committed=True, profile_grants=len(bundle.access.grants),
+                private_store_accessed=False)
+            (HERE/'unmatched_query.json').write_text(json.dumps(facts, indent=2)+'\n', encoding='utf-8')
+&gt;           assert after == before, facts
+E           AssertionError: {'ack_committed': True, 'private_store_accessed': False, 'profile_grants': 0, 'query_matched': False, ...}
+E           assert 1 == 0
+
+语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\feature_trigger_collaboration\independent_review_v2\test_review_edges.py:107: AssertionError</failure></testcase></testsuite></testsuites>

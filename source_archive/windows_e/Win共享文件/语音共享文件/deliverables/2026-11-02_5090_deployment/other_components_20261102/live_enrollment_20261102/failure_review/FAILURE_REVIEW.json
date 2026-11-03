@@ -1,0 +1,110 @@
+{
+  "schema": "aura-live-face-enrollment-failure-review-1",
+  "status": "TERMINAL_READY_CONFIRM_TIMEOUT_AND_REPRODUCIBLE_CACHED_START_HANDOFF_RACE",
+  "updated_utc": "2026-11-02T09:32:23.632550+00:00",
+  "observed_terminal_reason": "SAMPLE_OR_CONFIRM_TIMEOUT",
+  "sample_counts": {
+    "collect": 10,
+    "validate": 5
+  },
+  "last_failure_mono_ms": 31894860,
+  "heldout_validation_metrics": {
+    "quality_skips": 1,
+    "recovery_rejections": 0,
+    "validation_attempts": 11,
+    "validation_passes": 11,
+    "score_rejections": 0,
+    "margin_rejections": 0,
+    "best_validation_run": 5,
+    "front_pose_skips": 11
+  },
+  "strictly_simple_true_original_constructor": true,
+  "second_oral_face_confirmation_required_by_simple_mode": false,
+  "production_uses_cached_ui_snapshot_and_direct_post_command": true,
+  "production_handoff_source_pins_verified": {
+    "tools/production_board_business_gui.py": {
+      "actual_sha256": "b01f6edb9efe88cf95da60900e5ccc32eec93a24ef3f515ab08f51ae2ee6ada8",
+      "pin_matches_actual": true,
+      "matches_reviewed_public_source": true
+    },
+    "board/runtime/audio/channel_jobs.py": {
+      "actual_sha256": "015e13d27db25819d002c4c87087802e02e8b65ac10119bf467635871b458822",
+      "pin_matches_actual": true,
+      "matches_reviewed_public_source": true
+    },
+    "board/interaction/ui_services.py": {
+      "actual_sha256": "b55ee295e2cb5494f387fbaa4aa081fd1d6bffd57588c018c5f31daae56bd711",
+      "pin_matches_actual": true,
+      "matches_reviewed_public_source": true
+    },
+    "board/identity/voice_enrollment.py": {
+      "actual_sha256": "83796dd78c57555ea66eeb2b745a89f8b3670945a4406176cb3486111d9466b8",
+      "pin_matches_actual": true,
+      "matches_reviewed_public_source": true
+    },
+    "board/runtime/board_business.py": {
+      "actual_sha256": "b08209eca7979825e26845080bca5e1d64e065d3cabd1178df763a93540573f2",
+      "pin_matches_actual": true,
+      "matches_reviewed_public_source": true
+    }
+  },
+  "code_race_locally_reproduced_with_exact_original_methods": true,
+  "unique_live_root_cause_proved": false,
+  "phase_snapshot_does_not_persist_session_identity_for_cross_sample_correlation": true,
+  "last_identity_operation": {
+    "db_version": 2,
+    "present": true,
+    "action": "identity_delete",
+    "state": "COMMITTED"
+  },
+  "last_identity_operation_has_timestamp": false,
+  "delete_operation_actor_or_time_determined": false,
+  "face_catalog_count_from_later_public_api": 0,
+  "photo_archive_public_counters": {
+    "enabled": true,
+    "ready": true,
+    "image_count": 45,
+    "error_count": 0
+  },
+  "future_gallery_rejection_code_observed": false,
+  "camera_or_gui_restart_cause_proved": false,
+  "ack_contract": {
+    "fields": [
+      "protocol_version",
+      "board_boot_id",
+      "service_epoch",
+      "command_id",
+      "ui_epoch",
+      "ui_generation",
+      "accepted",
+      "detail"
+    ],
+    "sampling_session_id_or_result_present_in_contract": false,
+    "original_command_deadline_ms": 2500,
+    "required_correlation_fields": [
+      "protocol_version",
+      "board_boot_id",
+      "service_epoch",
+      "command_id",
+      "ui_epoch",
+      "ui_generation"
+    ]
+  },
+  "safe_fix_constraints": [
+    "One accepted identity_sample_start only, never resend it while publication is pending",
+    "Validate the current command ACK ownership and original deadline",
+    "Wait boundedly for a newly published session distinct from the pre-start session with unchanged source/target/gallery ownership",
+    "Recheck current request/cancellation during wait; do not label missing publication as confirmed failure or adopt an old ready/failed session",
+    "Cancel only a specifically proven session via exact id guard, never the unknown current session",
+    "Preserve thresholds, quality, TTL, model, original confirmation, save and partial-outcome semantics",
+    "Do not replace entire startup or unrelated main-page sources"
+  ],
+  "live_actions_performed": false,
+  "real_store_template_image_audio_or_name_read": false,
+  "evidence_sha256": {
+    "LIVE_FIXED_FAILURE_REASONS.json": "a40c6dec8bc52262aaa10351ab6d3d685604e4ae2f55ce35643b3040bfb32f17",
+    "HANDOFF_SOURCE_AND_ARCHIVE_METADATA.json": "c51d27d4a1dc29716f56d4403a738a632c4558ccbefa070244090611364bf98a",
+    "REPRO_STALE_START_SNAPSHOT.json": "5fea268095053dd6e7072b6eb7ab03a5d30bd88ffc7865f19a4b3dd88ac50ba8",
+    "reproduce_stale_start_snapshot.py": "097c8b8c676ad212e1f0aa9c041df88368ded1ad3f02ef647e5965b7aa77d8a1"
+  }
+}

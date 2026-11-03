@@ -1,0 +1,150 @@
+{
+  "boot": "7924ac9f-311d-4fcd-98be-57bf023cf1aa",
+  "release": "/home/root/aura-dpu-vision-20261021/postpower-retry-live/release-slot-wait-81e6463c3747-298300",
+  "unit_sha256": "048ee59cf4f01d84f0442825926b38ae0940e3c566a005449385d34536734e2f",
+  "camera_pid": 298571,
+  "camera_config": {
+    "device": "/dev/v4l/by-id/usb-HD_720P_Webcam_HD_720P_Webcam_20130901-video-index0",
+    "port": 8790,
+    "capture_fps": 30,
+    "inference_fps": 10,
+    "detector_backend": "dpu_yolox",
+    "yolo": {
+      "model": "/home/root/aura-bytetrack-20261011/models/yolox_nano_person.xmodel",
+      "model_sha256": "def64abdeeccbd020cb651913ba907464c1a1786e30ba7d4aa077b601388950a",
+      "model_config_sha256": "e3359212356578053b71a844ab10d82617d80c33274bb926875c3f422b6de611",
+      "native_library": "/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/board/vision/native/libaura_yolox.so",
+      "native_sha256": "14524ca6364f7ecab3464999a1f20271d9f3b13e80684859f6da1573caf6efa8",
+      "arch_fingerprint": "0x101000056010407",
+      "classes": [
+        "person"
+      ],
+      "score_threshold": 0.1,
+      "person_nms_iou": 0.45,
+      "reference_image": "/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/tests/fixtures/vision/person_bus.jpg",
+      "reference_sha256": "975917d943c3dd367a27c37c4a9b0cdaf28c73ce671c881f6489a18bda20b46f"
+    },
+    "backend_dir": "/home/root/aura-realtime-vision-20261007/releases/mirror-0c1d48dd418e922d",
+    "backend_sha256": {
+      "face_compat_fast.py": "ee34109e23423d99a4ea3ff75c2bf9d113329b1c8162cd02f30e7dfcfb6bfeaf",
+      "vision_core.py": "9629102ced2856bbd0c120b9c5e3df36c224424165bb980b90be42350ae8a700"
+    },
+    "model_root": "/home/root/aura-adaptation-20261006/identity",
+    "tracking": {
+      "backend": "bytetrack_numpy",
+      "track_threshold": 0.5,
+      "new_track_threshold": 0.6,
+      "match_threshold": 0.8,
+      "nominal_hz": 10,
+      "lost_ms": 500,
+      "confirm_observations": 2,
+      "source_sha256": {
+        "LICENSE": "e9d83751678cbaba6dfba902ea39215c423d93425e58f8450d6001f7261696f9",
+        "__init__.py": "8ca3af0743671af49094a5e770931311769e0a6dc3df9817170bbe128db0336b",
+        "basetrack.py": "c938afcf7c516bba4a77155c2499fcae6f926df7a2faa6f73a4be1b073f9bb2d",
+        "byte_tracker.py": "42a9ada9df21356da16b58096ad20aa42bf2820a1e6b64ba6372169bb04ca75a",
+        "kalman_filter.py": "877fbfd27fd8d76b68be280cc7483f984faa269165f987815b2b7d10b577bf9d",
+        "matching.py": "cce9866fabf71c4fc5d2350fabc050bde12de21dd5eafa2e0e76eb0299ce80c3",
+        "upstream_manifest.json": "86d5788b064af8b2370800a21db21af265ee0cfc3967aef8c89f3fe08aedd17c"
+      }
+    },
+    "identity": {
+      "enabled": true,
+      "config": "/home/root/aura-dpu-vision-20261021/runtime/81fdb11903abb71e-live-134783/board_identity.json"
+    },
+    "yunet_dpu_recovery": true,
+    "yunet_slot_wait_ms": 100
+  },
+  "identity_config": {
+    "schema_version": "aura-camera-identity-1",
+    "face_model": "/home/root/aura-adaptation-20261006/identity/models/yunet_2022mar.onnx",
+    "embedding_model": "/home/root/aura-adaptation-20261006/identity/models/sface_2021dec_retry.onnx",
+    "model_id": "sface-2021dec-0ba9fbfa01b5",
+    "database": "~/.local/share/aura/identities.sqlite3",
+    "input_size": 320,
+    "minimum_face_score": 0.9,
+    "minimum_face_pixels": 48,
+    "minimum_blur_variance": 40,
+    "threshold": 0.5,
+    "ambiguity_margin": 0.1,
+    "threshold_origin": "user_authorized_experimental_cosine_0.50_not_field_calibrated",
+    "interval_ms": 500,
+    "result_ttl_ms": 3000,
+    "feature_backend": {
+      "kind": "windows_sface",
+      "host": "192.168.50.1",
+      "port": 8792,
+      "timeout_ms": 650
+    },
+    "enrollment_photos": {
+      "enabled": true,
+      "directory": "~/.local/share/aura/enrollment_photos",
+      "max_images_per_session": 192
+    },
+    "face_backend": {
+      "kind": "dpu_yunet",
+      "model": "/home/root/aura-dpu-vision-20261021/staging/3f10273827d88501/kit-974f2fb1a5641f10/yunet_public_int8.xmodel",
+      "manifest": "/home/root/aura-dpu-vision-20261021/staging/3f10273827d88501/kit-974f2fb1a5641f10/manifest.json",
+      "model_sha256": "54d348bfeee01756a98bda4103c056a2d5e469a26ea887822da6edc28bdbbbee",
+      "manifest_sha256": "443d3de67837fa2b16d9c1caba55fb853416f784ced94054969e4cc43c02cf22"
+    }
+  },
+  "identity_config_path": "/home/root/aura-dpu-vision-20261021/runtime/81fdb11903abb71e-live-134783/board_identity.json",
+  "identity_config_sha256": "6e53c12c2b0128a4b44125a76a71e6e73a0ae487accb5eafd8acfeef00844cea",
+  "face_count": 1,
+  "face_backend": "DPU_YUNET_INT8",
+  "identity_backend": "WINDOWS_CPU_SFACE_ORT",
+  "files": {
+    "board/vision/dpu_sface.py": {
+      "sha256": "7bff1b22eaa7e9fd5334c28f210664942f43ba4592ec32cc0750f32f1b239b0b",
+      "bytes": 4669
+    },
+    "board/identity/model_store.py": {
+      "sha256": "310b4f3290fdf9d07b47800477e8ceb4c7631fbb9e622fac0f8c547a0d1563da",
+      "bytes": 7965
+    },
+    "board/identity/sface_shadow.py": {
+      "sha256": "69ae50d51ec325b79e264dc49f61e70d7d578fb1ed4f43f4fcc32235382059b5",
+      "bytes": 15695
+    },
+    "board/identity/sface_producer.py": {
+      "sha256": "663ae00fa98888767959c528c3d479a2ba9952d3975ef1a17b897623b3274a8e",
+      "bytes": 8352
+    },
+    "board/identity/sface_calibration.py": {
+      "sha256": "23a5c619b483e65c7dd152e5a225df55763ac2936dbf5ae717c6ec998fb19e5c",
+      "bytes": 26245
+    },
+    "board/identity/calibration_http.py": {
+      "sha256": "42159f8b5a37c8bd0a86628df035d959cfd8ce8558b3433bf6b7b9fd01cfb621",
+      "bytes": 4423
+    },
+    "board/identity/live.py": {
+      "sha256": "92ff7ea739c92942b37f60158bdbdec517596ce33fcc0113766e8f2a8fff2044",
+      "bytes": 19134
+    },
+    "board/identity/deferred.py": {
+      "sha256": "a09e7e751a8441d7f3be0d52c558ae8687360042872722eb3b3af87b9d24dc01",
+      "bytes": 323
+    },
+    "board/vision/reference_faces.py": {
+      "sha256": "ee34109e23423d99a4ea3ff75c2bf9d113329b1c8162cd02f30e7dfcfb6bfeaf",
+      "bytes": 6577
+    },
+    "board/identity/store.py": {
+      "sha256": "cd9f535dccb789938eaa9d625b85b104482226943dd2536c09c8002ae03c3c1a",
+      "bytes": 5907
+    },
+    "board/identity/sampling.py": {
+      "sha256": "29dcd8546fe1a57e1a3b757fbaa9b4459009d11f2324fcc0be27001c0580009a",
+      "bytes": 11916
+    },
+    "board/identity/photo_archive.py": {
+      "sha256": "9ace86699e40e008a13a81f9c371d1624f2b7f0cfe45f3c854414dd06367fc0f",
+      "bytes": 8086
+    }
+  },
+  "old_database_exists": false,
+  "old_archive_enabled": true,
+  "old_archive_file_counts": {}
+}

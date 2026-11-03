@@ -1,0 +1,60 @@
+{
+  "status": "PASS_STATIC_AND_TARGETED_REGRESSIONS_REAL_CV2_AND_DEPLOYMENT_PENDING",
+  "baseline_sha256": "9d714b9bd00ea1da12088fa1e22100d7bdb689d0cac10332c3933b31e4f4d2df",
+  "candidate_sha256": "7d4773b8ff527773eefc90aa2443dd4bfae801f07c6fcde672af65dd22ff8f66",
+  "scope_checks": [
+    "all original top-level definitions except CameraState/run unchanged; only _PreviewJpeg added",
+    "capture, observations, snapshot, identity/command and original HTTP handlers unchanged",
+    "normalizing only lazy publication and producer-error helper makes entire run AST identical",
+    "all five independent v2/latest-only blocker reproductions now pass against actual v3"
+  ],
+  "retained_frame_races": [
+    {
+      "old_mode": "ok",
+      "new_mode": "raise",
+      "new_jpeg_available": false,
+      "error_after_latest_request": true,
+      "error_after_stale_request": true,
+      "stale_request_changed_latest_error": false,
+      "old_request_returned_jpeg": true
+    },
+    {
+      "old_mode": "raise",
+      "new_mode": "ok",
+      "new_jpeg_available": true,
+      "error_after_latest_request": false,
+      "error_after_stale_request": false,
+      "stale_request_changed_latest_error": false,
+      "old_request_returned_jpeg": false
+    }
+  ],
+  "producer_error_after_request_start": {
+    "request_returned_old_valid_jpeg": true,
+    "newer_producer_error_preserved": true
+  },
+  "producer_error_before_cached_request": {
+    "request_returned_old_valid_jpeg": true,
+    "newer_producer_error_preserved": true
+  },
+  "same_fid_waiters": {
+    "cached_frames": 1,
+    "retired_waiter_owned_images": 0,
+    "total_owned_images_while_no_encoder_active": 1,
+    "unneeded_old_encodes": 0
+  },
+  "unmodified_agent_suite_reused": {
+    "tests": 27,
+    "passed": true,
+    "not_rerun": true
+  },
+  "actual_loop_unique_fid_confirmed": true,
+  "remaining": [
+    "root CPU-only real OpenCV synthetic byte-equivalence probe",
+    "fresh current-boot source closure and normal exact checkpoint restore/readback binding",
+    "same-condition current-boot camera/GTK CPU comparison and actual joint dialogue/follow acceptance"
+  ],
+  "production_candidate_modified": false,
+  "board_or_external_network_or_models_used": false,
+  "synthetic_loopback_http_fixture_executed_in_this_review": false,
+  "runtime_savings_claimed": false
+}

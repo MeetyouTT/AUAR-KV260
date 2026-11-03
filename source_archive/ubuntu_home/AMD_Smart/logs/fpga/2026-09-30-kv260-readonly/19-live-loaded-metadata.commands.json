@@ -1,0 +1,7 @@
+[
+  {
+    "id": "loaded_metadata",
+    "command": "python3 -B -c 'import pathlib,base64,json; p=pathlib.Path(\"/sys/bus/platform/devices/axi:zyxclmm_drm/ip_layout\"); b=p.read_bytes(); print(json.dumps({\"source\":\"live ZOCL sysfs IP_LAYOUT\",\"bytes\":len(b),\"base64\":base64.b64encode(b).decode()}))'; cat /sys/bus/platform/devices/axi:zyxclmm_drm/xclbinid /sys/bus/platform/devices/axi:zyxclmm_drm/dtbo_path /sys/bus/platform/devices/axi:zyxclmm_drm/kds_numcus /sys/bus/platform/devices/axi:zyxclmm_drm/kds_xrt_version; sha256sum /sys/bus/platform/devices/axi:zyxclmm_drm/xclbin_full; cat /etc/dfx-mgrd/default_firmware; cat /proc/sys/kernel/random/boot_id; dmesg | tail -n 18",
+    "timeout": 45
+  }
+]

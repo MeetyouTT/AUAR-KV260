@@ -1,0 +1,158 @@
+# The precheck above is the original 24-pin RAM-only collector through serialization.
+# The host composes it with this transaction; no project code other than isolated _verify.
+import argparse
+import os
+import stat
+import sys
+import uuid
+
+parser=argparse.ArgumentParser(description='Guarded selected GUI binding replacement; never starts services')
+parser.add_argument('--apply-selected-current-binding',action='store_true')
+args=parser.parse_args()
+TX=Path('/home/root/aura-5090-recovery-20261102-903cfade/gui-selected-1333-24pins-v1')
+DEST=TX/'face_gallery_readback.local.json'
+EXPECTED_CANDIDATE_SHA='4d8f0c2bccea1c7a56761fbcb204f40ba3b3c2fc9efad76af778aff535d378ac'
+assert hashlib.sha256(raw_candidate).hexdigest() == EXPECTED_CANDIDATE_SHA
+assert digest(RUN) == '6c9928fa49db7ef34ecc4d8854f3a456468fa72aa1faf7cdf1b7466cf2d2148a'
+assert not TX.exists() and not TX.is_symlink()
+assert TX.parent.is_dir() and TX.parent.resolve(strict=True) == TX.parent
+assert os.geteuid() == 0 and TX.parent.stat().st_uid == 0
+STARTUP=BUSINESS/'startup/config.json'
+UI=AURA/'config/board_avatar_gtk.json'
+before={STARTUP:raw(STARTUP),UI:raw(UI)}
+assert hashlib.sha256(before[STARTUP]).hexdigest() == STARTUP_SHA
+assert hashlib.sha256(before[UI]).hexdigest() == UI_SHA
+new_ui=copy.deepcopy(ui)
+assert set(spec) == {'path','sha256'}
+new_ui['board_business']['face_readback']={'path':str(DEST),'sha256':EXPECTED_CANDIDATE_SHA}
+ui_after=(json.dumps(new_ui,sort_keys=True,indent=2)+'\n').encode()
+new_startup=copy.deepcopy(startup)
+new_startup['component_sha256']['config/board_avatar_gtk.json']=hashlib.sha256(ui_after).hexdigest()
+startup_after=(json.dumps(new_startup,sort_keys=True,indent=2)+'\n').encode()
+assert {k:v for k,v in new_startup.items() if k!='component_sha256'} == {k:v for k,v in startup.items() if k!='component_sha256'}
+assert [k for k,v in startup['component_sha256'].items() if new_startup['component_sha256'][k]!=v] == ['config/board_avatar_gtk.json']
+assert new_startup['component_sha256']['config/face_gallery_readback.local.json'] == DEFAULT_SHA
+after={UI:ui_after,STARTUP:startup_after}
+receipt={'schema':'aura-gui-selected-binding-transaction-1','boot_id':BOOT,
+    'started_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    'transaction_directory':str(TX),'status':'DRY_RUN_READY',
+    'selected_before_path':spec['path'],'selected_before_sha256':SELECTED_SHA,
+    'new_selected_path':str(DEST),'new_selected_sha256':EXPECTED_CANDIDATE_SHA,
+    'default_14_pin_binding_sha256':DEFAULT_SHA,
+    'startup_before_sha256':STARTUP_SHA,'startup_after_sha256':hashlib.sha256(startup_after).hexdigest(),
+    'ui_before_sha256':UI_SHA,'ui_after_sha256':hashlib.sha256(ui_after).hexdigest(),
+    'candidate_source_files_verified':24,'original_source_pins_preserved':23,
+    'native_python_files_verified':222,'operator_files_verified':7,'components_verified':380,
+    'changed_component_keys':['config/board_avatar_gtk.json'],
+    'camera_owner':{'pid':1333,'birth_ticks':'2359','command_sha256':CMD_SHA},
+    'original_verifier_passed':True,'camera_samples':[project(first),project(last)],
+    'services_started':False,'models_started_or_stopped':False,'fpga_reconfigured':False,
+    'mmio_or_motion_requested':False,'database_opened_or_copied':False,
+    'template_or_conversation_exported':False,'board_mutations':False}
+
+def sync_dir(path):
+    fd=os.open(path,os.O_RDONLY|os.O_DIRECTORY)
+    try:os.fsync(fd)
+    finally:os.close(fd)
+
+def create(path,data,mode=0o600):
+    fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,mode)
+    with os.fdopen(fd,'wb') as stream:
+        stream.write(data);stream.flush();os.fsync(stream.fileno())
+    sync_dir(path.parent)
+
+def replace(path,expected,data):
+    info=path.lstat()
+    assert stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and info.st_uid == 0
+    assert raw(path) == expected, 'Concurrent configuration change; replacement refused'
+    temporary=path.with_name('.'+path.name+'.gui-selected-'+uuid.uuid4().hex+'.tmp')
+    fd=os.open(temporary,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,stat.S_IMODE(info.st_mode))
+    try:
+        with os.fdopen(fd,'wb') as stream:
+            os.fchmod(stream.fileno(),stat.S_IMODE(info.st_mode))
+            stream.write(data);stream.flush();os.fsync(stream.fileno())
+        assert raw(path) == expected, 'Concurrent configuration change; replacement refused'
+        os.replace(temporary,path);sync_dir(path.parent)
+        assert raw(path) == data
+    finally:
+        if temporary.exists():temporary.unlink()
+
+def save_receipt():
+    encoded=(json.dumps(receipt,sort_keys=True,indent=2)+'\n').encode()
+    path=TX/'transaction.json'
+    if path.exists():replace(path,raw(path),encoded)
+    else:create(path,encoded)
+
+if not args.apply_selected_current_binding:
+    print(json.dumps(receipt,sort_keys=True));sys.exit(0)
+
+# The failed GUI and unchanged camera are checked again immediately before all writes.
+units();owner()
+assert raw(STARTUP) == before[STARTUP] and raw(UI) == before[UI]
+assert digest(spec['path']) == SELECTED_SHA and digest(AURA/'config/face_gallery_readback.local.json') == DEFAULT_SHA
+assert json.loads(raw('/home/root/.local/share/aura-board-business/listening_preference.json')) == {'version':1,'enabled':False}
+TX.mkdir(mode=0o700);sync_dir(TX.parent)
+receipt.update(status='PREPARED_BACKUPS_PENDING',board_mutations=True)
+save_receipt()
+changed=[]
+try:
+    create(TX/'startup.before.json',before[STARTUP])
+    create(TX/'board_avatar_gtk.before.json',before[UI])
+    create(TX/'selected_binding.before.json',raw(spec['path']))
+    create(TX/'face_gallery_readback.local.json',raw_candidate)
+    assert digest(DEST) == EXPECTED_CANDIDATE_SHA
+    space['_verify'](json.loads(raw(DEST)))
+    receipt['status']='BACKUPS_AND_CANDIDATE_VERIFIED';save_receipt()
+    for path in (UI,STARTUP):
+        units();owner()
+        changed.append(path)  # Include replace-after-rename failure in rollback set.
+        replace(path,before[path],after[path])
+        receipt['status']='UI_WRITTEN_STARTUP_PENDING' if path==UI else 'CONFIGURATION_WRITTEN'
+        save_receipt()
+    assert digest(STARTUP) == receipt['startup_after_sha256']
+    assert all(digest(AURA/name) == sha for name,sha in new_startup['component_sha256'].items())
+    assert digest(spec['path']) == SELECTED_SHA
+    assert digest(AURA/'config/face_gallery_readback.local.json') == DEFAULT_SHA
+    assert all(digest(name)==sha for name,sha in candidate['source_sha256'].items())
+    assert digest(RUN) == run_sha
+    assert json.loads(raw(RUN))['identity'] == {'enabled':True,'config':candidate['identity_config']}
+    assert {str(p.relative_to(native_root)):digest(p) for p in native_root.rglob('*.py') if not p.is_symlink()} == native_pins
+    assert all(digest(path)==sha for path,sha in op_pins.items())
+    space['_verify'](json.loads(raw(DEST)))
+    assert json.loads(raw(UI))['board_business']['face_readback'] == {'path':str(DEST),'sha256':EXPECTED_CANDIDATE_SHA}
+    post=health()
+    assert post['capture_frames'] > last['capture_frames'] and post['detected_frames'] > last['detected_frames']
+    for key in ('pid','board_boot_id','service_epoch','camera_epoch'):
+        assert post[key] == last[key]
+    assert post['identity']['ready'] is True and not post['identity'].get('error')
+    assert not any(post.get(k) for k in ('camera_error','detector_error','preview_error'))
+    assert post['motion_command_emitted'] is False
+    assert json.loads(raw('/home/root/.local/share/aura-board-business/listening_preference.json')) == {'version':1,'enabled':False}
+    units();owner()
+    receipt.update(status='SELECTED_BINDING_UPDATED_GUI_STILL_STOPPED',
+        completed_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        post_camera_sample=project(post),post_component_sha256_verified=True,
+        post_original_verifier_passed=True,old_selected_binding_unchanged=True,
+        default_14_pin_binding_unchanged=True,services_started=False)
+    save_receipt()
+except BaseException as exc:
+    receipt.update(status='FAILED_ROLLBACK_PENDING',error_type=type(exc).__name__)
+    rollbacks=[]
+    for path in reversed(changed):
+        try:
+            units();owner()
+            current=raw(path)
+            if current == after[path]:
+                replace(path,after[path],before[path]);status='ORIGINAL_BYTES_RESTORED'
+            elif current == before[path]:status='ALREADY_ORIGINAL'
+            else:raise RuntimeError('Concurrent change; rollback refused')
+            rollbacks.append({'path':str(path),'status':status})
+        except BaseException as rollback_exc:
+            rollbacks.append({'path':str(path),'status':'ROLLBACK_REFUSED_OR_FAILED',
+                              'error_type':type(rollback_exc).__name__})
+    receipt['rollback_results']=rollbacks
+    receipt['status']='FAILED_ORIGINAL_CONFIG_RESTORED' if all(x['status'] in ('ORIGINAL_BYTES_RESTORED','ALREADY_ORIGINAL') for x in rollbacks) else 'FAILED_REQUIRES_RECONCILIATION'
+    save_receipt()
+    print(json.dumps(receipt,sort_keys=True),flush=True)
+    raise
+print(json.dumps(receipt,sort_keys=True))

@@ -1,0 +1,59 @@
+{
+  "source": "/home/ghmd/下载/xilinx-kv260-dpu-v2022.2-v3.0.0.img",
+  "method": "Read ext4 inode/extents via rb; no mount or loop device",
+  "filesystem_uuid": "740f013d-325f-4ca0-8b7b-6f398b41e481",
+  "filesystem_label": "root",
+  "files": [
+    {
+      "path_in_local_image": "/etc/os-release",
+      "bytes": 172,
+      "sha256": "dc3e493103800c9a9ea4b33c92b5e6b332f6691ace1ccc3635a29b853387c0ac",
+      "text": "ID=petalinux\nNAME=\"PetaLinux\"\nVERSION=\"2022.2_release_S10071807 (honister)\"\nVERSION_ID=2022.2_release_s10071807\nPRETTY_NAME=\"PetaLinux 2022.2_release_S10071807 (honister)\"\n"
+    },
+    {
+      "path_in_local_image": "/etc/vart.conf",
+      "bytes": 42,
+      "sha256": "a77a152dd2f907f0131efa019f461d267f009d9566b3857a0ada897adb0524a5",
+      "text": "firmware: /run/media/mmcblk0p1/dpu.xclbin\n"
+    },
+    {
+      "path_in_local_image": "/etc/fstab",
+      "bytes": 741,
+      "sha256": "b1978c1e094cd260b761afbaab75f0d9e659a78044d1d4fd86807bc44ef158bd",
+      "text": "# stock fstab - you probably want to override this with a machine specific one\n\n/dev/root            /                    auto       defaults              1  1\nproc                 /proc                proc       defaults              0  0\ndevpts               /dev/pts             devpts     mode=0620,ptmxmode=0666,gid=5      0  0\ntmpfs                /run                 tmpfs      mode=0755,nodev,nosuid,strictatime 0  0\ntmpfs                /var/volatile        tmpfs      defaults              0  0\n\n# uncomment this if your device has a SD/MMC/Transflash slot\n#/dev/mmcblk0p1       /media/card          auto       defaults,sync,noauto  0  0\n\nLABEL=boot        /boot   vfat    defaults    0   2\n/dev/mmcblk1p1\t/boot\tvfat\tdefaults\t0\t0\n"
+    },
+    {
+      "path_in_local_image": "/etc/init.d/dpu-auto-config",
+      "bytes": 262,
+      "sha256": "9fe0e4d23cdbb27c994e5168ab66c22a946bfa7a63180715089f09f4dba9bb82",
+      "text": "#!/bin/bash\n### BEGIN INFO\n# To start:\n#    1.Qos\n#    2.Auto Resize\n#    3.IRPS5401 for zcu104\n#    4.Dot tool\n### EBD INFO\n\n( cd /home/root/dpu_sw_optimize/zynqmp/;\nif [ -x zynqmp_dpu_optimize.sh ]; then\n\t./zynqmp_dpu_optimize.sh\nfi )\n\ndot -c > /dev/null 2>&1\n"
+    },
+    {
+      "path_in_local_image": "/home/root/dpu_sw_optimize/zynqmp/zynqmp_dpu_optimize.sh",
+      "bytes": 1098,
+      "sha256": "0a5ec6e3230b63d9e1e65836d5522dd691248ef48c4f04cdd44c2907d5e47c84",
+      "text": "#!/usr/bin/env bash\n\n# This script is for optimize DPU on software side\n\nset -e \n\nFOLDER=$(cd \"$(dirname $0)\";pwd)\nPLATFORM=$(cat /etc/hostname)\n\nfor _DIRECTORY in \"${FOLDER}/functions\"\ndo\n    if [ -e \"${_DIRECTORY}\" ]\n     then\n        for _FILE in \"${_DIRECTORY}\"/*.sh\n        do\n            if [ -e \"${_FILE}\" ]\n             then\n                source \"${_FILE}\"\n            fi\n        done\n\n        break\n    fi\ndone\n\nmsg() {\n    printf '%b' \"$1\" >&2\n}\n\nreport() {\n    if [ \"$ret\" -eq '0' ]; then\n        printf \"\\33[32m[✔]\\33[0m\\n\"\n    else\n        printf \"\\33[31m[✘]\\33[0m\\n\"\n    fi\n}\n\ncall_ext4_auto_resize() {\n    msg \"Auto resize ext4 partition ...\"\n    ext4_resize >/dev/null 2>&1\n    ret=\"$?\"\n    report\n\n}\n\ncall_qos_enable() {\n    msg \"Start QoS config ...\"\n    qos_config >/dev/null 2>&1\n    ret=\"$?\"\n    report\n}\n\ncall_irps5401() {\n    if [[ \"$PLATFORM\" =~ \"zcu104\" ]]; then\n        msg \"Config PMIC irps5401 ...\"\n        ${FOLDER}/functions/irps5401\n        ret=\"$?\"\n        report\n    fi\n}\n\nmain() {\n    call_ext4_auto_resize\n    call_qos_enable\n    call_irps5401\n}\n\nmain \"$@\"\n"
+    },
+    {
+      "path_in_local_image": "/lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.bit.bin",
+      "bytes": 7807932,
+      "sha256": "7d12c877e0fde40a243d2350b1a2227f565788bf9e2dcae4439d07f213d40a3f"
+    },
+    {
+      "path_in_local_image": "/lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.dtbo",
+      "bytes": 3139,
+      "sha256": "36338937904e5ec988566d7341f6504edba34c01bd7e2e3f2025ab0069337e35"
+    },
+    {
+      "path_in_local_image": "/lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.xclbin",
+      "bytes": 39603,
+      "sha256": "fc3abb934eec544e49a17c484336cf177258f475522cefc994ec458b726f69ac"
+    },
+    {
+      "path_in_local_image": "/lib/firmware/xilinx/kv260-benchmark-b4096/shell.json",
+      "bytes": 56,
+      "sha256": "2967ccbc1f75c8d4accd1b6fecc11b16a32a5d7992e56c6eebceb99a3410f777",
+      "text": "{\n    \"shell_type\" : \"XRT_FLAT\",\n    \"num_slots\": \"1\"\n}\n"
+    }
+  ]
+}

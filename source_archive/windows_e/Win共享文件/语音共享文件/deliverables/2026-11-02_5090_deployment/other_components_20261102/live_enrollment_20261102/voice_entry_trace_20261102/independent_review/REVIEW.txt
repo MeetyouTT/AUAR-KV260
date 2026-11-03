@@ -1,0 +1,16 @@
+两文件入口诊断候选独审通过，无可部署阻断；release脚本仅静态审查通过，未执行。
+
+Jobs580b2cf796275104cf15f2295afa2de29f82f32eabdd783a4b3aff858840a464
+Businessd034227118063dc4dbfb69f4bc735000980bd166e91262b4953f0db4b1baf5cc
+
+新增trace仅有界计数、13个固定片段布尔、固定kind/capability/phase/outcome和原异常类别白名单；没有原文、称呼、IDs、target原值、PCM或任意异常message。parser代码常量标志只是观察，不是授权或磁盘版本证明。RAM speaker窥视只读当前actor的sessions成员和until，不调用state()、不expire、不开库。
+
+独立6例全过：空ASR恰1次且不进handler；原speaker-query/active-enrollment/explicit-memory短路和调用次数；过期RAM session观察不删除或读私有字段；business.turn抛SystemExit同对象恰1次重抛，公开只记other类别。AST核对ASR与handler原调用参数相同、三处business.turn参数原样转发；_route条件在还原本地enrollment wrapper后完全相同。BoardBusinessRuntime整个class含实际AAC clock方法AST未变；原_admit_text/_put_error/ACK/cancel/public投影等方法未改。
+
+作者19专项全过，基线6原行为通过、13新投影测试明确skip。原60两版56通过、同4旧称呼/intent夹具失败、0error，保留此边界。
+
+release的PAYLOAD只在RAM做字节哈希校验未输出内容，与审阅两文件逐字节一致。stop仅正常GUI stop且临时no-force guard，pending不推进；apply要求停稳和旧GUI两PID消失，380源全核、每文件CAS/owner再核，仅改两源和两pin，异常条件回滚不会覆盖外来变化；start仅移除自有精确guard，daemon-reload后核原Restart/KillMode/SendSIGKILL/TimeoutStopUSec恢复才单次正常start。camera只校验，不控制。设备owner等实际前提由root现场核，审阅者未访问。
+
+解释边界：Jobs字段代表最后执行capture，包括空/错误capture；LIR reset保留trace并标记，下一次handler会新建trace；enrollment_checked=false表示短路没查状态；speaker RAM窥视是诊断瞬间，不是身份或授权。此候选用于捕获现场入口，没有宣称行为已修复。
+
+未SSH/GET/模型/真实DB/照片/语音/轴操作；未修改候选或producer测试、产品源，仅写independent_review产物。

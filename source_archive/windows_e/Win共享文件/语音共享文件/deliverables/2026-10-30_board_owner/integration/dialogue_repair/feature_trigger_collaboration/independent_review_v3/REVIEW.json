@@ -1,0 +1,206 @@
+{
+  "schema": "aura.feature-trigger-independent-review.v3",
+  "decision": "NO_BLOCKERS_FOR_ROOT_SOURCE_INTEGRATION",
+  "reviewed_source_manifest_sha256": "395eda57127551cd788c112ef1a8001f8d75c40d46b400d4a9a2af417702bb7e",
+  "superseded_v2_review": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\independent_review_v2\\REVIEW.json",
+    "sha256": "bfe4b878ab3d94796417c023641e0d432a00021ac264fd02e582b620e471cad4",
+    "preserved": true
+  },
+  "baseline": {
+    "startup_sha256": "bf6cdd70768ea5fac4e5be874a387f444c0834d67db5e7a2a744671d9019d63c",
+    "manifest_sha256": "e488f45660e78904d04ba57fe4210e2bcf9eeffa6282219096e9d7b6115df718"
+  },
+  "source_checks": {
+    "board/runtime/audio/board_dialogue_jobs.py": {
+      "after_sha256": "687b80cde20d70e4de56dd71956683b9cec59f55bd25965491dc08d00c8cb248",
+      "before_sha256": "71fd1ac8e2ddb2e20eeb572063cc69e370e18f40af4a97fb65e2d8258bae45a0",
+      "after_verified": true,
+      "python39_ast": true,
+      "before_and_v16_source_verified": true
+    },
+    "board/runtime/board_business.py": {
+      "after_sha256": "bb82c154ad1d0120b9b188f07a7aa69ec3b3ba6ca15894b1cb0d5ef4a1a1d025",
+      "before_sha256": "b0d19864ac305e52d5d9f4f86823ae97b4d8d134c56c0ec78c0ae316bd8efc18",
+      "after_verified": true,
+      "python39_ast": true,
+      "before_and_v16_source_verified": true
+    },
+    "board/runtime/board_speaker_business.py": {
+      "after_sha256": "f299273d903d3bed4f24576f12dd41e327f5a0f0b490f8f122904291a769b067",
+      "before_sha256": "43227afc6d86dbf3ae4eed5cf3efcb996ed0267551958773901f49309122a8c7",
+      "after_verified": true,
+      "python39_ast": true,
+      "before_and_v16_source_verified": true
+    },
+    "board/runtime/visual_policy.py": {
+      "after_sha256": "e8e80e0d92c889e5533aa84c4abf7782d7424d8658783d64acac2d17ea2a147e",
+      "before_sha256": "efb730d82b812f4323e92c8d6fdf1e69ae9f8dbffab1a5c5db346a18d12b4dc9",
+      "after_verified": true,
+      "python39_ast": true,
+      "before_and_v16_source_verified": true
+    },
+    "common/feature_intents.py": {
+      "after_sha256": "1bb807ed88a84515942cca7e0dadab92dac99e2fd39b163b2e5d20a0194d8945",
+      "before_sha256": null,
+      "after_verified": true,
+      "python39_ast": true
+    },
+    "common/voice_enrollment.py": {
+      "after_sha256": "238939dbc4afa0559caa8687ff01a67854b606a33df4bdeaf2b0103fb8c994a8",
+      "before_sha256": "9a40e16875afb5c7c031a2994a205bd4e29f7cb78115a624586164f1a08c4f67",
+      "after_verified": true,
+      "python39_ast": true,
+      "before_and_v16_source_verified": true
+    },
+    "tools/speaker_device.py": {
+      "after_sha256": "da9c199527abdf9e247661d8798f4345cf0b79524f5c2a06394b5dc9c44107de",
+      "before_sha256": "73648e960ab28e16cce1e0676bd7981b5fc35c70bce9868b864e5c8881af4e00",
+      "after_verified": true,
+      "python39_ast": true,
+      "before_and_v16_source_verified": true
+    },
+    "tools/yuki_jobs_candidate.py": {
+      "after_sha256": "18d4bcbc6d3a32b3a2edd64103d634493e2fbd00f88ab0809fa600144d26508d",
+      "before_sha256": "6dd98c8a1be49f1c4a468ba10a585cbe3fbf36258d9e90d28c7423bac1f8093c",
+      "after_verified": true,
+      "python39_ast": true,
+      "before_and_v16_source_verified": true
+    }
+  },
+  "changed_from_frozen_v2": [
+    "board/runtime/board_speaker_business.py",
+    "common/feature_intents.py",
+    "tools/speaker_device.py"
+  ],
+  "independent_structural_checks": {
+    "BoardSpeakerBusiness_ast_outside_five_declared_methods_equal_to_v16": true,
+    "SpeakerDevice_ast_outside_turn_equal_to_v2": true,
+    "other_five_files_equal_to_v2": true,
+    "all_eight_files_python39_parse": true
+  },
+  "resolved_v2_findings": [
+    {
+      "id": "V2-QUERY-SAMPLE",
+      "result": "PASS",
+      "evidence": "unmatched_query.json",
+      "facts": {
+        "query_matched": true,
+        "samples_before": 0,
+        "samples_after": 0,
+        "ack_committed": true,
+        "profile_grants": 0,
+        "private_store_accessed": false
+      },
+      "scope": "Original full paired Jobs/LocalIdentityReplies/Store/full ACK public synthetic scenario; next-turn status question now bypasses the sampler."
+    },
+    {
+      "id": "V2-STALE-QUERY-CACHE",
+      "result": "PASS",
+      "evidence": [
+        "replay_expired.json",
+        "replay_revision.json"
+      ],
+      "facts": {
+        "expiry": {
+          "change": "expired",
+          "original_deadline_still_live": true,
+          "repeated_request_positive": false,
+          "fresh_request_unknown": true,
+          "private_store_accessed": false
+        },
+        "gallery_revision": {
+          "change": "revision",
+          "original_deadline_still_live": true,
+          "repeated_request_positive": false,
+          "fresh_request_unknown": true,
+          "private_store_accessed": false
+        }
+      },
+      "scope": "The same exact actor/meta/request, original 120-second deadline still live, now rechecks status instead of returning stale positive. The original write replay and fingerprint mismatch refusal also pass."
+    },
+    {
+      "id": "V2-POSTCOMMIT-CANCEL-RECEIPT",
+      "result": "PASS",
+      "evidence": "cleanup_final.xml",
+      "scope": "Actual synthetic store/sole worker at three seams: failed before commit -> zero identities/receipts; cancelled after original commit before outer post-check, and cancelled after post-check before caller adoption -> one actual identity/zero temporary receipts. Later query is unknown and never reports the committed fact as unsaved."
+    }
+  ],
+  "cleanup_concurrency_review": {
+    "result": "NO_BLOCKER_FOUND",
+    "locations": [
+      {
+        "file": "board/runtime/board_speaker_business.py",
+        "line": 399
+      },
+      {
+        "file": "board/runtime/board_speaker_business.py",
+        "line": 422
+      },
+      {
+        "file": "board/runtime/board_speaker_business.py",
+        "line": 566
+      }
+    ],
+    "worker_scope": "_run and queued _clear_status_receipt execute on the existing max_workers=1 executor. _call queues metadata cleanup without waiting on that worker. No new nested wait or new mutex order is introduced.",
+    "late_cleanup_boundary": "The cleanup key is (boot,session). It removes only an existing receipt whose generation <= the failed request generation. A later same-actor generation is retained; a different actor is untouched.",
+    "independent_test": "test_receipt_cleanup_boundaries.py creates three genuine synthetic identity commits with fake orthogonal vectors, then executes delayed old-generation cleanup on the same worker. It preserves the higher-generation receipt and the other actor receipt. Matching-generation cleanup removes only RAM metadata; all three identity rows remain; a still-valid other-actor receipt remains queryable.",
+    "lock_boundary": "Original ownership RLock is released before is_current callback evaluation; no new lock spans future.result or metadata cleanup. Existing guarded identity transaction ownership and actual durable rows are unchanged.",
+    "reset_boundary": "reset deliberately clears all transient receipts with existing session reset. This is a global reset path, not a claim that any old request may clear a later unrelated actor.",
+    "limits": "Targeted deterministic synthetic ordering and source review; not a hardware, prolonged race stress, or full GUI deployment acceptance."
+  },
+  "session_and_revision_semantics": [
+    "The existing actual paired commit/full ACK/next-generation query scenario still passes. Session ownership is not reduced to one job generation.",
+    "Receipt uses the speaker identity/template revision, not timeline appends or general database mtime. A later real identity commit intentionally makes older-version status unknown; this is distinct from deleting its receipt.",
+    "Queries remain read-only and grant no profile permissions. A committed identity is not undone by later UI cancellation."
+  ],
+  "tests": {
+    "python": "D:/py312/python.exe",
+    "runner": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\run_candidate_tests.py",
+    "overlay_flag": "--candidate-v3",
+    "replay": {
+      "result": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0
+      },
+      "xml": "replay.xml",
+      "tests": "Unmodified copy of v2 three counterexamples plus existing test_feature_v2.py full paired/Store/ACK/next-turn scenario."
+    },
+    "cleanup": {
+      "result": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0
+      },
+      "xml": "cleanup_final.xml",
+      "tests": "One new delayed metadata cleanup boundary test; existing v3 write replay/fingerprint test; three existing v3 transaction cancellation seam cases."
+    },
+    "total_test_cases": 9,
+    "failures": 0,
+    "errors": 0,
+    "fixture_correction": "cleanup.xml retains the first local fixture run. Its final assertion incorrectly expected actor B receipt to survive a subsequent identity revision as a positive query; the receipt itself was correctly preserved. The final fixture performs actor B commit last so its revision is current. Candidate sources were not changed.",
+    "not_run": "Author full 265-case suite, hardware, models, actual microphone, camera, speaker playback, or real private stores."
+  },
+  "evidence_sha256": {
+    "test_review_edges.py": "744e9a904f9e2100eb099456809f419275b60bcc416af653077d2d2ade2972cf",
+    "test_receipt_cleanup_boundaries.py": "1245325ebacb8fcdd55758864b1ac4e0be80770f811f5dce95e32a28d579ad07",
+    "replay.xml": "3e07c1a631a152112623f3f865b635997faefe8024a5517dd2e5427e53d54937",
+    "cleanup_final.xml": "c4f5555ac0eaddcd4c80740f57cd193b0a50f1261b517bb088d590b684507af8",
+    "replay_expired.json": "9c1719fb3ef83c1daebda13cb83ad4e6c36a70298cca63533e9db1cec040d9c0",
+    "replay_revision.json": "4f64dbf04501b3a0b90a9a4ee3151caa91064c12a138b365220c758efc2d94f0",
+    "unmatched_query.json": "f4755a500170007d645ee48ebfa2f5924e4afa3c6c4657bd1f4d8fc4584cc7d0"
+  },
+  "scope": {
+    "candidate_or_production_modified": false,
+    "hardware_or_models_run": false,
+    "real_private_data_accessed": false,
+    "only_public_synthetic_test_data": true,
+    "production_deployment_or_hardware_acceptance_claimed": false
+  },
+  "root_integration_conditions": [
+    "Integrate the exact eight frozen sources and recompute startup/component pins through the normal owner-controlled path.",
+    "Preserve user PAUSED preference and durable identity stores; do not replay migration, overwrite an active database, or restore old temporary receipts.",
+    "Root alone controls runtime basic checks and real acceptance; this review grants no physical voice/face success claim."
+  ]
+}

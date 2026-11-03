@@ -1,0 +1,41 @@
+{
+  "backup": "/home/root/aura-handsfree-dialogue-20261020/resume-049c88498ae0/ui-backup-a049fa8989",
+  "runtime": "/home/root/aura-handsfree-dialogue-20261020/resume-049c88498ae0/runtime",
+  "previous_camera_pid": 106060,
+  "monitor_enabled_preserved": true,
+  "monitor_was_enabled_before": false,
+  "monitor_choice_source": "user_requested_continue",
+  "preference_path": "/root/.local/share/aura/handsfree_dialogue.json",
+  "camera_modified": false,
+  "pc_restarted": false,
+  "live_hearing_verified": false,
+  "status": "UI_ONLY_DEPLOYED",
+  "camera_pid": 106060,
+  "camera_service_unchanged": true,
+  "identity_database_unchanged": true,
+  "identity_threshold": 0.5,
+  "handsfree": {
+    "enabled": true,
+    "state": "WAITING_PERSON",
+    "reason": "VISUAL_UNAVAILABLE",
+    "error": "",
+    "visual_bound": false,
+    "conversation_entered": false,
+    "microphone_open": false,
+    "speech_detection": "energy_vad_then_asr",
+    "diagnostics": {
+      "armed": 0,
+      "speech_starts": 0,
+      "submitted": 0,
+      "entry_rejected": 0,
+      "visual_stops": 0
+    },
+    "speaker_binding_verified": false,
+    "voice_barge_in": false
+  },
+  "ui_unit": "# /etc/systemd/system/aura-avatar-ui.service\n[Unit]\nDescription=AURA cached avatar touchscreen interface\nWants=xserver-nodm.service systemd-modules-load.service\nAfter=local-fs.target xserver-nodm.service systemd-modules-load.service\nRequiresMountsFor=/home/root/aura-handsfree-dialogue-20261020/resume-049c88498ae0/runtime\nStartLimitIntervalSec=300\nStartLimitBurst=5\n\n[Service]\nType=notify\nNotifyAccess=main\nUser=root\nEnvironment=DISPLAY=:0 PYTHONUNBUFFERED=1\nWorkingDirectory=/home/root/aura-handsfree-dialogue-20261020/resume-049c88498ae0/runtime/aura\nExecStart=/usr/bin/python3 -B /home/root/aura-handsfree-dialogue-20261020/resume-049c88498ae0/startup/launcher.py --config /home/root/aura-handsfree-dialogue-20261020/resume-049c88498ae0/startup/config.json\nRestart=on-failure\nRestartSec=5\nTimeoutStartSec=240\nTimeoutStopSec=25\nKillMode=mixed\nStandardOutput=journal\nStandardError=journal\nSyslogIdentifier=aura-avatar-ui\n\n[Install]\nWantedBy=graphical.target\n",
+  "identity_db_sha256": "e0d2113eb51171079978b1e63eb4263d5fb13235fec1839f7be778dab1520aa1",
+  "camera_unit": "# /etc/systemd/system/aura-camera-ui.service\n[Unit]\nDescription=AURA shared USB camera preview and YOLOX person adapter\nAfter=local-fs.target\nStartLimitIntervalSec=0\n\n[Service]\nType=simple\nExecStart=/usr/bin/python3 -B /home/root/aura-handsfree-dialogue-20261020/candidate-0c0a8ab46ec2/runtime/aura/tools/board_camera_motion.py --config /home/root/aura-handsfree-dialogue-20261020/candidate-0c0a8ab46ec2/camera_live_config/board_camera_ui.json\nWorkingDirectory=/home/root/aura-handsfree-dialogue-20261020/candidate-0c0a8ab46ec2/runtime/aura\nEnvironment=PYTHONUNBUFFERED=1\nRestart=on-failure\nRestartSec=3\nTimeoutStopSec=10\nKillMode=control-group\nUMask=0077\n\n[Install]\nWantedBy=multi-user.target\n",
+  "camera_config_sha256": "26d737705363b6590c747497513d5388681ebdc81ec1175c7aa6ebebdaf1aa97",
+  "identity_config_sha256": "350c0475d653aa5d6034c76a64317eaac1bd578a4e610e2f892bf124d186258e"
+}

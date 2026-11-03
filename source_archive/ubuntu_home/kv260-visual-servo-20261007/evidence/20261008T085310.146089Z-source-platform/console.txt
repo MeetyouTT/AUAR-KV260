@@ -1,0 +1,317 @@
+
+****** Vivado v2022.2 (64-bit)
+  **** SW Build 3671981 on Fri Oct 14 04:59:54 MDT 2022
+  **** IP Build 3669848 on Fri Oct 14 08:30:02 MDT 2022
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+
+source /home/ghmd/kv260-visual-servo-20261007/evidence/20261008T085310.146089Z-source-platform/prepare_source_platform.tcl
+# set out [file normalize $::env(AURA_PLATFORM_OUT)]
+# set part xck26-sfvc784-2LV-c
+# set bid $::env(AURA_PLATFORM_BUILD_ID)
+# set bid_bits [format "0x%08x" $bid]
+# set repos [split [string trim [read [set f [open [file join $out repos.txt] r]]]] "\n"]
+# close $f
+# foreach {name top rtl} {aura_visual_servo aura_m3_regs visual_servo.sv aura_disabled_audio aura_disabled_audio disabled_audio.sv} {
+#     create_project $name [file join $out package_$name] -part $part
+#     add_files -norecurse [file join $out $rtl]
+#     set_property top $top [current_fileset]
+#     update_compile_order -fileset sources_1
+#     ipx::package_project -root_dir [file join $out ip_repo $name] -vendor aura.local -library user -taxonomy /UserIP -import_files -set_current true
+#     set core [ipx::current_core]
+#     set_property name $name $core
+#     set_property version 1.0 $core
+#     set_property display_name $name $core
+#     if {$name eq "aura_visual_servo"} {
+#         set buses {S_AXI}
+#         set clocks {s_axi_aclk}
+#         set param [ipx::get_user_parameters BUILD_ID -of_objects $core]
+#         set_property value $bid_bits $param
+#         set_property value $bid_bits [ipx::get_hdl_parameters BUILD_ID -of_objects $core]
+#     } else {
+#         set buses {s_axi_ctrl_i2s_rx s_axi_ctrl_i2s_tx s_axi_lite_audio_fmt}
+#         set clocks {ACLK m_axi_aclk}
+#     }
+#     foreach busname $buses {
+#         set bus [ipx::get_bus_interfaces $busname -of_objects $core]
+#         if {[llength $bus] != 1} {error "Missing interface $name/$busname"}
+#         set_property slave_memory_map_ref $busname $bus
+#         set mm [ipx::get_memory_maps $busname -of_objects $core]
+#         if {$mm eq ""} {set mm [ipx::add_memory_map $busname $core]}
+#         set blocks [ipx::get_address_blocks -of_objects $mm]
+#         if {[llength $blocks] == 0} {set block [ipx::add_address_block reg0 $mm]} else {set block [lindex $blocks 0]}
+#         set_property base_address 0 $block
+#         set_property range [expr {$name eq "aura_visual_servo" ? 4096 : 65536}] $block
+#         set_property width 32 $block
+#         set_property usage register $block
+#     }
+#     foreach clock $clocks {
+#         set c [ipx::get_bus_interfaces $clock -of_objects $core]
+#         if {[llength [ipx::get_bus_parameters FREQ_HZ -of_objects $c]]} {ipx::remove_bus_parameter FREQ_HZ $c}
+#     }
+#     ipx::create_xgui_files $core
+#     ipx::update_checksums $core
+#     ipx::check_integrity $core
+#     ipx::save_core $core
+#     close_project
+# }
+create_project: Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1253.902 ; gain = 0.023 ; free physical = 25739 ; free virtual = 45317
+WARNING: [IP_Flow 19-5101] Packaging a component with a SystemVerilog top file is not fully supported. Please refer to UG1118 'Creating and Packaging Custom IP'.
+WARNING: [IP_Flow 19-587] [HDL Parser] HDL port or parameter 'stop' has a dependency on the module local parameter or undefined parameter 'STOP'.
+WARNING: [IP_Flow 19-587] [HDL Parser] HDL port or parameter 'commit' has a dependency on the module local parameter or undefined parameter 'COMMIT'.
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/home/ghmd/Xilinx_2022.2/Vivado/2022.2/data/ip'.
+INFO: [IP_Flow 19-5107] Inferred bus interface 's_axi_aclk' of definition 'xilinx.com:signal:clock:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 's_axi_aclk' of definition 'xilinx.com:signal:clock:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 's_axi_aresetn' of definition 'xilinx.com:signal:reset:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 's_axi_aresetn' of definition 'xilinx.com:signal:reset:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'S_AXI' of definition 'xilinx.com:interface:aximm:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'S_AXI' of definition 'xilinx.com:interface:aximm:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-4728] Bus Interface 's_axi_aclk': Added interface parameter 'ASSOCIATED_BUSIF' with value 'S_AXI'.
+INFO: [IP_Flow 19-4728] Bus Interface 's_axi_aclk': Added interface parameter 'ASSOCIATED_RESET' with value 's_axi_aresetn'.
+INFO: [IP_Flow 19-4728] Bus Interface 's_axi_aresetn': Added interface parameter 'POLARITY' with value 'ACTIVE_LOW'.
+INFO: [IP_Flow 19-4728] Bus Interface 'S_AXI': Added interface parameter 'PROTOCOL' with value 'AXI4LITE'.
+INFO: [IP_Flow 19-4728] Bus Interface 'S_AXI': Added interface parameter 'DATA_WIDTH' with value '32'.
+INFO: [IP_Flow 19-4728] Bus Interface 'S_AXI': Added interface parameter 'ADDR_WIDTH' with value '12'.
+INFO: [IP_Flow 19-4728] Bus Interface 'S_AXI': Added interface parameter 'READ_WRITE_MODE' with value 'READ_WRITE'.
+INFO: [IP_Flow 19-2181] Payment Required is not set for this core.
+INFO: [IP_Flow 19-2187] The Product Guide file is missing.
+INFO: [IP_Flow 19-2181] Payment Required is not set for this core.
+INFO: [IP_Flow 19-2187] The Product Guide file is missing.
+INFO: [Ipptcl 7-1486] check_integrity: Integrity check passed.
+WARNING: [IP_Flow 19-5101] Packaging a component with a SystemVerilog top file is not fully supported. Please refer to UG1118 'Creating and Packaging Custom IP'.
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/home/ghmd/Xilinx_2022.2/Vivado/2022.2/data/ip'.
+INFO: [IP_Flow 19-5107] Inferred bus interface 'ACLK' of definition 'xilinx.com:signal:clock:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'ACLK' of definition 'xilinx.com:signal:clock:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'ARESETN' of definition 'xilinx.com:signal:reset:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'ARESETN' of definition 'xilinx.com:signal:reset:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'm_axi_aclk' of definition 'xilinx.com:signal:clock:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'm_axi_aclk' of definition 'xilinx.com:signal:clock:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'm_axi_aresetn' of definition 'xilinx.com:signal:reset:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'm_axi_aresetn' of definition 'xilinx.com:signal:reset:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'm_axi_mm2s_audio' of definition 'xilinx.com:interface:aximm:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'm_axi_mm2s_audio' of definition 'xilinx.com:interface:aximm:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'm_axi_s2mm_audio' of definition 'xilinx.com:interface:aximm:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'm_axi_s2mm_audio' of definition 'xilinx.com:interface:aximm:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 's_axi_ctrl_i2s_rx' of definition 'xilinx.com:interface:aximm:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 's_axi_ctrl_i2s_rx' of definition 'xilinx.com:interface:aximm:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 's_axi_ctrl_i2s_tx' of definition 'xilinx.com:interface:aximm:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 's_axi_ctrl_i2s_tx' of definition 'xilinx.com:interface:aximm:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 's_axi_lite_audio_fmt' of definition 'xilinx.com:interface:aximm:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 's_axi_lite_audio_fmt' of definition 'xilinx.com:interface:aximm:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'peripheral_aresetn' of definition 'xilinx.com:signal:reset:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-4728] Bus Interface 'peripheral_aresetn': Added interface parameter 'POLARITY' with value 'ACTIVE_LOW'.
+INFO: [IP_Flow 19-4728] Bus Interface 'ACLK': Added interface parameter 'ASSOCIATED_BUSIF' with value 'm_axi_mm2s_audio'.
+INFO: [IP_Flow 19-4728] Bus Interface 'ACLK': Added interface parameter 'ASSOCIATED_RESET' with value 'ARESETN'.
+INFO: [IP_Flow 19-4728] Bus Interface 'm_axi_aclk': Added interface parameter 'ASSOCIATED_RESET' with value 'm_axi_aresetn'.
+INFO: [IP_Flow 19-4728] Bus Interface 'ARESETN': Added interface parameter 'POLARITY' with value 'ACTIVE_LOW'.
+INFO: [IP_Flow 19-4728] Bus Interface 'm_axi_aclk': Added interface parameter 'ASSOCIATED_BUSIF' with value 'm_axi_mm2s_audio'.
+INFO: [IP_Flow 19-4728] Bus Interface 'm_axi_aresetn': Added interface parameter 'POLARITY' with value 'ACTIVE_LOW'.
+INFO: [IP_Flow 19-4728] Bus Interface 'm_axi_mm2s_audio': Added interface parameter 'PROTOCOL' with value 'AXI4'.
+INFO: [IP_Flow 19-4728] Bus Interface 'm_axi_mm2s_audio': Added interface parameter 'READ_WRITE_MODE' with value 'READ_ONLY'.
+INFO: [IP_Flow 19-4728] Bus Interface 'm_axi_s2mm_audio': Added interface parameter 'PROTOCOL' with value 'AXI4'.
+INFO: [IP_Flow 19-4728] Bus Interface 'm_axi_s2mm_audio': Added interface parameter 'READ_WRITE_MODE' with value 'WRITE_ONLY'.
+INFO: [IP_Flow 19-4728] Bus Interface 's_axi_ctrl_i2s_rx': Added interface parameter 'PROTOCOL' with value 'AXI4LITE'.
+INFO: [IP_Flow 19-4728] Bus Interface 's_axi_ctrl_i2s_rx': Added interface parameter 'READ_WRITE_MODE' with value 'READ_WRITE'.
+INFO: [IP_Flow 19-4728] Bus Interface 's_axi_ctrl_i2s_tx': Added interface parameter 'PROTOCOL' with value 'AXI4LITE'.
+INFO: [IP_Flow 19-4728] Bus Interface 's_axi_ctrl_i2s_tx': Added interface parameter 'READ_WRITE_MODE' with value 'READ_WRITE'.
+INFO: [IP_Flow 19-4728] Bus Interface 's_axi_lite_audio_fmt': Added interface parameter 'PROTOCOL' with value 'AXI4LITE'.
+INFO: [IP_Flow 19-4728] Bus Interface 's_axi_lite_audio_fmt': Added interface parameter 'READ_WRITE_MODE' with value 'READ_WRITE'.
+INFO: [IP_Flow 19-2181] Payment Required is not set for this core.
+INFO: [IP_Flow 19-2187] The Product Guide file is missing.
+INFO: [IP_Flow 19-2181] Payment Required is not set for this core.
+INFO: [IP_Flow 19-2187] The Product Guide file is missing.
+INFO: [Ipptcl 7-1486] check_integrity: Integrity check passed.
+# create_project platform [file join $out platform] -part $part
+# set_property board_part xilinx.com:kv260_som:part0:1.4 [current_project]
+# set_property board_connections {som240_1_connector xilinx.com:kv260_carrier:som240_1_connector:1.3} [current_project]
+# set_property ip_repo_paths [concat [list [file join $out ip_repo]] $repos] [current_project]
+# set_property ip_output_repo [file join $out ip_cache] [current_project]
+# update_ip_catalog
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/ghmd/kv260-visual-servo-20261007/evidence/20261008T085310.146089Z-source-platform/ip_repo'.
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/ghmd/kv260-m3-axilite-20261002/src/kv260/overlays/examples/benchmark/binary_container_1/link/int/xo/ip_repo/xilinx_com_RTLKernel_DPUCZDX8G_1_0'.
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/ghmd/kv260-m3-axilite-20261002/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/.local/hw_platform/iprepo'.
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/ghmd/kv260-m3-axilite-20261002/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/.local/hw_platform/ipcache'.
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/ghmd/Xilinx_2022.2/Vitis/2022.2/data/ip'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/home/ghmd/Xilinx_2022.2/Vivado/2022.2/data/ip'.
+# import_files -norecurse [file join $out inputs bd kv260_ispMipiRx_vcu_DP.bd]
+INFO: [Project 1-1727] Source BDs should be added before importing the top BD /home/ghmd/kv260-visual-servo-20261007/evidence/20261008T085310.146089Z-source-platform/inputs/bd/kv260_ispMipiRx_vcu_DP.bd with BDC
+INFO: [PSU-1]  DP_AUDIO clock source: RPLL is also being used by other peripheral clocks. Their outputs may get impacted if any driver changes DP_AUDIO PLL source to support runtime audio change 
+INFO: [PSU-0] Address Range of DDR (0x7ff00000 to 0x7fffffff) is reserved by PMU for internal purpose.
+INFO: [PSU-1]  DP_AUDIO clock source: RPLL is also being used by other peripheral clocks. Their outputs may get impacted if any driver changes DP_AUDIO PLL source to support runtime audio change 
+INFO: [Ipptcl 7-1463] No Compatible Board Interface found. Board Tab not created in customize GUI
+INFO: [Ipptcl 7-1463] No Compatible Board Interface found. Board Tab not created in customize GUI
+INFO: [Device 21-403] Loading part xck26-sfvc784-2LV-c
+INFO: [Ipptcl 7-1463] No Compatible Board Interface found. Board Tab not created in customize GUI
+INFO: [Ipptcl 7-1463] No Compatible Board Interface found. Board Tab not created in customize GUI
+INFO: [Ipptcl 7-1463] No Compatible Board Interface found. Board Tab not created in customize GUI
+INFO: [Ipptcl 7-1463] No Compatible Board Interface found. Board Tab not created in customize GUI
+WARNING: [IP_Flow 19-4684] Expected long value for param HDL_PLL_CLK_LO but, float/scientific notation value 0.0 is provided. The value is converted to long type(0)
+WARNING: [IP_Flow 19-4684] Expected long value for param HDL_PLL_CLK_HI but, float/scientific notation value 50.0 is provided. The value is converted to long type(50)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE_ACTUAL but, float/scientific notation value 284.533935546875 is provided. The value is converted to long type(284)
+WARNING: [IP_Flow 19-4684] Expected long value for param ENC_BUFFER_SIZE but, float/scientific notation value 253.0301513671875 is provided. The value is converted to long type(253)
+INFO: [xilinx.com:ip:vcu:1.2-603] kv260_ispMipiRx_vcu_DP_vcu_0_0:  in flao2hex  update method .. 2.99 
+INFO: [xilinx.com:ip:vcu:1.2-603] kv260_ispMipiRx_vcu_DP_vcu_0_0:  in HDL_AXI_MCU_CLK  update method ..1077894184 
+INFO: [xilinx.com:ip:vcu:1.2-603] kv260_ispMipiRx_vcu_DP_vcu_0_0:  in flao2hex  update method .. 0.0 
+INFO: [xilinx.com:ip:vcu:1.2-603] kv260_ispMipiRx_vcu_DP_vcu_0_0:  in HDL_AXI_ENC_CLK  update method ..0 
+INFO: [xilinx.com:ip:vcu:1.2-603] kv260_ispMipiRx_vcu_DP_vcu_0_0:  in flao2hex  update method .. 0.0 
+INFO: [xilinx.com:ip:vcu:1.2-603] kv260_ispMipiRx_vcu_DP_vcu_0_0:  in HDL_AXI_DEC_CLK  update method ..0 
+import_files: Time (s): cpu = 00:01:11 ; elapsed = 00:01:15 . Memory (MB): peak = 2819.449 ; gain = 1527.586 ; free physical = 24239 ; free virtual = 43822
+# set bd [get_files *.bd]
+# open_bd_design $bd
+Reading block design file </home/ghmd/kv260-visual-servo-20261007/evidence/20261008T085310.146089Z-source-platform/platform/platform.srcs/sources_1/bd/bd/kv260_ispMipiRx_vcu_DP.bd>...
+Adding component instance block -- xilinx.com:ip:zynq_ultra_ps_e:3.4 - PS_0
+INFO: [PSU-0] Address Range of DDR (0x7ff00000 to 0x7fffffff) is reserved by PMU for internal purpose.
+INFO: [PSU-1]  DP_AUDIO clock source: RPLL is also being used by other peripheral clocks. Their outputs may get impacted if any driver changes DP_AUDIO PLL source to support runtime audio change 
+Adding component instance block -- xilinx.com:ip:audio_formatter:1.0 - audio_formatter_0
+Adding component instance block -- xilinx.com:ip:axi_clock_converter:2.1 - axi_clock_converter_mm2s
+Adding component instance block -- xilinx.com:ip:axi_clock_converter:2.1 - axi_clock_converter_s2mm
+Adding component instance block -- xilinx.com:ip:clk_wiz:6.0 - clk_wiz_audio
+Adding component instance block -- xilinx.com:ip:i2s_receiver:1.0 - i2s_receiver_0
+Adding component instance block -- xilinx.com:ip:i2s_transmitter:1.0 - i2s_transmitter_0
+Adding component instance block -- xilinx.com:ip:oddr:1.0 - oddr_rx
+Adding component instance block -- xilinx.com:ip:oddr:1.0 - oddr_tx
+Adding component instance block -- xilinx.com:ip:proc_sys_reset:5.0 - proc_sys_reset_18MHz
+Adding component instance block -- xilinx.com:ip:axi_iic:2.1 - axi_iic_0
+Adding component instance block -- xilinx.com:ip:axi_vip:1.1 - axi_vip_0
+Adding component instance block -- xilinx.com:ip:axis_data_fifo:2.0 - axis_data_fifo_cap
+Adding component instance block -- xilinx.com:ip:axis_subset_converter:1.1 - axis_subset_converter_0
+Adding component instance block -- xilinx.com:ip:mipi_csi2_rx_subsystem:5.2 - mipi_csi2_rx_subsyst_0
+INFO: [Ipptcl 7-1463] No Compatible Board Interface found. Board Tab not created in customize GUI
+too many nested evaluations (infinite loop?)
+Adding component instance block -- xilinx.com:ip:v_frmbuf_wr:2.4 - v_frmbuf_wr_0
+Adding component instance block -- xilinx.com:ip:xlslice:1.0 - xlslice_0
+Adding component instance block -- xilinx.com:ip:clk_wiz:6.0 - clk_wiz_0
+Adding component instance block -- xilinx.com:ip:proc_sys_reset:5.0 - proc_sys_reset_100MHz
+Adding component instance block -- xilinx.com:ip:proc_sys_reset:5.0 - proc_sys_reset_300MHz
+Adding component instance block -- xilinx.com:ip:proc_sys_reset:5.0 - proc_sys_reset_600MHz
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - axi_reg_slice_vmcu
+Adding component instance block -- xilinx.com:ip:vcu:1.2 - vcu_0
+INFO: [xilinx.com:ip:vcu:1.2-17] /vcu/vcu_0: Init 
+Adding component instance block -- xilinx.com:ip:xlslice:1.0 - xlslice_0
+Adding component instance block -- xilinx.com:ip:axi_interconnect:2.1 - axi_ic_vcu_dec
+Adding component instance block -- xilinx.com:ip:axi_crossbar:2.1 - xbar
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - s00_regslice
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - s01_regslice
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - m00_regslice
+Adding component instance block -- xilinx.com:ip:axi_interconnect:2.1 - axi_ic_vcu_enc
+Adding component instance block -- xilinx.com:ip:axi_crossbar:2.1 - xbar
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - s00_regslice
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - s01_regslice
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - m00_regslice
+Adding component instance block -- xilinx.com:ip:xlconcat:2.1 - xlconcat_0_0
+Adding component instance block -- xilinx.com:ip:xlconstant:1.1 - xlconstant_0
+Adding component instance block -- xilinx.com:ip:xlslice:1.0 - xlslice_0
+Adding component instance block -- xilinx.com:ip:xlslice:1.0 - xlslice_ttc_0
+Adding component instance block -- aura.local:user:aura_m3_regs:1.0 - aura_m3_regs_0
+Adding component instance block -- xilinx.com:ip:axi_interconnect:2.1 - axi_ic_accel_ctrl
+Adding component instance block -- xilinx.com:ip:axi_crossbar:2.1 - xbar
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - s00_regslice
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - m01_regslice
+Adding component instance block -- xilinx.com:ip:axi_protocol_converter:2.1 - auto_pc
+Adding component instance block -- xilinx.com:ip:axi_interconnect:2.1 - axi_ic_audio_mcu
+Adding component instance block -- xilinx.com:ip:axi_crossbar:2.1 - xbar
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - s00_regslice
+Adding component instance block -- xilinx.com:ip:axi_dwidth_converter:2.1 - auto_us
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - s01_regslice
+Adding component instance block -- xilinx.com:ip:axi_dwidth_converter:2.1 - auto_us
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - s02_regslice
+Adding component instance block -- xilinx.com:ip:axi_dwidth_converter:2.1 - auto_us
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - m00_regslice
+Adding component instance block -- xilinx.com:ip:axi_interconnect:2.1 - axi_ic_ctrl_100
+Adding component instance block -- xilinx.com:ip:axi_crossbar:2.1 - xbar
+Adding component instance block -- xilinx.com:ip:axi_register_slice:2.1 - s00_regslice
+Adding component instance block -- xilinx.com:ip:axi_protocol_converter:2.1 - auto_pc
+Adding component instance block -- xilinx.com:ip:axi_interconnect:2.1 - axi_ic_ctrl_300
+Adding component instance block -- xilinx.com:ip:axi_protocol_converter:2.1 - auto_pc
+Adding component instance block -- xilinx.com:RTLKernel:DPUCZDX8G:1.0 - DPUCZDX8G_1
+Adding component instance block -- xilinx.com:ip:axi_interconnect:2.1 - axi_ic_PS_0_S_AXI_HPC1_FPD
+Adding component instance block -- xilinx.com:ip:axi_dwidth_converter:2.1 - auto_us
+Adding component instance block -- xilinx.com:ip:axi_interconnect:2.1 - axi_ic_PS_0_S_AXI_HP1_FPD
+Adding component instance block -- xilinx.com:ip:axi_interconnect:2.1 - axi_ic_PS_0_S_AXI_HP3_FPD
+Adding component instance block -- xilinx.com:ip:xlconcat:2.1 - PS_0_pl_ps_irq0_1_interrupt_concat
+Adding component instance block -- xilinx.com:ip:xlconstant:1.1 - irq_const_tieoff
+Excluding slave segment /PS_0/SAXIGP2/HP0_DDR_HIGH from address space /capture_pipeline/v_frmbuf_wr_0/Data_m_axi_mm_video.
+Excluding slave segment /PS_0/SAXIGP2/HP0_LPS_OCM from address space /capture_pipeline/v_frmbuf_wr_0/Data_m_axi_mm_video.
+Successfully read diagram <kv260_ispMipiRx_vcu_DP> from block design file </home/ghmd/kv260-visual-servo-20261007/evidence/20261008T085310.146089Z-source-platform/platform/platform.srcs/sources_1/bd/bd/kv260_ispMipiRx_vcu_DP.bd>
+open_bd_design: Time (s): cpu = 00:00:17 ; elapsed = 00:00:17 . Memory (MB): peak = 2906.340 ; gain = 86.891 ; free physical = 24142 ; free virtual = 43726
+# set motion [get_bd_cells aura_m3_regs_0]
+# set audio [get_bd_cells audio_ss_0]
+# if {[llength $motion] != 1 || [llength $audio] != 1} {error "Unexpected source platform"}
+# set saved_pins [dict create]
+# set saved_intfs [dict create]
+# foreach cell [list $motion $audio] {
+#     foreach pin [get_bd_pins -of_objects $cell] {
+#         set nets [get_bd_nets -quiet -of_objects $pin]
+#         if {[llength $nets] == 1} {dict set saved_pins [string trimleft $pin /] $nets}
+#     }
+#     foreach pin [get_bd_intf_pins -of_objects $cell] {
+#         set nets [get_bd_intf_nets -quiet -of_objects $pin]
+#         if {[llength $nets] == 1} {
+#             set peers {}
+#             foreach other [get_bd_intf_pins -of_objects $nets] {
+#                 if {$other ne $pin} {lappend peers [get_property NAME $other]}
+#             }
+#             if {[llength $peers] != 1} {error "Expected one retained AXI peer for $pin: $peers"}
+#             dict set saved_intfs [string trimleft $pin /] [list [get_property NAME $nets] [lindex $peers 0]]
+#         }
+#     }
+# }
+# delete_bd_objs $motion $audio
+# create_bd_cell -type ip -vlnv aura.local:user:aura_visual_servo:1.0 aura_m3_regs_0
+# set_property CONFIG.BUILD_ID $bid_bits [get_bd_cells aura_m3_regs_0]
+# create_bd_cell -type ip -vlnv aura.local:user:aura_disabled_audio:1.0 audio_ss_0
+# dict for {pin net} $saved_pins {
+#     if {$pin eq "audio_ss_0/lrclk_tx"} {continue}
+#     connect_bd_net -net $net [get_bd_pins $pin]
+# }
+# dict for {pin connection} $saved_intfs {
+#     lassign $connection net peer
+#     # connect_bd_intf_net requires TWO endpoints (AMD UG835, 2022.2).
+#     connect_bd_intf_net -intf_net $net [get_bd_intf_pins $pin] [get_bd_intf_pins $peer]
+# }
+WARNING: [BD 5-232] No interface pins matched 'get_bd_intf_pins M06_AXI'
+ERROR: [BD 5-106] Arguments to the connect_bd_intf_net command cannot be empty.
+ERROR: [Common 17-39] 'connect_bd_intf_net' failed due to earlier errors.
+
+    while executing
+"connect_bd_intf_net -intf_net $net [get_bd_intf_pins $pin] [get_bd_intf_pins $peer]"
+    ("dict for" body line 4)
+    invoked from within
+"dict for {pin connection} $saved_intfs {
+    lassign $connection net peer
+    # connect_bd_intf_net requires TWO endpoints (AMD UG835, 2022.2).
+    co..."
+    (file "/home/ghmd/kv260-visual-servo-20261007/evidence/20261008T085310.146089Z-source-platform/prepare_source_platform.tcl" line 92)
+INFO: [Common 17-206] Exiting Vivado at Thu Oct  8 01:55:03 2026...

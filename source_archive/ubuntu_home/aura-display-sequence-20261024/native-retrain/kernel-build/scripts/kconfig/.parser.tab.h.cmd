@@ -1,0 +1,1 @@
+cmd_scripts/kconfig/parser.tab.h := bison -o scripts/kconfig/parser.tab.c --defines=scripts/kconfig/parser.tab.h -t -l /home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux/scripts/kconfig/parser.y

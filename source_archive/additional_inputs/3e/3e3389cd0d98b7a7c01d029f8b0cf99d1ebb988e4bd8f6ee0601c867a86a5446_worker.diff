@@ -1,0 +1,11 @@
+--- frozen-r1/worker.py
++++ r2_devnull/worker.py
+@@ -126,7 +126,7 @@
+         raise RuntimeError('public_probe_database_or_native_initialization_forbidden')
+     if event == 'open' and isinstance(args[0], (str, bytes, os.PathLike)):
+         path = os.fsdecode(args[0]).lower()
+-        if path.startswith('/dev/') or any(path.endswith(suffix) for suffix in ('.db', '.sqlite', '.sqlite3', '-wal', '-shm')):
++        if (path.startswith('/dev/') and os.fsdecode(args[0]) != '/dev/null') or any(path.endswith(suffix) for suffix in ('.db', '.sqlite', '.sqlite3', '-wal', '-shm')):
+             raise RuntimeError('public_probe_private_database_or_device_read_forbidden')
+ 
+ 

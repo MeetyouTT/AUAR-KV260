@@ -1,0 +1,17 @@
+[
+  {
+    "id": "configure_direct",
+    "command": "python3 -B -c 'from pathlib import Path\np = Path(\"/etc/systemd/network/10-kv260-win11-direct.network\")\ncontent = \"[Match]\\nName=eth0\\n\\n[Network]\\nAddress=192.168.50.2/24\\nDHCP=no\\n\"\nif p.exists():\n    if p.read_text() != content:\n        raise SystemExit(\"Existing configuration differs; refusing to overwrite\")\n    print(\"CONFIG_ALREADY_MATCHES\", p)\nelse:\n    with p.open(\"x\") as f:\n        f.write(content)\n    print(\"CONFIG_CREATED\", p)\n' && networkctl reload && networkctl reconfigure eth0 && sleep 3 && ip -4 addr show eth0 && ip -4 route && cat /etc/systemd/network/10-kv260-win11-direct.network && sha256sum /etc/systemd/network/10-kv260-win11-direct.network",
+    "timeout": 40
+  },
+  {
+    "id": "ssh_ipv4_banner",
+    "command": "python3 -B -c 'import socket; s=socket.create_connection((\"127.0.0.1\",22),timeout=25); s.settimeout(25); print(s.recv(256).splitlines()[0].decode(\"ascii\",\"replace\")); s.close()'",
+    "timeout": 40
+  },
+  {
+    "id": "windows_peer",
+    "command": "ping -c 2 -W 2 192.168.50.1; rc=$?; echo ICMP_EXIT=$rc; ip neigh show 192.168.50.1; ip route get 192.168.50.1; ethtool eth0 | grep -E 'Speed:|Duplex:|Link detected:'",
+    "timeout": 25
+  }
+]

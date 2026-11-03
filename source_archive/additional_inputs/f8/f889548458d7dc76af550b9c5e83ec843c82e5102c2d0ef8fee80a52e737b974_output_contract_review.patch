@@ -1,0 +1,307 @@
+--- a/tools/model_inference_host.py
++++ b/tools/model_inference_host.py
+@@ -206,7 +206,9 @@
+                 # Exception strings may contain prompts/audio or backend paths.
+                 # Public responses and counters carry a small static code only.
+                 from common.gpu_coordination import GpuBusy
+-                code = ('gpu_busy' if isinstance(exc, GpuBusy) else
++                from common.inference_output_contract import OutputTruncated
++                code = ('backend_output_truncated' if isinstance(exc, OutputTruncated) else
++                        'gpu_busy' if isinstance(exc, GpuBusy) else
+                         'tts_owner_conflict' if isinstance(exc, TtsOwnerConflict) else
+                         'tts_ownership_unavailable' if isinstance(exc, TtsOwnershipUnavailable) else
+                         'startup_not_idle' if isinstance(exc, StartupNotIdle) else
+@@ -502,11 +504,10 @@
+         # messages wholesale. Never call stream_body/build_system_prompt: those
+         # construct business context/persona that only the board may own.
+         from tools.dialogue_host_ollama import chat_body
+-        options = payload['options']
+-        body = chat_body(self.model, '', '', fast=True)
+-        body.update(messages=payload['messages'], stream=True, format='json', keep_alive=-1,
+-                    think=options.get('think', False))
+-        body['options']['num_predict'] = options.get('num_predict', 512 if payload['task'] == 'summary' else 120)
++        from common.inference_output_contract import build_body, StreamObservation
++        body = build_body(chat_body(self.model, '', '', fast=True), payload)
++        observation = (StreamObservation(time.monotonic())
++                       if 'output_format' in payload['options'] else None)
+         target = urlsplit(self.ollama_host)
+         conn = http.client.HTTPConnection(target.hostname, target.port or 80,
+                                          timeout=max(.001, deadline-time.monotonic()))
+@@ -548,6 +549,8 @@
+                 packet = json.loads(raw)
+                 if not isinstance(packet, dict) or packet.get('error'):
+                     raise RuntimeError('backend_failed')
++                if observation is not None:
++                    observation.packet(packet, time.monotonic())
+                 message = packet.get('message') or {}
+                 delta = message.get('content') or ''
+                 if not isinstance(delta, str):
+@@ -566,6 +569,8 @@
+                         value = packet.get(key)
+                         if type(value) in (int, float) and math.isfinite(value) and value >= 0:
+                             metrics[key + '_ms'] = round(value / 1e6, 2)
++                    if observation is not None:
++                        metrics.update(observation.finish(packet))
+                     return {'text': ''.join(chunks), 'metrics': metrics}
+         except (OSError, EOFError, http.client.HTTPException):
+             self._check(deadline, cancelled)
+@@ -724,6 +729,7 @@
+ 
+     def health(self):
+         return dict(model=self.model, tts='omnivoice', num_step=16,
++                    format_contract_version=1, output_formats=['json', 'dialogue_schema_v1', 'dialogue_abc_v1'],
+                     voice=self.voice.health(), tts_ready=self._tts_ready(),
+                     warmup_automatic=False, gpu_coordination=self.gpu.public())
+ 
+--- a/common/model_inference_wire.py
++++ b/common/model_inference_wire.py
+@@ -116,10 +116,16 @@
+     if size > MAX_MESSAGE_BYTES or not any(message['role'] == 'user' for message in copied):
+         raise WireError('content_limit')
+     options = payload.get('options', {})
+-    if not isinstance(options, dict) or set(options) - {'think', 'num_predict'}:
++    if not isinstance(options, dict) or set(options) - {'think', 'num_predict', 'output_format'}:
+         raise WireError('invalid_options')
+     if 'think' in options and type(options['think']) is not bool:
+         raise WireError('invalid_options')
++    if 'output_format' in options:
++        from common.inference_output_contract import FORMATS
++        mode = options['output_format']
++        if (not isinstance(mode, str) or mode not in FORMATS
++                or payload['task'] != 'dialogue' or options.get('think', False)):
++            raise WireError('invalid_options')
+     if 'num_predict' in options and (type(options['num_predict']) is not int or not 1 <= options['num_predict'] <= 1024):
+         raise WireError('invalid_options')
+     normalized.update(task=payload['task'], messages=copied, options=dict(options))
+@@ -197,6 +203,8 @@
+         if 'metrics' in result:
+             allowed = {'prompt_eval_count', 'eval_count', 'load_duration_ms', 'prompt_eval_duration_ms',
+                        'eval_duration_ms', 'total_duration_ms'}
++            from common.inference_output_contract import EXTRA_METRICS
++            allowed |= EXTRA_METRICS
+             metrics = result['metrics']
+             if (not isinstance(metrics, dict) or set(metrics) - allowed
+                     or any(type(value) not in (int, float) or not 0 <= value < 1e15 for value in metrics.values())):
+--- /dev/null
++++ b/common/inference_output_contract.py
+@@ -0,0 +1,154 @@
++"""Caller-selected inference formats and metadata; no business state or IO.
++
++Only complete model responses are returned. No fragment authorizes speech.
++"""
++from __future__ import annotations
++
++import copy
++import json
++import math
++
++
++FORMATS = frozenset({'json', 'dialogue_schema_v1', 'dialogue_abc_v1'})
++FIELDS = {'a': 'reply_text', 'b': 'emotion', 'c': 'avatar_action'}
++EXTRA_METRICS = frozenset({
++    'first_packet_ms', 'first_content_ms', 'first_json_closed_ms', 'backend_done_ms',
++    'json_closed_to_done_ms', 'thinking_characters', 'content_characters',
++    'trailing_whitespace_characters', 'prompt_eval_cached_count',
++})
++
++
++class OutputContractError(ValueError):
++    """Fixed codes; no prompt or model output in exception details."""
++
++
++class OutputTruncated(RuntimeError):
++    pass
++
++
++def dialogue_schema(*, compact=False):
++    names = ('a', 'b', 'c') if compact else ('reply_text', 'emotion', 'avatar_action')
++    return {'type': 'object', 'properties': {
++        names[0]: {'type': 'string'},
++        names[1]: {'type': 'string', 'enum': ['neutral', 'friendly', 'happy', 'sad']},
++        names[2]: {'type': 'string', 'enum': ['']},
++    }, 'required': list(names), 'additionalProperties': False}
++
++
++def build_body(base, payload):
++    """Keep all selected text, original sampling/context and generation cap."""
++    body = copy.deepcopy(base)
++    options = payload['options']
++    mode = options.get('output_format', 'json')
++    if mode not in FORMATS:
++        raise OutputContractError('invalid_output_format')
++    if mode != 'json' and (payload['task'] != 'dialogue' or options.get('think', False)):
++        raise OutputContractError('incompatible_output_format')
++    body.update(messages=copy.deepcopy(payload['messages']), stream=True,
++                format=('json' if mode == 'json' else dialogue_schema(compact=mode == 'dialogue_abc_v1')),
++                keep_alive=-1, think=options.get('think', False))
++    body['options']['num_predict'] = options.get('num_predict', 512 if payload['task'] == 'summary' else 120)
++    return body
++
++
++def _unique(pairs):
++    result = {}
++    for key, value in pairs:
++        if key in result:
++            raise OutputContractError('duplicate_output_key')
++        result[key] = value
++    return result
++
++
++def canonicalize_compact(raw):
++    """Restore canonical keys only after a whole, bounded object was received."""
++    if not isinstance(raw, str) or not raw:
++        raise OutputContractError('invalid_compact_output')
++    try:
++        if len(raw.encode('utf-8')) > 96 * 1024:
++            raise OutputContractError('invalid_compact_output')
++        value = json.loads(raw, object_pairs_hook=_unique)
++    except (ValueError, TypeError, UnicodeError):
++        raise OutputContractError('invalid_compact_output') from None
++    if not isinstance(value, dict) or set(value) != set(FIELDS):
++        raise OutputContractError('invalid_compact_fields')
++    text = value['a']
++    if (not isinstance(text, str) or not 1 <= len(text.strip()) <= 500
++            or any(ord(char) < 32 or 0xD800 <= ord(char) <= 0xDFFF for char in text)
++            or '<think' in text.lower()
++            or not isinstance(value['b'], str) or value['b'] not in {'neutral', 'friendly', 'happy', 'sad'}
++            or value['c'] != ''):
++        raise OutputContractError('invalid_compact_content')
++    return json.dumps({FIELDS[key]: value[key] for key in FIELDS}, ensure_ascii=False, separators=(',', ':'))
++
++
++class StreamObservation:
++    """O(characters) metadata observation; never releases or stores a fragment.
++
++    First complete braces mean only syntactic closure, never approval to play.
++    The host continues until done and the board still validates the full reply.
++    """
++    def __init__(self, started):
++        self.started = started
++        self.values = {'thinking_characters': 0, 'content_characters': 0,
++                       'trailing_whitespace_characters': 0}
++        self.stack, self.in_string, self.escaped = [], False, False
++        self.root_started = self.closed = self.invalid = False
++        self.pending_whitespace = 0
++
++    def packet(self, packet, now):
++        elapsed = max(0., (now - self.started) * 1000)
++        self.values.setdefault('first_packet_ms', elapsed)
++        message = packet.get('message') or {}
++        if not isinstance(message, dict):
++            return
++        thinking = message.get('thinking')
++        if isinstance(thinking, str):
++            self.values['thinking_characters'] += len(thinking)
++        content = message.get('content') or ''
++        if isinstance(content, str) and content:
++            self.values.setdefault('first_content_ms', elapsed)
++            self.values['content_characters'] += len(content)
++            for char in content:
++                self.pending_whitespace = self.pending_whitespace + 1 if char.isspace() else 0
++                if self.closed:
++                    if not char.isspace(): self.invalid = True
++                    continue
++                if self.in_string:
++                    if self.escaped: self.escaped = False
++                    elif char == '\\': self.escaped = True
++                    elif char == '"': self.in_string = False
++                    continue
++                if char == '"':
++                    self.in_string = True
++                elif char in '{[':
++                    if not self.root_started:
++                        self.root_started = True
++                        if char != '{': self.invalid = True
++                    self.stack.append('}' if char == '{' else ']')
++                elif char in '}]':
++                    if not self.stack or self.stack.pop() != char:
++                        self.invalid = True
++                    elif not self.stack:
++                        self.closed = True
++                        if not self.invalid:
++                            self.values.setdefault('first_json_closed_ms', elapsed)
++                elif not self.root_started and not char.isspace():
++                    self.invalid = True
++        if packet.get('done') is True:
++            self.values['backend_done_ms'] = elapsed
++            self.values['trailing_whitespace_characters'] = self.pending_whitespace
++            closed = self.values.get('first_json_closed_ms')
++            if closed is not None and not self.invalid:
++                self.values['json_closed_to_done_ms'] = max(0., elapsed - closed)
++            elif self.invalid:
++                self.values.pop('first_json_closed_ms', None)
++
++    def finish(self, packet):
++        if packet.get('done_reason') == 'length':
++            raise OutputTruncated('backend_output_truncated')
++        cached = packet.get('prompt_eval_cached_count')
++        if type(cached) is int and 0 <= cached < 10 ** 15:
++            self.values['prompt_eval_cached_count'] = cached
++        return {key: value for key, value in self.values.items()
++                if type(value) in (int, float) and math.isfinite(value) and 0 <= value < 10 ** 15}
+--- /dev/null
++++ b/board/runtime/compact_request_adapter.py
+@@ -0,0 +1,63 @@
++"""Optional BOARD-only model-client wrapper; no early audio or new authority.
++
++The root injects the exact already-selected static system prompt. Only its
++output field names can change; user/history/reference data are never edited.
++"""
++import copy
++import re
++
++from common.model_inference_wire import Owner, validate_request, validate_response
++from common.inference_output_contract import canonicalize_compact, OutputContractError
++
++
++class CompactRequestAdapter:
++    def __init__(self, transport, *, system_prompt, capabilities, mode='dialogue_abc_v1'):
++        if mode not in {'json', 'dialogue_schema_v1', 'dialogue_abc_v1'}:
++            raise ValueError('invalid_adapter_mode')
++        if not isinstance(system_prompt, str) or not system_prompt.strip():
++            raise ValueError('require_exact_static_prompt')
++        if (not isinstance(capabilities, dict) or type(capabilities.get('format_contract_version')) is not int
++                or capabilities['format_contract_version'] != 1
++                or not isinstance(capabilities.get('output_formats'), (list, tuple))
++                or mode not in capabilities['output_formats']):
++            raise ValueError('output_format_not_negotiated')
++        self.transport, self.system_prompt, self.mode = transport, system_prompt, mode
++        translated = system_prompt
++        for canonical, alias in (('reply_text', 'a'), ('emotion', 'b'), ('avatar_action', 'c')):
++            pattern = r'(?<![A-Za-z0-9_])' + canonical + r'(?![A-Za-z0-9_])'
++            translated, count = re.subn(pattern, alias, translated)
++            if not count:
++                raise ValueError('static_prompt_contract_missing')
++        self.translated_prompt = translated
++
++    def request(self, kind, payload, *, deadline, cancelled):
++        original = validate_request(kind, payload)
++        route = (kind == 'llm' and original['task'] == 'dialogue'
++                 and not original['options'].get('think', False)
++                 and original['messages'][0] == {'role': 'system', 'content': self.system_prompt}
++                 and 'output_format' not in original['options'])
++        sent = original
++        if route:
++            sent = copy.deepcopy(original)
++            sent['options']['output_format'] = self.mode
++            if self.mode == 'dialogue_abc_v1':
++                sent['messages'][0]['content'] = self.translated_prompt
++            sent = validate_request(kind, sent)
++        response = self.transport.request(kind, sent, deadline=deadline, cancelled=cancelled)
++        checked = validate_response(response, Owner.from_dict(original), kind)
++        if route and self.mode == 'dialogue_abc_v1' and checked['ok']:
++            if cancelled():
++                raise InterruptedError('cancelled_before_compact_decode')
++            # No fallback/retry model request on malformed compact output.
++            checked = copy.deepcopy(checked)
++            checked['result']['text'] = canonicalize_compact(checked['result']['text'])
++            checked = validate_response(checked, Owner.from_dict(original), kind)
++        return checked
++
++    def cancel(self, owner):
++        return self.transport.cancel(owner)
++
++    def __getattr__(self, name):
++        # Preserve public transport health/date/reconfiguration hooks. No
++        # authorization, cache result or model-generated provenance is stored.
++        return getattr(self.transport, name)

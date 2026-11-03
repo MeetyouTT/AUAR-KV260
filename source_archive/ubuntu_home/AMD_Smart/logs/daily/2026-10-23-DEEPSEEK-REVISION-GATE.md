@@ -1,0 +1,9 @@
+# 修订版独立审查的补丁门槛核验
+
+用户回传修订版。读取最新入口、独立采纳清单、三条故障、现役schedule/metrics和SFace候选，未新增agent/接板/改生产。修订版已纠正多数事实，但测量伪代码未形成可执行合同，不能直接部署。
+
+本地check_revision.py实际执行：release在状态处理前取样仍少计；release_wall-occupancy只等于起点差，与3ms finish无关；finish_after_release只取入口不量finish主体；finally设worker_alive=True可在线程退出后误报；真实OptionalDiagnostics入口时钟抛异常后trace未清；C的execute_return相对optional_start应82.313083ms而非82.077971。反例结果写checks.json，合成7ms/3ms仅测试公式与顺序，不当板耗时。
+
+额外说明：69次自愿切换不能换算平均睡眠时长/证明GIL，0非自愿也不排除醒来后排队。未知native完成时必须阻止同owner的YOLO/SFace继续提交，不能只停人脸worker。保留现役deadline节拍与1000ms源TTL，不凭建议加入新p95/max标准。只读核对AMD3.0官方文档的blocking语义和v3.0绑定gil_scoped_release；未匹配本板二进制，不作根因证明。
+
+交付：[修订版核验和最小任务合同](/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-23_deepseek_revision_gate/README.md)。后续收敛为纯测量端点、诊断异常清理、移出聚合分别验证，复用SFace92/16候选；不再要求整份长报告重写。当前生产仍按最新已有C事件LATCHED退CPU记，本轮未在线确认或解除。未执行新推理、部署、发送外部消息或改Windows回执。

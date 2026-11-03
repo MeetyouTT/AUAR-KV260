@@ -1,0 +1,114 @@
+--- actual279/board/runtime/audio/channel_jobs.py
++++ board_bridge/board/runtime/audio/channel_jobs.py
+@@ -2,6 +2,7 @@
+ from collections import deque
+ from concurrent.futures import ThreadPoolExecutor
+ import hashlib
++from contextlib import nullcontext
+ import http.client
+ import copy
+ import json
+@@ -55,7 +56,11 @@
+         self.identity_snapshot=None;self.capture_owners={};self.last_voice_route=None
+         self.visual_entry_capture=None;self.wake_entry_capture=None;self.next_feedback_refresh=0.
+         from board.identity.voice_enrollment import VoiceEnrollment
+-        self.identity_flow=VoiceEnrollment(boot_id,self._identity_snapshot,self._identity_command,simple=True)
++        from board.runtime.audio.face_gallery_readback import FaceGalleryReadback
++        from board.runtime.audio.face_binding_bridge import FaceBindingBridge
++        self.face_readback=FaceGalleryReadback.configured()
++        self.face_binding=FaceBindingBridge(self._identity_snapshot,self._identity_command,self.face_readback)
++        self.identity_flow=VoiceEnrollment(boot_id,self.face_binding.snapshot,self.face_binding.command,simple=True)
+         self.acks=ThreadPoolExecutor(max_workers=1,thread_name_prefix='aura-playback-ack')
+         super().__init__(config,boot_id,include_voice=True)
+ 
+@@ -139,6 +144,35 @@
+         except (ValueError,KeyError,TypeError):value=None
+         with self.condition:
+             self.capture_owners={capture_id:copy.deepcopy(value)}
++
++    def _speaker_visual(self,meta):
++        # Reads the same in-memory provider as capture_started. No extra camera
++        # frame/identity call, image export, or requirement to be in view.
++        from common.speaker_visual import build_visual,unavailable
++        from board.interaction.ui_contract import millis
++        try:
++            with self.condition:start=copy.deepcopy(self.capture_owners.get(meta['capture_id']))
++            current=self.identity_snapshot() if self.identity_snapshot else None
++            return build_visual(start,current,meta,millis())
++        except Exception:return unavailable(meta,'VISUAL_PROVIDER_UNAVAILABLE')
++
++    def _face_gallery(self,meta):
++        # Private SQLite readback is on this network worker, never GTK/capture.
++        reader=getattr(self,'face_readback',None)
++        if reader is None:return None
++        try:
++            snapshot=self.identity_snapshot() if self.identity_snapshot else None
++            return reader.read(meta,snapshot)
++        except (OSError,ValueError,KeyError,TypeError):return None
++
++    def _face_reply(self,channel,meta,token,reply,exchange,*,sequence=None,final=True):
++        receipt=None
++        if exchange is not None and final:
++            try:receipt=exchange.receipt(reply,self.face_binding.original_snapshot)
++            except (OSError,ValueError,KeyError,TypeError):receipt=None
++        kwargs=dict(sequence=sequence,final=final)
++        if receipt is not None:kwargs['binding_receipt']=receipt
++        channel.identity_result(meta,token,reply,**kwargs)
+ 
+     def _record_voice_route(self,meta,header,reply_code=''):
+         # Keep one bounded RAM diagnostic after automatic listening clears the
+@@ -222,7 +256,17 @@
+                         if header['kind']=='transcript' and header.get('identity_request'):
+                             if self.identity_snapshot is None:raise ValueError('Identity voice control not enabled')
+                             with self.condition:start_owner=copy.deepcopy(self.capture_owners.get(meta['capture_id']))
+-                            reply=self.identity_flow.handle(header['text'],start_owner,is_current=current)
++                            from common.binding_intent import face_enrollment_text
++                            binding_request=header.get('binding_request');exchange=None
++                            board_text=header['text']
++                            if binding_request is not None:
++                                exchange=self.face_binding.exchange(meta,binding_request,start_owner,header['text'],current)
++                                board_text=exchange.request['board_text']
++                            # Narrow normalization stays inside the original
++                            # authorized identity branch. Transcript is unchanged.
++                            board_text=face_enrollment_text(board_text,active=self.identity_flow.public()['active'])
++                            with self.face_binding.scope(exchange) if exchange is not None else nullcontext():
++                                reply=self.identity_flow.handle(board_text,start_owner,is_current=current)
+                             if reply is None:raise ValueError('Unexpected identity voice transcript')
+                             if not current():raise InterruptedError('Stale identity voice result')
+                             self._record_voice_route(meta,header,reply['code'])
+@@ -230,14 +274,16 @@
+                                 token=header['identity_request'];sequence=[0]
+                                 # Bind every request-specific closure: the main
+                                 # network worker can later receive another turn.
+-                                def emit(value,final,channel=channel,meta=meta,token=token,sequence=sequence,current=current):
++                                def emit(value,final,channel=channel,meta=meta,token=token,sequence=sequence,current=current,exchange=exchange):
+                                     if not current():raise InterruptedError('Stale sampling guidance')
+-                                    channel.identity_result(meta,token,value,sequence=sequence[0],final=final)
++                                    self._face_reply(channel,meta,token,value,exchange,sequence=sequence[0],final=final)
+                                     sequence[0]+=1
+                                 emit(reply,False)
+-                                threading.Thread(target=self.identity_flow.guide,args=(emit,),
+-                                    kwargs={'is_current':current},name='identity-sampling-guide',daemon=True).start()
+-                            else:channel.identity_result(meta,header['identity_request'],reply)
++                                def guide(exchange=exchange,emit=emit,current=current):
++                                    with self.face_binding.scope(exchange) if exchange is not None else nullcontext():
++                                        self.identity_flow.guide(emit,is_current=current)
++                                threading.Thread(target=guide,name='identity-sampling-guide',daemon=True).start()
++                            else:self._face_reply(channel,meta,header['identity_request'],reply,exchange)
+                         self._put(meta,{'channel_event':header,'pcm':payload})
+                     with self.condition:
+                         if self.wake_entry_capture==meta['capture_id']:
+@@ -252,6 +298,13 @@
+                         if selection.active is None:raise ValueError('请先选择继续上次对话或新对话')
+                         options['conversation']=selection.active
+                     if personal is None and self.identity_snapshot is not None:options['enrollment_state']=self.identity_flow.public()['active']
++                    if options.get('conversation') is not None:
++                        options['speaker_visual']=self._speaker_visual(meta)
++                        packet=self._face_gallery(meta)
++                        if packet is not None:
++                            try:
++                                if channel.submit_face_gallery(meta,packet,is_current=current):options['face_gallery']=packet
++                            except (OSError,ValueError,RuntimeError):pass  # Ordinary voice stays available.
+                     result=channel.exchange(meta,pcm,receive,is_current=current,**options)
+                     if result.get('wake_only'):
+                         self._put(meta,{'wake_detected':True,'wake_only':True})

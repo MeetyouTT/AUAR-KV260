@@ -1,0 +1,186 @@
+{
+  "schema": "aura-project-progress-1",
+  "updated_utc": "2026-11-02T14:24:57.019892+00:00",
+  "client_date": "2026-11-02",
+  "timezone": "America/Los_Angeles",
+  "live_board_observed_utc": "2026-11-02T13:55:44.729318+00:00",
+  "live_models_observed_utc": "2026-11-02T14:01:03.176237+00:00",
+  "overall": "基础模块已跑通，人脸已现场确认；独立声纹、当前boot wide/轴恢复、优化后测及联合演示仍未闭环",
+  "full_five_component_human_acceptance_complete": false,
+  "axis_thread": {
+    "thread_id": "01a19b64-8194-70e3-806b-03fa9a283918",
+    "host_id": "local",
+    "title": "转轴跟随｜左侧停点优化",
+    "status": "idle_frozen_waiting_maintenance_handback",
+    "responsibility": "唯一板卡转轴操作、原跟随停点优化、转轴候选测试与发布、实体反馈",
+    "handoff": "AXIS_CHAT_HANDOFF_20261102.txt",
+    "result_authority": "AXIS_CURRENT_HANDOFF.json"
+  },
+  "modules": [
+    {
+      "module": "本机模型与LAN",
+      "status": "原模型部署及板卡LAN实测通过；本轮主机健康复查正常",
+      "facts": "原27B IQ4_XS / OmniVoice16保持；本轮仅GET健康，不发推理，不重启。当前板卡推理端到端未在本窗口重跑。",
+      "evidence": [
+        "LIVE_MODELS_READONLY_20261102T140103Z.json",
+        "../parallel_lan/LAN_PUBLIC_BOARD_READY.json"
+      ]
+    },
+    {
+      "module": "板端业务/角色UI",
+      "status": "当前启动主页面已恢复，软件核验通过",
+      "facts": "身份窗口13:55 UTC回执：GUI/相机运行，角色可见，380组件一致，业务时钟锚定、单写者持有、故障0；当时PAUSED/麦克风关闭。后续身份维护仍在进行，不是当前此刻操作授权。",
+      "evidence": [
+        "../other_components_20261102\\live_enrollment_20261102\\voice_entry_trace_20261102\\PRE_DEPLOYMENT_READINESS.json"
+      ]
+    },
+    {
+      "module": "视觉感知",
+      "status": "相机/DPU工作；人脸登记及KNOWN已有现场确认",
+      "facts": "本次boot相机1332；正式现用模型库1身份/1模板。识别成功不等于声纹完成或人物关联完成。",
+      "evidence": [
+        "../other_components_20261102\\live_enrollment_20261102\\split_commands_20261102\\actual_release\\VOICE_BEFORE_INVENTORY.json",
+        "../other_components_20261102/live_enrollment_20261102/CURRENT_ENROLLMENT_STATUS.json"
+      ]
+    },
+    {
+      "module": "基础语音对话",
+      "status": "已有两轮真人完整播放实测；新版联合轮次待重验",
+      "facts": "先前boot两轮有匹配完整播放回执。录音结束至软件SPEAKING 5.04/5.29秒；不作为本次新版本或声学首声成绩。",
+      "evidence": [
+        "../dialogue_latency_20261101/TWO_TURN_LATENCY.json"
+      ]
+    },
+    {
+      "module": "转轴跟随",
+      "status": "原跟随曾现场通过；本次重启后平台不匹配，专用窗口冻结",
+      "facts": "上次boot已发布左停点0.40/右0.45、恢复稳定150ms且至少3张独立有效图像的原算法扩展，42项双端测试通过；右转顿挫实体改善待验。当前boot最后核验为benchmark，原wide未恢复，无当前STOP/参考/方向验收；不重用旧输出关闭回执。",
+      "evidence": [
+        "../AXIS_CURRENT_HANDOFF.json",
+        "../maintenance_original_axis_20261101/new_boot_a6d4_readonly_20261102/NEW_BOOT_TECHNICAL_HANDOFF.json"
+      ]
+    },
+    {
+      "module": "身份与语言协同",
+      "status": "人脸已验收；独立声纹登记现场闭环未完成",
+      "facts": "独立人脸/声纹口令及有界原时钟重试已发布，保留原1秒RTT/共同3秒期限。最近正式库存声纹0/人物关联0；身份窗口正在定位口令识别或后续分流，尚无声纹保存成功凭证。按最新要求先独立登记，跨模态关联后置。",
+      "evidence": [
+        "../other_components_20261102\\live_enrollment_20261102\\split_commands_20261102\\actual_release\\APPLY_RESULT.json",
+        "../other_components_20261102\\live_enrollment_20261102\\split_commands_20261102\\actual_release\\VOICE_BEFORE_INVENTORY.json",
+        "../other_components_20261102/live_enrollment_20261102/voice_entry_trace_20261102/HANDOFF.txt"
+      ]
+    },
+    {
+      "module": "记忆",
+      "status": "板端时间轴及摘要已部署；个人权限/长时召回联合待验",
+      "facts": "已有摘要清理、数据库快检及真人多轮历史证据。此次未打开数据库，未更新计数；跨身份个人记忆授权与本次新版长时召回不能算已验收。",
+      "evidence": [
+        "../memory_status_20261102/MEMORY_CURRENT_082236.json",
+        "../video_demo_readiness_20261101/MEMORY_CURRENT_READONLY.json"
+      ]
+    },
+    {
+      "module": "板端CPU优化",
+      "status": "GTK代码已发布；相机候选未发布；缺同条件后测",
+      "facts": "本次benchmark的40秒before：整板四核CPU 82.59%，相机/DPU进程36.89%、GTK30.32%，采集23.66fps/处理9.90fps。GTK独立投影探针不是整板收益，当前无有效after，不报告CPU降幅。",
+      "evidence": [
+        "../cpu_optimization_20261102/CPU_OPT_STATUS.json",
+        "../cpu_optimization_20261102/SUMMARY_RESOURCE_a6d4_benchmark_before.json"
+      ]
+    },
+    {
+      "module": "开机恢复与全流程演示",
+      "status": "完整冷启动恢复及三分钟联合演示尚未验收",
+      "facts": "已实际发生重启后benchmark与旧wide接入不匹配；业务时钟可锚定，板端OS墙钟不可信，持久NTP未验收。需要同boot恢复wide、更新来源绑定、轴验收，再跑完整语音/视觉/角色/身份与记忆联合流程。",
+      "evidence": [
+        "../AXIS_CURRENT_HANDOFF.json",
+        "../other_components_20261102\\live_enrollment_20261102\\voice_entry_trace_20261102\\PRE_DEPLOYMENT_READINESS.json"
+      ]
+    }
+  ],
+  "measured_latency_ms": {
+    "asr_ms": 1243.7924844998633,
+    "context_ms": 77.33676399948308,
+    "llm_rpc_ms": 1886.5928990016982,
+    "tts_rpc_ms": 802.1756435009593,
+    "first_audio_queued_from_worker_ms": 4459.744669498832,
+    "capture_complete_to_observed_speaking_ms": 5164.906586499885
+  },
+  "next_sequence": [
+    "身份窗口完成独立声纹的明确采样提示、三段录入及确认保存闭环；人物关联按用户要求后置",
+    "原wide恢复由设备权持有人串行安排，保留原相机Native完整历史和新身份/GTK改动，刷新来源绑定",
+    "转轴专用窗口完成本boot STOP/参考/方向，并现场复验左停点与右转顿挫",
+    "在相同平台/页面/版本条件补CPU after；相机候选仅在正常生命周期与新鲜final验证后发布",
+    "执行本boot两轮完整播放及视觉/角色/身份/记忆/原跟随联合演示，记录CPU、吞吐和分段延迟",
+    "验证断电后完整恢复及持续运行，不沿用上次boot的动作或STOP凭证"
+  ],
+  "audit_actions": {
+    "board_queries_sent": 0,
+    "board_commands_sent": false,
+    "database_opened": false,
+    "models_restarted": false,
+    "model_inference_requested": false,
+    "private_content_exported": false,
+    "local_progress_documents_updated": true
+  },
+  "axis_latest_publication_utc": null,
+  "latest_axis_user_feedback": "right-turn jitter; left reportedly normal",
+  "axis_right_jitter_analysis": "right_jitter_readonly_20261102/EPISODE_ANALYSIS.json",
+  "live_board_observation_source": "Identity chat persisted readiness receipt; original chat made no board query",
+  "current_boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e",
+  "startup_sha256_at_latest_saved_board_receipt": "6f9653641a99ba8e5c8bed85f9628c87f9b22e54e205531e285e11a17611de7a",
+  "latest_saved_board_receipt": "other_components_20261102\\live_enrollment_20261102\\voice_entry_trace_20261102\\PRE_DEPLOYMENT_READINESS.json",
+  "full_three_minute_integrated_demo_ready": false,
+  "previous_progress_backup": "project_progress_20261102\\before_progress_refresh_20261102T140103Z",
+  "evidence_file_sha256": {
+    "project_progress_20261102\\PROJECT_PROGRESS.json": "686948b28a6d7d05b88cc63c671906cc54ae81c49a0fc88641d58a3815e278d0",
+    "AXIS_CURRENT_HANDOFF.json": "94ee5eb94c2916aa47ec13fad4083f204cb7ef6269cd32655019db67aabd5374",
+    "cpu_optimization_20261102\\CPU_OPT_STATUS.json": "97644143b540cab880ad26f2fe0a6e892bcc662e98aad8b5b5595be5c42a59bb",
+    "other_components_20261102\\live_enrollment_20261102\\CURRENT_ENROLLMENT_STATUS.json": "65144abcb5bed80d164be1cf871f9f8ff6f108bf43f6fdd27074a783b88decf2",
+    "other_components_20261102\\live_enrollment_20261102\\voice_entry_trace_20261102\\PRE_DEPLOYMENT_READINESS.json": "bf363627904ec4f64d46a71e0520dda25dbd106d3add1b70d47d0ad9245abc80",
+    "other_components_20261102\\live_enrollment_20261102\\split_commands_20261102\\actual_release\\VOICE_BEFORE_INVENTORY.json": "cd3f44291a54ef1e8f1fa2aa23e6a9c5578d808a2bd6eacb8ebf6640239ec06b",
+    "other_components_20261102\\live_enrollment_20261102\\split_commands_20261102\\actual_release\\APPLY_RESULT.json": "478a1e4590d8be94de0227f1ff18fd8636560fe91f0ce0c8a077491e5bfd5bc2"
+  },
+  "field_scope": "Point-in-time reconciliation from saved peer receipts plus local host health; not a device handback or authority to act",
+  "axis_publication_scope": "Stable150 release retained, publication was previous boot; current boot platform incompatible",
+  "parallel_workstream_update_utc": "2026-11-02T14:24:57.019892+00:00",
+  "parallel_workstreams": {
+    "identity": {
+      "thread_id": "01a19ad7-5865-7c60-82fa-605d17aea70f",
+      "host_id": "local",
+      "responsibility": "Independent voice enrollment repair and live confirmation",
+      "status": "active_sole_board_maintenance_owner"
+    },
+    "boot_recovery": {
+      "thread_id": "01a19ca4-6c68-70f2-a9a0-af51dfda6bc6",
+      "host_id": "local",
+      "title": "开机恢复｜wide与界面自动启动",
+      "status": "created_offline_development",
+      "responsibility": "Original cold-boot platform/camera/GUI startup recovery candidates, rollback and local tests",
+      "output_directory": "boot_recovery_parallel_20261102",
+      "result_authority": "boot_recovery_parallel_20261102/BOOT_RECOVERY_STATUS.json",
+      "board_queries_or_actions_allowed_now": false,
+      "production_writes_allowed_now": false,
+      "motion_initialization_or_follow_allowed_now": false,
+      "scope": "Real local implementation now; later deployment requires explicit maintained handback and existing sole axis/platform operator"
+    },
+    "cpu": {
+      "thread_id": "01a19b1a-6a07-7781-8af9-aacacb1c8ca4",
+      "host_id": "local",
+      "status": "offline_interface_work_board_access_frozen",
+      "responsibility": "Existing GTK/camera performance; reusable protected camera lifecycle interface for boot recovery",
+      "result_authority": "cpu_optimization_20261102/CPU_OPT_STATUS.json",
+      "new_interface": "cpu_optimization_20261102/BOOT_RECOVERY_INTERFACE.json"
+    },
+    "axis": {
+      "thread_id": "01a19b64-8194-70e3-806b-03fa9a283918",
+      "host_id": "local",
+      "title": "转轴跟随｜左侧停点优化",
+      "status": "frozen_waiting_explicit_maintenance_handback",
+      "responsibility": "Sole axis and original-wide platform operations after actual handback; preserve original controller and retained tuning",
+      "handoff": "AXIS_CHAT_HANDOFF_20261102.txt",
+      "result_authority": "AXIS_CURRENT_HANDOFF.json"
+    }
+  },
+  "parallel_workstream_update_scope": "Coordination only; previous board/model receipt timestamps unchanged. No board query/action or private store access."
+}

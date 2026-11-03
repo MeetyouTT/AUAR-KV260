@@ -1,0 +1,1 @@
+cmd_drivers/opp/built-in.a := echo >/dev/null; rm -f drivers/opp/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/opp/built-in.a drivers/opp/core.o drivers/opp/cpu.o drivers/opp/of.o drivers/opp/debugfs.o

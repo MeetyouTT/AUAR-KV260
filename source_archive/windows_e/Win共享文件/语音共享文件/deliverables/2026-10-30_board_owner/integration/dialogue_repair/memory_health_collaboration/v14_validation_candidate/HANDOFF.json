@@ -1,0 +1,237 @@
+{
+  "schema": "aura.memory-protected-validation-candidate.v1",
+  "status": "ROOT_DEPLOYED_V14_STRUCTURED_CAMERA_NET_BACKLOG_REDUCTION_VERIFIED",
+  "baseline_startup_sha256": "ae47311619310420b3215770b676c48a9f1d8e3d33d02c72fa04e21186ec903b",
+  "files": {
+    "common/board_memory.py": {
+      "path": "after/common/board_memory.py",
+      "before_sha256": "6e62b109f429c8b8ebb11b1bcf45258be08f5dd659c778e51bd1d95123ee5735",
+      "sha256": "fe50db190aaafcb8841eaa132ed9ea218a80bc582efacb3c3c83e952bf985e9f",
+      "bytes": 101431
+    },
+    "board/runtime/board_memory_policy.py": {
+      "path": "after/board/runtime/board_memory_policy.py",
+      "before_sha256": "48c7499fe5371c822738f2f42029a6b82fe2aa71c503fc0accd9fa15549188a5",
+      "sha256": "6050ed5e4dcfeb456c5d0969e257f624552f80ff722b3c3999a573f86cd933c2",
+      "bytes": 34811
+    }
+  },
+  "unchanged_backoff_sha256": "9710c079fc589eae8f2eb26fba7f0dd80038b66736b3e45e000a98904716ce82",
+  "atomic_source_update_required": true,
+  "deployment_note": "Install both source modules together; policy imports the typed reason constant. Root is sole publisher; recheck latest actual module hashes before merge.",
+  "readonly_script": {
+    "path": "board_readonly_metadata_v14.py",
+    "sha256": "2148f60f7ebdd2cad533dfc856099ef87e021f727578ba9aacbfa67bc561f55c",
+    "suitable_on_v13": true,
+    "sql_mode": "ro+query_only",
+    "vm_budget_seconds": 0.4,
+    "outputs": [
+      "Fixed rejection enums when available",
+      "Aggregate task attempt buckets",
+      "Backlog source counts",
+      "Existing metadata only"
+    ],
+    "calls_inference": false,
+    "imports_production": false
+  },
+  "tests": {
+    "baseline": {
+      "tests": 5,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 1,
+      "seconds": 0.457,
+      "evidence": "test_baseline\\results.xml"
+    },
+    "targeted": {
+      "tests": 34,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 34,
+      "seconds": 1.357,
+      "evidence": "test_targeted\\results.xml"
+    },
+    "regression": {
+      "tests": 271,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 270,
+      "seconds": 19.945,
+      "evidence": "test_regression\\results.xml"
+    }
+  },
+  "changes": [
+    "CandidateRejected carries at most seven static rejection reason enums; no exception text parsing or source values exported",
+    "Same original validation predicates now report all failing categories; Store/worker/permission/transaction functions are AST-identical",
+    "Exact known board camera person-count event schema can render a compact count-only summary without LLM; no user speech, extra fields or unknown producer text accepted",
+    "Structured candidate still passes original full-source validation, claims/refs/cutoff/lease/generation checks and atomic Store commit; unsupported events use unchanged LLM path"
+  ],
+  "structured_contract": {
+    "scope": "device",
+    "topic": "视觉",
+    "source": "camera_observed",
+    "time_basis": "board_camera_health_source_bound",
+    "evidence": "visual_observation",
+    "speaker_known": false,
+    "producer_claim_fields": [
+      "event_kind",
+      "people_count",
+      "source_frame_id",
+      "source_kind"
+    ],
+    "source_kind": "actual",
+    "count_range": [
+      0,
+      1000
+    ],
+    "limits": "Exact existing producer sentences plus consistent integer numbers/claims; no extra metadata or claims; output must fit existing final summary capacity",
+    "narrative": "Counts from typed sources in recording order; 0 means a sample did not detect a body; no arrival/departure/identity/continuous-presence claims",
+    "transcript_archive": false,
+    "model_calls_for_recognized_records": 0
+  },
+  "queue_findings": {
+    "attempts_four_is_cap": false,
+    "meaning": "Identical task retry count; source selection prefers the maximum previous source attempt count, then age. No four-attempt discard or quarantine.",
+    "worker_wide_cooldown": "Real failures delay every partition up to 60 seconds",
+    "different_partitions": "Fewer-attempt groups can progress after cooldown; not a permanent global head-of-line lock",
+    "same_atomic_segment": "A poison source can repeatedly retain a healthy companion; five synthetic attempts reproduce this without deleting either body",
+    "queue_code_changed": false
+  },
+  "guarantees": [
+    "No validation predicate removed or weakened",
+    "No business data replay/migration/schema change",
+    "No premature body deletion or raw archive",
+    "No new model/service/writer",
+    "Original same-boot generation fix, backoff, deadlines and source/permission guards preserved"
+  ],
+  "limitations": [
+    "Free-form LLM summaries still cannot be mechanically proven semantically lossless; rejected candidates stay pending",
+    "Queue scheduling and global backoff unchanged; residual poison batches may need a later separate remedy",
+    "Actual new rejection codes, eligible camera backlog size and postdeployment progress require root-only metadata"
+  ],
+  "production_modified": false,
+  "real_models_called": false,
+  "board_connected": false,
+  "v13_problem_baseline": {
+    "evidence": "../actual_metadata_v13_initial.json",
+    "historical_committed": 270,
+    "current_worker_rejections": 6,
+    "observed_stage": "full_source_validation",
+    "backlog_events": 796,
+    "missing_body_expected_migrated_command": 1,
+    "missing_body_unexplained": 0,
+    "exact_v13_rejection_reason": "Not recoverable from old four-field diagnostics; no model text was archived. New fixed enums reveal future rejections.",
+    "prior_wording_example": "Synthetic source-derived camera wording can omit metadata numeral 0 and fail the original observation marker regex; this reproduces possible causes without claiming they were the six real responses."
+  },
+  "root_deployment": {
+    "startup_sha256": "39b102a4a505db491cf06b90e3a5232bfb656c79cb0a3c221551d76d414a9a0a",
+    "root_published": true,
+    "candidate_modules_match": {
+      "common/board_memory.py": true,
+      "board/runtime/board_memory_policy.py": true,
+      "common/board_memory_backoff.py": true
+    },
+    "analysis": "ACTUAL_PROGRESS_ASSESSMENT.json",
+    "latest": {
+      "evidence": "deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\first_wait_integration\\actual_memory_v14_followup.json",
+      "startup_sha256": "39b102a4a505db491cf06b90e3a5232bfb656c79cb0a3c221551d76d414a9a0a",
+      "worker": {
+        "running": true,
+        "error_code": "",
+        "completed": 27,
+        "discarded": 0
+      },
+      "retry": {
+        "last_failure_code": "",
+        "failure_streak": 0,
+        "retry_in_seconds": 0.0,
+        "last_delay_seconds": 0.0
+      },
+      "last_summary": {
+        "state": "complete",
+        "stage": "complete",
+        "code": "none",
+        "error_class": "none",
+        "method": "structured_camera_counts"
+      },
+      "durable_committed_tasks": 298,
+      "valid_summaries": 298,
+      "backlog": {
+        "events": 858,
+        "source_counts": {
+          "assistant_played": 68,
+          "camera_observed": 607,
+          "device_event": 63,
+          "user_said": 120
+        },
+        "camera_source_events": 607,
+        "other_source_events": 251
+      },
+      "missing_body_classification": {
+        "total": 1,
+        "migration_proof_tables_present": true,
+        "migrated_excluded_command_with_current_fact": 1,
+        "unexplained": 0,
+        "classification_uses_text_or_private_identifiers": false
+      }
+    },
+    "comparison": {
+      "evidence": "deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\first_wait_integration\\actual_memory_v14_followup.json",
+      "evidence_sha256": "67835a894f518f0f8fdeb56e3d8fd832a26e841205e36f8df6741a5441796851",
+      "same_startup": true,
+      "same_source_map": true,
+      "observed_monotonic_elapsed_seconds": 187.16511020299367,
+      "comparable": true,
+      "backlog_net_change": -11,
+      "backlog_net_declined": true,
+      "durable_committed_change": 11,
+      "valid_summaries_change": 11,
+      "source_net_changes": {
+        "assistant_played": 0,
+        "camera_observed": -11,
+        "device_event": 0,
+        "user_said": 0
+      },
+      "latest_worker": {
+        "running": true,
+        "error_code": "",
+        "completed": 27,
+        "discarded": 0
+      },
+      "latest_retry": {
+        "last_failure_code": "",
+        "failure_streak": 0,
+        "retry_in_seconds": 0.0,
+        "last_delay_seconds": 0.0
+      },
+      "latest_summary_diagnostics": {
+        "state": "complete",
+        "stage": "complete",
+        "code": "none",
+        "error_class": "none",
+        "method": "structured_camera_counts"
+      },
+      "latest_store": {
+        "active_bodies": 888,
+        "valid_summaries": 298,
+        "invalidated_summaries": 0,
+        "open_turns": 0,
+        "maximum_task_attempts": 4,
+        "compacted_bodies_remaining": 0,
+        "invalidated_summary_payloads_remaining": 0,
+        "unlinked_missing_valid_bodies": 1,
+        "backlog_events": 858,
+        "oldest_backlog_age_seconds": 181566.79709887505,
+        "last_commit_age_seconds": 15.781260967254639,
+        "active_leases": 0,
+        "expired_leases": 0
+      },
+      "note": "Net queue change includes arrivals and any authorized mutations; report it alongside successful commits, not as an isolated throughput measurement."
+    },
+    "overall": "Structured camera publication and short-window net backlog reduction verified; all-library health, free-form summaries and backlog clearance not verified"
+  },
+  "action_scope_note": "production_modified/real_models_called/board_connected false refer to this collaborating conversation; root performed the recorded deployment and diagnostic reads."
+}

@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "status": "CORRELATED",
+  "host": "172.23.242.132",
+  "port": 22,
+  "capture_started_utc": "2026-10-30T11:34:44.967347+00:00",
+  "capture_finished_utc": "2026-10-30T11:37:44.982084+00:00",
+  "capture_directory": "/home/ghmd/Win共享文件/协作任务/2026-10-30_Codex跨机协作/network-runs/20261030T113440507578Z",
+  "windows_probe_snapshot": "/home/ghmd/Win共享文件/协作任务/2026-10-30_Codex跨机协作/network-runs/20261030T113440507578Z/windows-probe-correlated.json",
+  "windows_probe_sha256": "faea5b0c3ecc7c107b2ca56fd421fce560ee715d96b38b8d4385607e35769c29",
+  "windows_route": [
+    {
+      "IPAddress": "172.18.0.1",
+      "InterfaceAlias": "singbox_tun",
+      "InterfaceIndex": 19,
+      "DestinationPrefix": null,
+      "NextHop": null,
+      "RouteMetric": null
+    },
+    {
+      "IPAddress": null,
+      "InterfaceAlias": "singbox_tun",
+      "InterfaceIndex": 19,
+      "DestinationPrefix": "0.0.0.0/0",
+      "NextHop": "172.18.0.2",
+      "RouteMetric": 0
+    }
+  ],
+  "windows_attempt_overlap_confirmed": true,
+  "attempts": [
+    {
+      "index": 0,
+      "started_utc": "2026-10-30T11:35:35.0306763Z",
+      "finished_utc": "2026-10-30T11:35:40.0638566Z",
+      "windows_source_address": "172.18.0.1",
+      "windows_source_port": 65514,
+      "windows_tcp_connected": true,
+      "windows_banner": null,
+      "fully_inside_capture": true,
+      "ubuntu_exact_port_tcp_packets": 0,
+      "ubuntu_inbound_syn": 0,
+      "ubuntu_outbound_syn_ack": 0,
+      "ubuntu_exact_port_headers": []
+    },
+    {
+      "index": 1,
+      "started_utc": "2026-10-30T11:35:42.0739050Z",
+      "finished_utc": "2026-10-30T11:35:47.0816169Z",
+      "windows_source_address": "172.18.0.1",
+      "windows_source_port": 49213,
+      "windows_tcp_connected": true,
+      "windows_banner": null,
+      "fully_inside_capture": true,
+      "ubuntu_exact_port_tcp_packets": 0,
+      "ubuntu_inbound_syn": 0,
+      "ubuntu_outbound_syn_ack": 0,
+      "ubuntu_exact_port_headers": []
+    },
+    {
+      "index": 2,
+      "started_utc": "2026-10-30T11:35:49.0896590Z",
+      "finished_utc": "2026-10-30T11:35:54.1049204Z",
+      "windows_source_address": "172.18.0.1",
+      "windows_source_port": 49242,
+      "windows_tcp_connected": true,
+      "windows_banner": null,
+      "fully_inside_capture": true,
+      "ubuntu_exact_port_tcp_packets": 0,
+      "ubuntu_inbound_syn": 0,
+      "ubuntu_outbound_syn_ack": 0,
+      "ubuntu_exact_port_headers": []
+    }
+  ],
+  "total_captured_packets": 44,
+  "total_tcp22_packets": 0,
+  "capture_statistics": {
+    "packets_received_by_filter": 46,
+    "packets_dropped_by_kernel": 0
+  },
+  "non_ssh_traffic": {
+    "icmp_records": 44,
+    "udp_port_unreachable_ports": [
+      58080
+    ],
+    "note": "These ICMP records are not TCP/22 requests or SSH replies"
+  },
+  "conclusion": {
+    "code": "NO_WINDOWS_SSH_TRAFFIC_AT_UBUNTU_CAPTURE_POINT",
+    "requests_reached_ubuntu_capture_point": false,
+    "ubuntu_ssh_reply_observed": false,
+    "ubuntu_ssh_return_path_failure_demonstrated": false,
+    "scope": "Three timestamp-correlated Windows attempts; all Ubuntu interfaces for the stated IPv4 SSH endpoint",
+    "next_location": "Windows TUN forwarding and physical-interface egress, then upstream path before Ubuntu",
+    "exact_loss_hop_known": false,
+    "note": "Windows TCP Connected=true on 172.18.0.1 does not prove a connection to the real Ubuntu sshd; no SYN reached this capture point"
+  },
+  "clock_basis": "Each host reported UTC; clock settings were not changed",
+  "payload_recorded": false,
+  "routes_modified": false,
+  "board_contacted": false,
+  "gpu_admission_modified": false
+}

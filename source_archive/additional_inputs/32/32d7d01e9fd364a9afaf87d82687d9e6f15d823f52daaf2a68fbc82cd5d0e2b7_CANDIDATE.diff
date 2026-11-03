@@ -1,0 +1,88 @@
+--- a/board/runtime/board_dialogue.py
++++ b/board/runtime/board_dialogue.py
+@@ -18,6 +18,18 @@
+     MAX_BUDGET_MS, MAX_PCM, Owner, decode_audio, validate_request, validate_response,
+ )
+ from common.reply_quality import possible_question_echo
++
++
++# Numeric-only observations from the last accepted LLM result in a completed
++# prepare. Host-relative backend times remain separate from board RPC wall time.
++LLM_BACKEND_METRIC_KEYS = frozenset({
++    'prompt_eval_count', 'eval_count', 'load_duration_ms', 'prompt_eval_duration_ms',
++    'eval_duration_ms', 'total_duration_ms', 'first_packet_ms', 'first_content_ms',
++    'first_json_closed_ms', 'backend_done_ms', 'json_closed_to_done_ms',
++    'thinking_characters', 'content_characters', 'trailing_whitespace_characters',
++    'prompt_eval_cached_count',
++})
++LLM_BACKEND_METRIC_FIELDS = frozenset('llm_last_backend_' + key for key in LLM_BACKEND_METRIC_KEYS)
+ 
+ 
+ class StaleGeneration(InterruptedError):
+@@ -463,11 +475,28 @@
+         metrics = dict(metadata_only=True,streaming_enabled=chunk_sink is not None,
+             context_ms=0.,local_reply_ms=0.,llm_rpc_ms=0.,llm_calls=0,tts_rpc_ms=0.,
+             tts_calls=0,tts_max_rpc_ms=0.,streamed_chunks=0,complete=False,
+-            speaker_first_audio_measured=False)
++            speaker_first_audio_measured=False,llm_backend_metrics_calls=0)
++        self.last_prepare_metrics = dict(metrics)
+         def timed_request(kind,**fields):
+             started = self.clock()
++            if kind == 'llm':
++                # A retry with missing/rejected metrics cannot retain its predecessor.
++                for name in LLM_BACKEND_METRIC_FIELDS:
++                    metrics.pop(name, None)
+             try:
+-                return self._request(kind,turn,**fields)
++                result, owner = self._request(kind,turn,**fields)
++                if kind == 'llm':
++                    backend = result.get('metrics')
++                    observed = False
++                    if isinstance(backend, dict):
++                        for name in LLM_BACKEND_METRIC_KEYS:
++                            value = backend.get(name)
++                            if type(value) in (int, float) and 0 <= value < 1e15:
++                                metrics['llm_last_backend_' + name] = value
++                                observed = True
++                    if observed:
++                        metrics['llm_backend_metrics_calls'] += 1
++                return result, owner
+             finally:
+                 elapsed = (self.clock()-started)*1000
+                 metrics[kind+'_rpc_ms'] += elapsed
+@@ -589,6 +618,12 @@
+             metrics['complete'] = True
+             return plan
+ 
++        except Exception:
++            # Failed/cancelled prepares publish no backend-result observation.
++            for name in LLM_BACKEND_METRIC_FIELDS:
++                metrics.pop(name, None)
++            metrics['llm_backend_metrics_calls'] = 0
++            raise
+         finally:
+             metrics['prepare_total_ms'] = (self.clock()-prepare_started)*1000
+             self.last_prepare_metrics = dict(metrics)
+--- a/board/runtime/audio/board_dialogue_jobs.py
++++ b/board/runtime/audio/board_dialogue_jobs.py
+@@ -20,7 +20,7 @@
+ import time
+ import uuid
+ 
+-from board.runtime.board_dialogue import PlaybackPlan, StaleGeneration
++from board.runtime.board_dialogue import PlaybackPlan, StaleGeneration, LLM_BACKEND_METRIC_FIELDS
+ from board.runtime.audio.transcription import configuration
+ from common.asr_wire import PROTOCOL as ASR_PROTOCOL, context as validate_capture
+ from common.voice_channel import ChannelState, PROTOCOL as CHANNEL_PROTOCOL, MAX_SAMPLES, PACKET_SAMPLES
+@@ -661,8 +661,10 @@
+                         'first_chunk_emitted_ms','prepare_total_ms','streamed_chunks','complete',
+                         'speaker_first_audio_measured'}
+                     metrics = getattr(self.controller, 'last_prepare_metrics', {})
++                    numeric_backend = LLM_BACKEND_METRIC_FIELDS | {'llm_backend_metrics_calls'}
+                     phase['prepare'] = {k:v for k,v in metrics.items()
+-                        if k in allowed and (type(v) is bool or type(v) in (int,float) and math.isfinite(v) and v>=0)}
++                        if (k in allowed and (type(v) is bool or type(v) in (int,float) and math.isfinite(v) and v>=0))
++                        or (k in numeric_backend and type(v) in (int,float) and math.isfinite(v) and 0<=v<1e15)}
+                     publish()
+             self._check(job)
+             if (not isinstance(plan, PlaybackPlan) or plan.board_boot_id != self.boot_id

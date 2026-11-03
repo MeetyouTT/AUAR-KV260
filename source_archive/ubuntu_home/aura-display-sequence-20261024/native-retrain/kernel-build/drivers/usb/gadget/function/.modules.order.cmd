@@ -1,0 +1,1 @@
+cmd_drivers/usb/gadget/function/modules.order := {   echo drivers/usb/gadget/function/usb_f_serial.ko;   echo drivers/usb/gadget/function/usb_f_obex.ko; :; } | awk '!x[$$0]++' - > drivers/usb/gadget/function/modules.order

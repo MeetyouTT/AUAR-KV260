@@ -1,0 +1,10 @@
+set_property SRC_FILE_INFO {cfile:/home/ghmd/kv260-m3-axilite-20261002/src/kv260/overlays/examples/benchmark/binary_container_1/link/vivado/vpl/prj/prj.gen/sources_1/bd/kv260_ispMipiRx_vcu_DP/ip/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0/src/timing_clocks.xdc rfile:../../../prj.gen/sources_1/bd/kv260_ispMipiRx_vcu_DP/ip/kv260_ispMipiRx_vcu_DP_DPUCZDX8G_1_0/src/timing_clocks.xdc id:1 order:LATE scoped_inst:inst} [current_design]
+current_instance inst
+set_property src_info {type:SCOPED_XDC file:1 line:24 export:INPUT save:INPUT read:READ} [current_design]
+set_multicycle_path 2 -setup -start -from [get_clocks -of_objects [get_ports ap_clk_2]] -to [get_clocks -of_objects [get_ports aclk]]
+set_property src_info {type:SCOPED_XDC file:1 line:25 export:INPUT save:INPUT read:READ} [current_design]
+set_multicycle_path 1 -hold  -start -from [get_clocks -of_objects [get_ports ap_clk_2]] -to [get_clocks -of_objects [get_ports aclk]]
+set_property src_info {type:SCOPED_XDC file:1 line:27 export:INPUT save:INPUT read:READ} [current_design]
+set_multicycle_path 2 -setup -end   -from [get_clocks -of_objects [get_ports aclk]] -to [get_clocks -of_objects [get_ports ap_clk_2]]
+set_property src_info {type:SCOPED_XDC file:1 line:28 export:INPUT save:INPUT read:READ} [current_design]
+set_multicycle_path 1 -hold  -end   -from [get_clocks -of_objects [get_ports aclk]] -to [get_clocks -of_objects [get_ports ap_clk_2]]

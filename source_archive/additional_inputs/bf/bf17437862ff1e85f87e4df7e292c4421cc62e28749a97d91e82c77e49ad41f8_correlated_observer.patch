@@ -1,0 +1,33 @@
+--- frozen_live_observer_49fdf.py
++++ correlated_live_observer_3c7ec.py
+@@ -5,7 +5,7 @@
+ assert isinstance(EXPECTED_STARTUP,str) and len(EXPECTED_STARTUP)==64
+ assert isinstance(EXPECTED_BOOT,str) and EXPECTED_BOOT
+ began=time.monotonic(); deadline=began+180.
+-initial_request=None;first=True;ready=False;completed=set();last_probe=None
++initial_request=None;first=True;ready=False;completed=set();last_probe=None;target_request=None;target_complete_latency=None
+ while time.monotonic()<deadline:
+  tick=time.monotonic();cpu=time.process_time()
+  exec(SOURCE)
+@@ -26,10 +26,17 @@
+  last_probe=dict(wall_ms=(time.monotonic()-tick)*1000,cpu_ms=(time.process_time()-cpu)*1000)
+  print(json.dumps(dict(kind='observer_cost',**last_probe)),flush=True)
+  token=observed['request_token']
+- if (ready and token and token!=initial_request and observed['ack_committed']
+-     and observed['ack_matches_current_request'] and observed['latency'].get('complete') is True):
+-  completed.add(token)
+-  print(json.dumps(dict(kind='complete',status='ONE_NEW_TURN_COMPLETE',request_token=token,
++ if ready and target_request is None and token and token!=initial_request:
++  target_request=token
++ if token==target_request and observed['latency'].get('complete') is True:
++  target_complete_latency=dict(observed['latency'])
++ if (ready and target_request and observed['ack_committed']
++     and observed['ack_request_token']==target_request and observed['latency'].get('complete') is True
++     and observed['playing'] is False
++     and (token==target_request or token is None and target_complete_latency is not None
++          and observed['latency']==target_complete_latency)):
++  completed.add(target_request)
++  print(json.dumps(dict(kind='complete',status='ONE_NEW_TURN_COMPLETE',request_token=target_request,
+     observed_mono=observed['observed_mono'],raw_text_audio_or_images_saved=False)),flush=True)
+   break
+  time.sleep(max(0.,1.-(time.monotonic()-tick)))

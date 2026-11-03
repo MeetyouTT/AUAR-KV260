@@ -1,0 +1,163 @@
+﻿AUAR·雪妃：RAR源码复现包定稿结构（方案A）
+src/对应原aura运行根，旧拆分布局不再使用。
+按用户提供的赛事方老师说明：完整源码＋重建脚本＋精简关键说明。
+以下是设计；目录应收齐实际源码，所有脚本均为建议目标。
+未收集真实源码，未生成业务占位文件，未制作RAR。
+
+auar_xuefei/
+├── README.md                              # 简介/器件/版本、架构、接口、复现步骤、目录对照和边界
+├── license                                # 队伍原创内容的正式开源许可
+├── third_party_notices.md                  # 代码、IP、模型、资源和固定输入的来源/版本/许可
+├── checksums.sha256                        # 可选：实际装包文件SHA，不包含自身
+│
+├── src/                                   # 原aura运行根；完整保留最终实际源文件和相对位置
+│   ├── board/                             # 完整板端源码，不新造aura_board包名
+│   │   ├── fusion/
+│   │   ├── identity/
+│   │   ├── interaction/
+│   │   ├── motion/
+│   │   ├── runtime/
+│   │   ├── vision/
+│   │   └── visual_timeline.py
+│   ├── host/                              # 完整实际Windows/主机源码，其他现役入口也须收齐
+│   │   ├── __init__.py
+│   │   └── model_service/
+│   ├── common/                            # 完整实际共享层，保留全部引用模块及版本约定
+│   │   ├── config.py                      # 运行根和配置校验器原样保留
+│   │   ├── contracts.py
+│   │   └── schemas/                       # 实际协议schema原样保留
+│   ├── ui/                                # 真实布局/令牌/manifest数据，不与interaction代码混淆
+│   │   ├── avatar_board_manifest.json
+│   │   ├── board_touch_layout.json
+│   │   ├── ui_layout_spec.json
+│   │   ├── ui_state.schema.json
+│   │   └── ui_tokens.json
+│   ├── tools/                             # 完整实际GUI、相机、语音、模型等入口和辅助源码
+│   │   ├── aura_project.py                # 既有框架doctor/demo/replay等；不代表最终整机READY
+│   │   ├── aura_host.py
+│   │   ├── run_project.sh
+│   │   ├── run_project.bat
+│   │   ├── start.ps1                      # [条件] Windows启动入口，可保留其实际原位置/名字
+│   │   └── stop.ps1                       # [条件] Windows停止入口，可保留其实际原位置/名字
+│   ├── scripts/
+│   │   └── package_project.py             # 原框架打包工具源码；不直接当最终整机收集白名单
+│   ├── config/
+│   │   ├── readme.md                      # 两套加载体系、真实文件名、字段及生成/安装映射
+│   │   ├── runtime.sim.json               # 无敏感字段的完整有效仿真配置，默认文件名不改
+│   │   ├── runtime.experiment.sim.json     # [条件] 实际使用的实验仿真配置
+│   │   ├── runtime.reference.example.json  # [条件] 从有效原配置脱敏，使用前生成真实运行文件
+│   │   ├── runtime.kv260.example.json      # 从有效原配置脱敏；旧框架profile不等于正式业务配置
+│   │   ├── model_manifest.json            # doctor固定读取的清单，原名保留；不是权重文件
+│   │   ├── source_import_manifest.json    # 脱敏来源/导入清单，保留实际结构
+│   │   ├── servo_calibration.example.json  # 校准模板，生成时保持原程序期望的名字
+│   │   ├── toolchain_lock.json            # 与build/env.json统一来源，不独立手工维护两份版本
+│   │   ├── board_avatar_gtk.example.json
+│   │   ├── board_camera_ui.example.json
+│   │   ├── board_identity.example.json
+│   │   ├── board_dialogue_model.example.json
+│   │   ├── board_ui_services.example.json
+│   │   ├── pan_follow.shadow.example.json
+│   │   ├── timeline_memory.example.json
+│   │   ├── anonymous_identity.example.json
+│   │   ├── voice_latency.example.json
+│   │   ├── model_inference.example.json    # Windows模板，最终安装为真实加载器期望的文件
+│   │   ├── model_storage.example.json      # 权重位置由本机填写，LLM不下载到共享源码目录
+│   │   └── experiments.json               # [条件] 实际使用且已脱敏的实验定义
+│   ├── models/
+│   │   ├── readme.md                      # 取得、校验、适配、量化、编译及使用顺序
+│   │   ├── vision/
+│   │   │   ├── yunet_2022mar.onnx         # [条件] 有权分发且选定profile使用的固定原始模型
+│   │   │   └── sface_2021dec.onnx         # [条件] 实际采用时随包或提供固定取得方法
+│   │   ├── adapt/                        # 实际导出/改写/校准/量化/编译源码，不重写已有流程
+│   │   └── calibration/                  # 校准集定义、划分、量化信息、arch及编译配置
+│   ├── assets/                           # 最小必要测试资源与资源约定，不装全量旧帧和可再生缓存
+│   ├── data/                             # 运行时数据必须位于PROJECT_ROOT下
+│   │   ├── calibration_manifest.json
+│   │   ├── test_manifest.json
+│   │   └── golden/
+│   │       └── framework_frames.jsonl
+│   ├── hardware/                         # 原有模块/资料，必要引用原样保留
+│   ├── tests/                            # 原软件/系统测试，保留各测试及fixtures的相对位置
+│   │   ├── __init__.py
+│   │   ├── framework/
+│   │   ├── data/
+│   │   ├── fixtures/
+│   │   └── bench_identity_stop.py        # [条件] 收回的实际硬件验收源码，其他依赖同时收齐
+│   ├── skills/                           # [条件] 业务实际引用的技能目录，区别于顶层赛事skill
+│   ├── docs/                             # [条件] 源码/原工具实际引用的必要说明
+│   ├── requirements.txt
+│   ├── requirements-dev.txt
+│   ├── requirements-live.txt
+│   ├── requirements.windows.lock.txt      # [条件] Windows实际依赖锁，沿用既有真名亦可
+│   ├── requirements.kv260.lock.txt        # [条件] ARM实际依赖锁，不能混用x86 wheel
+│   ├── fpga/                             # 额外FPGA实现输入，不影响现有Python导入
+│   │   ├── rtl/
+│   │   │   ├── visual_servo.sv
+│   │   │   └── disabled_audio.sv          # 若真实BD仍引用此兼容模块，则属于必要源码
+│   │   ├── bd/
+│   │   │   ├── create_bd.tcl
+│   │   │   └── address_map.json
+│   │   ├── constraints/                  # 保留实际XDC名称和调用顺序，不为树拆分重命名
+│   │   ├── overlay/
+│   │   │   ├── aura-visual-servo.dtsi     # 目标overlay源；尚待实现并验证语义/合并
+│   │   │   └── readme.md
+│   │   ├── ip/
+│   │   │   ├── custom/                   # [条件] 实际自研IP完整源和封装元数据
+│   │   │   └── ip_config.tcl
+│   │   └── xrt_metadata/                 # [条件] 选元数据重建XCLBIN路线时保留完整输入
+│   ├── native/                           # [条件] 源树外收回的原生源码/构建定义；已在tools等处则原位
+│   └── third_party/                      # [条件] 必要上游源码、项目补丁和原始许可
+│
+├── sim/
+│   └── rtl/
+│       ├── tb_nominal.sv                  # 四份真实测试台，不用早期示意名称
+│       ├── tb_wide.sv
+│       ├── tb_pulse_guard.sv
+│       ├── tb_servo.sv
+│       ├── vectors/                      # [条件] 实际测试台需要的向量，保持真实相对路径
+│       └── run.tcl                       # 目标仿真入口，本轮结果写源码包之外
+│
+├── build/
+│   ├── reproduce.py                      # 薄编排：复用实际CLI和工具，不另造业务运行时
+│   ├── build.tcl                         # 目标硬件构建入口；不依赖历史DCP/旧工作目录
+│   ├── export_firmware.py                # 目标固件导出、报告检查、配对和元数据校验入口
+│   ├── prepare_models.py                 # 目标模型准备入口，调用包内真实适配源码
+│   ├── build_native.sh                   # 目标ARM原生构建，沿用实际makefile/CMake等定义
+│   └── env.json                          # 工具/补丁/器件/指纹/ABI/频率/依赖和固定输入
+│
+├── board/                                # 部署定义，不是Python的board包
+│   ├── systemd/
+│   │   ├── aura-camera.service            # 使用真实最终服务名称和有效参数
+│   │   ├── aura-business.service
+│   │   └── dropins/                      # [条件] 最终有效追加配置及加载顺序
+│   ├── udev/                             # [条件] 实际设备规则
+│   ├── system/
+│   │   ├── image_manifest.json            # 系统镜像/内核/XRT/VART/Python及base DTB的来源校验
+│   │   └── patches/                      # [条件] 实际系统、驱动与设备树修改
+│   ├── deploy.json                       # 保持src运行根整体关系，映射文件/权限/配置/服务/就绪
+│   └── install.sh                        # 目标安装入口，模板生成后保持代码真实文件名
+│
+├── data/                                 # 投稿指标和精选证据，不替代src/data
+│   ├── metrics.csv                       # 数值/单位/版本/条件/对照/来源及SHA
+│   └── expected/                         # [条件] 额外比对结果，不重复搬走运行根golden
+│
+├── skill/
+│   ├── README.md                         # 范围、用法、效果、失败来源和边界
+│   └── pynq-contract-testgen/             # 现有完整离线包，全部源/例子/证据/许可原样保留
+│       ├── readme.md
+│       ├── workflow.md
+│       ├── contract_format.md
+│       ├── case_studies.md
+│       ├── license
+│       ├── scripts/
+│       ├── templates/
+│       ├── examples/
+│       │   ├── adder/
+│       │   └── crc32/
+│       ├── tests/
+│       └── evidence/
+│
+└── report/
+    ├── design_report.md                  # 七类内容及完整复现说明，正式PDF按后台另交
+    ├── validation_summary.md             # 必须含真实测试命令/退出码/集合及资源时序摘要；未跑标NOT_RUN
+    └── ai_collaboration.md               # 真实提示、回答、纠错及验证摘录

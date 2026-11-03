@@ -1,0 +1,35 @@
+--- before/tools/board_avatar_gtk.py
++++ after/tools/board_avatar_gtk.py
+@@ -305,7 +305,9 @@
+                     recording_type=VoiceFirstRecordingController
+                 recording_options={'boot_id':self.board_boot_id,
+                                    'barge_enabled':bool(config.get('voice_barge_in')),
+-                                   'device_observer':True,'visual_social':True,
++                                   'device_observer':True,
++                                   'visual_social':not (self.board_business is not None
++                                       and self.board_business.runtime.config.data_origin == 'board'),
+                                    'audio_frontend':config.get('audio_frontend'),
+                                    'early_listen':bool(config.get('early_listen',False)),
+                                    'monitor_settings':HandsFreeSettings(Path.home()/'.local/share/aura/handsfree_dialogue.json'),
+--- before/tools/board_recording.py
++++ after/tools/board_recording.py
+@@ -134,8 +134,9 @@
+             # A model emits PCM in a burst. Drain enough to stay ahead of
+             # playback, but return to rendering/commands between batches.
+             # Preserve order and the existing producer backpressure; no drop.
+-            deadline=time.monotonic()+.006
++            deadline=time.monotonic()+.012
+             for index in range(8):
++                if self.closed or self.transcription['state'] in ('ERROR', 'CANCELLED'):return
+                 if index and time.monotonic()>=deadline:return
+                 result=self.transcriber.poll()
+                 if not result:return
+@@ -147,7 +148,7 @@
+                     self._entry_rejected();continue
+                 if result.get('error'):
+                     self.controller.cancel();self.transcription.update(state='ERROR',error=result['error'])
+-                    continue
++                    return
+                 if result.get('channel_event'):
+                     event=result['channel_event']
+                     started = time.perf_counter()

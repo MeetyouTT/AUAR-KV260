@@ -1,0 +1,123 @@
+{
+  "scope": "BOARD_READONLY_COUNTERS_SYNTHETIC_DIAGNOSTICS_AND_OVERHEAD_ONLY",
+  "source_hashes": {
+    "board/vision/pipeline_metrics.py": "4fe111373b6a50fe6b2f657a8fe82880889cabdab5e7f1a21b9243044496aac9",
+    "board/vision/thread_sched_metrics.py": "e9d4cdf56745af457b8e80720a4fa9f00a0f07a3da2c95b7bab5d43bfbe2d1bb",
+    "board/vision/dpu_vision_schedule.py": "acfbe653141d7098e3d87baabfbf7f530efc4309a417babfc76983ad9530dbb2",
+    "test_thread_sched_metrics.py": "7d9f25b1671c2d147a769cc39d0eefbe24a8543cc0a1cb2974e08de00483cc52"
+  },
+  "synthetic_tests": 20,
+  "test_output": "test_counter_decrease_and_cross_thread_are_missing (test_thread_sched_metrics.CounterTests) ... ok\ntest_counter_delta_matches_calling_thread_and_stays_numeric (test_thread_sched_metrics.CounterTests) ... ok\ntest_failed_usage_does_not_discard_schedstat (test_thread_sched_metrics.CounterTests) ... ok\ntest_malformed_counters_are_isolated (test_thread_sched_metrics.CounterTests) ... ok\ntest_reader_bounds_parse_and_closes_descriptor (test_thread_sched_metrics.CounterTests) ... ok\ntest_slow_read_latches_future_sampling_off (test_thread_sched_metrics.CounterTests) ... ok\ntest_zero_disabled_or_missing_sched_counters_are_not_zero_wait (test_thread_sched_metrics.CounterTests) ... ok\ntest_descriptor_reused_and_closed_once (test_thread_sched_metrics.DescriptorTests) ... ok\ntest_different_threads_never_reuse_each_others_fd_and_bound_is_two (test_thread_sched_metrics.DescriptorTests) ... ok\ntest_metrics_close_releases_probe_and_stops_reads (test_thread_sched_metrics.DescriptorTests) ... ok\ntest_disabled_option_does_not_read_proc_or_usage (test_thread_sched_metrics.IntegrationTests) ... ok\ntest_explicit_flag_requires_existing_diagnostics (test_thread_sched_metrics.IntegrationTests) ... ok\ntest_fault_keeps_original_hardcap_and_contains_counter_context (test_thread_sched_metrics.IntegrationTests) ... ok\ntest_probe_failure_never_changes_native_outcome (test_thread_sched_metrics.IntegrationTests) ... ok\ntest_reader_is_outside_metrics_lock (test_thread_sched_metrics.IntegrationTests) ... ok\ntest_success_has_two_samples_and_detached_flat_trace (test_thread_sched_metrics.IntegrationTests) ... ok\ntest_two_task_threads_do_not_mix_counter_pairs (test_thread_sched_metrics.IntegrationTests) ... ok\ntest_switch_mode_is_explicit_and_default_does_no_read (test_thread_sched_metrics.SwitchOnlyTests) ... ok\ntest_switch_only_failure_or_changed_thread_is_missing (test_thread_sched_metrics.SwitchOnlyTests) ... ok\ntest_switch_only_never_opens_proc_or_claims_queue_time (test_thread_sched_metrics.SwitchOnlyTests) ... ok\n\n----------------------------------------------------------------------\nRan 20 tests in 0.120s\n\nOK\n",
+  "baseline": {
+    "instrumentation_wall": {
+      "count": 200,
+      "mean_ms": 0.35904209499999995,
+      "p50_ms": 0.305263,
+      "p95_ms": 0.462474,
+      "max_ms": 4.037281
+    },
+    "observer": {
+      "enabled": false
+    }
+  },
+  "with_observer": {
+    "instrumentation_wall": {
+      "count": 200,
+      "mean_ms": 0.5835435400000001,
+      "p50_ms": 0.435374,
+      "p95_ms": 0.738077,
+      "max_ms": 11.263713
+    },
+    "observer": {
+      "enabled": true,
+      "mode": "CALLING_THREAD_CONTEXT_SWITCHES_ONLY",
+      "runqueue_time_collected": false,
+      "samples": 156,
+      "read_failures": 0,
+      "maximum_read_ns": 3668057,
+      "disabled_after_slow_read": true,
+      "closed": true,
+      "slow_read_limit_ns": 2000000,
+      "scope": "calling thread switch counts only; cannot time CPU runqueue or identify GIL/native root cause",
+      "observer_cost_scope": "original optional hard cap includes all observation work; never subtracted"
+    }
+  },
+  "incremental_mean_ms": 0.22450144500000013,
+  "overhead_prerequisite_passed": false,
+  "overhead_acceptance_limit_ms": 0.5,
+  "synthetic_sleep_trace": {
+    "event_sequence": 1,
+    "task_code": 1,
+    "calling_thread_native_id": 395824,
+    "diagnostic_finished": 1,
+    "optional_start_mono_ns": 38976116778530,
+    "optional_start_thread_cpu_ns": 1249721244,
+    "optional_end_mono_ns": 38976132949292,
+    "optional_end_thread_cpu_ns": 1250335171,
+    "last_mark_mono_ns": 38976132914692,
+    "last_mark_thread_cpu_ns": 1250300880,
+    "phase_code": 4,
+    "guard_deadline_mono_ns": 38976216774380,
+    "estimated_budget_ms": 20.0,
+    "execute_start_mono_ns": 38976116916902,
+    "execute_return_mono_ns": 38976132600249,
+    "execute_start_thread_cpu_ns": 1249858665,
+    "execute_return_thread_cpu_ns": 1249995537,
+    "wait_start_mono_ns": 38976132880911,
+    "wait_end_mono_ns": 38976132914692,
+    "wait_start_thread_cpu_ns": 1250269200,
+    "wait_end_thread_cpu_ns": 1250300880,
+    "native_attempts": 1,
+    "native_completed": 1,
+    "native_failed": 0,
+    "native_status": 0,
+    "native_failure_phase_code": 0,
+    "probe_before_tid": 395824,
+    "probe_before_voluntary": 7,
+    "probe_before_involuntary": 279,
+    "probe_before_read_wall_ns": 43751,
+    "probe_before_slow_read": 0,
+    "probe_after_tid": 395824,
+    "probe_after_voluntary": 8,
+    "probe_after_involuntary": 279,
+    "probe_after_read_wall_ns": 71511,
+    "probe_after_slow_read": 0,
+    "probe_same_thread": 1,
+    "probe_slow_read": 0,
+    "probe_execute_voluntary_delta": 1,
+    "probe_execute_involuntary_delta": 0,
+    "probe_read_wall_ns_total": 115262,
+    "optional_wall_ms": 16.170762,
+    "optional_thread_cpu_ms": 0.613927,
+    "scheduler_occupancy_ms": 16.0,
+    "finish_after_guard_ms": -80.0,
+    "waiting_primary": 0,
+    "hardcap_exceeded": 0,
+    "guard_exceeded": 0,
+    "body_failed": 0,
+    "execute_wall_ms": 15.683347,
+    "execute_thread_cpu_ms": 0.136872,
+    "wait_wall_ms": 0.033781,
+    "wait_thread_cpu_ms": 0.03168
+  },
+  "board_python": "3.9.9",
+  "camera_before": {
+    "pid": 378714,
+    "detected_frames": 16498,
+    "camera_error": "",
+    "detector_error": ""
+  },
+  "camera_after": {
+    "pid": 378714,
+    "detected_frames": 16506,
+    "camera_error": "",
+    "detector_error": ""
+  },
+  "actual_dpu_jobs": 0,
+  "production_sources_or_config_modified": false,
+  "root_cause_verified": false,
+  "observed_dpu_fault_with_this_probe": false,
+  "kernel_settings_modified": false,
+  "observer_mode": "CONTEXT_SWITCHES_ONLY_NO_RUNQUEUE_TIMING",
+  "all_reads_available": false
+}

@@ -1,0 +1,25 @@
+v20 六源发布和封存
+
+仅 root 在 ARM 检查通过后执行。以下命令默认进行本地校验，实际操作时追加 --execute-root-only。
+本次基线为 v19 de7772，安装后为 380 个组件。保留已保存的暂停选择。
+
+1. 核对和检查窗口
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v20_identity_history_candidate\publish_stability.py" guard --spec "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v20_identity_history_candidate\baseline_spec.json" --spec-sha256 2608f9e868c3b5c7ae8b5e796efbfa3cec2e2383845f2e67794c6ccff769f290
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v20_identity_history_candidate\publish_stability.py" window-inspect --spec "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v20_identity_history_candidate\baseline_spec.json" --spec-sha256 2608f9e868c3b5c7ae8b5e796efbfa3cec2e2383845f2e67794c6ccff769f290
+
+2. 正常关闭
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v20_identity_history_candidate\publish_stability.py" normal-close --spec "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v20_identity_history_candidate\baseline_spec.json" --spec-sha256 2608f9e868c3b5c7ae8b5e796efbfa3cec2e2383845f2e67794c6ccff769f290 --window-proof "<实际 window-inspect 输出文件>"
+
+3. 安装已封存六源
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v20_identity_history_candidate\apply_stability_closed.py" --spec "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v20_identity_history_candidate\proposed_spec.json" --spec-sha256 59d6c23ee778a4d422db75fcf57cc6bcf397442ab6552540c50b03fd371decc0
+实际安装成功后会返回 applied_spec 路径、SHA 和 actual_apply 证据路径。
+
+4. 使用实际 applied_spec 启动并确认
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v20_identity_history_candidate\publish_stability.py" start --spec "<实际 applied_spec 路径>" --spec-sha256 <实际 applied_spec SHA>
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v20_identity_history_candidate\publish_stability.py" ready --spec "<实际 applied_spec 路径>" --spec-sha256 <实际 applied_spec SHA>
+
+5. 使用本次实际证据封存
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v20_identity_history_candidate\seal_stability.py" --spec "<实际 applied_spec 路径>" --spec-sha256 <实际 SHA> --ready "<实际 ready 输出文件>" --ready-sha256 <实际 SHA> --installed "<实际 actual_apply 输出文件>" --installed-sha256 <实际 SHA>
+先运行默认 dry 校验。追加 --execute-root-only 后，工具只读核对 380 份来源和当前 COMMITTED/PAUSED 状态，证据落盘后更新 canonical。
+
+任何中间错误都会保留当前保护与备份。新增 history_delete.py 要求路径原本不存在，安装使用独占创建。

@@ -1,0 +1,34 @@
+{
+  "status": "LOCAL_SAFETY_AND_INTEGRATION_VALIDATED_NOT_DEPLOYED",
+  "production_source_files": 2,
+  "new_handler": "LocalHistoryDelete in board/runtime/history_delete.py",
+  "local_focused_tests": 16,
+  "combined_regression_passed": 183,
+  "deselected_windows_kernel_lock": 1,
+  "files": {
+    "SOURCE_MANIFEST.json": "0839d8aae1a0cf00fab116767fa005477b25c90cb8c59dbd04b0ff6a1be623a8",
+    "REGRESSION_02.xml": "8a9d03f140915aeb7ac00a5ec376a463c97fd63a6be4bc5d9d5a69c41fe059f1"
+  },
+  "supports": "explicit single calendar day in current conversation, or explicitly selected original-authorized profile; no topic/relative-week/all-history expansion",
+  "guards": [
+    "same original boot/session/scope/grant object",
+    "60 monotonic seconds and strictly newer generation",
+    "preview original turn must be played with full bound ACK",
+    "same source/dependency/fact/summary fingerprint reselected in one BEGIN IMMEDIATE transaction",
+    "original Store._scope/_operation_turn/_invalidate/_revoke_pending/_operation idempotency only",
+    "preview does not change source/fact bodies",
+    "process restart loses pending previews",
+    "source/dependency bounds fail without deletion"
+  ],
+  "schema_changed": false,
+  "new_model_or_profile_grant": false,
+  "board_memory_policy_changed": false,
+  "dependencies_and_merge": "Regression overlay includes candidate_h01+candidate_d01+one-line candidate_speaker_close. M03 files themselves are independent except board_business.py registration hunk overlapping D01; root must merge. Existing close race requires separate one-line close fix for reliable cleanup.",
+  "board_run_pending": true,
+  "old_legacy_not_reused": "aura/common/memory_controls.py uses conversations/turns/profile_facts and time.time; not the v17 BoardMemoryStore schema/trusted clock",
+  "kept_failed_evidence": {
+    "TESTS.xml": "all M03 bodies passed, teardown exposed actual original speaker close reentrant dictionary bug",
+    "TESTS_02.xml": "synthetic rollback fixture missing original management topic, fixed without weakening assertions",
+    "REGRESSION.xml": "synthetic timeline test interface lacked monotonic; real exposed clock identity remains checked, fixture event_time interface supported"
+  }
+}

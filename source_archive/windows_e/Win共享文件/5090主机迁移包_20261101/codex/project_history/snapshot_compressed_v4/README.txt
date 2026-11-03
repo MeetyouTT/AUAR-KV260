@@ -1,0 +1,4 @@
+补充导出旧Codex压缩rollout；仅根据E目录cwd或明确项目归属选择，解压后与其他快照同样脱敏。
+使用旧机PortableGit已有libzstd，只读解压，不需要联网；没有把未脱敏原压缩文件迁到E。
+旧state库所列未压缩rollout路径可能已被Codex转换为.jsonl.zst；因此V3的ROLLOUT_NOT_PRESENT要结合本目录已恢复源检查，不等于聊天记录最终缺失。
+所有多个源版本保留路径哈希，不冒充桌面可直接导入。

@@ -1,0 +1,72 @@
+{
+  "boot_id": "8817dc71-fe59-46fd-b235-83ffd93d56d1",
+  "kernel": "5.15.36-xilinx-v2022.2",
+  "cmdline": "earlycon console=ttyPS1,115200 clk_ignore_unused root=/dev/ram0 rw init_fatal_sh=1 cma=1536M",
+  "files_modified": 0,
+  "display_commands_sent": 0,
+  "movement_commands_sent": 0,
+  "tools": {
+    "fw_printenv": null,
+    "fw_setenv": null,
+    "dumpimage": "/usr/bin/dumpimage",
+    "mkimage": "/usr/bin/mkimage",
+    "strings": "/usr/bin/strings"
+  },
+  "mounts": [
+    "/dev/mmcblk1p2 / ext4 rw,relatime 0 0",
+    "/dev/mmcblk1p1 /boot vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0 0"
+  ],
+  "boot_files": [
+    {
+      "path": "/boot/boot.scr",
+      "directory": false,
+      "bytes": 2777
+    },
+    {
+      "path": "/boot/Image",
+      "directory": false,
+      "bytes": 27089408
+    },
+    {
+      "path": "/boot/ramdisk.cpio.gz.u-boot",
+      "directory": false,
+      "bytes": 23214754
+    },
+    {
+      "path": "/boot/system.dtb",
+      "directory": false,
+      "bytes": 43735
+    },
+    {
+      "path": "/boot/system-zynqmp-sck-kv-g-revB.dtb",
+      "directory": false,
+      "bytes": 43735
+    }
+  ],
+  "/boot/boot.scr": {
+    "sha256": "9ada4d88212468c12d2710b0fae35df42c4c72134bafa82b2ae5aca82570a7f1",
+    "strings": [
+      "fitimage_name=image.ub",
+      "booti 0x00200000 0x04000000 0x00100000",
+      "if test -e ${devtype} ${devnum}:${distro_bootpart} /uEnv.txt; then",
+      "fatload ${devtype} ${devnum}:${distro_bootpart} 0x00200000 uEnv.txt;",
+      "echo \"Importing environment(uEnv.txt) from ${boot_target}...\"",
+      "bootm 0x10000000;",
+      "booti 0x00200000 0x04000000 0x00100000",
+      "booti 0x00200000 0x04000000 0x00100000",
+      "booti 0x00200000 - 0x00100000",
+      "bootm 0x10000000;",
+      "booti 0x00200000 0x04000000 0x00100000;",
+      "bootm 0x10000000;",
+      "booti 0x00200000 0x04000000 0x00100000;"
+    ]
+  },
+  "force": "unspecified",
+  "override_bytes": 0,
+  "override_sha256": null,
+  "edid_bytes": 128,
+  "display": {
+    "rc": 0,
+    "text": "Screen 0: minimum 320 x 200, current 1024 x 600, maximum 4096 x 4096\nDP-1 connected primary 1024x600+0+0 150mm x 90mm\n   1024x600      59.85*+  59.85* \n"
+  }
+}

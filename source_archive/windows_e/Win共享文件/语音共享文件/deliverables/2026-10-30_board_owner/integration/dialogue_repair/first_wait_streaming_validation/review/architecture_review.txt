@@ -1,0 +1,45 @@
+流式ASR正式接线独立审查（仅源码；尚未实施）
+
+依据：现役v14 startup39b102a4…、manifest a2545970…、378pins。已由actual installed回执、ae473116基线组件表与本轮8源overlay重建组件集合，21份实际调用链源码逐项SHA匹配；路径及完整SHA见source_provenance.json。没有把publicaura目录当作现役，也未访问设备、模型、GUI或私库。
+
+结论：可以继续公开共存验证；当前隔离probe尚不能直接接入正式业务。最低新增面是“有界原PCM旁路 + 独立ASR进程 + 每轮stream所有权/一次性final桥”，无需改LLM、Store、身份设定或播放ACK。不能把ASR decode直接加入原20ms采集消费线程；已观察到单次decode约0.4秒，与原8帧/160ms采集队列不相容。
+
+现役真实调用链
+- tools/production_board_business_gui.py创建原BoardParaformer（ASR3线程），production_frontend_selection.py创建combined前端独立进程，并将自动采集替换为RemoteAutomaticCapture。
+- board_frontend_process.py的worker加载唯一GTCRN/Silero gate；board_frontend_auto.py的ChildAutomaticSession持有BoardAutomaticCapture。原BoundedPcmCaptureMixin的8帧队列→AutomaticMcp01Capture._read_automatic_pcm→SpeechEndpoint.feed。GTCRN降噪只用于Silero/VAD判定；ASR、声纹和CapturedAudio保留原PCM。
+- SpeechEndpoint保留500ms pre-roll、原onset、700ms静音及20秒边界。ChildAutomaticSession只在麦克风/reader/锁释放后公开READY；父RemoteAutomaticCapture还要求原speech_start_ready/CID与speech callback已绑定后，才允许take。
+- RecordingController._collect取得完整clip后submit；BoardDialogueJobs._execute才调用asr.transcribe，随后原_check→_admit_text→route→controller/Store。partial当前没有进入这个链路的入口。
+
+最小正式接口与准确钩子
+1. automatic_capture.py: SpeechEndpoint.feed / AutomaticMcp01Capture._read_automatic_pcm
+   增可选、默认关闭的原PCM观察口。只做非阻塞入界限队列，不跑decode、不改VAD结果或采集队列容量。onset时先交付pre-roll与已确认onset帧一次，此后交付连续原始帧；不能只从speech_active=true的当前帧开始，否则丢前音，也不能每次重送ring。按原endpoint完成的整个CapturedAudio核对sample_count、PCM SHA和AudioRef，尾部模型flush不算真实录音样本。最好在endpoint规范分帧点观察，以处理短读/pending；新增路径须证明拼接字节与原返回clip完全一致。
+
+2. board_frontend_auto.py: ChildAutomaticSession.start/take/cancel、RemoteAutomaticCapture.start/_consume/_finish
+   给本轮旁路分配独立不可变capture token，绑定boot、前端实例/代次、capture_id和最终audio_epoch/first_sample_index/count/hash。不能靠首次onset通常较晚来规避start/CID发布竞态：可先分配内部token，CID返回后完成绑定；绑定前不公开final。保留原owner线程speech callback及READY门，不让ASR先完成触发take、入对话或播放。
+   取消先在父端原子tombstone本轮并拒收后续数据/结果，再异步停止worker stream；native decode已开始时可完成但结果必须丢弃。新轮不得复用旧stream状态；只有旧native调用已结束或独立worker已完整重建，才可重用模型。只留有界退休token，close及异常释放本轮队列/FD/stream。
+
+3. 独立ASR adapter/worker（新增候选模块），production_board_business_gui.py和production_frontend_selection.py显式工厂注入
+   一个常驻recognizer、每次新建stream；模型就绪/预热在开麦前完成。ASR worker与前端采集进程隔离，不经GTK逐20ms转发，不占用原frontend控制RPC锁，不继承前端nice-10作为未经核验的调度变化。输入/结果IPC严格带token、递增序号、连续样本位置、有限长度与超时。满队列/序号缺口必须明确失败，不能静默丢音或增大原8帧队列掩盖失败。正式选择流式后应只有一个所选ASR模型常驻；当前探针与原模型共存不等于最终部署方案。
+   partial仅本轮worker RAM，首版无需显示；不发原channel的transcript事件，不触发记住/遗忘/身份登记或LLM。原endpoint是唯一断句权威，不能用新解码器自己的endpoint提前截断。最终input_finished/flush完成、完整原clip seal及麦克风释放后，才可交付一次完整final。
+
+4. board_dialogue_jobs.py: submit / _Job / _execute 的ASR调用点（约317/546行）
+   需明确传capture所有权：建议窄可选transcribe_capture(meta, pcm, *, deadline, cancelled, capture_ticket)，旧transcribe默认保持。现接口只有PCM，不能仅按PCM SHA命中缓存final；相同音频也可能属于另一轮。
+   特别注意submit本身调用_invalidate()并生成新的job generation，因此“录音阶段generation==最终job generation”不是现有不变量。capture token先跟随录音；submit验证完整clip后一次性claim，绑定新job的boot/session/generation/request_id/capture_id，再允许_execute取final。普通cancel、profile/conversation切换与新listen必须同时失效capture ticket；不要只取消已经存在的Job。保留原capture_started的身份快照及speech_proof，不将快照/个人grant发送ASR worker。
+   也不能在_invalidate里无条件清掉所有ASR ticket，否则submit自己的正常换代就会取消当前录音。外部cancel/关闭/切换要失效旧ticket，合法submit的内部换代则必须在同一受控claim中保留本轮ticket；该分支须有明确测试。
+   流式在录音中处理不能重置/延长原submit创建的deadline。每次IPC等待有限，传入原job deadline/cancelled，并在取得final前后保留_check；长时间安静等待不启动无限ASR正文缓冲。final通过原_admit_text非空/长度/控制字符/声学入口与来源授权校验，且只路由一次。不得让partial或worker自称final直接调用Store。
+
+5. 保持原下游不变
+   tools/production_listening.py的无唤醒半双工与cancel/rearm/用户暂停语义保持。生成及播放期间不重开采集或继续流式喂音；完整ACK及既有settling后再开新capture。
+   board_dialogue_jobs.py的每包_put admission_guard（含背压醒后重查）、prepared_turn_checker的逐次新事务、controller的generated/bind完整音频receipt、acknowledge的完整owner/count/hash/token检查全部保留。流式final不授予profile grant，不改变记忆来源、scope、清理或更正/遗忘规则。
+
+实施前必要行为测试（合成PCM/假worker/临时synthetic Store即可）
+- 一模型多轮、每轮新stream；500ms pre-roll/onset/末尾与片段短读的拼接完全等于原clip，AudioRef与完整hash不变，flush零填充不混入原样本。
+- decode故意阻塞时，原采集消费仍可前进；满旁路队列、乱序/重包/缺包均明确失败，不放宽queue8或隐藏丢音。
+- start返回前即onset/READY的竞态；原speech callback/CID/proof绑定前不交final。合法submit会换Job代次且仍能一次性claim，错误代次拒绝。
+- 在onset、decode中、endpoint结束、take、final到达/缓存后分别cancel；新轮即使PCM完全相同，旧final也不能串轮，重复final不能二次提交。
+- worker异常/关闭/超时/无speech及原20秒边界：无LLM/身份命令/Store原文写入，麦克风锁及IPC资源释放，原deadline不因轮询延长。
+- partial“记住/删除/登记…”而final包含否定或改口：只完整final经过原入口一次；partial不产生channel transcript、事实、身份变更或授权。
+- 半双工与用户暂停/停止本轮分别保持；rearm只在原完整ACK与settling后，关闭不复活聆听。
+- 真实Store合成回归保留撤权/更正/遗忘在TTS及逐包/背压期间拦截、部分播放不heard、完整ACK才提交；不为ASR优化改Store。
+
+证据限制：公开流式probe以已知WAV末端结束，不覆盖真实GTCRN/Silero/700ms端点/采集队列。27字输出不同于旧29字，旧输出也不是gold；尾等待约0.35–0.44秒不代表正式ASR准确率或端到端首声已通过。共存probe、内容准确性及以上接口行为通过前，正式ASR3线程/27B/OmniVoice16与v14启动指纹保持。

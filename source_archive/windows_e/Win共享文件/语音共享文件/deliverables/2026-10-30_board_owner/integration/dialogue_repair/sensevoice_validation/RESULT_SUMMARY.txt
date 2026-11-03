@@ -1,0 +1,28 @@
+SenseVoice固定pair结果：仅公开筛选，未看到加速，不正式替换。
+
+Pair SHA44cb1816063c9343dade2b4fa8f0a902cecfc59fb1d7e8477ec0f5a0931fed04；Paraformer结果SHAd0a4aced8bd2647c74cddbe1389d8b9f7139cf8e0810264ea98719753d1f89c7；SenseVoice结果SHA2a9158679c2752aaa20f9b75683c5c813841675e8c99826585de551028fabbca。两worker退出0、正式UI/camera owners相同、配置未变；两边均原3线程/2轮/每轮8个相同公开WAV，背景活动都变化。
+
+16次decode：Paraformer总99851.627ms/均6240.727ms，CPU154284.382ms，峰RSS424844KiB；SenseVoice总105171.648ms/均6573.228ms，CPU157435.686ms，峰RSS534776KiB。仅本窗口没有加速观察；不能据此认因果慢5.3%。
+首次加载单列（ms）：P验证797.077（其中模型hash752.676）/import982.278/constructor15341.926（factory14572.611）；SV验证1193.736（hash1159.261）/import995.799/constructor13732.451（factory13731.380）。重叠子项不可重复相加。无隐藏warmup；S01第一轮是首次decode且计入总数。
+
+round总decode/平均ms：
+paraformer R1: 47858.237 / 5982.280; intended差3/107
+paraformer R2: 51993.390 / 6499.174; intended差3/107
+sensevoice R1: 52682.036 / 6585.255; intended差2/107
+sensevoice R2: 52489.612 / 6561.202; intended差2/107
+
+逐句decode ms（P轮1/轮2；SV轮1/轮2；intended编辑差按轮1/2）：
+S01: P 4710.512/5734.339; SV 5541.040/6302.302; diff P[0, 0]/SV[0, 0]
+S02: P 5885.466/5591.984; SV 6741.001/6287.328; diff P[2, 2]/SV[2, 2]
+S03: P 6730.905/7411.324; SV 7801.369/7869.648; diff P[1, 1]/SV[0, 0]
+S04: P 4445.573/5414.703; SV 5529.173/4719.634; diff P[0, 0]/SV[0, 0]
+S05: P 7710.860/7740.259; SV 7802.167/8130.453; diff P[0, 0]/SV[0, 0]
+S06: P 7062.771/7410.392; SV 7231.994/7312.810; diff P[0, 0]/SV[0, 0]
+S07: P 5130.711/6610.778; SV 5803.855/6125.566; diff P[0, 0]/SV[0, 0]
+S08: P 6181.439/6079.611; SV 6231.437/5741.871; diff P[0, 0]/SV[0, 0]
+
+intended差6/214 vs4/214，不是人工gold CER。S02公开姓名林悦两边两轮均错；S01/S03–S08仅本轮语义筛选保留，未作正式准确率/身份/记忆业务验收。
+
+维护暂停到首次恢复观察约250.001秒，小于600秒。恢复命令返回WAITING_SPEECH，但首次真实快照mono54265.862仍WAITING_SERVICE/micfalse；fresh mono54333.948才核WAITING_SPEECH/mictrue、IDLE/no playing、GUI faults0、capture failures3不增。pre-pause到fresh确认保守包络318.087秒也小于600秒，不冒称250秒时麦克风已就绪。
+
+只有RESULT_HANDOFF.json与本摘要新增；PAIR、actual、既有MODEL/TEST/probe handoff、worker及当前生产文档均保留。正式仍原Paraformer3线程/27B/OmniVoice16，本pair未正式替换。

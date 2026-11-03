@@ -1,0 +1,40 @@
+test_bad_tokens_ids_and_capacity_never_start_close (__main__.MaintenanceTests) ... ok
+test_busy_and_external_gate_refuse_without_mutation (__main__.MaintenanceTests) ... ok
+test_close_remains_available_in_maintenance_and_blocks_future_stream (__main__.MaintenanceTests) ... ERROR
+test_cooldown_and_window_limit (__main__.MaintenanceTests) ... ok
+test_duplicate_request_is_idempotent_not_second_rebuild (__main__.MaintenanceTests) ... FAIL
+test_native_poll_sink_error_drops_old_reference_and_holds (__main__.MaintenanceTests) ... ok
+test_null_failure_timeout_or_query_error_holds_old_owner (__main__.MaintenanceTests) ... ok
+test_null_must_complete_before_new_pipeline (__main__.MaintenanceTests) ... ok
+test_null_timeout_rejects_late_completion (__main__.MaintenanceTests) ... ok
+test_ordinary_stop_still_keeps_pipeline_and_maintenance_stop_latches (__main__.MaintenanceTests) ... ok
+test_owner_thread_must_control_poll_command_and_recovery (__main__.MaintenanceTests) ... ok
+test_play_failure_keeps_new_pipeline_reachable_for_close (__main__.MaintenanceTests) ... ok
+test_rebuild_exception_and_play_failure_hold_without_retry (__main__.MaintenanceTests) ... ok
+test_rebuild_resets_pts_token_and_reference_epoch_preserves_sequence (__main__.MaintenanceTests) ... ok
+test_warmup_timeout_is_held_and_late_ready_cannot_admit (__main__.MaintenanceTests) ... ok
+
+======================================================================
+ERROR: test_close_remains_available_in_maintenance_and_blocks_future_stream (__main__.MaintenanceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ghmd/aura-audio-maintenance-20261022/test_idle_maintenance_engine.py", line 152, in test_close_remains_available_in_maintenance_and_blocks_future_stream
+    self.assertFalse(self.engine.command({'type':'stream','token':3}))
+  File "/home/ghmd/aura-audio-maintenance-20261022/idle_maintenance_engine.py", line 149, in command
+    accepted = super().command(message)
+  File "/home/ghmd/aura-audio-recovery-20261021/live-source/tools/gstreamer_persistent_engine.py", line 101, in command
+    if not self.device_ready:raise RuntimeError('Persistent audio device is not ready')
+RuntimeError: Persistent audio device is not ready
+
+======================================================================
+FAIL: test_duplicate_request_is_idempotent_not_second_rebuild (__main__.MaintenanceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ghmd/aura-audio-maintenance-20261022/test_idle_maintenance_engine.py", line 158, in test_duplicate_request_is_idempotent_not_second_rebuild
+    self.assertTrue(self.engine.request_idle_maintenance(**args))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.001s
+
+FAILED (failures=1, errors=1)

@@ -1,0 +1,15 @@
+v21 ASR线程与暂停显示保活已发布，实机体验继续验收
+
+运行根 /home/root/aura-board-business-20261030/production-5259eab11e42af13。startup SHA 94f665cf69e861d4f3d625dd627116218120cdbbef2244aa4cf2b63c39b9f1c7，manifest SHA 6f3d928489ba163a47d8c844141d23333e348a7bb028c3f997b34f2f86685388，380份组件，config SHA 228abe8f642254c68ad500a15f8d637189343a97753d1c359663744dc2bd06a2。
+封存boot bebd3e7d-e984-4517-8cbb-211df7f1c6dc，supervisor 171266，GTK 171274，camera 1335。操作前现读入口和进程归属。
+末次状态来自后续运行观测，enabled=false、PAUSED、mic=false。用户最新明确“暂时保持暂停”，真人测试留待后续。输入模式采用免唤醒词半双工。
+本次更新ASR配置与GTK源码两份组件。ASR使用2线程，GTK加入每5秒一次的暂停状态显示保活。原600秒屏保策略及DPMS启用/600秒各级策略已恢复，31个样本约30秒内观测到6次周期性idle复位，最大idle4965ms。观察器仅初始复位1次，后续复位0次，未排除外部输入，600秒无人操作的物理验证仍待做。后续相机试验正常关闭GUI期间，保活随GUI停止。
+公开两句ASR样本各按3/2/2/3线程进行ABBA对照，P00平均decode由2.940秒降到2.202秒，S01由1.693秒降到1.137秒。背景记忆与视觉计数有变化，结果属于公开样本筛选，新的真人端点至首声仍待测。首轮SIZE_REJECTED启动失败记录已保留。
+GTCRN双线程候选B2发生pcm_input_queue_overflow，A2随之停止。当前生产使用前端1线程与原8帧输入队列。
+v20已上线单日对话删除、自然身份查询、同轮图库证据和声纹事件事务检查，六份功能源码指纹仍匹配。v20真板公开合成链路92项通过，退出码0、stderr空、临时库已移除、线程遗留0。新的真人语音和辨认率继续待验。
+运行快照mono22785.471记录GUI故障0、worker故障0，视觉steps4620、accepted4620、inflight=false、errors0、emitted1、rejected0，声纹submitted0、evidence_errors0。新进程记忆完成2/丢弃35/streak19/60.0秒退避，脱敏错误无法识别具体拒绝原因。
+声纹仍未标定，候选身份不自动授予个人档案权限。已完成关联的自然解绑/重新关联入口、单独登记记录的统一命名仍有缺口。
+当前记忆压缩存在持续拒绝，末次新进程完成2批、丢弃35批、连续失败19次，退避60秒，错误仅有脱敏other及长度16，具体原因仍待定位。失败批次继续保留原文供重试。旧test_board_memory_review.py与test_board_memory_completion.py因缺少映射内common.timeline_conversations未完成收集，保留原失败记录。
+按需JPEG候选基于独立相机实际源码9d714，after44b020已完成本地回归、独审和公开ARM组件筛选。无GET/低频GET/原频率GET的组件CPU分别15.093→5.477、15.109→5.827、16.030→6.841ms/帧，计入首次GET编码，同帧哈希一致，6臂临时目录均已移除。隔离臂RSS增量约增加7.8MB；真实相机和整机收益待受保护A/B/A验证，候选尚未部署。
+公开测试临时遗留共11目录、10316348字节，约10.3MB，包含冷启动5目录与记忆6目录。自动审批阻止清理，已停止重试，清单原样保留。
+接续入口 E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\current_observation_v21.json。发布器 E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\publish_stability.py，以匹配spec及哈希操作。旧v20快照独立保留，本次原文档字节归档在 E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\docs_state_v21\before。

@@ -1,0 +1,1 @@
+cmd_drivers/uio/built-in.a := echo >/dev/null; rm -f drivers/uio/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/uio/built-in.a drivers/uio/uio_core.o drivers/uio/uio_dmabuf.o drivers/uio/uio_xilinx_apm.o

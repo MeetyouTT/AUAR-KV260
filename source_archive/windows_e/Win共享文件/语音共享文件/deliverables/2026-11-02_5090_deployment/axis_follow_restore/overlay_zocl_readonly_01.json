@@ -1,0 +1,134 @@
+{
+  "host_utc": "2026-11-02T06:07:16.547355+00:00",
+  "source": "import hashlib,json,os,datetime\nfrom pathlib import Path\nassert Path('/proc/sys/kernel/random/boot_id').read_text().strip()=='903cfade-b93c-48fa-804e-379be1967313'\ndef txt(p):\n try:return Path(p).read_text().strip()\n except OSError as e:return {'error_type':type(e).__name__}\nroots={}\nfor name in ('/sys/kernel/config/device-tree/overlays','/sys/class/fpga_manager/fpga0','/sys/class/fpga_region','/sys/bus/platform/drivers/zocl','/sys/class/drm'):\n p=Path(name)\n roots[name]={'exists':p.exists(),'children':[]}\n if p.exists():\n  for q in sorted(p.iterdir()):\n   row={'name':q.name,'symlink':q.is_symlink()}\n   if q.is_symlink():row['target']=os.readlink(q)\n   if name.endswith('/overlays') and q.is_dir():\n    row['attributes']={k:txt(q/k) for k in ('status','path') if (q/k).exists()}\n   if name.endswith('/fpga0') and q.name in ('state','name','flags','firmware'):row['value']=txt(q)\n   roots[name]['children'].append(row)\ndtnodes=[]\nfor p in Path('/proc/device-tree').rglob('*'):\n if not p.is_dir():continue\n c=p/'compatible'\n if c.is_file():\n  data=c.read_bytes()\n  if b'zocl' in data or b'xlnx,fpga' in data or b'dpu' in data:\n   row={'path':str(p),'compatible':data.decode(errors='replace').replace('\\0','|')}\n   for k in ('status','firmware-name'):\n    q=p/k\n    if q.exists():row[k]=q.read_bytes().decode(errors='replace').replace('\\0','|')\n   dtnodes.append(row)\nprint(json.dumps({'boot_id':Path('/proc/sys/kernel/random/boot_id').read_text().strip(),'board_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'roots':roots,'dt_nodes':dtnodes,'fdt_sha256':hashlib.sha256(Path('/sys/firmware/fdt').read_bytes()).hexdigest(),'vart':txt('/etc/vart.conf'),'board_mutations':False}))\n",
+  "board_result": {
+    "boot_id": "903cfade-b93c-48fa-804e-379be1967313",
+    "board_utc": "2026-11-02T06:07:16.209978+00:00",
+    "roots": {
+      "/sys/kernel/config/device-tree/overlays": {
+        "exists": true,
+        "children": [
+          {
+            "name": "kv260-benchmark-b4096_image_1",
+            "symlink": false,
+            "attributes": {
+              "status": "applied",
+              "path": "kv260-benchmark-b4096.dtbo"
+            }
+          }
+        ]
+      },
+      "/sys/class/fpga_manager/fpga0": {
+        "exists": true,
+        "children": [
+          {
+            "name": "device",
+            "symlink": true,
+            "target": "../../../firmware:zynqmp-firmware:pcap"
+          },
+          {
+            "name": "firmware",
+            "symlink": false,
+            "value": {
+              "error_type": "PermissionError"
+            }
+          },
+          {
+            "name": "flags",
+            "symlink": false,
+            "value": "100"
+          },
+          {
+            "name": "key",
+            "symlink": false
+          },
+          {
+            "name": "name",
+            "symlink": false,
+            "value": "Xilinx ZynqMP FPGA Manager"
+          },
+          {
+            "name": "of_node",
+            "symlink": true,
+            "target": "../../../../../../firmware/devicetree/base/firmware/zynqmp-firmware/pcap"
+          },
+          {
+            "name": "power",
+            "symlink": false
+          },
+          {
+            "name": "state",
+            "symlink": false,
+            "value": "operating"
+          },
+          {
+            "name": "status",
+            "symlink": false
+          },
+          {
+            "name": "subsystem",
+            "symlink": true,
+            "target": "../../../../../../class/fpga_manager"
+          },
+          {
+            "name": "uevent",
+            "symlink": false
+          }
+        ]
+      },
+      "/sys/class/fpga_region": {
+        "exists": true,
+        "children": [
+          {
+            "name": "region0",
+            "symlink": true,
+            "target": "../../devices/platform/fpga-full/fpga_region/region0"
+          }
+        ]
+      },
+      "/sys/bus/platform/drivers/zocl": {
+        "exists": false,
+        "children": []
+      },
+      "/sys/class/drm": {
+        "exists": true,
+        "children": [
+          {
+            "name": "card0",
+            "symlink": true,
+            "target": "../../devices/platform/axi/fd4a0000.display/drm/card0"
+          },
+          {
+            "name": "card0-DP-1",
+            "symlink": true,
+            "target": "../../devices/platform/axi/fd4a0000.display/drm/card0/card0-DP-1"
+          },
+          {
+            "name": "card1",
+            "symlink": true,
+            "target": "../../devices/platform/axi/axi:zyxclmm_drm/drm/card1"
+          },
+          {
+            "name": "renderD128",
+            "symlink": true,
+            "target": "../../devices/platform/axi/axi:zyxclmm_drm/drm/renderD128"
+          },
+          {
+            "name": "version",
+            "symlink": false
+          }
+        ]
+      }
+    },
+    "dt_nodes": [
+      {
+        "path": "/proc/device-tree/axi/zyxclmm_drm",
+        "compatible": "xlnx,zocl|",
+        "status": "okay|"
+      }
+    ],
+    "fdt_sha256": "d68bc147f22f5ab23bc60f0c2762af4bcd7b64340953e9c948e28ffa6b80f7ca",
+    "vart": "firmware: /lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.xclbin",
+    "board_mutations": false
+  }
+}

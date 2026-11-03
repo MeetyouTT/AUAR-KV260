@@ -1,0 +1,242 @@
+{
+  "host_utc": "2026-11-02T06:07:54.626433+00:00",
+  "source": "import json,os,subprocess,datetime,hashlib\nfrom pathlib import Path\nassert Path('/proc/sys/kernel/random/boot_id').read_text().strip()=='903cfade-b93c-48fa-804e-379be1967313'\npaths={}\nfor root in ('/sys/devices/platform/axi/axi:zyxclmm_drm','/sys/class/drm/renderD128','/proc/device-tree/fpga-full','/sys/class/fpga_region/region0'):\n p=Path(root);row={'exists':p.exists(),'resolved':str(p.resolve()),'children':[]}\n if p.exists():\n  for q in p.iterdir():\n   item={'name':q.name}\n   if q.is_symlink():item['target']=os.readlink(q)\n   if q.name in ('firmware-name','status','compatible') and q.is_file():\n    try:item['value']=q.read_bytes().decode(errors='replace').replace('\\0','|')\n    except OSError as e:item['error_type']=type(e).__name__\n   row['children'].append(item)\n paths[root]=row\np=Path('/sys/devices/platform/axi/axi:zyxclmm_drm/driver');driver=str(p.resolve()) if p.exists() else None\nif driver:\n paths[driver]={'children':[{'name':q.name,'target':os.readlink(q) if q.is_symlink() else None} for q in Path(driver).iterdir()]}\nr=subprocess.run(['uname','-r'],capture_output=True,text=True,timeout=3)\nlibfiles=[]\nfor root in ('/usr/lib','/lib'):\n for p in Path(root).glob('**/libdfx*'):\n  if p.is_file():libfiles.append({'path':str(p),'realpath':str(p.resolve()),'sha256':hashlib.sha256(p.read_bytes()).hexdigest()})\nprint(json.dumps({'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'paths':paths,'uname':r.stdout.strip(),'libdfx_files':libfiles,'board_mutations':False}))\n",
+  "board_result": {
+    "utc": "2026-11-02T06:07:54.266910+00:00",
+    "paths": {
+      "/sys/devices/platform/axi/axi:zyxclmm_drm": {
+        "exists": true,
+        "resolved": "/sys/devices/platform/axi/axi:zyxclmm_drm",
+        "children": [
+          {
+            "name": "memstat"
+          },
+          {
+            "name": "uevent"
+          },
+          {
+            "name": "dtbo_path"
+          },
+          {
+            "name": "ZOCL_CU_INTC.2.auto"
+          },
+          {
+            "name": "of_node",
+            "target": "../../../../firmware/devicetree/base/axi/zyxclmm_drm"
+          },
+          {
+            "name": "power"
+          },
+          {
+            "name": "connectivity"
+          },
+          {
+            "name": "kds_custat_raw"
+          },
+          {
+            "name": "host_mem_size"
+          },
+          {
+            "name": "kds_interval"
+          },
+          {
+            "name": "kds_stat"
+          },
+          {
+            "name": "kds_xrt_version"
+          },
+          {
+            "name": "ip_layout"
+          },
+          {
+            "name": "kds_skstat"
+          },
+          {
+            "name": "driver",
+            "target": "../../../../bus/platform/drivers/zocl-drm"
+          },
+          {
+            "name": "aie_metadata"
+          },
+          {
+            "name": "memstat_raw"
+          },
+          {
+            "name": "driver_override"
+          },
+          {
+            "name": "subsystem",
+            "target": "../../../../bus/platform"
+          },
+          {
+            "name": "mem_topology"
+          },
+          {
+            "name": "xclbin_full"
+          },
+          {
+            "name": "host_mem_addr"
+          },
+          {
+            "name": "kds_numcus"
+          },
+          {
+            "name": "xclbinid"
+          },
+          {
+            "name": "CU.3.auto"
+          },
+          {
+            "name": "kds_echo"
+          },
+          {
+            "name": "errors"
+          },
+          {
+            "name": "graph_status"
+          },
+          {
+            "name": "modalias"
+          },
+          {
+            "name": "drm"
+          },
+          {
+            "name": "debug_ip_layout"
+          }
+        ]
+      },
+      "/sys/class/drm/renderD128": {
+        "exists": true,
+        "resolved": "/sys/devices/platform/axi/axi:zyxclmm_drm/drm/renderD128",
+        "children": [
+          {
+            "name": "uevent"
+          },
+          {
+            "name": "power"
+          },
+          {
+            "name": "dev"
+          },
+          {
+            "name": "device",
+            "target": "../../../axi:zyxclmm_drm"
+          },
+          {
+            "name": "subsystem",
+            "target": "../../../../../../class/drm"
+          }
+        ]
+      },
+      "/proc/device-tree/fpga-full": {
+        "exists": true,
+        "resolved": "/sys/firmware/devicetree/base/fpga-full",
+        "children": [
+          {
+            "name": "fpga-config-from-dmabuf"
+          },
+          {
+            "name": "fpga-mgr"
+          },
+          {
+            "name": "#address-cells"
+          },
+          {
+            "name": "firmware-name",
+            "value": "kv260-benchmark-b4096.bit.bin|"
+          },
+          {
+            "name": "resets"
+          },
+          {
+            "name": "#size-cells"
+          },
+          {
+            "name": "compatible",
+            "value": "fpga-region|"
+          },
+          {
+            "name": "ranges"
+          },
+          {
+            "name": "phandle"
+          },
+          {
+            "name": "name"
+          }
+        ]
+      },
+      "/sys/class/fpga_region/region0": {
+        "exists": true,
+        "resolved": "/sys/devices/platform/fpga-full/fpga_region/region0",
+        "children": [
+          {
+            "name": "uevent"
+          },
+          {
+            "name": "of_node",
+            "target": "../../../../../firmware/devicetree/base/fpga-full"
+          },
+          {
+            "name": "power"
+          },
+          {
+            "name": "device",
+            "target": "../../../fpga-full"
+          },
+          {
+            "name": "subsystem",
+            "target": "../../../../../class/fpga_region"
+          },
+          {
+            "name": "compat_id"
+          }
+        ]
+      },
+      "/sys/bus/platform/drivers/zocl-drm": {
+        "children": [
+          {
+            "name": "uevent",
+            "target": null
+          },
+          {
+            "name": "bind",
+            "target": null
+          },
+          {
+            "name": "unbind",
+            "target": null
+          },
+          {
+            "name": "axi:zyxclmm_drm",
+            "target": "../../../../devices/platform/axi/axi:zyxclmm_drm"
+          },
+          {
+            "name": "module",
+            "target": "../../../../module/zocl"
+          }
+        ]
+      }
+    },
+    "uname": "5.15.36-xilinx-v2022.2",
+    "libdfx_files": [
+      {
+        "path": "/usr/lib/libdfx.so",
+        "realpath": "/usr/lib/libdfx.so.1.0",
+        "sha256": "1acb6c9ac1f27e0ea769dc231f32db5565f6ca02a53be00e969fc48c038d290f"
+      },
+      {
+        "path": "/usr/lib/libdfx.so.1.0",
+        "realpath": "/usr/lib/libdfx.so.1.0",
+        "sha256": "1acb6c9ac1f27e0ea769dc231f32db5565f6ca02a53be00e969fc48c038d290f"
+      },
+      {
+        "path": "/usr/lib/.debug/libdfx.so.1.0",
+        "realpath": "/usr/lib/.debug/libdfx.so.1.0",
+        "sha256": "9be3ad20636e62a9c6a26bc1c6dc04760f4499a7d728627878920904d774a4bd"
+      }
+    ],
+    "board_mutations": false
+  }
+}

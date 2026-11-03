@@ -1,0 +1,99 @@
+{
+  "schema": "aura.production-listening-handoff.v1",
+  "status": "SOURCE_READY_NOT_DEPLOYED",
+  "hardware_executed": false,
+  "tests": {
+    "passed": 14,
+    "failed": 0,
+    "xml": "tests.xml"
+  },
+  "base_startup_sha256": "e34590df7ecd4f74046671c9458edd48ede45d1474b5fbeba63481edd4cb8759",
+  "source_files": {
+    "aura/tools/board_avatar_gtk.py": {
+      "sha256": "30b563bd46a4c5bba9c84a3bd52bb3cdd28126dfe04504568935dea1599dd701",
+      "bytes": 115722,
+      "before_sha256": "5ab20a5b86a6982b75447933ce87e9be5b96cb5cc560fa1026c69b574f070fc5"
+    },
+    "aura/tools/production_listening.py": {
+      "sha256": "d5f9dd7bbb978962a49be633325c6d66580da323f17384f1ca423bc76475e3fe",
+      "bytes": 5571,
+      "before_sha256": null
+    }
+  },
+  "artifacts": {
+    "production_listening.overlay.zip": {
+      "sha256": "51e5bdab36b31265664623ca687b9cea571c2ba65c4d2847bc7eefcf03e1b595",
+      "bytes": 31520
+    },
+    "overlay_manifest.json": {
+      "sha256": "95706bae86cbd415fbeaf6fc6a8cb9fe387e41a4426d1b42d2edac4ae3dc5353",
+      "bytes": 623
+    },
+    "extra_source_map.json": {
+      "sha256": "0e309aa767c6b77e25fde45687d796929cee0820ab83a4a74a615e03c37225d9",
+      "bytes": 443
+    },
+    "build_overlay.py": {
+      "sha256": "e209f0928b3767b6f0d6833426cc91a238b430418f1586d818c48e561c93e01a",
+      "bytes": 4832
+    },
+    "test_production_listening.py": {
+      "sha256": "1c8ae643f24017a9cf7fed08babb5896f69adbc2a73e9b0ef797efd4b3b308c4",
+      "bytes": 12755
+    },
+    "tests.xml": {
+      "sha256": "2621451a0dd9ede487930c5f99e0535ec7057a382f81da28523640ff103b32b4",
+      "bytes": 3792
+    },
+    "REVIEW.txt": {
+      "sha256": "f324c7c90bd5a2d01dfd6e698bc0ec3eb2bd6021bd782cbe7e247d936ba2c484",
+      "bytes": 2957
+    }
+  },
+  "reused_dependencies": {
+    "common/handsfree_settings.py": {
+      "sha256": "1f590ed538305b7a82041a6b10e8e5fab03f45f6ecf8102a6d0d1eaa3d606811",
+      "bytes": 1181
+    },
+    "tools/formal_yuki.py": {
+      "sha256": "610696bfb89c77a295962e9186f6f5c069ed317234e6ad766d082203e523285d",
+      "bytes": 20077
+    },
+    "tools/voice_first_recording.py": {
+      "sha256": "ac2d235e31a874a7636157385277de693a508acaf4ac79a80acf40555e778ec1",
+      "bytes": 10751
+    },
+    "tools/handsfree_recording.py": {
+      "sha256": "a7e1a55e797e97fa605725ad7423e80704612c3ed4a703db177345ca4fe6a924",
+      "bytes": 14755
+    },
+    "tools/barge_in_recording.py": {
+      "sha256": "59794f4f234ba0e6433e8b26a44ca65dbd5616af513a5111fb2c6d6738530b6d",
+      "bytes": 10493
+    },
+    "tools/board_recording.py": {
+      "sha256": "a194a026bc224df4f153ff14ce4a228e111778bc39e6f86a09d472d61adde277",
+      "bytes": 17742
+    }
+  },
+  "scope": {
+    "only_board_production": true,
+    "synthetic_unchanged": true,
+    "new_private_preference": "listening_preference.json",
+    "missing_preference": true,
+    "persisted_user_pause": true,
+    "error_retry_changes_preference": false,
+    "ready_gate": [
+      "runtime.started",
+      "not runtime.closed",
+      "pair.ready_now"
+    ],
+    "per_tick_http": false,
+    "source_only": true
+  },
+  "remaining": [
+    "Root merge with independent capture fix and safe diagnostics",
+    "Root verify exact current base pins and publish normally",
+    "Actual microphone and physical audio acceptance remain root-owned"
+  ]
+}

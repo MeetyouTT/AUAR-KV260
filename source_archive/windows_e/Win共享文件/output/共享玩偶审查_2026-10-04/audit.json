@@ -1,0 +1,1129 @@
+{
+  "syntax_errors": [],
+  "states": {
+    "runtime": [
+      "IDLE",
+      "PRESENT",
+      "LISTENING",
+      "THINKING",
+      "SPEAKING",
+      "SPEAKING_NEUTRAL",
+      "SPEAKING_LOW",
+      "AWAKE",
+      "PUZZLED",
+      "ACK_NOD",
+      "DENY_SHAKE",
+      "CAMERA_LOST",
+      "NETWORK_LOST",
+      "CANCELLED",
+      "ERROR"
+    ],
+    "schema": [
+      "IDLE",
+      "PRESENT",
+      "LISTENING",
+      "THINKING",
+      "SPEAKING",
+      "SPEAKING_LOW",
+      "CAMERA_LOST",
+      "NETWORK_LOST",
+      "CANCELLED",
+      "ERROR"
+    ],
+    "presentation": [
+      "IDLE",
+      "PRESENT",
+      "LISTENING",
+      "THINKING",
+      "SPEAKING",
+      "SPEAKING_LOW",
+      "CAMERA_LOST",
+      "NETWORK_LOST",
+      "CANCELLED",
+      "ERROR"
+    ],
+    "missing_schema": [
+      "ACK_NOD",
+      "AWAKE",
+      "DENY_SHAKE",
+      "PUZZLED",
+      "SPEAKING_NEUTRAL"
+    ],
+    "board_export": [
+      "IDLE",
+      "PRESENT",
+      "LISTENING",
+      "THINKING",
+      "SPEAKING",
+      "SPEAKING_LOW",
+      "CAMERA_LOST",
+      "NETWORK_LOST",
+      "CANCELLED",
+      "ERROR"
+    ]
+  },
+  "fsm_traces": {
+    "normal_kws": [
+      {
+        "event": "scene.person_enter",
+        "state": "PRESENT",
+        "rejected": false
+      },
+      {
+        "event": "audio.kws_detected",
+        "state": "AWAKE",
+        "rejected": false
+      },
+      {
+        "event": "audio.vad_end",
+        "state": "LISTENING",
+        "rejected": false
+      },
+      {
+        "event": "dialogue.response_received",
+        "state": "LISTENING",
+        "rejected": true
+      },
+      {
+        "event": "audio.playback_stopped",
+        "state": "LISTENING",
+        "rejected": true
+      }
+    ],
+    "duplicate_vad": [
+      {
+        "event": "scene.person_enter",
+        "state": "PRESENT",
+        "rejected": false
+      },
+      {
+        "event": "audio.kws_detected",
+        "state": "AWAKE",
+        "rejected": false
+      },
+      {
+        "event": "audio.vad_end",
+        "state": "LISTENING",
+        "rejected": false
+      },
+      {
+        "event": "audio.vad_end",
+        "state": "THINKING",
+        "rejected": false
+      },
+      {
+        "event": "dialogue.response_received",
+        "state": "SPEAKING_NEUTRAL",
+        "rejected": false
+      },
+      {
+        "event": "audio.playback_stopped",
+        "state": "IDLE",
+        "rejected": false
+      }
+    ],
+    "button": [
+      {
+        "event": "scene.person_enter",
+        "state": "PRESENT",
+        "rejected": false
+      },
+      {
+        "event": "board.key_pressed",
+        "state": "LISTENING",
+        "rejected": false
+      },
+      {
+        "event": "audio.vad_end",
+        "state": "THINKING",
+        "rejected": false
+      },
+      {
+        "event": "dialogue.response_received",
+        "state": "SPEAKING_NEUTRAL",
+        "rejected": false
+      },
+      {
+        "event": "audio.playback_stopped",
+        "state": "IDLE",
+        "rejected": false
+      }
+    ],
+    "wake_animation_finished": [
+      {
+        "event": "audio.kws_detected",
+        "state": "AWAKE",
+        "rejected": false
+      },
+      {
+        "event": "audio.playback_stopped",
+        "state": "AWAKE",
+        "rejected": true
+      }
+    ]
+  },
+  "direct_tests": {
+    "passed": [
+      "test_avatar_fsm.test_all_states_defined",
+      "test_avatar_fsm.test_speaking_two_emotion_tiers",
+      "test_avatar_fsm.test_avatar_spec_fields",
+      "test_avatar_fsm.test_unknown_state_falls_back_idle",
+      "test_avatar_fsm.test_expression_spec_complete",
+      "test_avatar_fsm.test_animations_positive",
+      "test_avatar_fsm.test_animation_frames_interface",
+      "test_event_bus.test_subscribe_receives_event",
+      "test_event_bus.test_subscribe_filter_by_type",
+      "test_event_bus.test_bounded_drop_when_full",
+      "test_event_bus.test_latest_evict_oldest_frame",
+      "test_event_bus.test_latest_final_scene_state_keeps_newest",
+      "test_event_bus.test_critical_evicts_noncritical",
+      "test_event_bus.test_critical_blocking_when_all_critical",
+      "test_event_bus.test_wait_event",
+      "test_event_bus.test_wait_event_timeout",
+      "test_event_bus.test_async_dispatch",
+      "test_event_bus.test_handler_error_does_not_break_bus",
+      "test_event_bus.test_metrics_visibility",
+      "test_fsm.test_initial_idle",
+      "test_fsm.test_person_enter_present_exit_idle",
+      "test_fsm.test_cancel_with_presence_resumes_present",
+      "test_fsm.test_cancel_without_presence_resumes_idle",
+      "test_fsm.test_camera_lost_from_any_state",
+      "test_fsm.test_network_lost_and_restored",
+      "test_fsm.test_worker_crash_to_error_and_recover",
+      "test_fsm.test_invalid_transition_rejected",
+      "test_fsm.test_state_changed_published",
+      "test_fsm.test_deterministic_sequence",
+      "test_fsm.test_is_low_emotion_normalization",
+      "test_fsm.test_low_speaking_cancel_resumes_idle",
+      "test_fsm.test_avatar_action_whitelist_single_source",
+      "test_fsm.test_avatar_action_routes_to_landed_state",
+      "test_tts_style.test_tone_table_matches_fsm_single_source",
+      "test_tts_style.test_unknown_and_dirty_emotion_fall_back_to_neutral",
+      "test_tts_style.test_clamp_limits_keywords_pitch_step_and_break",
+      "test_tts_style.test_split_segments_keeps_punctuation_and_merges_fragments",
+      "test_tts_style.test_build_ssml_structure_and_escaping",
+      "test_tts_style.test_player_without_style_keeps_plain_text_rollback",
+      "test_tts_style.test_rate_multiplier_matches_tone_table_direction",
+      "test_tts_style.test_sherpa_speed_for_clamps_and_composes",
+      "test_tts_style.test_style_describe_is_readable",
+      "test_ui_state.test_initial_snapshot_schema",
+      "test_ui_state.test_fsm_state_changed_updates_runtime_state",
+      "test_ui_state.test_camera_lost_clears_scene",
+      "test_ui_state.test_network_lost_sets_core_local",
+      "test_ui_state.test_dialogue_response_updates_reply",
+      "test_ui_state.test_privacy_event",
+      "test_ui_state.test_recent_text_bounded",
+      "test_ui_state.test_avatar_anim_interface",
+      "test_ui_state.test_ingest_external_snapshot",
+      "test_ui_state.test_concurrent_update_no_crash"
+    ],
+    "failed": [
+      {
+        "test": "test_event_bus.test_envelope_validation",
+        "error": "No module named 'pytest'",
+        "trace": "Traceback (most recent call last):\n  File \"E:\\项目\\output\\共享玩偶审查_2026-10-04\\audit.py\", line 78, in <module>\n    getattr(m, f.name)()\n  File \"E:\\项目\\共享文件夹\\aura\\tests\\test_event_bus.py\", line 16, in test_envelope_validation\n    import pytest\nModuleNotFoundError: No module named 'pytest'\n"
+      },
+      {
+        "test": "test_fsm.test_full_dialogue_flow",
+        "error": "",
+        "trace": "Traceback (most recent call last):\n  File \"E:\\项目\\output\\共享玩偶审查_2026-10-04\\audit.py\", line 78, in <module>\n    getattr(m, f.name)()\n  File \"E:\\项目\\共享文件夹\\aura\\tests\\test_fsm.py\", line 34, in test_full_dialogue_flow\n    assert fsm.state == RuntimeState.IDLE\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+      },
+      {
+        "test": "test_fsm.test_low_emotion_routes_to_speaking_low",
+        "error": "_to_thinking() takes 0 positional arguments but 1 was given",
+        "trace": "Traceback (most recent call last):\n  File \"E:\\项目\\output\\共享玩偶审查_2026-10-04\\audit.py\", line 78, in <module>\n    getattr(m, f.name)()\n  File \"E:\\项目\\共享文件夹\\aura\\tests\\test_fsm.py\", line 146, in test_low_emotion_routes_to_speaking_low\n    _to_thinking(fsm)\nTypeError: _to_thinking() takes 0 positional arguments but 1 was given\n"
+      },
+      {
+        "test": "test_fsm.test_missing_or_high_emotion_stays_speaking",
+        "error": "_to_thinking() takes 0 positional arguments but 1 was given",
+        "trace": "Traceback (most recent call last):\n  File \"E:\\项目\\output\\共享玩偶审查_2026-10-04\\audit.py\", line 78, in <module>\n    getattr(m, f.name)()\n  File \"E:\\项目\\共享文件夹\\aura\\tests\\test_fsm.py\", line 158, in test_missing_or_high_emotion_stays_speaking\n    _to_thinking(fsm)\nTypeError: _to_thinking() takes 0 positional arguments but 1 was given\n"
+      },
+      {
+        "test": "test_fsm.test_low_speaking_state_change_published",
+        "error": "_to_thinking() takes 0 positional arguments but 1 was given",
+        "trace": "Traceback (most recent call last):\n  File \"E:\\项目\\output\\共享玩偶审查_2026-10-04\\audit.py\", line 78, in <module>\n    getattr(m, f.name)()\n  File \"E:\\项目\\共享文件夹\\aura\\tests\\test_fsm.py\", line 175, in test_low_speaking_state_change_published\n    _to_thinking(fsm)\nTypeError: _to_thinking() takes 0 positional arguments but 1 was given\n"
+      },
+      {
+        "test": "test_fsm.test_avatar_action_alias_and_unknown",
+        "error": "name 'changes' is not defined",
+        "trace": "Traceback (most recent call last):\n  File \"E:\\项目\\output\\共享玩偶审查_2026-10-04\\audit.py\", line 78, in <module>\n    getattr(m, f.name)()\n  File \"E:\\项目\\共享文件夹\\aura\\tests\\test_fsm.py\", line 226, in test_avatar_action_alias_and_unknown\n    assert changes[-1][\"to\"] == \"SPEAKING_LOW\"\n           ^^^^^^^\nNameError: name 'changes' is not defined\n"
+      },
+      {
+        "test": "test_ui_state.test_snapshot_matches_json_schema",
+        "error": "No module named 'jsonschema'",
+        "trace": "Traceback (most recent call last):\n  File \"E:\\项目\\output\\共享玩偶审查_2026-10-04\\audit.py\", line 78, in <module>\n    getattr(m, f.name)()\n  File \"E:\\项目\\共享文件夹\\aura\\tests\\test_ui_state.py\", line 26, in test_snapshot_matches_json_schema\n    import jsonschema\nModuleNotFoundError: No module named 'jsonschema'\n"
+      },
+      {
+        "test": "test_ui_state.test_speaking_low_in_schema_enum",
+        "error": "No module named 'jsonschema'",
+        "trace": "Traceback (most recent call last):\n  File \"E:\\项目\\output\\共享玩偶审查_2026-10-04\\audit.py\", line 78, in <module>\n    getattr(m, f.name)()\n  File \"E:\\项目\\共享文件夹\\aura\\tests\\test_ui_state.py\", line 47, in test_speaking_low_in_schema_enum\n    import jsonschema\nModuleNotFoundError: No module named 'jsonschema'\n"
+      }
+    ],
+    "skipped": [
+      {
+        "module": "test_adapter",
+        "reason": "No module named 'pytest'"
+      },
+      {
+        "module": "test_avatar_assets",
+        "reason": "No module named 'pytest'"
+      },
+      {
+        "module": "test_avatar_b2",
+        "reason": "requires test runner or fixtures"
+      },
+      {
+        "module": "test_avatar_board",
+        "reason": "No module named 'pytest'"
+      },
+      {
+        "module": "test_avatar_framing",
+        "reason": "No module named 'pytest'"
+      },
+      {
+        "module": "test_avatar_keyframes",
+        "reason": "No module named 'pytest'"
+      },
+      {
+        "module": "test_avatar_lod",
+        "reason": "No module named 'pytest'"
+      },
+      {
+        "module": "test_avatar_timing_idle",
+        "reason": "No module named 'pytest'"
+      },
+      {
+        "module": "test_despill_frames",
+        "reason": "despill_frames 需要 opencv-python（与 src.matting 同一依赖）"
+      },
+      {
+        "module": "test_kws",
+        "reason": "requires test runner or fixtures"
+      },
+      {
+        "module": "test_mock_board",
+        "reason": "No module named 'pytest'"
+      },
+      {
+        "module": "test_ui_layout",
+        "reason": "requires test runner or fixtures"
+      },
+      {
+        "module": "test_ui_mock_draft",
+        "reason": "No module named 'pytest'"
+      },
+      {
+        "module": "test_validator",
+        "reason": "requires test runner or fixtures"
+      },
+      {
+        "module": "test_validator_cases",
+        "reason": "requires test runner or fixtures"
+      },
+      {
+        "module": "test_ws_adapter",
+        "reason": "requires test runner or fixtures"
+      }
+    ]
+  },
+  "assets": [
+    {
+      "asset": "ack_nod",
+      "frames": 22,
+      "fps": 24.0,
+      "size": [
+        464,
+        480
+      ],
+      "png_mib": 6.93,
+      "manifest_entries": 22,
+      "bad_hash": [],
+      "motion_length": 21,
+      "segments": {
+        "asset": "ack_nod",
+        "frames": 22,
+        "fps": 24.0,
+        "enter": [
+          0,
+          2
+        ],
+        "loop": [
+          2,
+          15
+        ],
+        "exit": [
+          15,
+          21
+        ],
+        "loops_hint": 16,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 13,
+          "loop": [
+            2,
+            15
+          ],
+          "loop_frames": 14,
+          "loop_mean_motion": 12.337,
+          "loop_pose_gap": 13.883,
+          "target_motion": 4.722,
+          "enter_frames": 3,
+          "exit_frames": 7
+        }
+      },
+      "rgb565_exists": false,
+      "rgb565_bytes": 0,
+      "rgb565_expected": 9799680,
+      "loop_pose_gap_rechecked": 12.692,
+      "segment_period_short": 3.25
+    },
+    {
+      "asset": "deny_shake",
+      "frames": 22,
+      "fps": 24.0,
+      "size": [
+        464,
+        480
+      ],
+      "png_mib": 6.88,
+      "manifest_entries": 22,
+      "bad_hash": [],
+      "motion_length": 21,
+      "segments": {
+        "asset": "deny_shake",
+        "frames": 22,
+        "fps": 24.0,
+        "enter": [
+          0,
+          1
+        ],
+        "loop": [
+          1,
+          12
+        ],
+        "exit": [
+          12,
+          21
+        ],
+        "loops_hint": 19,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 13,
+          "loop": [
+            1,
+            12
+          ],
+          "loop_frames": 12,
+          "loop_mean_motion": 13.55,
+          "loop_pose_gap": 14.519,
+          "target_motion": 5.446,
+          "enter_frames": 2,
+          "exit_frames": 10
+        }
+      },
+      "rgb565_exists": false,
+      "rgb565_bytes": 0,
+      "rgb565_expected": 9799680,
+      "loop_pose_gap_rechecked": 14.35,
+      "segment_period_short": 3.0
+    },
+    {
+      "asset": "emo_puzzled",
+      "frames": 39,
+      "fps": 24.0,
+      "size": [
+        464,
+        480
+      ],
+      "png_mib": 12.07,
+      "manifest_entries": 39,
+      "bad_hash": [],
+      "motion_length": 38,
+      "segments": {
+        "asset": "emo_puzzled",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          13
+        ],
+        "loop": [
+          13,
+          20
+        ],
+        "exit": [
+          20,
+          38
+        ],
+        "loops_hint": 26,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 8,
+          "loop": [
+            13,
+            20
+          ],
+          "loop_frames": 8,
+          "loop_mean_motion": 6.602,
+          "loop_pose_gap": 15.408,
+          "target_motion": 5.643,
+          "enter_frames": 14,
+          "exit_frames": 19
+        }
+      },
+      "rgb565_exists": false,
+      "rgb565_bytes": 0,
+      "rgb565_expected": 17372160,
+      "loop_pose_gap_rechecked": 14.591,
+      "segment_period_short": 3.562
+    },
+    {
+      "asset": "emo_sad",
+      "frames": 39,
+      "fps": 24.0,
+      "size": [
+        464,
+        480
+      ],
+      "png_mib": 11.95,
+      "manifest_entries": 39,
+      "bad_hash": [],
+      "motion_length": 38,
+      "segments": {
+        "asset": "emo_sad",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          27
+        ],
+        "loop": [
+          27,
+          34
+        ],
+        "exit": [
+          34,
+          38
+        ],
+        "loops_hint": 26,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 22,
+          "loop": [
+            27,
+            34
+          ],
+          "loop_frames": 8,
+          "loop_mean_motion": 4.215,
+          "loop_pose_gap": 9.479,
+          "target_motion": 4.686,
+          "enter_frames": 28,
+          "exit_frames": 5
+        }
+      },
+      "rgb565_exists": false,
+      "rgb565_bytes": 0,
+      "rgb565_expected": 17372160,
+      "loop_pose_gap_rechecked": 8.71,
+      "segment_period_short": 3.562
+    },
+    {
+      "asset": "emo_surprised",
+      "frames": 22,
+      "fps": 24.0,
+      "size": [
+        464,
+        480
+      ],
+      "png_mib": 6.97,
+      "manifest_entries": 22,
+      "bad_hash": [],
+      "motion_length": 21,
+      "segments": {
+        "asset": "emo_surprised",
+        "frames": 22,
+        "fps": 24.0,
+        "enter": [
+          0,
+          2
+        ],
+        "loop": [
+          2,
+          15
+        ],
+        "exit": [
+          15,
+          21
+        ],
+        "loops_hint": 16,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 3,
+          "loop": [
+            2,
+            15
+          ],
+          "loop_frames": 14,
+          "loop_mean_motion": 19.653,
+          "loop_pose_gap": 4.845,
+          "target_motion": 6.773,
+          "enter_frames": 3,
+          "exit_frames": 7
+        }
+      },
+      "rgb565_exists": false,
+      "rgb565_bytes": 0,
+      "rgb565_expected": 9799680,
+      "loop_pose_gap_rechecked": 4.449,
+      "segment_period_short": 3.25
+    },
+    {
+      "asset": "idle_listening",
+      "frames": 39,
+      "fps": 24.0,
+      "size": [
+        464,
+        480
+      ],
+      "png_mib": 12.23,
+      "manifest_entries": 39,
+      "bad_hash": [],
+      "motion_length": 38,
+      "segments": {
+        "asset": "idle_listening",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          14
+        ],
+        "loop": [
+          14,
+          21
+        ],
+        "exit": [
+          21,
+          38
+        ],
+        "loops_hint": 26,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 26,
+          "loop": [
+            14,
+            21
+          ],
+          "loop_frames": 8,
+          "loop_mean_motion": 5.159,
+          "loop_pose_gap": 10.174,
+          "target_motion": 3.238,
+          "enter_frames": 15,
+          "exit_frames": 18
+        }
+      },
+      "rgb565_exists": false,
+      "rgb565_bytes": 0,
+      "rgb565_expected": 17372160,
+      "loop_pose_gap_rechecked": 9.536,
+      "segment_period_short": 3.562
+    },
+    {
+      "asset": "idle_normal",
+      "frames": 39,
+      "fps": 24.0,
+      "size": [
+        464,
+        480
+      ],
+      "png_mib": 12.22,
+      "manifest_entries": 39,
+      "bad_hash": [],
+      "motion_length": 38,
+      "segments": {
+        "asset": "idle_normal",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          27
+        ],
+        "loop": [
+          27,
+          34
+        ],
+        "exit": [
+          34,
+          38
+        ],
+        "loops_hint": 26,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 22,
+          "loop": [
+            27,
+            34
+          ],
+          "loop_frames": 8,
+          "loop_mean_motion": 4.027,
+          "loop_pose_gap": 9.175,
+          "target_motion": 2.523,
+          "enter_frames": 28,
+          "exit_frames": 5
+        }
+      },
+      "rgb565_exists": false,
+      "rgb565_bytes": 0,
+      "rgb565_expected": 17372160,
+      "loop_pose_gap_rechecked": 8.288,
+      "segment_period_short": 3.562
+    },
+    {
+      "asset": "idle_offline",
+      "frames": 39,
+      "fps": 24.0,
+      "size": [
+        464,
+        480
+      ],
+      "png_mib": 12.1,
+      "manifest_entries": 39,
+      "bad_hash": [],
+      "motion_length": 38,
+      "segments": {
+        "asset": "idle_offline",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          18
+        ],
+        "loop": [
+          18,
+          25
+        ],
+        "exit": [
+          25,
+          38
+        ],
+        "loops_hint": 26,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 30,
+          "loop": [
+            18,
+            25
+          ],
+          "loop_frames": 8,
+          "loop_mean_motion": 5.341,
+          "loop_pose_gap": 12.623,
+          "target_motion": 2.867,
+          "enter_frames": 19,
+          "exit_frames": 14
+        }
+      },
+      "rgb565_exists": false,
+      "rgb565_bytes": 0,
+      "rgb565_expected": 17372160,
+      "loop_pose_gap_rechecked": 11.818,
+      "segment_period_short": 3.562
+    },
+    {
+      "asset": "idle_present",
+      "frames": 39,
+      "fps": 24.0,
+      "size": [
+        464,
+        480
+      ],
+      "png_mib": 12.04,
+      "manifest_entries": 39,
+      "bad_hash": [],
+      "motion_length": 38,
+      "segments": {
+        "asset": "idle_present",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          13
+        ],
+        "loop": [
+          13,
+          20
+        ],
+        "exit": [
+          20,
+          38
+        ],
+        "loops_hint": 26,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 26,
+          "loop": [
+            13,
+            20
+          ],
+          "loop_frames": 8,
+          "loop_mean_motion": 4.279,
+          "loop_pose_gap": 8.655,
+          "target_motion": 2.585,
+          "enter_frames": 14,
+          "exit_frames": 19
+        }
+      },
+      "rgb565_exists": false,
+      "rgb565_bytes": 0,
+      "rgb565_expected": 17372160,
+      "loop_pose_gap_rechecked": 7.876,
+      "segment_period_short": 3.562
+    },
+    {
+      "asset": "idle_thinking",
+      "frames": 39,
+      "fps": 24.0,
+      "size": [
+        464,
+        480
+      ],
+      "png_mib": 12.24,
+      "manifest_entries": 39,
+      "bad_hash": [],
+      "motion_length": 38,
+      "segments": {
+        "asset": "idle_thinking",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          10
+        ],
+        "loop": [
+          10,
+          17
+        ],
+        "exit": [
+          17,
+          38
+        ],
+        "loops_hint": 26,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 5,
+          "loop": [
+            10,
+            17
+          ],
+          "loop_frames": 8,
+          "loop_mean_motion": 7.01,
+          "loop_pose_gap": 15.549,
+          "target_motion": 2.984,
+          "enter_frames": 11,
+          "exit_frames": 22
+        }
+      },
+      "rgb565_exists": false,
+      "rgb565_bytes": 0,
+      "rgb565_expected": 17372160,
+      "loop_pose_gap_rechecked": 14.489,
+      "segment_period_short": 3.562
+    },
+    {
+      "asset": "talking_low",
+      "frames": 39,
+      "fps": 24.0,
+      "size": [
+        464,
+        480
+      ],
+      "png_mib": 12.16,
+      "manifest_entries": 39,
+      "bad_hash": [],
+      "motion_length": 38,
+      "segments": {
+        "asset": "talking_low",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          27
+        ],
+        "loop": [
+          27,
+          34
+        ],
+        "exit": [
+          34,
+          38
+        ],
+        "loops_hint": 26,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 22,
+          "loop": [
+            27,
+            34
+          ],
+          "loop_frames": 8,
+          "loop_mean_motion": 4.369,
+          "loop_pose_gap": 9.104,
+          "target_motion": 3.114,
+          "enter_frames": 28,
+          "exit_frames": 5
+        }
+      },
+      "rgb565_exists": false,
+      "rgb565_bytes": 0,
+      "rgb565_expected": 17372160,
+      "loop_pose_gap_rechecked": 8.227,
+      "segment_period_short": 3.562
+    },
+    {
+      "asset": "talking_neutral",
+      "frames": 39,
+      "fps": 24.0,
+      "size": [
+        464,
+        480
+      ],
+      "png_mib": 12.3,
+      "manifest_entries": 39,
+      "bad_hash": [],
+      "motion_length": 38,
+      "segments": {
+        "asset": "talking_neutral",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          12
+        ],
+        "loop": [
+          12,
+          19
+        ],
+        "exit": [
+          19,
+          38
+        ],
+        "loops_hint": 26,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 9,
+          "loop": [
+            12,
+            19
+          ],
+          "loop_frames": 8,
+          "loop_mean_motion": 5.762,
+          "loop_pose_gap": 11.828,
+          "target_motion": 2.707,
+          "enter_frames": 13,
+          "exit_frames": 20
+        }
+      },
+      "rgb565_exists": false,
+      "rgb565_bytes": 0,
+      "rgb565_expected": 17372160,
+      "loop_pose_gap_rechecked": 10.792,
+      "segment_period_short": 3.562
+    },
+    {
+      "asset": "talking_normal",
+      "frames": 39,
+      "fps": 24.0,
+      "size": [
+        464,
+        480
+      ],
+      "png_mib": 12.25,
+      "manifest_entries": 39,
+      "bad_hash": [],
+      "motion_length": 38,
+      "segments": {
+        "asset": "talking_normal",
+        "frames": 39,
+        "fps": 24.0,
+        "enter": [
+          0,
+          12
+        ],
+        "loop": [
+          12,
+          19
+        ],
+        "exit": [
+          19,
+          38
+        ],
+        "loops_hint": 26,
+        "spec": "三段式（avatar_timing.segment_time）；由 tools/split_avatar_segments.py 推荐，可人工改",
+        "diag": {
+          "peak": 26,
+          "loop": [
+            12,
+            19
+          ],
+          "loop_frames": 8,
+          "loop_mean_motion": 8.025,
+          "loop_pose_gap": 17.102,
+          "target_motion": 4.421,
+          "enter_frames": 13,
+          "exit_frames": 20
+        }
+      },
+      "rgb565_exists": false,
+      "rgb565_bytes": 0,
+      "rgb565_expected": 17372160,
+      "loop_pose_gap_rechecked": 16.762,
+      "segment_period_short": 3.562
+    }
+  ],
+  "stale_board_manifest": [
+    {
+      "state": "IDLE",
+      "recorded_frames": 100,
+      "actual_frames": 39,
+      "recorded_fps": 9.983,
+      "actual_fps": 24.0
+    },
+    {
+      "state": "PRESENT",
+      "recorded_frames": 100,
+      "actual_frames": 39,
+      "recorded_fps": 9.983,
+      "actual_fps": 24.0
+    },
+    {
+      "state": "LISTENING",
+      "recorded_frames": 100,
+      "actual_frames": 39,
+      "recorded_fps": 9.983,
+      "actual_fps": 24.0
+    },
+    {
+      "state": "THINKING",
+      "recorded_frames": 100,
+      "actual_frames": 39,
+      "recorded_fps": 9.983,
+      "actual_fps": 24.0
+    },
+    {
+      "state": "SPEAKING",
+      "recorded_frames": 100,
+      "actual_frames": 39,
+      "recorded_fps": 9.983,
+      "actual_fps": 24.0
+    },
+    {
+      "state": "SPEAKING_LOW",
+      "recorded_frames": 100,
+      "actual_frames": 39,
+      "recorded_fps": 9.983,
+      "actual_fps": 24.0
+    },
+    {
+      "state": "CAMERA_LOST",
+      "recorded_frames": 100,
+      "actual_frames": 39,
+      "recorded_fps": 9.983,
+      "actual_fps": 24.0
+    },
+    {
+      "state": "NETWORK_LOST",
+      "recorded_frames": 100,
+      "actual_frames": 39,
+      "recorded_fps": 9.983,
+      "actual_fps": 24.0
+    },
+    {
+      "state": "CANCELLED",
+      "recorded_frames": 100,
+      "actual_frames": 39,
+      "recorded_fps": 9.983,
+      "actual_fps": 24.0
+    },
+    {
+      "state": "ERROR",
+      "recorded_frames": 100,
+      "actual_frames": 39,
+      "recorded_fps": 9.983,
+      "actual_fps": 24.0
+    }
+  ],
+  "checks": [
+    {
+      "script": "verify_idle_alive.py",
+      "exit": 0,
+      "summary": [
+        "RESULT: OK (0 项失败)"
+      ]
+    },
+    {
+      "script": "verify_loop_seam.py",
+      "exit": 0,
+      "summary": [
+        "RESULT: OK (0 项失败)"
+      ]
+    },
+    {
+      "script": "verify_v2_actions.py",
+      "exit": 0,
+      "summary": [
+        "=== RESULT: OK (0 项失败) ==="
+      ]
+    },
+    {
+      "script": "verify_v2_timing.py",
+      "exit": 0,
+      "summary": [
+        "=== RESULT: OK (0 项失败) ==="
+      ]
+    },
+    {
+      "script": "verify_p01_sync.py",
+      "exit": 0,
+      "summary": [
+        "=== RESULT: OK (0 项失败) ==="
+      ]
+    },
+    {
+      "script": "verify_v2_amp.py",
+      "exit": 0,
+      "summary": [
+        "FAILED: none"
+      ]
+    },
+    {
+      "script": "build_motion_table.py",
+      "exit": 0,
+      "summary": [
+        "talking_low               39    24.0       0.41      0.56        0  ★需检查",
+        "idle_offline              39    24.0       1.49      1.48        0  ★需检查",
+        "RESULT: CHECK（素材 13 个，需检查 2 个：talking_low、idle_offline）"
+      ]
+    },
+    {
+      "script": "split_avatar_segments.py",
+      "exit": 0,
+      "summary": [
+        "idle_normal              39      27..34 (8帧)      4.03      9.18       22  ★需检查",
+        "idle_present             39      13..20 (8帧)      4.28      8.65       26  ★需检查",
+        "idle_listening           39      14..21 (8帧)      5.16     10.17       26  ★需检查",
+        "idle_thinking            39      10..17 (8帧)      7.01     15.55        5  ★需检查",
+        "talking_normal           39      12..19 (8帧)      8.03     17.10       26  ★需检查",
+        "talking_low              39      27..34 (8帧)      4.37      9.10       22  ★需检查",
+        "talking_neutral          39      12..19 (8帧)      5.76     11.83        9  ★需检查",
+        "emo_puzzled              39      13..20 (8帧)      6.60     15.41        8  ★需检查",
+        "ack_nod                  22      2..15 (14帧)     12.34     13.88       13  ★需检查",
+        "deny_shake               22      1..12 (12帧)     13.55     14.52       13  ★需检查",
+        "idle_offline             39      18..25 (8帧)      5.34     12.62       30  ★需检查",
+        "emo_sad                  39      27..34 (8帧)      4.21      9.48       22  ★需检查",
+        "RESULT: CHECK（素材 13 个，需检查 12 个：idle_normal、idle_present、idle_listening、idle_thinking、talking_normal、talking_low、talking_neutral、emo_puzzled、ack_nod、deny_shake、idle_offline、emo_sad）"
+      ]
+    }
+  ],
+  "stage_selftest": {
+    "exit": 0,
+    "output": "[PRESENT         ] asset=idle_present     frame=1/39 loop phase=1.226 speed=1.000\n[AWAKE           ] asset=emo_surprised    frame=1/22 burst phase=0.000 speed=1.000\n[LISTENING       ] asset=idle_listening   frame=1/39 loop phase=0.638 speed=1.000\n[THINKING        ] asset=idle_thinking    frame=1/39 loop phase=0.850 speed=1.000\n长句 第1次入场：state=SPEAKING_NEUTRAL speed=0.850 phase=1.345 frame=1\n长句 第2次入场：state=SPEAKING_NEUTRAL speed=0.850 phase=0.206 frame=1\n两次入场相位：1.345 / 0.206 → DIFFERENT [P0-2 OK]\n拼图：E:\\项目\\output\\共享玩偶审查_2026-10-04\\stage\\stage_selftest.png（20 格）\nSELFTEST OK\n"
+  }
+}

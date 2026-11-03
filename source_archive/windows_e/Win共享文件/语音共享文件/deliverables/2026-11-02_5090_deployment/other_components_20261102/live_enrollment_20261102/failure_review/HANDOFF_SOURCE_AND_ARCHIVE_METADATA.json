@@ -1,0 +1,86 @@
+{
+  "script_sha256": "82f5dd4828e8b75a89f48ab90502d5d4d57ac05f0f6195c00ddf970c59f9b7e4",
+  "board_result": {
+    "utc": "2026-11-02T09:18:32.459646+00:00",
+    "startup_sha256": "1177df3831407bc819c1f1e3b89090f8c6b97661c8e74c2866b281be93b0a9c8",
+    "source_snapshot_stable": true,
+    "source_checks": {
+      "tools/production_board_business_gui.py": {
+        "actual_sha256": "b01f6edb9efe88cf95da60900e5ccc32eec93a24ef3f515ab08f51ae2ee6ada8",
+        "pin_matches_actual": true,
+        "matches_reviewed_public_source": true
+      },
+      "board/runtime/audio/channel_jobs.py": {
+        "actual_sha256": "015e13d27db25819d002c4c87087802e02e8b65ac10119bf467635871b458822",
+        "pin_matches_actual": true,
+        "matches_reviewed_public_source": true
+      },
+      "board/interaction/ui_services.py": {
+        "actual_sha256": "b55ee295e2cb5494f387fbaa4aa081fd1d6bffd57588c018c5f31daae56bd711",
+        "pin_matches_actual": true,
+        "matches_reviewed_public_source": true
+      },
+      "board/identity/voice_enrollment.py": {
+        "actual_sha256": "83796dd78c57555ea66eeb2b745a89f8b3670945a4406176cb3486111d9466b8",
+        "pin_matches_actual": true,
+        "matches_reviewed_public_source": true
+      },
+      "board/runtime/board_business.py": {
+        "actual_sha256": "b08209eca7979825e26845080bca5e1d64e065d3cabd1178df763a93540573f2",
+        "pin_matches_actual": true,
+        "matches_reviewed_public_source": true
+      }
+    },
+    "face_catalog_count_from_api": 0,
+    "identity_capabilities": {
+      "identity_enroll": false,
+      "identity_sample_start": false,
+      "identity_sample_cancel": true
+    },
+    "last_operation_public_keys": [
+      "action",
+      "command_id",
+      "db_version",
+      "detail",
+      "state"
+    ],
+    "last_operation_contains_timestamp_field": false,
+    "photo_archive_public_keys": [
+      "active_session",
+      "directory",
+      "enabled",
+      "error",
+      "error_count",
+      "image_count",
+      "last_error",
+      "latest_session",
+      "outcome",
+      "ready"
+    ],
+    "photo_archive_projection": {
+      "enabled": true,
+      "ready": true,
+      "image_count": 45,
+      "error_count": 0
+    },
+    "photo_public_source_functions": {
+      "board/identity/photo_archive.py::validated": {
+        "path": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura/board/identity/photo_archive.py",
+        "sha256": "9ace86699e40e008a13a81f9c371d1624f2b7f0cfe45f3c854414dd06367fc0f",
+        "source": "    def validated(self,sid,frame_ids,scores):\n        with self.lock:\n            if not self._owns(sid):return False\n            try:\n                if len(frame_ids)!=5 or len(set(frame_ids))!=5 or len(scores)!=5:\n                    raise ValueError('Expected five independent validation photos')\n                self.document['validation_frame_ids']=list(frame_ids)\n                self.document['validation_scores']=list(scores);self._manifest();return True\n            except (OSError,ValueError,TypeError) as exc:self._failed(exc);return False"
+      },
+      "board/identity/photo_archive.py::finish": {
+        "path": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura/board/identity/photo_archive.py",
+        "sha256": "9ace86699e40e008a13a81f9c371d1624f2b7f0cfe45f3c854414dd06367fc0f",
+        "source": "    def finish(self,sid,outcome,revision=None,reason=''):\n        with self.lock:\n            if not self._owns(sid):return False\n            try:\n                if outcome not in ('committed','cancelled','failed','interrupted'):raise ValueError('Invalid photo outcome')\n                self.document.update(outcome=outcome,database_revision_after=revision,reason=reason)\n                self._manifest();self.active=None;self.error='';return True\n            except (OSError,ValueError,TypeError) as exc:self._failed(exc);return False"
+      },
+      "board/identity/photo_archive.py::health": {
+        "path": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura/board/identity/photo_archive.py",
+        "sha256": "9ace86699e40e008a13a81f9c371d1624f2b7f0cfe45f3c854414dd06367fc0f",
+        "source": "    def health(self):\n        with self.lock:\n            return {'enabled':self.config['enabled'],'ready':self.config['enabled'] and not self.error,\n                'directory':str(self.root),'active_session':self.active,\n                'latest_session':self.document['session_id'] if self.document else None,\n                'image_count':len(self.document['images']) if self.document else 0,\n                'outcome':self.document['outcome'] if self.document else None,\n                'error':self.error,'error_count':self.error_count,'last_error':self.last_error}"
+      }
+    },
+    "real_private_databases_templates_or_photos_opened": false,
+    "board_mutations": false
+  }
+}

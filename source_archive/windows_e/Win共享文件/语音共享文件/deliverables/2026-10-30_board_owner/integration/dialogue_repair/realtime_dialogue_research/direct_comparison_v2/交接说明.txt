@@ -1,0 +1,21 @@
+直接 canonical → compact 的公开名字对照（v2）
+
+本目录独立于已冻结 first_wait_candidate，不修改该目录任何源码或交接文件，不读真实对话正文。
+
+下一步仅一次四调用：你叫什么名字？固定 seed8701、num_predict120、num_ctx2048、think=false、原采样/驻留/53层不变，A–B–B–A，无额外预热。
+A：原 canonical 字段、通用 JSON、原静态人格。
+B：ABC 字段、strict ABC schema；只改静态人格里的三个字段契约词，由已冻结板端解码器恢复 canonical 字段。
+两边公开问题/预算/seed/采样相同；静态字段契约名称必然不同，因此结果明确 same_prompt_seed_budget_across_A_B=false，不冒称原始提示词逐字相同。非 system 的输入完全相同。
+
+实际执行入口：root_direct_name_abba.py。主对话重新实读并生成 fresh root permit，沿原 guard 关闭板端 UI/业务写者、确认模型主机 idle、唯一原 runner、原显存驻留与日志策略后执行。guard 子函数及 fetch/选定静态提示/load 的 AST 与冻结 v1 相同；只重定向本地候选路径。仍使用 v1 完整响应校验、GPU准入、取消/预算；不创建 TTS 所有者，不播放，不读写生产记忆。
+
+命令：
+python -B root_direct_name_abba.py --execute --root-permit <主对话新实读的许可文件> --seed 8701
+
+正常名字检查接受“我叫雪妃”“我是雪妃”“我的名字是雪妃”、正式名及正常称呼；否定名字、他人/引文、假设、矛盾、未注册其他自称不自动通过。不确定时 UNKNOWN。这是该公开固定问题的保守判断，不是通用语义模型、身份授权或生产输入门槛。17项离线测试通过，包含正常变体、反例、完整四调用、错误格式、guard拒绝、正文/哈希不落盘与长度差异。
+
+四条台词只在脚本 RAM 内比较，保存 exact_speech_equal / same_speech_length / both_name_checks_pass 布尔值。不同措辞或长度即使名字都 PASS，也不能报成固定台词的纯加速。不会保存原文、原文哈希或 PCM。root执行结果只写本目录 benchmark_runs 下的新文件。
+
+已有证据的判断：canonical schema 那组 A32词元/6字/UNKNOWN，B35词元/8字/PASS，不支持恢复 schema 即可提速；UNKNOWN 未读原文也不追认 PASS。compact_schema 后3次约2.1–2.2秒、15词元、语义PASS是候选潜力，首次缓存0而后续233，不能与另一组32–35词元当等内容因果幅度。只先做本次直接名字对照，保留缓存/生成词元/解码计时及台词相同标志，不扩矩阵。实际自然度、首声与权限/记忆整合由主对话后续组合验收。
+
+direct_name_runner_review.patch 只供审阅新增派生脚本的差异，不要将它应用到冻结的 v1 文件。所有新文件精确 SHA 和旧冻结源完整性核对见 FREEZE_DIRECT.json。无实际性能收益声明，本对话未执行任何模型/设备操作。

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.514" timestamp="2026-10-31T08:34:06.831082-07:00" hostname="zhenghang"><testcase classname="tests.test_history_delete_m03" name="test_original_forget_transaction_failure_rolls_back_source_and_facts" time="0.413"><failure message="AssertionError: Unexpected synthetic confirmation outcome:{'status': 'selection_changed', 'source_events': 0}">h = &lt;public_m03_integration_fixture.Harness object at 0x000001CE890F3C50&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001CE8AD1F770&gt;
+
+    def test_original_forget_transaction_failure_rolls_back_source_and_facts(h,monkeypatch):
+        target=seed(h)
+        h.say('雪妃，删除今天的对话记录',route='history_delete_preview',contains='拟删除')
+        pending=next(iter(handler(h).pending.values())).copy()
+        receipt=h.bundle.store.begin_turn(h.scope,'public-failed-confirm','确认删除记录',generation=100)
+        original=h.bundle.store._invalidate
+        def fail_after_original_writes(*args,**kwargs):
+            original(*args,**kwargs)
+            raise RuntimeError('public_synthetic_transaction_failure')
+        monkeypatch.setattr(h.bundle.store,'_invalidate',fail_after_original_writes)
+        with pytest.raises(RuntimeError,match='public_synthetic_transaction_failure'):
+            result=handler(h)._confirm(h.scope,start=pending['start'],end=pending['end'],fingerprint=pending['fingerprint'],
+                operation_id='history-delete:public-failed-confirm',operation_turn_id='public-failed-confirm',
+                preview_turn_id=pending['preview_turn_id'])
+&gt;           raise AssertionError('Unexpected synthetic confirmation outcome:'+repr(result))
+E           AssertionError: Unexpected synthetic confirmation outcome:{'status': 'selection_changed', 'source_events': 0}
+
+tests\test_history_delete_m03.py:154: AssertionError</failure></testcase></testsuite></testsuites>

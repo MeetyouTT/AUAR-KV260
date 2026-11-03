@@ -1,0 +1,67 @@
+import re
+assert initial_unit['pid']==16314 and initial_unit['active_state']=='active' and initial_unit['sub_state']=='running'
+old_path=Path('/home/root/aura-face-follow-test-20261101-bebd3e7d-r2/camera-binding/face_gallery_readback.local.json')
+old_sha='a7402eb0f3e8d5391a95136d65759569be86eceeb75d830146a4b1d14cc81667'
+assert digest(old_path)==old_sha
+old=json.loads(raw(old_path));assert len(old['source_sha256'])==23
+assert all(binding['source_sha256'].get(path)==sha for path,sha in old['source_sha256'].items())
+identity_path=Path(binding['identity_config'])
+assert old['identity_config']==binding['identity_config']
+identity_sha=digest(identity_path);policy=json.loads(raw(identity_path))
+assert type(policy['threshold']) in (float,int) and type(policy['ambiguity_margin']) in (float,int)
+run_path=Path(binding['camera_config']);run=json.loads(raw(run_path))
+assert run['identity']=={'enabled':True,'config':str(identity_path)}
+native=run['native_execution'];manifest_path=Path(native['source_manifest'])
+assert digest(manifest_path)==native['source_manifest_sha256']=='5e08f7cf587d74334ef24104ea01f79701629b48f2004fb772ce3f8ea82afd0d'
+pins=json.loads(raw(manifest_path))['files'];native_root=manifest_path.parent/'aura'
+assert len(pins)==222
+snippets={}
+for name in ('board/identity/camera_faces.py','board/identity/store.py','board/identity/live.py'):
+    path=native_root/name;content=raw(path)
+    assert hashlib.sha256(content).hexdigest()==pins[name]
+    text=content.decode();lines=text.splitlines()
+    selected_lines=[]
+    if name.endswith('camera_faces.py'):
+        wanted=re.compile(r'def (config_for|make_identity)|IdentityStore|config\[.(?:threshold|ambiguity_margin|result_ttl_ms|interval_ms|model_id).\]|config_path|identity.*config')
+        selected_lines=[{'line':n,'source':line} for n,line in enumerate(lines,1) if wanted.search(line)]
+    elif name.endswith('store.py'):
+        wanted=re.compile(r'def __init__|self\.threshold|self\.ambiguity_margin|def match|scored\[0\]\[0\]|return IdentityMatch')
+        selected_lines=[{'line':n,'source':line} for n,line in enumerate(lines,1) if wanted.search(line)]
+    else:
+        tree=ast.parse(text)
+        klass=next(node for node in tree.body if isinstance(node,ast.ClassDef) and node.name=='IdentityService')
+        for node in klass.body:
+            if isinstance(node,ast.FunctionDef) and node.name in ('_fresh','view'):
+                for n in range(node.lineno,node.end_lineno+1):
+                    if node.name=='_fresh' or any(token in lines[n-1] for token in ('fresh','state','result[','source_mono_ms','source_frame_id','target=','return value')):
+                        selected_lines.append({'line':n,'source':lines[n-1]})
+        diagnostic_present=any(isinstance(node,ast.FunctionDef) and node.name=='recognition_diagnostics' for node in klass.body)
+    snippets[name]={'path':str(path),'sha256':pins[name],'selected_public_source_lines':selected_lines}
+config_pins={'old_23pin':old['source_sha256'].get(str(identity_path)),
+             'new_24pin':binding['source_sha256'].get(str(identity_path)),
+             'actual_file':identity_sha}
+cmd=(Path('/proc/1333')/'cmdline').read_bytes().split(b'\0')
+identity_health=request(8790,'/health').get('identity',{})
+assert isinstance(identity_health,dict)
+assert digest(STARTUP if 'STARTUP' in globals() else BUSINESS/'startup/config.json')==STARTUP_SHA
+assert digest(old_path)==old_sha and digest(SELECTED)==SELECTED_SHA and digest(identity_path)==identity_sha
+print(json.dumps({'schema':'aura-joint-trial-identity-policy-provenance-1',
+    'board_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'boot_id':BOOT,
+    'startup_sha256':STARTUP_SHA,'old_binding_path':str(old_path),'old_binding_sha256':old_sha,
+    'new_binding_path':str(SELECTED),'new_binding_sha256':SELECTED_SHA,
+    'identity_config_path':str(identity_path),'identity_config_sha256':identity_sha,
+    'direct_json_field_names':['threshold','ambiguity_margin','result_ttl_ms'],
+    'direct_numeric_values':{key:policy[key] for key in ('threshold','ambiguity_margin','result_ttl_ms')},
+    'configuration_source_pins':config_pins,
+    'same_config_sha_in_old_23_new_24_and_actual':len(set(config_pins.values()))==1 and None not in config_pins.values(),
+    'all_old_23_source_pins_unchanged_in_new_24':True,
+    'actual_camera_run_config_path':str(run_path),'actual_camera_run_config_sha256':digest(run_path),
+    'camera_command_contains_actual_run_config_path':str(run_path).encode() in cmd,
+    'actual_camera_run_config_selects_same_identity_path':True,
+    'native_source_manifest_sha256':native['source_manifest_sha256'],'source_read_path_evidence':snippets,
+    'native_live_has_recognition_diagnostics_method':diagnostic_present,
+    'health_has_recognition_diagnostics_object':isinstance(identity_health.get('recognition_diagnostics'),dict),
+    'model_chain_ready':identity_health.get('ready') is True and not identity_health.get('error'),
+    'board_mutations':False,'configuration_changed':False,'database_opened':False,
+    'registration_or_recording_or_playback_or_motion_requested':False,
+    'names_ids_templates_photos_similarity_scores_or_dialogue_exported':False},sort_keys=True))

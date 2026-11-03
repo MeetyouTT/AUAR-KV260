@@ -1,0 +1,56 @@
+{
+  "scope": "host fake filesystem/MMIO only; no UART, board or production access",
+  "source_base": "/home/ghmd/aura-pan-joint-20261023/candidate/native/vsrv_mmio.c",
+  "original_function_bodies_identical": {
+    "vsrv_read": true,
+    "vsrv_write": true,
+    "vsrv_open": true,
+    "vsrv_close": true
+  },
+  "original_protocol_header_identical": true,
+  "host_tests": {
+    "groups": 18,
+    "result": "passed",
+    "real_filesystem_mmio_accesses": 0,
+    "compiler_flags": "gcc -std=c11 -O2 -Wall -Wextra -Werror -pedantic"
+  },
+  "sanitizers": {
+    "address": true,
+    "undefined_behavior": true,
+    "groups": 18,
+    "result": "passed"
+  },
+  "cross_build": {
+    "compiler": "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-gcc",
+    "flags": "-std=c11 -O2 -Wall -Wextra -Werror -pedantic -fPIC -shared -Wl,-z,relro,-z,now",
+    "architecture": "AArch64 ELF64 shared object",
+    "undefined_libc_symbol_versions": [
+      "GLIBC_2.17"
+    ],
+    "fake_test_symbols_in_library": false
+  },
+  "batch_guards": {
+    "count_min": 1,
+    "count_max": 32,
+    "platform_checks_per_call": 2,
+    "identity_checks_per_call": 2,
+    "ack_attempts_max": 3,
+    "outputs_unchanged_on_failure": true,
+    "writes_added": 0
+  },
+  "normal_status_file_open_count": {
+    "original": 48,
+    "batch": 8,
+    "kind": "source-derived and host fake verified; not board latency"
+  },
+  "library": {
+    "path": "/home/ghmd/aura-pan-follow-shadow-20261024/mmio_batch_v1/libvsrv2_batch.so",
+    "bytes": 14504,
+    "sha256": "93e17fdfd312a565e7cd560b73c7958f34eda3f9024ebeb25327e95494009b76"
+  },
+  "not_verified": [
+    "board execution",
+    "board latency",
+    "mechanical smoothness"
+  ]
+}

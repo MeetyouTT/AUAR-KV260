@@ -1,0 +1,1 @@
+cmd_crypto/modules.order := {   cat crypto/asymmetric_keys/modules.order;   echo crypto/ctr.ko;   echo crypto/gcm.ko;   echo crypto/ccm.ko;   echo crypto/ghash-generic.ko; :; } | awk '!x[$$0]++' - > crypto/modules.order

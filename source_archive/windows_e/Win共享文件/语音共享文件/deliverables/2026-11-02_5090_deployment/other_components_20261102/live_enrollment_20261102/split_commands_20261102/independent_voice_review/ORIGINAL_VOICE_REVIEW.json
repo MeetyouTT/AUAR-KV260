@@ -1,0 +1,70 @@
+{
+  "status": "ORIGINAL_PUBLIC_CONTRACT_REVIEW_COMPLETE_SPLIT_CANDIDATE_NOT_YET_REVIEWED",
+  "public_local_sources": {
+    "tools/speaker_device.py": "da9c199527abdf9e247661d8798f4345cf0b79524f5c2a06394b5dc9c44107de",
+    "common/feature_intents.py": "1bb807ed88a84515942cca7e0dadab92dac99e2fd39b163b2e5d20a0194d8945",
+    "common/speaker_identity.py": "c3dead40ff6c67bae9c1f77c395ea9b33b2d28cd4479f72644ff210431563e65",
+    "board/identity/store.py": "cd9f535dccb789938eaa9d625b85b104482226943dd2536c09c8002ae03c3c1a",
+    "board/runtime/board_speaker_business.py": "6904267bd016a10a1508b26f372f0db54a71d78eed2eb15b043026218b1b7816",
+    "board/runtime/board_business.py": "b08209eca7979825e26845080bca5e1d64e065d3cabd1178df763a93540573f2",
+    "tools/binding_hub_runtime.py": "80b20963160242eb06fca69dd0fd5774251d1da626f5de718cefa276bd58b375"
+  },
+  "tests": {
+    "total": 24,
+    "passed": 24,
+    "failed": 0
+  },
+  "tests_sha256": "61964ee54c7aaebe91ffea8c610be4b459908053fed9642e12d946f99da4e917",
+  "xml_sha256": "60c5edf68a62efef9a867df9fcd11d9ef2c91a7b6a766018d576552eed9b5725",
+  "original_start_commands": [
+    "登记声纹",
+    "帮我登记声纹",
+    "注册我的声纹"
+  ],
+  "named_start_example": "帮我登记声纹，我叫某某",
+  "save_command": "确认保存声纹",
+  "original_sample_contract": {
+    "start_utterance_is_sample": false,
+    "count": 3,
+    "distinct_raw_pcm_sha256": true,
+    "sample_rate": 16000,
+    "channels": 1,
+    "bits": 16,
+    "min_recording_seconds": 3,
+    "max_recording_seconds": 20,
+    "minimum_vad_seconds": 2.5,
+    "vad": "webrtcvad mode2 30ms",
+    "window_seconds": 180,
+    "final_confirmation_required": true,
+    "voice_gallery_revision_cas": true,
+    "automatic_profile_access": false
+  },
+  "same_name_policy": "No automatic update: new UUID at save; close-existing score refuses new template; far voice can create another identity with identical display name.",
+  "split_requirements": [
+    "Intercept explicit modality before unified route or SpeakerDevice.turn",
+    "Face-only must not call voice turn, open speaker samples, or create unified link attempt",
+    "Voice-only should call original business.turn with audio owner and unmodified PCM, without visual/gallery gate",
+    "During active voice sampling, explicit face command must not become a voice sample",
+    "During active face sampling, explicit voice command must not silently cancel or supersede face",
+    "Arbitrary intended voice sample followups must continue original speaker session; combined public.active alone does not distinguish voice from unified",
+    "Same name across face/voice does not authorize automatic cross-modal link or grant",
+    "Keep c514/01b NoSpeech handling; preserve true service failure, explicit cancel, conversation switch and original expiry cleanup"
+  ],
+  "known_boundaries": [
+    "Recognized original speaker status questions never consume sample; unrecognized wording may count as ordinary voice sample during samples stage",
+    "Independent original voice save can work uncalibrated but must not claim verified current speaker",
+    "Business.turn after_original_voice_turn reconciles existing links and control evidence; it does not create new cross-modal links",
+    "Original reset clears standalone speaker sessions and save receipts; 30s audio-session silence and true error cleanup remain relevant"
+  ],
+  "board_actions": false,
+  "ssh_calls": false,
+  "real_private_store_reads": false,
+  "model_or_device_initialization": false,
+  "production_changes": false,
+  "split_candidate_changes": false,
+  "limitations": [
+    "Tests use the real original FSM with RAM synthetic store/encoder/VAD; no model accuracy or field quality claim",
+    "Local source SHA records are provenance; root must CAS against latest production pins before any deployment",
+    "This report does not approve the not-yet-present split entry candidate"
+  ]
+}

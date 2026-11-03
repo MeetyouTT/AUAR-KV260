@@ -1,0 +1,153 @@
+{
+  "checked_utc": "2026-10-26T16:03:20.489633+00:00",
+  "scope": "OFFLINE_PERFORMANCE_EVIDENCE_AND_RESEARCH_PLAN",
+  "new_board_test": false,
+  "new_model_inference": false,
+  "production_modified": false,
+  "archived_snapshot_scope": "2026-10-24 native r4, per-stage recent windows; not current live and not necessarily aligned to the 180s business window",
+  "selected_recent_metrics_ms": {
+    "yolo.native_and_decode": {
+      "recent_count": 256,
+      "recent_p50_ms": 13.155291,
+      "recent_p95_ms": 21.719437
+    },
+    "yolo.path": {
+      "recent_count": 256,
+      "recent_p50_ms": 20.51,
+      "recent_p95_ms": 33.17
+    },
+    "yolo.publish_source_age": {
+      "recent_count": 256,
+      "recent_p50_ms": 65.0,
+      "recent_p95_ms": 105.0
+    },
+    "yunet.native_lease": {
+      "recent_count": 256,
+      "recent_p50_ms": 2.201012,
+      "recent_p95_ms": 7.246133
+    },
+    "sface.native_lease": {
+      "recent_count": 64,
+      "recent_p50_ms": 7.95019,
+      "recent_p95_ms": 9.874649
+    }
+  },
+  "separate_business_window": {
+    "new_gaps": 0,
+    "new_optional_faults": {
+      "sface": 0,
+      "yunet": 0
+    },
+    "new_primary_overruns": 0,
+    "new_sface_completions": 46,
+    "seconds": 180.84116636399995,
+    "short_window_passed": true,
+    "sustained_three_model_load_verified": true,
+    "yolo_hz": 9.936896759352736
+  },
+  "metric_semantics": {
+    "schedule_wait": "Python primary-context entry duration; excludes later native execution-gate wait",
+    "native_lease": "host/native execution-gate occupancy, not pure accelerator time",
+    "quantiles": "nearest-rank recent p50/p95, max 256 per stage; no complete-run p99",
+    "source_timestamp": "application appsink dequeue, not exposure"
+  },
+  "checks": {
+    "metrics_enabled_in_saved_snapshot": true,
+    "saved_metrics_capacity_256": true,
+    "metrics_source_has_bounded_deque": true,
+    "source_exports_p50_p95_not_p99": true,
+    "schedule_wait_logged_before_native_call": true,
+    "primary_context_announces_and_yields": true,
+    "primary_context_has_no_execution_acquisition": true,
+    "admission_35ms_from_budget_and_guard": true,
+    "yolo_path_snapshot_matches_report": true,
+    "yolo_age_snapshot_matches_report": true,
+    "sface_snapshot_64_samples": true,
+    "short_window_sface_46": true,
+    "original_G_groups_still_planned": true,
+    "new_matrix_ten_unique_ids": true,
+    "all_new_experiments_are_plans": true,
+    "new_matrix_does_not_relabel_G_groups": true
+  },
+  "all_checks_passed": true,
+  "sources": [
+    {
+      "path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-24_native_critical_live/final-accepted-audit.json",
+      "bytes": 15268,
+      "sha256": "360489111ca70a810369943916d536c86670fe41c0d2b471d609062af05ce6e9"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-24_native_critical_live/source/aura/board/vision/pipeline_metrics.py",
+      "bytes": 17628,
+      "sha256": "f1606a7129d317a62f547c28a4a871ad2e83ee753a5678855bc6e096b3003b27"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-24_native_critical_live/source/aura/board/vision/ui_camera_service.py",
+      "bytes": 37792,
+      "sha256": "9d714b9bd00ea1da12088fa1e22100d7bdb689d0cac10332c3933b31e4f4d2df"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-24_native_critical_live/source/aura/board/vision/native_schedule.py",
+      "bytes": 8264,
+      "sha256": "dd42f2110cab499130706759bd2155dae0a161abb05d7b5563d319f29e956abf"
+    },
+    {
+      "path": "/home/ghmd/aura-native-critical-20261024/integrated/native-v2-560d824588eb8f8a/native/native_lease_v2.hpp",
+      "bytes": 23816,
+      "sha256": "a080fa4b53c020889434a2bab8a9d0cd7b0729f2ad96716104db598f3409a547"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/语音共享文件/aura/config/experiments.json",
+      "bytes": 1242,
+      "sha256": "a2ff6ba195ae7d5f73c68134c3477638333c703209d863f603e23c45e2b788c8"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/协作任务/2026-10-26_整机架构时序与硬件审查/README.md",
+      "bytes": 20991,
+      "sha256": "3210a6dc4be9ae0c74d6215e0f2c97e0c9396f489a6b485bb05b4aaf3ce37552"
+    },
+    {
+      "path": "/home/ghmd/Win共享文件/协作任务/2026-10-26_抽动延迟全链路复核_r15/README.md",
+      "bytes": 8519,
+      "sha256": "313049d3852a0dde6d4abe3e8e30da6962a71a9fec441f2afa39fab852f3f400"
+    }
+  ],
+  "research_sources": [
+    {
+      "url": "https://retis.santannapisa.it/~giorgio/paps/2026/Aromolo-RTAS26.pdf",
+      "scope": "DPU split/memory regulation framework; prior turn detailed sections, current recheck"
+    },
+    {
+      "url": "https://arxiv.org/html/1909.04548v1",
+      "scope": "PREMA architecture and scheduling overview; PDF request timed out, HTML accessible"
+    },
+    {
+      "url": "https://arxiv.org/abs/2501.10161",
+      "scope": "AXI-REALM v2 abstract and architecture claims"
+    },
+    {
+      "url": "https://github.com/pulp-platform/axi_rt",
+      "scope": "author RTL repository and README, not executed or integrated"
+    },
+    {
+      "url": "https://arxiv.org/abs/1903.05356",
+      "scope": "AoI/VoI motivation and application boundary"
+    },
+    {
+      "url": "https://doi.org/10.1109/TC.2022.3214113",
+      "scope": "H3M publication metadata/abstract, full author PDF timed out"
+    },
+    {
+      "url": "https://www.zzzdavid.tech/pdf/iap_poster_h3m.pdf",
+      "scope": "author poster for architecture/scheduling/mapping; no reproduced performance"
+    },
+    {
+      "url": "https://xilinx.github.io/kria-apps-docs/kv260/2021.1/build/html/docs/smartcamera/docs/hw_arch_accel.html",
+      "scope": "official alternative KV260 preprocessing architecture, not current bitstream"
+    },
+    {
+      "url": "https://xilinx.github.io/Vitis_Libraries/dsp/2021.1/index.html",
+      "scope": "PL FFT library capability, no claim of ported Mel pipeline"
+    }
+  ]
+}

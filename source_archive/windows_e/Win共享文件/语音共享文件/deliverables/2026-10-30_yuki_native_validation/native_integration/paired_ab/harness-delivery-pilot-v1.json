@@ -1,0 +1,34 @@
+{
+  "schema": "aura.paired_ab.harness_delivery.v1",
+  "status": "FROZEN_FOR_PARENT_PILOT",
+  "files": {
+    "paired_renderer_harness.py": "ac9408c346f59c98bf8afec9615de9347807c1e507f921dcd832c2730da0523b",
+    "old_renderer_harness.py": "4da7c98151f633a5920818481dda4baacf977a31390a1a76b18f7b7f17652f81",
+    "old_harness_support.py": "0695c9b3f8732e1b9aaf7174e27000c92e09a7c2bfd19564d80ea59ebdd93f64",
+    "OLD_HARNESS_README.txt": "c67996bd060e51424b9729cfbc26dafe962c85f3d7db3bfbaf304619aa8a9d43",
+    "BASELINE_ANALYSIS.txt": "89b27e72a6a324b07d97d814b46be68f65b94192ce02b0bcc63146e49c4cf793"
+  },
+  "validation": {
+    "python_ast": 3,
+    "scenario_constraints": 3,
+    "pcm_24k_mono_seconds": 12,
+    "tail240_quantile_formula": "PASS",
+    "renderer_or_network_execution_by_this_agent": false
+  },
+  "cli_new_addition": "--backend new --yuki-root /home/root/aura-yuki-validation-20261030/native_integration/paired_ab/yuki-root.json --candidate-manifest /home/root/aura-yuki-validation-20261030/native_integration/ui_candidate/manifest.json",
+  "outputs": [
+    "ready.json",
+    "measurement-ready.json",
+    "summary.json",
+    "samples.json",
+    "commands.json",
+    "old-summary.json or new-summary.json"
+  ],
+  "limitations": [
+    "A identity callback entry versus B EGL swap completion; neither scanout",
+    "Mode spans are sampled at200ms; transient A local mode is recorded rather than automatically invalidated",
+    "B genuine pipeline omits JPEG/FramePresenter/NativeVideo and publishes16Hz versus A max10Hz; total pipeline comparison cannot isolate renderer delta",
+    "B additional stats dict copy and scalar observer append included in candidate cost",
+    "Cold includes provenance hashing and does not clear OS page cache; Windows server already ready"
+  ]
+}

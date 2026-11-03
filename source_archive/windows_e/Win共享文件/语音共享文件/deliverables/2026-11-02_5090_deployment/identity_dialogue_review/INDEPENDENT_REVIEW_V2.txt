@@ -1,0 +1,28 @@
+独立审查结论：通过，无剩余代码审查阻断；可进入root原单GUI组件发布流程。
+
+审查对象是v2候选tools/unified_identity_binding.py：
+SHA256 85e415d00daa770d4d94ae58006a23ed9700067651a0448de80c99eb33ed1809
+原生产SHA256 f083fe8b618f4b09dce1587b3c32bf47f92510948e728615ce989ef31a1757cf
+现startup 3fd124287463650f48232cb387c78d01399bad7ddcda483db725163298de4591
+拟单pin startup 0f2a319abb15d26956857c945c247f6b5fac6421b42692fd173a48104f2e3c4f，独立RAM重建吻合，仍380组件。
+
+改动及先前缺口
+v1只用identity_query_requested，漏掉原hub另外支持的整句“听声音我是谁”“你认识我的声音吗”。独立实证两句仍各被作为一次声纹登记样本，sample1→sample2。该v1问题、SHA和测试结果在INDEPENDENT_REVIEW_V1.txt/INDEPENDENT_AUDIT.json完整保留；归档清单所列11个文件的SHA全部通过。
+v2直接复用现役tools.provisional_voice.query_reply(text,{'state':'UNKNOWN'})是否非None作为纯整句谓词，不复制或扩大语法。该函数及其依赖匹配production pins；传入UNKNOWN只是判断是否为现有查询，不含实际身份、不发设备请求、不分析声纹或写库。只有原hub后续_identity_query才使用当前face/voice proof和原resolver形成回复。
+
+本审查静态证明
+- 339项manifest baseline文件SHA通过。移除SAMPLING_VOICE中新加的ImportFrom和If两个AST节点后，候选完整AST与原生产文件完全相同；候选仅有这一个Python组件改变。
+- 当前分支使用与BindingHubRuntime._identity_query完全相同的query_reply入口。共同谓词fullmatch和原两句精确strip匹配保持；否定、引用、第三人称转述、嵌句、复句、问助手身份、附带保存/取消指令不被该入口捕获。
+- context校验、terminal状态处理、显式取消、AWAIT_CONFIRMATION和SAMPLING_FACE都先于新分支。它不重新登记、不代替姓名/最终确认、不签发提交回执，不把查询计作三段声纹样本，不取消或推进在途登记。普通样本及明确保存仍走原流程，后续样本仍须重新通过原绑定人脸校验。
+- 原BoardSpeakerBusiness._submit/_call没有修改：boot/generation/context、容量2、原单CPU worker、busy拒绝、原deadline、取消事件与is_current/采纳前后检查完整保留。新路由仍在该层之内，未开额外worker或绕过busy。
+- 原hub的同请求120秒缓存、内容fingerprint、重复请求复用与换文本/visual/gallery_digest拒绝未改。取消和过期终止路径的源文件SHA保持；新谓词不会先于原取消路径执行。
+- 原face/voice联合resolver未改，保留跨模态冲突拒绝、ACTIVE链接、模型/库修订/模板指纹/时效、声纹标定或三次独立采集稳定性。原face候选仍只声明“当前画面”，不把画外说话者当同一人。
+- router decision、binding API与resolver均保持personal_memory_allowed=false、identity_verified=false和single_speaker_verified=false。没有修改权限grant、个人记忆、原始身份模板、登记参数、模型或设备配置。
+
+独立验证
+- 本审查在自己的目录独立复跑候选15项公开合成router/hub测试，全部通过，无错误。
+- 额外直接复验v1两句反例，v2都得到EXPLICIT_IDENTITY_QUERY、speaker.turn调用0次、sample1保持sample1、registry.resolve调用1次、personal_memory_allowed=false。
+- 候选作者运行的22项原speaker/board-speaker合成回归，XML已只读核对22 tests、0 failures、0 errors、0 skipped；本审查没有重复运行这22项。
+- 独立测试与证据在INDEPENDENT_QUERY_TESTS_V2.log、INDEPENDENT_AUDIT_V2.json。没有改候选、baseline或生产，没有连接板卡、调用模型、录音/播放、打开私有库或执行实体操作。
+
+本结论是固定v2 SHA的本地代码审查。root发布时继续按原真实startup/唯一GUI owner/暂停闲置/单pin及回滚串行校验；本报告不把隔离测试冒作板端发布成功、真人身份识别或转轴就绪。

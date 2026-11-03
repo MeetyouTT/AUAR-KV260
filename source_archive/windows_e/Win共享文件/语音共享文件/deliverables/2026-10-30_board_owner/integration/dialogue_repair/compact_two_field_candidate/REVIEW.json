@@ -1,0 +1,48 @@
+{
+  "schema": "aura.next-dialogue-wait-readonly-review.v1",
+  "inputs": "Saved public evidence and pinned source only; no current device/model/private-store read",
+  "public_S01_evidence": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\paraformer_small_validation\\public_chain\\ACTUAL_CHAIN_1793454952793344600.json",
+    "sha256": "be2c8fc0e549aed2b0cee392383f235094a94dba78ebe75208d9656efa54b59f",
+    "asr_ms": 1518.1044729979476,
+    "llm_rpc_ms": 4332.1423289962695,
+    "llm_prompt_ms": 907.68,
+    "llm_decode_ms": 3212.2,
+    "llm_decode_tokens": 30,
+    "decode_tokens_per_second": 9.339393562044705,
+    "first_sentence_ram_tts_ms": 626.9135900001856,
+    "first_ram_from_asr_start_ms": 6492.791778000537,
+    "json_closed_to_done_ms": 125.0,
+    "scope": "Single public RAM chain with background change; no full business context, endpoint completion, Store/player, or acoustic first sound; ASR load separately excluded"
+  },
+  "already_enabled_not_new_optimizations": [
+    "Small3 ASR",
+    "think=False",
+    "keep_alive=-1",
+    "Ollama stream=True but wait for done",
+    "compact ABC",
+    "first completed sentence TTS delivery",
+    "scoped fresh per-packet Store guard"
+  ],
+  "not_recommended_as_unmeasured_shortcuts": [
+    "Lowering num_predict120 does not speed a reply that already ends at30 tokens; truncation loses complete JSON.",
+    "Early return at JSON closure would weaken done/truncation validation for only125ms in S01.",
+    "TTS sentence streaming is already active; two-sentence S01 first TTS ~627ms, not the entire1.233s.",
+    "Additional comma cuts or short fixed token caps can degrade prosody/content without addressing the3.212s decode component.",
+    "Prompt reordering has an old separate patch, no measured production gain; it affects recent/summary note order and needs memory-owner review. Do not copy its old full file.",
+    "GPU fit/offload has a prior reviewed memory budget; no new reduction of reserve or TTS16 is justified here.",
+    "No retry of failed DFlash/onlineASR/allocation/4thread plans in this work."
+  ],
+  "new_candidate": {
+    "mode": "dialogue_ab_v1",
+    "rationale": "Current c/avatar_action is constrained to the sole empty string. Make that invariant application-owned; retain model reply/emotion only.",
+    "benefit_measured": false,
+    "token_saving_measured": false,
+    "no_speed_promise": "JSON byte reduction is not tokenizer measurement. Root must measure decode tokens/wall and complete RAM first audio; no assumed perceptual improvement.",
+    "all_other_persona_rules": "Only translated output field names and exact c=empty output clause change; identity/visual/memory/safety prose, user/history text and selected persona bytes are not edited."
+  },
+  "cache_evidence": {
+    "source": "realtime_dialogue_research/first_wait_candidate/benchmark_runs/public_abba_a7f3d110e08a.json",
+    "caution": "Historical cached_count235 still had ~0.58-0.67s prefill; the30token decode remains dominant. Counts are metadata, not a source authorization. Public S01 cached_count0 cannot characterize all live conversations."
+  }
+}

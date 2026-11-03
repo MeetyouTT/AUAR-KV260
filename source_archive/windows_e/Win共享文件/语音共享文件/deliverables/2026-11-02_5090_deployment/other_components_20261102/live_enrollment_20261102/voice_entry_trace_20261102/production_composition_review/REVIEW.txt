@@ -1,0 +1,52 @@
+Frozen trace overlay: independent real-component synthetic regression
+
+Result: 11 passed, zero failures/errors/skips. No regression was observed in the
+11 original production-composition cases. Baseline REAL_COMPOSITION_V5.xml had
+the same 11 cases passing; TRACE_REAL_COMPOSITION.xml runs them with the two
+frozen diagnostic candidates and the same original real target components.
+
+Exact overlay:
+- board/runtime/audio/board_dialogue_jobs.py
+  43708b7fcbf72b11d7a37b01ae090c2cdb3e621b5f334151601206735a34a1fc
+  -> 580b2cf796275104cf15f2295afa2de29f82f32eabdd783a4b3aff858840a464
+- board/runtime/board_business.py
+  ea4f4565f558e5e2b6a347360f362e7810dd5792b2d2fe7af3a26389e26514d7
+  -> d034227118063dc4dbfb69f4bc735000980bd166e91262b4953f0db4b1baf5cc
+
+A fresh independent runtime copied all 349 public source/config files from
+split_commands_20261102/actual_release/runtime. SHA comparison confirms only
+those two files differ; the original 349-file source snapshot remains unchanged.
+The test explicitly checks updated d034 and 580b SHA values, plus unchanged
+intent8048, speaker690, Hub80b and SpeakerDevice da9; no SHA check was skipped.
+The only other harness changes are its independent runtime path and these pins.
+Every original test body/assertion remains unchanged.
+
+The original actual target chain includes Jobs, Controller, LocalIdentityReplies,
+Runtime.attach_speaker_business and Runtime._submit_speaker_analysis, actual
+BoardSpeakerBusiness.create/sole worker, original SpeakerDevice, BindingHub and
+progressive analyzer, and original fresh synthetic SQLite stores. It is not a
+FakeBusiness.turn test. All three existing named entry phrases enter samples;
+the start clip is not encoded or counted as a sample. Three subsequent distinct
+synthetic PCM clips reach original confirm; original final voice confirmation
+saves one synthetic voice and zero links. Bare entry then name followup remains
+working. Noncanonical ordinary-route and original explicit-reset counterexamples
+also retain their original behavior.
+
+Scope is unchanged from the baseline review. ASR/LLM/TTS, VAD and 192D encoder
+are synthetic doubles; time is controlled. Jobs.run_next executes its actual
+original body without a queue-consumer thread; the speaker's sole pool worker
+is real. Audio receipt ACK is synthetic, no playback or device is used.
+Complete BoardBusinessRuntime.__init__ is still outside scope because the public
+snapshot lacks the unrelated history_delete module; actual target classes are
+explicitly assembled in original order. No fake history module was supplied.
+
+No board, SSH, GET, model service, real PCM, real identity/timeline store, anchor,
+GUI/service lifecycle or axis operation was accessed. No original release or
+production source was changed. New synthetic stores are only under
+E:/aura_synthetic_trace_composition_20261102_01.
+
+This result supports local behavioral non-regression of the frozen observation
+overlay in these cases. It does not establish the live incident's root cause,
+real acoustic quality, latency, GUI/player integration, clock deployment outcome,
+or actual registration success. Grammar remains unchanged. The separate trace
+owner's privacy/allowlist tests are not repeated or claimed as this test suite.

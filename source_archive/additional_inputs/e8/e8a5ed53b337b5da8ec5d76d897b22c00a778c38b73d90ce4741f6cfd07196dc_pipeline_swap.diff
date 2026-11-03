@@ -1,0 +1,11 @@
+--- original/tools/board_camera_preview.py
++++ candidate/tools/board_camera_preview.py
+@@ -31,7 +31,7 @@
+         pipeline=gst.parse_launch('appsrc name=input is-live=true format=time block=false max-bytes=921600 '
+             'caps="video/x-raw,format=BGR,width=640,height=480,framerate=0/1,pixel-aspect-ratio=1/1" ! '
+             'queue max-size-buffers=1 max-size-bytes=0 max-size-time=0 leaky=downstream ! '
+-            'videoconvert ! videoscale ! video/x-raw,width='+str(width)+',height='+str(height)+
++            'videoscale ! videoconvert ! video/x-raw,width='+str(width)+',height='+str(height)+
+             ',pixel-aspect-ratio=1/1 ! identity name=count signal-handoffs=true ! '
+             'ximagesink name=screen sync=false handle-events=false force-aspect-ratio=true')
+         output={'pipeline':pipeline,'source':pipeline.get_by_name('input'),'reference':None,

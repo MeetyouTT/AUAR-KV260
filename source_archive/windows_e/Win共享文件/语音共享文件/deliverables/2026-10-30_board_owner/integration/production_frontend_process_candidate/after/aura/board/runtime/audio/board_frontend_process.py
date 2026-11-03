@@ -1,0 +1,388 @@
+"""One baseline frontend model in an owned subprocess; fixed local IPC only.
+
+Importing this module is inert. BoardProcessSpeechGate explicitly starts one
+child before any audio owner. No parent model, network listener, file audio or
+alternate inference/endpoint path is constructed.
+"""
+import argparse
+import math
+import os
+from pathlib import Path
+import socket
+import struct
+import subprocess
+import sys
+import threading
+import time
+
+
+MAGIC = b'AFG1'
+HEADER = struct.Struct('!4sBBHQQI')
+RESULT = struct.Struct('!HBBQQ8dIi')
+FRAME, RESET_DENOISER, RESET_VAD, STOP, HELLO = 1, 2, 3, 4, 5
+OK, INIT_FAILED, PROTOCOL_FAILED, FRAME_FAILED, COMPUTE_FAILED, PRIORITY_FAILED = range(6)
+FRAME_BYTES = 320 * 4
+MAX_PAYLOAD = FRAME_BYTES
+_KINDS = (FRAME, RESET_DENOISER, RESET_VAD, STOP, HELLO)
+_ERRORS = {INIT_FAILED:'frontend_worker_initialization_failed',
+           PROTOCOL_FAILED:'frontend_worker_protocol_failed',
+           FRAME_FAILED:'frontend_worker_invalid_frame',
+           COMPUTE_FAILED:'frontend_worker_compute_failed',
+           PRIORITY_FAILED:'frontend_worker_priority_rejected'}
+
+
+class FrontendProcessError(RuntimeError):
+    pass
+
+
+class _Cancelled(InterruptedError):
+    pass
+
+
+class _Channel:
+    """Stateful partial-message buffer; at most one fixed frame plus header."""
+    def __init__(self, stream, clock=time.monotonic):
+        self.stream, self.clock = stream, clock
+        self.buffer = bytearray()
+
+    def send(self, kind, generation, sequence, payload, deadline):
+        if len(payload) > MAX_PAYLOAD:
+            raise FrontendProcessError('frontend_worker_payload_limit')
+        packet = HEADER.pack(MAGIC, 1, kind, 0, generation, sequence, len(payload)) + payload
+        offset = 0
+        while offset < len(packet):
+            remaining = deadline - self.clock()
+            if remaining <= 0:
+                raise FrontendProcessError('frontend_worker_write_timeout')
+            self.stream.settimeout(min(.02, remaining))
+            try:
+                sent = self.stream.send(packet[offset:])
+            except socket.timeout:
+                continue
+            if sent <= 0:
+                raise FrontendProcessError('frontend_worker_disconnected')
+            offset += sent
+
+    def receive(self, deadline, cancelled=lambda:False, poll_interval=.02):
+        while True:
+            if cancelled():
+                raise _Cancelled('frontend_worker_capture_cancelled')
+            needed = HEADER.size
+            if len(self.buffer) >= HEADER.size:
+                magic, version, kind, reserved, generation, sequence, size = HEADER.unpack_from(self.buffer)
+                if (magic != MAGIC or version != 1 or reserved or size > MAX_PAYLOAD
+                        or kind not in _KINDS + tuple(k | 128 for k in _KINDS)):
+                    raise FrontendProcessError('frontend_worker_protocol_failed')
+                needed += size
+                if len(self.buffer) >= needed:
+                    payload = bytes(self.buffer[HEADER.size:needed])
+                    del self.buffer[:needed]
+                    return kind, generation, sequence, payload
+            remaining = poll_interval if deadline is None else deadline - self.clock()
+            if remaining <= 0:
+                raise FrontendProcessError('frontend_worker_read_timeout')
+            self.stream.settimeout(min(poll_interval, remaining))
+            try:
+                block = self.stream.recv(needed - len(self.buffer))
+            except socket.timeout:
+                continue
+            if not block:
+                raise FrontendProcessError('frontend_worker_disconnected')
+            self.buffer.extend(block)
+
+
+def _result(code=OK, decision=False, gate=None, timing=None, nice=-10):
+    timing = timing or [0.] * 6
+    return RESULT.pack(code, bool(decision), 0,
+        getattr(gate, 'frames', 0), getattr(gate, 'samples', 0),
+        float(getattr(gate, 'last_ms', 0.) or 0.), float(getattr(gate, 'max_ms', 0.)),
+        *timing, os.getpid(), nice)
+
+
+def serve(stream, gate_factory, *, apply_priority=None, clock=time.monotonic,
+          thread_clock=time.thread_time, priority_reader=None):
+    """Single-request child loop; tests inject only a fake gate/priority setter."""
+    channel = _Channel(stream, clock)
+    gate = None
+    def result(*args, **kwargs):
+        kwargs['nice'] = priority_reader() if priority_reader is not None else -10
+        return _result(*args, **kwargs)
+    try:
+        try:
+            if apply_priority is not None:
+                apply_priority()
+        except Exception:
+            channel.send(HELLO | 128, 0, 0, result(PRIORITY_FAILED), clock() + 1.)
+            return
+        try:
+            gate = gate_factory()
+        except Exception:
+            channel.send(HELLO | 128, 0, 0, result(INIT_FAILED), clock() + 1.)
+            return
+        channel.send(HELLO | 128, 0, 0, result(gate=gate), clock() + 1.)
+        generation = 0
+        last_sequence = 0
+        reset_pending = False
+        timing = [0.] * 6  # wall last/max/total ms, thread CPU last/max/total ms
+        while True:
+            kind, current, sequence, payload = channel.receive(None, poll_interval=.5)
+            if sequence <= last_sequence or kind & 128:
+                raise FrontendProcessError('frontend_worker_protocol_failed')
+            last_sequence = sequence
+            if kind == STOP and not payload:
+                channel.send(STOP | 128, current, sequence, result(gate=gate, timing=timing), clock() + 1.)
+                return
+            if kind == RESET_DENOISER and not payload and current == generation + 1:
+                gate.denoiser.reset()
+                generation = current
+                reset_pending = True
+                gate.closed = True
+            elif kind == RESET_VAD and not payload and current == generation and reset_pending:
+                gate.vad.reset()
+                gate.closed = False
+                gate.error = ''
+                gate.frames = gate.samples = 0
+                gate.last_ms = None
+                gate.max_ms = 0.
+                reset_pending = False
+                timing = [0.] * 6
+            elif kind == FRAME and current == generation and not reset_pending and not gate.closed:
+                if len(payload) != FRAME_BYTES:
+                    channel.send(FRAME | 128, current, sequence, result(FRAME_FAILED), clock() + 1.)
+                    return
+                import numpy as np
+                frame = np.frombuffer(payload, dtype='<f4')
+                start, cpu = clock(), thread_clock()
+                try:
+                    decision = gate(frame)
+                    if type(decision) is not bool:
+                        raise ValueError('Nonboolean classifier result')
+                except Exception:
+                    channel.send(FRAME | 128, current, sequence, result(COMPUTE_FAILED), clock() + 1.)
+                    return
+                wall_ms, cpu_ms = (clock() - start) * 1000., (thread_clock() - cpu) * 1000.
+                timing = [wall_ms, max(timing[1], wall_ms), timing[2] + wall_ms,
+                          cpu_ms, max(timing[4], cpu_ms), timing[5] + cpu_ms]
+                del frame, payload
+                channel.send(FRAME | 128, current, sequence,
+                             result(decision=decision, gate=gate, timing=timing), clock() + 1.)
+                continue
+            else:
+                channel.send(kind | 128, current, sequence, result(PROTOCOL_FAILED), clock() + 1.)
+                return
+            channel.send(kind | 128, current, sequence, result(gate=gate, timing=timing), clock() + 1.)
+    except (OSError, FrontendProcessError):
+        pass
+    finally:
+        if gate is not None:
+            gate.close()
+        stream.close()
+
+
+class _Reset:
+    def __init__(self, owner, kind):
+        self.owner, self.kind = owner, kind
+    def reset(self):
+        self.owner._reset(self.kind)
+
+
+class BoardProcessSpeechGate:
+    """BoardFrontendPool-compatible proxy. close() cancels; shutdown() exits."""
+    def __init__(self, directory, *, num_threads=1, process_factory=subprocess.Popen,
+                 clock=time.monotonic, startup_timeout=60., frame_timeout=.5):
+        if type(num_threads) is not int or num_threads != 1:
+            raise ValueError('The baseline frontend worker requires one model thread')
+        if not 0 < startup_timeout <= 90 or not .05 <= frame_timeout <= 2:
+            raise ValueError('Bounded frontend IPC timeouts required')
+        import numpy as np
+        self.np, self.clock, self.frame_timeout = np, clock, frame_timeout
+        self.lock, self._io_lock = threading.Lock(), threading.Lock()
+        self.denoiser, self.vad = _Reset(self, RESET_DENOISER), _Reset(self, RESET_VAD)
+        self.frames = self.samples = 0
+        self.last_ms = None
+        self.max_ms = 0.
+        self.closed = True
+        self.error = ''
+        self._generation = self._sequence = 0
+        self._abandoned = set()
+        self._shutdown = False
+        self._metrics = {}
+        self._rpc_last_ms = self._rpc_max_ms = self._rpc_total_ms = 0.
+        self.process = None
+        parent, child = socket.socketpair()
+        self._channel = _Channel(parent, clock)
+        entry = Path(__file__).resolve()
+        env = dict(os.environ)
+        aura = str(entry.parents[3])
+        env['PYTHONPATH'] = aura + (os.pathsep + env['PYTHONPATH'] if env.get('PYTHONPATH') else '')
+        for key in ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS'):
+            env[key] = '1'
+        env.update(PYTHONNOUSERSITE='1', PYTHONDONTWRITEBYTECODE='1')
+        try:
+            self.process = process_factory([sys.executable, '-B', str(entry), '--worker-fd', str(child.fileno()),
+                '--frontend-directory', str(directory), '--parent-pid', str(os.getpid())],
+                stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                pass_fds=(child.fileno(),), close_fds=True, env=env)
+            child.close()
+            kind, generation, sequence, payload = self._channel.receive(clock() + startup_timeout)
+            if (kind, generation, sequence) != (HELLO | 128, 0, 0):
+                raise FrontendProcessError('frontend_worker_protocol_failed')
+            self._accept(payload)
+        except BaseException:
+            child.close()
+            self.shutdown(timeout=1.)
+            raise
+
+    def _accept(self, payload):
+        if len(payload) != RESULT.size:
+            raise FrontendProcessError('frontend_worker_protocol_failed')
+        code, decision, reserved, frames, samples, *values = RESULT.unpack(payload)
+        numbers, pid, nice = values[:-2], values[-2], values[-1]
+        if code:
+            raise FrontendProcessError(_ERRORS.get(code, 'frontend_worker_protocol_failed'))
+        if nice != -10:
+            raise FrontendProcessError('frontend_worker_priority_rejected')
+        if (decision not in (0, 1) or reserved or pid != self.process.pid
+                or any(not math.isfinite(x) or x < 0 for x in numbers)
+                or not 0 <= frames * 320 - samples <= 1024):
+            raise FrontendProcessError('frontend_worker_protocol_failed')
+        self.frames, self.samples = frames, samples
+        self.last_ms, self.max_ms = numbers[:2]
+        self._metrics = dict(zip(('worker_frame_wall_last_ms', 'worker_frame_wall_max_ms',
+            'worker_frame_wall_total_ms', 'worker_frame_cpu_last_ms',
+            'worker_frame_cpu_max_ms', 'worker_frame_cpu_total_ms'), numbers[2:]))
+        return bool(decision)
+
+    def _rpc(self, kind, *, payload=b'', generation=None, cancellable=False, timeout=None):
+        generation = self._generation if generation is None else generation
+        deadline = self.clock() + (self.frame_timeout if timeout is None else timeout)
+        with self._io_lock:
+            if self._shutdown or self.process is None or self.process.poll() is not None:
+                raise FrontendProcessError('frontend_worker_not_alive')
+            if self.error and kind != STOP:
+                raise FrontendProcessError(self.error)
+            cancelled = lambda: cancellable and (self.closed or self._generation != generation)
+            if cancelled():
+                raise _Cancelled('frontend_worker_capture_cancelled')
+            self._sequence += 1
+            sequence = self._sequence
+            started = self.clock()
+            awaiting = False
+            try:
+                self._channel.send(kind, generation, sequence, payload, deadline)
+                awaiting = True
+                while True:
+                    response, current, received, data = self._channel.receive(deadline, cancelled)
+                    key = (response, current, received)
+                    if key in self._abandoned:
+                        self._abandoned.remove(key)  # Discard cancelled generation's complete result.
+                        continue
+                    if key != (kind | 128, generation, sequence):
+                        raise FrontendProcessError('frontend_worker_response_owner_mismatch')
+                    awaiting = False
+                    if cancelled():
+                        raise _Cancelled('frontend_worker_capture_cancelled')
+                    decision = self._accept(data)
+                    elapsed = (self.clock() - started) * 1000.
+                    self._rpc_last_ms, self._rpc_max_ms = elapsed, max(self._rpc_max_ms, elapsed)
+                    self._rpc_total_ms += elapsed
+                    return decision
+            except _Cancelled:
+                if awaiting:
+                    self._abandoned.add((kind | 128, generation, sequence))
+                if len(self._abandoned) > 2:
+                    self.error = 'frontend_worker_cancelled_response_limit'
+                raise
+            except (OSError, FrontendProcessError) as exc:
+                self.error = str(exc) if isinstance(exc, FrontendProcessError) else 'frontend_worker_ipc_failed'
+                self.closed = True
+                raise FrontendProcessError(self.error) from None
+
+    def _reset(self, kind):
+        if kind == RESET_DENOISER:
+            self._generation += 1
+        self._rpc(kind)
+        if kind == RESET_VAD:
+            self._rpc_last_ms = self._rpc_max_ms = self._rpc_total_ms = 0.
+
+    def __call__(self, frame):
+        if self.closed or self.error:
+            raise FrontendProcessError(self.error or 'frontend_worker_capture_closed')
+        values = self.np.asarray(frame, dtype=self.np.float32)
+        if values.shape != (320,) or not self.np.isfinite(values).all() or self.np.max(self.np.abs(values)) > 1:
+            raise ValueError('Board frontend requires normalized 20 ms/16 kHz mono frames')
+        if not self.lock.acquire(blocking=False):
+            raise FrontendProcessError('frontend_worker_busy')
+        try:
+            return self._rpc(FRAME, payload=values.astype('<f4', copy=False).tobytes(), cancellable=True)
+        finally:
+            self.lock.release()
+
+    def close(self):
+        self.closed = True  # Atomic cancellation flag; child/model stays available for reset.
+
+    def public(self):
+        return dict(enabled=True, backend='gtcrn-numpy-fft-silero-v5-board-process',
+            frames=self.frames, processed_samples=self.samples, closed=self.closed, error=self.error,
+            last_roundtrip_ms=self.last_ms, max_roundtrip_ms=self.max_ms,
+            worker_process_alive=bool(self.process and self.process.poll() is None),
+            worker_pid=self.process.pid if self.process else None, worker_nice=-10,
+            worker_generation=self._generation, ipc_rpc_last_ms=self._rpc_last_ms,
+            ipc_rpc_max_ms=self._rpc_max_ms, ipc_rpc_total_ms=self._rpc_total_ms, **self._metrics)
+
+    def shutdown(self, timeout=2.):
+        """Owned child only: graceful IPC, then bounded TERM; never force-kill."""
+        self.close()
+        if self._shutdown:
+            return self.process is None or self.process.poll() is not None
+        process = self.process
+        if process is not None and process.poll() is None:
+            if self._io_lock.acquire(timeout=min(.25, timeout)):
+                self._io_lock.release()
+                try:
+                    self._rpc(STOP, timeout=min(.5, timeout))
+                except (OSError, FrontendProcessError):
+                    pass
+            try:
+                process.wait(timeout=min(.5, timeout))
+            except subprocess.TimeoutExpired:
+                try:
+                    process.terminate()
+                except ProcessLookupError:
+                    pass
+                try:
+                    process.wait(timeout=min(.75, timeout))
+                except subprocess.TimeoutExpired:
+                    return False
+        self._shutdown = True
+        self._channel.stream.close()
+        return True
+
+
+def _worker_main():
+    parser = argparse.ArgumentParser(description='Owned baseline frontend socketpair child')
+    parser.add_argument('--worker-fd', required=True, type=int)
+    parser.add_argument('--frontend-directory', required=True)
+    parser.add_argument('--parent-pid', required=True, type=int)
+    args = parser.parse_args()
+    if args.worker_fd < 3 or args.parent_pid != os.getppid():
+        raise SystemExit(2)
+    stream = socket.socket(fileno=args.worker_fd)
+    if stream.family != socket.AF_UNIX or stream.getsockopt(socket.SOL_SOCKET, socket.SO_TYPE) != socket.SOCK_STREAM:
+        stream.close()
+        raise SystemExit(2)
+    def priority():
+        os.setpriority(os.PRIO_PROCESS, 0, -10)
+        if os.getpriority(os.PRIO_PROCESS, 0) != -10:
+            raise RuntimeError('Worker priority rejected')
+    def create():
+        from board.runtime.audio.board_gtcrn_fft import BoardFftSpeechGate
+        if os.getppid() != args.parent_pid:
+            raise RuntimeError('Frontend owner disappeared')
+        return BoardFftSpeechGate(args.frontend_directory, num_threads=1)
+    serve(stream, create, apply_priority=priority,
+          priority_reader=lambda:os.getpriority(os.PRIO_PROCESS, 0))
+
+
+if __name__ == '__main__':
+    _worker_main()

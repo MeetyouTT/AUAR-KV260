@@ -1,0 +1,1 @@
+cmd_security/built-in.a := echo >/dev/null; rm -f security/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST security/built-in.a security/keys/built-in.a security/commoncap.o security/min_addr.o security/inode.o security/device_cgroup.o

@@ -1,0 +1,37 @@
+最终六源公开ARM包：原67例 + memory原25例 = 92例；运行文件严格19件。
+
+按STAGING_MANIFEST.json.files或UPLOAD_LIST.json复制，保留relative_path。
+不要上传343份public_runtime_v19本地快照、环境、模型、真实库或生成音频。
+原4例必须保留tree/a/b/c/d/review_m03_win_inference/test_delete_boundaries.py层级。
+after/恰好6源，不带pycache。旧stage_v19及旧候选/测试全部保持原字节。
+
+R=/home/root/aura-board-business-20261030/production-5259eab11e42af13
+S=新的绝对公开stage路径，例如/home/root/aura-public-feature-validation-20261031/joint-final-06e5-92
+OUT=绝对且不存在的新JSON路径，ROOT_SLOT=root为这个测试进程指定的归属标签。
+root先现场核验freshowner/空闲，尊重已保存false/PAUSED/micfalse。
+worker不切换UI/监听，不开启物理采集、播放、真实模型或私库。
+
+正式命令（替换R/S/OUT/ROOT_SLOT；不要在Linux使用--local-replay）：
+python3 -B S/arm_public_worker.py --runtime-root R/runtime/aura --startup-config R/startup/config.json --candidate-root S/after --mapping S/source_mapping.v19.json --candidate-manifest S/SOURCE_MANIFEST.json --candidate-manifest-sha256 7ad9bb44686f86068ff61e89865eb0333785287ca1949bbdcc4cfe138bd1ef4f --original-review S/tree/a/b/c/d/review_m03_win_inference/test_delete_boundaries.py --independent-tests S/test_independent_boundaries.py --public-worker S/public_worker.py --applied-spec S/applied_spec.v19.json --identity-tests S/identity_tests.py --identity-independent S/identity_independent.py --speaker-fixtures S/speaker_fixtures.py --face-fixtures S/face_fixtures.py --identity-adapter S/identity_stdlib_cases.py --memory-regression S/memory_public_regressions.py --root-coordinated-slot ROOT_SLOT --output OUT
+
+ROOT_ARM_CLI.json给出等价结构化argv，便于root调用subprocess并保留原始stdout/stderr。
+必须等待实际进程退出，记录exitcode及最后JSON；RUNNING/CHECKED_ONLY均不是通过。
+通过要求exit0、status=PASS、tests=92、failures/errors=0、temporary_stores_removed=true、
+new_threads_remaining=0、imported_optional_packages=[]，并核对六源实际加载SHA。
+
+固定v19基线：startup de7772b898378d2263b0809d18c095a60585a672690371d2f072b2e04c2f574f；
+mapping ef8db220fde3b70a62ff1ff7cf2e9471a199a6d43b9234a18f8701eff58448f7；
+spec49ffbc82a4b9543d92234f055fce8af055de29764ca6f688ae0a36fe7a35a904。
+发布前当前379组件逐项校验，应用才可import；六源覆盖后拟380组件，只有history_delete新增。
+common.board_memory和另外5源同样校验before/after及实际加载模块，不混用原c27d模块。
+
+所有Store都在独立进程自建0700 /dev/shm临时根内，data_origin=synthetic。
+原M03 8例、身份47和独审12的输入/hash/断言保持；memory25的类/方法/断言AST原样编译。
+memory模块9918d4ac...内嵌原测试c9b316b4...和三份已核before源，仅作明确baseline对照alias。
+AFTER直接使用当前六源runtime，未向应用package path插入旧实现或未映射依赖。
+缺common.timeline_conversations的两个旧测试模块未运行，不能声称覆盖。
+这些是标准库适配后的92例，不是ARM直接执行pytest184；subTest不另算用例数。
+
+本地LOCAL_REPLAY_01.json已92/92 PASS，临时库清除、线程0、无pytest/numpy/onnxruntime导入。
+本地只校验343份公开源/配置，不代替ARM当前379实读、真人识别、物理听音或性能验收。
+身份独审9911...、memory独审c2ac...通过；root负责最终实机执行和发布，本窗口未上板。

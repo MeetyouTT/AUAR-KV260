@@ -1,0 +1,76 @@
+{
+  "utc": "2026-10-03T02:08:28.599229+00:00",
+  "commands": [
+    {
+      "argv": [
+        "lsusb"
+      ],
+      "returncode": 0,
+      "output": "Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub\nBus 003 Device 005: ID 0403:6011 Future Technology Devices International, Ltd FT4232H Quad HS USB-UART/FIFO IC\nBus 003 Device 002: ID 27c6:5f91 Shenzhen Goodix Technology Co.,Ltd. Goodix FingerPrint Device\nBus 003 Device 003: ID 8087:0033 Intel Corp. \nBus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub\nBus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub\nBus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub\n"
+    },
+    {
+      "argv": [
+        "ip",
+        "-4",
+        "-j",
+        "address"
+      ],
+      "returncode": 0,
+      "output": "[{\"ifindex\":1,\"ifname\":\"lo\",\"flags\":[\"LOOPBACK\",\"UP\",\"LOWER_UP\"],\"mtu\":65536,\"qdisc\":\"noqueue\",\"operstate\":\"UNKNOWN\",\"group\":\"default\",\"txqlen\":1000,\"addr_info\":[{\"family\":\"inet\",\"local\":\"127.0.0.1\",\"prefixlen\":8,\"scope\":\"host\",\"label\":\"lo\",\"valid_life_time\":4294967295,\"preferred_life_time\":4294967295}]},{\"ifindex\":2,\"ifname\":\"wlp0s20f3\",\"flags\":[\"BROADCAST\",\"MULTICAST\",\"UP\",\"LOWER_UP\"],\"mtu\":1500,\"qdisc\":\"noqueue\",\"operstate\":\"UP\",\"group\":\"default\",\"txqlen\":1000,\"addr_info\":[{\"family\":\"inet\",\"local\":\"192.168.1.102\",\"prefixlen\":24,\"broadcast\":\"192.168.1.255\",\"scope\":\"global\",\"dynamic\":true,\"noprefixroute\":true,\"label\":\"wlp0s20f3\",\"valid_life_time\":6096,\"preferred_life_time\":6096}]},{\"ifindex\":3,\"ifname\":\"docker0\",\"flags\":[\"NO-CARRIER\",\"BROADCAST\",\"MULTICAST\",\"UP\"],\"mtu\":1500,\"qdisc\":\"noqueue\",\"operstate\":\"DOWN\",\"group\":\"default\",\"addr_info\":[{\"family\":\"inet\",\"local\":\"172.17.0.1\",\"prefixlen\":16,\"broadcast\":\"172.17.255.255\",\"scope\":\"global\",\"label\":\"docker0\",\"valid_life_time\":4294967295,\"preferred_life_time\":4294967295}]}]\n"
+    },
+    {
+      "argv": [
+        "ip",
+        "-4",
+        "route"
+      ],
+      "returncode": 0,
+      "output": "default via 192.168.1.1 dev wlp0s20f3 proto dhcp metric 600 \n169.254.0.0/16 dev wlp0s20f3 scope link metric 1000 \n172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown \n192.168.1.0/24 dev wlp0s20f3 proto kernel scope link src 192.168.1.102 metric 600 \n"
+    },
+    {
+      "argv": [
+        "ip",
+        "-4",
+        "route",
+        "get",
+        "192.168.50.2"
+      ],
+      "returncode": 0,
+      "output": "192.168.50.2 via 192.168.1.1 dev wlp0s20f3 src 192.168.1.102 uid 1000 \n    cache \n"
+    }
+  ],
+  "serial_ports": [
+    {
+      "path": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if00-port0",
+      "target": "/dev/ttyUSB0"
+    },
+    {
+      "path": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+      "target": "/dev/ttyUSB1"
+    },
+    {
+      "path": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if02-port0",
+      "target": "/dev/ttyUSB2"
+    },
+    {
+      "path": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if03-port0",
+      "target": "/dev/ttyUSB3"
+    },
+    {
+      "path": "/dev/ttyUSB0",
+      "target": "/dev/ttyUSB0"
+    },
+    {
+      "path": "/dev/ttyUSB1",
+      "target": "/dev/ttyUSB1"
+    },
+    {
+      "path": "/dev/ttyUSB2",
+      "target": "/dev/ttyUSB2"
+    },
+    {
+      "path": "/dev/ttyUSB3",
+      "target": "/dev/ttyUSB3"
+    }
+  ]
+}

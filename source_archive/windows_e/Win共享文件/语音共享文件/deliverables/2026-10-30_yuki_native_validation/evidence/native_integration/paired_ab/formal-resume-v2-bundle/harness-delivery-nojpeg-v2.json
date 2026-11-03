@@ -1,0 +1,101 @@
+{
+  "schema": "aura.paired_ab.harness_delivery.v1",
+  "status": "FROZEN_NOJPEG_V2_FOR_PARENT_12CASE_SUITE",
+  "files": {
+    "paired_renderer_harness.py": "ac9408c346f59c98bf8afec9615de9347807c1e507f921dcd832c2730da0523b",
+    "old_renderer_harness.py": "682baad65e1770dbbbc2aec6e7a0e6b225f4ad545b48946cd97d2ecbcd337466",
+    "old_harness_support.py": "d898bd92ff621b304bbffa8ba73e282d19d2a3c15b5b833e79d01c0798a37259",
+    "OLD_HARNESS_README.txt": "b66cb685a5c05f1a0968c5598b0c82b679fde2a5f3f1e835bb4b5840eb237797",
+    "BASELINE_ANALYSIS.txt": "89b27e72a6a324b07d97d814b46be68f65b94192ce02b0bcc63146e49c4cf793",
+    "nojpeg-static-check.json": "37a5e837bf477cf303c8fb10c21f26e802cc77502fa0b9385048a12bb83f6207"
+  },
+  "validation": {
+    "python_ast": 3,
+    "scenario_constraints": 3,
+    "pcm_24k_mono_seconds": 12,
+    "tail240_quantile_formula": "PASS",
+    "renderer_or_network_execution_by_this_agent": false
+  },
+  "cli_new_addition": "--backend new --yuki-root /home/root/aura-yuki-validation-20261030/native_integration/paired_ab/yuki-root.json --candidate-manifest /home/root/aura-yuki-validation-20261030/native_integration/ui_candidate/manifest.json",
+  "outputs": [
+    "ready.json",
+    "measurement-ready.json",
+    "summary.json",
+    "samples.json",
+    "commands.json",
+    "old-summary.json / old-nojpeg-summary.json / new-summary.json"
+  ],
+  "limitations": [
+    "A identity callback entry versus B EGL swap completion; neither scanout",
+    "Mode spans are sampled at200ms; transient A local mode is recorded rather than automatically invalidated",
+    "B genuine pipeline omits JPEG/FramePresenter/NativeVideo and publishes16Hz versus A max10Hz; total pipeline comparison cannot isolate renderer delta",
+    "B additional stats dict copy and scalar observer append included in candidate cost",
+    "Cold includes provenance hashing and does not clear OS page cache; Windows server already ready"
+  ],
+  "revision": "nojpeg-control-v2",
+  "predecessor_delivery": "harness-delivery-pilot-v1.json",
+  "predecessor_source_hashes": {
+    "paired_renderer_harness.py": "ac9408c346f59c98bf8afec9615de9347807c1e507f921dcd832c2730da0523b",
+    "old_renderer_harness.py": "4da7c98151f633a5920818481dda4baacf977a31390a1a76b18f7b7f17652f81",
+    "old_harness_support.py": "0695c9b3f8732e1b9aaf7174e27000c92e09a7c2bfd19564d80ea59ebdd93f64",
+    "OLD_HARNESS_README.txt": "c67996bd060e51424b9729cfbc26dafe962c85f3d7db3bfbaf304619aa8a9d43",
+    "BASELINE_ANALYSIS.txt": "89b27e72a6a324b07d97d814b46be68f65b94192ce02b0bcc63146e49c4cf793"
+  },
+  "diagnostic_control": {
+    "backend_cli": "old_nojpeg",
+    "summary_backend": "fresh-r3-remote16-nojpeg-control",
+    "purpose": "separate JPEG preview subsystem impact from the total old-versus-new pipeline comparison",
+    "source_file_modified": false,
+    "scope": "module symbol replacement in isolated diagnostic process only",
+    "original_worker_sha256": "3eff9cbda4705e18c799b0d0ace3a944f29dcf118ae8a8dfa0a24bb458d2e25e",
+    "patch": "worker_module.PreviewEncoder = old_harness_support.NoPreviewEncoder before AvatarRenderWorker construction",
+    "patch_linenumber": 127,
+    "constructor_linenumber": 134,
+    "replacement_methods": {
+      "__bool__": "True",
+      "offer": "no-op",
+      "offer_rgb": "no-op",
+      "read": "b''",
+      "close": "no-op"
+    },
+    "preserved": [
+      "NativePixels threads3",
+      "eight-state prewarm",
+      "remote16",
+      "FramePresenter",
+      "NativeVideo/Gst",
+      "PerformanceRecorder",
+      "old public max10Hz",
+      "same PCM/controller/events/window"
+    ],
+    "changed": [
+      "JPEG encoder thread/lock/queue and compression omitted",
+      "worker JPEG bytes are empty"
+    ],
+    "not_a_production_alternative": true
+  },
+  "attribution": {
+    "A-B": "total replacement pipeline delta",
+    "A-C": "old JPEG subsystem marginal cost estimate including encoder thread/queue and scheduling interactions; not an exact additive constant",
+    "C-B": "JPEG absent on both sides; remaining delta still combines transport, presenter/Gst versus EGL, public snapshot10/16Hz, initialization and rendering; not pure renderer attribution"
+  },
+  "requested_schedule": {
+    "main": "A B B A A B B A",
+    "jpeg_control": "C B B C",
+    "measurement_seconds_per_case": 60,
+    "execution_owner": "root after explicit runtime-window return"
+  },
+  "added_local_validation": {
+    "status": "PASS_NO_RENDER_OR_NETWORK",
+    "python_ast_files": 3,
+    "noop_truthy": true,
+    "noop_read_empty_bytes": true,
+    "actual_fresh_worker_sha256": "3eff9cbda4705e18c799b0d0ace3a944f29dcf118ae8a8dfa0a24bb458d2e25e",
+    "actual_worker_branches": [
+      "remote_rgb",
+      "local_fallback"
+    ],
+    "synchronous_PIL_JPEG_calls": 0,
+    "preserved_RGB_output": true
+  }
+}

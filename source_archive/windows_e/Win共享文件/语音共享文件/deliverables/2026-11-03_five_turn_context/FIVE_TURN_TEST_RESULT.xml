@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="9" time="0.615" timestamp="2026-11-03T01:43:54.037107-08:00" hostname="REVO1"><testcase classname="test_five_turn_context" name="test_fifth_request_includes_four_complete_prior_turns_and_recognition" time="0.001"><failure message="TypeError: 'str' object is not callable">Win共享文件\语音共享文件\deliverables\2026-11-03_five_turn_context\tests\test_five_turn_context.py:45: in test_fifth_request_includes_four_complete_prior_turns_and_recognition
+    b = builder()
+Win共享文件\语音共享文件\deliverables\2026-11-03_five_turn_context\tests\test_five_turn_context.py:35: in builder
+    return BoardContextBuilder(selected_profile().legacy_fast_prompt(), context_limit=4096)
+E   TypeError: 'str' object is not callable</failure></testcase><testcase classname="test_five_turn_context" name="test_facts_and_old_summaries_cannot_displace_first_turn" time="0.001"><failure message="TypeError: 'str' object is not callable">Win共享文件\语音共享文件\deliverables\2026-11-03_five_turn_context\tests\test_five_turn_context.py:57: in test_facts_and_old_summaries_cannot_displace_first_turn
+    b = builder(); out = b(c, '请回忆最开始的话。')
+Win共享文件\语音共享文件\deliverables\2026-11-03_five_turn_context\tests\test_five_turn_context.py:35: in builder
+    return BoardContextBuilder(selected_profile().legacy_fast_prompt(), context_limit=4096)
+E   TypeError: 'str' object is not callable</failure></testcase><testcase classname="test_five_turn_context" name="test_long_assistant_answers_preserve_all_four_user_originals" time="0.000"><failure message="TypeError: 'str' object is not callable">Win共享文件\语音共享文件\deliverables\2026-11-03_five_turn_context\tests\test_five_turn_context.py:63: in test_long_assistant_answers_preserve_all_four_user_originals
+    b = builder(); out = b(context(reply='很长的回答。'*300), '最初的小猫叫什么？')
+Win共享文件\语音共享文件\deliverables\2026-11-03_five_turn_context\tests\test_five_turn_context.py:35: in builder
+    return BoardContextBuilder(selected_profile().legacy_fast_prompt(), context_limit=4096)
+E   TypeError: 'str' object is not callable</failure></testcase><testcase classname="test_five_turn_context" name="test_raw_five_turns_survive_age_and_store_reopen" time="0.111" /><testcase classname="test_five_turn_context" name="test_sixth_completed_turn_allows_only_oldest_raw_turn_to_compact" time="0.123"><failure message="KeyError: 'turn_id'">Win共享文件\语音共享文件\deliverables\2026-11-03_five_turn_context\tests\test_five_turn_context.py:87: in test_sixth_completed_turn_allows_only_oldest_raw_turn_to_compact
+    assert prepared and {r['turn_id'] for r in prepared['sources']} == {'public-turn-1'}
+Win共享文件\语音共享文件\deliverables\2026-11-03_five_turn_context\tests\test_five_turn_context.py:87: in &lt;setcomp&gt;
+    assert prepared and {r['turn_id'] for r in prepared['sources']} == {'public-turn-1'}
+E   KeyError: 'turn_id'</failure></testcase><testcase classname="test_five_turn_context" name="test_pending_fifth_keeps_first_available_and_active_turn_blocks_compaction" time="0.083"><failure message="TypeError: 'str' object is not callable">Win共享文件\语音共享文件\deliverables\2026-11-03_five_turn_context\tests\test_five_turn_context.py:98: in test_pending_fifth_keeps_first_available_and_active_turn_blocks_compaction
+    b = builder(); out = b(c, '第一轮的小猫叫什么？')
+Win共享文件\语音共享文件\deliverables\2026-11-03_five_turn_context\tests\test_five_turn_context.py:35: in builder
+    return BoardContextBuilder(selected_profile().legacy_fast_prompt(), context_limit=4096)
+E   TypeError: 'str' object is not callable</failure></testcase><testcase classname="test_five_turn_context" name="test_conversation_partition_does_not_import_another_conversation" time="0.046" /><testcase classname="test_five_turn_context" name="test_board_factory_selects_expanded_context_without_changing_synthetic_defaults" time="0.001" /><testcase classname="test_five_turn_context" name="test_model_preload_and_every_request_share_4096_context" time="0.009" /></testsuite></testsuites>

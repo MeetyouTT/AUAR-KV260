@@ -1,0 +1,26 @@
+{
+  "actual_problem": "Two active /etc/fstab entries target /boot",
+  "boot_entries": [
+    "LABEL=boot        /boot   vfat    defaults    0   2",
+    "/dev/mmcblk1p1\t/boot\tvfat\tdefaults\t0\t0"
+  ],
+  "board_fstab_sha256": "b1978c1e094cd260b761afbaab75f0d9e659a78044d1d4fd86807bc44ef158bd",
+  "matches_preexisting_baseline_rootfs": true,
+  "baseline_extraction": {
+    "argv": [
+      "/sbin/debugfs",
+      "-R",
+      "dump /etc/fstab /home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T060312Z-fstab-audit/image-fstab-confirmed",
+      "/home/ghmd/kv260-dpu41-control-20261001/evidence/baseline-rootfs.ext4"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "debugfs 1.45.5 (07-Jan-2020)\n"
+  },
+  "actual_boot_mounts": [
+    "/dev/mmcblk1p1 /boot vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0 0"
+  ],
+  "boot_unit": "Where=/boot\nWhat=/dev/mmcblk1p1\nResult=success\nLoadState=loaded\nActiveState=active\nSubState=mounted\nFragmentPath=/run/systemd/generator/boot.mount\nSourcePath=/etc/fstab\n",
+  "board_configuration_modified": false,
+  "scope": "Confirmed preexisting baseline configuration; does not attribute the entries to the vendor image or their author."
+}

@@ -1,0 +1,55 @@
+{
+  "schema": "aura.stream-memory-contract-review.v1",
+  "status": "SOURCE_AND_SYNTHETIC_STORE_PASS",
+  "prepared_api": {
+    "name": "BoardMemoryStore.check_prepared_turn_current(turn_id, *, generation) -> True",
+    "before_sha256": "19dabc48425ed711af17fc56929a0198067217c52593e157db23b8724ddffde3",
+    "after_sha256": "943bf88c05400c49c76a1aee68a0bb242cb929cee3e213bc21f465ac3ef77d46",
+    "path": "after/common/board_memory.py",
+    "readonly": true,
+    "schema_or_state_machine_changed": false,
+    "all_other_module_AST_unchanged": true
+  },
+  "independently_tested_streaming_sources": {
+    "../streaming_candidate/after/board/runtime/board_dialogue.py": "bce1f21962d083275d9e8a966f244d8c227d0d62e9a30314767453d04c05b475",
+    "../streaming_candidate/after/board/runtime/audio/board_dialogue_jobs.py": "2206239b0e7c1bdabb2002a5d932550201541a2a6a15f2b5ff3f381de5d07da2"
+  },
+  "test_sources": {
+    "tests/test_prepared_turn.py": "c9734e1eb3906334ad3fa34ae1dd0d5337436fa98764409ec0cc1eddb9892f4c",
+    "../streaming_candidate/tests/test_stream_memory_contract.py": "7c6e888ffeaa3d413d7ff4e15639f8b98df66adbc43ac77544e51e82086bef13"
+  },
+  "tests": {
+    "prepared_API_real_synthetic_Store_cases": 18,
+    "independent_stream_real_synthetic_Store_cases": 25,
+    "runtime_agent_stream_fake_cases": 14,
+    "combined_passed": 57,
+    "combined_failed": 0,
+    "combined_seconds": 3.50,
+    "command": "python -B -m pytest -p no:cacheprovider deliverables/2026-10-30_board_owner/integration/response_latency/memory_candidate/tests/test_prepared_turn.py deliverables/2026-10-30_board_owner/integration/response_latency/streaming_candidate/tests/test_stream_memory_contract.py deliverables/2026-10-30_board_owner/integration/response_latency/streaming_candidate/tests/test_streaming.py --basetemp=deliverables/2026-10-30_board_owner/integration/response_latency/streaming_candidate/combined-test-run-1 -q"
+  },
+  "verified_contracts": [
+    "Complete generated text and durable event dependencies precede first TTS chunk; awaiting_playback is not assistant_played",
+    "One playback token and contiguous sentence offsets bind to the complete ordered native 24kHz mono PCM16 SHA and sample count",
+    "Only complete player ACK of the exact final receipt commits assistant_played; queued network completion alone does not",
+    "Independent Store forget/correct/clear and profile revoke block first or later chunks without relying on controller cancellation Event",
+    "Second TTS failure and cancellation after first chunk never mark partial text heard; Jobs clears queued packets and publishes failure",
+    "Ordinary-stream durable guards run before each packet publication and after backpressure waits; local FSM generating path is unchanged",
+    "Default nonstream path, original model request owner and single original deadline remain supported"
+  ],
+  "review_finding_resolved": {
+    "initial_bug": "A same-sentence sink could enqueue further packets after independent durable invalidation; final bind rejection cannot undo PCM already consumed",
+    "initial_reproductions": 4,
+    "initial_published_packets": 2,
+    "required_maximum_after_first_packet_invalidation": 1,
+    "fix_owner": "runtime_completion",
+    "resolution": "Request-local ordinary-stream admission_guard in Jobs._put, SQL outside jobs condition, recheck after every wait, append only while current",
+    "same_sentence_regressions_passed": 4,
+    "backpressure_wait_regressions_passed": 2
+  },
+  "limitations": [
+    "Checks are bounded snapshots, not future authorization leases; already emitted or physically played PCM cannot be retracted",
+    "No actual speakers, model host, device, network or private production database was used",
+    "No real first-audio latency, listening quality or hardware playback acceptance is claimed"
+  ],
+  "production_modified": false
+}

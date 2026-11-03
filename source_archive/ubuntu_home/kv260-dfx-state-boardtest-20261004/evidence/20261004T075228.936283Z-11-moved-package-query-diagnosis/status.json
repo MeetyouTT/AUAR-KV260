@@ -1,0 +1,24 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/11-moved-package-query-diagnosis.json",
+  "manifest_sha256": "32bb4339de06158c4cb52dc3e64af2608cac967681715a45b5ec0f68ef28ba46",
+  "started_utc": "2026-10-04T07:52:28.936428+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "moved-package-query-error",
+      "started_utc": "2026-10-04T07:52:29.455485+00:00",
+      "entry": {
+        "id": "moved-package-query-error",
+        "command": "python3 -B -c 'import pathlib,json,re; P=pathlib.Path; p=P(\"/home/root/kv260-dfx-state-boardtest-20261004/evidence/active-move-65164627772438\"); libs=[x for pattern in [\"libvart*dpu*.so*\",\"libxrt-device-handle.so*\"] for x in P(\"/usr/lib\").glob(pattern) if x.is_file()]; print(json.dumps({\"query_stdout\":(p/\"00011-dpu-still-present.stdout\").read_text(),\"query_stderr\":(p/\"00011-dpu-still-present.stderr\").read_text(),\"uio_stdout\":(p/\"00010-uio-while-package-missing.stdout\").read_text(),\"vart_conf\":P(\"/etc/vart.conf\").read_text(),\"library_firmware_constants\":{str(x):sorted(set(s.decode() for s in re.findall(rb\"XLNX_[A-Z_]{3,80}\",x.read_bytes()))) for x in libs},\"overlays\":[x.name for x in P(\"/sys/kernel/config/device-tree/overlays\").iterdir()],\"render\":[x.name for x in P(\"/dev/dri\").glob(\"renderD*\")]},indent=2))'"
+      },
+      "exit_code": 0,
+      "output_sha256": "4360043541c3301f24ee6480b6621d215ff3de8353a513f7363239e5d71f0c52",
+      "bytes": 6119,
+      "finished_utc": "2026-10-04T07:52:31.312689+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T07:52:31.360109+00:00"
+}

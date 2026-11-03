@@ -1,0 +1,2 @@
+import os;from pathlib import Path;assert os.uname().machine=='aarch64';assert Path('/sys/block/mmcblk1/device/cid').read_text().strip()=='0353445345333247805558c00401a100';
+exec(compile(Path('/home/root/aura-realtime-vision-20261007/releases/fcc207d4b226988f/board_launch.py').read_text(),"board_launch.py","exec"))

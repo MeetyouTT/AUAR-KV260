@@ -1,0 +1,819 @@
+{
+  "models": [
+    {
+      "path": "/usr/share/vitis_ai_library/models/yolov5_nano_pt",
+      "files": [
+        {
+          "name": "md5sum.txt",
+          "bytes": 33,
+          "sha256": "fd5dedfda982062e49edabf1e4803840f8152a35360025925be9c38ccead7d33",
+          "text": "6c0ac557c973caf942c9ad35fa8764b6\n"
+        },
+        {
+          "name": "meta.json",
+          "bytes": 209,
+          "sha256": "7feb46605e6b2650b278ee10f7a0d917aea35aa7cebe008cdeabaa5038fe7527",
+          "text": "{\n    \"lib\": \"libvart-dpu-runner.so\",\n    \"filename\": \"yolov5_nano_pt.xmodel\",\n    \"kernel\": [\n        \"subgraph_Model__Model_C3_model__C3_13__Cat_cat__input_111\"\n    ],\n    \"target\": \"DPUCZDX8G_ISA1_B4096\"\n}\n"
+        },
+        {
+          "name": "yolov5_nano_pt.prototxt",
+          "bytes": 679,
+          "sha256": "d7b085d584a7976727f40f27f4bec96d4358063e392792df31b90dab96fe9d22",
+          "text": "model {\n  kernel {\n     mean: 0.0\n     mean: 0.0\n     mean: 0.0\n     scale: 0.00392156\n     scale: 0.00392156\n     scale: 0.00392156\n  }\n  model_type : YOLOv3\n  yolo_v3_param {\n    num_classes: 80\n    anchorCnt: 3\n    layer_name: \"ip_fix\"\n    layer_name: \"ip_2_fix\"\n    layer_name: \"ip_1_fix\"\n    conf_threshold: 0.5\n    nms_threshold: 0.65\n    biases: 10\n    biases: 13\n    biases: 16\n    biases: 30\n    biases: 33 \n    biases: 23\n    biases: 30\n    biases: 61\n    biases: 62\n    biases: 45 \n    biases: 59\n    biases: 119\n    biases: 116\n    biases: 90\n    biases: 156\n    biases: 198\n    biases: 373 \n    biases: 326\n    test_mAP: false\n    type: YOLOV5\n  }\n  is_tf: true \n}\n\n"
+        },
+        {
+          "name": "yolov5_nano_pt.xmodel",
+          "bytes": 2698722,
+          "sha256": "ea981ef4f75c1739974715b518b554d5593a0efab4c4d6295cc33c712f80218e",
+          "subgraphs": [
+            {
+              "name": "subgraph_Model__Model_QuantStub_quant__input_1",
+              "attrs": {
+                "device": "USER"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "name": "Model__Model_QuantStub_quant__input_1_fix",
+                  "dims": [
+                    1,
+                    640,
+                    640,
+                    3
+                  ],
+                  "type": "xint8",
+                  "fix": 6
+                }
+              ]
+            },
+            {
+              "name": "subgraph_Model__Model_C3_model__C3_13__Cat_cat__input_111",
+              "attrs": {
+                "device": "DPU",
+                "dpu_name": "DPUCZDX8G_ISA1_B4096"
+              },
+              "inputs": [
+                {
+                  "name": "Model__Model_QuantStub_quant__input_1_fix",
+                  "dims": [
+                    1,
+                    640,
+                    640,
+                    3
+                  ],
+                  "type": "xint8",
+                  "fix": 6
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_0__ip_1_fix",
+                  "dims": [
+                    1,
+                    80,
+                    80,
+                    255
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                },
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_2__ip_fix",
+                  "dims": [
+                    1,
+                    20,
+                    20,
+                    255
+                  ],
+                  "type": "xint8",
+                  "fix": 4
+                },
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_1__ip_2_fix",
+                  "dims": [
+                    1,
+                    40,
+                    40,
+                    255
+                  ],
+                  "type": "xint8",
+                  "fix": 4
+                }
+              ]
+            },
+            {
+              "name": "subgraph_Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_2__ip_fix_",
+              "attrs": {
+                "device": "CPU"
+              },
+              "inputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_2__ip_fix",
+                  "dims": [
+                    1,
+                    20,
+                    20,
+                    255
+                  ],
+                  "type": "xint8",
+                  "fix": 4
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_2__ip_fix_",
+                  "dims": [
+                    1,
+                    20,
+                    20,
+                    255
+                  ],
+                  "type": "float32",
+                  "fix": null
+                }
+              ]
+            },
+            {
+              "name": "subgraph_Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_1__ip_2_fix_",
+              "attrs": {
+                "device": "CPU"
+              },
+              "inputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_1__ip_2_fix",
+                  "dims": [
+                    1,
+                    40,
+                    40,
+                    255
+                  ],
+                  "type": "xint8",
+                  "fix": 4
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_1__ip_2_fix_",
+                  "dims": [
+                    1,
+                    40,
+                    40,
+                    255
+                  ],
+                  "type": "float32",
+                  "fix": null
+                }
+              ]
+            },
+            {
+              "name": "subgraph_Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_0__ip_1_fix_",
+              "attrs": {
+                "device": "CPU"
+              },
+              "inputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_0__ip_1_fix",
+                  "dims": [
+                    1,
+                    80,
+                    80,
+                    255
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_0__ip_1_fix_",
+                  "dims": [
+                    1,
+                    80,
+                    80,
+                    255
+                  ],
+                  "type": "float32",
+                  "fix": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/usr/share/vitis_ai_library/models/yolov5_nano_pt_acc",
+      "files": [
+        {
+          "name": "yolov5_nano_pt_acc.prototxt",
+          "bytes": 681,
+          "sha256": "55b1443088f73a914c677073215477d345bf7ece709f0409f8f26438fde856bf",
+          "text": "model {\n  kernel {\n     mean: 0.0\n     mean: 0.0\n     mean: 0.0\n     scale: 0.00392156\n     scale: 0.00392156\n     scale: 0.00392156\n  }\n  model_type : YOLOv3\n  yolo_v3_param {\n    num_classes: 80\n    anchorCnt: 3\n    layer_name: \"ip_fix\"\n    layer_name: \"ip_2_fix\"\n    layer_name: \"ip_1_fix\"\n    conf_threshold: 0.001\n    nms_threshold: 0.65\n    biases: 10\n    biases: 13\n    biases: 16\n    biases: 30\n    biases: 33 \n    biases: 23\n    biases: 30\n    biases: 61\n    biases: 62\n    biases: 45 \n    biases: 59\n    biases: 119\n    biases: 116\n    biases: 90\n    biases: 156\n    biases: 198\n    biases: 373 \n    biases: 326\n    test_mAP: true \n    type: YOLOV5\n  }\n  is_tf: true \n}\n\n"
+        },
+        {
+          "name": "yolov5_nano_pt_acc.xmodel",
+          "bytes": 2698722,
+          "sha256": "ea981ef4f75c1739974715b518b554d5593a0efab4c4d6295cc33c712f80218e",
+          "subgraphs": [
+            {
+              "name": "subgraph_Model__Model_QuantStub_quant__input_1",
+              "attrs": {
+                "device": "USER"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "name": "Model__Model_QuantStub_quant__input_1_fix",
+                  "dims": [
+                    1,
+                    640,
+                    640,
+                    3
+                  ],
+                  "type": "xint8",
+                  "fix": 6
+                }
+              ]
+            },
+            {
+              "name": "subgraph_Model__Model_C3_model__C3_13__Cat_cat__input_111",
+              "attrs": {
+                "device": "DPU",
+                "dpu_name": "DPUCZDX8G_ISA1_B4096"
+              },
+              "inputs": [
+                {
+                  "name": "Model__Model_QuantStub_quant__input_1_fix",
+                  "dims": [
+                    1,
+                    640,
+                    640,
+                    3
+                  ],
+                  "type": "xint8",
+                  "fix": 6
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_1__ip_2_fix",
+                  "dims": [
+                    1,
+                    40,
+                    40,
+                    255
+                  ],
+                  "type": "xint8",
+                  "fix": 4
+                },
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_0__ip_1_fix",
+                  "dims": [
+                    1,
+                    80,
+                    80,
+                    255
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                },
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_2__ip_fix",
+                  "dims": [
+                    1,
+                    20,
+                    20,
+                    255
+                  ],
+                  "type": "xint8",
+                  "fix": 4
+                }
+              ]
+            },
+            {
+              "name": "subgraph_Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_2__ip_fix_",
+              "attrs": {
+                "device": "CPU"
+              },
+              "inputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_2__ip_fix",
+                  "dims": [
+                    1,
+                    20,
+                    20,
+                    255
+                  ],
+                  "type": "xint8",
+                  "fix": 4
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_2__ip_fix_",
+                  "dims": [
+                    1,
+                    20,
+                    20,
+                    255
+                  ],
+                  "type": "float32",
+                  "fix": null
+                }
+              ]
+            },
+            {
+              "name": "subgraph_Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_1__ip_2_fix_",
+              "attrs": {
+                "device": "CPU"
+              },
+              "inputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_1__ip_2_fix",
+                  "dims": [
+                    1,
+                    40,
+                    40,
+                    255
+                  ],
+                  "type": "xint8",
+                  "fix": 4
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_1__ip_2_fix_",
+                  "dims": [
+                    1,
+                    40,
+                    40,
+                    255
+                  ],
+                  "type": "float32",
+                  "fix": null
+                }
+              ]
+            },
+            {
+              "name": "subgraph_Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_0__ip_1_fix_",
+              "attrs": {
+                "device": "CPU"
+              },
+              "inputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_0__ip_1_fix",
+                  "dims": [
+                    1,
+                    80,
+                    80,
+                    255
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "Model__Model_Detect_model__Detect_24__Conv2d_m__ModuleList_0__ip_1_fix_",
+                  "dims": [
+                    1,
+                    80,
+                    80,
+                    255
+                  ],
+                  "type": "float32",
+                  "fix": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/usr/share/vitis_ai_library/models/yolox_nano_pt",
+      "files": [
+        {
+          "name": "md5sum.txt",
+          "bytes": 33,
+          "sha256": "5ee3c6747ab4506e8bd33494838295612814396fb0830f84bd0e0cb2e58bc9f9",
+          "text": "16bf148674d15aee06ba66ba8df52fda\n"
+        },
+        {
+          "name": "meta.json",
+          "bytes": 239,
+          "sha256": "0b614f33976b45d67fb23749bc1b9a972164f4461afe5f69b97b9fa69111af1d",
+          "text": "{\n    \"lib\": \"libvart-dpu-runner.so\",\n    \"filename\": \"yolox_nano_pt.xmodel\",\n    \"kernel\": [\n        \"subgraph_YOLOX__YOLOX_YOLOPAFPN_backbone__BaseConv_lateral_conv0__Conv2d_conv__input_277\"\n    ],\n    \"target\": \"DPUCZDX8G_ISA1_B4096\"\n}\n"
+        },
+        {
+          "name": "yolox_nano_pt.prototxt",
+          "bytes": 488,
+          "sha256": "371c5979ac0ec1558455e86459b498cbeaa50852c90b722c31712a84904db7bf",
+          "text": "model {\n  kernel {\n     mean: 0.0\n     mean: 0.0\n     mean: 0.0\n     scale: 1.0 \n     scale: 1.0 \n     scale: 1.0 \n  }\n  model_type : YOLOv5\n  yolo_v5_param {\n    stride:32\n    stride:16\n    stride:8\n    max_boxes_num:30000\n    max_nms_num:300\n    yolo_param {\n      num_classes: 80\n      anchorCnt: 1\n      layer_name: \"_2__\"\n      layer_name: \"_1__\"\n      layer_name: \"_0__\"\n      conf_threshold: 0.3\n      nms_threshold: 0.65\n      test_mAP: false \n      type: YOLOX_NANO\n    }\n  }\n}\n\n"
+        },
+        {
+          "name": "yolox_nano_pt.xmodel",
+          "bytes": 2127303,
+          "sha256": "def64abdeeccbd020cb651913ba907464c1a1786e30ba7d4aa077b601388950a",
+          "subgraphs": [
+            {
+              "name": "subgraph_YOLOX__YOLOX_QuantStub_quant_in__input_1",
+              "attrs": {
+                "device": "USER"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "name": "YOLOX__YOLOX_QuantStub_quant_in__input_1_fix",
+                  "dims": [
+                    1,
+                    416,
+                    416,
+                    3
+                  ],
+                  "type": "xint8",
+                  "fix": -2
+                }
+              ]
+            },
+            {
+              "name": "subgraph_YOLOX__YOLOX_YOLOPAFPN_backbone__BaseConv_lateral_conv0__Conv2d_conv__input_277",
+              "attrs": {
+                "device": "DPU",
+                "dpu_name": "DPUCZDX8G_ISA1_B4096"
+              },
+              "inputs": [
+                {
+                  "name": "YOLOX__YOLOX_QuantStub_quant_in__input_1_fix",
+                  "dims": [
+                    1,
+                    416,
+                    416,
+                    3
+                  ],
+                  "type": "xint8",
+                  "fix": -2
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_2__inputs_fix",
+                  "dims": [
+                    1,
+                    13,
+                    13,
+                    85
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                },
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_0__inputs_3_fix",
+                  "dims": [
+                    1,
+                    52,
+                    52,
+                    85
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                },
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_1__inputs_5_fix",
+                  "dims": [
+                    1,
+                    26,
+                    26,
+                    85
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                }
+              ]
+            },
+            {
+              "name": "subgraph_YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_2__inputs_fix_",
+              "attrs": {
+                "device": "CPU"
+              },
+              "inputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_2__inputs_fix",
+                  "dims": [
+                    1,
+                    13,
+                    13,
+                    85
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_2__inputs_fix_",
+                  "dims": [
+                    1,
+                    13,
+                    13,
+                    85
+                  ],
+                  "type": "float32",
+                  "fix": null
+                }
+              ]
+            },
+            {
+              "name": "subgraph_YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_1__inputs_5_fix_",
+              "attrs": {
+                "device": "CPU"
+              },
+              "inputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_1__inputs_5_fix",
+                  "dims": [
+                    1,
+                    26,
+                    26,
+                    85
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_1__inputs_5_fix_",
+                  "dims": [
+                    1,
+                    26,
+                    26,
+                    85
+                  ],
+                  "type": "float32",
+                  "fix": null
+                }
+              ]
+            },
+            {
+              "name": "subgraph_YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_0__inputs_3_fix_",
+              "attrs": {
+                "device": "CPU"
+              },
+              "inputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_0__inputs_3_fix",
+                  "dims": [
+                    1,
+                    52,
+                    52,
+                    85
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_0__inputs_3_fix_",
+                  "dims": [
+                    1,
+                    52,
+                    52,
+                    85
+                  ],
+                  "type": "float32",
+                  "fix": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/usr/share/vitis_ai_library/models/yolox_nano_pt_acc",
+      "files": [
+        {
+          "name": "yolox_nano_pt_acc.prototxt",
+          "bytes": 489,
+          "sha256": "9311df31812c3429d7c8aa5b39e8fa2d25ee288fbaea920262e762c338e32c19",
+          "text": "model {\n  kernel {\n     mean: 0.0\n     mean: 0.0\n     mean: 0.0\n     scale: 1.0 \n     scale: 1.0 \n     scale: 1.0 \n  }\n  model_type : YOLOv5\n  yolo_v5_param {\n    stride:32\n    stride:16\n    stride:8\n    max_boxes_num:30000\n    max_nms_num:300\n    yolo_param {\n      num_classes: 80\n      anchorCnt: 1\n      layer_name: \"_2__\"\n      layer_name: \"_1__\"\n      layer_name: \"_0__\"\n      conf_threshold: 0.001\n      nms_threshold: 0.65\n      test_mAP: true \n      type: YOLOX_NANO\n    }\n  }\n}\n\n"
+        },
+        {
+          "name": "yolox_nano_pt_acc.xmodel",
+          "bytes": 2127303,
+          "sha256": "def64abdeeccbd020cb651913ba907464c1a1786e30ba7d4aa077b601388950a",
+          "subgraphs": [
+            {
+              "name": "subgraph_YOLOX__YOLOX_QuantStub_quant_in__input_1",
+              "attrs": {
+                "device": "USER"
+              },
+              "inputs": [],
+              "outputs": [
+                {
+                  "name": "YOLOX__YOLOX_QuantStub_quant_in__input_1_fix",
+                  "dims": [
+                    1,
+                    416,
+                    416,
+                    3
+                  ],
+                  "type": "xint8",
+                  "fix": -2
+                }
+              ]
+            },
+            {
+              "name": "subgraph_YOLOX__YOLOX_YOLOPAFPN_backbone__BaseConv_lateral_conv0__Conv2d_conv__input_277",
+              "attrs": {
+                "device": "DPU",
+                "dpu_name": "DPUCZDX8G_ISA1_B4096"
+              },
+              "inputs": [
+                {
+                  "name": "YOLOX__YOLOX_QuantStub_quant_in__input_1_fix",
+                  "dims": [
+                    1,
+                    416,
+                    416,
+                    3
+                  ],
+                  "type": "xint8",
+                  "fix": -2
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_1__inputs_5_fix",
+                  "dims": [
+                    1,
+                    26,
+                    26,
+                    85
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                },
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_2__inputs_fix",
+                  "dims": [
+                    1,
+                    13,
+                    13,
+                    85
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                },
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_0__inputs_3_fix",
+                  "dims": [
+                    1,
+                    52,
+                    52,
+                    85
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                }
+              ]
+            },
+            {
+              "name": "subgraph_YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_2__inputs_fix_",
+              "attrs": {
+                "device": "CPU"
+              },
+              "inputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_2__inputs_fix",
+                  "dims": [
+                    1,
+                    13,
+                    13,
+                    85
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_2__inputs_fix_",
+                  "dims": [
+                    1,
+                    13,
+                    13,
+                    85
+                  ],
+                  "type": "float32",
+                  "fix": null
+                }
+              ]
+            },
+            {
+              "name": "subgraph_YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_1__inputs_5_fix_",
+              "attrs": {
+                "device": "CPU"
+              },
+              "inputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_1__inputs_5_fix",
+                  "dims": [
+                    1,
+                    26,
+                    26,
+                    85
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_1__inputs_5_fix_",
+                  "dims": [
+                    1,
+                    26,
+                    26,
+                    85
+                  ],
+                  "type": "float32",
+                  "fix": null
+                }
+              ]
+            },
+            {
+              "name": "subgraph_YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_0__inputs_3_fix_",
+              "attrs": {
+                "device": "CPU"
+              },
+              "inputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_0__inputs_3_fix",
+                  "dims": [
+                    1,
+                    52,
+                    52,
+                    85
+                  ],
+                  "type": "xint8",
+                  "fix": 3
+                }
+              ],
+              "outputs": [
+                {
+                  "name": "YOLOX__YOLOX_YOLOXHead_head__Cat_cat_list__ModuleList_0__inputs_3_fix_",
+                  "dims": [
+                    1,
+                    52,
+                    52,
+                    85
+                  ],
+                  "type": "float32",
+                  "fix": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "vitis_ai_library": {
+    "path": "/usr/lib/python3.9/site-packages/vitis_ai_library.so",
+    "members": [
+      "GraphRunner",
+      "__doc__",
+      "__file__",
+      "__loader__",
+      "__name__",
+      "__package__",
+      "__spec__"
+    ]
+  },
+  "headers": [
+    "/usr/include/vitis/ai/yolov2.hpp",
+    "/usr/include/vitis/ai/yolov3.hpp",
+    "/usr/include/vitis/ai/yolovx.hpp",
+    "/usr/include/vitis/ai/yolov6.hpp",
+    "/usr/include/vitis/ai/ofa_yolo.hpp"
+  ],
+  "examples": [
+    "/home/root/Vitis-AI/examples/vai_library/samples/yolovx",
+    "/home/root/Vitis-AI/examples/vai_library/samples/yolovx/test_video_yolovx",
+    "/home/root/Vitis-AI/examples/vai_library/samples/yolovx/test_accuracy_yolovx_coco_mt",
+    "/home/root/Vitis-AI/examples/vai_library/samples/yolovx/test_accuracy_yolovx_nano_mt.cpp",
+    "/home/root/Vitis-AI/examples/vai_library/samples/yolovx/test_jpeg_yolovx",
+    "/home/root/Vitis-AI/examples/vai_library/samples/yolovx/test_accuracy_yolovx_mt.cpp",
+    "/home/root/Vitis-AI/examples/vai_library/samples/yolovx/test_video_yolovx.cpp",
+    "/home/root/Vitis-AI/examples/vai_library/samples/yolovx/test_performance_yolovx.cpp",
+    "/home/root/Vitis-AI/examples/vai_library/samples/yolovx/test_jpeg_yolovx.cpp",
+    "/home/root/Vitis-AI/examples/vai_library/samples/yolovx/test_accuracy_yolovx_coco_mt.cpp",
+    "/home/root/Vitis-AI/examples/vai_library/samples/yolovx/test_performance_yolovx",
+    "/home/root/Vitis-AI/examples/vai_library/samples/yolovx/test_accuracy_yolovx_mt"
+  ],
+  "compiler": "/usr/bin/g++",
+  "images": []
+}

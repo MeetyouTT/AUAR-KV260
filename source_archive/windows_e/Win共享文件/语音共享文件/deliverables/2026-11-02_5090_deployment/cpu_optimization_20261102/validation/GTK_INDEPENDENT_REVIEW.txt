@@ -1,0 +1,33 @@
+GTK候选独立审查
+
+生产候选结论：未发现静态发布阻塞；真实GStreamer像素等价与同场景性能仍待root串行执行。
+原SHA 6e697c16f7ae264dff56b6b35f38da4b531ea13026b69a7c8bdbfb1960a6afcd。
+候选SHA 022098636a41b35bc17929da1cbef0f05e5c257640f9b64a8504c1b4a13e7127。
+独立逐字节确认：仅将videoconvert ! videoscale替换为videoscale ! videoconvert。PTS/offset、frame/owner身份、250ms stale drop、appsrc及queue界限、生命周期锁、Raw/JPEG后备、源刷新策略与所有业务逻辑均保持。
+用隔离AST执行实际attach方法，在568x300、587x440、640x480捕获真实构造字符串，确认候选确实选中换序路径，所有其他参数相同。没有导入生产模块、GI或设备。
+
+原合成benchmark ef9eedd2dfe5f57f921280310d9b59a400762ba91c843efd0d9e0a873139c296 审查
+— CPU口径成立：process_time包括该benchmark进程内的Gst工作线程，不包括仍运行的相机进程。AB/BA轮次顺序有助减轻调度漂移。appsink替代X11后只能筛选转换/缩放管线，不能将该百分比直接当作GTK整机收益。
+— RGB逐字节及BGRA alpha等价门槛严格。BGRx/RGBx第4字节是未定义X padding，允许该字节不同正确；不能把同样规则用于BGRA alpha。
+— 原pixel等价失败仍exit0且继续performance；root若只看SSH返回码会误判。必须解析strict_visible_pixels_and_alpha_equal和status，否则是自动发布阻塞。
+— 原packed仅使用caps VideoInfo默认stride，未看GstVideoMeta实际stride/plane offset。默认appsink布局通常一致，但存在非默认布局时可误读；不能把这样的字节结果当可靠像素证明。
+— 原performance段不核每个sample offset/PTS，不输出实际协商的converter/scaler pad caps。此次硬编码CHAINS与已核候选确实相符，但原脚本不独立证明它实测了哪种中间格式。实际X11最终格式也未由appsink测试直接确定。
+— 原每帧pull最多3秒但无整体deadline；root必须控制自身合成进程的边界，不能将外层超时当原业务服务失败，也不能重试生产操作。
+
+提供独立硬化版本（只在validation目录）
+gst_synthetic_compare_hardened.py
+raw SHA ed1282178f3be19d2fef993725749c6dae54416f78c178c980d4a627c8c05e59。
+规范LF SHA a35e015752524e5ea353b1e999da792bc3ae5f4efac3e3fdac33c719b47df8c2。
+源与硬化清单见GST_BENCHMARK_HARDENING.json。生产候选和原benchmark没有被修改。
+该版使用存在的VideoMeta实际正stride/offset，否则采用VideoInfo默认布局；精确核输出尺寸/格式，每个warm/计时sample核offset/PTS；记录videoconvert/videoscale双方协商caps；整体60秒默认pull deadline；像素失败跳过CPU测试并退出2。
+负stride/未知格式会明确拒绝，而非猜测布局。硬化版本身尚未在板端GI 1.18.5执行，首次必须以实际成功结果为准，不能把本地mock当原Gst已通过。
+
+GTK_INDEPENDENT_OFFLINE_CHECK.json：9项本地静态/纯mock检查通过，涵盖唯一差异、实际attach选链、VideoMeta非默认stride/offset、负stride拒绝、X padding与alpha区别、错误sample序号、deadline及非零退出。
+
+root门槛
+1. 保留另一个活动对话已发布voice修复和专用轴当前配置，部署使用协调后的最新startup/owner闭包，不能用旧1177整份覆盖。
+2. 合成结果必须严格像素通过，实际converter/scaler协商符合预期，且所有测试清理正常；如果不通过，保持原GTK版本并保留失败结果。
+3. 实际GUI同视觉页40秒前后测，检查Raw/JPEG、分辨率/方向/边界叠加、源龄与帧进度，不靠降低分辨率/帧率获得CPU下降。
+4. 再做主页面角色可见、实际语音与原跟随联合复测，确认字幕/声音/口型/完整ACK与STOP。此阶段未发生时保持PENDING。
+
+本审查无SSH、板端负载、相机/GUI操作、模型调用、音频或转轴动作。

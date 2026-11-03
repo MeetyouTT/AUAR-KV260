@@ -1,0 +1,83 @@
+Production composition review, local synthetic evidence only
+
+Result: no canonical-input failure reproduced in the current released target
+chain. REAL_COMPOSITION_V5.xml records 11 passed cases using the current actual
+Jobs, Controller, LocalIdentityReplies, BoardSpeakerBusiness.create, sole speaker
+worker, original SpeakerDevice, BindingHubRuntime, progressive analyzer, and fresh
+synthetic SQLite stores. This is not a FakeBusiness.turn contract test.
+
+Three existing exact named voice commands reach the original samples state with
+zero encoding calls for the start clip. Three subsequent distinct synthetic PCM
+clips reach confirm. Only the original final command confirms the original voice
+store transaction, yielding one synthetic voice and zero active identity links.
+The original bare voice command followed by a valid self-name also reaches samples.
+No face snapshot or face enrollment command is needed for these successful starts.
+
+Exact implementation order and references in actual_release/runtime:
+- board/runtime/audio/board_dialogue_jobs.py:463 selects the installed capability.
+- board/runtime/board_business.py:221 prepares the original local sequence.
+  Line 272 chooses standalone mode; line 301 canonicalizes existing voice intent;
+  line 318 calls actual business.turn; lines 376 onward clear mode on a raised
+  exception or loss of current ownership. Ordinary fallback is explicit.
+- board/runtime/board_speaker_business.py:462 invokes original SpeakerDevice.turn,
+  then BindingHubRuntime.after_original_voice_turn, and returns the original value.
+  _run (400) and _call (423) return that value, with ownership/deadline checks.
+  _run's finally refreshes public state before the Future completes. Exceptions
+  propagate; there is no silent None substitution in this chain.
+- tools/speaker_device.py:44 validates context/PCM and preserves request identity.
+  The named-start branch in _turn creates samples and returns its original cue;
+  quality/encoder work is only in subsequent sample turns.
+- tools/binding_hub_runtime.py:267 after_original_voice_turn reconciles existing
+  voice links and records reusable control evidence. It does not require a face
+  or clear the original standalone speaker session.
+- board/runtime/audio/board_dialogue_jobs.py:638 finishes foreground routing
+  before line 645 submits descriptive analysis. Its counters include both control
+  and descriptive analysis; submitted/complete alone do not identify route use.
+- tools/binding_hub_runtime.py:131 precomputed_analysis reuses original enrollment
+  control evidence; this preserves the sampler and avoids duplicating encoding.
+
+Diagnostic counterexamples (synthetic, not the user's actual transcript):
+1. Four currently unrecognized natural commands, including an explicit natural
+   prefix and nontechnical vocabulary, take ordinary dialogue, complete healthy
+   speaker analysis, and leave entry_mode None/active false with error_class none.
+2. A successful canonical start followed by the original Jobs.reset_enrollment
+   clears standalone mode and speaker sessions while the prior latency snapshot
+   still says error_class none. No voice or link is committed.
+Therefore the reported live fixed metadata does not distinguish failure before
+the handler, a completed handler followed by cleanup, and a later healthy turn.
+No assumption about actual ASR, name, user intent, or a unique field root cause
+is justified from this review. No product repair or alias expansion is published.
+
+Scope and harness boundaries:
+- No board/network/device/service/axis command was issued by this review.
+- No real PCM, ASR, names, templates, identity DBs or timeline anchors were read.
+- All PCM is constant synthetic PCM, the encoder emits a fixed synthetic 192D
+  vector, ASR/TTS/LLM are bounded test doubles, and VAD is an always-voiced fake.
+  Production algorithms, worker scheduling, ownership, stores and consent FSM
+  remain real. This does not validate real acoustic quality, latency, drivers,
+  recognition accuracy, GUI/player integration, or actual field state.
+- Jobs.run_next executes the actual original job body without starting its queue
+  consumer; the real speaker has its actual sole ThreadPoolExecutor worker.
+  The existing network playback receipt is acknowledged synthetically, not played.
+- Full BoardBusinessRuntime.__init__ could not load because the supplied public
+  snapshot lacks unrelated board/runtime/history_delete.py. No fake substitute
+  was installed. The harness explicitly wires actual target classes in original
+  constructor order, then calls the actual Runtime.attach_speaker_business and
+  Runtime._submit_speaker_analysis. The unrelated constructor is not tested.
+- The synthetic origin is explicitly selected. Fresh test stores are kept under
+  E:/aura_synthetic_composition_20261102_05, distinct from every real private store.
+
+Earlier harness attempts are retained, not presented as product failures:
+- REAL_COMPOSITION.xml: setup path exceeded Windows path limit.
+- REAL_COMPOSITION_V2.xml: unrelated missing history_delete module at full init.
+- REAL_COMPOSITION_V3.xml: three assertions assumed exactly one TTS call although
+  the original cue is three sentences; teardown called nonexistent Store.close.
+  All stage/commit assertions passed. The actual Store uses context-bound SQLite.
+- REAL_COMPOSITION_V4.xml: corrected harness; 6 passed.
+- REAL_COMPOSITION_V5.xml: added five diagnostic counterexamples; 11 passed.
+
+Suggested next evidence: per-turn fixed classification of the current intent,
+selected installed handler, whether the voice-only branch and actual business
+turn were entered, original before/after stage, and reset source/count. Keep all
+text, names, IDs, PCM and vectors out of the diagnostic projection. Root's separate
+diagnostic owner is implementing this; this review does not alter its files.

@@ -1,0 +1,155 @@
+
+****** Vivado v2022.2 (64-bit)
+  **** SW Build 3671981 on Fri Oct 14 04:59:54 MDT 2022
+  **** IP Build 3669848 on Fri Oct 14 08:30:02 MDT 2022
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+
+source /home/ghmd/Win共享文件/协作任务/2026-11-02_作品概述_AMD实跑_01a19c53/query_gui_syntax.tcl
+# foreach cmd {open_project write_device_image open_wave_database open_wave_config create_wave_config add_wave zoom_wave save_wave_config} {
+#  puts "AUAR_HELP_BEGIN $cmd"
+#  if {[catch {help $cmd} value]} {puts "HELP_ERROR $value"} else {puts $value}
+#  puts "AUAR_HELP_END $cmd"
+# }
+AUAR_HELP_BEGIN open_project
+open_project
+
+Description: 
+Open a Vivado project file (.xpr)
+
+Syntax: 
+open_project  [-part <arg>] [-read_only] [-quiet] [-verbose] <file>
+
+Returns: 
+opened project object
+
+Usage: 
+  Name          Description
+  -------------------------
+  [-part]       Open the project using this part (overrides project's part)
+  [-read_only]  Open the project in read-only mode
+  [-quiet]      Ignore command errors
+  [-verbose]    Suspend message limits during command execution
+  <file>        Project file to be read
+
+Categories: 
+Project
+
+Description:
+
+  Opens the specified Vivado Design Suite project file (.xpr), or the project
+  file for the Vivado Lab Edition (.lpr).
+
+  Note: The open_project command has a different command syntax in the Vivado
+  Lab Edition. The -part option is not supported because the Vivado Lab
+  Edition project (.lpr) does not specify a target part. The
+  current_hw_target and current_hw_device commands determine the target part.
+
+  This command returns a transcript of its process and the name of the
+  created project, or returns an error if it fails.
+
+Arguments:
+
+  -part <arg> - (Optional) Specify a target part to use when opening the
+  project. This option lets you change the speed grade of the part used by a
+  saved project, or change early availability parts for production parts of
+  the same device and package. This option is not supported in Vivado Lab
+  Edition.
+
+  Note: The use of -part is limited in terms of the range of parts that can
+  be used, and can result in an error when opening the project if an
+  incompatible part is specified.
+
+  -read_only - (Optional) Open the project in read only mode. You will not be
+  able to save any modifications to the project unless you use the
+  save_project_as command to save the project to a new editable project.
+
+  -quiet - (Optional) Execute the command quietly, returning no messages from
+  the command. The command also returns TCL_OK regardless of any errors
+  encountered during execution.
+
+  Note: Any errors encountered on the command-line, while launching the
+  command, will be returned. Only errors occurring inside the command will be
+  trapped.
+
+  -verbose - (Optional) Temporarily override any message limits and return
+  all messages from this command.
+
+  Note: Message limits can be defined with the set_msg_config command.
+
+  <file> - (Required) The project file to open. You must include both the
+  path to the file and the .xpr file extension.
+
+Examples:
+
+  The following example opens the project named my_project1 located in the
+  Designs directory.
+
+    open_project C:/Designs/project1.xpr  
+    
+
+  Note: The project must be specified with the .xpr extension for the tool to
+  recognize it as a project file. The path to the file must be specified
+  along with the project file name or the tool will return an error that it
+  cannot find the specified file.
+
+See Also:
+
+   *  close_project
+   *  create_project
+   *  current_hw_device
+   *  current_hw_target
+   *  current_project
+
+AUAR_HELP_END open_project
+AUAR_HELP_BEGIN write_device_image
+write_device_image
+
+Description: 
+Write programmable device image
+
+Syntax: 
+write_device_image  [-force] [-verbose] [-raw_partitions] [-mask_file]
+                    [-logic_location_file] [-cell <arg>] [-no_pdi]
+                    [-no_partial_pdifile] [-quiet] <file>
+
+Usage: 
+  Name                    Description
+  -----------------------------------
+  [-force]                Overwrite existing file
+  [-verbose]              Print write_device_image options
+  [-raw_partitions]       Write raw CFI and NPI partition files (.rcfi and 
+                          .rnpi)
+  [-mask_file]            Write mask file (.msk_cfi)
+  [-logic_location_file]  Write logic location file (.ll)
+  [-cell]                 Create only partial device image for named cell
+  [-no_pdi]               Do not generate pdi file
+  [-no_partial_pdifile]   Do not write partial pdi files for a Dynamic 
+                          Function eXchange design
+  [-quiet]                Ignore command errors
+  <file>                  The name of the .rcfi and .rnpi files to generate
+
+Categories: 
+FileIO
+
+AUAR_HELP_END write_device_image
+AUAR_HELP_BEGIN open_wave_database
+The command 'open_wave_database' is auto loaded by Tcl. To explicitly load the command type 'load_features simulator'.
+AUAR_HELP_END open_wave_database
+AUAR_HELP_BEGIN open_wave_config
+The command 'open_wave_config' is auto loaded by Tcl. To explicitly load the command type 'load_features simulator'.
+AUAR_HELP_END open_wave_config
+AUAR_HELP_BEGIN create_wave_config
+The command 'create_wave_config' is auto loaded by Tcl. To explicitly load the command type 'load_features simulator'.
+AUAR_HELP_END create_wave_config
+AUAR_HELP_BEGIN add_wave
+The command 'add_wave' is auto loaded by Tcl. To explicitly load the command type 'load_features simulator'.
+AUAR_HELP_END add_wave
+AUAR_HELP_BEGIN zoom_wave
+HELP_ERROR ERROR: [Common 17-25] No topics matched 'zoom_wave'
+
+AUAR_HELP_END zoom_wave
+AUAR_HELP_BEGIN save_wave_config
+The command 'save_wave_config' is auto loaded by Tcl. To explicitly load the command type 'load_features simulator'.
+AUAR_HELP_END save_wave_config
+# exit
+INFO: [Common 17-206] Exiting Vivado at Mon Nov  2 07:33:27 2026...

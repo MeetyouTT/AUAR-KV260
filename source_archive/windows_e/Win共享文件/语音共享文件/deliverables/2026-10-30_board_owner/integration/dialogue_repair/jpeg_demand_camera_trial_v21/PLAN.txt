@@ -1,0 +1,43 @@
+实际相机按需JPEG A/B/A试验
+
+当前材料仅用于root独占窗口的受保护串行试验。GUI恢复发布器通过独审并具备失败后继续提交能力，是正常关闭GUI与停止相机前的执行条件。
+
+基线
+GUI为v21，startup94f665cf69e861d4f3d625dd627116218120cdbbef2244aa4cf2b63c39b9f1c7，380组件，ASR2，用户选择PAUSED。
+相机为face-source-v17原入口，boot bebd3e7d-e984-4517-8cbb-211df7f1c6dc，PID1335，birth2344，原源码9d714，private readback c730含21份来源。
+实际元数据来自progress_followup_20261031/v21_camera_metadata_1793506766766332400.json，SHA3ccef2829ef9fbbece73c7408855ab2a461c9eaa78692cd19a23676c0ef13964。
+
+最少新增运行文件
+candidate/entry.py负责精确校验并在原r17进入native_operator的唯一调用处选择JPEG候选。
+candidate/ui_camera_service.py为冻结44b020源码，原生调用、身份和检测逻辑的字节逆向证明见原JPEG候选。
+candidate/candidate-manifest.json固定两份新增代码及62份继承来源。原APP_PINS、SHADOW_PINS、meta、r17和native_operator入口仍执行各自检查。
+entry保留真实candidate __file__，AURA显式指回原native-r4依赖根，加载前后sys.path原样恢复，预载或重复camera module均拒绝。
+serial_trial.py精确复用旧v3，SHA1e8aeee2a94b4fce674f2468ce48c77fbb88ef99bd9cb1ab66dd3bf20a0327f6。
+rebuild_same_boot_readback.py精确复用e42d。restored_readback.py为本次已完成试验绑定显式authority，原helper的旧CLI保持封存。
+sample_camera.py仅采集数值metadata。
+
+执行顺序
+1. root检查自身硬件独占权、当前boot、380份GUI闭包、相机1335/birth2344和暂停选择。等待当前630秒显示观察完成。
+2. 将PACKAGE_MANIFEST列出的少量公开代码置于独立0700试验目录，文件0600。先运行candidate/entry.py --verify-only，所有62份继承pin现场通过后才能继续。
+3. GUI恢复发布器已通过公开故障注入与独审后，由root使用现役v21正常guard/window-inspect/WM_DELETE完成关闭，保持GUI guard。正常关闭范围保留原4个数据库和用户暂停偏好。
+4. serial_trial prepare只创建本次相机保护drop-in并封存原owner与单位设置。A1保持原相机。所有三段采样都要求GUI unit已关闭且旧supervisor/GTK消失。
+5. 每段在就绪后先等待相同的10秒，再记录30秒metadata。A1对应GUARDED，B对应CANDIDATE_RUNNING，A2对应BASELINE_RESTORED。
+6. stop-baseline正常SIGTERM，只在原owner确认消失、最新同boot checkpoint有效且尚未消费后进入BASELINE_STOPPED。start-candidate仅向原service发送一次start。PENDING只继续观察原意图。
+7. B完成采样后正常stop-candidate。新的checkpoint含B期间递增的原生和SFace状态。restore由原A入口消费该最新checkpoint。A2采样后finalize移除本次保护drop-in并核对原unit设置。
+8. COMPLETE之后，root读取公开owner/checkpoint/journal摘要，填充AUTHORITY_TEMPLATE的4个待定字段并核对SHA。先运行restored_readback只读证明，再以观察token写入新的私有readback及proof文件。保留原21pin，仅扩展恢复A的新runtime配置，形成22pin。
+9. GUI恢复发布器使用该COMPLETE证明、已消费checkpoint、新22pin readback和恢复A实际owner。GUI config仅更新board_business.face_readback.path与sha256，380份业务源码保持。startup只更新配置组件SHA，camera tuple在SPEC与boot守卫中精确绑定。配置、startup和source manifest在guard内以可继续提交事务闭合后正常start/READY。
+10. root验证界面可见、暂停false/micfalse、视觉线程和当前身份来源正常，再将actual source/owner/readback及回执封存。试验默认结束在原A。B常驻由新的实测结果另行决定。
+
+失败与恢复
+每个动作记录自己的退出码与白名单结果。正常stop尚未完成、UNSAFE_OWNER_RETAINED、来源漂移、checkpoint不匹配或消费证明不完整时，继续保留唯一owner和guard。
+相机停止或启动存在歧义时，需要root复核现有intent及owner。每个已发出的start仅观察，禁止重发来猜测是否成功。
+候选B正常完成关闭并产生新checkpoint时，恢复原A消费该最新状态。原库、模板、checkpoint历史及已消费marker全部保留。
+候选在初始化前失败且没有新的可证明关闭checkpoint时，保留故障状态供root核对，旧执行器不会自动重放旧seed。
+相机恢复到新PID后，旧c730读取配置已经过期。GUI发布过程中断时，在guard内从已记录INTENT继续提交新配置、startup、manifest。旧1335配置仅作为历史归档。
+
+测量范围
+CPU按camera进程utime+stime差值除以HZ和单调时长，单位为CPU核。同时记录整机busy核数、RSS、capture/detect/preview完成速率、人数和人脸来源年龄。
+样本绑定同boot、PID/birth和service/camera epoch，前后检查原生单owner、源码、单位设置和journal。
+sampler每轮仅GET /health，JPEG请求数0，所有实际图像、像素哈希、私库、模板和身份名字均不导出。
+全程GUI关闭，因此显示保活随GUI停止。各臂使用相同采样时长，场景和人数变化仍需纳入判断。实际对话首声与界面显示收益留待后续业务联测。
+公开合成筛选已覆盖无GET、低频GET与原频率GET，请求侧编码已计入CPU。实机本轮主要验证GUI关闭、无新增JPEG请求的相机进程收益及稳定性。

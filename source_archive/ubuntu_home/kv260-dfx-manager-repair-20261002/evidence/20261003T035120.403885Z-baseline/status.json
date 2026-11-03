@@ -1,0 +1,159 @@
+{
+  "phase": "baseline",
+  "source": "/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr",
+  "build": "/home/ghmd/kv260-dfx-manager-repair-20261002/build/20261003T035120.403885Z-baseline",
+  "commands": [
+    {
+      "name": "compiler",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-gcc",
+        "--version"
+      ],
+      "cwd": "/home/ghmd/kv260-dfx-manager-repair-20261002",
+      "exit_code": 0,
+      "log": "evidence/20261003T035120.403885Z-baseline/compiler.log",
+      "sha256": "ee2c2cdcd3e65f25d3cc1bbdae6f9643bc678266cb809a5f91e1bfb429c32896",
+      "elapsed_seconds": 0.008
+    },
+    {
+      "name": "cmake-version",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/x86_64-petalinux-linux/usr/bin/cmake",
+        "--version"
+      ],
+      "cwd": "/home/ghmd/kv260-dfx-manager-repair-20261002",
+      "exit_code": 0,
+      "log": "evidence/20261003T035120.403885Z-baseline/cmake-version.log",
+      "sha256": "fec59c7603b9f6ddcdbc2de6448e0025b5282c5e8a20012baa2e6f2f75a9bfac",
+      "elapsed_seconds": 0.009
+    },
+    {
+      "name": "configure",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/x86_64-petalinux-linux/usr/bin/cmake",
+        "-S",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr",
+        "-B",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/build/20261003T035120.403885Z-baseline",
+        "-G",
+        "Unix Makefiles",
+        "-DCMAKE_SYSTEM_NAME=Linux",
+        "-DCMAKE_SYSTEM_PROCESSOR=aarch64",
+        "-DCMAKE_C_COMPILER=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-gcc",
+        "-DCMAKE_ASM_COMPILER=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-gcc",
+        "-DCMAKE_SYSROOT=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/aarch64-xilinx-linux",
+        "-DCMAKE_INCLUDE_PATH=/home/ghmd/kv260-dfx-manager-repair-20261002/deps/include",
+        "-DCMAKE_LIBRARY_PATH=/home/ghmd/kv260-dfx-manager-repair-20261002/deps/lib",
+        "-D_deps=dfx",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DWITH_STATIC_LIB=ON",
+        "-DWITH_SHARED_LIB=OFF",
+        "-DCMAKE_C_FLAGS=-O2 -fPIC -fstack-protector-strong -D_FORTIFY_SOURCE=2 -mbranch-protection=standard",
+        "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-z,relro,-z,now"
+      ],
+      "cwd": "/home/ghmd/kv260-dfx-manager-repair-20261002",
+      "exit_code": 0,
+      "log": "evidence/20261003T035120.403885Z-baseline/configure.log",
+      "sha256": "3a0818b97152d0a0a913f912347bfec281008711ae236b1914935c560e87883d",
+      "elapsed_seconds": 0.285
+    },
+    {
+      "name": "compile",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/x86_64-petalinux-linux/usr/bin/cmake",
+        "--build",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/build/20261003T035120.403885Z-baseline",
+        "--parallel",
+        "4",
+        "--target",
+        "dfx-mgrd-static",
+        "dfx-mgr-client-static"
+      ],
+      "cwd": "/home/ghmd/kv260-dfx-manager-repair-20261002",
+      "exit_code": 0,
+      "log": "evidence/20261003T035120.403885Z-baseline/compile.log",
+      "sha256": "403ea1b4c0b8faac35904aa344ee72d968f3376c3f32422a1fd9f9df8a26a760",
+      "elapsed_seconds": 1.746
+    },
+    {
+      "name": "strip-dfx-mgrd",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-strip",
+        "--strip-debug",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/artifacts/baseline/dfx-mgrd"
+      ],
+      "cwd": "/home/ghmd/kv260-dfx-manager-repair-20261002",
+      "exit_code": 0,
+      "log": "evidence/20261003T035120.403885Z-baseline/strip-dfx-mgrd.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_seconds": 0.012
+    },
+    {
+      "name": "elf-dfx-mgrd",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "-h",
+        "-l",
+        "-d",
+        "-V",
+        "-Ws",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/artifacts/baseline/dfx-mgrd"
+      ],
+      "cwd": "/home/ghmd/kv260-dfx-manager-repair-20261002",
+      "exit_code": 0,
+      "log": "evidence/20261003T035120.403885Z-baseline/elf-dfx-mgrd.log",
+      "sha256": "7d2e56e998f99977cd1b3ce1ad5e78a15dca65a910f949fc1c9832e58eb18430",
+      "elapsed_seconds": 0.012
+    },
+    {
+      "name": "strip-dfx-mgr-client",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-strip",
+        "--strip-debug",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/artifacts/baseline/dfx-mgr-client"
+      ],
+      "cwd": "/home/ghmd/kv260-dfx-manager-repair-20261002",
+      "exit_code": 0,
+      "log": "evidence/20261003T035120.403885Z-baseline/strip-dfx-mgr-client.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_seconds": 0.01
+    },
+    {
+      "name": "elf-dfx-mgr-client",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "-h",
+        "-l",
+        "-d",
+        "-V",
+        "-Ws",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/artifacts/baseline/dfx-mgr-client"
+      ],
+      "cwd": "/home/ghmd/kv260-dfx-manager-repair-20261002",
+      "exit_code": 0,
+      "log": "evidence/20261003T035120.403885Z-baseline/elf-dfx-mgr-client.log",
+      "sha256": "ad0974c5276b55fe7e4fefbd3a3b12803f0cbcd8234c9c97e78d0ac9444ffc38",
+      "elapsed_seconds": 0.008
+    }
+  ],
+  "jobs": 4,
+  "passed": true,
+  "artifacts": {
+    "dfx-mgr-client": {
+      "bytes": 23200,
+      "sha256": "2052ab7b4080d24add7390f9ceec2d07730f6bc5031ff96d8c696023106c4c72"
+    },
+    "dfx-mgr-client.debug": {
+      "bytes": 58864,
+      "sha256": "45e267d21e5d469ca0e6eb1feedc369241307109869098bea186d4f87cd52438"
+    },
+    "dfx-mgrd": {
+      "bytes": 117344,
+      "sha256": "04f1ea8059fb49230b57e39ea9818bba85cac24ad04f06362be633316f335be4"
+    },
+    "dfx-mgrd.debug": {
+      "bytes": 370800,
+      "sha256": "16e367706066ab8a0fe8c1b173d6e24084f5d7cfaeda1a10d1dcf7c0ccf7a9d8"
+    }
+  }
+}

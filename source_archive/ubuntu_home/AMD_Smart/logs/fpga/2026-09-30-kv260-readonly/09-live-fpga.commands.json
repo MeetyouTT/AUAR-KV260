@@ -1,0 +1,12 @@
+[
+  {
+    "id": "live_device_tree",
+    "command": "dtc -I fs -O dts /sys/firmware/devicetree/base",
+    "timeout": 45
+  },
+  {
+    "id": "fpga_runtime",
+    "command": "xmutil listapps; xbutil examine; for d in /sys/class/fpga_manager/*; do printf \"\\n%s\\n\" \"$d\"; for f in name state status firmware flags; do if test -f \"$d/$f\"; then printf \"%s: \" \"$f\"; cat \"$d/$f\"; fi; done; done; find /sys/kernel/config/device-tree /configfs/device-tree -maxdepth 3 -type f; ls -l /dev/dri /dev/uio*; ls -l /sys/bus/platform/drivers/zocl /sys/bus/platform/drivers/dpu*; cat /proc/iomem",
+    "timeout": 45
+  }
+]

@@ -1,0 +1,383 @@
+{
+  "host_observed_start_utc": "2026-11-02T05:24:53.779715+00:00",
+  "host_observed_end_utc": "2026-11-02T05:24:55.598182+00:00",
+  "script_sha256": "bad64c8277812e70673e1904e852f2760a1e099f86062ae0048d14541cb2d80f",
+  "board_result": {
+    "board_mutations": false,
+    "board_utc": "2026-11-02T05:24:55.140860+00:00",
+    "boot_id": "903cfade-b93c-48fa-804e-379be1967313",
+    "database_opened": false,
+    "empty_gallery_inferred_from_unknown": false,
+    "gallery_availability_publicly_available": false,
+    "gallery_count_publicly_available": false,
+    "ids_names_templates_scores_images_dialogue_exported": false,
+    "model_chain_ready": true,
+    "public_health_gallery_availability": {},
+    "public_health_gallery_counts": {},
+    "schema": "aura-policy-consumer-and-public-health-projection-1",
+    "source_read_path_evidence": {
+      "board/identity/camera_faces.py": {
+        "path": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura/board/identity/camera_faces.py",
+        "selected_public_source_lines": [
+          {
+            "line": 230,
+            "source": "def create_service(root, config_path, state, *, schedule=None, owner=None):"
+          },
+          {
+            "line": 231,
+            "source": "    from board.identity.live import IdentityService"
+          },
+          {
+            "line": 232,
+            "source": "    from board.identity.store import IdentityStore"
+          },
+          {
+            "line": 233,
+            "source": "    config = config_for(root, config_path)"
+          },
+          {
+            "line": 234,
+            "source": "    dpu = (config.get('feature_backend') or {}).get('kind') == 'dpu_sface'"
+          },
+          {
+            "line": 235,
+            "source": "    if getattr(schedule,'native_critical',False):"
+          },
+          {
+            "line": 236,
+            "source": "        if not dpu or (config.get('face_backend') or {}).get('kind') != 'dpu_yunet':"
+          },
+          {
+            "line": 237,
+            "source": "            raise ValueError('Native execution requires both reviewed INT8 face backends')"
+          },
+          {
+            "line": 238,
+            "source": "        for name in ('dpu_sface_shadow','dpu_sface_calibration','dpu_sface_producer'):"
+          },
+          {
+            "line": 239,
+            "source": "            if (config.get(name) or {}).get('enabled'):"
+          },
+          {
+            "line": 240,
+            "source": "                raise ValueError('Legacy auxiliary runner cannot bypass the shared native gate: '+name)"
+          },
+          {
+            "line": 241,
+            "source": "    if dpu:"
+          },
+          {
+            "line": 242,
+            "source": "        if schedule is None or owner is None:"
+          },
+          {
+            "line": 243,
+            "source": "            raise ValueError('Select a shared DPU scheduler and owner before opening INT8 identity storage')"
+          },
+          {
+            "line": 244,
+            "source": "        from board.identity.model_store import open_dpu_store"
+          },
+          {
+            "line": 245,
+            "source": "        store = open_dpu_store(config)"
+          },
+          {
+            "line": 246,
+            "source": "    else:"
+          },
+          {
+            "line": 247,
+            "source": "        path = Path(config['database'])"
+          },
+          {
+            "line": 248,
+            "source": "        path.parent.mkdir(parents=True, exist_ok=True)"
+          },
+          {
+            "line": 249,
+            "source": "        # New local biometric databases are private and are never part of a bundle."
+          },
+          {
+            "line": 250,
+            "source": "        try:"
+          },
+          {
+            "line": 251,
+            "source": "            fd = os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)"
+          },
+          {
+            "line": 252,
+            "source": "        except FileExistsError:"
+          },
+          {
+            "line": 253,
+            "source": "            pass"
+          },
+          {
+            "line": 254,
+            "source": "        else:"
+          },
+          {
+            "line": 255,
+            "source": "            os.close(fd)"
+          },
+          {
+            "line": 256,
+            "source": "        store = IdentityStore(path, config['model_id'], 128, config['threshold'], config['ambiguity_margin'],"
+          },
+          {
+            "line": 257,
+            "source": "                              allow_cross_thread=True)"
+          },
+          {
+            "line": 258,
+            "source": "    from board.identity.photo_archive import EnrollmentPhotoArchive"
+          },
+          {
+            "line": 259,
+            "source": "    photos=EnrollmentPhotoArchive(config['enrollment_photos']) if config.get('enrollment_photos') else None"
+          },
+          {
+            "line": 260,
+            "source": "    service = IdentityService(store, lambda: CameraFaceExtractor(config, face_targets=True,"
+          },
+          {
+            "line": 261,
+            "source": "        schedule=schedule, owner=owner, clock=state.clock,"
+          },
+          {
+            "line": 262,
+            "source": "        current_target=state.identity_target, guard_lock=state.lock), state.identity_target,"
+          },
+          {
+            "line": 263,
+            "source": "        lock=state.lock, clock=state.clock, result_ttl_ms=config['result_ttl_ms'], interval_ms=config['interval_ms'],"
+          },
+          {
+            "line": 264,
+            "source": "        multi_frame=True, backend='DPU_SFACE_INT8' if dpu else"
+          },
+          {
+            "line": 265,
+            "source": "        'WINDOWS_CPU_SFACE_ORT' if config.get('feature_backend') else 'CPU_SFACE_REFERENCE',"
+          },
+          {
+            "line": 266,
+            "source": "        photo_archive=photos)"
+          },
+          {
+            "line": 267,
+            "source": "    from board.identity.face_targets import FaceTargetService"
+          },
+          {
+            "line": 268,
+            "source": "    from board.vision.reference_faces import YuNetCompat"
+          },
+          {
+            "line": 269,
+            "source": "    if config.get('face_backend'):"
+          },
+          {
+            "line": 270,
+            "source": "        from board.vision.dpu_yunet import DpuYuNet"
+          },
+          {
+            "line": 271,
+            "source": "        factory=lambda:DpuYuNet(config, schedule, owner)"
+          },
+          {
+            "line": 272,
+            "source": "    else:"
+          },
+          {
+            "line": 273,
+            "source": "        factory=lambda:YuNetCompat(config['face_model'],"
+          },
+          {
+            "line": 274,
+            "source": "            score_threshold=config['minimum_face_score'],input_size=config['input_size'])"
+          },
+          {
+            "line": 275,
+            "source": "    service.face_targets=FaceTargetService(factory,"
+          },
+          {
+            "line": 276,
+            "source": "        service.offer_face,state.camera_epoch,lock=state.lock,clock=state.clock,"
+          },
+          {
+            "line": 277,
+            "source": "        minimum_score=config['minimum_face_score'],minimum_pixels=config['minimum_face_pixels'],slot_retry=True,freshness_metrics=True,retry_recovery_ms=50,"
+          },
+          {
+            "line": 278,
+            "source": "        independent_admission=bool(schedule is not None and getattr(schedule,'yunet_slot_wait_ms',0)))"
+          }
+        ],
+        "sha256": "ad80ee2e4694b1e498b9ecfeca8ba5d59d83112e778c56ee79716aff43305c04"
+      },
+      "board/identity/live.py": {
+        "path": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura/board/identity/live.py",
+        "selected_public_source_lines": [
+          {
+            "line": 326,
+            "source": "    def health(self):"
+          },
+          {
+            "line": 327,
+            "source": "        with self.lock:"
+          },
+          {
+            "line": 328,
+            "source": "            feature = self._feature_status()"
+          },
+          {
+            "line": 329,
+            "source": "            face=self.face_targets.health() if self.face_targets else None"
+          },
+          {
+            "line": 330,
+            "source": "            return {'ready': self.ready and not self.error and feature['ready'] and (not face or face['ready']),"
+          },
+          {
+            "line": 331,
+            "source": "                    'error': self.error or feature['detail'] or (face['error'] if face else ''), 'face_targets':face,"
+          },
+          {
+            "line": 332,
+            "source": "                    'feature_status': feature,"
+          },
+          {
+            "line": 333,
+            "source": "                    'backend': self.backend, 'processed': self.processed,"
+          },
+          {
+            "line": 334,
+            "source": "                    'shutdown_incomplete':self.shutdown_incomplete,"
+          },
+          {
+            "line": 335,
+            "source": "                    'feature_inference': self.extractor.health() if self.extractor is not None"
+          },
+          {
+            "line": 336,
+            "source": "                        and callable(getattr(self.extractor, 'health', None)) else None,"
+          },
+          {
+            "line": 337,
+            "source": "                    'enrollment_photos':self.photo_archive.health() if self.photo_archive else {'enabled':False},"
+          },
+          {
+            "line": 338,
+            "source": "                    'sampling_diagnostics':None if not self.sampling else {"
+          },
+          {
+            "line": 339,
+            "source": "                        'stage':self.sampling.stage,'pool_frames':len(self.sampling.training),"
+          },
+          {
+            "line": 340,
+            "source": "                        'template_policy':self.sampling.policy,"
+          },
+          {
+            "line": 341,
+            "source": "                        'last_failure':copy.deepcopy(self.sampling.last_failure),'metrics':copy.deepcopy(self.sampling.metrics)},"
+          },
+          {
+            "line": 342,
+            "source": "                    'discarded': self.discarded, 'deferred': self.deferred,"
+          },
+          {
+            "line": 343,
+            "source": "                    'model_id': self.store.model_id, 'last_inference_ms': self.last_ms,"
+          },
+          {
+            "line": 344,
+            "source": "                    'match_diagnostics':{'counts':dict(self.match_counts),"
+          },
+          {
+            "line": 345,
+            "source": "                        'last_state':self.result['match'].state if self.result else None,"
+          },
+          {
+            "line": 346,
+            "source": "                        'last_score':float(self.result['match'].score) if self.result else None},"
+          },
+          {
+            "line": 347,
+            "source": "                    'pending_frames': int(self.pending is not None)}"
+          }
+        ],
+        "sha256": "d639c4e52ab68db3c602ac6055967e3990781cfd3dcf2aa8527c249ff1be5d8c"
+      },
+      "board/identity/model_store.py": {
+        "path": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura/board/identity/model_store.py",
+        "selected_public_source_lines": [
+          {
+            "line": 17,
+            "source": "def validate_dpu_configuration(config):"
+          },
+          {
+            "line": 25,
+            "source": "            or not 100 <= backend['max_source_age_ms'] <= min(1500, config['result_ttl_ms'])):"
+          },
+          {
+            "line": 33,
+            "source": "    database = Path(config['database']).expanduser()"
+          },
+          {
+            "line": 59,
+            "source": "def check_artifact_configuration(config):"
+          },
+          {
+            "line": 63,
+            "source": "    backend = config['feature_backend']"
+          },
+          {
+            "line": 77,
+            "source": "    threshold = config.get('threshold')"
+          },
+          {
+            "line": 78,
+            "source": "    margin = config.get('ambiguity_margin')"
+          },
+          {
+            "line": 79,
+            "source": "    threshold_configured = (type(threshold) in (int, float) and math.isfinite(threshold)"
+          },
+          {
+            "line": 80,
+            "source": "                            and 0 <= threshold <= 1 and type(margin) in (int, float)"
+          },
+          {
+            "line": 85,
+            "source": "            'threshold_configured':threshold_configured, 'field_threshold_validated':False,"
+          },
+          {
+            "line": 89,
+            "source": "def validate_existing_database(path):"
+          },
+          {
+            "line": 114,
+            "source": "def open_dpu_store(config):"
+          },
+          {
+            "line": 116,
+            "source": "    from board.identity.store import IdentityStore"
+          },
+          {
+            "line": 118,
+            "source": "    path = Path(config['database'])"
+          },
+          {
+            "line": 131,
+            "source": "        store = IdentityStore(path, MODEL_ID, 128, config['threshold'], config['ambiguity_margin'],"
+          }
+        ],
+        "sha256": "310b4f3290fdf9d07b47800477e8ceb4c7631fbb9e622fac0f8c547a0d1563da"
+      }
+    }
+  }
+}

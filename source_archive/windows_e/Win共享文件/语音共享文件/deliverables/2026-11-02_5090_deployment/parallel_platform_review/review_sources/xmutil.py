@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+
+"""
+# Copyright (C) 2010 - 2020 Xilinx, Inc.  All rights reserved.
+
+# SPDX-License-Identifier: MIT
+"""
+
+import subprocess, argparse, distro
+
+cmds = { 'boardid':'/usr/bin/fru-print', \
+	'bootfw_status':'/usr/bin/image_update', \
+	'bootfw_update':'/usr/bin/image_update', \
+	'listapps':'dfx-mgr-client', \
+	'loadapp':'dfx-mgr-client', \
+	'unloadapp':'dfx-mgr-client', \
+	'xlnx_platformstats':'/usr/bin/xlnx_platformstats', \
+	'ddrqos':'/usr/bin/ddr-qos', \
+	'axiqos':'/usr/bin/axi-qos', \
+	'pwrctl':'/usr/bin/som-pwrctl', \
+	}
+
+#have separate functions for each, in case some preprocessing/specialcommand/prints needed
+#separate functions not necessarily needed, can run straight from top function
+def boardid(args):
+    subprocess.run([cmds['boardid']]+args)
+
+def bootfw_status(args):
+    subprocess.run([cmds['bootfw_status'],'-p'])
+
+def bootfw_update(args):
+    subprocess.run([cmds['bootfw_update']]+args)
+
+def getpkgs(args):
+    if ('-h' in args) or ('--help' in args):
+        print("\ngetpkgs will use fru-print to determine the SOM + CC combination\nand search the package feed for compatible packagegroups\n")
+        exit()
+    somnum=subprocess.getoutput("fru-print -b som -f product | awk -F- '{ print $2}' | tr '[:upper:]' '[:lower:]'| sed 's/[^0-9]*//g'")
+    cc=subprocess.getoutput("fru-print -b cc -f product | awk -F- '{ print $2}' | tr '[:upper:]' '[:lower:]'")
+    print("\nSearching package feed for packages compatible with: " +cc+somnum+'0\n')
+    if distro.id() == 'ubuntu':
+        subprocess.run('apt search xlnx-app-' +cc+somnum +'0- 2>/dev/null',shell=True)
+    elif distro.id() == 'petalinux':
+        subprocess.run('dnf list --available | grep packagegroup-' +cc+somnum +'0- | awk "!/-dev\./&&!/-lic\./&&!/-dbg\./&&!/-ptest\./"' ,shell=True)
+
+def listapps(args):
+    subprocess.run([cmds['listapps'],'-listPackage'])
+
+def loadapp(args):
+    subprocess.run([cmds['loadapp'],'-load']+args)
+
+def unloadapp(args):
+    subprocess.run([cmds['unloadapp'],'-remove']+args)
+
+def xlnx_platformstats(args):
+    subprocess.run([cmds['xlnx_platformstats']]+args)
+
+def ddrqos(args):
+    subprocess.run([cmds['ddrqos']]+args)
+
+def axiqos(args):
+    subprocess.run([cmds['axiqos']]+args)
+
+def pwrctl(args):
+    subprocess.run([cmds['pwrctl']]+args)
+
+def top(cmd,args):
+    globals()[cmd[0]](args)
+
+def desktop_disable(args):
+    subprocess.run('systemctl isolate multi-user.target', shell=True)
+
+def desktop_enable(args):
+    subprocess.run('systemctl isolate graphical.target', shell=True)
+
+def dp_unbind(args):
+    subprocess.run('echo -n fd4a0000.display > /sys/bus/platform/drivers/zynqmp-display/unbind', shell=True)
+
+def dp_bind(args):
+    subprocess.run('echo -n fd4a0000.display > /sys/bus/platform/drivers/zynqmp-display/bind', shell=True)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='\n\
+boardid: Reads all board EEPROM contents. Prints information summary in human readable structure to CLI.\n\t-b\tPick which board to print fru data for\n\t-f\tEnter field to print\n\t-s\tEnter som EEPROM path\n\t-c\tEnter cc EEPROM path\n\n\
+bootfw_status: Prints Qspi MFG version and date info along with persistent state values.\n\n\
+bootfw_update: Updates the primary boot device with a new BOOT.BIN in the inactive partition (either A or B).\n\n\
+getpkgs: Queries Xilinx package feeds and provides summary to CLI of relevant packages for active platform based on board ID information.\n\n\
+listapps: Queries on target FW resource manager daemon of pre-built app bitstreams available on the platform and provides summary to CLI.\n\n\
+loadapp: Loads requested application configuration bitstream to programmable logic if the device is available.\n\n\
+unloadapp: Removes application bitstream. (Takes slot number, default 0) \n\n\
+xlnx_platformstats: Reads and prints a summary of the following performance related information:\n\tCPU Utilization for each configured CPU\n\tRAM utilization\n\tSwap memory Utilization\n\tSOM overall current, power, voltage utilization\n\tSysMon Temperatures(s)\n\tSOM power supply data summary reported by PMICs & ZU+ SysMon sources\n\n\
+ddrqos: Set QOS value for DDR slots on zynqmp platform\n\n\
+axiqos: Set QOS value for AXI ports on zynqmp platform. \n\n\
+pwrctl: PL power control utility.\n\n\
+desktop_disable: Disable the desktop.\n\n\
+desktop_enable: Enable the desktop.\n\n\
+dp_unbind: Unbind the display driver.\n\n\
+dp_bind: Bind the display driver.\n\n',\
+
+    formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('cmd', choices=['boardid','bootfw_status','bootfw_update','getpkgs','listapps','loadapp','unloadapp','xlnx_platformstats','ddrqos','axiqos','pwrctl','desktop_disable','desktop_enable','dp_unbind','dp_bind'], type=str, nargs=1,help='Enter a function')
+    parser.add_argument('args', nargs=argparse.REMAINDER)
+    args = parser.parse_args()
+    top(args.cmd,args.args)
+

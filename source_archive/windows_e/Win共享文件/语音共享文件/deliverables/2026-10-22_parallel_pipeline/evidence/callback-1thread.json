@@ -1,0 +1,176 @@
+{
+  "scope": "SYNTHETIC_MATCHED_INPUT_ACTUAL_CALLBACK_ARM_MICROBENCHMARK_NO_PRODUCTION_CHANGE",
+  "source_sha256": "890fea726de2c6d29581ab2ee4c36db5e36df52f3e84ee20cd634fc8961ec2ce",
+  "candidate_sha256": "d74e30250e94584217c90eba9efaed41413e72d64505eeecd20d7cce66e7de45",
+  "opencv": "4.5.2",
+  "numpy": "1.21.2",
+  "benchmark_opencv_threads": 1,
+  "synthetic_input_bytes": 921600,
+  "pairs": [
+    {
+      "pair": 0,
+      "order": [
+        "original",
+        "candidate"
+      ],
+      "original": {
+        "calls": 40,
+        "wall_ms_per_call": 3.222146475,
+        "process_cpu_ms_per_call": 2.998829475
+      },
+      "candidate": {
+        "calls": 40,
+        "wall_ms_per_call": 3.673543,
+        "process_cpu_ms_per_call": 2.6220709500000003
+      }
+    },
+    {
+      "pair": 1,
+      "order": [
+        "candidate",
+        "original"
+      ],
+      "candidate": {
+        "calls": 40,
+        "wall_ms_per_call": 3.073799975,
+        "process_cpu_ms_per_call": 2.61101605
+      },
+      "original": {
+        "calls": 40,
+        "wall_ms_per_call": 3.4690827,
+        "process_cpu_ms_per_call": 3.0561399000000002
+      }
+    },
+    {
+      "pair": 2,
+      "order": [
+        "original",
+        "candidate"
+      ],
+      "original": {
+        "calls": 40,
+        "wall_ms_per_call": 4.0927747,
+        "process_cpu_ms_per_call": 2.967357925
+      },
+      "candidate": {
+        "calls": 40,
+        "wall_ms_per_call": 3.22921755,
+        "process_cpu_ms_per_call": 2.6335838249999997
+      }
+    },
+    {
+      "pair": 3,
+      "order": [
+        "candidate",
+        "original"
+      ],
+      "candidate": {
+        "calls": 40,
+        "wall_ms_per_call": 3.141097675,
+        "process_cpu_ms_per_call": 2.676928125
+      },
+      "original": {
+        "calls": 40,
+        "wall_ms_per_call": 4.0942677000000005,
+        "process_cpu_ms_per_call": 2.91528775
+      }
+    },
+    {
+      "pair": 4,
+      "order": [
+        "original",
+        "candidate"
+      ],
+      "original": {
+        "calls": 40,
+        "wall_ms_per_call": 3.696642475,
+        "process_cpu_ms_per_call": 2.9554383
+      },
+      "candidate": {
+        "calls": 40,
+        "wall_ms_per_call": 3.1480025,
+        "process_cpu_ms_per_call": 2.660547375
+      }
+    },
+    {
+      "pair": 5,
+      "order": [
+        "candidate",
+        "original"
+      ],
+      "candidate": {
+        "calls": 40,
+        "wall_ms_per_call": 3.3498797750000002,
+        "process_cpu_ms_per_call": 2.579338375
+      },
+      "original": {
+        "calls": 40,
+        "wall_ms_per_call": 3.4387561499999997,
+        "process_cpu_ms_per_call": 3.0411572
+      }
+    }
+  ],
+  "tested_calls_per_variant": 240,
+  "median_original_process_cpu_ms_per_call": 2.9830937,
+  "median_candidate_process_cpu_ms_per_call": 2.6278273875,
+  "median_process_cpu_reduction_fraction": 0.11909324621616812,
+  "pixel_memory_and_layout_checks_passed": true,
+  "existing_camera_before": {
+    "pid": 215707,
+    "detected_frames": 9045,
+    "camera_error": "",
+    "detector_error": "",
+    "dpu_schedule": {
+      "active": null,
+      "primary_calls": 9045,
+      "primary_period_overruns": 1,
+      "waiting_primary": 0,
+      "budget_ms": 20.0,
+      "guard_ms": 5.0,
+      "optional": {
+        "yunet": {
+          "calls": 2057,
+          "skipped": 1632,
+          "overruns": 0,
+          "budget_exceeded": 1,
+          "estimated_budget_ms": 28.825528999324888,
+          "maximum_ms": 26.825528999324888,
+          "disabled": false
+        }
+      }
+    }
+  },
+  "existing_camera_after": {
+    "pid": 215707,
+    "detected_frames": 9090,
+    "camera_error": "",
+    "detector_error": "",
+    "dpu_schedule": {
+      "active": "yolo",
+      "primary_calls": 9090,
+      "primary_period_overruns": 1,
+      "waiting_primary": 0,
+      "budget_ms": 20.0,
+      "guard_ms": 5.0,
+      "optional": {
+        "yunet": {
+          "calls": 2067,
+          "skipped": 1640,
+          "overruns": 0,
+          "budget_exceeded": 1,
+          "estimated_budget_ms": 28.825528999324888,
+          "maximum_ms": 26.825528999324888,
+          "disabled": false
+        }
+      }
+    }
+  },
+  "limitations": [
+    "synthetic in-memory BGR; Gst extract_dup simulated and not timed as real driver copy",
+    "existing live process runs concurrently; microbenchmark result is not whole-board CPU gain",
+    "candidate production deployment and actual GStreamer lifetime acceptance remain unverified"
+  ],
+  "camera_or_dpu_owner_opened": false,
+  "biometric_data_used": false,
+  "production_modified": false
+}

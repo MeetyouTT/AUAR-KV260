@@ -1,0 +1,1 @@
+cmd_drivers/cpufreq/built-in.a := echo >/dev/null; rm -f drivers/cpufreq/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/cpufreq/built-in.a drivers/cpufreq/cpufreq.o drivers/cpufreq/freq_table.o drivers/cpufreq/cpufreq_userspace.o drivers/cpufreq/cpufreq-dt.o drivers/cpufreq/cpufreq-dt-platdev.o

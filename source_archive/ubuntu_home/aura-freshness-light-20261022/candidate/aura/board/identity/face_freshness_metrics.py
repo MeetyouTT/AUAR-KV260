@@ -1,0 +1,176 @@
+"""Bounded count/source-age recorder. Per-attempt wall/CPU durations are omitted."""
+import threading
+from collections import deque
+
+SCHEMA = 'aura-face-freshness-light-1'
+LIMIT = (1 << 63) - 1
+COUNTERS = ('offers', 'offers_accepted', 'offers_closed', 'latest_replaced', 'attempts',
+    'attempts_finished', 'active_attempts', 'slot_unavailable', 'input_ttl_discarded',
+    'publish_ttl_discarded', 'closed_after_detect_discarded', 'published',
+    'published_positive', 'published_negative', 'published_multiface', 'process_errors',
+    'callback_errors', 'consecutive_slot_rejections', 'maximum_consecutive_slot_rejections',
+    'invalid_source_ages', 'source_clock_pairs_rejected', 'definite_clipped_gap_intervals',
+    'observed_gap_intervals', 'post_commit_at_or_over_ttl', 'events_evicted', 'counter_saturation')
+EVENT_CODES = {'slot_unavailable': 1, 'input_ttl': 2, 'publish_ttl': 3,
+    'closed_after_detect': 4, 'gap': 5, 'invalid_source': 6, 'process_error': 7, 'closed': 8}
+
+
+def integer(value):
+    return type(value) is int and 0 <= value <= LIMIT
+
+
+class FaceFreshnessMetrics:
+    def __init__(self, *, ttl_ms, event_capacity=16):
+        if not integer(ttl_ms) or not 1 <= ttl_ms <= 60000:
+            raise ValueError('Invalid TTL')
+        if type(event_capacity) is not int or not 1 <= event_capacity <= 64:
+            raise ValueError('Invalid event capacity')
+        self.ttl_ms, self.capacity = ttl_ms, event_capacity
+        self.lock = threading.Lock()
+        self.counters = dict.fromkeys(COUNTERS, 0)
+        self.closed = False
+        self.previous = None
+        self.events = deque(maxlen=event_capacity)
+        self.summaries = {name: {'count': 0, 'total_ms': 0, 'min_ms': None, 'max_ms': None, 'last_ms': None}
+            for name in ('input_source_age_ms', 'pre_commit_source_age_ms',
+                         'post_commit_source_age_ms', 'post_commit_interval_ms',
+                         'clipped_gap_lower_bound_ms', 'clipped_gap_upper_bound_ms')}
+
+    def inc(self, name, amount=1):
+        total = self.counters[name] + amount
+        if total > LIMIT:
+            total = LIMIT
+            if name != 'counter_saturation':
+                self.counters['counter_saturation'] = min(LIMIT, self.counters['counter_saturation'] + 1)
+        self.counters[name] = total
+
+    def event(self, kind, now=None, **values):
+        if len(self.events) == self.capacity:
+            self.inc('events_evicted')
+        self.events.append(dict(event_code=EVENT_CODES[kind], source_observed_ms=now, **values))
+
+    def summary(self, name, value):
+        if not integer(value):
+            self.inc('invalid_source_ages')
+            return
+        row = self.summaries[name]
+        if row['count'] == LIMIT or row['total_ms'] > LIMIT - value:
+            self.inc('counter_saturation')
+            return
+        row['count'] += 1
+        row['total_ms'] += value
+        row['min_ms'] = value if row['min_ms'] is None else min(row['min_ms'], value)
+        row['max_ms'] = value if row['max_ms'] is None else max(row['max_ms'], value)
+        row['last_ms'] = value
+
+    def mark(self):
+        # The existing service hook calls mark; no clock or lock is needed.
+        return None
+
+    def offer(self, *, accepted, replaced):
+        with self.lock:
+            if self.closed:
+                return
+            self.inc('offers')
+            self.inc('offers_accepted' if accepted else 'offers_closed')
+            if accepted and replaced:
+                self.inc('latest_replaced')
+
+    def begin(self, stamp_ms):
+        with self.lock:
+            if self.closed:
+                return None
+            self.inc('attempts')
+            self.inc('active_attempts')
+        return {'stamp_ms': stamp_ms, 'input_now_ms': None, 'pre_commit_check_now_ms': None,
+                'outcome_code': 0, 'finished': False, 'publication_observed': False,
+                'callback_started': False, 'callback_completed': False}
+
+    def publish(self, token, source_now_ms, face_count):
+        if type(token) is not dict or type(face_count) is not int or not 0 <= face_count <= 16:
+            raise ValueError('Invalid numeric observation')
+        with self.lock:
+            if self.closed or token['publication_observed']:
+                return
+            token['publication_observed'] = True
+            self.inc('published_positive' if face_count else 'published_negative')
+            if face_count > 1:
+                self.inc('published_multiface')
+            stamp, checked = token.get('stamp_ms'), token.get('pre_commit_check_now_ms')
+            if not (integer(stamp) and integer(checked) and integer(source_now_ms)
+                    and stamp <= checked <= source_now_ms):
+                self.inc('invalid_source_ages')
+                self.event('invalid_source')
+                self.previous = None
+                return
+            self.summary('pre_commit_source_age_ms', checked - stamp)
+            self.summary('post_commit_source_age_ms', source_now_ms - stamp)
+            if source_now_ms - stamp >= self.ttl_ms:
+                self.inc('post_commit_at_or_over_ttl')
+            previous = self.previous
+            if previous is not None:
+                old_stamp, old_observed = previous
+                if old_observed <= checked <= source_now_ms and old_stamp <= stamp:
+                    self.summary('post_commit_interval_ms', source_now_ms - old_observed)
+                    anchor = max(old_stamp + self.ttl_ms, old_observed)
+                    lower, upper = max(0, checked - anchor), max(0, source_now_ms - anchor)
+                    self.summary('clipped_gap_lower_bound_ms', lower)
+                    self.summary('clipped_gap_upper_bound_ms', upper)
+                    if lower:
+                        self.inc('definite_clipped_gap_intervals')
+                    if upper:
+                        self.inc('observed_gap_intervals')
+                        self.event('gap', source_now_ms, lower_ms=lower, upper_ms=upper)
+                else:
+                    self.inc('source_clock_pairs_rejected')
+            self.previous = (stamp, source_now_ms)
+
+    def finish(self, token):
+        if type(token) is not dict:
+            return
+        with self.lock:
+            if self.closed or token['finished']:
+                return
+            token['finished'] = True
+            self.inc('attempts_finished')
+            self.counters['active_attempts'] = max(0, self.counters['active_attempts'] - 1)
+            now, stamp = token.get('input_now_ms'), token.get('stamp_ms')
+            if integer(now) and integer(stamp) and now >= stamp:
+                self.summary('input_source_age_ms', now - stamp)
+            else:
+                self.inc('invalid_source_ages')
+            code = token.get('outcome_code')
+            reason = {1: ('input_ttl_discarded', 'input_ttl'), 2: ('slot_unavailable', 'slot_unavailable'),
+                3: ('publish_ttl_discarded', 'publish_ttl'), 4: ('closed_after_detect_discarded', 'closed_after_detect'),
+                5: ('published', None)}.get(code, ('process_errors', 'process_error'))
+            self.inc(reason[0])
+            if reason[1]:
+                self.event(reason[1], now if integer(now) else None)
+            if token.get('callback_started') and not token.get('callback_completed'):
+                self.inc('callback_errors')
+            if code == 2:
+                self.inc('consecutive_slot_rejections')
+                self.counters['maximum_consecutive_slot_rejections'] = max(
+                    self.counters['maximum_consecutive_slot_rejections'], self.counters['consecutive_slot_rejections'])
+            else:
+                self.counters['consecutive_slot_rejections'] = 0
+
+    def close(self):
+        with self.lock:
+            if not self.closed:
+                self.closed = True
+                self.event('closed')
+
+    def snapshot(self):
+        with self.lock:
+            summaries = {name: dict(row, mean_ms=row['total_ms']/row['count'] if row['count'] else None)
+                for name, row in self.summaries.items()}
+            return {'schema_version': SCHEMA, 'enabled': True, 'collecting': not self.closed,
+                'closed': self.closed, 'mode': 'COUNTS_AND_SOURCE_AGE_ONLY', 'ttl_ms': self.ttl_ms,
+                'per_attempt_wall_or_thread_cpu_collected': False,
+                'clock_scope': 'existing service source clock; assumes monotonic service millis; no independent clock comparison',
+                'gap_scope': 'pre-check/post-commit bounds clipped after previous post-commit observation; no head/tail extrapolation',
+                'post_commit_ttl_scope': 'observation age reaching TTL is not proof of accepting stale input at the original gate',
+                'snapshot_scope': 'recorder only; enclosing health caller may hold the shared service RLock',
+                'event_capacity': self.capacity, 'event_codes': dict(EVENT_CODES),
+                'events': [dict(row) for row in self.events], 'counters': dict(self.counters), 'summaries': summaries}

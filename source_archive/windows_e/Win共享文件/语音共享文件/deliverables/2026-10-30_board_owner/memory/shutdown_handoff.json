@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "written_utc": "2026-10-30T15:41:28Z",
+  "owner": "board_memory",
+  "purpose": "Metadata-only power-down and restart handoff; no private content or new raw archive",
+  "requested_safe_close_window_utc": ["2026-10-30T15:45:00Z", "2026-10-30T15:50:00Z"],
+  "production_state": {
+    "last_known_windows": "voice-board-vision-20261030-r12; legacy Windows business databases remain authoritative until an explicit single-writer handoff",
+    "last_known_board": "/home/root/aura-board-vision-20261030/06391079cfddb734-r3-ubuntu",
+    "candidate_store_is_production": false,
+    "real_database_migration_performed": false,
+    "new_compaction_or_body_cleanup_activated": false,
+    "automatic_migration_on_restart_allowed": false,
+    "automatic_candidate_cleanup_on_restart_allowed": false,
+    "role_asset_replacement_decided": false,
+    "runtime_state_reverified_by_this_shutdown_task": false
+  },
+  "frozen_sources_sha256": {
+    "aura/common/board_memory.py": "A6A39A7868F8FE9EF64A6985822BD49795CF0443B7977680C018A02920B7E343",
+    "aura/common/board_memory_migration.py": "563C36C330F1831C7419A558D32CBC9B1B89BCA46FA9B6FD93FE6202958CBD61",
+    "aura/common/board_timeline_clock.py": "93B65EC3D9CA393B32499845297C78A2F1F71BC19E069B2CE3DC6F69E795AF02",
+    "aura/tests/framework/test_board_memory.py": "E7F8DB56B4C13E20272E955D3DF674E7AB040BE163A63F8A28C12E75F44ECEB5",
+    "aura/tests/framework/test_board_memory_migration.py": "3EDDF5741C337218C7437911835ED65C517E094EBE83D7A45E455E2901B8A7BB",
+    "aura/tests/framework/test_board_timeline_clock.py": "F54ADE8F7A8F521AFBAC1B2A057EC3D342E7117E29431BAB3374AA0329936514",
+    "aura/tests/framework/test_board_memory_search_clear.py": "8F324178EEB1DF2BCEF0B5ED7E399632754362A91BFEEFD7E01493D6ED2617FC",
+    "deliverables/2026-10-30_board_owner/windows/shutdown_database_check.py": "90E1603BC44C9CB876F3CB6E0ED120CEECEF21D1893469752FB1A278ADDEF8A8"
+  },
+  "verified_evidence": [
+    {
+      "scope": "Synthetic BoardMemoryStore plus StableTimelineClock/Worker before latest history-search/clear/default-batch edits",
+      "result": "92 passed, 1 skipped in 4.76 seconds",
+      "checks": ["SQLite hot-journal crash recovery", "full audio receipt and interrupted playback boundaries", "scope/forget/source revisions", "TTL expiry and Date conflict during model work", "fatal monotonic rollback/boot mismatch keeps worker alive and original bodies", "no clock or SQLite lock across model callback", "real SQLite writer lock order"],
+      "current_store_sha_fully_regressed": false,
+      "skip": "POSIX permission mode assertion on Windows"
+    },
+    {
+      "scope": "Synthetic legacy migration bridge",
+      "result": "25 passed; earlier combined bridge/store run 75 passed, overlapping other runs",
+      "private_source_exercised": false,
+      "checks": ["read-only pinned synthetic snapshot", "atomic rollback", "empty-target enforcement", "same-import idempotency preserving newer target data", "forget/unknown reason suppression", "memory_command fact-source distinction", "incomplete assistant provenance excluded"]
+    },
+    {
+      "scope": "Public ECAPA candidate only",
+      "result": "16 unit tests; CPU six public variants max embedding absolute error 8.77e-7; ARM four public clips max error 3.77e-7",
+      "evidence_directory": "deliverables/2026-10-30_board_owner/speaker",
+      "production_identity_templates_used": false,
+      "realtime_or_field_identity_calibration_proven": false
+    }
+  ],
+  "unverified_latest_changes": [
+    "BoardMemoryStore.history(search=...) applies body/summary/keyword matching inside scope/state/time SQL before LIMIT; exact topic remains a separate partition",
+    "BoardMemoryStore.clear(scope, operation_id=None, operation_turn_id=None) atomically clears full-scope body/summary/keywords/current and old fact values, preserves active operation turn, and is idempotent without a 100-item cap",
+    "BoardMemoryWorker default max_events=2; Store.prepare_compaction generic default remains 32",
+    "New test_board_memory_search_clear.py was written but not run after the character performance exclusive window began",
+    "Parent policy/jobs/dialogue fixes for search, clear, current-fact direct answer, history priority, provenance and idle guards require the parent's final combined regression",
+    "StableTimelineClock external HTTP Date source validation and actual ARM boot/anchor integration have not been exercised live"
+  ],
+  "pending_lightweight_regression_after_window_release": {
+    "must_not_run_during_shutdown_or_role_exclusive_window": true,
+    "working_directory": "E:/Win共享文件/语音共享文件",
+    "python": "C:/Users/35870/.codex/visualizations/2026/10/09/01a12110-3ba4-7651-b3d7-2e6560916eb6/omnivoice-runtime-py310/Scripts/python.exe",
+    "arguments": ["-B", "-m", "pytest", "aura/tests/framework/test_board_memory_search_clear.py", "aura/tests/framework/test_board_memory.py", "aura/tests/framework/test_board_timeline_clock.py", "aura/tests/framework/test_board_memory_policy.py", "-q", "-p", "no:cacheprovider", "-k", "not real_http", "--basetemp", "aura/tests/framework/.tmp-memory-search-clear-20261030"],
+    "counts_must_not_be_added_across_overlapping_runs": true
+  },
+  "launch_gates": [
+    "An indivisible long closed turn can exceed the 2048-byte summary/context budget and remain queued; do not truncate names/numbers/negation or delete originals to bypass this",
+    "A summary crossing a requested day/time boundary may be omitted by exact bounded history selection; empty results must not be represented as proof that an event never happened",
+    "Observed board wall clock was approximately 2021 while evidence host was 2026; never use unverified board time.time for production timeline cleanup",
+    "A new boot requires a verified external HTTP Date sample and monotonic anchor; expiry/conflict can retain event estimates but must disable destructive compaction",
+    "Schema/source-version validation is not a guarantee of semantically lossless LLM compression",
+    "Actual private migration, single-writer transfer, profile grants and hardware end-to-end acceptance remain explicit later integration work"
+  ],
+  "shutdown_database_check": {
+    "source": "deliverables/2026-10-30_board_owner/windows/shutdown_database_check.py",
+    "executed_by_this_agent": false,
+    "parent_execution_required": "independent hidden WMI/CIM in the real production file view",
+    "python": "C:/Users/35870/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe",
+    "arguments_template": "-B <absolute shutdown_database_check.py> --job-id <new 32 lowercase hex> --max-seconds 25",
+    "working_directory": "deliverables/2026-10-30_board_owner/windows",
+    "output_template": "deliverables/2026-10-30_board_owner/windows/shutdown_database_check_<job-id>.json",
+    "check": "quick_check by default; integrity_check explicitly supported within the same total progress-handler budget",
+    "database_paths": {
+      "conversation": "E:/Win共享文件/语音共享文件/deliverables/2026-10-18_board_dialogue/model_host/conversations.sqlite3",
+      "observation": "%USERPROFILE%/AppData/Local/Aura/device-memory/observations.sqlite3",
+      "speaker": "%USERPROFILE%/AppData/Local/Aura/device-memory/speakers.sqlite3",
+      "anonymous_voice": "%USERPROFILE%/AppData/Local/Aura/device-memory/anonymous-voices.sqlite3",
+      "identity_links": "%USERPROFILE%/AppData/Local/Aura/device-memory/identity-links.sqlite3"
+    },
+    "scope": "mode=ro + query_only + BEGIN separately for each database; schema table counts, integrity verdict, path, file-size metadata and elapsed time only",
+    "cross_database_atomic_snapshot": false,
+    "certifies_shutdown_or_durability": false,
+    "does_not": ["select or serialize business columns/templates", "create a backup or new original archive", "hash an active SQLite file as a snapshot", "checkpoint", "VACUUM", "modify business state", "stop services", "change system power state"],
+    "status_at_handoff": "Source prepared only; parent owns actual launch context and the resulting metadata receipt"
+  },
+  "static_shutdown_audit": {
+    "existing_backup_paths_reviewed_but_not_run": [
+      "deliverables/2026-10-29_service_recovery/start_checkpoint.ps1",
+      "deliverables/2026-10-29_service_recovery/db_checkpoint.py",
+      "deliverables/2026-10-29_parallel_interaction/verify_private_final.py"
+    ],
+    "new_raw_backup_requested_or_created": false,
+    "backup_scripts_not_suitable_for_this_check_only_task": "They create raw snapshots; three-database checkpoint is incomplete for all five, and verify_private_final also compares private rows and assumes older snapshots",
+    "voice_exit_path": "aura/tools/board_model_host.py has server_close/tracker.close/voice.close in normal main finally; no verified hidden-process graceful-control endpoint was found",
+    "hub_exit_path": "aura/tools/device_hub.py main has no complete shutdown/finally endpoint",
+    "obsolete_stop_script": "deliverables/2026-10-29_chat_latency/manage_owned.ps1 uses Stop-Process -Force and an obsolete hub entry; do not label it graceful or reuse its process matching blindly",
+    "actual_shutdown_performed_by_this_agent": false,
+    "actual_host_poweroff_or_private_data_durability_receipt": "Parent task must provide; structural checks alone do not prove service drain, last utterance completion, disk flush or power-off safety"
+  },
+  "restart_first_steps": [
+    "Start from the existing last-known r3 production line; first read actual boot IDs, MainPID/cmdline, startup config and systemd pending entries. Do not replay old deployment scripts or assume historic PIDs remain valid",
+    "Read IMPLEMENTATION_STATE.json and the parent's final shutdown receipt; confirm which processes actually stopped and which data checks completed",
+    "Keep prior microphone/listening/follow protections and mechanical FAULT/null safeguards; do not open input, play audio or move hardware automatically",
+    "Do not auto-import legacy private databases, restore older snapshots, start the candidate compactor or delete old originals on reboot",
+    "Release the character performance exclusive window explicitly before running pending mock regressions; no candidate role asset replacement without the user's decision",
+    "Before any real timeline transfer, validate the configured model-health HTTP Date origin/status/cache policy, establish a fresh boot-bound monotonic UTC anchor, and gate both prepare and commit cleanup",
+    "Only after synthetic regression and explicit single-writer handoff should a separately coordinated private snapshot migration be considered; no double writing or copying private databases/templates/recordings to this shared tree",
+    "Keep LLM weights, downloads and Ollama data in the existing D:/AIModels directories; no shared-tree weight copies, virtual environments or external-weight junctions"
+  ]
+}

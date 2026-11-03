@@ -1,0 +1,38 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/26-readonly-tpm-and-nfs-startup.json",
+  "manifest_sha256": "0ff67bf8fa6f09c83a8eb63dbe25c1257a4fefbaecce47e50c07cbe8e50f06e9",
+  "started_utc": "2026-10-04T10:06:38.016554+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "tpm-capability-query",
+      "started_utc": "2026-10-04T10:06:38.520633+00:00",
+      "entry": {
+        "id": "tpm-capability-query",
+        "command": "tpm2_getcap -T device:/dev/tpmrm0 properties-fixed",
+        "timeout": 45
+      },
+      "exit_code": 0,
+      "output_sha256": "66da4cf15e77abed9bc5ac512374f78edb2e1a5e295dd40b1f2fb56c3b868beb",
+      "bytes": 1733,
+      "finished_utc": "2026-10-04T10:06:39.593391+00:00"
+    },
+    {
+      "id": "nfs-boot-links-and-init",
+      "started_utc": "2026-10-04T10:06:39.593620+00:00",
+      "entry": {
+        "id": "nfs-boot-links-and-init",
+        "command": "python3 -B -c 'import pathlib,json; P=pathlib.Path; out={\"links\":[],\"init_scripts\":{},\"fstab_nfs_entries\":[]}; roots=[P(\"/etc/systemd/system\"),P(\"/lib/systemd/system\"),P(\"/run/systemd/generator\"),P(\"/run/systemd/generator.early\"),P(\"/run/systemd/generator.late\")]; [(out[\"links\"].append({\"path\":str(p),\"target\":str(p.resolve())})) for r in roots if r.exists() for p in r.rglob(\"*\") if p.is_symlink() and any(s in p.name for s in [\"nfs\",\"mountd\"])]; [(out[\"init_scripts\"].update({str(p):p.read_text()})) for p in P(\"/etc/init.d\").glob(\"*nfs*\") if p.is_file()]; out[\"fstab_nfs_entries\"]=[l for l in P(\"/etc/fstab\").read_text().splitlines() if l.strip() and not l.lstrip().startswith(\"#\") and \"nfs\" in l]; print(json.dumps(out,indent=2))'",
+        "timeout": 60
+      },
+      "exit_code": 0,
+      "output_sha256": "9995970edb2095dc59e303a52c39da8e6eb779a612923fb25e16fd62ff84e698",
+      "bytes": 9116,
+      "finished_utc": "2026-10-04T10:06:41.609650+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T10:06:41.657875+00:00"
+}

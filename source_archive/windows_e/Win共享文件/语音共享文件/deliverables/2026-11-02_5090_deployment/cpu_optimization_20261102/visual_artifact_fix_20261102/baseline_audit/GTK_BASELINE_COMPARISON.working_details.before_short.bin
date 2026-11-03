@@ -1,0 +1,628 @@
+{
+  "schema": "aura-GTK-historical-baseline-comparison-2",
+  "status": "EXACT_SOURCE_DELTAS_PROVEN_MORNING_HUMAN_SOURCE_JOIN_MISSING_EARLY_OWNERSHIP_HYPOTHESIS_CORRECTED",
+  "scope": "Historical metadata/source audit only;0board access,0new candidates,0source edits,0experiments. Editor V2/new patch work remains stopped. Root uniquely owns GUI/camera actions and any rollback.",
+  "sources": {
+    "GTK5e5c": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\visual_artifact_fix_20261102\\actual_source_capture\\board_avatar_gtk.py",
+      "sha256": "5e5c492832fc1273d45fa25d0ec692b47c9ffa4b6c6d46e42f176e842b50d70c",
+      "bytes": 126374
+    },
+    "GTKd3c3": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\visual_artifact_fix_20261102\\gtk\\tools\\board_avatar_gtk.py",
+      "sha256": "d3c3d18aad2afdd02e25c5619befc67cfdd3fd8a7ef9f8713b5403a88c9a7bc5",
+      "bytes": 126738
+    },
+    "preview6e69": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\v2\\original\\tools\\board_camera_preview.py",
+      "sha256": "6e697c16f7ae264dff56b6b35f38da4b531ea13026b69a7c8bdbfb1960a6afcd",
+      "bytes": 10969
+    },
+    "preview67d6": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\v2\\candidate\\tools\\board_camera_preview.py",
+      "sha256": "67d6c0f2b24ea97e20fdcc7b3383b6444269a6e26f5deb566f2b88746b7daf9b",
+      "bytes": 11087
+    },
+    "servicesb55": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\v2\\original\\board\\interaction\\ui_services.py",
+      "sha256": "b55ee295e2cb5494f387fbaa4aa081fd1d6bffd57588c018c5f31daae56bd711",
+      "bytes": 17551
+    },
+    "servicese4ded": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\v2\\candidate\\board\\interaction\\ui_services.py",
+      "sha256": "e4dedf9b3d56d22d9eb93de1e96ad1a69870d553ea50f7dd5082b21e19f381c9",
+      "bytes": 18967
+    }
+  },
+  "critical_correction": {
+    "supersedes_early_finding": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\visual_artifact_fix_20261102\\GTK_FINDINGS.json",
+      "sha256": "27ddf05463995c644e3b73201276d90037820d293d6d6d408cf0b522e9c3c743",
+      "bytes": 13180
+    },
+    "affected_finding_id": "NATIVE_AND_GTK_SURFACE_OWNERSHIP",
+    "exact_composed_source": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\boot_recovery_parallel_20261102\\face_box_sync_review_20261102\\exact_c115\\tools\\face_pan_controls.py",
+      "sha256": "3ebb1b32368c8f12864e0f13da68853e4d9653e4279eada124eb337c5ca9d7ee",
+      "bytes": 15966
+    },
+    "matched_actual_c115_and_c386_380": true,
+    "locations": {
+      "tools/face_pan_controls.py": [
+        180,
+        182,
+        188,
+        191,
+        192,
+        194,
+        195,
+        196,
+        199,
+        200,
+        201,
+        205,
+        207,
+        209,
+        210,
+        212,
+        213
+      ]
+    },
+    "correction": "The earlier main-class-only audit missed actual FaceStage composition. FaceStage.attach_preview already set_double_buffered(False) and set_app_paintable(True), connects face_native_draw returningTrue and coalesces face_native_expose with the original250ms freshness gate. Therefore the current composed GUI did NOT lack native sink ownership. GTK d3c3 sets the same property values earlier, at construction; it did not newly add the intended mapped-window ownership values. Its visual causal effect is unproven. Main identified the active composition; this audit independently matched its source hash to the actual380 maps.",
+    "still_valid": "The4setter-only byte/AST delta and opaque native BGR delivery findings remain valid. FaceStage draw is a native expose hook rather than a Cairo/Pixbuf camera-image blender. External face boxes remain separate popup/editor work.",
+    "causal_confounders": [
+      "Property-setting time moved before map/realization",
+      "The GUI and editor were restarted in the same visual publication window",
+      "Page/listening mode changed after the short good observation"
+    ],
+    "history_and_candidate_bytes_retained_unmodified": true
+  },
+  "historical_baselines": [
+    {
+      "time_utc": "2026-11-02T07:48:31.895155+00:00",
+      "receipt": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\maintenance_original_axis_20261101\\ui_follow_final.json",
+        "sha256": "30ba5475a88d09bfd855db685cc74555a615ac92c42b33156d39f6efbcaf5fe6",
+        "bytes": 2861
+      },
+      "boot_id": "903cfade-b93c-48fa-804e-379be1967313",
+      "scope": "Original109.352s follow/STOP technical report. No exact GTK380 map or contemporaneous human video acceptance in this receipt. Adjacent07:49:52 GUI record names startup092c2ccf0872cae2f6e13c81e2d8b8a2ffe3b0800ab701566128b5c7947159af with OBSERVED_NOT_ALL_SOFTWARE_READY; not silently assigned later source pins."
+    },
+    {
+      "time_utc": "2026-11-02T09:45:08.732300+00:00",
+      "receipt": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\BASELINE_PREPARED.json",
+        "sha256": "e9113223acd82085e4643d12e053a904225fb946782f6b02a2b39e47fbdc4374",
+        "bytes": 41809
+      },
+      "boot_id": "903cfade-b93c-48fa-804e-379be1967313",
+      "startup_sha256": "1177df3831407bc819c1f1e3b89090f8c6b97661c8e74c2866b281be93b0a9c8",
+      "component_count": 380,
+      "GTK_preview_services": [
+        "5e5c492832fc1273d45fa25d0ec692b47c9ffa4b6c6d46e42f176e842b50d70c",
+        "6e697c16f7ae264dff56b6b35f38da4b531ea13026b69a7c8bdbfb1960a6afcd",
+        "b55ee295e2cb5494f387fbaa4aa081fd1d6bffd57588c018c5f31daae56bd711"
+      ],
+      "source_capture": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\SOURCE_SNAPSHOT.json",
+        "sha256": "c7e105d0c0c839f8e497192e33a156ad934032c439189e584d5db3cb29cf64e8",
+        "bytes": 1887
+      },
+      "additional_source_capture": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\SOURCE_ADDITIONAL.json",
+        "sha256": "1fc8f06f1e9f101c196f5d9f096f2f58ba86b893b2b050536ac3d0ae9e8bf8fb",
+        "bytes": 671
+      },
+      "scope": "Actual preCPU09:45:08Z full380 baseline, corroborating09:37:25 source capture. Proves actual historical bytes, not an arbitrary local aura tree. No human video acceptance at this same source observation."
+    },
+    {
+      "time_utc": "2026-11-02T12:33:40.863556+00:00",
+      "receipt": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\window_benchmark_1231\\PREFLIGHT.json",
+        "sha256": "ee7a703444d40541a09e4fd05d7f2067e7cfc7a7f0c33fc75b041142e3895352",
+        "bytes": 49527
+      },
+      "startup_sha256": "f507bfa6cb5ea5de807dd36601ac4ff2e4af9bba5aa75f6fd5a2b3a5fd54e3eb",
+      "scope": "Fresh new-boot preinstall380 still shows5e5c/6e69/b55. Actual projection commit below changed the two sources."
+    },
+    {
+      "time_utc": "2026-11-02T12:42:51.654109+00:00",
+      "receipt": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\window_benchmark_1231\\GTK_APPLIED.json",
+        "sha256": "3c84d92a77e67652f42f676818ccbf23c75fe882fbb4ffc559decd53f8b1ad97",
+        "bytes": 1818
+      },
+      "before_startup": "f507bfa6cb5ea5de807dd36601ac4ff2e4af9bba5aa75f6fd5a2b3a5fd54e3eb",
+      "after_startup": "e49436a8ada938c071b484ac04302134ac29420172457da6a2c544c841d77217",
+      "scope": "Actual projection publication. Neither this commit nor a pure microbenchmark is human visual acceptance or a matched whole-GUI benefit proof."
+    },
+    {
+      "time_utc": "2026-11-02T14:54:29.589532+00:00",
+      "receipt": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\maintenance_original_axis_20261101\\user_acceptance_20261102\\USER_ACCEPTANCE.json",
+        "sha256": "04c755267f8b036ee1c7c2399248e05333184c970bf0df80abfa1aa88d4e499d",
+        "bytes": 1394
+      },
+      "human_quote": "\u8f6c\u8f74\u6d4b\u8bd5\u662f\u6ca1\u95ee\u9898\u7684\u6ca1\u6709\u4e00\u987f\u4e00\u987f\uff0c\u4eba\u8138\u4e0e\u58f0\u7eb9\u5173\u8054\u4e0d\u7528\u505a",
+      "boot_proven": null,
+      "source_proven": null,
+      "scope": "Explicit human follow/no-stutter acceptance, intentionally no contemporaneous boot/source fingerprint. The requested morning camera/follow baseline cannot be assigned to arbitrary old files or to a later manifest solely by this timestamp."
+    },
+    {
+      "time_utc": "2026-11-02T19:38:00.189939+00:00",
+      "receipt": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\visual_artifact_fix_20261102\\release\\APPLY_VISUAL_1_RESULT.json",
+        "sha256": "390370b493f74e7355a9b116f5a778183e3e5222b0a3bf7af078de794760501d",
+        "bytes": 43753
+      },
+      "before_startup": "c1154308fcd25a9c8d957f33c5e2a4db0a0ef73e7656eb5aa437e29af9cd123b",
+      "after_startup": "c3861fa3d2cbb10fee424804f7b3932eadd576819a2a6290c7ca406d900b9602",
+      "scope": "c115->c386 actual380 changes only GTK5e5c->d3c3; all other379 same. Editor6a->6d0 outside380 and GUI/editor restart are separate publication dimensions."
+    },
+    {
+      "time_utc": "2026-11-02T19:43:17.383856+00:00",
+      "receipt": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\visual_artifact_fix_20261102\\VISUAL_LIVE_USER_ACCEPTANCE.json",
+        "sha256": "320e0a6cffee5d70bb9ccca27586c5758d75321d09ea481f0b510579655dcad7",
+        "bytes": 765
+      },
+      "quote": "\u4eba\u7269\u89c6\u9891\u548c\u8138\u6846\u90fd\u5df2\u660e\u663e\u6b63\u5e38",
+      "startup_sha256": "c3861fa3d2cbb10fee424804f7b3932eadd576819a2a6290c7ca406d900b9602",
+      "scope": "Human observed video/face-box improvement in this short\u73b0\u573atest; not180s acceptance or a hardware timing measurement."
+    },
+    {
+      "time_utc": "2026-11-02T19:48:14.238012+00:00",
+      "receipt": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\joint_acceptance_180s_20261102\\VISUAL_AXIS_RECURRENCE_USER_REPORT.json",
+        "sha256": "bcede4652f2a5d00f8b0ed2658286d30dec0cd0acc43e0e1510a2b5988966d46",
+        "bytes": 875
+      },
+      "scope": "Visual recurrence plus intermittent rightward movement reported about5minutes after the short pass. The10s c386 pass is not stable acceptance."
+    }
+  ],
+  "root_full_manifest_audit": {
+    "receipt": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\visual_artifact_fix_20261102\\baseline_audit\\MANIFEST_TIMELINE_AND_DELTA.json",
+      "sha256": "abd775ae67f016c71169a2d14ef9de5a432649375c1b585f86231eb44898223f",
+      "bytes": 11979
+    },
+    "input_records": {
+      "pre_CPU_094508Z": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\BASELINE_PREPARED.json",
+        "sha256": "e9113223acd82085e4643d12e053a904225fb946782f6b02a2b39e47fbdc4374",
+        "startup_sha256": "1177df3831407bc819c1f1e3b89090f8c6b97661c8e74c2866b281be93b0a9c8",
+        "boot_id": "903cfade-b93c-48fa-804e-379be1967313"
+      },
+      "pre_restore_d667": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\joint_acceptance_180s_20261102\\CPU_RESTORE_PHASE_HANDOFF.json",
+        "sha256": "4f681fd35b251b1c340b893996c944a6b80633e54f7131ca385d9f38175ae1c7",
+        "startup_sha256": "d667b871e159a9f2b52cfb48a16a31ba39847e4d68658a521aee006e7db915ef",
+        "boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e"
+      },
+      "restored_pan_c115": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\joint_acceptance_180s_20261102\\AXIS_BINDING_REFRESH_RESULT.json",
+        "sha256": "b273ba9c8b36101dde1befacb1ccb0a0fab0e4f97c5bc42a006f6703c45b13ed",
+        "startup_sha256": "c1154308fcd25a9c8d957f33c5e2a4db0a0ef73e7656eb5aa437e29af9cd123b",
+        "boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e"
+      },
+      "last_root_handoff": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\joint_acceptance_180s_20261102\\LIVE_READY_HANDOFF.json",
+        "sha256": "e83d0ca859a8576699cbebdecd9e636ddd6dd866e00ccbbf860f81de804837d9",
+        "startup_sha256": "c3861fa3d2cbb10fee424804f7b3932eadd576819a2a6290c7ca406d900b9602",
+        "boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e"
+      }
+    },
+    "counts": {
+      "preCPU1177_to_d667": 16,
+      "d667_to_c115": 4,
+      "c115_to_c386": 1
+    },
+    "interpretation": "The16-component earlier-to-d667 change is broader than this preview projection; d667->c115 is4configuration bindings. Replaying an old entire startup/config set is not a one-variable GUI comparison."
+  },
+  "deltas": {
+    "GTK5e5c_to_d3c3": {
+      "before": "5e5c492832fc1273d45fa25d0ec692b47c9ffa4b6c6d46e42f176e842b50d70c",
+      "after": "d3c3d18aad2afdd02e25c5619befc67cfdd3fd8a7ef9f8713b5403a88c9a7bc5",
+      "delta": "Exactly two surfaces each get app_paintableTrue/double_bufferedFalse at construction. Same values already applied at attach by FaceStage; this is an earlier-setting delta, not repair of missing mapped ownership.",
+      "diff": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\visual_artifact_fix_20261102\\gtk\\board_avatar_gtk.diff",
+        "sha256": "6c142d99ef228b865cfa1459dd4f70cc3528c79bb171631f7508c703a731e365",
+        "bytes": 1348
+      },
+      "existing_AST_proof": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\visual_artifact_fix_20261102\\gtk\\NATIVE_SURFACE_LOCAL_CHECK.json",
+        "sha256": "33b017b81f5e3442aaa911264923004d491554c35feb10ca0d83f39daf3272ec",
+        "bytes": 1036
+      }
+    },
+    "preview6e69_to67d6": {
+      "before": "6e697c16f7ae264dff56b6b35f38da4b531ea13026b69a7c8bdbfb1960a6afcd",
+      "after": "67d6c0f2b24ea97e20fdcc7b3383b6444269a6e26f5deb566f2b88746b7daf9b",
+      "only_changed_existing_method": "CameraPreviewWorker.work",
+      "old_read_line": 158,
+      "new_read_lines": [
+        158,
+        159
+      ],
+      "delta": "services.read() changed to prefer callable read_preview(), falling back to services.read(). No other method changed.",
+      "diff": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\v2\\board_camera_preview.diff",
+        "sha256": "02e76170ef0dd67cb52482a0b2c4c64f86e9a16e2d10e0d7156e8fef87f1d80f",
+        "bytes": 829
+      }
+    },
+    "servicesb55_toe4ded": {
+      "before": "b55ee295e2cb5494f387fbaa4aa081fd1d6bffd57588c018c5f31daae56bd711",
+      "after": "e4dedf9b3d56d22d9eb93de1e96ad1a69870d553ea50f7dd5082b21e19f381c9",
+      "only_added_method": "UiServiceClient.read_preview",
+      "changed_existing_methods": [],
+      "new_method_lines": [
+        156,
+        164,
+        178
+      ],
+      "delta": "Adds only a locked narrow snapshot/JPEG/raw-owner projection. Original read, command handling, source ingestion, preview publication and identity APIs are unchanged. Narrow read retains READY/TTL/boot/service/camera/preview fields used by the worker; skips deep-copying unused whole state/results.",
+      "diff": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\v2\\ui_services.diff",
+        "sha256": "5a1eaca9c348b742083ba8f31cca7581b92106afabb7f4ce478a901bcfec91e0",
+        "bytes": 1936
+      }
+    }
+  },
+  "per_frame_preview_invariants": {
+    "verified_AST_identical_methods": [
+      "CameraPreviewWorker.__init__",
+      "CameraPreviewWorker.attach",
+      "CameraPreviewWorker.detach",
+      "CameraPreviewWorker.push",
+      "CameraPreviewWorker.clear",
+      "CameraPreviewWorker.read",
+      "CameraPreviewWorker.placeholder_visible",
+      "CameraPreviewWorker.close"
+    ],
+    "pipeline": "Unchanged BGR640x480 appsrc -> one-buffer leaky queue -> videoconvert -> videoscale -> identity -> ximagesink syncfalse. No deployed scale-first swap.",
+    "frame_rate": "No rate reduction or new cap: original10ms read loop and framerate0/1 caps unchanged. Delivery follows source frame arrival, freshness and bounded sink queues.",
+    "clear_and_TTL": "Original raw/sink250ms guard and full-black clear unchanged, including no-frame/epoch handling. No hold-last-frame extension.",
+    "cache_and_buffers": "Same one-frame appsrc-byte admission, downstream queue1, four metadata references, raw inode/sequence dedup and owner reset. No new image accumulation cache.",
+    "metrics": "read() displayed_frames/update_hz/frame_reference/frame_visible/entry_age_ms unchanged. Its measurement is sink entry, not physical scanout or an actual face packet TTL.",
+    "causal_limit": "Identical frame-delivery code does not prove equal thread scheduling/workload or rule out indirect effects. No whole-board improvement or physical root cause is inferred."
+  },
+  "mode_receipts": [
+    {
+      "receipt": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\visual_artifact_fix_20261102\\release\\GUI_READY_1_RESULT.json",
+        "sha256": "0a3755904e0ba50a946dc88d7647cc9883e7a63e160fea87e2df6770003f24dd",
+        "bytes": 7324
+      },
+      "host_utc": "2026-11-02T19:39:37.885946+00:00",
+      "startup_sha256": "c3861fa3d2cbb10fee424804f7b3932eadd576819a2a6290c7ca406d900b9602",
+      "saved_listening_enabled": false,
+      "samples": [
+        {
+          "page": "main",
+          "handsfree": {
+            "enabled": false,
+            "microphone_open": false,
+            "state": "PAUSED"
+          }
+        },
+        {
+          "page": "main",
+          "handsfree": {
+            "enabled": false,
+            "microphone_open": false,
+            "state": "PAUSED"
+          }
+        },
+        {
+          "page": "main",
+          "handsfree": {
+            "enabled": false,
+            "microphone_open": false,
+            "state": "PAUSED"
+          }
+        }
+      ],
+      "motion_face_source_and_detection_ages_recorded": false
+    },
+    {
+      "receipt": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\visual_artifact_fix_20261102\\release\\OPEN_VISION_1_RESULT.json",
+        "sha256": "430851749450f550c3f6dbdd6ce7eec83ac6600610f4715b5b66249c13d9d916",
+        "bytes": 10168
+      },
+      "host_utc": "2026-11-02T19:40:51.689699+00:00",
+      "startup_sha256": "c3861fa3d2cbb10fee424804f7b3932eadd576819a2a6290c7ca406d900b9602",
+      "saved_listening_enabled": null,
+      "samples": [
+        {
+          "page": "main",
+          "preview": {
+            "frame_visible": false,
+            "sink_active": false,
+            "active_outputs": [],
+            "transport": "jpeg-http",
+            "update_hz": 0,
+            "entry_age_ms": null
+          },
+          "following": false
+        },
+        {
+          "page": "vision",
+          "preview": {
+            "frame_visible": false,
+            "sink_active": false,
+            "active_outputs": [],
+            "transport": "jpeg-http",
+            "update_hz": 0,
+            "entry_age_ms": null
+          },
+          "following": false
+        },
+        {
+          "page": "vision",
+          "preview": {
+            "frame_visible": false,
+            "sink_active": false,
+            "active_outputs": [],
+            "transport": "jpeg-http",
+            "update_hz": 0,
+            "entry_age_ms": null
+          },
+          "following": false
+        },
+        {
+          "page": "vision",
+          "preview": {
+            "frame_visible": false,
+            "sink_active": false,
+            "active_outputs": [],
+            "transport": "jpeg-http",
+            "update_hz": 0,
+            "entry_age_ms": null
+          },
+          "following": false
+        },
+        {
+          "page": "vision",
+          "preview": {
+            "frame_visible": false,
+            "sink_active": false,
+            "active_outputs": [],
+            "transport": "jpeg-http",
+            "update_hz": 0,
+            "entry_age_ms": null
+          },
+          "following": false
+        },
+        {
+          "page": "vision",
+          "preview": {
+            "frame_visible": true,
+            "sink_active": true,
+            "active_outputs": [
+              "vision"
+            ],
+            "transport": "raw-local",
+            "update_hz": 18.2,
+            "entry_age_ms": {
+              "median": 94.37,
+              "p95": 118.68
+            }
+          },
+          "following": false
+        },
+        {
+          "page": "vision",
+          "preview": {
+            "frame_visible": true,
+            "sink_active": true,
+            "active_outputs": [
+              "vision"
+            ],
+            "transport": "raw-local",
+            "update_hz": 18.2,
+            "entry_age_ms": {
+              "median": 94.37,
+              "p95": 118.68
+            }
+          },
+          "following": false
+        },
+        {
+          "page": "vision",
+          "preview": {
+            "frame_visible": true,
+            "sink_active": true,
+            "active_outputs": [
+              "vision"
+            ],
+            "transport": "raw-local",
+            "update_hz": 18.2,
+            "entry_age_ms": {
+              "median": 94.37,
+              "p95": 118.68
+            }
+          },
+          "following": false
+        },
+        {
+          "page": "vision",
+          "preview": {
+            "frame_visible": true,
+            "sink_active": true,
+            "active_outputs": [
+              "vision"
+            ],
+            "transport": "raw-local",
+            "update_hz": 16.94,
+            "entry_age_ms": {
+              "median": 109.07,
+              "p95": 188.94
+            }
+          },
+          "following": false
+        },
+        {
+          "page": "vision",
+          "preview": {
+            "frame_visible": true,
+            "sink_active": true,
+            "active_outputs": [
+              "vision"
+            ],
+            "transport": "raw-local",
+            "update_hz": 15.91,
+            "entry_age_ms": {
+              "median": 110.42,
+              "p95": 188.94
+            }
+          },
+          "following": false
+        },
+        {
+          "page": "vision",
+          "preview": {
+            "frame_visible": true,
+            "sink_active": true,
+            "active_outputs": [
+              "vision"
+            ],
+            "transport": "raw-local",
+            "update_hz": 15.93,
+            "entry_age_ms": {
+              "median": 118.68,
+              "p95": 190.58
+            }
+          },
+          "following": false
+        },
+        {
+          "page": "vision",
+          "preview": {
+            "frame_visible": true,
+            "sink_active": true,
+            "active_outputs": [
+              "vision"
+            ],
+            "transport": "raw-local",
+            "update_hz": 15.93,
+            "entry_age_ms": {
+              "median": 118.68,
+              "p95": 190.58
+            }
+          },
+          "following": false
+        }
+      ],
+      "motion_face_source_and_detection_ages_recorded": false
+    },
+    {
+      "receipt": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\visual_artifact_fix_20261102\\release\\FINAL_JOINT_READY_1_RESULT.json",
+        "sha256": "799687946b5ec147715e703da0155d01347dc78649cbac3a2c58d890789405ed",
+        "bytes": 7351
+      },
+      "host_utc": "2026-11-02T19:44:28.763612+00:00",
+      "startup_sha256": "c3861fa3d2cbb10fee424804f7b3932eadd576819a2a6290c7ca406d900b9602",
+      "saved_listening_enabled": true,
+      "samples": [
+        {
+          "page": null,
+          "handsfree": {
+            "enabled": true,
+            "microphone_open": true,
+            "state": "WAITING_SPEECH"
+          }
+        },
+        {
+          "page": null,
+          "handsfree": {
+            "enabled": true,
+            "microphone_open": true,
+            "state": "WAITING_SPEECH"
+          }
+        },
+        {
+          "page": null,
+          "handsfree": {
+            "enabled": true,
+            "microphone_open": true,
+            "state": "WAITING_SPEECH"
+          }
+        }
+      ],
+      "motion_face_source_and_detection_ages_recorded": false
+    },
+    {
+      "receipt": {
+        "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\visual_artifact_fix_20261102\\release\\FINAL_JOINT_READY_2_RESULT.json",
+        "sha256": "97137e59652c28fc9ca30608598b9ffc93aaef449f2a08d60fa383f8481e8c75",
+        "bytes": 7345
+      },
+      "host_utc": "2026-11-02T19:46:11.076076+00:00",
+      "startup_sha256": "c3861fa3d2cbb10fee424804f7b3932eadd576819a2a6290c7ca406d900b9602",
+      "saved_listening_enabled": true,
+      "samples": [
+        {
+          "page": "main",
+          "handsfree": {
+            "enabled": true,
+            "microphone_open": true,
+            "state": "WAITING_SPEECH"
+          }
+        },
+        {
+          "page": "main",
+          "handsfree": {
+            "enabled": true,
+            "microphone_open": true,
+            "state": "WAITING_SPEECH"
+          }
+        },
+        {
+          "page": "main",
+          "handsfree": {
+            "enabled": true,
+            "microphone_open": true,
+            "state": "WAITING_SPEECH"
+          }
+        }
+      ],
+      "motion_face_source_and_detection_ages_recorded": false
+    }
+  ],
+  "mode_interpretation": {
+    "root_contemporaneous_context": "Root reports the short human pass was vision + mic PAUSED; after that root switched main and listeningtrue before recurrence.",
+    "direct_receipt_coverage": "19:39:37 GUI_READY records HFdisabled/micfalse/PAUSED;19:40:51 OPEN_VISION records active raw-local vision-only sink but not HF.19:44:28 and19:46:11 FINAL_JOINT_READY record main and HFenabled/mictrue/WAITING_SPEECH but no preview activeOutputs. Human pass and recurrence receipts contain no simultaneous face-source/decode ages.",
+    "not_same_mode_AB": true,
+    "source_age_at_actual_failure_proven": false,
+    "age_warning": "GUI software-projected reference ages280-531ms must not be interpreted as /motion/face source age or used to extend250ms face input TTL. Preview public-state projection, sink-entry reference and source_mono_ms/face_detection_mono_ms have different observation times and meanings."
+  },
+  "minimal_comparisons_NOT_EXECUTED": [
+    {
+      "priority": "Root already selected; no new source revision",
+      "comparison": "Keep c386, same vision page, camera owner/settings and editor6d0; vary only original listening pause/on after axis ownership returns. CPU does not run/schedule this or change preferences."
+    },
+    {
+      "priority": "Optional root choice only, not an automatic additional change",
+      "comparison": "If source isolation remains necessary, compare only d3c3 construction setters versus5e5c while preserving unchanged FaceStage3ebb, preview67d6/services e4ded/editor6d0 and other379. It tests earlier setting timing, not missing ownership; GUI restart remains a confounder."
+    },
+    {
+      "priority": "Separate optional root choice, never simultaneous with setter test",
+      "comparison": "Worker67d6 versus6e69 alone can isolate narrow read versus existing full read while retaining servicese4ded. Reverting b55 simultaneously is not needed to select the old read path. No broad startup or old camera/pan/identity configuration replay."
+    }
+  ],
+  "evidence_boundaries": [
+    "No reviewed receipt proves the exact morning human-good GUI/preview source fingerprint. The human report remains valid, its source-version join is missing.",
+    "Do not convert historical technical ready/CPU receipts into human moving-video acceptance.",
+    "Short post-restart improvement and later recurrence are both retained; no root-cause conclusion from the first10seconds.",
+    "The early GTK_FINDINGS missing-ownership hypothesis is superseded here; no historical evidence or candidate bytes were edited or removed.",
+    "No V2 patch, broad test, telemetry, model, benchmark, GUI control or axis action occurred in this audit."
+  ],
+  "board_calls": 0,
+  "new_candidates_or_source_edits": 0,
+  "new_experiments_or_tests": 0,
+  "root_only_control_and_rollback": true,
+  "publication_or_rollback_authorized_by_report": false
+}

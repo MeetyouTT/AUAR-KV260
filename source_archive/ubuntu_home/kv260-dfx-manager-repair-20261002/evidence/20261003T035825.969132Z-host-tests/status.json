@@ -1,0 +1,133 @@
+{
+  "scope": "Native helper tests; no board, FPGA access, daemon or app loading",
+  "commands": [
+    {
+      "name": "compile-baseline",
+      "argv": [
+        "/home/ghmd/petalinux/2022.2/components/yocto/buildtools_extended/sysroots/x86_64-petalinux-linux/usr/bin/x86_64-petalinux-linux-gcc",
+        "-O1",
+        "-g",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-fno-omit-frame-pointer",
+        "-pthread",
+        "-I/home/ghmd/kv260-dfx-manager-repair-20261002/build/20261003T035120.403885Z-baseline/src/include",
+        "-I/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr/include",
+        "-DHELPER_FILE=\"/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr/src/daemon_helper.c\"",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/watch_regression.c",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr/src/sys/linux/json-config.c",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr/src/sys/linux/print.c",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr/src/assert.c",
+        "-Wl,--gc-sections",
+        "-o",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/watch-baseline"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.766,
+      "log": "evidence/20261003T035825.969132Z-host-tests/compile-baseline.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "name": "baseline-legacy",
+      "argv": [
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/watch-baseline",
+        "legacy",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/fixture-legacy"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.032,
+      "log": "evidence/20261003T035825.969132Z-host-tests/baseline-legacy.log",
+      "sha256": "01aeb520b7783de00c77910ac8ccdf1402debec15c07a3a265b4d25a118ffe63",
+      "result_lines": [
+        "RESULT rescan rounds=130 entries=500 kernel_watches=5 legacy_defect_reproduced=1"
+      ]
+    },
+    {
+      "name": "compile-patched",
+      "argv": [
+        "/home/ghmd/petalinux/2022.2/components/yocto/buildtools_extended/sysroots/x86_64-petalinux-linux/usr/bin/x86_64-petalinux-linux-gcc",
+        "-O1",
+        "-g",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-fno-omit-frame-pointer",
+        "-pthread",
+        "-I/home/ghmd/kv260-dfx-manager-repair-20261002/build/20261003T035243.033181Z-patched/src/include",
+        "-I/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr-patched/include",
+        "-DHELPER_FILE=\"/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr-patched/src/daemon_helper.c\"",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/watch_regression.c",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr-patched/src/sys/linux/json-config.c",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr-patched/src/sys/linux/print.c",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr-patched/src/assert.c",
+        "-Wl,--gc-sections",
+        "-o",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/watch-patched"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.466,
+      "log": "evidence/20261003T035825.969132Z-host-tests/compile-patched.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    {
+      "name": "patched-rescan",
+      "argv": [
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/watch-patched",
+        "rescan",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/fixture-rescan"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.276,
+      "log": "evidence/20261003T035825.969132Z-host-tests/patched-rescan.log",
+      "sha256": "20dae286cc99bd09f9ed42c3a372e751fb1835d9c920fb54f2b0857a2470b6c4",
+      "result_lines": []
+    },
+    {
+      "name": "patched-lifecycle",
+      "argv": [
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/watch-patched",
+        "lifecycle",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/fixture-lifecycle"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.168,
+      "log": "evidence/20261003T035825.969132Z-host-tests/patched-lifecycle.log",
+      "sha256": "f48e227bb88f82c884ffc935a7a6e4a323316640d38693e5bfa7801f2d23e2b1",
+      "result_lines": []
+    },
+    {
+      "name": "patched-boundaries",
+      "argv": [
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/watch-patched",
+        "boundaries",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/fixture-boundaries"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.004,
+      "log": "evidence/20261003T035825.969132Z-host-tests/patched-boundaries.log",
+      "sha256": "529209b7afba5bb45f14604153c4c60392af44b6b204a829f9ea5306e0f383af",
+      "result_lines": [
+        "RESULT boundaries passed=1 capacity=500"
+      ]
+    },
+    {
+      "name": "patched-concurrent",
+      "argv": [
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/watch-patched",
+        "concurrent",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035825.969132Z-host-tests/fixture-concurrent"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.065,
+      "log": "evidence/20261003T035825.969132Z-host-tests/patched-concurrent.log",
+      "sha256": "a9f5bfd7b63a489cf858ab46f2df53e1ac97e4dc94bf12ccdff3d64d9cd0b775",
+      "result_lines": [
+        "RESULT concurrent threads=8 calls=80000 entries=1"
+      ]
+    }
+  ],
+  "passed": true,
+  "host_compiler": "/home/ghmd/petalinux/2022.2/components/yocto/buildtools_extended/sysroots/x86_64-petalinux-linux/usr/bin/x86_64-petalinux-linux-gcc",
+  "sanitizers": "Not enabled: this existing GCC 11 SDK does not ship libasan."
+}

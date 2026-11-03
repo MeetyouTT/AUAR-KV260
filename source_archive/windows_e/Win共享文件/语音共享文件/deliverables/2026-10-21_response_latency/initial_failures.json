@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-21",
+  "failures": [
+    {
+      "stage": "initial_local_regression",
+      "result": "3 failed, 65 passed",
+      "reason": "HTTP loopback fixtures encountered sandbox WinError 10013; importing the unittest fixture class also caused duplicate collection.",
+      "resolution": "Import fixture module instead of test class, then rerun with permitted local HTTP. tests_initial.log records 60 passing tests; expanded tests.log records 155 passed, 1 skipped and 26 subtests passed."
+    },
+    {
+      "stage": "initial_manual_http_probe",
+      "result": "HTTP 400: Invalid conversation identifier",
+      "reason": "Diagnostic CID contained a prefix rather than exactly 32 hexadecimal characters.",
+      "resolution": "measure_host.py creates a valid UUID hex CID. Rejected probe did not start inference and is excluded from timing results."
+    }
+  ],
+  "product_regression_claimed": false
+}

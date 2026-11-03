@@ -1,0 +1,1 @@
+cmd_net/9p/built-in.a := echo >/dev/null; rm -f net/9p/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST net/9p/built-in.a net/9p/mod.o net/9p/client.o net/9p/error.o net/9p/protocol.o net/9p/trans_fd.o net/9p/trans_common.o

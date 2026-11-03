@@ -1,0 +1,59 @@
+全状态自然头晃与多部件动态：v17上的独立motion候选
+
+用户最新范围：不只思考期间，待机、聆听、思考、回答、暂停和取消回待机都应有自然动态。
+目前是可审C++源码候选，尚未编译/实机动态验收，不宣称新动态已上线。
+原眼嘴版本现已由主窗口部署v17，纯角色实图通过；真人声学口型及严格物理16fps仍未验。
+该事实另记父目录EYE_GATING_DEPLOYED_V17.json；原冻结眼嘴候选和失败预览证据保留。
+
+基线
+当前保存v17 startup0cbc191b4bf9029b15a65ef15797e43e15459e06b88381025d28a2c9b573dd2a；
+manifest38a267a4f8d504803587c8be353452b146f1e232e926ac4e061a5e2832b33620，379组件。
+native b2432e75a75e4dbdebee8e89a141a68ba00671c33b2b258b81ce16794b2c73d2；pair998710...
+基线来自主窗口封存source_mapping及构建回执，不是本窗口操作设备取得。
+feature v3已在此版本中，yuki_jobs_candidate及视觉/声纹所有功能文件不改，不恢复v16启动配置。
+
+具体变化
+在原有60Hz author tick加入低频、连续、不同相位的六通道小幅叠加：
+head_LR、head_UD、head_slant、body_LR、body_UD、body_slant。
+最大增量分别3.6/1.6/1.9/0.65/0.5/0.65作者单位，远小于角色原±30范围；
+资源审计核对两套现有待机姿势的原key范围，加上增量后仍在安全范围内。
+头与身体周期和相位不同，不是整张图片平移或统一摆动。
+启动用1.4秒渐入，状态切换渐变强度和节奏，不随音轨owner、取消或暂停重新起相位。
+待机/聆听共享轻柔基调；思考稍慢；真正回答音频的音量只加入很小且平滑的头部响应。
+暂停和取消仅继续自然动作，嘴仍按原规则立即闭合。
+
+多部件依据
+现役模型已有4组头发链（前/左侧/右侧/后），2组衣饰链及原身体物理。
+新头身参数在原作者步、几何/物理求值之前写入现有difference source。
+因此原有头发/衣饰物理链收到动态锚点；不直接给头发贴同一正弦，不更改弹性/阻尼等物理参数。
+RESOURCE_AUDIT.json保存真实资源pin、两套姿势范围及6组hair/parts绑定。
+眼嘴三参数的最终锁定层保持，头身驱动不会写eye/mouth/talk或提前触发说话。
+
+开销与约束
+只改native host源/header并新增小型gentle_motion.hpp；核心引擎、资源、纹理、构图和配色不变。
+Control/Stats布局和输入字段不变；能力位增加CONTINUOUS_MOTION=2，原眼嘴能力位1保留。
+复用现有作者步与物理步，没有额外帧循环、物理pass、GPU draw、网络或常驻进程。
+仍以16fps为目标，额外6个轻量参数提交的板端CPU成本尚未量测，不能预称帧率通过。
+原音频8帧、PAUSED/mic=false、模型设置与D盘LLM存储保持。
+
+测试和设备交接
+本地已核v17全部相关源pin/构建来源、实际公开模型的参数范围和physics绑定，Python辅助脚本语法有效。
+Windows本窗口未运行C++或打开设备，mandatory native tests全部待主窗口隔离执行。
+新native_motion_source.zip仅含3个native文件、两个CPU测试、构建脚本与公开manifest/资源审计。
+主窗口在新的独立目录解包，沿用上次build_native_isolated.py参数与nice15串行隔离构建方式：
+python3 -B build_native_isolated.py --native-root /home/root/aura-yuki-validation-20261030/native_integration --model /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki/model.runtime.json --resx /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki/yuk_0.ems.resx.json --resource-root /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura/assets/yuki
+不会安装或显示，新的native_build拒绝覆盖既有目录。
+测试先完整跑原眼嘴/暂停/TTL/取消回归，再用真实新C++ policy做12000作者步的界限与切换连续性检查，
+再用真实Host/core做六种状态各160帧，验证六通道一直运动、两种pose、原多组hair/parts输出变化、无额外作者步。
+如果任何一项失败，保持v17现役，不把未通过参数测试的候选推到可见预览。
+
+构建通过后本窗口可用seal_motion_overlay.py接库和匹配receipt生成5文件配套bundle：
+库、pair JSON、formal_yuki的pair常量改变；native_yuki/formal_native_yuki仅原字节随包，功能路由不入包。
+pair内层仅lib pin改变。实际selection绑定仍在GUI config/board_avatar_gtk.json，再重算GUI组件startup pin。
+仅由主窗口安排单GTK/EGL所有者动态预览。应每个状态看至少两个不同时间的纯角色帧/短序列，
+确认头相对身体变化且头发/衣饰有跟随，而不是只看单张图或数值计数；capture沿已修Gtk.Fixed和swap前读取路径。
+最后由主窗口合并发布，保留现役feature v3和用户手动暂停。
+
+回退
+仅撤回本增量native lib、pair JSON与formal pair常量，再重算最新启动绑定；before/aura保留v17精确字节。
+不回退整个v17到v16，不覆盖功能路由、业务库或模型配置，不删除任何历史归档。

@@ -1,0 +1,17 @@
+[
+  {
+    "id": "live_dt_identity",
+    "command": "for f in /sys/firmware/devicetree/base/model /sys/firmware/devicetree/base/compatible /sys/firmware/devicetree/base/chosen/bootargs /sys/firmware/devicetree/base/chosen/stdout-path; do printf \"\\n%s\\n\" \"$f\"; tr \"\\000\" \"\\n\" < \"$f\"; done; cat /proc/cmdline",
+    "timeout": 35
+  },
+  {
+    "id": "storage",
+    "command": "lsblk -o NAME,MAJ:MIN,SIZE,TYPE,FSTYPE,LABEL,UUID,MOUNTPOINT; cat /proc/partitions; cat /proc/mtd; cat /proc/mounts; df -h; fdisk -l /dev/mmcblk1",
+    "timeout": 35
+  },
+  {
+    "id": "tool_sources",
+    "command": "command -v xmutil xlnx-bootfw xlnx_platformstats xbutil xdputil xclbinutil dtc python3 rpm opkg dnf lsusb v4l2-ctl media-ctl arecord aplay i2cdetect; cat /usr/bin/xmutil; head -n 100 /usr/bin/xdputil",
+    "timeout": 35
+  }
+]

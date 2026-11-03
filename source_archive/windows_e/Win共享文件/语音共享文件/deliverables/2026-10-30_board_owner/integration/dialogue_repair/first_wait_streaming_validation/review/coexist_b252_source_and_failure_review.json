@@ -1,0 +1,71 @@
+{
+  "status": "SOURCE_REVIEW_COMPLETE_COEXIST_FAILURE_VALID_CTC_NOT_SELECTED",
+  "scope": "Read-only source and saved metadata review; original architecture review preserved, no global document or candidate/source/device/model changes.",
+  "source": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\first_wait_streaming_validation\\coexist\\probe_coexist.py",
+    "sha256": "b252e7cc3d09f84557a580bae13356e99f6e3e1c6037271e672dd1c203a45570",
+    "handoff_sha256": "32f22ccaf80a663eddbe1bb934f0aa84ebca1087fecba1d05b6f890dfaa56061"
+  },
+  "actual_receipt": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\first_wait_streaming_validation\\actual_coexist_1793447410990795800.json",
+    "sha256": "8c71ceb77254ad3d6539b24e0ff142e9183daa1c9e881fbe2ab111dd8273e8d7"
+  },
+  "contracts_checked": {
+    "raw_tap": "Original immutable 640-byte PCM after original endpoint.feed; denoised FFT output is not fed to CTC.",
+    "capture_queue": "Original 8 frames/160ms unchanged; observed peak3, error empty, reader closed.",
+    "ctc_isolation": "One separately spawned CTC process, one model/stream, one thread, normal nice0; observer performs no decode or blocking socket send.",
+    "credit": "Offer increments pending before sender queue/socket; only ordered exact-count ACK after accept+drain releases samples. Queued+sent+unACKed count is real, not reset on send.",
+    "final": "END carries source sample count/hash; worker checks before flush; result requires all prior ACKs.",
+    "device_database": "Probe calls _read_pcm on paced public source, never capture.start; process_factory refuses arecord. No SQLite/Store/identity/device write calls. Guard reads process/config and HTTP state/health metadata; public output excludes dialogue bodies.",
+    "cleanup": "Source/pump/endpoint and private socket threads are closed in finally, own CTC wait/terminate/kill is bounded. Actual root runner adds120s own-new-session process-group timeout/cleanup; no production PGID signalled."
+  },
+  "observed_failure": {
+    "frontend_processed_frames": 154,
+    "ctc_offered_frames": 153,
+    "ctc_outstanding_frames": 50,
+    "ctc_ack_prefix_frames": 103,
+    "ctc_offered_audio_seconds": 3.06,
+    "ctc_ack_prefix_audio_seconds": 2.06,
+    "credit_limit_ms": 1000,
+    "completed_ack_latency_max_ms": 843.141,
+    "frontend_cpu_mean_ms": 17.29884477922078,
+    "frontend_wall_max_ms": 36.326582994661294,
+    "background_memory_completed": [
+      493,
+      497
+    ],
+    "ui_camera_owner_unchanged": true,
+    "production_configuration_changed": false
+  },
+  "interpretation": [
+    "未发现单位换算、重复计数或GTCRN变长输出被混作RAW计数的问题。第154帧offer超过固定1秒未确认预算，失败有效。",
+    "oldest_ack_max_ms只统计已经收到ACK的offer→ACK最大时长843.141ms；不是失败时最老未ACK的当前年龄，不能拿它证明所有在途帧均不足1秒。",
+    "child在DATA触发is_ready时同步完成decode后才ACK；未ready帧则可立即ACK。这会产生模型块状峰值。当前结果证明共存条件下传输/处理确认延迟超预算，尚不能区分平均算力不足、首轮/块decode、CPU调度、ACK线程延迟。",
+    "失败时没有child的decode调用wall/processCPU与进行中阶段报告。隔离4轮9次decode总3.2–3.52秒wall/2.75–2.86秒CPU、单次max约0.408–0.476秒，不足以替代本次共存测量。",
+    "不提前ACK、不增credit、不扩大原queue8。当前1秒是外部transport预算，不能声称覆盖模型内部已接受但尚未ready的全部上下文或等于端到端延迟。"
+  ],
+  "runnable_conditions": "As a bounded public diagnostic only: exact source/model pins, paused production microphone/no task or playback, current boot/PID/birth guards, four-core normal-priority parent, dependency versions and memory margin, plus the root-owned finite process-group runner. No production-readiness or accuracy pass follows.",
+  "source_timing_caveat": "The3s parent reader timeout starts before frontend construction/warmup. An initialization exceeding3s can fail this diagnostic before first data; this did not cause the observed154-frame credit overflow.",
+  "deployment_decision": "小CTC不替换：质量/输出差异尚未获得可接受的准确率结论，且本次共存credit预算失败。按root指令不继续小CTC追测；正式原ASR3线程/27B/OmniVoice16/v14保持。",
+  "restored_state": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\post_streaming_quality_resume.json",
+    "sha256": "e3338ae08fab41720b40c5814b17992b957745a7ce925ee596b30b89baa18377",
+    "observed_mono": 49797.995531903,
+    "startup_sha256": "39b102a4a505db491cf06b90e3a5232bfb656c79cb0a3c221551d76d414a9a0a",
+    "board_boot_id": "8100a7fd-0c6a-46c4-82b8-f874988a1521",
+    "phase": "IDLE",
+    "playing": false,
+    "listening": {
+      "enabled": true,
+      "state": "WAITING_SPEECH",
+      "conversation_entered": false,
+      "entry_mode": "direct_speech",
+      "wake_word_required": false,
+      "microphone_open": true,
+      "conversation_mode": "half_duplex",
+      "voice_barge_in": false
+    },
+    "gui_fault_count": 0
+  },
+  "prior_architecture_report_unchanged": true
+}

@@ -1,0 +1,90 @@
+{
+  "schema": "aura-long-checkpoint-review-1",
+  "reviewed_utc": "2026-10-22T22:53:51.410801+00:00",
+  "review_passed": false,
+  "blocking_findings": [
+    "New history IO failure propagates through RESTORING save before the existing rollback try; independent timer is still the fallback.",
+    "Partially successful append/close followed by save retry duplicates history rows; written_samples advances only after full close."
+  ],
+  "builder_sha256": "4f6a941a43e8c44064a7fdfc9e8cb5a52e7470f6d3f5a0ec36635c703f760fba",
+  "short_helper_sha256": "261f76c0927a3a126c6ceb24749dd162a76803ae8d2b085cd1cad319e16bdf03",
+  "restore_finalizer_ast_identical": true,
+  "scope": "Extracted save function and pure AST only; temporary files/fault injection, no helper/board/systemd execution.",
+  "cases": {
+    "empty_restoring": {
+      "samples": [],
+      "sample_count": 0,
+      "history_rows": 0,
+      "history_exists": false
+    },
+    "normal_repeat_and_phase_boundaries": {
+      "history_sequence": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "observing_samples": 2,
+      "restoring_samples": 2,
+      "restoring_preserves_error": "synthetic supervision failure",
+      "final_samples": 12,
+      "report_in_memory_samples": 12
+    },
+    "history_open": {
+      "exception_propagated": "OSError: injected history open failure",
+      "rows_before_retry": 0,
+      "sequence_after_retry": [
+        0,
+        1,
+        2
+      ],
+      "duplicates_after_retry": false,
+      "written_samples_after_retry": 3
+    },
+    "history_second_write": {
+      "exception_propagated": "OSError: injected second history write failure",
+      "rows_before_retry": 1,
+      "sequence_after_retry": [
+        0,
+        0,
+        1,
+        2
+      ],
+      "duplicates_after_retry": true,
+      "written_samples_after_retry": 3
+    },
+    "history_close": {
+      "exception_propagated": "OSError: injected history close failure",
+      "rows_before_retry": 3,
+      "sequence_after_retry": [
+        0,
+        1,
+        2,
+        0,
+        1,
+        2
+      ],
+      "duplicates_after_retry": true,
+      "written_samples_after_retry": 3
+    },
+    "atomic_checkpoint_failure": {
+      "exception_propagated": "OSError: injected checkpoint atomic failure",
+      "history_sequence_after_retry": [
+        0,
+        1,
+        2
+      ],
+      "duplicates_after_retry": false
+    }
+  },
+  "remaining_inherited_limit": "Atomic checkpoint failure also propagates as in original save; no new behavior is claimed fixed.",
+  "evidence_script_sha256": "58dfdb810df073af63c9864012f922ae4657db86fa41eac0ca2de425748ea399"
+}

@@ -1,0 +1,64 @@
+{
+  "schema": "aura.prepared-guard-single-read-candidate.v1",
+  "status": "SOURCE_FROZEN_SYNTHETIC_CONTRACTS_PASS_ARM_MEASUREMENT_PENDING",
+  "file": {
+    "target": "common/board_memory.py",
+    "path": "after/common/board_memory.py",
+    "before_sha256": "943bf88c05400c49c76a1aee68a0bb242cb929cee3e213bc21f465ac3ef77d46",
+    "sha256": "33cb8cedd191382967884850a31e8d106dc41a20b5deee493e23168c8c13b3b0",
+    "bytes": 96742,
+    "change": "Only the existing check_prepared_turn_current method; all other module AST unchanged"
+  },
+  "observed_reason": {
+    "source": "../half_duplex_after_operator.json and root metadata",
+    "audio_packets": 192,
+    "audio_seconds": 3.84,
+    "guard_calls": 198,
+    "guard_total_ms": 6785.98,
+    "progress_waits": 0,
+    "queue_peak": 4,
+    "claim": "Production guard cost was slower than audio consumption in the reported round; actual improvement still requires root's same-state ARM comparison and playback verification"
+  },
+  "method_cost_change": {
+    "SQLite_connections_per_check": {"before": 2, "after": 1},
+    "fresh_read_transactions_per_check": {"before": 2, "after": 1},
+    "SELECT_statements_per_check": {"before": "6 + N dependencies", "after": 1},
+    "PRAGMAs_per_check": {"before": 4, "after": 2},
+    "batching": "One joined SELECT plus indexed EXISTS subqueries; internal dependency work still scales with actual dependency count",
+    "connection_reused_or_persisted": false,
+    "validity_cached": false,
+    "read_snapshot_retained_across_packets": false
+  },
+  "authority_and_state": [
+    "Each call keeps generation, awaiting_playback, no turn closure, exact admitted user/device event and pending same-turn assistant checks",
+    "Each dependency still must have the original identifier format and exist valid in the exact scope; SQL IS NOT and explicit missing row checks reject NULL/absent sources",
+    "The original process-local ProfileGrant from begin_turn enters original _scope before opening SQLite, retaining ProfileAccess-lock then DB ordering",
+    "SQL actual profile owner must match that selected grant; missing/reopened or wrong-owner grants are rejected",
+    "Anonymous/device paths use the same single fresh read and cannot accept profile rows without the original live grant",
+    "Jobs per-packet and post-backpressure checks are unchanged, including in-memory generation/cancel recheck after SQL and before append",
+    "Complete audio binding, actual full player ACK, source invalidation, compaction and retention are unchanged"
+  ],
+  "tests": {
+    "path": "tests/test_guard_contract.py",
+    "sha256": "e4b78bb2289091d0708824745525ca6ace858dde82cc527d5f0efc5772dece15",
+    "passed": 56,
+    "failed": 0,
+    "seconds": 4.09,
+    "reused_prepared_Store_cases": 17,
+    "reused_real_Store_and_Jobs_stream_cases": 25,
+    "additional_cases": 14,
+    "covers": ["Exact other AST unchanged", "One connection/SELECT/transaction and DB bytes unchanged", "Forget/correct/clear/revoke before first or later chunks", "Same-sentence invalidation and backpressure invalidation", "Missing/reopened/wrong-owner profile grant", "Original grant lock held before DB opens", "Missing dependency LEFT JOIN", "Nine invalid identifier forms including NUL", "Summary provenance after body cleanup", "Full aggregate PCM and actual ACK", "Partial model failure/cancellation never heard"],
+    "command": "python -B -m pytest -p no:cacheprovider deliverables/2026-10-30_board_owner/integration/dialogue_repair/guard_candidate/tests/test_guard_contract.py --basetemp=deliverables/2026-10-30_board_owner/integration/dialogue_repair/guard_candidate/test-run-1 -q"
+  },
+  "independent_review": {
+    "agent": "runtime_completion",
+    "result": "No accepted-state/authority widening found in joined SQL, original grant use, lock order, or unchanged Jobs guard call sites",
+    "exception_note": "Mixed corrupt dependencies can fail with a different rejection exception order; the rejected set is not weakened"
+  },
+  "limits": [
+    "A read check is a bounded snapshot, not a future lease; already emitted/played PCM cannot be retracted",
+    "SQLite lock timeout remains the original 150ms; this candidate does not weaken fail-closed behavior",
+    "No actual device/model/private database was accessed and no ARM or listening acceptance is claimed by this source-only candidate"
+  ],
+  "production_modified": false
+}

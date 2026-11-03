@@ -1,0 +1,6 @@
+[
+  {"id":"enabled","command":"systemctl is-enabled dfx-mgr.service"},
+  {"id":"final-properties","command":"systemctl show dfx-mgr.service -p MainPID -p UnitFileState -p ActiveState -p SubState -p Result -p ExecMainStatus -p ExecStart -p DropInPaths -p After -p Requires"},
+  {"id":"final-packages","command":"xmutil listapps"},
+  {"id":"final-live-state","command":"python3 -B -c 'import sys,json,pathlib; sys.path.insert(0,\"/home/root/kv260-dfx-state-boardtest-20261004/board\"); import validate_v5 as v; e=v.Evidence(\"final-running\"); v.guard(e); pid=v.manager(e,v.NEW); e.check(\"persistent_config_exact\",v.PERSIST.read_text()==v.PERSIST_CONTENT and not v.TEMP.exists()); e.check(\"candidate_hash_exact\",v.sha(v.NEW)==v.NEW_SHA); state=v.watch_state(pid); e.check(\"watch_baseline_five\",state[\"watch_count\"]==5); v.stock(e); v.save(e.out/\"live-state.json\",state); print(\"LIVE \"+json.dumps({\"boot_id\":v.read(\"/proc/sys/kernel/random/boot_id\"),\"manager_sha256\":v.sha(v.NEW),\"manager_bytes\":v.NEW.stat().st_size,\"persistent_dropin_sha256\":v.sha(v.PERSIST),\"zocl_srcversion\":v.read(\"/sys/module/zocl/srcversion\"),\"state\":state})); e.finish()'","timeout":120}
+]

@@ -1,0 +1,70 @@
+转轴设备接续记录（5090 Laptop迁移冻结）
+
+本记录覆盖此前旧boot的READY、相机430894和方向通过等历史段落；历史证据保留。
+本窗口只负责设备接续。E盘完整迁移、Windows模型服务和Codex配置由主窗口总交接负责。
+
+一、交接时的结论
+已取消后续运动，不再运行2秒重复、6秒往返或25秒跟随。repeat此前只准备到REPEAT_READY，未在本窗口发出执行命令。
+最终STOP-only核验尝试遇到192.168.50.2:22 SSH banner超时，未获远端执行确认；当前板端在线、boot和机械状态不能新鲜确认。
+最后已知STOP读回：2026-11-01 14:54:33 UTC（洛杉矶06:54:33），flags=0、lease_left_ms=0、active=false、armed=false、referenced=false、bound=false、width_us=1505。
+最近一次已执行STOP及进程检查：14:53:32 UTC，无运动owner；GUI不可用、保存聆听偏好false，相机PID2094。
+不能把这两个历史读回写成迁移时实时通过。机器可离线后再恢复，但不得自动接续旧的运动请求。
+
+二、本轮平台恢复实际完成了什么
+当时boot：3c94e7a0-3f4d-4b66-801c-fa0a1b749bfb。
+重启后先发现默认kv260-benchmark-b4096.bit.bin，相机1352/birth2396，尚无wide转轴外设。
+正常停止原相机并保存最终Native检查点，保留primary和YuNet/SFace累计计数，无强杀、清锁或伪造seed。
+最终检查点SHA256：5b26714b0be9d52bf99fe14c07a0f810105379171712328b63454beb314bc6bb。
+随后通过既有xmutil流程临时加载wide一次；xmutil自动改了VART，原步骤在旧VART假设处失败后，仅做finalize核验，没有重复加载。
+恢复后固件：aura-visual-servo-b4096-wide-v1.bit.bin，FPGA operating。
+VART：firmware: /lib/firmware/xilinx/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.xclbin
+当前轮FDT SHA256：e35979051349cffd903e2acf42b6ce10fbc9074d8e807c7e7ba92bf47adf0cc3。
+按同一最终检查点恢复原相机：PID2094/birth64899；命令SHA256 acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd。
+当时health无camera/detector/identity错误、identity ready，源帧和检测推进；不等于真人身份识别通过。
+持久启动仍有缺口：此轮只完成运行时维护恢复，尚未修复重启回benchmark，不得声称开机永久集成完成。
+
+三、软件与实物验收边界
+startup ec12fccfdd3e8446e9c761e161167e00187e6fcf90372aa7e52c9865cc23c56f；manifest b144536398bcaa6fdda2f36f9c14decced7e2f766f03e55714853674d8cfdd0d。
+生产380文件闭包此前匹配；GUI仍因MCP01音频设备未就绪而failed/MainPID0，保存监听偏好enabled=false。没有完成本boot GUI READY或新相机readback正常发布。
+暂停/继续软件修复已应用，但不恢复聆听、不处理声卡，也不重启GUI；软件详情另见summary_retention_acceptance_20261101/SOFTWARE_ONLY_HANDOFF.json。
+原25文件控制器保持未改。另建原控制器约束副本，仅将minimum_us/maximum_us从500..2500约束为1400..1600，其他24文件和算法不变；未运行跟随。
+本boot只执行一次2秒初始化：1500→1505微秒，43次ACK，最终STOP。数字协议通过，不代表实际机械位置、中心角、方向或可用转动范围确认。
+首次反馈“抖动、卡住或碰到限位”已立即STOP；用户随后更正“刚刚没有注意，再一次”，故物理结果记录为未观察，异常和通过均未确认。证据不删除。
+重复初始化只准备、未执行；本boot6秒方向往返及25秒人脸跟随均未执行。旧boot“左边”、方向+1及“差不多额”不能当作本boot的新验收。
+
+四、板端与共享盘材料位置
+板端本轮根：/home/root/aura-axis-priority-20261101-3c94e7a0
+  session.json、baseline.json/baseline.fdt、camera-final-checkpoint.json、wide-context.json、initialization.json、abort-id-stop.json、initialization-user-correction.json。
+  initialization-repeat-observed.json是未执行的预定输出；迁移前未能重新联网确认目录，勿假定该文件存在。
+原控制器：/home/root/aura-pan-wide-20261028/control-10282601
+  25项manifest SHA256 5c8206ee626c91c9f311ee870245813e169ac14e554e2579554c74489066f562。
+约束副本：/home/root/aura-axis-priority-20261101-3c94e7a0/original-bounded-1400-1600
+  manifest SHA256 e988502a382551c84920f412287e3cc05b736142b262cea84c76307e3858991c。
+固件release：/home/root/aura-pan-wide-20261028/release-6a4b645a5bbfd35c
+  candidate-manifest SHA256 6a4b645a5bbfd35c9107976edf27886cf8e0c91e40f48be6f052a95e1172c1cf；driver位于release/driver。
+原业务根：/home/root/aura-board-business-20261030/production-5259eab11e42af13
+原相机运行树：/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura
+原相机ops：/home/root/aura-native-live-20261024/ops/be72669aa53de735
+共享盘本轮证据：E:\Win共享文件\语音共享文件\deliverables\2026-10-31_visual_axis_maintenance\reviews\axis_priority_20261101\evidence
+既有恢复说明：E:\Win共享文件\语音共享文件\deliverables\2026-10-31_visual_axis_maintenance\reviews\platform_receipt_v2\COEXISTENCE_RECOVERY.md
+旧成功轮：E:\Win共享文件\语音共享文件\deliverables\2026-10-31_visual_axis_maintenance\reviews\live_follow_test_20261101\HANDOFF.md（历史，不能替代本轮）。
+
+五、恢复流程与命令的用途
+本次原维护入口为：
+  & 'D:\py312\python.exe' -B 'E:\Win共享文件\语音共享文件\deliverables\2026-10-31_visual_axis_maintenance\reviews\axis_priority_20261101\tools\run_step.py' STEP --timeout SECONDS
+本次完成顺序：prepare_stop_camera_new_boot → load_wide_platform_new_boot → finalize_loaded_wide_new_boot → restore_camera_wide_new_boot → id_stop_new_boot。
+其中平台命令为/usr/bin/xmutil unloadapp、/usr/bin/xmutil loadapp aura-visual-servo-b4096-wide-v1。
+这些是恢复过程记录，不是新电脑可盲跑的恢复按钮：脚本固定旧boot、PID、FDT、SHA和状态阶段；当前会话不允许新增设备命令。
+freeze_for_5090_migration是STOP-only源文件，本次因SSH banner超时未得远端执行回执。原有STOP脚本不含ARM/COMMIT。
+新机恢复时先只读核对当前boot/固件/VART/FDT、相机owner/命令/源码闭包、GUI和进程，核清当前唯一设备owner。
+如需再切平台，沿原流程正常释放相机、封存真实最终检查点，确认无DPU使用者，再切换成套平台并按真实检查点恢复；不得强杀、清锁、仅改PID/boot来满足校验。
+物理位置/供电/清障及观察条件需以恢复当时事实建立。当前冻结任务结束前不重新ARM，不自动执行旧repeat或跟随。
+
+六、SSH和迁移约束
+传输实现：E:\Win共享文件\语音共享文件\deliverables\2026-10-18_board_dialogue\board_ssh.py
+旧机私钥引用位置：C:\Users\35870\.codex\visualizations\2026\10\09\01a12110-3ba4-7651-b3d7-2e6560916eb6\board-access-20261018\id_ed25519
+只记录路径，不把私钥或凭证复制进E盘。旧helper硬编码本机ssh.exe/私钥，需新机本地密钥和主机校验配置；保留StrictHostKeyChecking=yes。
+新机应使用自己的密钥并由用户授权，核实板端主机指纹。不得为迁移关闭主机校验或导出身份模板、真实记忆私库和密钥。
+LLM权重、下载分段、Ollama数据继续保存在共享目录外，由总迁移单处理；本目录只含小型源码、证据、配置路径及提示词。
+
+本目录CURRENT_MIGRATION_STATE.json区分历史实证和当前不可核验；HANDOFF_5090_MANIFEST.json提供本目录文件SHA256。所有失败与原证据保留。

@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "candidate": "sherpa-onnx-streaming-zipformer-small-bilingual-zh-en-2023-02-16",
+  "source_repository": "csukuangfj/k2fsa-zipformer-bilingual-zh-en-t",
+  "revision": "e2382758de9a0219b4efe682b95af30b399db3b8",
+  "official_guide": "https://github.com/k2-fsa/sherpa/blob/master/docs/source/onnx/pretrained_models/online-transducer/zipformer-transducer-models.rst",
+  "official_release_archive_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-streaming-zipformer-small-bilingual-zh-en-2023-02-16.tar.bz2",
+  "large_models_downloaded_by_this_agent": false,
+  "inference_or_devices_used": false,
+  "flatten_files_into_root_owned_isolated_directory": true,
+  "files": [
+    {
+      "role": "encoder",
+      "filename": "encoder-epoch-99-avg-1.int8.onnx",
+      "url": "https://huggingface.co/csukuangfj/k2fsa-zipformer-bilingual-zh-en-t/resolve/e2382758de9a0219b4efe682b95af30b399db3b8/exp/32/encoder-epoch-99-avg-1.int8.onnx",
+      "bytes": 42980793,
+      "sha256": "db6f51551762e40e549166fe041ea3e45464370b595e9ad23f06478ec3794fbb",
+      "sha_evidence": "official Hugging Face LFS metadata; root must verify downloaded bytes"
+    },
+    {
+      "role": "decoder",
+      "filename": "decoder-epoch-99-avg-1.onnx",
+      "url": "https://huggingface.co/csukuangfj/k2fsa-zipformer-bilingual-zh-en-t/resolve/e2382758de9a0219b4efe682b95af30b399db3b8/exp/32/decoder-epoch-99-avg-1.onnx",
+      "bytes": 13877276,
+      "sha256": "89be509a83175261695bdef5fd1c7b9ab1129a663d1284e7ba9f8507b21e0906",
+      "sha_evidence": "official Hugging Face LFS metadata; root must verify downloaded bytes",
+      "quantization": "FP32 as recommended by official INT8 recipe"
+    },
+    {
+      "role": "joiner",
+      "filename": "joiner-epoch-99-avg-1.int8.onnx",
+      "url": "https://huggingface.co/csukuangfj/k2fsa-zipformer-bilingual-zh-en-t/resolve/e2382758de9a0219b4efe682b95af30b399db3b8/exp/32/joiner-epoch-99-avg-1.int8.onnx",
+      "bytes": 3228485,
+      "sha256": "bdda356d6f9b8c2d7cee9ee0e26075fa537490f7fd06520be408d287073667b9",
+      "sha_evidence": "official Hugging Face LFS metadata; root must verify downloaded bytes"
+    },
+    {
+      "role": "tokens",
+      "filename": "tokens.txt",
+      "url": "https://huggingface.co/csukuangfj/k2fsa-zipformer-bilingual-zh-en-t/resolve/e2382758de9a0219b4efe682b95af30b399db3b8/data/lang_char_bpe/tokens.txt",
+      "bytes": 56317,
+      "sha256": "a8e0e4ec53810e433789b54a5c0134a7eaa2ffca595a6334d54c00da858841d3",
+      "sha_evidence": "retrieved small public text into RAM and hashed; no local model download"
+    }
+  ],
+  "export_configuration": {
+    "url": "https://huggingface.co/csukuangfj/k2fsa-zipformer-bilingual-zh-en-t/resolve/e2382758de9a0219b4efe682b95af30b399db3b8/exp/32/export-for-onnx.sh",
+    "bytes": 783,
+    "sha256": "722ea9675d0d37891745dc282eb91054ba1975ffef8f6cc1105bda12d8ee0eac",
+    "decode_chunk_len": 32,
+    "argument_from_source": "--decode-chunk-len 32",
+    "runtime_handling": "Choose these exp/32 model bytes. Do not invent a chunk_size argument for from_transducer or substitute the exp/64 or exp/96 models."
+  },
+  "optional_official_public_wav": {
+    "url": "https://huggingface.co/csukuangfj/k2fsa-zipformer-bilingual-zh-en-t/resolve/e2382758de9a0219b4efe682b95af30b399db3b8/test_wavs/0.wav",
+    "bytes": 321744,
+    "sha256": "7d93384ca14702cc584a7a33fe2fed92e89e708549161cb12ea38c916882103b",
+    "frames": 160850,
+    "sample_rate": 16000,
+    "channels": 1,
+    "sample_width_bytes": 2,
+    "duration_seconds": 10.053125,
+    "sha_evidence": "retrieved public WAV into RAM, checked header and hashed; not stored",
+    "gold_text": null,
+    "same_as_existing_paraformer_or_ctc_0_wav": false,
+    "used_by_worker": false
+  },
+  "worker_fixture_policy": "Use only the same frozen 8 intended-text synthetic WAV manifest already used for Paraformer/CTC comparison. Official optional 0.wav above is provenance only, not a replacement input.",
+  "api_source": "https://github.com/k2-fsa/sherpa-onnx/blob/v1.13.8/sherpa-onnx/python/sherpa_onnx/online_recognizer.py#L97",
+  "tail_source": "https://github.com/k2-fsa/sherpa-onnx/blob/v1.13.8/python-api-examples/online-decode-files.py#L410",
+  "tail_protocol": "After real input, append 0.66 s float32 zeros, input_finished(), drain while is_ready(), get_result(). Zero padding is context, not recorded audio or an additional wall-clock wait."
+}

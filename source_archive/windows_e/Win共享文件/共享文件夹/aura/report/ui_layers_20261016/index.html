@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AURA 双层界面 · 首版审阅</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:24px;background:#eeeFE9;color:#1f242b;font:15px system-ui,sans-serif}main{max-width:1100px;margin:auto}h1{font-size:23px;margin:0 0 8px}p{line-height:1.7;color:#5a6572}.bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:16px 0}button,a{font:inherit}button{cursor:pointer;border:1px solid #d5d5cb;border-radius:8px;background:#fcfcf3;padding:10px 18px;color:#1f242b}button[aria-pressed=true]{background:#0b7fc4;border-color:#0b7fc4;color:white}#switch{margin-left:auto;background:transparent;color:#5a6572}figure{margin:0}img{display:block;width:100%;height:auto;max-width:1024px;background:#fcfcf3;border-radius:10px;border:1px solid #d5d5cb}figcaption{margin-top:12px;color:#5a6572;line-height:1.7}a{color:#025e8f}footer{margin-top:20px;font-size:13px;color:#5a6572}
+</style>
+<main>
+<h1>AURA · 双层界面首版</h1>
+<p>新版已上板替换默认界面：查看<a href="board/main.jpg">实板玩偶交流</a>、<a href="board/vision.jpg">实板视觉追踪</a>、<a href="board/debug.jpg">实板调试层</a>。下方保留上板前的主机GTK示例截图，对话、画面和检测信息为示例。图片内控件不可点击；使用上方按钮切换截图。</p>
+<nav class="bar" aria-label="截图选择"><span id="tabs"></span><button id="switch">查看调试层</button></nav>
+<figure><img id="shot" src="main.png" alt="玩偶交流页面截图"><figcaption id="caption"></figcaption></figure>
+<div class="bar"><button id="settings">查看视觉页进入的设置</button><button id="offline">查看未连接状态</button><a id="original" href="main.png" target="_blank" rel="noopener">查看原尺寸</a></div>
+<footer>录音与播放逻辑沿用原实现；本版先确认布局。画面解读来自人数、轨迹和身份字段，未接入新的语义模型。真实相机、手指触控与新版板端实屏待后续验证。</footer>
+</main>
+<script>
+const presentation=[['main','玩偶交流'],['vision','视觉追踪']];
+const debug=[['debug_demo','声音测试'],['debug_devices','设备状态'],['debug_connection','服务连接'],['debug_settings','设置']];
+const notes={main:'左侧对话与录音，右侧保留汐蓝；摄像头移至视觉追踪。',vision:'左侧摄像头与操作，右侧人数、目标、身份和画面解读。底栏“···”进入调试层。',presentation_settings:'从视觉追踪页进入设置；顶部仍可直接返回两个主页面。',debug_demo:'调试层保留缓存声音、暂停、打断和保存入口。',debug_devices:'调试层集中显示设备与服务状态。',debug_connection:'调试层配置服务连接，并显示阶段耗时。',debug_settings:'调试层与演示层共用设置。',offline_main:'未连接状态：保留录音入口，不显示伪识别或回答。',offline_vision:'未连接状态：不显示旧画面，选择目标与当前图问答禁用。'};
+let layer='presentation',selected='main',last='main';
+function show(key){selected=key;if(key==='main'||key==='vision')last=key;document.getElementById('shot').src=key+'.png';document.getElementById('shot').alt=notes[key];document.getElementById('caption').textContent=notes[key];document.getElementById('original').href=key+'.png';document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.page===key)));}
+function tabs(){const box=document.getElementById('tabs');box.replaceChildren();(layer==='presentation'?presentation:debug).forEach(([key,title])=>{const button=document.createElement('button');button.textContent=title;button.dataset.page=key;button.style.marginRight='8px';button.onclick=()=>show(key);box.appendChild(button);});document.getElementById('switch').textContent=layer==='presentation'?'查看调试层':'返回演示层';document.getElementById('settings').hidden=layer!=='presentation';document.getElementById('offline').hidden=layer!=='presentation';}
+document.getElementById('switch').onclick=()=>{layer=layer==='presentation'?'debug':'presentation';tabs();show(layer==='presentation'?last:'debug_devices');};
+document.getElementById('settings').onclick=()=>show('presentation_settings');
+document.getElementById('offline').onclick=()=>show(last==='vision'?'offline_vision':'offline_main');
+tabs();show('main');
+</script>
+</html>

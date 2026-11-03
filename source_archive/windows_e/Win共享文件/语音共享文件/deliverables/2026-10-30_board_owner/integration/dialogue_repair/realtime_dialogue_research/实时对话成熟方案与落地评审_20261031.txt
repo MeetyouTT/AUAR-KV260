@@ -1,0 +1,123 @@
+实时对话成熟方案与落地评审
+研究日期：2026-10-31（America/Los_Angeles）。状态：候选与离线验证完成，未部署、未新增模型请求或实机听音。
+
+结论与推荐顺序
+
+推荐保留现有板端业务链，吸收 Pipecat 的轮次/文本聚合方式和 LiveKit 的分段延迟口径，不在当前阶段整栈迁入框架。近期只做三件事，顺序如下：
+1. 用现有 metadata 分清“等待结束、ASR、完整 LLM 输出、首段 TTS、逐包供音、sink 软件首样本、完整 ACK、重新聆听”。已有指标尽量复用，缺失项保持空值；环境讲话与主动测试分组。
+2. 在完整回复校验后，试验“有内容的首句先交付、极短应答词与后文合并、后续短句成组 TTS”，配合现有常驻播放器与有界供音。具体补丁和离线测试已备妥。
+3. 无唤醒词环境误触先做低开销影子评估，区分本机回声、外部真语音与设备定向；不直接改变门槛或体验。端点/ASR 在前端稳定且有余量后另评，当前保留 700ms 静默与同一离线 Paraformer。
+
+第 1 项主要避免错判收益；第 2 项主要改善碎句与后续连续供音，不能承诺缩短 ASR/LLM 等待；第 3 项先了解不必要回复与漏听的取舍，不承诺影子观察本身减少误触。真正流式 ASR 可能触及较大的识别等待，但涉及另一套资源，属于后续能力。没有任何调研或单元测试可以代替真人完整对话验收。
+
+一、现役核对与范围
+
+权威入口仍是上级 dialogue_repair/STATUS.json 和主对话随后产生的 installed/ready/live 回执。本报告以主对话实读的 frontend_balance_candidate/baseline_manifest.json 为源码基线：startup 1129a2a7af2b401537710d1a67651c79961c1b10198f5625ae6802e7ac99fd77，375 个组件。新前端试验后由主对话重新核对入口；本报告不修改权威状态。
+
+SOURCE_REVIEW.json 已把 7 个实际组件 SHA 对上上述映射，包括 board_dialogue、Jobs、ASR、常驻播放器、streaming_controller、board_recording、voice_first_recording。Windows model_inference_host 的 1bdb2004… 与 response_latency 的已装回执一致。aura 主树部分文件较旧，例如 board_recording 与 ASR，报告中的行为判断采用 SHA 匹配的交付源码。
+
+v10 已有证据：20ms 输入帧的完整 endpoint.feed 平均 19.1071ms；274.383 秒稳定窗口中原 8 帧队列峰值 5、无新增故障，但启动早期另有一次溢出。v7 一轮逐包只读检查平均 7.43ms、239 次、1 个欠载包、完整 ACK，用户确认连续完整。这些结论不扩展为 v10 或新组合全面听音通过。历史少量 ASR 约 3.0–6.1 秒、LLM 约 4.7–5.7 秒，提交至首音频入队约 9.7–13.8 秒，样本/版本不同，入队也不是实际声学首声。
+
+主对话新通报的公开 ABBA 是 baseline 完整端点 15.863ms、combined 15.551ms，约 2% 差异，PCM/VAD/数值一致。该通报不是本对话重新测量，也不代替有人、连续采集或冷启动证明。这里不接触 selector、worker、GTCRN 缓冲与 IO 优化文件。
+
+随后用户说明当前未主动测试，周围有讲话或播放声；主对话据此将 v11 连续轮次认定为环境触发。那些轮次不能当主动实聊或听感验收，正常完成后 rearm 也不能据此判故障。对 v11 或以后版本的实际性能与发布状态，以主对话新回执为准；本候选仍仅对上面的已冻结业务源码 SHA 出补丁。
+
+固定边界：KV260 保留麦克风、GTCRN/Silero、Paraformer、视觉/身份、上下文/记忆与播放；Windows 只运行原 27B 和 OmniVoice16。无唤醒词、自动听，生成和播放期间半双工，匹配完整播放 ACK 后恢复聆听。逐包 fresh 权限、更正、遗忘检查不缓存；16fps 目标、声卡保护首字的原暖机/静音策略保持。没有云上传真实对话、收费服务、新账户、模型/音色替换、生产私库访问或模型权重下载。所有本次写入只在本研究目录。
+
+二、官方成熟方案与本机适配判断
+
+Pipecat：适合借鉴的部分是原始 VAD 活动与“用户轮次结束”分开，以及先聚合成句再交给 TTS。它允许组合轮次策略；默认中存在 Smart Turn，不能把示例中的 0.2 秒 VAD 静默直接当成本项目端点。上述机制有官方文档和开源实现，优于临时用几个散落布尔值拼接控制，但本项目已经有完整归属与 ACK 链，应在现有控制器内保持同一契约。来源：[轮次检测](https://docs.pipecat.ai/pipecat/learn/speech-input)、[TTS 文本聚合](https://docs.pipecat.ai/pipecat/learn/text-to-speech)。后半句是本项目工程判断。
+
+检索时官方发布为 Pipecat v1.15.0，发布日 2026-10-29 UTC；固定标签要求 Python >=3.11，NumPy >=1.26.4，ONNX Runtime >=1.24.3,<2。整包装入板端可能推动现有二进制依赖升级，不是“只多一层状态机”。尚未确认本机全部对应轮子/ABI，也未做 ARM 负载试验；因此不建议现在 pip install 或替换运行环境。来源：[固定发布](https://github.com/pipecat-ai/pipecat/releases/tag/v1.15.0)、[固定依赖](https://github.com/pipecat-ai/pipecat/blob/v1.15.0/pyproject.toml)。
+
+LiveKit Agents：适合借鉴清晰的 turn handling、取消与分阶段观测，而不是当前就引入 RTC 媒体栈。官方区分 STT 延迟、端点等待、LLM TTFT、TTS TTFB 和播放开始；还说明 STT 自带端点与后加的端点等待可能叠加。本项目应按自身串行/重叠关系记时间，不能把这些名字对应的耗时随意相加。来源：[轮次调节](https://docs.livekit.io/agents/logic/turns/tuning/)、[选项语义](https://docs.livekit.io/reference/agents/turn-handling-options/)、[延迟口径](https://docs.livekit.io/reference/agents/session-traces/)。适配结论为本报告推断。
+
+官方检索时发布为 livekit-agents@1.8.10（2026-10-29 UTC），Python >=3.10,<3.15，依赖 livekit 本地媒体 SDK、av、local-inference 等。开源与自托管是可选形态，并不要求迁云；但整栈接入仍需重新证明设备单所有者、取消、样本时钟、内存与 ARM 二进制适配。当前网线点对点、半双工、单设备链没有证明需要这些新增成本。来源：[固定发布](https://github.com/livekit/agents/releases/tag/livekit-agents%401.8.10)、[固定依赖](https://github.com/livekit/agents/blob/livekit-agents%401.8.10/livekit-agents/pyproject.toml)。
+
+语义端点候选只列作后续：Smart Turn v3 官方称支持中文，CPU int8 约 8MB，作者在部分 CPU 上约 10ms、部分云实例低于 100ms；这些不是 KV260 结果，特征处理与调度仍有成本。LiveKit 文本轮次模型支持中文，文档给出约 396MB、典型 CPU 50–160ms，并依赖实时转写；其当前离线 Paraformer 适配链不能提供这种增量结果。现有架构也不允许把业务端点迁去 Windows。来源：[Smart Turn 官方仓库](https://github.com/pipecat-ai/smart-turn)、[LiveKit 端点模型](https://docs.livekit.io/agents/logic/turns/turn-detector/)。目前不下载这两个模型；将来如需引入须另立资源/版本/准确率与 ARM 验收。
+
+三、实际代码链路与首声瓶颈
+
+SHA 匹配的 board_dialogue.py 在 _prepare 中先 timed_request('llm')，再验证完整三字段 JSON、拒绝问题复述，随后 split_sentences 并逐句请求 TTS。第一句完成后立刻送 chunk_sink，后句继续生成；这是现有有效优化，不能重复提议成“尚未实现逐句 TTS”。response_latency 的公开同文本试验首个可交付 TTS 从 2036.98ms 到 676.26ms，证明的是该试验的分段交付，不是本轮扬声器首声。
+
+model_inference_host 虽向 Ollama 请求 stream=True，却在 _ollama 内收集所有 delta，到 done 才给板端完整 text。27B 和 TTS 仍走原 GPU 准入。OmniVoice 适配器固定 model revision c5fdb5ccb189668d56333f77ba2629f4cd7535f4、16 步，按整段 generate 返回后编码 PCM。官网生成示例同样返回波形数组，作者的低 RTF 是吞吐指标，不能推导为本机首个字节或首声。来源：[OmniVoice 官方接口](https://github.com/k2-fsa/OmniVoice#python-api)。本项目行为由本地已核对源码决定。
+
+现阶段真实等待可粗分为：最后一次 VAD speech → 静默端点确认 → ASR → 路由/上下文 → LLM 排队与完整输出 → 首段 TTS → fresh 检查/进度队列/IPC → sink 软件首次回答样本。后续 TTS 与已有音频播放可以重叠；总 TTS RPC 时间不是可以直接加到首声上的一个串行阶段。
+
+LLM 首句直出属于下一阶段协议工程。把旧 voice_channel_source.FirstSentenceBuffer 搬来或把 host 的 stream=True 露出来，都不能保留当前“完整 JSON 校验后才允许发音”的保证。若先念出一句而末尾 JSON 非法、复述校验失败或权限撤销，已经发出的声音无法收回。真正增量方案需由板端拥有序号/预算/归属/解析、明确可提交的句子契约、取消与 fresh 检查，并重新评审完整回复策略；旧 8792 业务通道不能为此恢复。本报告未准备这种未获边界验证的播放补丁。
+
+四、近期改进 1：完整轮次观测与验收口径
+
+代码落点：复用 Jobs._execute/last_prepare_metrics 与 guard/progress 诊断、StreamingController 完成事件、PersistentGstAudioEngine 的 answer_started_at、RecordingController 的 ACK/rearm。对应源码位置与 SHA 见 SOURCE_REVIEW.json；board_recording 必须用 instrumentation_candidate/after 的 f5be5181…，不能用主树旧文件。
+
+状态契约保持：LISTENING → ENDPOINT_COMMITTED → ASR → PREPARING → STREAMING/PLAYING → WAITING_COMPLETE_ACK → SETTLING → LISTENING。PCM 入队、模型结束、单句结束都不能进入“已完整播放”；取消/过期清掉旧代次后走已有取消恢复路径。状态图另存 conversation_contract.mmd，仅是审查说明，未替换现有 FSM。
+
+metadata_contract.py 是纯函数：拒绝正文/PCM/身份/任意异常字段，只接受固定枚举、数字或 null；只计算同一 board_monotonic 的相对值；缺失 sink 测量不以 0 代替；成功、取消、失败分开计数，延迟统计只使用显式指定场景中的完整成功轮次。ENVIRONMENT_ONLY 不混入主动测试，程序永不自动认定人体验收。它不访问日志、数据库或服务，也不会产生授权决定。
+
+区分三个数：first_audio_queued_ms 是板端软件入队；answer_started_at 是根据 ALSA sink 查询映射的回答样本首次观测；外部声学首声才是人真正听到的开始。现有 sink 指标可用于近端定位，但受轮询、驱动和 DAC 路径影响，不改名为声学结果。原暖机/起音保护不删除。
+
+同一 round 的 Jobs 计时和 controller 的 prepare 计时起点不同，不能直接把 prepare.first_tts_ready_ms 当作 round-relative 时刻；应补明原点或只报时长。Windows monotonic 与板端 monotonic 也不能直接相减。整个改进的预期直接提速为 0；收益是知道应该改哪里，并能拒绝只把指标起点挪后的虚假提速。
+
+METADATA_REQUEST.json 已交到共享目录，只请主对话从现有被动 metadata 提取最多 20 轮。没有现成逐包到达时间则省略，不为本请求新增热路径逐包日志、采集、播音或压测。包级回放若使用 TTS 完成时刻而非 fresh 校验之后的实际入队时间，会漏算检查与阻塞，结果无效。
+
+验收：空值、错误枚举、回执与代次归属正确，观察不改变控制决策；统计写入应在既有非实时路径有界完成。回退：移除新增观测调用和本地分析模块，保留原诊断及 ACK；不改库或业务内容。
+
+五、近期改进 2：经完整验证后的分段与有界供音
+
+可审查交付：candidate/dialogue_chunk_policy.py、integration_review.patch、build_review_patch.py、tests/test_candidate.py。补丁基于 board_dialogue SHA bce1f21962d083275d9e8a966f244d8c227d0d62e9a30314767453d04c05b475。
+
+补丁只在 _prepare 的“通过模型取得回复”分支调用新增 split_dialogue_sentences；原 split_sentences 和本地记忆/管理命令、登记提示序列仍用原策略。所有完整 JSON 校验、生成后持久状态、每句/逐包 fresh 检查、取消、时限、样本/哈希/token 绑定、最终 ACK 代码保持。构建脚本校验基线 SHA 与 375pins，反向消去三处指定编辑后要求完整 AST 与原源码一致；它只生成本目录补丁，不应用到生产。
+
+策略：完整且有内容的首句保留；仅对显式短应答词表中的“好的/嗯/当然”等与后文合并。实质短答如“先别删除！”或“我是雪妃。”不按填充词处理。后续若有多句短句，按完整句聚成约 48 个内容字符的候选目标，单请求仍不超过原 220 字符硬界。8/48 是待试听的实验参数，不是时长预测；不依逗号随意切小块，不改一个字符、不裁尾。
+
+候选还保留引号及括号里的内容、右闭合标点、URL 查询、小数和带逗号数字。无法在界内找到安全外部分界则失败关闭。代价是某些长引文在旧策略能切、候选会拒绝；这是明确的兼容风险，须用项目公开脚本确认范围。分段变更也可能改变停顿、重音与韵律，不能用文本字节相同声称音质相同。
+
+合成示例而非模型成绩：SHORT_ACK 3 次 TTS → 2 次；SHORT_TAILS 4 → 2；QUOTED_SENTENCES 4 → 2；BRIEF 仍 1 次。每组原文连接一致。潜在收益来自少掉若干请求固定开销和段间重置；若每请求固定开销为 H，少 m 次至多省去约 mH 的重复部分，实际还取决于文本长度、GPU 排队、RTF 和首句变长的代价。没有本机 H 的新测量，因此不填写“预计快几秒”。
+
+供音观测落点：Jobs.reply_sink/_put 的授权后入队、progress 原 128 事件边界、StreamingController 推送、常驻引擎 queue/appsrc/sink。保持单 TTS 所有者与 GPU 准入，第一阶段不引入 LLM/TTS 争抢或另开生产线程。若下一段总是在前一段播放完后才就绪，要先看下段合成和逐包交付耗时；扩容不能增加生成速度。
+
+当前常驻引擎已经有 20ms 帧、appsrc 8 帧字节上限（24kHz PCM16 为 160ms）、实际 current-level-bytes 检查、sink 缓冲 80ms，以及每轮累计最多 35 秒的应用内容边界。累计 35 秒不是抖动缓冲目标；不同层的缓冲量也不能未经观测直接相加。采集的原 8 帧队列与上述播放缓冲是不同对象，前者绝不扩容。
+
+GStreamer 官方说明 block=False 时 max-bytes 会发 enough-data，应用需遵守供需信号/实际队列边界；现有查询检查应保留。不要为语音设置 leaky 丢首尾来制造低延迟。current-level-bytes 从 1.2 可用，current-level-time/max-time/leaky-type 等部分属性需 1.20，dropped 等统计需 1.28。版本未核对前不引入新属性。来源：[appsrc](https://gstreamer.freedesktop.org/documentation/app/appsrc.html)、[queue](https://gstreamer.freedesktop.org/documentation/coreelements/queue.html)。
+
+supply_budget.py 只接受同一板端时钟的 arrival_ms 与 samples，输出 0/80/160/240ms 额外初始储备的理想回放比较。没有运行时缓冲、PCM 或音频操作。所需最小额外起始等待 B = max_i(a_i − 前面各包时长之和) − a_0，负值按 0；它假定有无限暂存空间，仍须另看 peak_pending_audio_ms，不是设备容量证明。
+
+合成短抖动例需 120ms 储备可无理想供音空洞，但首声也晚 120ms；合成两包相隔 2000ms 时需额外 1980ms，给 240ms 仍剩 1740ms 断供。这些只是因果约束示例，不能当现场波形或缺陷复现。若真实需要的储备超过约 240ms 候选上限，先修生成/调度，不扩大队列掩盖。
+
+验收：先原参数/同一公开固定文本，记录每段 TTS 时间、样本数、授权后到包间隔、供音余量与完整 ACK。再 10 轮现场听音观察起字、尾字、断续、语义停顿、音色、口型和自动接续；宣称提速前补同组至少 20 对前后样本，冷热与失败分层，P50/P95/样本数并报。拟定保留门槛是连续性有可复核改善，首个回答 sink 软件时间 P50 不额外恶化超过 200ms、P95 不明显恶化；这 200ms 是建议的试验门槛，交根统一，不是既有达标成绩。任何权限、内容、ACK、语音完整性退化立即拒绝候选。失败率与严格 16fps/采集稳定也须独立保持。
+
+回退：根代理只恢复本次 _prepare 的两处选择改动与新增 helper/module，保留此前 fresh 连接复用、前端和记忆健康修改；不恢复旧数据库，不回放旧数据。补丁基线失配时先重读现役 SHA 并人工合并，禁止覆盖整个控制器。
+
+六、后续输入能力的边界：端点、持续采集、ASR
+
+自动聆听已在当前轮间持续开启；“始终开第二路麦克风”与当前半双工约束冲突。生成/播放期间不采集插话，完成/取消后的恢复仍由原状态机控制。原端点使用前导与 700ms 静默，包含 GTCRN/Silero 算法及帧调度延迟，不能只用超时值当说话者实际停口时间。
+
+近期先测公开停顿脚本：短答，句中 400/600/800/1200ms 犹豫，数字/姓名，连续两句，环境声。500/700/900ms 单因素比较以是否错切、漏尾、产生多轮、ASR 差错与等待为依据；不再叠一个固定后处理静默。将 700 改成 500 仅少 200ms 固定静默预算，不能抵消几秒 ASR/LLM；600ms 句中停顿在 500ms 策略下就可能早切。合成停顿表只验证这个取舍，不是 VAD 或实人准确率测试。来源：[VAD 与轮次判断的区别](https://docs.pipecat.ai/pipecat/learn/speech-input)、[端点等待的语义](https://docs.livekit.io/reference/agents/turn-handling-options/)。
+
+ASR 目前是 OfflineRecognizer.from_paraformer，一句完整 PCM 一次 decode_stream。官方 sherpa 同时提供在线和离线 API，但在线 Paraformer 需要单独的 encoder.onnx、decoder.onnx 与 tokens，离线单个 model.int8.onnx 不能直接接为 OnlineRecognizer。官方 ARM64 支持与当前模型实时性能是两件事；检索到 sherpa-onnx v2.0.1 提供 Linux aarch64 CPU 工件，不等于本项目应升级。来源：[在线 Paraformer](https://k2-fsa.github.io/sherpa/onnx/pretrained_models/online-paraformer/paraformer-models.html)、[离线 Paraformer](https://k2-fsa.github.io/sherpa/onnx/pretrained_models/offline-paraformer/paraformer-models.html)、[固定发布](https://github.com/k2-fsa/sherpa-onnx/releases/tag/v2.0.1)。
+
+同一离线模型反复解码增长前缀属于模拟流式：会重复计算、改写前文，没有稳定词边界承诺，当前端接近饱和时尤其不合适。即使分块在较早静默处提前做 ASR，也需保留最终重解码与拼接准确率验证；它不是无代价并行。Paraformer 原始论文的非自回归并行加速是作者训练/测试条件下的结论，不能换算为这台板卡线程数或本项目的实时保证。来源：[原始论文 v3](https://arxiv.org/abs/2206.08317v3)。
+
+后续真正流式分支的准入条件：原前端/视觉/16fps 同负载下至少 10–15 分钟无溢出和持续排队，冷启动单列；同语言公开集比较 CER、短词/数字/姓名和停顿，确认增量结果只用于等待策略而不写入已确认记忆，端点最终确认才提交一轮。在线资源若需变更由根另行评审；本次不下载、不选择、不切换。
+
+七、回声与插话何时才适合加入
+
+原先历史的声音打断实现与听音结论不能直接沿用新板端业务组合。当前先不启用。成熟插话至少需要播放参考先于其回声进入 AEC、稳定的时钟/延迟、双讲与背景声测试、只取消旧代次、清空未播音频、拒绝旧回执，并能区分用户有效发言与“嗯/对”的附和。GTCRN 降噪与 Silero 活动检测都不等于可靠 AEC 或说话人授权。
+
+Speex 官方说明强调远端参考与麦克风信号的时序及非线性失真问题；只调整 VAD 阈值不能解决回采。未来验证应先用授权公开/合成信号，之后由主对话统一安排真实声学测试，不能在当前板端余量不足时同时开新采集链试图获得自然插话。来源：[Speex Echo Cancellation](https://www.speex.org/docs/manual/speex-manual/node7.html#SECTION00740000000000000000)。
+
+八、交付、验证与下一步
+
+VALIDATION.json：44 个独立测试全过；另含 1000 个文本分组与 200 个到包轨迹属性样本，这些不是额外独立测试计数。首轮有 1 个括号边界测试失败，已修复并保留记录。测试验证原文保持、数值/URL/引号边界、大小上限、模型输出完整性门槛、控制器流式交付与完整 ACK、取消与权限失效阻止后续 TTS、本地命令不采用新策略、metadata 不泄漏、空值与环境轮次隔离口径。未测试模型质量、ARM 性能、设备连续性或声学首声。
+
+SOURCE_REVIEW.json：当前基线源码定位。CANDIDATE_MANIFEST.json：候选源码/补丁 SHA。SYNTHETIC_COMPARISON.json：合成计数与供音/端点示例。METADATA_REQUEST.json：给主对话的有界只读请求。SOURCES.json：官方来源、版本与作者/本机指标边界。HANDOFF.json 与本目录 STATUS.json 是本研究的交接入口，不替代上级权威状态。
+
+PATCH_CHECK.json：git apply --check 和实际应用均在本目录新建的公开源码副本内通过；应用后的控制器 AST 与预期一致，新增模块字节一致。首次核对暴露 Windows Git autocrlf 自动改换行，已将候选模块规范为 LF、仅在验证命令上指定 core.autocrlf=false；未改用户全局 Git 配置。隔离检查副本原地保留，不是部署目录。复验命令为 python -B verify_patch.py。
+
+根代理下一步可直接审阅补丁；先完成其前端 live 窗口，再决定是否在独立候选中接入文本分段并安排同文本 TTS 与现场听音。本对话不部署，不等待硬件才能交付，也不把离线通过标成流畅自然已经解决。
+
+九、新增近期改进 3：环境讲话误触
+
+详见同目录《环境讲话误触与无唤醒词取舍_20261031.txt》。成熟研究把 device-directed speech detection 作为独立任务，结合声学、ASR/解码或上下文；不是 AEC 或 VAD 的另一个阈值。来源：[Amazon 原始论文](https://arxiv.org/abs/1808.02504v1)、[Apple 多信号研究](https://machinelearning.apple.com/research/llm-device-directed-speech-detection)。本项目目前不引入新模型或额外 27B 意图调用。
+
+优先做无需改变体验的场景分组和误回应/漏收观测。后续低成本候选是改善现有拾音信噪比、把已计算声学质量作为弱证据、ASR 后而业务入库前的轻量上下文判断；都需同时看轻声、短答、远处、无称呼第一句和长叙述的漏听代价。不会加回唤醒词、强制按钮、硬性人脸/注视/声纹绑定，不把“未知道意图”默认作拒收，不通过长冷却默默暂停自动听。当前仅报告，未启用任何抑制。

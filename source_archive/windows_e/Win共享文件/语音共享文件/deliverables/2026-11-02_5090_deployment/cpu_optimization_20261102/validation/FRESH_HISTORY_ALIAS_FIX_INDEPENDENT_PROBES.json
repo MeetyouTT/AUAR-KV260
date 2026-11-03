@@ -1,0 +1,76 @@
+{
+  "schema": "aura-independent-fresh-history-alias-fix-probes-1",
+  "candidate_sha256": "5ca99d4231c686de0f89dac5792299bec13af517a5c6e2b8f73c4cc66b9285c9",
+  "previous_candidate_sha256": "e92d8b0c461ff060d2e6d5e0aceef81c13ad1580cc3f66ad118b27c805b9f102",
+  "cases_run": 8,
+  "passed": true,
+  "results": [
+    {
+      "case": "baseline",
+      "accepted": true,
+      "expected_accept": true,
+      "passed": true,
+      "rejection": null
+    },
+    {
+      "case": "same_sha_sealed_copy",
+      "accepted": false,
+      "expected_accept": false,
+      "passed": true,
+      "rejection": "ValueError: History source SHA aliases final/result/provenance"
+    },
+    {
+      "case": "reformatted_same_owner_final",
+      "accepted": false,
+      "expected_accept": false,
+      "passed": true,
+      "rejection": "ValueError: History source contains current stopped-owner checkpoint"
+    },
+    {
+      "case": "checkpoint_envelope",
+      "accepted": false,
+      "expected_accept": false,
+      "passed": true,
+      "rejection": "ValueError: History source contains current stopped-owner checkpoint"
+    },
+    {
+      "case": "same_sha_stop_result_copy",
+      "accepted": false,
+      "expected_accept": false,
+      "passed": true,
+      "rejection": "ValueError: History source SHA aliases final/result/provenance"
+    },
+    {
+      "case": "same_boot_other_pid",
+      "accepted": true,
+      "expected_accept": true,
+      "passed": true,
+      "rejection": null
+    },
+    {
+      "case": "same_pid_other_birth",
+      "accepted": true,
+      "expected_accept": true,
+      "passed": true,
+      "rejection": null
+    },
+    {
+      "case": "old_boot_archive_envelope",
+      "accepted": true,
+      "expected_accept": true,
+      "passed": true,
+      "rejection": null
+    }
+  ],
+  "new_function_names": [
+    "reject_current_checkpoint_source"
+  ],
+  "changed_existing_function_names": [
+    "referenced_value",
+    "validate_inputs"
+  ],
+  "all_other_functions_and_top_level_ast_unchanged": true,
+  "test_scope": "Only validate_inputs with the existing pinned public in-memory fixture and its synthetic legacy pin override. No original16 suite, guard, CLI, original_modules, SSH, board/proc/device/service/marker/model IO.",
+  "candidate_modified": false,
+  "hostile_root_authentication_claimed": false
+}

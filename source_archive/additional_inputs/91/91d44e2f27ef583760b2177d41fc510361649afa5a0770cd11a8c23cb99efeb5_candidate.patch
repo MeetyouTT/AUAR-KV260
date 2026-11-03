@@ -1,0 +1,60 @@
+--- a/board/runtime/board_memory_policy.py
++++ b/board/runtime/board_memory_policy.py
+@@ -14,7 +14,7 @@
+ from common.profile_memory import scoped_command
+ from common.spoken_input import prepare_spoken_input
+ from common.fact_answers import question as fact_question, fact_reply
+-from common.board_memory import (CandidateRejected, COMPACTION_REJECTION_REASONS, NUMBER, NEGATION, PLANNED,
++from common.board_memory import (CandidateRejected, COMPACTION_REJECTION_REASONS, NUMBER, NEGATION, PLANNED, OBSERVED,
+                                 COMPLETED, validate_compaction_text)
+ from board.runtime.board_dialogue import BoardReply
+ from board.runtime.character import CHARACTER_NAME
+@@ -245,6 +245,31 @@
+         """Only fixed enums; no exception messages, result text or source IDs."""
+         return dict(self._last_attempt)
+ 
++    def _validate_narrative(self, text, sources):
++        """Validate model narrative while evidence remains typed board data.
++
++        Do not inject a board source label into fragments or reductions: its
++        words must never satisfy another source's protected name. Every other
++        original text/metadata protection remains on the untouched narrative.
++        """
++        return validate_compaction_text(text, [dict(source, metadata={key: value
++            for key, value in source['metadata'].items()
++            if not (key == 'evidence' and value == 'visual_observation')}) for source in sources])
++
++    def _observation_provenance(self, semantic, sources, *, maximum):
++        """Add origin once, after all non-evidence protections passed unlabelled."""
++        if not any(source['metadata'].get('evidence') == 'visual_observation' for source in sources):
++            return semantic
++        self._validate_narrative(semantic['summary'], sources)
++        if OBSERVED.search(semantic['summary']):
++            return semantic
++        label = ('历史视觉观察摘要：' if all(source['source'] == 'camera_observed' for source in sources)
++                 else '混合历史记录（含视觉观察来源）：')
++        text = label + semantic['summary']
++        if len(text.encode('utf-8')) > maximum:
++            raise ContextLimitError('Source evidence label exceeds the bounded summary capacity')
++        return dict(semantic, summary=text)
++
+     def _structured_camera_summary(self, prepared, eligible):
+         """Only the exact board person-count producer contract is recognized.
+ 
+@@ -520,7 +545,7 @@
+                 part = self._infer([item[0] for item in batch], cancelled, deadline=deadline,
+                                    keepalive=keepalive, multipart=True)
+                 self._summary_stage = 'fragment_validation'
+-                validate_compaction_text(part['summary'], [item[1] for item in batch])
++                self._validate_narrative(part['summary'], [item[1] for item in batch])
+                 partials.append(part['summary']); keywords.extend(part['keywords'])
+             # Combining validated fragment summaries is board work. Large
+             # aggregates need bounded model reductions, never raw truncation.
+@@ -560,6 +585,7 @@
+         if cancelled():
+             raise InterruptedError('Summary cancelled before full-source validation')
+         self._summary_stage = 'full_source_validation'
++        semantic = self._observation_provenance(semantic, eligible, maximum=self.final_maximum)
+         validate_compaction_text(semantic['summary'], eligible)
+         self.metrics['final_summary_utf8_bytes'] = len(semantic['summary'].encode('utf-8'))
+         return dict(schema_version=prepared['schema_version'], scope=dict(prepared['scope']),

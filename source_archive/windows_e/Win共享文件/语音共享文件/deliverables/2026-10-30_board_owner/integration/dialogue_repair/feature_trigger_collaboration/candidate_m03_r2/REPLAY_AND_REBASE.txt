@@ -1,0 +1,26 @@
+M03-r2已封存为独立源码审查候选，未发布，不能覆盖正在修复的冷启动文件。
+源码/213项回归主入口：HANDOFF.json；新boot合并限制：ROOT_REBASE_REQUIRED.json。
+
+isolated_review_replay.py 是不用pytest的四个独立反例原样回放入口。
+它核验冻结candidate manifest、4条原断言所在文件SHA、保存v18 mapping与343公开
+Python/config源，才在单一测试进程加载三份候选；所有数据库只在自建临时目录。
+Linux使用/dev/shm，Windows使用系统临时目录。都不访问生产私库、设备、网络或模型。
+所需依赖：Python>=3.9及现有时区库。Linux使用现有OS tzdb；Windows本地验证使用
+C:/Users/35870/.codex/scratch/feature_trigger_collaboration/test_dependencies 中已有tzdata，
+没有将依赖环境/模型/真实模板复制到共享目录。
+
+CLI（S为独立公开源码stage；R为准备出的public_v18_snapshot）：
+python3 -B isolated_review_replay.py --public-runtime-snapshot R --mapping S/source_mapping.v18.json --candidate-manifest S/SOURCE_MANIFEST.json --candidate-root S/after --original-review S/test_delete_boundaries.py --root-coordinated-slot ROOT_SLOT --output S/NEW_RESULT.json
+输出必须新绝对路径。原四条断言不会改写，结果保存每个loaded module hash与临时库清理。
+
+注意：此入口只证明“指定保存源码快照上的隔离回放”，不核新boot的live服务。
+当前newboot冷启动修改包含board_business.py，必须先由root三方合并、审查新pins，
+另建恢复后基线绑定；本入口和旧v18全文件均不能直接当成新生产发布包。
+公开源码快照只含.py与4份角色公开配置，准备脚本不复制权重、环境或私库。
+
+本地独立入口STANDALONE_REPLAY_02.json：4/4通过、temporary store已移除、无线程残留。
+初次STANDALONE_REPLAY.json因Windows解释器没有tzdata搜索路径而报4个环境错误，
+原失败保留，未改生产候选或断言。
+
+补跑117例另有114通过、3个旧角色称呼断言失败，移除M03-r2 overlay的保存v18基线
+亦原样同错，见ADDITIONAL_REGRESSION.json；未将这些旧测试表述为全部通过。

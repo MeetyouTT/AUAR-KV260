@@ -1,0 +1,55 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/30-nfs-backup-apply-verify.json",
+  "manifest_sha256": "ce6b7b558731ece91b89bee6647e4027b8b870c2aa41f998afa5b6fadfe6993c",
+  "started_utc": "2026-10-04T10:27:52.260525+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": false,
+  "results": [
+    {
+      "id": "transfer-nfs-controller",
+      "started_utc": "2026-10-04T10:27:52.763877+00:00",
+      "entry": {
+        "id": "transfer-nfs-controller",
+        "type": "transfer",
+        "source": "/home/ghmd/kv260-dfx-state-boardtest-20261004/board/nfs_repair_v1.py",
+        "sha256": "e271acd8299dee154f40e11d9c5a4614ffde5e8943442f332e132eaa03ab17db",
+        "destination": "/home/root/kv260-dfx-state-boardtest-20261004/board/nfs_repair_v1.py"
+      },
+      "frames_acknowledged": 5,
+      "bytes": 13742,
+      "sha256": "e271acd8299dee154f40e11d9c5a4614ffde5e8943442f332e132eaa03ab17db",
+      "exit_code": 0,
+      "finished_utc": "2026-10-04T10:27:55.420059+00:00"
+    },
+    {
+      "id": "nfs-backup",
+      "started_utc": "2026-10-04T10:27:55.420461+00:00",
+      "entry": {
+        "id": "nfs-backup",
+        "command": "python3 -B /home/root/kv260-dfx-state-boardtest-20261004/board/nfs_repair_v1.py backup",
+        "timeout": 180
+      },
+      "exit_code": 0,
+      "output_sha256": "f0f49d860549e44e8ed077ded99797c9966fe28385790964974c6ec6e8470751",
+      "bytes": 2166,
+      "finished_utc": "2026-10-04T10:27:57.933460+00:00"
+    },
+    {
+      "id": "nfs-apply-and-verify",
+      "started_utc": "2026-10-04T10:27:57.933836+00:00",
+      "entry": {
+        "id": "nfs-apply-and-verify",
+        "command": "python3 -B /home/root/kv260-dfx-state-boardtest-20261004/board/nfs_repair_v1.py apply",
+        "timeout": 180
+      },
+      "exit_code": 1,
+      "output_sha256": "6aceaba701df5b8458419d045f5297938601258a91757f08be1f57e70a6dec1a",
+      "bytes": 1990,
+      "finished_utc": "2026-10-04T10:28:04.604785+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "error": "Command failed; subsequent entries stopped: nfs-apply-and-verify",
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T10:28:04.651924+00:00"
+}

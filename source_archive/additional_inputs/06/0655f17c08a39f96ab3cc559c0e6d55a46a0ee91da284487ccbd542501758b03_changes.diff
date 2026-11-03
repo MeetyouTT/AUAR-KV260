@@ -1,0 +1,35 @@
+--- before/tools/board_avatar_gtk.py
++++ after/tools/board_avatar_gtk.py
+@@ -1211,8 +1211,11 @@
+         elif transcription.get('state') == 'EMPTY':transcript = '没有听清，请再说一次。'
+         elif transcription.get('state') == 'DISABLED' and local_recording.get('state') == 'READY':
+             transcript = '录音已完成，转写服务尚未连接。'
+-        self.transcript_label.set_text(transcript)
+-        self.transcript_label.set_tooltip_text(transcription.get('error') or transcript)
++        # The bound production lifecycle is the sole writer of subtitle slots.
++        # Its final projection still runs every refresh, including expiry/clear.
++        if getattr(self, 'production_presentation', None) is None:
++            self.transcript_label.set_text(transcript)
++            self.transcript_label.set_tooltip_text(transcription.get('error') or transcript)
+         reply = interaction.get('reply') or ('本轮已取消。' if interaction.get('state') == 'CANCELLED' else
+                     '我在这里，准备好就开始说话吧。\n语音主机连接后，将在这里显示回答。')
+         if local_busy and state.get('reply'):
+@@ -1233,7 +1236,7 @@
+                    '免点击对话已暂停，点“恢复免点击”后我会等你开口。' if handsfree else
+                    '我在呢，点一下开始对话，就可以直接和我聊天。' if self.config.get('automatic_turns') else
+                    '我在呢，点一下开始录音，聊完再点停止。')
+-        if reply != self.reply_text:
++        if getattr(self, 'production_presentation', None) is None and reply != self.reply_text:
+             self.reply_view.get_buffer().set_text(reply)
+             self.reply_text = reply
+         timings = interaction.get('timings_ms',{})
+@@ -1633,7 +1636,8 @@
+             status = '已暂停' if state['paused'] else {'IDLE':'等你开口','VOICE_PREPARING':'正在准备声音…',
+                 'VOICE_STARTING':'正在准备播放…','SPEAKING':'正在说话','ACTION':'正在回应'}.get(state['phase'],state['phase'])
+             self.demo_status.set_text('本地演示 · '+(state['error'] or status))
+-            self.reply.set_text(state['reply'])
++            if getattr(self, 'production_presentation', None) is None:
++                self.reply.set_text(state['reply'])
+             self.refresh_runtime(state,settings_text)
+             from tools.production_business_ui import project_business_ui
+             project_business_ui(self,state)

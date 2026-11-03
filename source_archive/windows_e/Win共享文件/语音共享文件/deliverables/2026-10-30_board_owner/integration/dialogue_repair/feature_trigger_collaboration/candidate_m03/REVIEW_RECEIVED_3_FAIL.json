@@ -1,0 +1,29 @@
+{
+  "schema": "aura.m03.independent-counterexamples-received.v1",
+  "status": "HOLD_WAITING_COMPLETE_REVIEW_BEFORE_SEPARATE_R2",
+  "source": "Authorized main/root chat relayed independent win_inference reproduction",
+  "independent_test": "review_m03_win_inference/test_delete_boundaries.py",
+  "independent_test_sha256": "7528a035ae301b3bf0d3bb0747cb52c322f82b5a1c236102ba5d47915e0c008b",
+  "independent_test_assertions_modified": false,
+  "old_candidate_source_or_manifest_modified": false,
+  "negative_evidence_overwritten": false,
+  "confirmed_by_independent_reviewer": [
+    "Deleting yesterday also selects exactly today's local midnight.",
+    "A new same-day event after preview with UTC and monotonic advancing one second does not invalidate the frozen-today preview.",
+    "Confirm at preview age 59.9 seconds, then advance 0.2 seconds after BEGIN acquires the write transaction: deletion still occurs beyond the 60-second TTL."
+  ],
+  "source_review_still_pending_runtime_proof": [
+    "Private _invalidate/_save_operation path bypasses the production instance postcommit presentation wrappers. Display, queued audio, stale source delivery and late ACK need explicit proof."
+  ],
+  "r2_constraints": [
+    "Separate new revision only after the remaining independent review arrives; keep original candidate and exact failing tests.",
+    "Deletion-specific timezone calendar day is [local midnight, next local midnight), with DST accounted for.",
+    "The requested day must detect a same-day source added after preview rather than hide it behind preview-time end.",
+    "Recheck original TTL, job deadline, cancellation and current ownership after write acquisition and immediately before commit; reject or roll back on loss.",
+    "Do not add Store/job/controller/presentation lock inversion; actual paired is_current uses lock-free jobs._current fields.",
+    "Any postcommit lifecycle notification must run after database and original ProfileAccess grant locks exit and must preserve the confirmation owner.",
+    "Seal actual written bytes, correcting the original M03 board_business.py CRLF/LF manifest error in the new revision only."
+  ],
+  "v18_scope_from_root": "H01, memory_r2, one-line speaker close and UI numeric timer only; excludes M03 and D01.",
+  "production_or_device_or_model_or_private_database_access": false
+}

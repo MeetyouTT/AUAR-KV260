@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "status": "READ_ONLY_AUDIT_FROZEN_NO_NATIVE16_ACCEPTANCE",
+  "utc": "2026-10-30T23:43:43.712534+00:00",
+  "finding": "Existing old-character board-local CPU renderer can be configured to request16fps without character replacement. Yuki GLES is not a compatible drop-in backend for old PNG assets. Neither source support nor existing remote16 proves full board-local16 capacity.",
+  "candidate_minimal_config_only": {
+    "native_avatar": true,
+    "native_pixel_threads": 3,
+    "stable_avatar_fps": 16,
+    "portrait_offload.enabled": false,
+    "native_yuki.enabled": false,
+    "geometry": [
+      423,
+      438
+    ],
+    "scope": "New isolated config only; never overwrite selected production config. Reuse exact original assets/core/facials/native pixel library/player, no material regeneration.",
+    "why_no_worker_change": "Fresh GTK passes stable_avatar_fps when native_avatar=true. Worker only forces local fallback to8 when an offload object exists; disabled portrait_offload means no offload object is constructed.",
+    "business_factory": "Existing candidate rejection of enabled remote portrait remains intact; local16 config satisfies ownership but still needs capacity acceptance."
+  },
+  "direct_yuki_reuse_blockers": [
+    "prepare_portrait requires profile_id fuyukiss-yuki-freemote39-frame-mesh and pinned EMS/resx/atlas resource set.",
+    "yuki_host.cpp imports E-mote and requires face_eyebrow/face_mouth/face_eye_open/face_cheek/face_talk/arm_type and two authored Japanese idle timelines; old PNG sequences have none of these.",
+    "Yuki adapter maps nod/shake/wake completion to a fixed0.8s and has its own emotion/pose/mouth behavior, so substituting it would not preserve old FSM bursts or original tracked39-frame geometry.",
+    "Old frame pipeline uses original sequence enter/loop/exit and pool rotation, four body tracks, registered eye/mouth matrices, mouth ROI bilinear warp, eye ROI bicubic warp, body-alpha protection, final affine plus cubic resize. Generic textured-quad replacement does not prove matching sampling/composition."
+  ],
+  "reusable_yuki_pieces": [
+    "EGLWindow child X window and GLES2 context lifecycle on GTK thread, with swap pacing.",
+    "Latest-one control mailbox concept and generation/track/sequence/audio-sample ownership checks; adapter semantics must remain old-character specific."
+  ],
+  "gl_option_if_cpu16_fails": "A separate PNG layer compositor can reuse only EGL hosting. It must preserve all original coordinate/sampling/alpha/mask/temporal semantics; uploading already CPU-composited full images only replaces presentation and does not remove facial/affine CPU cost. No such compatible backend was implemented or validated by this subtask.",
+  "existing_asset_manifest_metadata": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-29_audio_animation_polish\\renderer_snapshot\\manifest.json",
+    "sha256": "0ea5cf37f679126aa7a6758c3e2787134405a8136c3dc04b71baf6cf5b733969",
+    "revision": "763d0b05a67a79ff6f8a6d9d5e2a67cc9cc060181499cef7a416bccdf7315bac",
+    "pinned_asset_entries": 676,
+    "encoded_asset_bytes": 188362769,
+    "note": "188MB compressed/input files is not decoded RAM/VRAM. Per-asset bytes were not revalidated in this read-only source audit; deployment must verify existing complete manifest, not preload all frames unbounded."
+  },
+  "required_actual_gates": [
+    "Fresh runtime/config/library/source pins and same old asset manifest; no image replacement.",
+    "Isolated old-local16 actual presentation at423x438 under original state/material/action/PCM/pause/cancel timeline. No acceptable8fps fallback.",
+    "Same camera/person/YOLO/face and board ASR/GTCRN/Silero/ECAPA/business load as deployment; measure actual handoff intervals and whole-board CPU/RSS/RTF/tails.",
+    "Original39-frame tracked eyes/mouth registration, semantic pool selection, exact burst completion, enter/exit, pause/resume, stale/cancel owner rejection and sink-time mouth position must pass.",
+    "Whole16fps and audio capacity success precede switch; if fail retain explicit unresolved rendering gate. Yuki inconclusive wholeCPU A/B does not authorize replacement."
+  ],
+  "source_evidence": [
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_runtime\\fresh_source\\aura\\tools\\board_avatar_gtk.py",
+      "sha256": "874f0075741b0794a6bed4ba8aab33dfd0280e57a899d63a38ffa70f76b3cda9"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_runtime\\fresh_source\\aura\\tools\\board_avatar_worker.py",
+      "sha256": "3eff9cbda4705e18c799b0d0ace3a944f29dcf118ae8a8dfa0a24bb458d2e25e"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_runtime\\fresh_source\\aura\\tools\\native_pixels.py",
+      "sha256": "ccdc93a2432093387b45047d83775e593a59b6887a4ac7db84c3b5cec4c37742"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_runtime\\fresh_source\\aura\\tools\\realtime_controller.py",
+      "sha256": "0c4f77bdd5f639ec8efc174ba186ca9c6d8fc63ba811c9d66c35c1d204009a4d"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\aura\\tools\\realtime_facials.py",
+      "sha256": "b7dadf10ffc0d91441029df77d0d7cde121b2b991b6d8c47fbea9a15f08d5036"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\aura\\tools\\idle_body_compositor.py",
+      "sha256": "b0fa6642d9836fffb5d18ecbb8122e9ebbc43351b3e954433d477db1534d9e3f"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\aura\\tools\\facial_layers.py",
+      "sha256": "6601c59b8e6bb99439ee20ae956c1c7c8f0f90f368afb3a33d878fbcf202cb7b"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\host\\native_yuki.py",
+      "sha256": "b5193b8766bb3bfe58f748affefbb0cebda9da6e33703dbef41833dfd789e8a4"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\host\\yuki_host.cpp",
+      "sha256": "015c22b2c81ef366874b36f3324d897e0166e8288d1a96f838180c922d7ded73"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\host\\gles2_renderer.hpp",
+      "sha256": "9c6bd0156949904cb1baab29d4d7a210e602fb60b2435700139eb6b9ebccf325"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\host\\egl_window.py",
+      "sha256": "6b95345e7017f681d063ba7766ee238f62e5d618422a02e47ce34f75f9aa970b"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_runtime\\build_gui_candidate.py",
+      "sha256": "3c825ccfb3d6a79631f1a30ae86565d24b94e8c69dfacfc47bf1e721f2048be7"
+    }
+  ],
+  "executed": {
+    "board": false,
+    "models": false,
+    "gui": false,
+    "rendering": false,
+    "production_config_change": false,
+    "asset_change": false,
+    "new_renderer_code": false,
+    "new_config_generated": false
+  },
+  "stopped_reason": "Parent requested immediate compact audit freeze to release parallel slot for explicit user GUI task."
+}

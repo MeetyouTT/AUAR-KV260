@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="8" time="0.236" timestamp="2026-11-02T01:46:05.808646-08:00" hostname="REVO1"><testcase classname="tests.framework.test_start_publish_race" name="test_original_immediate_and_delayed_publications_bind_one_start_without_new_consent[0.0]" time="0.002" /><testcase classname="tests.framework.test_start_publish_race" name="test_original_immediate_and_delayed_publications_bind_one_start_without_new_consent[0.05]" time="0.001"><failure message="AssertionError: assert 'sample_failed' == 'sample_auto'&#10;  &#10;  - sample_auto&#10;  + sample_failed">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002731CEB1FF0&gt;
+delay = 0.05
+
+    @pytest.mark.parametrize('delay', [0., .05, .6, 1.2])
+    def test_original_immediate_and_delayed_publications_bind_one_start_without_new_consent(monkeypatch, delay):
+        fixture = Fixture(monkeypatch, publish_after=delay)
+&gt;       assert fixture.start()['code'] == 'sample_auto'
+E       AssertionError: assert 'sample_failed' == 'sample_auto'
+E         
+E         - sample_auto
+E         + sample_failed
+
+tests\framework\test_start_publish_race.py:90: AssertionError</failure></testcase><testcase classname="tests.framework.test_start_publish_race" name="test_original_immediate_and_delayed_publications_bind_one_start_without_new_consent[0.6]" time="0.001"><failure message="AssertionError: assert 'sample_failed' == 'sample_auto'&#10;  &#10;  - sample_auto&#10;  + sample_failed">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002731CFD6B60&gt;
+delay = 0.6
+
+    @pytest.mark.parametrize('delay', [0., .05, .6, 1.2])
+    def test_original_immediate_and_delayed_publications_bind_one_start_without_new_consent(monkeypatch, delay):
+        fixture = Fixture(monkeypatch, publish_after=delay)
+&gt;       assert fixture.start()['code'] == 'sample_auto'
+E       AssertionError: assert 'sample_failed' == 'sample_auto'
+E         
+E         - sample_auto
+E         + sample_failed
+
+tests\framework\test_start_publish_race.py:90: AssertionError</failure></testcase><testcase classname="tests.framework.test_start_publish_race" name="test_original_immediate_and_delayed_publications_bind_one_start_without_new_consent[1.2]" time="0.001"><failure message="AssertionError: assert 'sample_failed' == 'sample_auto'&#10;  &#10;  - sample_auto&#10;  + sample_failed">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002731CDAF5E0&gt;
+delay = 1.2
+
+    @pytest.mark.parametrize('delay', [0., .05, .6, 1.2])
+    def test_original_immediate_and_delayed_publications_bind_one_start_without_new_consent(monkeypatch, delay):
+        fixture = Fixture(monkeypatch, publish_after=delay)
+&gt;       assert fixture.start()['code'] == 'sample_auto'
+E       AssertionError: assert 'sample_failed' == 'sample_auto'
+E         
+E         - sample_auto
+E         + sample_failed
+
+tests\framework\test_start_publish_race.py:90: AssertionError</failure></testcase><testcase classname="tests.framework.test_start_publish_race" name="test_precommand_intermediate_cache_b_cannot_be_adopted_or_cancelled[failed]" time="0.001"><failure message="AssertionError: assert 'sample_failed' == 'sample_auto'&#10;  &#10;  - sample_auto&#10;  + sample_failed">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002731CE88EB0&gt;
+stage = 'failed'
+
+    @pytest.mark.parametrize('stage', ['failed', 'ready', 'collect'])
+    def test_precommand_intermediate_cache_b_cannot_be_adopted_or_cancelled(monkeypatch, stage):
+        fixture = Fixture(monkeypatch, publish_after=.6, previous='cached-A')
+        fixture.now = 1.1
+        def old_b():
+            fixture.view['sequence'] += 1
+            fixture.view['observed_mono_ms'] = 1050  # Genuine old source stamp, before issued1100.
+            fixture.view['modules']['identity']['enrollment_sampling'].update(
+                session_id='precommand-B', stage=stage,
+                bound_target=copy.deepcopy(fixture.flow.owner[2]))
+        fixture.after_send = old_b
+&gt;       assert fixture.start()['code'] == 'sample_auto'
+E       AssertionError: assert 'sample_failed' == 'sample_auto'
+E         
+E         - sample_auto
+E         + sample_failed
+
+tests\framework\test_start_publish_race.py:238: AssertionError</failure></testcase><testcase classname="tests.framework.test_start_publish_race" name="test_precommand_intermediate_cache_b_cannot_be_adopted_or_cancelled[ready]" time="0.001"><failure message="AssertionError: assert 'sample_failed' == 'sample_auto'&#10;  &#10;  - sample_auto&#10;  + sample_failed">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002731B3881F0&gt;
+stage = 'ready'
+
+    @pytest.mark.parametrize('stage', ['failed', 'ready', 'collect'])
+    def test_precommand_intermediate_cache_b_cannot_be_adopted_or_cancelled(monkeypatch, stage):
+        fixture = Fixture(monkeypatch, publish_after=.6, previous='cached-A')
+        fixture.now = 1.1
+        def old_b():
+            fixture.view['sequence'] += 1
+            fixture.view['observed_mono_ms'] = 1050  # Genuine old source stamp, before issued1100.
+            fixture.view['modules']['identity']['enrollment_sampling'].update(
+                session_id='precommand-B', stage=stage,
+                bound_target=copy.deepcopy(fixture.flow.owner[2]))
+        fixture.after_send = old_b
+&gt;       assert fixture.start()['code'] == 'sample_auto'
+E       AssertionError: assert 'sample_failed' == 'sample_auto'
+E         
+E         - sample_auto
+E         + sample_failed
+
+tests\framework\test_start_publish_race.py:238: AssertionError</failure></testcase><testcase classname="tests.framework.test_start_publish_race" name="test_precommand_intermediate_cache_b_cannot_be_adopted_or_cancelled[collect]" time="0.001"><failure message="AssertionError: assert 'precommand-B' == 'new-owned-session'&#10;  &#10;  - new-owned-session&#10;  + precommand-B">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002731B0223B0&gt;
+stage = 'collect'
+
+    @pytest.mark.parametrize('stage', ['failed', 'ready', 'collect'])
+    def test_precommand_intermediate_cache_b_cannot_be_adopted_or_cancelled(monkeypatch, stage):
+        fixture = Fixture(monkeypatch, publish_after=.6, previous='cached-A')
+        fixture.now = 1.1
+        def old_b():
+            fixture.view['sequence'] += 1
+            fixture.view['observed_mono_ms'] = 1050  # Genuine old source stamp, before issued1100.
+            fixture.view['modules']['identity']['enrollment_sampling'].update(
+                session_id='precommand-B', stage=stage,
+                bound_target=copy.deepcopy(fixture.flow.owner[2]))
+        fixture.after_send = old_b
+        assert fixture.start()['code'] == 'sample_auto'
+&gt;       assert fixture.flow.sampling_id == 'new-owned-session'
+E       AssertionError: assert 'precommand-B' == 'new-owned-session'
+E         
+E         - new-owned-session
+E         + precommand-B
+
+tests\framework\test_start_publish_race.py:239: AssertionError</failure></testcase><testcase classname="tests.framework.test_start_publish_race" name="test_snapshot_generated_before_ack_even_if_after_issue_is_not_claimed" time="0.001"><failure message="AssertionError: assert 'pre-ACK-B' == 'new-owned-session'&#10;  &#10;  - new-owned-session&#10;  + pre-ACK-B">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002731B0718D0&gt;
+
+    def test_snapshot_generated_before_ack_even_if_after_issue_is_not_claimed(monkeypatch):
+        fixture = Fixture(monkeypatch, publish_after=.6, previous='cached-A')
+        fixture.now = 1.1
+        def old_b():
+            fixture.now = 1.2
+            fixture.view['sequence'] += 1
+            fixture.view['observed_mono_ms'] = 1150
+            fixture.view['modules']['identity']['enrollment_sampling'].update(
+                session_id='pre-ACK-B', stage='collect',
+                bound_target=copy.deepcopy(fixture.flow.owner[2]))
+        fixture.after_send = old_b
+        assert fixture.start()['code'] == 'sample_auto'
+&gt;       assert fixture.flow.sampling_id == 'new-owned-session'
+E       AssertionError: assert 'pre-ACK-B' == 'new-owned-session'
+E         
+E         - new-owned-session
+E         + pre-ACK-B
+
+tests\framework\test_start_publish_race.py:255: AssertionError</failure></testcase></testsuite></testsuites>

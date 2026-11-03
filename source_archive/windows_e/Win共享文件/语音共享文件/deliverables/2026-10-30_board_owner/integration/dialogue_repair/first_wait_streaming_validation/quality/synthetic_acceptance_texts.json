@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "corpus_id": "aura_public_synthetic_asr_quality_20261031_v1",
+  "provenance": "Original fictional public test sentences authored for this project",
+  "label": "SYNTHETIC_INTENDED_TEXT_NOT_REAL_SPEAKER_GOLD",
+  "generated_audio_exists": false,
+  "human_listening_verified": false,
+  "purpose": "ASR content checks only; root may use the existing TTS to generate isolated public samples",
+  "execution_policy": {
+    "execute_memory_or_device_commands": false,
+    "production_store_access": false,
+    "treat_recognized_text_as_user_authorization": false,
+    "private_user_data_used": false,
+    "record_raw_human_audio": false
+  },
+  "scoring_notes": [
+    "Report intended-text CER separately from semantic preservation and from actual spoken-text accuracy.",
+    "A TTS mispronunciation or skipped word can invalidate the intended-text reference; preserve human listening review status and do not blame ASR automatically.",
+    "Ignore punctuation/spacing for character comparison; do not delete negation, correction markers, names, numbers, units, or memory scope.",
+    "Chinese numerals and Arabic-digit renderings can be semantically equivalent; report that separately, without pretending their raw character strings match.",
+    "The linked memory sentences are language fixtures only. Do not write/clear real memory and do not treat recognition as permission to do so."
+  ],
+  "cases": [
+    {
+      "id": "S01",
+      "category": "ordinary_chinese",
+      "text": "你好，请用两句话介绍你自己。",
+      "expected_key_semantics": ["A greeting and request for self-introduction", "Requested response length is two sentences"],
+      "critical_spans": ["两句", "介绍", "自己"]
+    },
+    {
+      "id": "S02",
+      "category": "person_name",
+      "text": "我叫林悦，树林的林，喜悦的悦。",
+      "expected_key_semantics": ["Fictional name is 林悦", "Spelling explanation disambiguates 林 and 悦; 林月 is not an accepted exact name"],
+      "critical_spans": ["林悦", "树林", "喜悦"]
+    },
+    {
+      "id": "S03",
+      "category": "numbers_and_units",
+      "text": "桌上有三本书，杯子里有二百五十毫升水。",
+      "expected_key_semantics": ["Book count equals 3", "Water volume equals 250 millilitres", "Do not turn millilitres into litres or change the number"],
+      "critical_spans": ["三本书", "二百五十", "毫升"]
+    },
+    {
+      "id": "S04",
+      "category": "negation",
+      "text": "我没有关灯，也没有锁门。",
+      "expected_key_semantics": ["Both actions are negated: light was not turned off and door was not locked", "Not an instruction to operate either device"],
+      "critical_spans": ["没有关灯", "没有锁门"]
+    },
+    {
+      "id": "S05",
+      "category": "correction",
+      "text": "更正一下，会议改到下午四点，不是三点。",
+      "expected_key_semantics": ["Explicit correction", "New meeting time is 16:00", "15:00 is rejected, not a second simultaneous meeting time"],
+      "critical_spans": ["更正", "下午四点", "不是三点"]
+    },
+    {
+      "id": "S06",
+      "category": "remember_intent",
+      "text": "请记住，我把蓝色钥匙放在书架第二层。",
+      "expected_key_semantics": ["Explicit remember intent in fictional test text", "Object is the blue key", "Location is the second shelf of the bookcase"],
+      "critical_spans": ["记住", "蓝色钥匙", "书架第二层"],
+      "execute_intent": false
+    },
+    {
+      "id": "S07",
+      "category": "past_memory_question",
+      "text": "我刚才把蓝色钥匙放在哪里？",
+      "expected_key_semantics": ["Question about a past placement", "Object is the blue key", "Do not turn the question into a newly asserted location"],
+      "critical_spans": ["刚才", "蓝色钥匙", "哪里"],
+      "related_fixture": "S06",
+      "execute_intent": false
+    },
+    {
+      "id": "S08",
+      "category": "forget_scope",
+      "text": "请忘记我刚才说的钥匙位置。",
+      "expected_key_semantics": ["Explicit forget intent in fictional test text", "Scope is the previously mentioned key location", "Does not request deletion of all memories"],
+      "critical_spans": ["忘记", "刚才", "钥匙位置"],
+      "related_fixture": "S06",
+      "execute_intent": false
+    }
+  ]
+}

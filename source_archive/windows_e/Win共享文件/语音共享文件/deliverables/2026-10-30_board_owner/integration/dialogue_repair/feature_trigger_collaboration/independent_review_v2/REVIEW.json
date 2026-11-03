@@ -1,0 +1,206 @@
+{
+  "schema": "aura.feature-trigger-independent-review.v2",
+  "decision": "DO_NOT_MERGE_V2_FIX_IN_V3",
+  "reviewed_source_manifest_sha256": "8366977e473ca226af8c714b13bdde00eaba1b37ae0a157d30042d319c99824f",
+  "baseline": {
+    "startup_sha256": "bf6cdd70768ea5fac4e5be874a387f444c0834d67db5e7a2a744671d9019d63c",
+    "manifest_sha256": "e488f45660e78904d04ba57fe4210e2bcf9eeffa6282219096e9d7b6115df718",
+    "pin_scope": "six pre-existing sources match saved v16 public source; one new helper"
+  },
+  "source_verification": {
+    "board/runtime/audio/board_dialogue_jobs.py": {
+      "after_sha256": "687b80cde20d70e4de56dd71956683b9cec59f55bd25965491dc08d00c8cb248",
+      "before_sha256": "71fd1ac8e2ddb2e20eeb572063cc69e370e18f40af4a97fb65e2d8258bae45a0",
+      "after_verified": true,
+      "before_and_v16_source_verified": true
+    },
+    "board/runtime/board_business.py": {
+      "after_sha256": "bb82c154ad1d0120b9b188f07a7aa69ec3b3ba6ca15894b1cb0d5ef4a1a1d025",
+      "before_sha256": "b0d19864ac305e52d5d9f4f86823ae97b4d8d134c56c0ec78c0ae316bd8efc18",
+      "after_verified": true,
+      "before_and_v16_source_verified": true
+    },
+    "board/runtime/visual_policy.py": {
+      "after_sha256": "e8e80e0d92c889e5533aa84c4abf7782d7424d8658783d64acac2d17ea2a147e",
+      "before_sha256": "efb730d82b812f4323e92c8d6fdf1e69ae9f8dbffab1a5c5db346a18d12b4dc9",
+      "after_verified": true,
+      "before_and_v16_source_verified": true
+    },
+    "common/feature_intents.py": {
+      "after_sha256": "0bb3a5287eddb104c65ea1cc6b57ae89bcc59c6a57ebfaa17e373657fca33e7a",
+      "before_sha256": null,
+      "after_verified": true
+    },
+    "common/voice_enrollment.py": {
+      "after_sha256": "238939dbc4afa0559caa8687ff01a67854b606a33df4bdeaf2b0103fb8c994a8",
+      "before_sha256": "9a40e16875afb5c7c031a2994a205bd4e29f7cb78115a624586164f1a08c4f67",
+      "after_verified": true,
+      "before_and_v16_source_verified": true
+    },
+    "tools/speaker_device.py": {
+      "after_sha256": "e975e58891461bbcbb68522c83f90b976631c9fa2c703c2780651b825b66f2e0",
+      "before_sha256": "73648e960ab28e16cce1e0676bd7981b5fc35c70bce9868b864e5c8881af4e00",
+      "after_verified": true,
+      "before_and_v16_source_verified": true
+    },
+    "tools/yuki_jobs_candidate.py": {
+      "after_sha256": "18d4bcbc6d3a32b3a2edd64103d634493e2fbd00f88ab0809fa600144d26508d",
+      "before_sha256": "6dd98c8a1be49f1c4a468ba10a585cbe3fbf36258d9e90d28c7423bac1f8093c",
+      "after_verified": true,
+      "before_and_v16_source_verified": true
+    }
+  },
+  "findings": [
+    {
+      "id": "V2-QUERY-SAMPLE",
+      "priority": "P1",
+      "blocking": true,
+      "title": "A natural save-status question becomes a voice-enrollment sample",
+      "locations": [
+        {
+          "file": "common/feature_intents.py",
+          "line": 43
+        },
+        {
+          "file": "tools/yuki_jobs_candidate.py",
+          "line": 71
+        },
+        {
+          "file": "board/runtime/board_business.py",
+          "line": 235
+        }
+      ],
+      "reproduction": "Real paired BoardBusinessRuntime + BoardDialogueJobs + temporary synthetic SQLite + fake encoder. Explicit voice enrollment completes its full playback ACK, then a normal next request asks the public fixture question: 你有没有保存我的声纹？",
+      "observed": {
+        "query_matched": false,
+        "samples_before": 0,
+        "samples_after": 1,
+        "ack_committed": true,
+        "profile_grants": 0,
+        "private_store_accessed": false
+      },
+      "impact": "The whitelist does not recognize this management question. The active enrollment route consumes it as a sample; no identity grant or committed enrollment was demonstrated by this question alone.",
+      "required_fix": "Recognize unambiguous speaker save-status/active-status management questions before enrollment sampling in both the paired route and LocalIdentityReplies. Keep explicit action/confirmation validation and raw input recording unchanged. Do not classify all arbitrary enrollment sentences as management questions."
+    },
+    {
+      "id": "V2-STALE-QUERY-CACHE",
+      "priority": "P1",
+      "blocking": true,
+      "title": "An accepted exact request retry bypasses receipt TTL and gallery revision validation",
+      "locations": [
+        {
+          "file": "tools/speaker_device.py",
+          "line": 48
+        },
+        {
+          "file": "tools/speaker_device.py",
+          "line": 71
+        }
+      ],
+      "baseline_support": [
+        {
+          "file": "board/runtime/board_speaker_business.py",
+          "line": 377
+        }
+      ],
+      "reproduction": "Actual BoardSpeakerBusiness public turn() API with synthetic stores and fake encoder: explicitly enroll three samples and confirm; query once; expire the 60-second receipt or change speaker-store revision; retry identical current actor/generation/full metadata/request ID before the same original 120-second deadline. A new request ID is the control.",
+      "observed": {
+        "expired": {
+          "change": "expired",
+          "original_deadline_still_live": true,
+          "repeated_request_positive": true,
+          "fresh_request_unknown": true,
+          "private_store_accessed": false
+        },
+        "revision_changed": {
+          "change": "revision",
+          "original_deadline_still_live": true,
+          "repeated_request_positive": true,
+          "fresh_request_unknown": true,
+          "private_store_accessed": false
+        }
+      },
+      "impact": "The supported same-metadata retry returns the cached positive while a fresh request returns unknown. Normal new-request next turns were not shown to bypass TTL. This is stale status evidence, not an identity authorization bypass.",
+      "required_fix": "Re-evaluate current actor, receipt TTL, gallery revision, and target existence for read-only status retries before returning cached status. Preserve idempotency for write/action retries: never rerun enrollment or delete merely to refresh the query."
+    }
+  ],
+  "additional_source_confirmed_gap": {
+    "id": "V2-POSTCOMMIT-CANCEL-RECEIPT",
+    "locations": [
+      {
+        "file": "tools/speaker_device.py",
+        "line": 108
+      },
+      {
+        "file": "tools/speaker_device.py",
+        "line": 114
+      },
+      {
+        "file": "board/runtime/board_speaker_business.py",
+        "line": 406
+      },
+      {
+        "file": "board/runtime/board_speaker_business.py",
+        "line": 554
+      }
+    ],
+    "evidence_kind": "source review and author/parent independent source confirmation; no extra race test in this review",
+    "issue": "After a real enrollment transaction commits, SpeakerDevice can create a temporary receipt before the outer job current check fails. The original _cancel_actor clears active sessions but not this new receipt.",
+    "required_boundary": "Invalidate temporary status evidence for the cancelled owner and reply unknown on later status queries as required by the new policy. Do not delete the actually committed identity/template, roll back a completed transaction, or claim that saved data was not saved."
+  },
+  "positive_checks": [
+    "The existing complete paired runtime/Store/ACK scenario passes: recognized status queries before/during/after commit are read-only; a fresh request after TTL returns unknown.",
+    "Jobs session_id survives ordinary generation changes and full ACK. Conversation/profile selection controls session identity; using (boot,session) is appropriate and must not be narrowed to one generation.",
+    "Receipt revision is the identity/template store metadata revision, not timeline event count or general SQLite activity. Unrelated visual events need not invalidate a receipt.",
+    "Receipt construction follows original store.enroll return, revision +1 and identity existence checks. Original IdentityStore transaction commits before enroll returns.",
+    "Confirmed full-path question reproduction grants zero profile permissions. No threshold, model, device, PCM, playback ACK, memory retention, or renderer change was made by this review."
+  ],
+  "tests": {
+    "existing_actual_pair_store_ack_scenario": {
+      "result": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      "evidence": "flow.xml"
+    },
+    "new_counterexamples": {
+      "result": {
+        "tests": 3,
+        "failures": 3,
+        "errors": 0
+      },
+      "evidence": "edges_final.xml",
+      "interpretation": "Three intended regression assertions fail, confirming two independent defects (TTL/revision are parameterized variants)."
+    },
+    "runner": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\run_candidate_tests.py",
+    "python": "D:/py312/python.exe",
+    "repro_test": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\independent_review_v2\\test_review_edges.py",
+    "initial_fixture_error": "edges.xml is retained but not defect evidence: the first cache fixtures had a boot-ID mismatch; edges_final.xml uses matching boot IDs and is the reviewed result.",
+    "suite_scope": "Only one existing complete-flow test and three small synthetic counterexamples; the author 265-case suite was not rerun."
+  },
+  "v3_acceptance_requirements": [
+    "Re-run the natural status-question full paired/Store/ACK scenario and require no added enrollment vector/hash and no grant.",
+    "Same-current exact query replay must become unknown after TTL or gallery revision changes; original live deadline and same metadata must remain accepted by the outer service.",
+    "Successful write replay must stay idempotent; failed or pre-commit-cancelled writes must not create a success receipt.",
+    "Post-commit cancellation may invalidate temporary receipt only; durable identity/template facts must remain consistent with the real transaction.",
+    "A valid commit plus full ACK followed by a new generation in the same real session must still produce usable recent status. New boot/session or invalidated gallery evidence must yield unknown."
+  ],
+  "evidence_sha256": {
+    "test_review_edges.py": "744e9a904f9e2100eb099456809f419275b60bcc416af653077d2d2ade2972cf",
+    "flow.xml": "afb9d1047a7c0b8f9db218f4da3f9ab38c7533a18934e33cd13484cb573de7a3",
+    "edges_final.xml": "c5f9585e93f617e12b7935ea414f5bb8bc66e4cae049bf805835e537763b8239",
+    "replay_expired.json": "f37759df51bc950dee8e9c4e41753f72d6acfc702b81755a8f96595111eef5ad",
+    "replay_revision.json": "ae842d1bb7a37d06cc567bc3c93c01d7d8a6cd5639efc29563fec31032c81c6c",
+    "unmatched_query.json": "910734e30611e9d1fb11c587179e370521f352ec04cc5ef9a0994b4fa65b3fdf"
+  },
+  "scope": {
+    "source_only": true,
+    "candidate_modified": false,
+    "production_modified": false,
+    "hardware_or_models_run": false,
+    "real_private_database_accessed": false,
+    "test_sqlite_and_pcm": "public synthetic fixtures only",
+    "hardware_acceptance_claimed": false
+  }
+}

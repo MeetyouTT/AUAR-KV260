@@ -1,0 +1,43 @@
+--- a/drivers/gpu/drm/xlnx/zynqmp_dp.c
++++ b/drivers/gpu/drm/xlnx/zynqmp_dp.c
+@@ -41,6 +41,12 @@
+ static uint zynqmp_dp_power_on_delay_ms = 4;
+ module_param_named(power_on_delay_ms, zynqmp_dp_power_on_delay_ms, uint, 0444);
+ MODULE_PARM_DESC(power_on_delay_ms, "DP power on delay in msec (default: 4)");
++
++/* Optional preparation window before AUX becomes visible to consumers. */
++static uint zynqmp_dp_initial_aux_delay_ms;
++module_param_named(initial_aux_delay_ms, zynqmp_dp_initial_aux_delay_ms, uint, 0444);
++MODULE_PARM_DESC(initial_aux_delay_ms,
++		 "Initial AUX preparation delay, 0-10000 ms (default: 0)");
+ 
+ /* Link configuration registers */
+ #define ZYNQMP_DP_TX_LINK_BW_SET			0x0
+@@ -1933,6 +1939,12 @@
+ 	zynqmp_dp_write(dp->iomem, ZYNQMP_DP_TX_FORCE_SCRAMBLER_RESET, 1);
+ 	zynqmp_dp_write(dp->iomem, ZYNQMP_DP_TX_ENABLE, 0);
+ 
++	if (zynqmp_dp_initial_aux_delay_ms > 10000) {
++		dev_err(dp->dev, "initial_aux_delay_ms exceeds 10000 ms\n");
++		ret = -EINVAL;
++		goto err_reset;
++	}
++
+ 	ret = zynqmp_dp_phy_probe(dp);
+ 	if (ret)
+ 		goto err_reset;
+@@ -1940,6 +1952,14 @@
+ 	ret = zynqmp_dp_phy_init(dp);
+ 	if (ret)
+ 		goto error_phy;
++
++	/* No AUX adapter or IRQ handler is registered at this point. */
++	if (zynqmp_dp_initial_aux_delay_ms) {
++		dev_info(dp->dev, "AURA initial AUX preparation: %u ms\n",
++			 zynqmp_dp_initial_aux_delay_ms);
++		msleep(zynqmp_dp_initial_aux_delay_ms);
++		dev_info(dp->dev, "AURA initial AUX preparation complete\n");
++	}
+ 
+ 	dp->aux.name = "ZynqMP DP AUX";
+ 	dp->aux.dev = dp->dev;

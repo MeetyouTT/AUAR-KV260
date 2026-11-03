@@ -1,0 +1,51 @@
+五分钟原文压缩与摘要关联验收：最小方案及只读诊断候选
+
+本目录是本地候选，未写板端、未执行真实库/HTTP/模型/设备操作。唯一设备执行者仍是转轴维护窗口。不得把公开SQLite测试当成实机验收。
+基线来自现役subtitle_receipt：startup22317f7933447b28a2ca535a47246de8b3869989cc0d964a13cd169cd2289311，spec62b99e24560229c78a3be000fed5752b6a50c4fb16ab6bc2c88e987561831177，manifest5b741bff8039a4f71110b06cce88ff40bea32a27ace718a263f6879f79deaa2b，380项；source de04。候选硬固定startup及7份关键源SHA，未来变版必须重新核对而非删检查。
+
+先明确本次两段验收
+A. 原文→正常摘要→正文删除。可以独立完成；这不依赖后续能否恢复同scope。
+B. 同scope追问→正确回答→记录中的摘要来源关联。若scope变化、无真实历史路由证据或只能证明预选来源，按对应级别报告，不能宣称比证据更强的“精确prompt摘要检索已通过”。
+
+最少操作
+1. 复用已修好的live_observer_caption_accepted目标选择和完整ACK关联（不改生产）。用户只说一次：
+   “你好，我把杯子放在桌子左边了。”
+   这是普通公开事件，不说“记住/项目是”等显式事实命令；观察到第一个已接纳request hash与同请求完整播放ACK，并由用户确认字幕位置语义正确、正常答完。首个旧seed已被用户报告位置识别错，仅保留原技术证据，不把旧hash送本候选或算语义验收通过。无录音/正文导出。
+2. ACK后30秒内由原owner通过既有UI动作正常暂停免点击监听，确认monitor_enabled=false/monitor_owned=false/auto_enabled=false，无播放、micfalse。不要恢复handsfree，不创建新会话或档案。
+3. 自然等待。压缩资格是Store可信UTC下该turn及事件closed_utc（完整播放ACK/关闭）都已至少300秒；不是从用户开始说话算300秒，也不是硬到5分钟立即删除。原worker默认3秒节拍、前台idle、时钟safe、租约、模型与保真校验都会影响完成时间。
+4. 待300秒以上，由唯一owner执行本候选，参数只给本次seed request hash。输出target_compaction_proven=true、两角色body_rows=0、valid_summary_link_count>=1、committed_task_count>=1、clock_safe=true，且current_fact_source_links=0，才通过A。若失败，保留正文/重试是原正确语义，不调时钟、不清私库、不手工生成摘要。
+5. 若继续B：保持handsfree暂停，用已有本地手动录音命令启动一次采集，用户说：
+   “回忆一下今天我把杯子放在哪里了？”
+   手动stop后自动提交，无额外submit；配对新request hash和完整ACK。完成后再次确认自然idle/暂停，再给probe两个request hashes。要求seed_scope_token==answer_scope_token、same_scope=true以及saved selection仍对应seed；否则只报A通过与scope限制。
+6. B结合用户确认“桌子左边”、目标源原文已无、没有当前明确事实来源链接、新助手dependency是否含目标user/assistant源和provenance_complete。候选明确actual_prompt_retrieval_observed=false，因为现有数据库无法给出精确prompt入选日志；不得把依赖true单独当作强检索证明。
+
+合法手动入口与门槛
+现役GTK command接受 type=service_action/action=record_start 与 record_stop。不是record_toggle，也不是conversation_toggle：handsfree配置下后两者会toggle监听，之后voice_first._monitor_tick会select_conversation(resume=False)创建新匿名scope。
+本地手动链：GtkStage.command service_action use_local→AvatarRenderWorker.record_start/stop排队→RecordingController.record_start/stop→READY _collect→VoiceFirst._queue_transcription在monitor_owned=false时直接父类队列→BoardDialogueJobs._scope读取仍active的ConversationSelection。
+原GUI能力/状态检查保持：use_local必须为真（已有本地录音可stop，或远端无record_start且不在RECORDING）；远端模块不得RECORDING/PLAYING或LISTENING/PROCESSING/SPEAKING；本地phase IDLE且无avatar_command_pending；auto_enabledfalse；服务和feedback就绪、未播放、录音器未closed。若实际路由去了远端服务，不算这条手动路径通过。
+record_start只采一次、max_seconds20，不改active/saved CID；record_stop停止后_collect自动提交，有效语音不足可能EMPTY，不能算记忆失败。不要调用私有方法、改monitor字段或强写selection来补scope。
+普通暂停cancel会取消采集/旧任务，不清ConversationSelection.active/saved。新的monitor owner、选新会话、选择/清除profile、进程重启会改变或丢失active；发生任何一个就先停止。磁盘saved存在本身不自动授权恢复active，本候选只核saved一致且拒绝profile/device，不授予任何权限。
+若active已丢失：当前handsfree UI没有可达的明确resume命令；非handsfree GUI中的“继续上次”分支不适用于现配置。此时保持限制，不绕过scope，仅保留A结果。
+
+自然历史句式已本地核对
+现役common/timeline.py SHA19b05e4ff14dba6eaf4de571c5855fd4c6f75cd97b785a4aa6b5b1a13f5e357a。
+纯函数结果见PUBLIC_PHRASE_ROUTE.json：当前短句recall_requested=true，topic恰为“杯子”，当天明确范围、error=null；前一蓝色水杯公开句的路由结果保留为历史，但不是本次语义seed。没有ASR或模型调用。
+“刚才”在现版只有最近600秒，压缩或重试稍久可能超窗，故用“今天”。若测试跨本地午夜，要先核查询日期，不用当天范围漏掉前一天的seed。
+
+诊断候选的范围
+read_target_memory_metadata.py CLI只接受1或2个64位小写SHA256 request hash；本次观察器使用SHA256(request_id UTF8)，Store turn_id=同request_id，可在最多最新64个turn元数据内精确匹配。
+只处理本次普通conversation范围：seed必须匹配当前saved selection，answer必须与seed同scope。profile/device拒绝；范围不符时不读取任何event行。CLI没有scope参数、路径参数、任意SQL或正文搜索参数，不会选择或恢复会话。
+固定ROOT/PRIVATE/DB/selection；startup与7源前后SHA校验；固定私有文件canonical/owner/权限/nlink检查；SQLite mode=ro/query_only、短VM progress预算0.4秒、150ms锁等待、单读快照。读前只取原/api/state数值时钟与IDLE/PAUSED/micfalse状态，读后检查DB inode与selection字节未变。
+源级结果只有event/summary/scope哈希、来源枚举、body行数、closure年龄、同revision有效summary链接、已提交任务计数、当前事实来源链接。有效summary查询明确绑定到该event.compacted_summary_id；另一有效summary不能为失效的直接指针借证。追问只输出provenance_complete与dependency布尔量。
+没有SELECT text/summary/metadata/事实value，也不导出原turn/event/summary/scope IDs、对话或录音。无法找到最新64内目标时直接拒绝，不扩大到全库正文搜索。
+候选不构造生产Store对象、不回收租约、不恢复journal、不写数据库；热journal或版本/选择变化就返回静态失败代码，不能修库再假装只读成功。
+
+依赖记录的证据边界（必须保留）
+现役BoardDialogueController._messages在BoardContextBuilder筛选预算之前收集context/history全部event_refs/summary_ids；生成时summary依赖展开成source event依赖。
+因此dependency=true证明“这轮记录了与目标来源的保守关联”，不精确证明那一摘要最终进入prompt。context()还能自动提供continuity_summary，不能仅凭回答正确区分显式history检索与连续摘要注入。
+本候选available_source_category=timeline_summary指目标有效摘要在该scope可用；actual_prompt_source_category始终unknown，不能改成已观测。若要严格验收“显式历史检索选中该摘要且已入prompt”，需另有请求相关的builder/history元数据观察（类别+哈希，不含正文）。当前未找到现役公开诊断导出这层信息，不为本轮扩展生产服务。
+原memory_health/v14只提供全库计数和失败/时钟诊断，不能替代本次目标source关联；其中first_wait_integration/read_memory_metadata包装还自动SSH，不能在分析窗口执行或当现役直接复用。
+
+候选验证与执行权
+test_public_probe.py为6项新公开in-memory SQLite夹具：近期/失败保留原文不误通过；已提交正文0且答复来源关联；scope或selection错立即拒绝；时钟/年龄/未提交/无有效摘要不误通过；最新64和hash参数限制；直接摘要指针已失效但另有同源有效摘要仍拒绝通过。SQLite authorizer拒绝所有正文列读取，正常路径全部通过；无HTTP或真实库调用。
+FROZEN_HANDOFF.json记录文件SHA。先由主控复核并交唯一设备owner；不得让分析窗口自行上传或执行。本候选会读取/api/state和只读生产元数据，只有设备owner在既定授权范围内执行；本轮作者没有做这些调用。

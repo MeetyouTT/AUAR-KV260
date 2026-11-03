@@ -1,0 +1,39 @@
+Small bilingual Zipformer Transducer — isolated candidate, not deployed
+
+Files and source
+- official_files.json records exact immutable Hugging Face URLs, bytes and SHA256 for encoder INT8, decoder FP32, joiner INT8, tokens. Recommended four-file set totals 60,142,871 bytes, excluding runtime working memory. Large ONNX hashes are official LFS metadata; root verifies downloaded bytes. No model was downloaded or executed by this agent.
+- Public upstream test_wavs/0.wav was read into RAM only: 321744 bytes, 160850 frames at 16k mono PCM16, SHA7d93384c..., 10.053125s. It is not the existing Paraformer/CTC 0.wav; no gold transcript claimed. Worker intentionally uses the same already-pinned 8 synthetic WAVs instead.
+- Version-fixed from_transducer API exists in sherpa-onnx v1.13.8. It takes encoder, decoder, joiner, tokens, not a chunk_size argument. The chosen upstream exp/32/export-for-onnx.sh explicitly sets --decode-chunk-len 32. Do not swap exp/64 or exp/96 and still describe it as this candidate.
+- Model type is read from model metadata by the recognizer. Start with 1 CPU thread and greedy_search, endpoint detection disabled. No hotword, LM, spelling replacement, or test-text-specific correction.
+
+Root-only execution
+Copy public_transducer_worker.py and the unchanged quality/public_quality_worker.py into the approved board candidate area. The latter must hash to 293b23f5dd350e5f4d1cce1489120a44b2c4d743c1534080da496f3f58407176; the worker compiles those verified bytes in RAM and reuses its exact 8-ID/text/manifest/WAV validation. No edits to the original helper.
+Flatten the four verified resources into --model-dir outside shared storage. Worker requires exact sizes and hashes.
+
+CLI (root supplies actual copied helper/model paths)
+python3 -B public_transducer_worker.py
+  --mode quality
+  --quality-helper ABSOLUTE_COPIED_FROZEN_HELPER_PATH
+  --model-dir ABSOLUTE_ISOLATED_RESOURCE_DIRECTORY
+  --manifest /home/root/aura-public-streaming-validation-20261031/synthetic-8a9983b6bb9f42c6/manifest.json
+  --manifest-sha256 7109ee213126f098a3a3da08bbc521beb0db54a21e0911be02e04f2010b9a869
+  --external-deadline-managed --max-seconds 180
+
+For realtime public pacing, use --mode realtime --feed-ms 160 (or 20). Each invocation loads one constant recognizer and makes one fresh stream per case; all eight cases must validate before model load. First decode is explicitly labelled; no hidden warmup. Use the existing reviewed Python/sherpa/numpy environment, not a package install.
+The wrapper must enforce a root-owned external deadline and verify the current exclusive hardware window. Soft checks cannot interrupt a single stuck native call. This worker does not inspect/control production services, signal processes, open microphones, play audio, access Store/network, or persist anything. Native logs go to /dev/null; only public synthetic references/hypotheses and fixed numeric diagnostics go to stdout JSON. Exceptions use fixed enums. Bytecode writes are disabled.
+
+Tail/measurement
+- Both modes append 0.66 s / 10560 float32 zeros, call stream.input_finished(), drain while is_ready(), then get_result(), following the pinned official example. No extra 0.66s wall-clock sleep. These zeros are model context, not recorded speech.
+- quality feeds the whole WAV before tail/drain. Its timing is offline_quality_not_realtime_latency. Do not call it speech-end latency.
+- realtime offers 20/160ms chunks when their last sample becomes available, preserves final short blocks, and never discards overdue blocks. final_after_scheduled_input_end_ms includes accumulated input lag, last-block decode, and flush. Do not replace it with flush_wall_ms alone. No live capture or Silero endpoint evaluation is implied; endpoint_source=PUBLIC_WAV_END.
+- Sample rate and actual PCM bytes remain those in the frozen manifest; no resampling in this worker. CER is against intended synthetic text, not human-verified spoken content. Critical spans are literal diagnostics; semantic_acceptance_passed remains null.
+
+Offline checks
+python -B -m unittest -v test_public_transducer_worker.py
+Two checks: official file/pin/interface consistency including unchanged quality helper; fake-clock quality/realtime finalization, final partial samples, and slow-consumer backlog accounting. They do not prove native model compatibility, model quality, KV260 resource fit, playback, or production readiness.
+
+Primary sources
+https://github.com/k2-fsa/sherpa/blob/master/docs/source/onnx/pretrained_models/online-transducer/zipformer-transducer-models.rst
+https://huggingface.co/csukuangfj/k2fsa-zipformer-bilingual-zh-en-t/tree/e2382758de9a0219b4efe682b95af30b399db3b8/exp/32
+https://github.com/k2-fsa/sherpa-onnx/blob/v1.13.8/sherpa-onnx/python/sherpa_onnx/online_recognizer.py#L97
+https://github.com/k2-fsa/sherpa-onnx/blob/v1.13.8/python-api-examples/online-decode-files.py#L410

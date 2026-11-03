@@ -1,0 +1,65 @@
+id,group,name,owner,placement,status,existing,planned_path,input,output,remaining,tests
+platform,M1,Linux / 驱动 / SDK / 平台指纹,A,KV260 PS,已有有限板测,config/toolchain_lock.json ; hardware/platform/platform_manifest.json ; /home/ghmd/kv260-reference-2022.2-20260930/DEPLOYMENT_REVIEW.md,board/firmware/platform,硬件包与系统版本,可核验运行环境,最终镜像、精确器件型号、DPU 指纹与统一发布待冻结,T01 T02 T28
+dpu,M1,PL 官方 DPU：单 CU B4096,A / B,KV260 PL,已有有限板测,/home/ghmd/kv260-visual-servo-20261007/BOARD_TEST_REPORT.md,src/platform/dpu_integration,模型张量 / DDR,神经网络输出,历史分类与共存板测已有；项目检测/身份共享负载待验,T02 T04 T05
+devices,M1,外设枚举 / 时间 / 启动自检,A / C,KV260 PS,接口或部分实现,tools/aura_project.py ; board/vision/capture.py,board/scripts/device_diagnostics,相机 / USB 音频 / HDMI / IP 身份,设备状态与明确降级,MCP01 实测、统一启动、时基映射与失联恢复待接,T26 T28
+camera,M2,USB 相机：唯一来源与最新帧槽,B,KV260 PS,已有有限板测,board/vision/capture.py ; board/vision/frames.py ; /home/ghmd/kv260-realtime-vision-20261007/realtime_vision.py,src/ps/vision/capture,实际帧与采集元数据,FrameRef + 最新图像,原 CPU 相机链已有板测；新框架采集适配未开设备，曝光时间语义待校准,T05 T06 T24
+cpu_vision,M2,CPU YuNet / IoU 参考链,B,KV260 PS CPU,已有有限板测,board/vision/reference_core.py ; board/vision/reference_faces.py ; /home/ghmd/kv260-realtime-vision-20261007/REALTIME_REPORT.md,src/ps/vision/cpu_reference,人脸图像,参考框 / 轨迹,它是人脸与 IoU 参考，不能当作人体 DPU 或 ByteTrack 完成,T04 T05 T08
+person,M2,项目人体模型量化 / 编译 / 前后处理,B,DPU + PS,接口或部分实现,board/vision/backends.py ; config/model_manifest.json,src/ps/vision/person_dpu,真实图像 / 模型工件,原图人体框与质量,冻结权重、INT8 校准、arch 指纹、专用解码器与精度验证,T03 T04 T05
+tracking,M2,ByteTrack / 轨迹代次 / 人员事件,B,KV260 PS,接口或部分实现,board/vision/tracking.py ; common/contracts.py,src/ps/vision/tracking,高低分检测 / 空帧 / 源时间,TrackKey / 生命周期 / 人员事件,IoU 运行接入已验证；ByteTrack 依赖、实际视频与交叉遮挡待验,T08 T09
+target,M2,当前目标与手动 / 建议复核,B,KV260 PS,软件联调通过,board/fusion/targets.py ; board/runtime/application.py,src/ps/fusion/target_manager,当前轨迹 / 用户选择 / ASD 建议,唯一目标 key 或 UNKNOWN,真实多人规则、身份称呼与轨迹切换整机验收,T09 T15 T22
+snapshot,M2,本轮图像与连续人脸片段,B / C,KV260 PS,接口或部分实现,board/runtime/media_session.py ; common/contracts.py,src/ps/vision/media_windows,帧引用 / 轨迹 / 同期音频窗口,ImageRef / 连续脸片段,图像引用门已有；真实编码、连续裁剪、声画归属待接,T15 T24
+face,M3,人脸归属 / 质量 / 五点对齐,B,KV260 PS,接口或部分实现,board/identity/backends.py ; board/vision/reference_faces.py,src/ps/identity/quality_alignment,人体 ROI / 人脸框 / 关键点,合格对齐人脸或拒绝,CPU 对齐参考已有；多脸归属、姿态/模糊/遮挡质量门待完善,T20 T21 T22
+id_cpu,M3,SFace 128 维 CPU 图片参考,B,KV260 PS CPU,已有有限板测,models/vision/sface_2021dec.onnx ; /home/ghmd/kv260-adaptation-check-20261006/ADAPTATION_REPORT.md,src/ps/identity/cpu_reference,对齐人脸,归一化特征,既有板端静态图片参考；实时身份应用未验收,T21 T22
+id_dpu,M3,项目身份模型 / 共享 DPU 特征,B,DPU + PS,待实现或待实验,config/model_manifest.json,src/ps/identity/dpu_embedding,合格人脸 / 编译工件,模型专属特征,MobileFaceNet 等候选尚未冻结；量化、算子分界和共享成本待验,T04 T21
+identity,M3,SQLite 模板 / 匹配 / 删除失效,B,KV260 PS,软件联调通过,board/identity/store.py ; board/runtime/application.py,src/ps/identity/store,特征 / 登记与删除操作,KNOWN / UNKNOWN / AMBIGUOUS,数据库逻辑已测；真人阈值、重返、实时板端持久化待验,T20 T21 T22 T23
+enrollment,M3,授权登记 / 纠错 / 偏好界面,B / C,KV260 PS + UI,待实现或待实验,board/identity/store.py,src/ui/enrollment_memory,用户明确操作 / 当前唯一轨迹,登记事务 / 删除 / 偏好,显式同意 API 已有；完整操作页、多样本事务、在途个性化失效待接,T20 T23
+freshness,M4,固定 / 候选可变源有效期,B / A,KV260 PS,软件联调通过,board/fusion/freshness.py ; config/runtime.experiment.sim.json,src/ps/fusion/freshness,真实观测 / 速度 / 误差参数,不可延长的源期限,示例模型软件通过；独立标定、急变/遮挡失配与真实收益待验,T06 T07 T12
+scheduler,M4,单 CU 不可抢占任务准入,B,KV260 PS,软件联调通过,board/fusion/scheduler.py,src/ps/fusion/scheduler,源期限 / 检测与身份成本,检测刷新或身份准入,软件执行锁已测；两个实际 DPU 模型、并发成本和身份等待待测,T05 T06 T21
+calibration,M4,误差界 / 相对运动 / 成本标定,B / A,开发机 + KV260,待实现或待实验,data/calibration_manifest.json,data/calibration,独立标定轨迹 / 负载日志,冻结参数 / 适用范围,当前清单为空；相机随动引入的运动及单位需独立校准,T03 T06 T07
+clock_map,M4,PS ↔ PL 保守时钟与代次映射,A / B,PS + PL,待实现或待实验,common/clock.py,src/ps/fusion/pl_time_mapping,时钟快照 / 源时间 / 余量,PL 期限与计时代次,软件时钟域已有；硬件快照、映射误差、回绕和复位合同待实现,T06 T12
+motion,M5,唯一视觉运动服务 / 平滑 / 限制,B,KV260 PS,接口或部分实现,board/motion/service.py ; /home/ghmd/kv260-visual-servo-20261007/physical_motion_service.py,src/ps/motion/service,当前目标 / 有效位置 / 标定,有来源的唯一命令,虚拟归一化命令与旧有限随动已有；正式角度/极性/滤波与机构待验,T07 T09 T12
+vsrv,M5,既有 VSRV：相对租约 / PWM / STOP,A,KV260 PL,已有有限板测,hardware/rtl/visual_servo.sv ; board/motion/vsrv_driver.py ; /home/ghmd/kv260-visual-servo-20261007/BOARD_TEST_REPORT.md,src/rtl/vsrv_reference,影子字段 / COMMIT / STOP,有限许可 / 受限 PWM / 状态,有限板测已有；不是新的绝对源期限监督，数字引脚波形仍需测,T02 T10 T11 T12
+guard_model,M5,软件监督合同模型,A / B,PC / PS 模拟,软件联调通过,board/motion/guard.py,src/ps/motion/simulation_guard,命令 / 源证据 / 时钟,接受、拒绝、到期状态,需 tick/poll；不能证明 PS 暂停时 FPGA 独立停止,T12
+axi_commit,M5,新监督：AXI-Lite / 原子 COMMIT,A,KV260 PL,待实现或待实验,hardware/README.md,src/rtl/motion_guard/axi_commit,影子字段 / 字节写掩码 / 提交,完整命令快照,在参考基础实现新字段，冻结 ABI；背压/半写/冲突仿真待做,T12
+source_guard,M5,新监督：绝对源期限 / 防旧源续期,A,KV260 PL,待实现或待实验,hardware/platform/platform_manifest.json,src/rtl/motion_guard/source_deadline,目标/源代次 / PL 绝对期限,许可截止与拒绝原因,新 RTL 未实现；同源不续期、PS 暂停、期限边界待仿真和板测,T12
+output_gate,M5,输出门控 / 限幅限速 / 停止恢复,A,KV260 PL,接口或部分实现,hardware/rtl/visual_servo.sv,src/rtl/motion_guard/output_gate,有效命令 / 实体停止 / 复位,PWM 数字输出与状态,参考逻辑已有；新 ABI 优先级、真实停止输入与示波器验收待做,T10 T11 T12
+servo,M5,单轴供电 / 限位 / 3D 机构与标定,A / B,物理装置,等待机构,config/servo_calibration.json ; /home/ghmd/AMD_Smart/logs/daily/2026-10-08-SERVO-VISIBLE-TEST.md,board/calibration/mechanics,PWM / 动力 / 实际机构,方向、范围、位置与真实随动,既有带电有限动作记录；机构、角度和机械停止验收等 3D 模型,T07 T10 T11 T28
+mcp_capture,M6,MCP01 USB 采集 / 实际样本时钟,C,KV260 PS,待实现或待实验,host/model_service/protocol.py,src/ps/audio/mcp01_capture,实际 USB 音频 / 按键,PCM + AudioRef / 样本时间,设备身份、实际格式、录音转换、xrun 与并发未实测,T16 T18 T26
+media_session,M6,会话 / 图像绑定 / 取消 / 回复校验,C / B,KV260 PS,软件联调通过,board/runtime/session.py ; board/runtime/media_session.py,src/ps/runtime/session,录音与本轮图 / 当前目标,有效请求 token / 交付结果,逻辑与 fixture 通过；真实数据传输和播放消费待接,T19 T24
+transport,M6,板端 ↔ Windows 媒体传输 / 重连,C,LAN / 两端,接口或部分实现,host/model_service/client.py ; board/runtime/dialogue_client/ws_client.py,src/shared/contracts/interaction,音频、图像、请求、段流,带归属回复 / 失败 / 重连,文字 1.0 客户端与同进程媒体接口已有；跨机媒体通道未接,T18 T19 T26
+asr,M6,常驻中文 ASR / 准备探针,C,Windows 模型主机,接口或部分实现,board/runtime/audio/asr.py ; host/model_service/backends.py,src/host/asr,真实 PCM,中文转写与阶段耗时,旧后端代码与 fixture 已有；当前项目真实输入的模型验收待做,T16 T18
+vlm,M6,当前图 VLM / 对话与人设,C,Windows 模型主机,接口或部分实现,tools/dialogue_host_ollama.py ; board/runtime/character.py ; host/model_service/pipeline.py,src/host/vlm,当前图 / 提问 / 允许上下文,有依据回答 / 情绪与动作建议,汐蓝人设与文字接口已有；真实看图模型与整机证据待验,T17 T24
+tts,M6,汐蓝选定声线：Qwen3-TTS,C,Windows 模型主机,已有 PC 成果,tools/selected_voice_service.py ; board/runtime/audio/selected_voice.py,src/host/tts,回答文本 / 已选声线,明确格式 PCM,Windows 声线/音强口型已有记录；真实管线和 KV260 播放待接,T18 T19
+mcp_play,M6,MCP01 播放 / 真实停声 / 半双工,C,KV260 PS,待实现或待实验,board/runtime/audio/tts.py ; board/runtime/media_session.py,src/ps/audio/mcp01_playback,有效 PCM 段 / cancel,真实样本进度 / 静音与结束事件,逻辑 token 有效；声卡取消、缓冲清理、首声与半双工待验,T18 T19
+av_sync,M7,音视频同步 / 有界同窗裁剪,B / C,KV260 + Windows,待实现或待实验,board/runtime/application.py,src/ps/fusion/av_windows,帧时刻 / 样本锚点 / 校准,连续同窗音频与人脸序列,窗口登记已有；真实偏移/漂移、缺帧与重采样映射待实现,T15 T24
+asd,M7,Windows Light-ASD / 有限上下文,C,Windows 模型主机,待实现或待实验,config/model_manifest.json,src/host/asd,同期录音 / 每人连续脸片段,每人分数 / 模型与窗口归属,模型与作者样例、真实同窗输入和两人测试未接,T15
+speaker,M7,说话人建议 / 阈值 / 板端复核,B / C,KV260 PS,接口或部分实现,board/fusion/speaker.py ; board/runtime/application.py,src/ps/fusion/speaker_context,ASD 结果 / 当前轨迹 / 证据窗,可靠选人建议或拒判,当前窗口归属门已测；持续条件、重叠证据与自动切换整机待做,T15 T22
+avatar,M7,汐蓝素材 / 眨眼 / 音强口型 / 动作,C,PC 基线 → KV260,已有 PC 成果,assets ; tools/realtime_facials.py ; tools/realtime_stage.py ; board/interaction/avatar_player.py,src/ui/avatar,实际播放与会话事件,角色动画与口型,既有 Windows 成果；正式板端帧预算和真实样本同步待验,T19 T25
+ui,M7,正式 UI / 字幕 / 对象 / 错误反馈,C,KV260 PS / HDMI,接口或部分实现,board/interaction/qt_app.py ; board/interaction/ui_state.py ; ui/ui_state.schema.json,src/ui/views,会话 / 目标 / 身份 / 硬件状态,正常页 / 调试页 / 字幕,Qt/UI 状态接入已有；实屏完整交互及登记界面待验,T23 T25
+fsm,M7,单一 EventBus / 交互状态机,C / B,KV260 PS,软件联调通过,board/runtime/event_bus.py ; board/runtime/fsm.py ; board/runtime/application.py,src/ps/runtime/state_machine,真实事件 / 取消 / 故障,角色与会话状态 / 诊断,软件已测；真实异步媒体、失联恢复和整机长测待验,T19 T26 T27
+hdmi,M7,HDMI 1024×600 显示参考,A / C,KV260 PS + 显示链,已有有限板测,/home/ghmd/kv260-hdmi-display-check-20261004/DISPLAY_CHECK_REPORT.md,board/scripts/display,板端显示帧,真实屏幕画面,基础桌面/视觉屏幕已有；汐蓝实屏、裁剪与操作待验,T25
+rtl_verify,M8,RTL 正反例 / AXI / PWM / 到期仿真,A,Ubuntu 仿真,接口或部分实现,/home/ghmd/kv260-visual-servo-20261007/tests/tb_servo.sv ; /home/ghmd/kv260-visual-servo-20261007/scripts/run_sim.py,sim/rtl,冻结合同 / 时钟 / 正反例,波形 / 自检查结果,参考仿真代码已有；新绝对期限与完整边界仿真待做,T10 T11 T12
+software_verify,M8,框架联调 / 媒体交付 / 异常测试,A / B / C,PC 软件,软件联调通过,tests/framework ; metrics/raw/framework-validation-20261009/validation.json,sim/software,合成帧 / 乱序 / 取消 / 身份库,41 项测试与联调记录,不能替代设备、真实模型或整机验收,T09 T19 T23 T24
+hardware_build,M8,Vivado / Vitis / PetaLinux 构建,A,Ubuntu 构建机,已有有限板测,/home/ghmd/kv260-visual-servo-20261007/scripts/implement_source_platform.py ; /home/ghmd/kv260-visual-servo-20261007/SOURCE_PLATFORM_REPORT.md,build/scripts/hardware,平台 / RTL / XDC / 固定工具,配套硬件包 / 报告 / SHA,旧源共存工程有构建与板测；最终新监督整体构建和外部约束待补,T01 T02
+model_build,M8,Vitis AI 模型锁 / 校准 / 编译,B,Ubuntu 模型构建环境,接口或部分实现,config/model_manifest.json,build/scripts/models,来源权重 / arch / 校准集,xmodel / 模型卡 / 精度对照,项目检测和身份最终工件未冻结；不拿 ResNet18 当人体结果,T03 T04
+implementation,M8,最终资源 / 时序 / DRC / CDC 报告,A,Ubuntu + KV260,接口或部分实现,/home/ghmd/kv260-visual-servo-20261007/SOURCE_PLATFORM_REPORT.md,build/reports,最终同片设计,LUT/FF/BRAM/DSP / WNS/TNS / 时钟,历史报告已有；新的绝对源期限联合设计报告待生成,T02
+datasets,M8,标定 / 独立测试 / 黄金参考,B / C,数据与开发机,接口或部分实现,data/golden/framework_frames.jsonl ; data/calibration_manifest.json ; data/test_manifest.json,data/reference,真实场景 / 独立标注 / 版本,分离数据集 / 参考输出,合成小样已有；真人视频、身份/ASD/语音与标注集待采集,T03 T04 T15 T16 T17 T21
+experiments,M8,G0–G5 六组公平对照,A / B / C,相同 KV260 与输入,待实现或待实验,config/experiments.json,data/metrics/experiments,共同模型 / 硬件 / 误差判据,误差、覆盖、帧龄、身份等待,当前仅配置与模拟策略联调；六组真实实验未执行,T05 T06 T07 T12 T21
+g0,M8,G0 固定期限 / 检测优先 / 软件监督,B,实验组,待实现或待实验,config/experiments.json,data/metrics/experiments/g0,共同输入 / 校准最佳固定期限,强软件基线,不是默认模拟 250ms 已完成真实实验,T06
+g1,M8,G1 固定期限 / 检测优先 / PL 监督,A / B,实验组,待实现或待实验,config/experiments.json,data/metrics/experiments/g1,相同固定期限 / 新 PL,硬件监督对照,新 PL 未完成，实验未执行,T12
+g2,M8,G2 可变期限 / 检测优先 / PL 监督,A / B,实验组,待实现或待实验,config/experiments.json,data/metrics/experiments/g2,经标定期限 / 新 PL,有效期模型消融,实验未执行,T06
+g3,M8,G3 固定期限 / 准入 / PL 监督,A / B,实验组,待实现或待实验,config/experiments.json,data/metrics/experiments/g3,固定期限 / 实测任务成本,调度消融,实验未执行,T06 T21
+g4,M8,G4 可变期限 / 准入 / 软件监督,B,实验组,待实现或待实验,config/experiments.json,data/metrics/experiments/g4,经标定期限 / 实测任务成本,最终执行位置对照,仅对应策略的合成联调已有，不是真实 G4 实验,T06 T21
+g5,M8,G5 可变期限 / 准入 / PL 监督,A / B,实验组,待实现或待实验,config/experiments.json,data/metrics/experiments/g5,最终同片版本 / 同一输入,完整方案结果,实验未执行，不能预填增益,T06 T07 T12 T21
+board_verify,M8,同板验收 / 数字输出 / 冷启动 / 长测,A / B / C,KV260 实机,接口或部分实现,/home/ghmd/AMD_Smart/logs/daily/2026-10-08-SERVO-VISIBLE-TEST.md,board/results,统一 release / 仪器 / 故障输入,真实输出与参考比对,有限模块板测已有；最终两小时、冷启动、媒体和完整流程待验,T10 T11 T26 T27 T28 T29
+ai_records,M8,真实 AI 协作 / 判断 / 自我纠错记录,全队,研发过程,接口或部分实现,/home/ghmd/AMD_Smart/logs/daily,report/llm_collaboration,真实可见提问/回答 / 修正 / 验证,有来源的案例与链接,工程日志已有；原始可见对话归档和完整关联需整理，不补造内部推理,T30
+skill_a,M8,Skill A：命令监督验证,A,可复用技能包,待实现或待实验,board/motion/guard.py ; tests/framework/test_project.py,skill/command-guard-validation,可替换合同 / 用例 / 波形,边界验证与迁移说明,正式技能说明骨架本次建立；参数化硬件入口、真实失败和外队复用待补,T12 T30
+skill_b,M8,Skill B：感知时效评测,B,可复用技能包,待实现或待实验,board/runtime/project_log.py ; config/experiments.json,skill/perception-freshness-benchmark,有源归属日志 / 独立参考,误差、覆盖、等待评测,框架日志可作基础；独立分析入口、真实数据和非作者复用待补,T03 T06 T30
+skill_c,M8,Skill C：异步结果与取消验证,C,可复用技能包,待实现或待实验,board/runtime/media_session.py ; tests/framework/test_media.py,skill/async-result-validation,协议 / 迟到、重放、取消样例,结果归属与消费检查,逻辑测试已有；独立包装、替换协议样例、真实停声证据待补,T19 T30
+design_report,M8,设计报告 / 框图 / 软硬件接口,全队,正式报告,接口或部分实现,docs/PROJECT_FRAMEWORK.md,report/design_report,全部模块与最终证据,报告正文 / 图 / 结果表,本次搭建完整报告框架；最终结论和性能/资源数据待填,T30
+reproduction,M8,从零复现 / 清洁环境 / 非作者执行,全队,开发与交付,接口或部分实现,scripts/package_project.py ; metrics/raw/framework-validation-20261009/package_validation.json,report/reproduction,版本锁 / 源包 / 步骤,他人实际复现与缺步修正,软件源包新目录通过；最终硬件/模型/设备复现和非作者验收待做,T01 T28 T30
+release,M8,统一工程包 / 许可 / 开源 / 演示,全队,最终交付,接口或部分实现,config/source_import_manifest.json ; docs/LICENSE_MATRIX.md ; artifacts/releases,report/release,源码 / 验证 / 工件 / 模型 / 数据 / Skill,英文目录的完整参赛包,本次是框架材料；最终工件、许可选择、公开视频、GitHub/Gitee 发布待完成,T29 T30
+observation,EXT,可选：历史观察 / 物品记忆 / 主动复查,后续决定,PS + 主机 + UI,待实现或待实验,,src/ps/extensions/observation_memory,已绑定观察与用户授权,有来源的历史卡片 / 有限复查,历史 P2/P3 扩展，仅画预留接口，不升级为当前必交,
+audio_ext,EXT,可选：KWS / VAD / AEC / 流式全双工,C 后续,PS + Windows,接口或部分实现,board/runtime/audio/kws.py ; board/runtime/audio/vad.py,src/ps/extensions/streaming_audio,真实音频 / 自播音 / 取消,语音唤醒或流式交互,旧 KWS/VAD 代码已有；本期先按键半双工，AEC/全双工待评估,
+vision_ext,EXT,可选：运动补偿 / 高级质量 / 上下文 ASD,B / C 后续,PS + 主机,待实现或待实验,,src/ps/extensions/vision_context,相机相对运动 / 质量 / 历史分数,改进关联或选人,BoT-SORT/MagFace/LoCoNet 仅后续对照；不能把规则当论文复现,
+accel_ext,EXT,可选：HLS 预处理 / 定制加速优化,A / B 后续,PL / 模型构建,待实现或待实验,,src/rtl/extensions/hls_acceleration,测得瓶颈 / 固定算法,额外核与前后对照,剪枝、SATAY/TAPA/FILM-QNN/NAF/H2PIPE 作为论文候选，不列当前主创新必做,

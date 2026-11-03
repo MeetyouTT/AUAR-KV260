@@ -1,0 +1,83 @@
+{
+  "schema": "aura.speaker-evidence-retry.handoff.v2",
+  "status": "FROZEN_FOR_ROOT_INDEPENDENT_REVIEW",
+  "deployed": false,
+  "incremental_sources": 3,
+  "composed_sources": 6,
+  "expected_component_count": 380,
+  "source_files": {
+    "board/runtime/board_business.py": {
+      "before_sha256": "7c5cef7b648af0d8f3aad026c97ee82dace5911a7bdb88d040fc2d0c01038662",
+      "sha256": "b08209eca7979825e26845080bca5e1d64e065d3cabd1178df763a93540573f2",
+      "bytes": 36912,
+      "before_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\identity_cooperation_v90\\combined_with_frozen_M03\\board\\runtime\\board_business.py"
+    },
+    "board/runtime/board_speaker_business.py": {
+      "before_sha256": "134466a85599d73697b11aceaeec97c1e0b5d9db4b125f4accd50bf14f525e25",
+      "sha256": "6904267bd016a10a1508b26f372f0db54a71d78eed2eb15b043026218b1b7816",
+      "bytes": 44981,
+      "before_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\identity_cooperation_v90\\after\\board\\runtime\\board_speaker_business.py"
+    },
+    "common/board_memory.py": {
+      "before_sha256": "c27d4d3c39e5de293cbc7fed8899de8b0d39ea6ccc99c0e7f64f22c8a90a2c0b",
+      "sha256": "05095d249caf3598802d5951910b412affe167b508933c7e831e3ffacc4fc0d0",
+      "bytes": 102905,
+      "before_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\candidate_m03_v90_stage\\public_runtime_v90\\common\\board_memory.py"
+    }
+  },
+  "artifacts": {
+    "SOURCE_MANIFEST.json": "2ad7b32e6e3afa42548c8cf89e9d41fb49d3274a6f37897837cd77bc269907b2",
+    "CANDIDATE.diff": "ae53a5209af947d4ffda30aca54767a5a1f32c2ea94c7e42570aa59dd1368e0e",
+    "REVERSIBLE_SOURCE_PROOF.json": "32cb563ba52c0014cf217161d8014adbbec598b641e1f74742ac6bf8fab47c39",
+    "COMBINED_SIX_SOURCE_MANIFEST.json": "06e5ced57c55b0ef551424c37b08c1a9bd5f43217af98c8a6f9170c1cc597f91",
+    "PUBLIC_REGRESSION_04_v19.xml": "1a3da1ee12a25f32a2448da092497b6d0246c1cd91caeb10f157f4ab6d2b0ff4",
+    "test_public_replay.py": "c9b316b4c5848de2c4933ba15a3f362b0a0f642073d24101f33c1388495fea21",
+    "test_factory_composition.py": "0e5fa0cc97aed960ed6826aa43607304db2201044910fc5816083ae9effc7abb",
+    "run_regressions.py": "61682462f5ea075b8db37c4735286109f92f652d05d191d281e259b58bc8c04b",
+    "build_candidate.py": "496362323bdb2d2683c4e0747fb9f17abc605ea5f5d9df5ceab5e1fc45e52c1d"
+  },
+  "public_regression": {
+    "tests": 184,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 11.556,
+    "base": "v19 exact GTK/recording overlay on 343 verified public Python/config files"
+  },
+  "confirmed_public_defects": [
+    "single_transient_sqlite_busy_loses_speaker_timeline_evidence",
+    "sqlite_lock_wait_can_outlive_callback_owner_cancel_or_deadline"
+  ],
+  "production_historical_error_causes": "unknown; counters 6/104/103 cannot establish a common cause",
+  "visual_change_required": false,
+  "retry": {
+    "total_attempts": 3,
+    "waits_seconds": [
+      0.025,
+      0.05
+    ],
+    "only": "MemoryBusy",
+    "same_event_id_occurrence_time_and_payload": true,
+    "existing_speaker_worker": true
+  },
+  "guard": {
+    "optional_keyword": "guard",
+    "caller_contract": "pure callable which raises on invalidation",
+    "checks": [
+      "before_each_attempt",
+      "after_BEGIN_IMMEDIATE",
+      "after_insert_before_commit"
+    ],
+    "cancellation_exit": "existing StaleGeneration; original transaction rollback"
+  },
+  "excluded_legacy_test": "test_board_mode_cannot_bypass_board_kernel_lock_on_windows; previously documented baseline failure",
+  "collection_gap": {
+    "artifact": "PUBLIC_REGRESSION_02.xml",
+    "modules": [
+      "test_board_memory_review.py",
+      "test_board_memory_completion.py"
+    ],
+    "missing_runtime_dependency": "common.timeline_conversations",
+    "unmapped_runtime_fallback_used": false
+  },
+  "live_device_or_model_or_private_database_access": false
+}

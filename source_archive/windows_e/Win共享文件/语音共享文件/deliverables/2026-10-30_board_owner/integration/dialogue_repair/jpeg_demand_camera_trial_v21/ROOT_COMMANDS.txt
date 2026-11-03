@@ -1,0 +1,40 @@
+root串行操作入口
+
+这些命令仅供root在已确认的独占硬件窗口逐条执行。每次保留退出码和结果。GUI恢复发布器完成评审之前，停止在源码核验阶段。
+
+部署材料
+本地目录 E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\jpeg_demand_camera_trial_v21
+公开代码包 camera_aba_public_code.zip，SHA961509cf0665599ce1ff01e26daac0bf2a0548832acbbdbbb286ba02ec107ca4
+目标根 /home/root/aura-board-owner-candidate-20261030/jpeg-trial-6a7c6a56a5ceda22
+根和journal目录0700，代码与manifest0600。仅新建PACKAGE_MANIFEST声明的7个文件，先核所有文件SHA，已有文件只接受相同原字节。
+
+核验
+/usr/bin/python3 -B /home/root/aura-board-owner-candidate-20261030/jpeg-trial-6a7c6a56a5ceda22/candidate/entry.py --manifest-sha256 6a7c6a56a5ceda2259ddf0ee7e00fbc932d1a34d56a396202e2f4cd045fce6e1 --verify-only
+
+正常关闭GUI
+使用当前v21已审发布器的guard、window-inspect、normal-close。调用参数必须绑定当前94f源闭包、实际owner与暂停偏好。
+相机ABA期间继续保留GUI guard。后续恢复入口为另行冻结的 release_v22_camera_rebind_candidate，同boot owner重绑定通过后再正常start/READY。
+
+准备相机保护事务
+/usr/bin/python3 -B /home/root/aura-board-owner-candidate-20261030/jpeg-trial-6a7c6a56a5ceda22/serial_trial.py prepare --journal /home/root/aura-board-owner-candidate-20261030/jpeg-trial-6a7c6a56a5ceda22/journal/state.json --candidate-dir /home/root/aura-board-owner-candidate-20261030/jpeg-trial-6a7c6a56a5ceda22/candidate --manifest-sha256 6a7c6a56a5ceda2259ddf0ee7e00fbc932d1a34d56a396202e2f4cd045fce6e1 --readback /home/root/aura-board-owner-candidate-20261030/private-pin-bebd3e7d-1335-20261031/face_gallery_readback.local.json --readback-sha256 c7300d1cf8b2f6c9dae7bd953ada0c55997d3a8d623703df35ff43e0f0d33df4 --expected-boot bebd3e7d-e984-4517-8cbb-211df7f1c6dc --expected-pid 1335 --expected-birth 2344
+
+分步动作模板
+/usr/bin/python3 -B /home/root/aura-board-owner-candidate-20261030/jpeg-trial-6a7c6a56a5ceda22/serial_trial.py <action> --journal /home/root/aura-board-owner-candidate-20261030/jpeg-trial-6a7c6a56a5ceda22/journal/state.json --wait-seconds 20
+action依次为stop-baseline、start-candidate、stop-candidate、restore、finalize。
+只有对应完成phase允许推进。PENDING时重复相同动作只用于继续观察已记录的intent，异常owner或unsafe保持保护。
+
+三臂采样模板
+每臂就绪后等待同样10秒，再现读journal SHA。A1位于GUARDED，B位于CANDIDATE_RUNNING，A2位于BASELINE_RESTORED且finalize之前。
+/usr/bin/python3 -B /home/root/aura-board-owner-candidate-20261030/jpeg-trial-6a7c6a56a5ceda22/sample_camera.py <A1|B|A2> --journal-sha256 <本阶段实际journal SHA> --seconds 30
+sampler仅查询metadata。三段同GUI关闭、同持续时长，记录人数与后台变化。需要60秒时三段统一使用60。
+
+恢复A后的新readback
+finalize返回COMPLETE后，将AUTHORITY_TEMPLATE中的candidate_pid、restored_pid、checkpoint_sha256、journal_sha256替换为经过root核验的实际值，其他固定值逐项保持。将新authority作为0700目录内0600文件保存并记录精确SHA。
+/usr/bin/python3 -B /home/root/aura-board-owner-candidate-20261030/jpeg-trial-6a7c6a56a5ceda22/restored_readback.py --authority <本次私有authority路径> --authority-sha256 <精确SHA>
+只读证明ready后，用返回的observation_sha256再次核对，选择全新0700私有目录与两个不存在的JSON路径。
+/usr/bin/python3 -B /home/root/aura-board-owner-candidate-20261030/jpeg-trial-6a7c6a56a5ceda22/restored_readback.py --authority <本次私有authority路径> --authority-sha256 <精确SHA> --write --private-root <新0700私有目录> --output <新face_gallery_readback.local.json路径> --proof-output <新proof.json路径> --expected-observation-sha256 <已审只读proof token>
+将白名单written report及authority交给GUI owner-rebind发布器。原始private journal和身份数据库留在板端。
+
+GUI恢复
+新GUI config只改face_readback路径和SHA。startup只改配置组件SHA，SPEC.camera_owner绑定新原A。使用guard内可重试的配置/startup/manifest提交事务后，正常start/READY。
+终态必须是新owner闭包一致、可见界面、原数据库与身份来源、用户暂停false/PAUSED/micfalse。随后再封存最终source mapping及运行证据。

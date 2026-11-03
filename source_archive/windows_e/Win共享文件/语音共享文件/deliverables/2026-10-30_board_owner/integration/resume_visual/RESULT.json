@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "status": "VISUAL_WORKER_AND_FACTORY_IMPLEMENTED_SYNTHETIC_PASS_NOT_DEPLOYED",
+  "validation": {
+    "tests": 55,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 2.58,
+    "evidence": "factory_complete_tests.xml",
+    "evidence_sha256": "cb5d05e171cb6974327f96f68844f8bb744da11039cf371dfdc65ffbbe754193",
+    "real_board_camera_used": false,
+    "production_database_used": false,
+    "initial_failures_preserved": "tests_initial_silent_header_cancellation.xml: 35 passed, 2 failed. Silent-header cancellation fixed by nonblocking socket reader; tests were not relaxed."
+  },
+  "sources": [
+    {
+      "path": "aura/board/visual_timeline.py",
+      "sha256": "45990ec15e61aad99e05b47a021dfeda3cde01bf150eef21a515ce2a129a61e3"
+    },
+    {
+      "path": "aura/board/runtime/visual_memory.py",
+      "sha256": "e558c9d94486c4b443452c46bf9f98b67b1a6a49dd96b410c3b837103278136d"
+    },
+    {
+      "path": "aura/tests/framework/test_visual_memory_worker.py",
+      "sha256": "e50f71152cf75321a2b735aa78fab4eeff2e994d2fb357702348cde902e610a6"
+    }
+  ],
+  "assembly": {
+    "module": "board.runtime.visual_memory",
+    "enable": "Explicit BoardBusinessConfig.visual_device_id; None disables it",
+    "reader": "Only GET http://127.0.0.1:8790/health; actual socket peer verified; no redirect following or image route",
+    "poll_interval_seconds": 0.35,
+    "http_deadline_seconds": 0.2,
+    "body_limit_bytes": 65536,
+    "projection": "Only count, source frames, epochs, ages, role and detector count-kind. Identity, image and extra fields discarded; private error contents never retained.",
+    "events": "At least 3 new detection frames across 600 ms; at most 1 event per second; unchanged stable count emits nothing",
+    "scope_kind": "device",
+    "clock": "Exact shared timeline.event_time and same board monotonic/boot; initial missing anchor refuses HTTP and writes; no board wall-time fallback",
+    "lifecycle": "Import/constructor passive. Explicit runtime start/close/public. Bounded close returns false if writing still in flight; runtime retains its writer lock.",
+    "foreground": "HTTP and SQLite run in the board worker, outside public-state locks",
+    "source_loss": "Break stability; never convert an unreadable camera into zero people or departure",
+    "uncertain_store": "Frozen pending event ID and payload reused after an uncertain write acknowledgement"
+  },
+  "verified": [
+    "Real loopback socket peer, filtered projection and fixed health path",
+    "Silent and continuously dripping header/body deadline, cancellation and close",
+    "Redirect, oversize framing, duplicate/nonfinite JSON rejected",
+    "No initial UTC anchor means no camera request or write",
+    "Observed events stored only in device scope of a real synthetic Store",
+    "Camera/clock outage cannot create departure or combine old stability frames",
+    "Uncertain write retries identical event ID and time",
+    "Public state remains responsive during HTTP/SQLite waits",
+    "Explicit runtime factory lifecycle and writer-lock retention"
+  ],
+  "remaining": [
+    "Actual board loopback health freshness/count collection and overhead",
+    "Parent-managed full runtime and migration gates before production cutover"
+  ],
+  "actions": {
+    "board_accessed": false,
+    "uart_opened": false,
+    "model_loaded": false,
+    "camera_opened": false,
+    "image_endpoint_read": false,
+    "production_database_opened": false,
+    "service_restarted": false,
+    "production_cutover": false
+  },
+  "report_write": "The embedded Python report-writing command was rejected by automatic policy review before execution, reason only 'blocked by policy'. This report was saved with a direct reviewable local text patch; source and XML hashes were read with Get-FileHash."
+}

@@ -1,0 +1,1 @@
+cmd_fs/cramfs/built-in.a := echo >/dev/null; rm -f fs/cramfs/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST fs/cramfs/built-in.a fs/cramfs/inode.o fs/cramfs/uncompress.o

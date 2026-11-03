@@ -1,0 +1,252 @@
+{
+  "actual_llm": true,
+  "actual_tts": true,
+  "actual_playback": false,
+  "fixed_reply_for_experiment": "还好呀，就是有点想你。你那边怎么样？",
+  "production_prompt_changed": false,
+  "cases": [
+    {
+      "variant": "schema",
+      "request": {
+        "prompt": "<|im_start|>system\n你是桌面玩偶汐蓝，DeepSeek 鲸鱼娘。和面前的人连续闲聊。自然、亲近、像朋友接话，不复述用户，不用客服语气。通常一两句，最多48个中文字。用中文全角标点，自然停顿和语气词。记住上文，不虚构视觉。语音转写可能有同音错字，结合上下文理解，不纠正发音或反复纠名。分清自己与别人的姓名，提到别人姓名不改变自己的身份。姓名、数字、否定含义不擅改；关键信息拿不准时简短确认。输出JSON：a为说出口的话，b为neutral/friendly/happy/sad之一，c为空字符串。<|im_end|>\n<|im_start|>user\n你好汐蓝今天过得怎么样<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+        "stream": true,
+        "n_predict": 120,
+        "temperature": 0.6,
+        "top_k": 20,
+        "top_p": 0.95,
+        "min_p": 0.0,
+        "repeat_penalty": 1.0,
+        "seed": 42,
+        "cache_prompt": true,
+        "n_keep": 4,
+        "json_schema": {
+          "type": "object",
+          "properties": {
+            "a": {
+              "type": "string",
+              "const": "还好呀，就是有点想你。你那边怎么样？"
+            },
+            "b": {
+              "type": "string",
+              "enum": [
+                "neutral",
+                "friendly",
+                "happy",
+                "sad"
+              ]
+            },
+            "c": {
+              "type": "string",
+              "enum": [
+                ""
+              ]
+            }
+          },
+          "required": [
+            "a",
+            "b",
+            "c"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "speech_ready_ms": 2716.62,
+      "tts_ms": 1107.94,
+      "first_pcm_ms": 3824.58,
+      "reply": {
+        "reply_text": "还好呀，就是有点想你。你那边怎么样？",
+        "emotion": "friendly",
+        "avatar_action": ""
+      },
+      "raw_reply": "{\n  \"a\": \"还好呀，就是有点想你。你那边怎么样？\",\n  \"b\": \"friendly\",\n  \"c\": \"\"\n}",
+      "timings": {
+        "cache_n": 148,
+        "prompt_n": 18,
+        "prompt_ms": 998.381,
+        "prompt_per_token_ms": 55.46561111111111,
+        "prompt_per_second": 18.029189257407744,
+        "predicted_n": 36,
+        "predicted_ms": 5183.165,
+        "predicted_per_token_ms": 148.09042857142856,
+        "predicted_per_second": 6.7526308732212845
+      },
+      "tokens_predicted": 36,
+      "total_ms": 6203.92,
+      "audio_sha256": "3b60806f8bb8cb457c3a96c4e467049567ce5d586e3a0b35c85a508a2093e7d4",
+      "audio_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-18_gpu_scheduling\\grammar-0-schema.wav",
+      "audio_duration_seconds": 3.32
+    },
+    {
+      "variant": "compact",
+      "request": {
+        "prompt": "<|im_start|>system\n你是桌面玩偶汐蓝，DeepSeek 鲸鱼娘。和面前的人连续闲聊。自然、亲近、像朋友接话，不复述用户，不用客服语气。通常一两句，最多48个中文字。用中文全角标点，自然停顿和语气词。记住上文，不虚构视觉。语音转写可能有同音错字，结合上下文理解，不纠正发音或反复纠名。分清自己与别人的姓名，提到别人姓名不改变自己的身份。姓名、数字、否定含义不擅改；关键信息拿不准时简短确认。输出JSON：a为说出口的话，b为neutral/friendly/happy/sad之一，c为空字符串。<|im_end|>\n<|im_start|>user\n你好汐蓝今天过得怎么样<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+        "stream": true,
+        "n_predict": 120,
+        "temperature": 0.6,
+        "top_k": 20,
+        "top_p": 0.95,
+        "min_p": 0.0,
+        "repeat_penalty": 1.0,
+        "seed": 42,
+        "cache_prompt": true,
+        "n_keep": 4,
+        "grammar": "root ::= \"{\\\"a\\\":\\\"还好呀，就是有点想你。你那边怎么样？\\\",\\\"b\\\":\" emotion \",\\\"c\\\":\\\"\\\"}\"\nemotion ::= \"\\\"neutral\\\"\" | \"\\\"friendly\\\"\" | \"\\\"happy\\\"\" | \"\\\"sad\\\"\"\n"
+      },
+      "speech_ready_ms": 1806.9,
+      "tts_ms": 1081.97,
+      "first_pcm_ms": 2888.88,
+      "reply": {
+        "reply_text": "还好呀，就是有点想你。你那边怎么样？",
+        "emotion": "friendly",
+        "avatar_action": ""
+      },
+      "raw_reply": "{\"a\":\"还好呀，就是有点想你。你那边怎么样？\",\"b\":\"friendly\",\"c\":\"\"}",
+      "timings": {
+        "cache_n": 162,
+        "prompt_n": 4,
+        "prompt_ms": 195.78,
+        "prompt_per_token_ms": 48.945,
+        "prompt_per_second": 20.431096128307285,
+        "predicted_n": 24,
+        "predicted_ms": 4180.711,
+        "predicted_per_token_ms": 181.77004347826087,
+        "predicted_per_second": 5.501456570425461
+      },
+      "tokens_predicted": 24,
+      "total_ms": 4378.25,
+      "audio_sha256": "3b60806f8bb8cb457c3a96c4e467049567ce5d586e3a0b35c85a508a2093e7d4",
+      "audio_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-18_gpu_scheduling\\grammar-1-compact.wav",
+      "audio_duration_seconds": 3.32
+    },
+    {
+      "variant": "compact",
+      "request": {
+        "prompt": "<|im_start|>system\n你是桌面玩偶汐蓝，DeepSeek 鲸鱼娘。和面前的人连续闲聊。自然、亲近、像朋友接话，不复述用户，不用客服语气。通常一两句，最多48个中文字。用中文全角标点，自然停顿和语气词。记住上文，不虚构视觉。语音转写可能有同音错字，结合上下文理解，不纠正发音或反复纠名。分清自己与别人的姓名，提到别人姓名不改变自己的身份。姓名、数字、否定含义不擅改；关键信息拿不准时简短确认。输出JSON：a为说出口的话，b为neutral/friendly/happy/sad之一，c为空字符串。<|im_end|>\n<|im_start|>user\n你好汐蓝今天过得怎么样<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+        "stream": true,
+        "n_predict": 120,
+        "temperature": 0.6,
+        "top_k": 20,
+        "top_p": 0.95,
+        "min_p": 0.0,
+        "repeat_penalty": 1.0,
+        "seed": 42,
+        "cache_prompt": true,
+        "n_keep": 4,
+        "grammar": "root ::= \"{\\\"a\\\":\\\"还好呀，就是有点想你。你那边怎么样？\\\",\\\"b\\\":\" emotion \",\\\"c\\\":\\\"\\\"}\"\nemotion ::= \"\\\"neutral\\\"\" | \"\\\"friendly\\\"\" | \"\\\"happy\\\"\" | \"\\\"sad\\\"\"\n"
+      },
+      "speech_ready_ms": 1715.01,
+      "tts_ms": 943.19,
+      "first_pcm_ms": 2658.21,
+      "reply": {
+        "reply_text": "还好呀，就是有点想你。你那边怎么样？",
+        "emotion": "friendly",
+        "avatar_action": ""
+      },
+      "raw_reply": "{\"a\":\"还好呀，就是有点想你。你那边怎么样？\",\"b\":\"friendly\",\"c\":\"\"}",
+      "timings": {
+        "cache_n": 162,
+        "prompt_n": 4,
+        "prompt_ms": 191.443,
+        "prompt_per_token_ms": 47.86075,
+        "prompt_per_second": 20.893947545744684,
+        "predicted_n": 24,
+        "predicted_ms": 3973.124,
+        "predicted_per_token_ms": 172.74452173913042,
+        "predicted_per_second": 5.7888955894656196
+      },
+      "tokens_predicted": 24,
+      "total_ms": 4184.34,
+      "audio_sha256": "3b60806f8bb8cb457c3a96c4e467049567ce5d586e3a0b35c85a508a2093e7d4",
+      "audio_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-18_gpu_scheduling\\grammar-2-compact.wav",
+      "audio_duration_seconds": 3.32
+    },
+    {
+      "variant": "schema",
+      "request": {
+        "prompt": "<|im_start|>system\n你是桌面玩偶汐蓝，DeepSeek 鲸鱼娘。和面前的人连续闲聊。自然、亲近、像朋友接话，不复述用户，不用客服语气。通常一两句，最多48个中文字。用中文全角标点，自然停顿和语气词。记住上文，不虚构视觉。语音转写可能有同音错字，结合上下文理解，不纠正发音或反复纠名。分清自己与别人的姓名，提到别人姓名不改变自己的身份。姓名、数字、否定含义不擅改；关键信息拿不准时简短确认。输出JSON：a为说出口的话，b为neutral/friendly/happy/sad之一，c为空字符串。<|im_end|>\n<|im_start|>user\n你好汐蓝今天过得怎么样<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+        "stream": true,
+        "n_predict": 120,
+        "temperature": 0.6,
+        "top_k": 20,
+        "top_p": 0.95,
+        "min_p": 0.0,
+        "repeat_penalty": 1.0,
+        "seed": 42,
+        "cache_prompt": true,
+        "n_keep": 4,
+        "json_schema": {
+          "type": "object",
+          "properties": {
+            "a": {
+              "type": "string",
+              "const": "还好呀，就是有点想你。你那边怎么样？"
+            },
+            "b": {
+              "type": "string",
+              "enum": [
+                "neutral",
+                "friendly",
+                "happy",
+                "sad"
+              ]
+            },
+            "c": {
+              "type": "string",
+              "enum": [
+                ""
+              ]
+            }
+          },
+          "required": [
+            "a",
+            "b",
+            "c"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "speech_ready_ms": 1933.64,
+      "tts_ms": 941.99,
+      "first_pcm_ms": 2875.64,
+      "reply": {
+        "reply_text": "还好呀，就是有点想你。你那边怎么样？",
+        "emotion": "friendly",
+        "avatar_action": ""
+      },
+      "raw_reply": "{\n  \"a\": \"还好呀，就是有点想你。你那边怎么样？\",\n  \"b\": \"friendly\",\n  \"c\": \"\"\n}",
+      "timings": {
+        "cache_n": 162,
+        "prompt_n": 4,
+        "prompt_ms": 187.615,
+        "prompt_per_token_ms": 46.90375,
+        "prompt_per_second": 21.320256909095754,
+        "predicted_n": 36,
+        "predicted_ms": 5058.669,
+        "predicted_per_token_ms": 144.5334,
+        "predicted_per_second": 6.91881599685609
+      },
+      "tokens_predicted": 36,
+      "total_ms": 5247.98,
+      "audio_sha256": "3b60806f8bb8cb457c3a96c4e467049567ce5d586e3a0b35c85a508a2093e7d4",
+      "audio_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-18_gpu_scheduling\\grammar-3-schema.wav",
+      "audio_duration_seconds": 3.32
+    }
+  ],
+  "summary": {
+    "schema": {
+      "speech_ready_ms": 2325.13,
+      "tts_ms": 1024.97,
+      "first_pcm_ms": 3350.11,
+      "total_ms": 5725.95,
+      "tokens_predicted": 36.0
+    },
+    "compact": {
+      "speech_ready_ms": 1760.95,
+      "tts_ms": 1012.58,
+      "first_pcm_ms": 2773.55,
+      "total_ms": 4281.3,
+      "tokens_predicted": 24.0
+    }
+  },
+  "audio_bit_identical": true
+}

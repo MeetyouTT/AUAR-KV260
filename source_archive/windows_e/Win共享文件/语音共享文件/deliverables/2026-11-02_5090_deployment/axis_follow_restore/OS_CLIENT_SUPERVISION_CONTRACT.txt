@@ -1,0 +1,46 @@
+沿用板端原 client，由现有 systemd 监督（只读审查结果，未创建或执行）
+
+实板验证：systemd 249.7+；systemd-run --help 明确支持 --service-type、--no-block、--remain-after-exit、--property。/lib/systemd/systemd 原二进制含 append:、StandardOutput、RuntimeMaxSec 配置键。实证见 os_supervision_capabilities_01.json。
+原client：/usr/bin/dfx-mgr-client，当前SHA a37d8449c3362a509d459f9e57aa3711314602369354f7d98ca60c3e51607ad7。
+原修复daemon保持，不重启或替换。
+
+精确原argv
+卸载：/usr/bin/dfx-mgr-client -remove 0
+加载：/usr/bin/dfx-mgr-client -load aura-visual-servo-b4096-wide-v1
+-remove不带第三参数也默认slot0，但本次建议明确写0。原xmutil unloadapp只是转发-remove及余下argv，loadapp转发-load；包装层会丢失child退出码。
+参数依据：已核review_sources/dfx_cli.c main的实际活动分支，以及原installed-client ELF审查。-h也先initSocket，因此本轮没有运行client --help。
+
+原stdout成功语义（完整原字节，不能只匹配字符0）
+remove from slot 0 returns: 0 (Ok)\n
+aura-visual-servo-b4096-wide-v1: loaded to slot 0\n
+负load slot/非0remove回复为确认失败或HOLD；原client可能仍返回0。底层daemon也可在实际remove失败后回复0，故完整语义成功仍须与实际overlay/ZOCL/固件/VART/FDT读回合并。
+
+现有OS命令模板，必须由唯一操作者在真实checkpoint已通过、无DPU/MMIO owner后逐阶段调用；本文件不执行命令。
+
+systemd-run --unit=<本轮唯一服务名> --no-block --service-type=exec --remain-after-exit \
+  --property=Restart=no \
+  --property=TimeoutStartSec=infinity \
+  --property=RuntimeMaxSec=infinity \
+  --property=TimeoutStopSec=infinity \
+  --property=KillMode=process \
+  --property=SendSIGKILL=no \
+  --property=StandardInput=null \
+  --property=StandardOutput=append:<本轮独占目录>/stdout.raw \
+  --property=StandardError=append:<本轮独占目录>/stderr.raw \
+  --property=UMask=0077 \
+  /usr/bin/dfx-mgr-client -remove 0
+
+load阶段只替换本次唯一unit名、独占输出路径及原client的-load argv；先完成卸载实际读回再单独发送。输出目录及两个空文件须由root按原字节O_EXCL创建、0600、fsync并封存intent，拒绝符号链接/既有结果或复用旧日志。append保留client字节，不经过文本转码。单位中直接ExecStart原client，避免shell包装的child身份丢失。
+
+不使用 --scope/--pipe/--pty/--wait/--send-sighup，不绑定SSH unit，不使用 --collect，不设自动重启或有限RuntimeMax/启动超时。该transient service由系统manager持有，SSH断线不会成为其标准输入/输出或控制寿命；RemainAfterExit保留完成后的单元供读取。
+--no-block仅证明提交了启动请求，不代表client已执行/完成。任何启动回复未知都只按唯一unit名和原intent查回，不重发systemd-run或client，不reset-failed/stop清理未确认结果。
+
+确认与保持
+1. 写前intent记录action、真实boot/startup/context SHA、单元名、client/daemon源身份及精确argv、创建时间。旧3fd启动记录只作本轮源盘点；root后续身份补丁的新startup0f2已交接，实际操作前使用当前值。
+2. 只读systemctl show核LoadState/Job/ActiveState/SubState、InvocationID、ExecStart、MainPID/ExecMainPID、ExecMainStartTimestampMonotonic、ExecMainExitTimestampMonotonic、ExecMainCode/Status、Result和以上有效属性；活动时再取/proc PID/birth/exe/完整argv hash，与intent关联。
+3. 活动/排队、没有确认退出时间、SSH未知或结果未落盘均继续PENDING/OUTCOME_UNKNOWN。不能因MainPID变0就补填退出0；不因超预算杀client或重启daemon。
+4. 结束时保存systemd真实退出结果、原stdout/stderr的全部字节、长度、SHA与同一InvocationID。确认正常退出且完整回复符合当前操作语义后，仍须核实际平台读回，才能推进下一阶段。
+5. 卸载须检查实际configfs overlay/ZOCL达到可重新加载态，并无相机/GUI/job/DPU/MMIO owner；listapps为空不是充分条件，也不要求原VART文件因卸载自动清空。
+6. 加载须核wide firmware/operating、成套4固件+3driver、精确wide VART、实际overlay/ZOCL和本次真实FDT。随后原ID_STOP_ONLY先于恢复相机。新硬件阶段任何失败/未知均保持现场，不自动重发、回退或运动。
+
+这只是调用既有OS监督已有程序，不是新增转轴控制器或恢复框架；本子代理没有创建transient unit、执行client、停启服务、访问寄存器或发出运动。

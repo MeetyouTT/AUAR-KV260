@@ -1,0 +1,150 @@
+{
+  "kernel-boot": {
+    "argv": [
+      "dmesg"
+    ],
+    "returncode": 0
+  },
+  "os-release": {
+    "argv": [
+      "cat",
+      "/etc/os-release"
+    ],
+    "returncode": 0
+  },
+  "root-mount": {
+    "argv": [
+      "findmnt",
+      "-n",
+      "-o",
+      "SOURCE,FSTYPE,TARGET",
+      "/"
+    ],
+    "returncode": 0
+  },
+  "boot-mount": {
+    "argv": [
+      "findmnt",
+      "-n",
+      "-o",
+      "SOURCE,FSTYPE,TARGET",
+      "/boot"
+    ],
+    "returncode": 0
+  },
+  "manager": {
+    "argv": [
+      "systemctl",
+      "show",
+      "dfx-mgr.service",
+      "-p",
+      "MainPID",
+      "-p",
+      "ActiveState",
+      "-p",
+      "SubState",
+      "-p",
+      "Result",
+      "-p",
+      "ExecMainStatus",
+      "-p",
+      "ExecStart",
+      "-p",
+      "DropInPaths"
+    ],
+    "returncode": 0
+  },
+  "loader": {
+    "argv": [
+      "systemctl",
+      "show",
+      "kv260-repaired-zocl.service",
+      "-p",
+      "ActiveState",
+      "-p",
+      "SubState",
+      "-p",
+      "Result",
+      "-p",
+      "ExecMainStatus"
+    ],
+    "returncode": 0
+  },
+  "apps": {
+    "argv": [
+      "xmutil",
+      "listapps"
+    ],
+    "returncode": 0
+  },
+  "stock-check": {
+    "argv": [
+      "sha256sum",
+      "-c",
+      "/home/root/kv260-runtime-persistent-backup-20261003/original/stock.sha256"
+    ],
+    "returncode": 0
+  },
+  "persistent-hashes": {
+    "argv": [
+      "sha256sum",
+      "/usr/local/lib/kv260-runtime-repair/dfx-mgrd",
+      "/usr/local/lib/kv260-runtime-repair/zocl.ko"
+    ],
+    "returncode": 0
+  },
+  "dpu-query": {
+    "argv": [
+      "xdputil",
+      "query"
+    ],
+    "returncode": 0
+  },
+  "classification": {
+    "argv": [
+      "/home/root/Vitis-AI/examples/vai_library/samples/classification/test_jpeg_classification",
+      "/usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel",
+      "/home/root/kv260-test-20261001/pytorch-resnet-dog.jpg"
+    ],
+    "returncode": 0
+  },
+  "full-boot-journal": {
+    "argv": [
+      "journalctl",
+      "-b",
+      "--no-pager",
+      "-o",
+      "short-monotonic"
+    ],
+    "returncode": 0
+  },
+  "service-journal": {
+    "argv": [
+      "journalctl",
+      "-b",
+      "-u",
+      "dfx-mgr.service",
+      "-u",
+      "kv260-repaired-zocl.service",
+      "--no-pager",
+      "-o",
+      "short-monotonic"
+    ],
+    "returncode": 0
+  },
+  "failed-units": {
+    "argv": [
+      "systemctl",
+      "--failed",
+      "--no-pager",
+      "--plain"
+    ],
+    "returncode": 0
+  },
+  "kernel-final": {
+    "argv": [
+      "dmesg"
+    ],
+    "returncode": 0
+  }
+}

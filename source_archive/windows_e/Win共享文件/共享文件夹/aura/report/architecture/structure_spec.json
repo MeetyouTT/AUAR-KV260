@@ -1,0 +1,1481 @@
+{
+  "schema_version": "aura-structure-review-2",
+  "updated": "2026-10-09",
+  "scope": "REVIEWED_TARGET_LAYOUT_AND_CURRENT_SOURCE_BINDINGS",
+  "top_level_recommendation": [
+    "src",
+    "sim",
+    "build",
+    "board",
+    "data",
+    "skill",
+    "report"
+  ],
+  "directory_meaning": "Target delivery responsibility areas, not current Python import packages. No active source relocation is performed.",
+  "source_of_truth": "Current main repository and verified external source references; submission directory is a generated framework until a real source export is validated.",
+  "official_details_are_project_choices": true,
+  "physical_actuation_enabled": false,
+  "basis": [
+    {
+      "id": "O1",
+      "kind": "official",
+      "section": "AMD 指南 §3.3.5.1、§3.3.5.4",
+      "claim": "源码、验证、构建、上板与推荐七目录；其他组织须对照",
+      "paths": [
+        "/home/ghmd/aura-submission-framework-20261009/official_guide.pdf"
+      ]
+    },
+    {
+      "id": "O2",
+      "kind": "official",
+      "section": "AMD 指南 §3.3.5.2",
+      "claim": "技能包适用、方法、失效、效果、失败来源与可复用性",
+      "paths": [
+        "/home/ghmd/aura-submission-framework-20261009/official_guide.pdf"
+      ]
+    },
+    {
+      "id": "O3",
+      "kind": "official",
+      "section": "AMD 指南 §3.3.5.3",
+      "claim": "原理框图、软硬件接口、优化、AI 协作与复现",
+      "paths": [
+        "/home/ghmd/aura-submission-framework-20261009/official_guide.pdf"
+      ]
+    },
+    {
+      "id": "O4",
+      "kind": "official",
+      "section": "AMD 指南 §3.3.5.4",
+      "claim": "英文命名，目录结构为推荐；细分职责是本项目设计",
+      "paths": [
+        "/home/ghmd/aura-submission-framework-20261009/official_guide.pdf"
+      ]
+    },
+    {
+      "id": "P1",
+      "kind": "project_plan",
+      "section": "2026-10-08 当前框架 §4–5",
+      "claim": "KV260 PS/PL、Windows 模型主机、Ubuntu 构建与 M1–M8",
+      "paths": [
+        "/home/ghmd/Win共享文件/方案/aura_junior_project_framework_20261008.md"
+      ]
+    },
+    {
+      "id": "P2",
+      "kind": "project_plan",
+      "section": "2026-10-02 总包 §2.3、§4、§6.1",
+      "claim": "共享资源唯一所有者、板端服务职责与原 I01–I07",
+      "paths": [
+        "/home/ghmd/aura-submission-framework-20261009/references/manager_20261002.md"
+      ]
+    },
+    {
+      "id": "P3",
+      "kind": "project_plan",
+      "section": "2026-10-08 当前框架 §6–8",
+      "claim": "候选源期限/调度/新 PL 监督、实验、机构等待",
+      "paths": [
+        "/home/ghmd/Win共享文件/方案/aura_junior_project_framework_20261008.md"
+      ]
+    },
+    {
+      "id": "P4",
+      "kind": "project_plan",
+      "section": "2026-10-07 技能包方案",
+      "claim": "三项技能包是项目选择，最终需实际复用验证",
+      "paths": [
+        "/home/ghmd/Win共享文件/方案/aura_skill_package_plan_and_delivery_20261007.md"
+      ]
+    },
+    {
+      "id": "C1",
+      "kind": "code",
+      "section": "公共类型和路径计算",
+      "claim": "当前运行时依赖 common 与仓根资源路径",
+      "paths": [
+        "common/contracts.py",
+        "common/config.py",
+        "common/clock.py"
+      ]
+    },
+    {
+      "id": "C2",
+      "kind": "code",
+      "section": "组合入口与资源调用",
+      "claim": "AuraRuntime 组合检测、目标、身份、模拟监督、会话和客户端",
+      "paths": [
+        "board/runtime/application.py"
+      ]
+    },
+    {
+      "id": "C3",
+      "kind": "code",
+      "section": "媒体协议使用点",
+      "claim": "PS media_session 与 host pipeline 共用 protocol.py",
+      "paths": [
+        "board/runtime/media_session.py",
+        "host/model_service/protocol.py",
+        "host/model_service/pipeline.py"
+      ]
+    },
+    {
+      "id": "C4",
+      "kind": "code",
+      "section": "板端客户端的实际导入",
+      "claim": "client.py 导入板端 WebSocket 客户端；由 AuraRuntime 创建",
+      "paths": [
+        "host/model_service/client.py",
+        "board/runtime/application.py"
+      ]
+    },
+    {
+      "id": "C5",
+      "kind": "code",
+      "section": "模型与播放混合的旧音频目录",
+      "claim": "selected_voice 是 Qwen/Torch 合成；tts.py 同时含合成与播放类",
+      "paths": [
+        "board/runtime/audio/selected_voice.py",
+        "board/runtime/audio/asr.py",
+        "board/runtime/audio/tts.py"
+      ]
+    },
+    {
+      "id": "C6",
+      "kind": "code",
+      "section": "主机流水线与候选后端",
+      "claim": "流水线框架已有，RealBackendPlaceholder 明确占位",
+      "paths": [
+        "host/model_service/pipeline.py",
+        "host/model_service/backends.py"
+      ]
+    },
+    {
+      "id": "C7",
+      "kind": "code",
+      "section": "当前选定声线服务依赖",
+      "claim": "选定声线服务依赖演示/脸部工具；纯模型适配待整理",
+      "paths": [
+        "tools/selected_voice_service.py",
+        "tools/facial_layers.py"
+      ]
+    },
+    {
+      "id": "C8",
+      "kind": "code_and_reference",
+      "section": "旧平台能力与 VSRV",
+      "claim": "只有相对租约；新绝对源期限未实现",
+      "paths": [
+        "hardware/platform/platform_manifest.json",
+        "hardware/README.md",
+        "hardware/rtl/visual_servo.sv",
+        "board/motion/guard.py"
+      ]
+    },
+    {
+      "id": "C9",
+      "kind": "code",
+      "section": "UI 代码和素材路径",
+      "claim": "UI 源码在 board/interaction；ui 为配置；素材由仓根路径加载",
+      "paths": [
+        "board/interaction/avatar_assets.py",
+        "board/interaction/qt_app.py",
+        "ui/ui_state.schema.json"
+      ]
+    },
+    {
+      "id": "C10",
+      "kind": "build_reference",
+      "section": "既有构建脚本",
+      "claim": "依赖原工程、绝对路径、IP cache 和 routed DCP",
+      "paths": [
+        "/home/ghmd/kv260-visual-servo-20261007/scripts/implement_source_platform.py",
+        "/home/ghmd/kv260-visual-servo-20261007/SOURCE_PLATFORM_REPORT.md"
+      ]
+    },
+    {
+      "id": "C11",
+      "kind": "configuration",
+      "section": "配置和待冻结清单",
+      "claim": "runtime.*、模型、工具、机械标定与 G0–G5 声明",
+      "paths": [
+        "config/model_manifest.json",
+        "config/toolchain_lock.json",
+        "config/servo_calibration.json",
+        "config/experiments.json"
+      ]
+    },
+    {
+      "id": "C12",
+      "kind": "historical_document",
+      "section": "历史许可矩阵",
+      "claim": "9 月旧方案中含 LVGL、旧素材/模型/版本；最终需重核",
+      "paths": [
+        "docs/LICENSE_MATRIX.md"
+      ]
+    },
+    {
+      "id": "C13",
+      "kind": "software_evidence",
+      "section": "此前框架验证",
+      "claim": "41 项软件验证及合成样例，未替代真实系统",
+      "paths": [
+        "tests/framework",
+        "metrics/raw/framework-validation-20261009/validation.json"
+      ]
+    },
+    {
+      "id": "C14",
+      "kind": "packaging_code",
+      "section": "现有软件源包工具",
+      "claim": "按既有包路径打包；正式分层导出与整机包待验",
+      "paths": [
+        "scripts/package_project.py"
+      ]
+    }
+  ],
+  "directories": [
+    {
+      "path": "src",
+      "owner": "A/B/C",
+      "placement": "源码",
+      "purpose": "实际采用的设计源码与固定合同",
+      "boundary": "生成工件、板测结果与性能结论放到对应交付目录",
+      "basis": [
+        "O1",
+        "O4"
+      ],
+      "sources": []
+    },
+    {
+      "path": "src/shared",
+      "owner": "A/B/C",
+      "placement": "PS/Windows/开发机共用",
+      "purpose": "纯数据类型、格式校验、公共配置加载、时钟接口",
+      "boundary": "不打开设备、不启动模型线程，不依赖具体 UI 或厂商运行库",
+      "basis": [
+        "P2",
+        "C1"
+      ],
+      "sources": [
+        "common"
+      ]
+    },
+    {
+      "path": "src/shared/contracts",
+      "owner": "A/B/C 按 I01–I07",
+      "placement": "跨模块",
+      "purpose": "合同登记、模式、单位、代次与兼容性",
+      "boundary": "一份定义；各消费者引用或生成，避免三份独立寄存器表",
+      "basis": [
+        "P2",
+        "C1",
+        "C3"
+      ],
+      "sources": [
+        "common/contracts.py",
+        "common/schemas",
+        "host/model_service/protocol.py"
+      ]
+    },
+    {
+      "path": "src/shared/contracts/platform",
+      "owner": "A",
+      "placement": "I01",
+      "purpose": "平台/版本/能力/证据引用合同",
+      "boundary": "具体部署实例及匹配固件在 board/firmware；未知保持未冻结",
+      "basis": [
+        "P2",
+        "C8"
+      ],
+      "sources": [
+        "hardware/platform/platform_manifest.json"
+      ]
+    },
+    {
+      "path": "src/shared/contracts/motion",
+      "owner": "A 主写，B 评审",
+      "placement": "I02",
+      "purpose": "寄存器、命令、状态、时钟/回绕和恢复行为的唯一规格",
+      "boundary": "本轮不预填未核实地址、位宽、引脚与绝对期限 ABI",
+      "basis": [
+        "P2",
+        "P3",
+        "C8"
+      ],
+      "sources": [
+        "board/motion/vsrv_driver.py",
+        "common/contracts.py"
+      ]
+    },
+    {
+      "path": "src/shared/contracts/interaction",
+      "owner": "C 主写，B 评审",
+      "placement": "I05",
+      "purpose": "文字与媒体版本、请求/取消/段序/PCM/图像归属",
+      "boundary": "文字 1.0 与 aura-runtime-1 分别登记；跨机媒体编码尚未冻结",
+      "basis": [
+        "P2",
+        "C3"
+      ],
+      "sources": [
+        "common/schemas",
+        "host/model_service/protocol.py"
+      ]
+    },
+    {
+      "path": "src/shared/utilities",
+      "owner": "A/B/C",
+      "placement": "PS/Windows/开发机共用",
+      "purpose": "纯时钟抽象、数据校验、配置解析",
+      "boundary": "共用工具不成为业务大杂烩；目标、身份、取消状态由业务所有者管理",
+      "basis": [
+        "C1"
+      ],
+      "sources": [
+        "common/clock.py",
+        "common/config.py"
+      ]
+    },
+    {
+      "path": "src/ps",
+      "owner": "B/C；A 提供硬件访问层",
+      "placement": "KV260 ARM/Linux",
+      "purpose": "板端采集、感知业务、状态、执行请求与本地反馈",
+      "boundary": "该目录表示 PS 职责；Python 进程与 PL 电路分别验收",
+      "basis": [
+        "P1",
+        "P2"
+      ],
+      "sources": []
+    },
+    {
+      "path": "src/ps/vision",
+      "owner": "B",
+      "placement": "KV260 PS + DPU 调用",
+      "purpose": "唯一相机、检测前后处理、跟踪、快照与脸片段",
+      "boundary": "人体检测、CPU 人脸参考、跟踪预测分别标明；不拥有身份库/运动寄存器",
+      "basis": [
+        "P2",
+        "C2"
+      ],
+      "sources": [
+        "board/vision"
+      ]
+    },
+    {
+      "path": "src/ps/identity",
+      "owner": "B",
+      "placement": "KV260 PS + 可选 DPU 子图",
+      "purpose": "人脸质量/对齐/特征、模板库、登记/删除与修订号",
+      "boundary": "姓名与轨迹分开；UI 经 API 操作库；模型/阈值实测后冻结",
+      "basis": [
+        "P2"
+      ],
+      "sources": [
+        "board/identity"
+      ]
+    },
+    {
+      "path": "src/ps/fusion",
+      "owner": "B；C 提供说话人窗口结果",
+      "placement": "KV260 PS",
+      "purpose": "唯一当前目标、有效期、单 CU 准入和说话人复核",
+      "boundary": "不运行 Windows ASD 模型；旧窗口坐标不直接变成运动命令",
+      "basis": [
+        "P2",
+        "P3",
+        "C2"
+      ],
+      "sources": [
+        "board/fusion"
+      ]
+    },
+    {
+      "path": "src/ps/motion",
+      "owner": "B；A 提供驱动和 ABI",
+      "placement": "KV260 PS",
+      "purpose": "唯一运动服务、命令校验与硬件访问适配",
+      "boundary": "正式模式只有运动服务提交；软件模拟监督属于可执行适配，仿真目录保存测试",
+      "basis": [
+        "P2",
+        "C2",
+        "C8"
+      ],
+      "sources": [
+        "board/motion"
+      ]
+    },
+    {
+      "path": "src/ps/motion/hw_access",
+      "owner": "A，B 调用",
+      "placement": "KV260 PS",
+      "purpose": "IP/ABI 核验、原子提交、状态快照、STOP 与恢复访问库",
+      "boundary": "不承担目标选择；维护诊断与正式写入互斥",
+      "basis": [
+        "P2",
+        "C8"
+      ],
+      "sources": [
+        "board/motion/vsrv_driver.py"
+      ]
+    },
+    {
+      "path": "src/ps/motion/simulation_guard",
+      "owner": "B/A",
+      "placement": "PC 联调 / PS 软件参考",
+      "purpose": "软件合同模型及模拟运动后端",
+      "boundary": "当前运行时直接依赖；不把它当作 PL 独立到期的证据",
+      "basis": [
+        "C2",
+        "C8"
+      ],
+      "sources": [
+        "board/motion/guard.py"
+      ]
+    },
+    {
+      "path": "src/ps/audio",
+      "owner": "C；A 解决驱动/USB",
+      "placement": "KV260 PS",
+      "purpose": "MCP01 唯一采录/播放、样本时间、真实停声与半双工",
+      "boundary": "模型合成与设备播放分层；旧 tts.py 混合职责需拆分",
+      "basis": [
+        "P2",
+        "C5"
+      ],
+      "sources": [
+        "board/runtime/audio/tts.py"
+      ]
+    },
+    {
+      "path": "src/ps/runtime",
+      "owner": "C 编排，A/B 提供业务探针",
+      "placement": "KV260 PS；模拟在 PC",
+      "purpose": "组合入口、生命周期、会话、事件总线、日志与取消",
+      "boundary": "组合入口可以连接模块，单个业务模块不反向控制全局启动",
+      "basis": [
+        "P2",
+        "C2"
+      ],
+      "sources": [
+        "board/runtime/application.py",
+        "board/runtime/fsm.py",
+        "board/runtime/session.py",
+        "board/runtime/media_session.py",
+        "board/runtime/project_log.py"
+      ]
+    },
+    {
+      "path": "src/ps/runtime/model_client",
+      "owner": "C",
+      "placement": "KV260 PS；模拟在 PC",
+      "purpose": "板端异步客户端、有界在途/等待/结果队列",
+      "boundary": "不是 Windows 推理服务；模型执行、媒体传输后端分别实现",
+      "basis": [
+        "C2",
+        "C4"
+      ],
+      "sources": [
+        "host/model_service/client.py",
+        "board/runtime/dialogue_client"
+      ]
+    },
+    {
+      "path": "src/host",
+      "owner": "C",
+      "placement": "Windows 模型主机",
+      "purpose": "常驻模型、准备探针、ASR→VLM→TTS 和 ASD",
+      "boundary": "不写运动寄存器、不决定是否播放旧结果、不直接改板端身份库",
+      "basis": [
+        "P1",
+        "P2"
+      ],
+      "sources": []
+    },
+    {
+      "path": "src/host/service",
+      "owner": "C",
+      "placement": "Windows 模型主机",
+      "purpose": "服务生命周期、模型流水线、协议分派和阶段耗时",
+      "boundary": "pipeline/backends 的 fixture 只是软件联调，实际模型和服务端媒体传输待接",
+      "basis": [
+        "C3",
+        "C6"
+      ],
+      "sources": [
+        "host/model_service/pipeline.py",
+        "host/model_service/backends.py",
+        "tools/dialogue_host_ollama.py"
+      ]
+    },
+    {
+      "path": "src/host/media_transport",
+      "owner": "C",
+      "placement": "Windows 服务端",
+      "purpose": "媒体接收、编码解码、回复与重连的服务端适配",
+      "boundary": "板端客户端在 src/ps/runtime/model_client；公用协议在 src/shared/contracts/interaction",
+      "basis": [
+        "P2",
+        "C3",
+        "C4"
+      ],
+      "sources": [
+        "host/model_service/protocol.py"
+      ]
+    },
+    {
+      "path": "src/host/asr",
+      "owner": "C",
+      "placement": "Windows 模型主机",
+      "purpose": "中文识别后端与准备/失败报告",
+      "boundary": "旧 board/runtime/audio/asr.py 是候选实现来源，最终服务接入待验",
+      "basis": [
+        "P2",
+        "C5"
+      ],
+      "sources": [
+        "board/runtime/audio/asr.py",
+        "host/model_service/backends.py"
+      ]
+    },
+    {
+      "path": "src/host/vlm",
+      "owner": "C",
+      "placement": "Windows 模型主机",
+      "purpose": "本轮图像问答、角色与对话上下文",
+      "boundary": "只消费有来源的图像；自然语言输出没有运动执行权限",
+      "basis": [
+        "P2",
+        "C6"
+      ],
+      "sources": [
+        "tools/dialogue_host_ollama.py",
+        "board/runtime/character.py"
+      ]
+    },
+    {
+      "path": "src/host/tts",
+      "owner": "C",
+      "placement": "Windows 模型主机",
+      "purpose": "选定 Qwen3-TTS 声线、文本到真实音频",
+      "boundary": "当前服务有演示/UI 耦合；迁移时保留声线原件并提取纯合成适配",
+      "basis": [
+        "P2",
+        "C5",
+        "C7"
+      ],
+      "sources": [
+        "board/runtime/audio/selected_voice.py",
+        "tools/selected_voice_service.py"
+      ]
+    },
+    {
+      "path": "src/host/asd",
+      "owner": "C，B 复核对象",
+      "placement": "Windows 模型主机",
+      "purpose": "Light-ASD 同窗视听推理与质量/分数",
+      "boundary": "真实模型和同步未完成；只给建议，不生成舵机坐标",
+      "basis": [
+        "P1",
+        "P2"
+      ],
+      "sources": [
+        "config/model_manifest.json"
+      ]
+    },
+    {
+      "path": "src/ui",
+      "owner": "C",
+      "placement": "KV260 PS；PC 为开发基线",
+      "purpose": "状态投影、汐蓝播放器、字幕与授权操作页面",
+      "boundary": "单独管理显示状态；不直接打开相机/声卡、改库或写寄存器；板端渲染后端待实测冻结",
+      "basis": [
+        "P2",
+        "C9"
+      ],
+      "sources": [
+        "board/interaction",
+        "ui",
+        "tools/realtime_stage.py",
+        "tools/realtime_facials.py"
+      ]
+    },
+    {
+      "path": "src/rtl",
+      "owner": "A",
+      "placement": "KV260 PL",
+      "purpose": "自研运动监督、AXI 接口、PWM、到期/停止/恢复电路",
+      "boundary": "官方 DPU 的来源和集成单列；旧相对租约与拟议绝对源期限分开",
+      "basis": [
+        "P2",
+        "P3",
+        "C8"
+      ],
+      "sources": [
+        "hardware/rtl"
+      ]
+    },
+    {
+      "path": "src/platform",
+      "owner": "A",
+      "placement": "Ubuntu 构建 → KV260 PS/PL",
+      "purpose": "块设计、IP 集成、XDC、时钟复位、设备树/驱动配置源",
+      "boundary": "输入工程与构建脚本、生成工件分别存放",
+      "basis": [
+        "O1",
+        "P2",
+        "C10"
+      ],
+      "sources": [
+        "hardware/platform"
+      ]
+    },
+    {
+      "path": "src/platform/dpu_integration",
+      "owner": "A",
+      "placement": "KV260 PL 集成",
+      "purpose": "官方 DPU 配置、版本、来源、架构指纹及集成输入",
+      "boundary": "不声称拥有/交付 AMD DPU 的自研 RTL；以实际授权工具/IP 获取流程复建",
+      "basis": [
+        "P2",
+        "C8",
+        "C10"
+      ],
+      "sources": [
+        "hardware/platform/platform_manifest.json"
+      ]
+    },
+    {
+      "path": "src/platform/constraints",
+      "owner": "A",
+      "placement": "Vivado 输入",
+      "purpose": "实际 pin/clock/reset XDC 与约束来源",
+      "boundary": "不根据示例填写最终引脚；与最终统一平台同次验证",
+      "basis": [
+        "P2",
+        "C10"
+      ],
+      "sources": [
+        "/home/ghmd/kv260-visual-servo-20261007/scripts/implement_source_platform.py"
+      ]
+    },
+    {
+      "path": "src/platform/system",
+      "owner": "A",
+      "placement": "Linux/设备树/驱动源配置",
+      "purpose": "内核/DT/驱动/系统配方与固定版本补丁",
+      "boundary": "最终镜像在 board/firmware；系统源码来源和许可获取流程须固定",
+      "basis": [
+        "P2"
+      ],
+      "sources": []
+    },
+    {
+      "path": "src/config",
+      "owner": "A/B/C 按字段",
+      "placement": "应用/构建配置输入",
+      "purpose": "模拟/CPU参考/KV260 配置、模型与工具清单、实验定义",
+      "boundary": "示例配置与实测参数有 verified 状态；密码令牌、运行日志和身份库不作为配置源",
+      "basis": [
+        "C1",
+        "C11"
+      ],
+      "sources": [
+        "config"
+      ]
+    },
+    {
+      "path": "src/third_party",
+      "owner": "A/B/C 各自引入者",
+      "placement": "依赖登记",
+      "purpose": "来源、固定版本、修改范围、许可原文和获取方式",
+      "boundary": "旧许可矩阵含历史路线与版本；最终不能直接沿用全部已核实标记",
+      "basis": [
+        "O1",
+        "C12"
+      ],
+      "sources": [
+        "docs/LICENSE_MATRIX.md",
+        "config/source_import_manifest.json"
+      ]
+    },
+    {
+      "path": "sim",
+      "owner": "A/B/C",
+      "placement": "开发机/软件测试",
+      "purpose": "测试激励、运行脚本、预期/实际、失败样例与波形",
+      "boundary": "测试通过范围按 PC、RTL 仿真分别记录，不能替代板测",
+      "basis": [
+        "O1"
+      ],
+      "sources": []
+    },
+    {
+      "path": "sim/rtl",
+      "owner": "A",
+      "placement": "RTL 仿真",
+      "purpose": "AXI/COMMIT、到期/停止、重放、复位、恢复的自检查用例",
+      "boundary": "对新源期限核新增用例；既有相对租约 testbench 仅验证旧核",
+      "basis": [
+        "P2",
+        "P3"
+      ],
+      "sources": [
+        "/home/ghmd/kv260-visual-servo-20261007/tests/tb_servo.sv"
+      ]
+    },
+    {
+      "path": "sim/software",
+      "owner": "B/C；A 审合同",
+      "placement": "PC",
+      "purpose": "纯软件单元/合同/集成测试与 fixture",
+      "boundary": "源码中的 SimulationGuard 在 src/ps/motion；这里放验证它的用例",
+      "basis": [
+        "C2",
+        "C13"
+      ],
+      "sources": [
+        "tests/framework",
+        "tests"
+      ]
+    },
+    {
+      "path": "build",
+      "owner": "A；B 模型，C 应用依赖",
+      "placement": "Ubuntu/开发机",
+      "purpose": "复建入口、固定工具与产生的工程报告",
+      "boundary": "依赖构建输入版本；不将旧绝对路径脚本标成干净环境已复现",
+      "basis": [
+        "O1",
+        "C10"
+      ],
+      "sources": []
+    },
+    {
+      "path": "build/scripts/hardware",
+      "owner": "A",
+      "placement": "Ubuntu",
+      "purpose": "平台/RTL/系统构建流程",
+      "boundary": "外部旧脚本使用主机绝对路径与缓存，发布前需要参数化及实跑",
+      "basis": [
+        "C10"
+      ],
+      "sources": [
+        "/home/ghmd/kv260-visual-servo-20261007/scripts/implement_source_platform.py"
+      ]
+    },
+    {
+      "path": "build/scripts/models",
+      "owner": "B；C 模型环境",
+      "placement": "Ubuntu/模型环境",
+      "purpose": "权重校验、校准、量化、DPU 编译与比较",
+      "boundary": "记录输入/工具/arch/hash；不能拿分类参考替代项目人体/身份模型",
+      "basis": [
+        "P1",
+        "P2"
+      ],
+      "sources": [
+        "config/model_manifest.json"
+      ]
+    },
+    {
+      "path": "build/scripts/application",
+      "owner": "C 编排，三人核对",
+      "placement": "开发机",
+      "purpose": "依赖准备、按清单导出、保留包导入与资源查找、隔离复现",
+      "boundary": "目标目录是职责位置，不能把当前 Python 文件机械搬过去就声称可运行",
+      "basis": [
+        "C1",
+        "C9",
+        "C14"
+      ],
+      "sources": [
+        "scripts/package_project.py",
+        "requirements.txt",
+        "requirements-live.txt"
+      ]
+    },
+    {
+      "path": "build/reports",
+      "owner": "A/B/C",
+      "placement": "构建输出",
+      "purpose": "资源、时序、DRC/CDC、量化/编译报告",
+      "boundary": "原始报告绑定构建 ID；报告中的结论引用原始文件",
+      "basis": [
+        "O1",
+        "C10"
+      ],
+      "sources": []
+    },
+    {
+      "path": "board",
+      "owner": "A/B/C",
+      "placement": "KV260 实机交付",
+      "purpose": "匹配的工件、部署运行、自检、真实输出及恢复",
+      "boundary": "与开发主仓 board/ 的源码含义不同，目录对照必须说明",
+      "basis": [
+        "O1",
+        "P2"
+      ],
+      "sources": []
+    },
+    {
+      "path": "board/firmware",
+      "owner": "A",
+      "placement": "KV260",
+      "purpose": "同一 release 的 bitstream/overlay/系统/平台实例清单",
+      "boundary": "只纳入匹配版本，说明来源与哈希；无新工件时保留待补",
+      "basis": [
+        "O1",
+        "C8"
+      ],
+      "sources": []
+    },
+    {
+      "path": "board/scripts",
+      "owner": "C 总入口，A/B 提探针",
+      "placement": "KV260",
+      "purpose": "部署、启动、自检、停止、维护与恢复",
+      "boundary": "物理访问采用冻结入口；当前框架默认禁能",
+      "basis": [
+        "P2"
+      ],
+      "sources": []
+    },
+    {
+      "path": "board/results",
+      "owner": "三人按测试归档",
+      "placement": "KV260 实測",
+      "purpose": "平台/功能/异常/冷启动/长测记录与仪器证据",
+      "boundary": "按 run_id/release 归档原始结果；data/metrics 保留分析或引用，不维护两份可修改原始日志",
+      "basis": [
+        "O1",
+        "P2"
+      ],
+      "sources": []
+    },
+    {
+      "path": "board/calibration/mechanics",
+      "owner": "A/B",
+      "placement": "3D 模型到位后的实物",
+      "purpose": "轴向、角度/PWM、限位、供电与停止输入标定记录",
+      "boundary": "当前 WAIT；图像归一化偏差不当作已标定角度",
+      "basis": [
+        "P3",
+        "C11"
+      ],
+      "sources": [
+        "config/servo_calibration.json"
+      ]
+    },
+    {
+      "path": "data",
+      "owner": "B/C；A 提供硬件参考",
+      "placement": "数据与资源",
+      "purpose": "标定/测试/参考、模型/素材与可追溯分析",
+      "boundary": "数据来源、用途、权限、哈希和是否合成分别记录",
+      "basis": [
+        "O1",
+        "P1"
+      ],
+      "sources": []
+    },
+    {
+      "path": "data/calibration",
+      "owner": "B/A；C 视听同步",
+      "placement": "标定输入与输出",
+      "purpose": "误差界、成本、身份阈值、声画映射的标定集和结果",
+      "boundary": "与独立测试划分分开；控制时效和长媒体窗口不能混成同一期限",
+      "basis": [
+        "P2",
+        "P3"
+      ],
+      "sources": [
+        "data/calibration_manifest.json"
+      ]
+    },
+    {
+      "path": "data/test",
+      "owner": "B/C",
+      "placement": "独立测试",
+      "purpose": "固定输入集、标注、测试划分及版本",
+      "boundary": "不使用同一批数据既调参数又报告独立测试效果",
+      "basis": [
+        "P3"
+      ],
+      "sources": [
+        "data/test_manifest.json"
+      ]
+    },
+    {
+      "path": "data/reference",
+      "owner": "A/B/C",
+      "placement": "黄金参考",
+      "purpose": "CPU/浮点参考、合成 fixture 和预期输出",
+      "boundary": "每项带适用算法/版本；合成演示与真实样本分别标记",
+      "basis": [
+        "O1",
+        "C13"
+      ],
+      "sources": [
+        "data/golden"
+      ]
+    },
+    {
+      "path": "data/models",
+      "owner": "B/C",
+      "placement": "推理资源",
+      "purpose": "模型卡、来源、固定版本、SHA、获取方式和兼容性",
+      "boundary": "权重与编译产物分目录；实际分发按许可/大小决定",
+      "basis": [
+        "P1",
+        "C11"
+      ],
+      "sources": [
+        "models/vision",
+        "config/model_manifest.json"
+      ]
+    },
+    {
+      "path": "data/models/source",
+      "owner": "B/C",
+      "placement": "原始权重",
+      "purpose": "获准使用的 ONNX/原始模型或固定获取清单",
+      "boundary": "不把目录名/模型名当作真实可用权重",
+      "basis": [
+        "C11"
+      ],
+      "sources": [
+        "models/vision"
+      ]
+    },
+    {
+      "path": "data/models/compiled",
+      "owner": "B",
+      "placement": "KV260 DPU 模型",
+      "purpose": "最终项目 xmodel、arch、指纹、编译日志引用",
+      "boundary": "当前项目人体/身份 xmodel 待完成；CPU 权重另列",
+      "basis": [
+        "P1",
+        "C11"
+      ],
+      "sources": [
+        "config/model_manifest.json"
+      ]
+    },
+    {
+      "path": "data/assets",
+      "owner": "C",
+      "placement": "界面运行资源",
+      "purpose": "汐蓝帧、UI 清单、已选声线参考与资源版本",
+      "boundary": "素材同一权威版本，UI 源码引用；资源路径重组要经过迁移验收",
+      "basis": [
+        "C7",
+        "C9"
+      ],
+      "sources": [
+        "assets",
+        "ui"
+      ]
+    },
+    {
+      "path": "data/metrics",
+      "owner": "A/B/C",
+      "placement": "实验分析",
+      "purpose": "G0–G5、延迟、误差、覆盖、身份等待与分析入口",
+      "boundary": "记录真实 run_id；空值代表未测，合成数字不填进板测对比",
+      "basis": [
+        "P3",
+        "C11"
+      ],
+      "sources": [
+        "config/experiments.json",
+        "metrics/raw/framework-validation-20261009/validation.json"
+      ]
+    },
+    {
+      "path": "skill",
+      "owner": "A/B/C",
+      "placement": "陌生使用者复用",
+      "purpose": "命令监督、感知时效、异步取消三个候选包",
+      "boundary": "每包应有适用/步骤/失败/效果/边界/复用记录；三个数量是项目安排",
+      "basis": [
+        "O2",
+        "P4"
+      ],
+      "sources": []
+    },
+    {
+      "path": "report",
+      "owner": "全队",
+      "placement": "评审与复现",
+      "purpose": "设计报告、框图、接口、需求/证据索引、AI 协作与复现",
+      "boundary": "解释原始数据，不能凭模板/图册宣称优化或整机完成",
+      "basis": [
+        "O3"
+      ],
+      "sources": []
+    },
+    {
+      "path": "report/contracts",
+      "owner": "按 I01–I07 主责",
+      "placement": "接口说明",
+      "purpose": "原七份合同登记、字段/单位/状态/兼容性及修订记录",
+      "boundary": "接口描述不是已经冻结的运行时 schema 或硬件 ABI",
+      "basis": [
+        "P2",
+        "C1",
+        "C3"
+      ],
+      "sources": []
+    },
+    {
+      "path": "report/release",
+      "owner": "A 汇总，各人确认",
+      "placement": "统一交付",
+      "purpose": "源码、系统、模型、配置、数据、报告的同一 release 清单与 SHA",
+      "boundary": "当前工程框架包与最终完整交付分别标记",
+      "basis": [
+        "P2",
+        "C14"
+      ],
+      "sources": []
+    },
+    {
+      "path": "report/reproduction",
+      "owner": "C 编排，A/B 补步骤",
+      "placement": "第三方复现",
+      "purpose": "从零构建/部署/运行/停止和非作者实际记录",
+      "boundary": "有脚本与实际执行成功分别记录；源包通过不表示整机通过",
+      "basis": [
+        "O3",
+        "C10",
+        "C14"
+      ],
+      "sources": []
+    }
+  ],
+  "contracts": [
+    {
+      "id": "I01",
+      "name": "平台清单",
+      "owner": "A；B/C 补实际值",
+      "original_name": "contracts/platform_manifest.json",
+      "area": "src/shared/contracts/platform",
+      "module_ids": [
+        "platform",
+        "dpu",
+        "devices"
+      ],
+      "existing": [
+        "hardware/platform/platform_manifest.json",
+        "config/toolchain_lock.json"
+      ],
+      "status": "已存在参考清单；最终统一平台实例/模型/系统/器件待冻结",
+      "frozen_final_contract": false
+    },
+    {
+      "id": "I02",
+      "name": "运动寄存器与行为",
+      "owner": "A 主写，B 评审",
+      "original_name": "contracts/motion_regs.yaml",
+      "area": "src/shared/contracts/motion",
+      "module_ids": [
+        "motion",
+        "vsrv",
+        "axi_commit",
+        "source_guard",
+        "output_gate",
+        "clock_map"
+      ],
+      "existing": [
+        "board/motion/vsrv_driver.py",
+        "common/contracts.py",
+        "hardware/rtl/visual_servo.sv"
+      ],
+      "status": "旧相对租约 ABI 与软件模型已有；新绝对源期限 ABI/位宽/时钟映射待冻结",
+      "frozen_final_contract": false
+    },
+    {
+      "id": "I03",
+      "name": "相机与轨迹",
+      "owner": "B 主写，C 评审",
+      "original_name": "contracts/camera_track.schema.json",
+      "area": "src/shared/contracts",
+      "module_ids": [
+        "camera",
+        "tracking",
+        "target",
+        "snapshot"
+      ],
+      "existing": [
+        "common/contracts.py",
+        "board/vision/frames.py"
+      ],
+      "status": "软件类型已有；真实采集时义、池生命周期和对外序列化待冻结",
+      "frozen_final_contract": false
+    },
+    {
+      "id": "I04",
+      "name": "身份与授权",
+      "owner": "B 主写，C 评审",
+      "original_name": "contracts/identity.schema.json",
+      "area": "src/shared/contracts",
+      "module_ids": [
+        "face",
+        "identity",
+        "enrollment"
+      ],
+      "existing": [
+        "board/identity/store.py"
+      ],
+      "status": "匹配/删除软件逻辑已有；登记操作、质量和阈值实测待接",
+      "frozen_final_contract": false
+    },
+    {
+      "id": "I05",
+      "name": "交互与媒体",
+      "owner": "C 主写，B 评审",
+      "original_name": "contracts/interaction.schema.json",
+      "area": "src/shared/contracts/interaction",
+      "module_ids": [
+        "mcp_capture",
+        "media_session",
+        "transport",
+        "asr",
+        "vlm",
+        "tts",
+        "mcp_play"
+      ],
+      "existing": [
+        "common/schemas",
+        "host/model_service/protocol.py",
+        "board/runtime/media_session.py"
+      ],
+      "status": "文字 1.0 与媒体 aura-runtime-1 分开；真实跨机媒体编码与设备交付待验",
+      "frozen_final_contract": false
+    },
+    {
+      "id": "I06",
+      "name": "说话人建议",
+      "owner": "C 主写，B 评审",
+      "original_name": "contracts/asd_focus.schema.json",
+      "area": "src/shared/contracts",
+      "module_ids": [
+        "av_sync",
+        "asd",
+        "speaker",
+        "target"
+      ],
+      "existing": [
+        "board/fusion/speaker.py",
+        "board/runtime/application.py"
+      ],
+      "status": "窗口结果门已有；真实同步/Light-ASD、竞争保持和完整 schema 待完成",
+      "frozen_final_contract": false
+    },
+    {
+      "id": "I07",
+      "name": "运行状态",
+      "owner": "C 汇总，A/B 定义状态",
+      "original_name": "contracts/runtime_status.schema.json",
+      "area": "src/shared/contracts",
+      "module_ids": [
+        "fsm",
+        "ui",
+        "avatar",
+        "devices",
+        "board_verify"
+      ],
+      "existing": [
+        "board/runtime/events.py",
+        "board/runtime/event_bus.py",
+        "board/interaction/ui_state.py"
+      ],
+      "status": "事件/UI 状态已有；统一平台/进程/设备状态合同与实屏待验",
+      "frozen_final_contract": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "F01",
+      "title": "共享定义缺少归属",
+      "evidence": "common 与 host/model_service/protocol.py 被多端消费，原目录图没有共享层。",
+      "decision": "增加 src/shared/contracts 与 utilities，保存单一定义和原 I01–I07 登记。",
+      "basis": [
+        "C1",
+        "C3"
+      ],
+      "status": "STRUCTURE_CORRECTED_CODE_REFACTOR_PENDING"
+    },
+    {
+      "id": "F02",
+      "title": "目录名不能判断部署位置",
+      "evidence": "host/model_service/client.py 是运行在 AuraRuntime 所在端的客户端。",
+      "decision": "明确归属 PS 客户端；Windows 服务端与双端协议另列。",
+      "basis": [
+        "C2",
+        "C4"
+      ],
+      "status": "STRUCTURE_CORRECTED_CODE_REFACTOR_PENDING"
+    },
+    {
+      "id": "F03",
+      "title": "旧音频目录混合三类职责",
+      "evidence": "Qwen 合成、旧 ASR、SAPI/Sherpa 合成与本地播放都在 board/runtime/audio 下。",
+      "decision": "按主机推理、板端真实设备、历史参考划分；不机械整体搬迁。",
+      "basis": [
+        "C5",
+        "C7"
+      ],
+      "status": "STRUCTURE_CORRECTED_CODE_REFACTOR_PENDING"
+    },
+    {
+      "id": "F04",
+      "title": "软件监督放错交付位置",
+      "evidence": "AuraRuntime 直接 import SimulationGuard，单独放到 sim 会遗漏运行依赖。",
+      "decision": "模型位置改为 src/ps/motion/simulation_guard；sim/software 放测试。",
+      "basis": [
+        "C2",
+        "C8"
+      ],
+      "status": "STRUCTURE_CORRECTED"
+    },
+    {
+      "id": "F05",
+      "title": "DPU 平台与自研 RTL 混称",
+      "evidence": "已有 DPU 是官方 IP/平台集成；图中有限板测来源不是自研 DPU RTL。",
+      "decision": "DPU 集成位置改为 src/platform/dpu_integration；自研 motion RTL 单列。",
+      "basis": [
+        "P2",
+        "C8",
+        "C10"
+      ],
+      "status": "STRUCTURE_CORRECTED"
+    },
+    {
+      "id": "F06",
+      "title": "接口编号与原总包冲突",
+      "evidence": "前一版把数据流说明记作 I01–I09，与总包 I01–I07 含义冲突。",
+      "decision": "恢复 I01–I07；原九类数据流说明改名为 D01–D09 并给映射。",
+      "basis": [
+        "P2",
+        "C1",
+        "C3"
+      ],
+      "status": "STRUCTURE_CORRECTED"
+    },
+    {
+      "id": "F07",
+      "title": "构建、输入和工件未分清",
+      "evidence": "XDC/BD/DT 输入、工具脚本、最终固件和报告用途不同；旧脚本有绝对路径。",
+      "decision": "分别归 src/platform、build/scripts、board/firmware、build/reports；复现结论待实际重建。",
+      "basis": [
+        "C10"
+      ],
+      "status": "STRUCTURE_CORRECTED_BUILD_PORTABILITY_PENDING"
+    },
+    {
+      "id": "F08",
+      "title": "资源和运行数据缺少分类",
+      "evidence": "ui/ 多为 JSON，UI 源码在 board/interaction；素材/模型/标定/个人库不能仅按后缀归组。",
+      "decision": "新增 data/assets、data/models/source/compiled、data/test；运行身份库/临时媒体为外部可写状态。",
+      "basis": [
+        "C9",
+        "C11"
+      ],
+      "status": "STRUCTURE_CORRECTED"
+    },
+    {
+      "id": "F09",
+      "title": "新目录不能证明搬迁后可运行",
+      "evidence": "common/config.py 与 avatar_assets.py 按源码相对层级定位根目录；导入仍使用 board/common/host。",
+      "decision": "现有源码唯一开发；目录说明记录目标区域；真正重排源码前先解决包/资源路径，再隔离验收。",
+      "basis": [
+        "C1",
+        "C9",
+        "C14"
+      ],
+      "status": "MIGRATION_NOT_EXECUTED"
+    },
+    {
+      "id": "F10",
+      "title": "历史说明不能替代最终平台选择",
+      "evidence": "旧 LICENSE_MATRIX.md 声称板端 LVGL，当前存在 Qt 代码而最终板端渲染尚未冻结。",
+      "decision": "标为历史依据；按总包 §4.9 在实际镜像选定后端后再更新依赖/许可与资源预算。",
+      "basis": [
+        "P2",
+        "C9",
+        "C12"
+      ],
+      "status": "FINAL_UI_BACKEND_AND_LICENSE_AUDIT_PENDING"
+    }
+  ],
+  "resource_owners": [
+    {
+      "resource": "相机和帧池",
+      "owner": "B / camera_service",
+      "consumer_rule": "检测、UI、VLM、ASD 通过帧引用/副本读取",
+      "invariant": "重连换 camera_epoch；来源时间语义真实",
+      "module_ids": [
+        "camera",
+        "snapshot"
+      ],
+      "basis": [
+        "P2"
+      ]
+    },
+    {
+      "resource": "DPU 提交",
+      "owner": "B / 单 CU 调度",
+      "consumer_rule": "检测/身份统一准入，A 提供匹配平台",
+      "invariant": "在途任务不可假设抢占；成本必须测量",
+      "module_ids": [
+        "scheduler",
+        "person",
+        "id_dpu"
+      ],
+      "basis": [
+        "P2"
+      ]
+    },
+    {
+      "resource": "目标与轨迹代次",
+      "owner": "B / target_manager",
+      "consumer_rule": "C 只提交手动/说话人建议",
+      "invariant": "重新出现换代；不以身份姓名替代轨迹",
+      "module_ids": [
+        "tracking",
+        "target",
+        "speaker"
+      ],
+      "basis": [
+        "P2"
+      ]
+    },
+    {
+      "resource": "身份数据库",
+      "owner": "B / identity_service",
+      "consumer_rule": "C 经授权 API 登记/删除",
+      "invariant": "修订号更新，旧缓存/在途结果失效",
+      "module_ids": [
+        "identity",
+        "enrollment"
+      ],
+      "basis": [
+        "P2"
+      ]
+    },
+    {
+      "resource": "运动寄存器",
+      "owner": "B / motion_service；A 提供访问库",
+      "consumer_rule": "UI/主机消费状态或建议对象",
+      "invariant": "维护与正式服务互斥；新源期限/恢复合同待冻结",
+      "module_ids": [
+        "motion",
+        "vsrv",
+        "source_guard"
+      ],
+      "basis": [
+        "P2"
+      ]
+    },
+    {
+      "resource": "音频采录播放",
+      "owner": "C / 音频服务",
+      "consumer_rule": "媒体/ASD 使用有时标的样本接口",
+      "invariant": "取消先废止代次并真实停声；采样格式来自设备",
+      "module_ids": [
+        "mcp_capture",
+        "mcp_play"
+      ],
+      "basis": [
+        "P2"
+      ]
+    },
+    {
+      "resource": "会话和取消代次",
+      "owner": "C / 板端会话",
+      "consumer_rule": "Windows 回显请求归属与板端期限",
+      "invariant": "旧结果不恢复字幕/音频/动画",
+      "module_ids": [
+        "media_session",
+        "transport"
+      ],
+      "basis": [
+        "P2"
+      ]
+    },
+    {
+      "resource": "模型流水线",
+      "owner": "C / Windows 服务",
+      "consumer_rule": "接收明确媒体，返回文字/PCM/分数",
+      "invariant": "不得操作板端运动或数据库",
+      "module_ids": [
+        "asr",
+        "vlm",
+        "tts",
+        "asd"
+      ],
+      "basis": [
+        "P2"
+      ]
+    },
+    {
+      "resource": "显示与动画",
+      "owner": "C / UI",
+      "consumer_rule": "订阅单一事件总线/状态快照",
+      "invariant": "口型跟实际播放；不再开一套设备或业务状态机",
+      "module_ids": [
+        "avatar",
+        "ui",
+        "fsm"
+      ],
+      "basis": [
+        "P2"
+      ]
+    },
+    {
+      "resource": "PL/系统发布",
+      "owner": "A / 平台入口",
+      "consumer_rule": "B/C 使用相同 release 和指纹",
+      "invariant": "不是三人分别加载三个 bitstream",
+      "module_ids": [
+        "platform",
+        "hardware_build",
+        "release"
+      ],
+      "basis": [
+        "P2"
+      ]
+    }
+  ],
+  "plan_path_corrections": [
+    {
+      "module": "dpu",
+      "before": "src/rtl/dpu_platform",
+      "after": "src/platform/dpu_integration",
+      "reason": "官方 DPU 集成不等于自研 DPU RTL"
+    },
+    {
+      "module": "guard_model",
+      "before": "sim/software_guard",
+      "after": "src/ps/motion/simulation_guard",
+      "reason": "当前软件运行时直接依赖模型，sim 保存测试"
+    },
+    {
+      "module": "transport",
+      "before": "src/host/media_transport",
+      "after": "src/shared/contracts/interaction",
+      "reason": "逻辑模块覆盖双端合同；PS 客户端与 Windows 服务端分别挂接"
+    }
+  ],
+  "unverified": [
+    "最终具体器件/引脚/时钟与新运动 ABI",
+    "真实项目 DPU 模型与跨机媒体/ASD",
+    "目标分层目录的源码迁移及隔离重建",
+    "最终板端渲染后端与更新后的依赖许可",
+    "真实数据标定、G0–G5、同板整机与非作者复现"
+  ]
+}

@@ -1,0 +1,14 @@
+--- v1/root_public_probe.py
++++ v2/root_public_probe_v2.py
+@@ -116,6 +116,11 @@
+         raise TrialError('SOURCE_PIN_CHANGED')
+     for relative, digest in pins['candidate_sources'].items():
+         if sha(HERE/'after'/relative) != digest: raise TrialError('SOURCE_PIN_CHANGED')
++    # D01 imports the original before sources: pin those bytes too.
++    manifest = read_json(HERE/'SOURCE_MANIFEST.json')
++    for relative, row in manifest['files'].items():
++        if sha(HERE/'before'/relative) != row['before_sha256']:
++            raise TrialError('SOURCE_PIN_CHANGED')
+     for name in ('legacy_guard_runner', 'validator'):
+         if sha(Path(pins[name]['path'])) != pins[name]['sha256']:
+             raise TrialError('SOURCE_PIN_CHANGED')

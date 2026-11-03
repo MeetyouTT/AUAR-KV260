@@ -1,0 +1,182 @@
+{
+  "host_observed_start_utc": "2026-11-02T02:53:07.783006+00:00",
+  "host_observed_end_utc": "2026-11-02T02:53:08.470276+00:00",
+  "script_path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_platform_review\\collect_loader_readonly.py",
+  "script_sha256": "ec27fb7124de966be705bd132a1f4a56661cdca52a8bf27ed8b5a1b1ec43d9e6",
+  "transport_sha256": "6aefec94f620c6c86fa6b17c83613b22c8599e899cb2c2fcaf36c9cdd17c7373",
+  "board_result": {
+    "board_monotonic_ns": 9449324750858,
+    "board_mutations": false,
+    "boot_id": "903cfade-b93c-48fa-804e-379be1967313",
+    "database_opened": false,
+    "device_opened": false,
+    "directories": {
+      "/usr/local/lib/kv260-dfx-state-repair-20261003": [
+        {
+          "is_dir": false,
+          "is_symlink": false,
+          "name": "dfx-mgrd"
+        }
+      ],
+      "/usr/src": [
+        {
+          "is_dir": true,
+          "is_symlink": false,
+          "name": "debug"
+        }
+      ]
+    },
+    "executable_resolution": {
+      "dfx-mgr-client": "/usr/bin/dfx-mgr-client",
+      "dfx-mgrd": "/usr/bin/dfx-mgrd",
+      "objdump": "/usr/bin/objdump",
+      "readelf": "/usr/bin/readelf",
+      "strings": "/usr/bin/strings",
+      "xmutil": "/usr/bin/xmutil"
+    },
+    "files": {
+      "/etc/systemd/system/dfx-mgr.service.d/10-kv260-repaired.conf": {
+        "elf": false,
+        "exists": true,
+        "is_symlink": false,
+        "mode": "0o644",
+        "path": "/etc/systemd/system/dfx-mgr.service.d/10-kv260-repaired.conf",
+        "realpath": "/etc/systemd/system/dfx-mgr.service.d/10-kv260-repaired.conf",
+        "sha256": "32dcc98eaffba6eba4f0ccf9109961a5227cf220e76fa22635659190a1d2dd4d",
+        "size": 239,
+        "text": "# PROPOSAL ONLY. Keep the vendor unit intact; install only after review and backup.\n[Unit]\nRequires=kv260-repaired-zocl.service\nAfter=kv260-repaired-zocl.service\n\n[Service]\nExecStart=\nExecStart=/usr/local/lib/kv260-runtime-repair/dfx-mgrd\n",
+        "uid": 0
+      },
+      "/etc/systemd/system/dfx-mgr.service.d/20-kv260-dfx-state-repaired.conf": {
+        "elf": false,
+        "exists": true,
+        "is_symlink": false,
+        "mode": "0o644",
+        "path": "/etc/systemd/system/dfx-mgr.service.d/20-kv260-dfx-state-repaired.conf",
+        "realpath": "/etc/systemd/system/dfx-mgr.service.d/20-kv260-dfx-state-repaired.conf",
+        "sha256": "b46fd13058a791972516355663ff64da8c0692628ea2467e5627476aa9a5ce16",
+        "size": 163,
+        "text": "# Board-verified state lifecycle fix; previous runtime drop-in is retained.\n[Service]\nExecStart=\nExecStart=/usr/local/lib/kv260-dfx-state-repair-20261003/dfx-mgrd\n",
+        "uid": 0
+      },
+      "/usr/bin/dfx-mgr-client": {
+        "elf": true,
+        "exists": true,
+        "is_symlink": false,
+        "mode": "0o755",
+        "path": "/usr/bin/dfx-mgr-client",
+        "realpath": "/usr/bin/dfx-mgr-client",
+        "sha256": "a37d8449c3362a509d459f9e57aa3711314602369354f7d98ca60c3e51607ad7",
+        "size": 18408,
+        "uid": 0
+      },
+      "/usr/bin/dfx-mgrd": {
+        "elf": true,
+        "exists": true,
+        "is_symlink": false,
+        "mode": "0o755",
+        "path": "/usr/bin/dfx-mgrd",
+        "realpath": "/usr/bin/dfx-mgrd",
+        "sha256": "bdbd8ee09b3f767a53bd5111240c9ade3bb19b1da83d73bd06785ae86260e9a2",
+        "size": 100808,
+        "uid": 0
+      },
+      "/usr/bin/objdump": {
+        "elf": true,
+        "exists": true,
+        "is_symlink": true,
+        "link_target": "/usr/bin/aarch64-xilinx-linux-objdump",
+        "mode": "0o755",
+        "path": "/usr/bin/objdump",
+        "realpath": "/usr/bin/aarch64-xilinx-linux-objdump",
+        "sha256": "f9fd938e66831d02049f714c25ae5f0552cafd41e1a0ae7433472c160d5fb517",
+        "size": 447000,
+        "uid": 0
+      },
+      "/usr/bin/readelf": {
+        "elf": true,
+        "exists": true,
+        "is_symlink": true,
+        "link_target": "/usr/bin/aarch64-xilinx-linux-readelf",
+        "mode": "0o755",
+        "path": "/usr/bin/readelf",
+        "realpath": "/usr/bin/aarch64-xilinx-linux-readelf",
+        "sha256": "b5f2e221ebb41db329e578dd8815fd921c633e7dd0c472ed8dcd7e1d61873b0d",
+        "size": 825064,
+        "uid": 0
+      },
+      "/usr/bin/strings": {
+        "elf": true,
+        "exists": true,
+        "is_symlink": true,
+        "link_target": "/usr/bin/aarch64-xilinx-linux-strings",
+        "mode": "0o755",
+        "path": "/usr/bin/strings",
+        "realpath": "/usr/bin/aarch64-xilinx-linux-strings",
+        "sha256": "1c0af8511c7499b2163a7a4529f00d6460857f701a232408cde3424dc29abdb2",
+        "size": 35224,
+        "uid": 0
+      },
+      "/usr/bin/xmutil": {
+        "elf": false,
+        "exists": true,
+        "is_symlink": false,
+        "mode": "0o755",
+        "path": "/usr/bin/xmutil",
+        "realpath": "/usr/bin/xmutil",
+        "sha256": "037a78b2bafb9d72cd7f0b8343b2f9fe06de5f501adcebcc7e44227b0452209b",
+        "size": 4913,
+        "text": "#!/usr/bin/env python3\n\n\"\"\"\n# Copyright (C) 2010 - 2020 Xilinx, Inc.  All rights reserved.\n\n# SPDX-License-Identifier: MIT\n\"\"\"\n\nimport subprocess, argparse, distro\n\ncmds = { 'boardid':'/usr/bin/fru-print', \\\n\t'bootfw_status':'/usr/bin/image_update', \\\n\t'bootfw_update':'/usr/bin/image_update', \\\n\t'listapps':'dfx-mgr-client', \\\n\t'loadapp':'dfx-mgr-client', \\\n\t'unloadapp':'dfx-mgr-client', \\\n\t'xlnx_platformstats':'/usr/bin/xlnx_platformstats', \\\n\t'ddrqos':'/usr/bin/ddr-qos', \\\n\t'axiqos':'/usr/bin/axi-qos', \\\n\t'pwrctl':'/usr/bin/som-pwrctl', \\\n\t}\n\n#have separate functions for each, in case some preprocessing/specialcommand/prints needed\n#separate functions not necessarily needed, can run straight from top function\ndef boardid(args):\n    subprocess.run([cmds['boardid']]+args)\n\ndef bootfw_status(args):\n    subprocess.run([cmds['bootfw_status'],'-p'])\n\ndef bootfw_update(args):\n    subprocess.run([cmds['bootfw_update']]+args)\n\ndef getpkgs(args):\n    if ('-h' in args) or ('--help' in args):\n        print(\"\\ngetpkgs will use fru-print to determine the SOM + CC combination\\nand search the package feed for compatible packagegroups\\n\")\n        exit()\n    somnum=subprocess.getoutput(\"fru-print -b som -f product | awk -F- '{ print $2}' | tr '[:upper:]' '[:lower:]'| sed 's/[^0-9]*//g'\")\n    cc=subprocess.getoutput(\"fru-print -b cc -f product | awk -F- '{ print $2}' | tr '[:upper:]' '[:lower:]'\")\n    print(\"\\nSearching package feed for packages compatible with: \" +cc+somnum+'0\\n')\n    if distro.id() == 'ubuntu':\n        subprocess.run('apt search xlnx-app-' +cc+somnum +'0- 2>/dev/null',shell=True)\n    elif distro.id() == 'petalinux':\n        subprocess.run('dnf list --available | grep packagegroup-' +cc+somnum +'0- | awk \"!/-dev\\./&&!/-lic\\./&&!/-dbg\\./&&!/-ptest\\./\"' ,shell=True)\n\ndef listapps(args):\n    subprocess.run([cmds['listapps'],'-listPackage'])\n\ndef loadapp(args):\n    subprocess.run([cmds['loadapp'],'-load']+args)\n\ndef unloadapp(args):\n    subprocess.run([cmds['unloadapp'],'-remove']+args)\n\ndef xlnx_platformstats(args):\n    subprocess.run([cmds['xlnx_platformstats']]+args)\n\ndef ddrqos(args):\n    subprocess.run([cmds['ddrqos']]+args)\n\ndef axiqos(args):\n    subprocess.run([cmds['axiqos']]+args)\n\ndef pwrctl(args):\n    subprocess.run([cmds['pwrctl']]+args)\n\ndef top(cmd,args):\n    globals()[cmd[0]](args)\n\ndef desktop_disable(args):\n    subprocess.run('systemctl isolate multi-user.target', shell=True)\n\ndef desktop_enable(args):\n    subprocess.run('systemctl isolate graphical.target', shell=True)\n\ndef dp_unbind(args):\n    subprocess.run('echo -n fd4a0000.display > /sys/bus/platform/drivers/zynqmp-display/unbind', shell=True)\n\ndef dp_bind(args):\n    subprocess.run('echo -n fd4a0000.display > /sys/bus/platform/drivers/zynqmp-display/bind', shell=True)\n\nif __name__ == \"__main__\":\n    parser = argparse.ArgumentParser(description='\\n\\\nboardid: Reads all board EEPROM contents. Prints information summary in human readable structure to CLI.\\n\\t-b\\tPick which board to print fru data for\\n\\t-f\\tEnter field to print\\n\\t-s\\tEnter som EEPROM path\\n\\t-c\\tEnter cc EEPROM path\\n\\n\\\nbootfw_status: Prints Qspi MFG version and date info along with persistent state values.\\n\\n\\\nbootfw_update: Updates the primary boot device with a new BOOT.BIN in the inactive partition (either A or B).\\n\\n\\\ngetpkgs: Queries Xilinx package feeds and provides summary to CLI of relevant packages for active platform based on board ID information.\\n\\n\\\nlistapps: Queries on target FW resource manager daemon of pre-built app bitstreams available on the platform and provides summary to CLI.\\n\\n\\\nloadapp: Loads requested application configuration bitstream to programmable logic if the device is available.\\n\\n\\\nunloadapp: Removes application bitstream. (Takes slot number, default 0) \\n\\n\\\nxlnx_platformstats: Reads and prints a summary of the following performance related information:\\n\\tCPU Utilization for each configured CPU\\n\\tRAM utilization\\n\\tSwap memory Utilization\\n\\tSOM overall current, power, voltage utilization\\n\\tSysMon Temperatures(s)\\n\\tSOM power supply data summary reported by PMICs & ZU+ SysMon sources\\n\\n\\\nddrqos: Set QOS value for DDR slots on zynqmp platform\\n\\n\\\naxiqos: Set QOS value for AXI ports on zynqmp platform. \\n\\n\\\npwrctl: PL power control utility.\\n\\n\\\ndesktop_disable: Disable the desktop.\\n\\n\\\ndesktop_enable: Enable the desktop.\\n\\n\\\ndp_unbind: Unbind the display driver.\\n\\n\\\ndp_bind: Bind the display driver.\\n\\n',\\\n\n    formatter_class=argparse.RawTextHelpFormatter)\n    parser.add_argument('cmd', choices=['boardid','bootfw_status','bootfw_update','getpkgs','listapps','loadapp','unloadapp','xlnx_platformstats','ddrqos','axiqos','pwrctl','desktop_disable','desktop_enable','dp_unbind','dp_bind'], type=str, nargs=1,help='Enter a function')\n    parser.add_argument('args', nargs=argparse.REMAINDER)\n    args = parser.parse_args()\n    top(args.cmd,args.args)\n\n",
+        "uid": 0
+      },
+      "/usr/local/lib/kv260-dfx-state-repair-20261003/dfx-mgrd": {
+        "elf": true,
+        "exists": true,
+        "is_symlink": false,
+        "mode": "0o755",
+        "path": "/usr/local/lib/kv260-dfx-state-repair-20261003/dfx-mgrd",
+        "realpath": "/usr/local/lib/kv260-dfx-state-repair-20261003/dfx-mgrd",
+        "sha256": "369c7fb0ddd023a7cf7af14896a7fda6036219a36f4980c73640889720c95dfd",
+        "size": 117856,
+        "uid": 0
+      },
+      "/usr/local/lib/kv260-runtime-repair/dfx-mgrd": {
+        "elf": true,
+        "exists": true,
+        "is_symlink": false,
+        "mode": "0o755",
+        "path": "/usr/local/lib/kv260-runtime-repair/dfx-mgrd",
+        "realpath": "/usr/local/lib/kv260-runtime-repair/dfx-mgrd",
+        "sha256": "db9c25f09f1178177884b1114c57f32c076f1e7f9cdd0d12b7a896039038a46c",
+        "size": 117488,
+        "uid": 0
+      }
+    },
+    "loader_executed": false,
+    "path_environment": "/usr/bin:/bin",
+    "processes": [
+      {
+        "birth_ticks": 1516,
+        "command": "/usr/local/lib/kv260-dfx-state-repair-20261003/dfx-mgrd ",
+        "command_sha256": "eba390fe164718811ee931534079ab55a51a95b5e8092c7600dcf730346d7088",
+        "exe": "/usr/local/lib/kv260-dfx-state-repair-20261003/dfx-mgrd",
+        "exe_sha256": "369c7fb0ddd023a7cf7af14896a7fda6036219a36f4980c73640889720c95dfd",
+        "pid": 1121
+      }
+    ],
+    "project_imported": false,
+    "root_dfx_candidates": [
+      "kv260-dfx-manager-repair-20261003T042453Z",
+      "kv260-dfx-state-boardtest-20261004",
+      "kv260-fs-repair-reboot-20261003",
+      "kv260-fs-repair-reboot-20261003.tar.gz",
+      "kv260-m3-boardtest-20261003T021012Z",
+      "kv260-runtime-live-20261003T082232Z",
+      "kv260-runtime-live-20261003T085031Z",
+      "kv260-runtime-persistent-backup-20261003",
+      "kv260-runtime-stage-20261003",
+      "kv260-zocl-repair-20261003T005805Z"
+    ],
+    "schema": "aura-loader-static-inventory-1"
+  }
+}

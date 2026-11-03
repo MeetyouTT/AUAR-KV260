@@ -1,0 +1,12 @@
+[
+  {
+    "id": "board_qspi",
+    "command": "xmutil boardid; xmutil bootfw_status",
+    "timeout": 45
+  },
+  {
+    "id": "packages_sources",
+    "command": "python3 --version; rpm -qa --qf \"%{NAME}\\t%{VERSION}-%{RELEASE}\\t%{ARCH}\\t%{VENDOR}\\n\" | grep -Ei \"vitis|vart|xir|xrt|dpu|zocl|xlnx|dfx|kria|bootfw|xmutil|image-update|fru|kernel|gstreamer|opencv\"; find /usr/lib -maxdepth 6 -path \"*/xdputil*\" -type f; ls -l /usr/lib/libvart* /usr/lib/libxir* /usr/lib/libvitis* /usr/lib/libxrt* /usr/lib/libvaip*",
+    "timeout": 45
+  }
+]

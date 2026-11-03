@@ -1,0 +1,18 @@
+本地恢复候选已准备：仅BoardBusinessRuntime.initialize_clock，待独审和现场验收。
+
+基线 b08209eca7979825e26845080bca5e1d64e065d3cabd1178df763a93540573f2
+候选 aac26f39b8cbec1496df93a3de24b0bc2a14289552d2728c585f3625ef779eae
+
+保留原单个绝对截止时间（生产调用timeout=3s），每份样本继续通过原clock的1s RTT门槛。仅首份抛原ClockUnavailable精确固定sample_rtt_exceeded时，允许最多第二份全新原client GET/连接/Date/一次性proof。第二份任何失败立即结束；不重放旧样本，不扩大期限或修改系统时间、clock算法、anchor或业务库。
+
+仅真实StableTimelineClock+InferenceHttpClient、runtime尚未started且未closed可重取。原timeline.lock短区间只读取detached元数据token；原对象、boot/source/policy/monotonic/endpoint/verifier/path/完整anchor必须不变，且无fatal、busy、取消、超期或其它前置错误。已有persistent anchor必须由原拒绝保存把file_revision精确加1；fresh无anchor仅接受前后revision0。不能证明时保留首份原失败。任何clock/file锁都不跨HTTP持有。fake/nonstandard timeline的原首请求仍允许，但没有重取权限。
+
+原93b6的RTT异常处理会吞掉拒绝状态保存的ClockUnavailable，再抛最初RTT错误。仅凭固定码会漏掉隐藏anchor_revision_conflict。本候选以原成功保存后的revision凭据收口。合成验证既用了纯RAM注入，也用了本地隔离synthetic-boot文件，通过原_save_locked和原文件锁实际验证保存成功/冲突。另一个原Clock.save推进fixture文件版本后，隐藏冲突确实仍被RTT码遮住，但候选只发1次GET就拒绝。
+
+自然TTL过期已实测：原quality.reason变verification_expired、safe_for_compaction=false；原status仍verified、last_error空、fatal=false。现白名单已覆盖，不需要加状态或改候选。先慢样本拒绝并正常保存，再以同一3s预算取全新快样本，原observe合法恢复verified；原anchor origin和uncertainty不变。
+
+43个合成场景全过，整模块AST仅initialize_clock改变。覆盖慢→快、两份慢、同绝对deadline、取消/boot/source/policy/endpoint/path/fatal/owner变化、hidden revision冲突、第二份anchor冲突、fake timeline、token只读/锁及HTTP期间无锁。首次Windows fixture路径过长造成setup的anchor_write_failed已保留边界；只缩短合成路径后原持久逻辑通过，没有改clock或候选。
+
+启动顺序：ASR和frontend模型/子进程在Date前已构造，业务ASR worker尚未启动；ECAPA在Date成功后才初始化；recording/render/UI服务和preview worker在prepare_board_business返回后才构造。因此不能把本进程ECAPA/GUI preview说成当前Date采样期间后台负载。已加载native ASR/frontend线程池可能影响CPU调度，但源码不能证明其空闲spinning/GIL情况。现网GUI>1s的精确成因仍未定位，独立RAM16ms/5ms不构成反证或复现。
+
+本轮没有SSH、GET、板卡/模型/真实Store/业务anchor/轴操作，没有修改producer三文件；仅本地独立候选、合成夹具与报告。没有宣称已部署或已恢复GUI。

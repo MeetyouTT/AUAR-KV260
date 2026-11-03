@@ -1,0 +1,221 @@
+# /etc/systemd/system/aura-avatar-ui.service
+[Unit]
+Description=AURA cached avatar touchscreen interface
+Wants=xserver-nodm.service systemd-modules-load.service
+After=local-fs.target xserver-nodm.service systemd-modules-load.service
+RequiresMountsFor=/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=notify
+NotifyAccess=main
+User=root
+Environment=DISPLAY=:0 PYTHONUNBUFFERED=1
+WorkingDirectory=/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime/aura
+ExecStart=/usr/bin/python3 -B /home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/startup/launcher.py --config /home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/startup/config.json
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=240
+TimeoutStopSec=25
+KillMode=mixed
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=aura-avatar-ui
+
+[Install]
+WantedBy=graphical.target
+
+# /etc/systemd/system/aura-avatar-ui.service.d/80-aura-pan-manual-20261020.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-pan-manual-ui-20261020/camera-fix-v3/startup/launcher.py --config /home/root/aura-pan-manual-ui-20261020/camera-fix-v3/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/99-aura-rgb565-trial.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-render24-rgb565-20261020/887c4b6b2b5d/startup/launcher.py --config /home/root/aura-render24-rgb565-20261020/887c4b6b2b5d/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zz-aura-listening-timing-20261020.conf
+[Unit]
+RequiresMountsFor=/home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/runtime
+[Service]
+WorkingDirectory=/home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/runtime/aura
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/startup/launcher.py --config /home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zz-aura-render-budget-trial.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-render24-budget-20261020/e06409743174/startup/launcher.py --config /home/root/aura-render24-budget-20261020/e06409743174/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzz-aura-echo-verify-20261021.conf
+[Unit]
+RequiresMountsFor=/home/root/aura-echo-verify-20261021/candidate-a3c8e50c2797/runtime
+[Service]
+WorkingDirectory=/home/root/aura-echo-verify-20261021/candidate-a3c8e50c2797/runtime/aura
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-echo-verify-20261021/candidate-a3c8e50c2797/startup/launcher.py --config /home/root/aura-echo-verify-20261021/candidate-a3c8e50c2797/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzz-aura-stable-fps-trial.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-render24-budget-20261020/f8e48486023d/startup/launcher.py --config /home/root/aura-render24-budget-20261020/f8e48486023d/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzz-aura-speech-motion-trial.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-speech-motion-20261021/0e98f7830e27/startup/launcher.py --config /home/root/aura-speech-motion-20261021/0e98f7830e27/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzz-aura-interaction-render-fix.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-speech-motion-20261021/bd9e48cc658f/startup/launcher.py --config /home/root/aura-speech-motion-20261021/bd9e48cc658f/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzz-native-maintenance-be72669aa53de735.conf
+[Service]
+ExecCondition=/usr/bin/python3 -B /home/root/aura-native-live-20261024/ops/be72669aa53de735/boot_ops.py --root /home/root/aura-native-live-20261024/ops/be72669aa53de735 condition gui
+Restart=no
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzz-aura-snapshot-budget.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-speech-motion-20261021/922dab49a74f/startup/launcher.py --config /home/root/aura-speech-motion-20261021/922dab49a74f/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzz-aura-audio-frontend-20261021.conf
+[Unit]
+RequiresMountsFor=/home/root/aura-audio-frontend-20261021/candidate-0a4d1ec72b51/runtime
+[Service]
+WorkingDirectory=/home/root/aura-audio-frontend-20261021/candidate-0a4d1ec72b51/runtime/aura
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-audio-frontend-20261021/candidate-0a4d1ec72b51/startup/launcher.py --config /home/root/aura-audio-frontend-20261021/candidate-0a4d1ec72b51/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzz-aura-audio-frontend-budget-20261021.conf
+[Unit]
+RequiresMountsFor=/home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/runtime
+[Service]
+WorkingDirectory=/home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/runtime/aura
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/startup/launcher.py --config /home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzz-aura-motion-binding.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-speech-motion-20261021/de989bf024a9/startup/launcher.py --config /home/root/aura-speech-motion-20261021/de989bf024a9/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzz-aura-reliability-f7624754038f.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/gui-startup/launcher.py --config /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/gui-startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzz-aura-video-66cde810eb059dce.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-video-cpu-20261023/66cde810eb059dce/startup/launcher.py --config /home/root/aura-video-cpu-20261023/66cde810eb059dce/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzz-aura-pan-ui-ecfbdef064d157b6.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-pan-ui-v2-20261024/observed-ecfbdef064d157b6/startup/launcher.py --config /home/root/aura-pan-ui-v2-20261024/observed-ecfbdef064d157b6/startup/config.json
+WorkingDirectory=/home/root/aura-pan-ui-v2-20261024/observed-ecfbdef064d157b6/runtime/aura
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzz-aura-pan-current-463c.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-pan-current-20261024/463c9307/gui-release/startup/launcher.py --config /home/root/aura-pan-current-20261024/463c9307/gui-release/startup/config.json
+WorkingDirectory=/home/root/aura-pan-current-20261024/463c9307/gui-release/runtime/aura
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzz-aura-face-edge-v5.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-pan-current-20261024/463c9307/gui-face-edge-v5/startup/launcher.py --config /home/root/aura-pan-current-20261024/463c9307/gui-face-edge-v5/startup/config.json
+WorkingDirectory=/home/root/aura-pan-current-20261024/463c9307/gui-face-edge-v5/runtime/aura
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzz-aura-pan-16a-manual.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-pan-current-20261024/16a07283/gui-manual-bound-v1/startup/launcher.py --config /home/root/aura-pan-current-20261024/16a07283/gui-manual-bound-v1/startup/config.json
+WorkingDirectory=/home/root/aura-pan-current-20261024/16a07283/gui-manual-bound-v1/runtime/aura
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-animation-dialogue.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-animation-dialogue-20261026/d6d1617467724213b3d9fd3d11530a47/startup/launcher.py --config /home/root/aura-animation-dialogue-20261026/d6d1617467724213b3d9fd3d11530a47/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-pan-da36-reference-merged.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-pan-current-20261024/da36c36a/gui-reference-bound-v2/startup/launcher.py --config /home/root/aura-pan-current-20261024/da36c36a/gui-reference-bound-v2/startup/config.json
+WorkingDirectory=/home/root/aura-pan-current-20261024/da36c36a/gui-reference-bound-v2/runtime/aura
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-windows-portrait.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-windows-portrait-20261027/handoff-31b0c262c5b74d52966c00b978dfef3f/startup/launcher.py --config /home/root/aura-windows-portrait-20261027/handoff-31b0c262c5b74d52966c00b978dfef3f/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-pan-continuity-20261028.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-system-pan-20261028/gui-continuity-v1/startup/launcher.py --config /home/root/aura-system-pan-20261028/gui-continuity-v1/startup/config.json
+WorkingDirectory=/home/root/aura-system-pan-20261028/gui-continuity-v1/runtime/aura
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-device-skills.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-device-skills-20261028/0cd7c3445a84475098b938d5b97175e0/startup/launcher.py --config /home/root/aura-device-skills-20261028/0cd7c3445a84475098b938d5b97175e0/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-pan-wide-20261029.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-pan-wide-resume-20261029/gui-wide-v1/startup/launcher.py --config /home/root/aura-pan-wide-resume-20261029/gui-wide-v1/startup/config.json
+WorkingDirectory=/home/root/aura-pan-wide-resume-20261029/gui-wide-v1/runtime/aura
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-boundary-page-sync-20261029.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-boundary-nav-20261029/gui-page-sync-v1/startup/launcher.py --config /home/root/aura-boundary-nav-20261029/gui-page-sync-v1/startup/config.json
+WorkingDirectory=/home/root/aura-boundary-nav-20261029/gui-page-sync-v1/runtime/aura
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-boundary-page-sync-20261029.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-boundary-nav-20261029/gui-page-sync-v2/startup/launcher.py --config /home/root/aura-boundary-nav-20261029/gui-page-sync-v2/startup/config.json
+WorkingDirectory=/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/aura
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-avatar-startup-speed-20261029.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-avatar-startup-speed-20261029/launcher.py --config /home/root/aura-avatar-startup-speed-20261029/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-audio-animation-20261029.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-audio-animation-20261029/2a62bf25b0994029a1ff0f23f0b9720e/startup/launcher.py --config /home/root/aura-audio-animation-20261029/2a62bf25b0994029a1ff0f23f0b9720e/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-identity-bridge-20261030.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-identity-bridge-20261030/063ae6c47d2048d5a8e78111fc9484a9/startup/launcher.py --config /home/root/aura-identity-bridge-20261030/063ae6c47d2048d5a8e78111fc9484a9/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-board-vision-ubuntu-20261030.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-board-vision-20261030/06391079cfddb734-r3-ubuntu/startup/launcher.py --config /home/root/aura-board-vision-20261030/06391079cfddb734-r3-ubuntu/startup/config.json
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-xuefei-formal-20261030.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-character-xuefei-20261030/f94fca2c94288acb/startup/launcher.py --config /home/root/aura-character-xuefei-20261030/f94fca2c94288acb/startup/config.json
+TimeoutStartSec=180s
+
+# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-board-business-20261030.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/python3 -B /home/root/aura-board-business-20261030/production-5259eab11e42af13/startup/launcher.py --config /home/root/aura-board-business-20261030/production-5259eab11e42af13/startup/config.json
+TimeoutStartSec=180s
+Environment=PYTHONPATH=/home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura:/home/root/aura-board-owner-candidate-20261030/fft-ee19b936d17aa451/deps:/home/root/aura-board-owner-candidate-20261030/asr-1.13.8/deps:/home/root/aura-board-owner-candidate-20261030/webrtcvad-wheels-2.0.14-127741474d07c52f/deps
+Environment=OMP_NUM_THREADS=1
+Environment=OPENBLAS_NUM_THREADS=1
+Environment=MKL_NUM_THREADS=1
+Environment=PYTHONNOUSERSITE=1
+Environment=PYTHONDONTWRITEBYTECODE=1

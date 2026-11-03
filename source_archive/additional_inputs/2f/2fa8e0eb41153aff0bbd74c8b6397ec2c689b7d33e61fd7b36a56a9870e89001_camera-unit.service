@@ -1,0 +1,18 @@
+[Unit]
+Description=AURA shared USB camera preview and YOLOX person adapter
+After=local-fs.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -B /home/root/aura-enrollment-photos-20261019/candidate-6f1aa1842d53/runtime/aura/board/vision/ui_camera_service.py --config /home/root/aura-enrollment-photos-20261019/candidate-6f1aa1842d53/camera_live_config/board_camera_ui.json
+WorkingDirectory=/home/root/aura-enrollment-photos-20261019/candidate-6f1aa1842d53/runtime/aura
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=10
+KillMode=control-group
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

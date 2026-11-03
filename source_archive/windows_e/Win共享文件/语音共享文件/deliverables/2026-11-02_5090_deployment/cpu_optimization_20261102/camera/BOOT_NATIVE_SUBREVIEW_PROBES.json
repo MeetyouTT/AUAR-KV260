@@ -1,0 +1,63 @@
+{
+  "schema": "boot-native-subreview-targeted-probes-1",
+  "runtime_sha256": "15e4f53f981603dff3d10bb1c53272c479a9b97d557f539f8f9a31ffa6b601d7",
+  "rules_sha256": "72492c2d50c746b2f26b3292beff189bd76d7d39be04515baab13dbc881c7284",
+  "results": [
+    {
+      "case": "v2_old_checkpoint_marker_route_is_fixed",
+      "original_new_boot_loader_accepted": true,
+      "v2_pointer_accepted": true,
+      "current_counter_domain_primary": 0,
+      "archived_primary": 1000,
+      "checkpoint_specific_marker_preserved": true
+    },
+    {
+      "case": "unclean_boot_old_sealed_owner_differs_from_last_live_owner",
+      "original_loader_accepted": true,
+      "v2_rejected": "FINAL_POINTER_WRONG_PREDECESSOR",
+      "source_checkpoint_owner": {
+        "pid": 900,
+        "birth_ticks": "99",
+        "command_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "active_predecessor_last_live_owner": {
+        "pid": 901,
+        "birth_ticks": "100",
+        "command_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "interpretation": "Fail-closed cold coverage gap when shutdown produced no latest final; not an unsafe replay pass"
+    },
+    {
+      "case": "same_boot_handoff_mode_for_different_boot_gate",
+      "accepted": true,
+      "source_boot_fields_missing": true,
+      "interpretation": "Mode is not tied to source/current boot relation"
+    },
+    {
+      "case": "truncated_prior_history_passes_pointer_and_handoff_gate",
+      "original_immediate_source_loader_accepted": true,
+      "pointer_and_handoff_accepted": true,
+      "complete_history_adapter_or_current_bound_receipt_supplied": false,
+      "interpretation": "These metadata gates do not enforce the full accepted archive chain; no real startup/READY is claimed"
+    },
+    {
+      "case": "rebind_camera_samples_accepts_pending_stop",
+      "accepted": true,
+      "fake_samples": 2,
+      "unit_state": {
+        "ActiveState": "deactivating",
+        "SubState": "stop-sigterm",
+        "Job": "99 pending-stop"
+      },
+      "interpretation": "Stable PID/two advancing samples do not prove active/running/noJob during rebinding"
+    }
+  ],
+  "existing65_tests_rerun": false,
+  "existing16_tests_rerun": false,
+  "all_checkpoint_marker_archive_proc_service_http_IO_in_memory": true,
+  "board_or_original_runtime_executed": false,
+  "original_pure_new_boot_loader_AST_executed": true,
+  "native_context_or_aura_cdll_created": false,
+  "candidate_and_other_branch_files_modified": false,
+  "cross_dialogue_messages_sent": false
+}

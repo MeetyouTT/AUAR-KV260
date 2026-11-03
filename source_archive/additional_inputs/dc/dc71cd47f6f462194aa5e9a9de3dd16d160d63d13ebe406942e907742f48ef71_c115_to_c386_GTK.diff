@@ -1,0 +1,22 @@
+--- before
++++ current
+@@ -533,6 +533,9 @@
+         self.preview_box.set_size_request(left_width,video['preview']['height'])
+         overlay = gtk.Overlay()
+         self.preview_image = gtk.DrawingArea()
++        # The native ximagesink owns this surface; keep GTK painting out.
++        self.preview_image.set_app_paintable(True)
++        self.preview_image.set_double_buffered(False)
+         self.preview_image.set_size_request(video['preview']['image_width'],video['preview']['image_height'])
+         self.preview_image.set_halign(gtk.Align.CENTER)
+         self.preview_image.connect('map',self.attach_preview,'vision',video['preview']['image_width'],video['preview']['image_height'])
+@@ -1047,6 +1050,9 @@
+         content.set_border_width(8)
+         content.pack_start(self.Gtk.Label(label='摄像头实时画面'),False,False,0)
+         self.large_preview = self.Gtk.DrawingArea()
++        # The native ximagesink owns this surface; keep GTK painting out.
++        self.large_preview.set_app_paintable(True)
++        self.large_preview.set_double_buffered(False)
+         self.large_preview.set_size_request(587,440)
+         self.large_preview.set_halign(self.Gtk.Align.CENTER)
+         self.large_preview.connect('map',self.attach_preview,'large',587,440)

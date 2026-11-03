@@ -1,0 +1,15 @@
+# PROPOSAL ONLY. Review with the target systemd version before installation.
+[Unit]
+Description=Load the previously board-tested KV260 ZOCL module
+DefaultDependencies=no
+After=local-fs.target systemd-modules-load.service systemd-udevd.service systemd-udev-trigger.service
+Before=dfx-mgr.service
+ConditionPathExists=/usr/local/lib/kv260-runtime-repair/zocl.ko
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/lib/kv260-runtime-repair/load-repaired-zocl.sh
+
+[Install]
+WantedBy=multi-user.target

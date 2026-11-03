@@ -1,0 +1,53 @@
+--- r3/candidate/boot_recovery.py
++++ r4/candidate/boot_recovery.py
+@@ -550,6 +550,26 @@
+                 first = None
+             require(time.monotonic() < deadline, 'CAMERA_NOT_READY_NO_RESTART')
+             time.sleep(1)
++
++    def check_camera_live(self, expected_owner):
++        def lifecycle():
++            state = unit(CAMERA)
++            require(state['ActiveState'] == 'active' and state['SubState'] == 'running'
++                    and not state.get('Job') and state.get('ControlPID', '0') == '0'
++                    and state['MainPID'] == str(expected_owner['pid']), 'CAMERA_LIFECYCLE_CHANGED_NO_BINDING_OR_READY')
++            require(process(expected_owner['pid']) == expected_owner, 'CAMERA_OWNER_CHANGED_NO_BINDING_OR_READY')
++        lifecycle()
++        health = get_metadata(8790, '/health')
++        schedule = health.get('dpu_schedule') or {}
++        require(health.get('pid') == expected_owner['pid'] and health.get('board_boot_id') == self.boot
++                and health.get('motion_command_emitted') is False and health.get('identity', {}).get('ready') is True
++                and not any(health.get(key) for key in ('camera_error', 'detector_error', 'preview_error'))
++                and not health.get('identity', {}).get('error')
++                and schedule.get('native_critical') is True and schedule.get('native_abi') == 2
++                and schedule.get('owner_fenced') is False and schedule.get('quiesced') is False,
++                'CAMERA_NATIVE_STATE_CHANGED_NO_BINDING_OR_READY')
++        lifecycle()
++        return health
+ 
+     def bind_camera(self):
+         self.prepared()
+@@ -607,9 +627,11 @@
+                 and now['active_source_raw'] == prior_active_raw, 'SOURCE_CHANGED_BEFORE_BINDING_CAS')
+         original_verify(snapshot['aura'], candidate)
+         create(directory / 'active-source.before.json', prior_active_raw)
++        self.check_camera_live(current_owner)
+         replace_known(snapshot['ui_path'], snapshot['ui_raw'], new_ui)
+         replace_known(self.contract['startup_path'], snapshot['startup_raw'], new_startup)
+         require(process(current_owner['pid']) == current_owner, 'CAMERA_OWNER_CHANGED_AFTER_CAS')
++        self.check_camera_live(current_owner)
+         original_verify(snapshot['aura'], candidate)
+         active = dict(contract_sha256=self.contract_sha, startup_sha256=digest(new_startup), ui_sha256=digest(new_ui),
+                       selected_pin=selected_pin, selected_sources=candidate['source_sha256'],
+@@ -660,6 +682,11 @@
+         require(self.source_snapshot()['startup_raw'] == snapshot['startup_raw'], 'READY_SOURCE_CHANGED')
+         original_verify(snapshot['aura'], snapshot['selected'])
+         self.prepared()
++        final_gui = unit(GUI)
++        require(final_gui['MainPID'] == str(supervisor['pid']) and final_gui['ActiveState'] == 'active'
++                and final_gui['SubState'] == 'running' and not final_gui.get('Job')
++                and final_gui.get('ControlPID', '0') == '0', 'GUI_LIFECYCLE_CHANGED_BEFORE_READY')
++        self.check_camera_live(current_owner)
+         receipt = dict(schema='aura-boot-recovery-ready-1', status='GUI_SOFTWARE_READY_AXIS_OUTPUT_DISABLED',
+                        boot_id=self.boot, contract_sha256=self.contract_sha,
+                        startup_sha256=digest(snapshot['startup_raw']), camera_owner=current_owner,

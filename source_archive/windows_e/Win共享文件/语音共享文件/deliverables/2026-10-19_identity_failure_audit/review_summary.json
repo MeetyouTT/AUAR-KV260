@@ -1,0 +1,103 @@
+{
+  "date": "2026-10-19",
+  "status": "REVIEW_COMPLETED_REMEDIATIONS_PROPOSED_NOT_DEPLOYED",
+  "scope": "active face enrollment and identification pipeline, voice identity query and actual retained evidence",
+  "database": {
+    "identities": 1,
+    "templates": 1,
+    "revision": 15
+  },
+  "threshold": 0.8,
+  "ambiguity_margin": 0.1,
+  "findings": [
+    {
+      "id": "F1",
+      "priority": "P1",
+      "title": "0.80为未标定试用门槛，直接拒绝已确认本人的有效输入",
+      "file": "aura/board/identity/store.py",
+      "needle": "if not scored or scored[0][0] < self.threshold:",
+      "confirmed": true,
+      "evidence": [
+        "controlled_front_check.json",
+        "offline_dataset_audit.json"
+      ],
+      "line": 95,
+      "absolute_path": "E:/Win共享文件/语音共享文件/aura/board/identity/store.py",
+      "link": "[store.py](E:/Win共享文件/语音共享文件/aura/board/identity/store.py:95)"
+    },
+    {
+      "id": "F2",
+      "priority": "P1",
+      "title": "自然多帧登记最终仅存一个模板，未覆盖多种外观",
+      "file": "aura/board/identity/store.py",
+      "needle": "PRIMARY KEY(identity_id, model_id)",
+      "confirmed": true,
+      "evidence": [
+        "active_runtime.json",
+        "offline_dataset_audit.json"
+      ],
+      "line": 45,
+      "absolute_path": "E:/Win共享文件/语音共享文件/aura/board/identity/store.py",
+      "link": "[store.py](E:/Win共享文件/语音共享文件/aura/board/identity/store.py:45)"
+    },
+    {
+      "id": "F3",
+      "priority": "P2",
+      "title": "独立帧验证限于同一短视频，没有跨场景或负样本验收",
+      "file": "aura/board/identity/sampling.py",
+      "needle": "self.stage = 'ready'; self.until",
+      "confirmed": true,
+      "evidence": [
+        "offline_dataset_audit.json",
+        "controlled_front_check.json"
+      ],
+      "line": 199,
+      "absolute_path": "E:/Win共享文件/语音共享文件/aura/board/identity/sampling.py",
+      "link": "[sampling.py](E:/Win共享文件/语音共享文件/aura/board/identity/sampling.py:199)"
+    },
+    {
+      "id": "F4",
+      "priority": "P2",
+      "title": "人脸检测额外后等待降低吞吐，丢检即撤销目标和结果",
+      "file": "aura/board/identity/face_targets.py",
+      "needle": "self.process(packet,detector);next_at=time.monotonic()+self.interval/1000",
+      "confirmed": true,
+      "evidence": [
+        "passive_pipeline.json",
+        "controlled_front_check.json"
+      ],
+      "line": 121,
+      "absolute_path": "E:/Win共享文件/语音共享文件/aura/board/identity/face_targets.py",
+      "link": "[face_targets.py](E:/Win共享文件/语音共享文件/aura/board/identity/face_targets.py:121)"
+    },
+    {
+      "id": "F5",
+      "priority": "P2",
+      "title": "低相似度被显示为未登记，且关键故障证据未保留",
+      "file": "aura/board/identity/live.py",
+      "needle": "else '未登记 / UNKNOWN'",
+      "confirmed": true,
+      "evidence": [
+        "active_runtime.json",
+        "controlled_front_check.json"
+      ],
+      "line": 126,
+      "absolute_path": "E:/Win共享文件/语音共享文件/aura/board/identity/live.py",
+      "link": "[live.py](E:/Win共享文件/语音共享文件/aura/board/identity/live.py:126)"
+    }
+  ],
+  "direct_rejection_cause_confirmed": "fresh known-positive scores 0.620695–0.643428 are below 0.80",
+  "exact_image_cause_of_cross_session_score_drop_confirmed": false,
+  "official_alignment_math_bug_reproduced": false,
+  "rgb_channel_or_cpu_backend_mismatch_reproduced": false,
+  "one_template_per_identity_confirmed": true,
+  "negative_person_test_count": 0,
+  "controlled_frontal_test_passed": false,
+  "photo_and_template_consistency_passed": true,
+  "native_opencv_vs_windows_features_equivalent_on_three_actual_pngs": true,
+  "official_formula_vs_custom_alignment_pixel_identical_on_five_public_cases": true,
+  "model_replacement_or_threshold_reduction_authorized_by_this_review": false,
+  "production_sources_models_config_or_db_modified": false,
+  "new_current_photos_saved": false,
+  "end_of_review_runtime_unchanged_verified": true
+}

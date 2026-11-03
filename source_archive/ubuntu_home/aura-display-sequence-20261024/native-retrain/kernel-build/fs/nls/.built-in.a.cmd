@@ -1,0 +1,1 @@
+cmd_fs/nls/built-in.a := echo >/dev/null; rm -f fs/nls/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST fs/nls/built-in.a fs/nls/nls_base.o fs/nls/nls_cp437.o fs/nls/nls_iso8859-1.o

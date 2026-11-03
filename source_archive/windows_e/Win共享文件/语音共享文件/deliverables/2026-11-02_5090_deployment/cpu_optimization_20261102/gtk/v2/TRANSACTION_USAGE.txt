@@ -1,0 +1,43 @@
+两组件发布/回滚事务模板，仅供root审查；本代理没有执行。
+
+文件
+transaction_preview_projection.py：Linux/board端模板，默认dry-run；只有--apply会写。
+transaction_payload.json：仅两项已审候选源码的base64和原/新SHA。
+TRANSACTION_REVIEW.json：脚本/payload SHA、静态检查和完整mutation列表。
+transaction_expected.EXAMPLE.json：故意无效的输入示例，不能直接执行。
+
+执行前提
+所有设备写者已正式交回/冻结给root。当前用户另窗口优先恢复/登记，不能因本模板存在而执行。模板不发服务start/stop、GUI页面、相机、模型、录音、转轴或MMIO命令。
+需要fresh expected：本boot UUID、actual startup绝对路径和字节SHA、当前camera完整PID/birth/cmd SHA、已正常停止GUI的supervisor/GTK前owner指纹、两项实际源码和已审ui_contract SHA、当前pan组件全部pins、当前controller25项及deployment-manifest/原context/direction/human/固件manifest/zone/manual-release的绝对路径SHA、实际选用readback SHA与精确source_count。
+不固定旧boot903c、新boota6d4、任何PID、1177/680/9a9a startup或25/26个readback来源；所有这些都从root fresh expected核。controller本身仍要求原25项清单。
+原380组件必须逐项匹配，两个安装目标必须为原b55ee2…/6e697c…，ui_contract必须为已审7f67e4…；其它合法voice/clock/pan变更由当前startup和当前全源校验承接，模板不会恢复旧startup。
+
+输入与调用
+可在严格SSH stdin脚本前缀注入EXPECTED字典与PAYLOAD_BASE64（整个transaction_payload.json的base64），或用--expected/--payload指向root已准备的板端公开元数据文件；不得把密码或私库正文放入expected。
+公共参数：
+  --payload-sha256 <TRANSACTION_REVIEW中的payload_sha256>
+  --transaction <fresh transaction_root下面的全新唯一叶目录>
+默认不加--apply，只读验证并输出DRY_RUN_READY。安装明确加--apply；回滚增加--action rollback --rollback-id <新的唯一标识>，同样只有加--apply才执行。
+建议先dry-run，再以相同expected显式apply；apply会再次完整复核，不把dry-run当未来授权或未来状态保证。
+事务root必须是已存在、非symlink、root专用目录。安装叶目录必须不存在；不重试同一TX。回滚读取原TX的plan/原源码backup，再新建TX/rollback-<id>，保留每次意图与备份。
+
+selected readback边界
+真实选用路径与SHA来自当前UI配置，全部source_sha256逐项核对并核当前camera owner。若其来源map包含任一将修改源码或startup，明确HOLD_SELECTED_READBACK_PINS_MODIFIED_COMPONENT，模板不会改binding或跳过验证。root需要先设计按真实依赖重制的新binding事务，不能用本模板偷改来源。
+source_count与fresh expected精确相等，既接受26来源，也接受后来合法的新数量；不盲套旧25来源。
+
+写入行为
+仅替换两个Python文件，以及从当前startup字典只改对应两项component pins后原子替换startup。
+写前在专用TX以O_EXCL/NOFOLLOW保存intent、plan、两个源码与startup原字节、startup.after；每文件和目录fsync。
+通过startup父目录的协作flock拒绝其他同协议发布者；每阶段重复核boot、相机owner、GUI正常inactive/dead/MainPID0/noJob/success、380组件内容+inode/mtime、所有pan及selected来源；每目标替换前后都有已知字节和身份CAS。
+每个目标父目录创建唯一O_EXCL stage，fsync后os.replace并fsync目录；原始备份永不删除。任一冲突HOLD，无自动重试或自动回滚。
+
+并发说明
+这不是跨三个文件的内核原子事务。POSIX的检查后rename无法防止不合作写者恰在最后间隙写入，所以root的正式写权冻结是必要条件；flock和重复CAS用于拒绝观察到的冲突。不能靠模板替代跨窗口协调。
+
+回滚
+只接受目标实际源码和当前两pin属于原/新已知集合；未知字节HOLD，不覆盖后来另一版源码。支持已知的部分发布状态。
+回滚从当前fresh startup构造只回两pin的新字节，保留后来合法voice、clock、pan及所有其它字段。它不会整份恢复历史startup。除两目标之外的378项仍须与当前完整pins匹配。
+完成后新startup两pin与源码一致，receipt说明preflight是否为已知部分状态。失败时保留TX，root先只读核实际结果，不能盲目重发。
+
+校验范围
+仅做本地AST/语法/小型纯函数检查。没有导入运行该事务main，没有连接板卡或运行任何设备/负载。正式使用前请root/validator复核TRANSACTION_REVIEW和脚本。

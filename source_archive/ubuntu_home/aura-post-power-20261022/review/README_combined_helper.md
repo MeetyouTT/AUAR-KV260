@@ -1,0 +1,13 @@
+# 组合1ms短helper准入审查
+
+**v3准入通过**：`board_postpower_combined_live_v3_20261022.py` SHA `261f76c0927a3a126c6ceb24749dd162a76803ae8d2b085cd1cad319e16bdf03`。这是仅限隔离120秒试验的结构审查，不是实板实验通过，也不是永久部署批准。
+
+原2e8756f0版存在fake82直接路径布局阻塞：actual源码在folder/aura，light/service测试却直接读folder/candidate/aura。root已在v3增加四份源码的字节同一fixture复制并逐SHA检查；baseline仍为folder/baseline/aura原d03e。bootstrap先fixture再actual依赖的路径可满足全部测试，fixture不复制模型；实际fake82仍将在切服务前运行。
+
+v3四源payload及五份测试共9份字节/源码SHA和82定稿逐一一致，wrapper SHA匹配。factory显式双True，进程wrapper请求1ms并验证previous5ms；boot7924…/USB devnum3保持。板端保存的light2成本已通过且四源针脚全部匹配；root也已将四源匹配写入前置。
+
+native_failed只允许由明确withdrawn_after_slot解释；payload runtime只有native前pre_execute AdmissionCancelled可打native_not_submitted标记，真正execute异常及非零status不增加withdrawn。diagnostic_errors必须0，hardcap/guard fault和原调度overrun也都拒绝；未隐藏native/API失败。
+
+时效门检查light2 collecting、observer/process/callback错误0、无效源/源时钟对拒绝/饱和0、空窗摘要非空、记录gap0及稀疏健康年龄未过TTL。不能把“无记录gap”扩大成未覆盖头尾或所有瞬间的硬实时保证。恢复finalizer与a439 AST完全相同，未修改原生产源。
+
+审查只做AST、payload解码后SHA/语法和已有本机保存成本报告核对；未导入/运行helper或builder，未重跑82或接板。原2e875的阻塞报告保留为历史，v3通过报告单独为combined-helper-v3-structure-review.json。

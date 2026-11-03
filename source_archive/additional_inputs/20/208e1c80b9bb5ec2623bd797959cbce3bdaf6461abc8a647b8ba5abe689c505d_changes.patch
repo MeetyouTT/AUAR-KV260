@@ -1,0 +1,283 @@
+--- a/aura/tools/formal_native_yuki.py
++++ b/aura/tools/formal_native_yuki.py
+@@ -37,10 +37,11 @@
+             raise PairRejected('Restore the whole idle renderer/persona bundle to roll back')
+         return dict(enabled=True)
+ 
+-    def offer(self, core, now, gain, level, audio_sample, track):
++    def offer(self, core, now, gain, level, audio_sample, track, *, waiting_for_answer=False):
+         value = None
+         if core.talk_gen >= self._minimum_generation:
+-            value = super().offer(core, now, gain, level, audio_sample, track)
++            value = super().offer(core, now, gain, level, audio_sample, track,
++                                  waiting_for_answer=waiting_for_answer)
+         if value is None:
+             # Never None: the current RealtimeController would otherwise run
+             # old display_frame/PNG paths when a GL widget is not ready.
+--- a/aura/tools/formal_yuki.py
++++ b/aura/tools/formal_yuki.py
+@@ -248,8 +248,24 @@
+         def __init__(self, *args, **kwargs):
+             self.stream = None
+             self.completed_streams = []
++            self.transcription_waiting = False
+             init(self, *args, **kwargs)
+-    # channel_event/tick/completion/pause/cancel are inherited byte-for-byte.
++        def cancel(self):
++            self.transcription_waiting = False
++            return super().cancel()
++        def portrait_frame(self, now, gain, level):
++            # No fallback to a guessed answer track or legacy PNG rendering.
++            snapshot = self.output.read()
++            track = snapshot.get('track')
++            if track not in ('answer', 'feedback'):track = 'none'
++            waiting = (self.transcription_waiting or self.stream is not None or
++                       self.phase in ('DIALOGUE_WAITING', 'VOICE_PREPARING', 'VOICE_STARTING', 'ACTION'))
++            meta = self.portrait_offload.offer(self.core, now, gain, level,
++                round(self.output.position()*24000), track, waiting_for_answer=waiting)
++            if meta is None or meta.get('_portrait_wait'):
++                return self.last_meta, True, False
++            return meta, True, meta['_portrait_burst']
++    # channel_event/tick/completion/pause and every audio/ACK owner stay inherited.
+     return NativeStreamingController
+ 
+ 
+@@ -340,7 +356,18 @@
+             return super().handsfree_toggle()
+         def _queue_transcription(self):
+             pair.require_ready()
+-            return super()._queue_transcription()
++            result = super()._queue_transcription()
++            self._sync_avatar_waiting()
++            return result
++        def _poll_transcription(self):
++            result = super()._poll_transcription()
++            self._sync_avatar_waiting()
++            return result
++        def _sync_avatar_waiting(self):
++            # Existing job states cover the ASR interval before channel start.
++            # This is display-only; no FSM, admission, capture or job mutation.
++            self.controller.transcription_waiting = self.transcription.get('state') in (
++                'TRANSCRIBING', 'GENERATING', 'PLAYING')
+         def submit(self, text, *args, **kwargs):
+             pair.require_ready()
+             # Old cached introductions must never be relabelled as Yuki. New
+--- a/aura/tools/native_yuki.py
++++ b/aura/tools/native_yuki.py
+@@ -12,6 +12,12 @@
+ import time
+ import uuid
+ 
++EXPRESSION_MASK = 0xff
++EYES_AUTHORED = 0
++EYES_THINKING_CLOSED = 0x100
++EYES_ANSWER_OPEN = 0x200
++FACIAL_CONTROL_FEATURE = 1
++
+ class Control(C.Structure):
+     _fields_=[('owner',C.c_uint64),('sequence',C.c_uint64),('audio_sample',C.c_uint64),
+       ('sample_rate',C.c_uint32),('track',C.c_uint32),('playing',C.c_uint32),('paused',C.c_uint32),
+@@ -24,6 +30,11 @@
+ class Native:
+     def __init__(self,library,model,resx,resource_root,seed=1):
+         self.api=C.CDLL(str(library));self.ptr=None
++        features=getattr(self.api,'yuki_control_features',None)
++        if features is None:raise RuntimeError('Native Yuki library lacks dialogue facial controls')
++        features.restype=C.c_uint32;features.argtypes=[]
++        if features() & FACIAL_CONTROL_FEATURE != FACIAL_CONTROL_FEATURE:
++            raise RuntimeError('Native Yuki dialogue facial controls are incompatible')
+         declarations={
+           'create':(C.c_void_p,[C.c_char_p,C.c_char_p,C.c_char_p,C.c_uint32]),
+           'error':(C.c_char_p,[C.c_void_p]),'control':(C.c_int,[C.c_void_p,C.POINTER(Control)]),
+@@ -34,15 +45,18 @@
+         self.ptr=self.api.yuki_create(*(str(p).encode() for p in (model,resx,resource_root)),seed)
+         if not self.ptr:raise RuntimeError(self.error())
+         self.stats=Stats()
+-        self.pose=self.expression=0
++        self.pose=self.expression=self.eye_policy=0
+     def error(self):return self.api.yuki_error(self.ptr).decode(errors='replace')
+     def offer(self,value):
+         accepted=bool(self.api.yuki_control(self.ptr,C.byref(value)))
+-        if accepted:self.pose=int(value.pose);self.expression=int(value.expression)
++        if accepted:
++            self.pose=int(value.pose);self.expression=int(value.expression)&EXPRESSION_MASK
++            self.eye_policy=int(value.expression)&~EXPRESSION_MASK
+         return accepted
+     def render(self,now,width,height):
+         if not self.api.yuki_render(self.ptr,now,width,height,C.byref(self.stats)):raise RuntimeError(self.error())
+-        return dict({name:getattr(self.stats,name) for name,_ in self.stats._fields_},model_pose=self.pose,model_expression=self.expression)
++        return dict({name:getattr(self.stats,name) for name,_ in self.stats._fields_},
++                    model_pose=self.pose,model_expression=self.expression,model_eye_policy=self.eye_policy)
+     def capture(self,path,width,height):
+         if not self.api.yuki_capture(self.ptr,str(path).encode(),width,height):raise RuntimeError(self.error())
+     def close(self):
+@@ -81,29 +95,42 @@
+     def set_pose(self,pose):
+         if type(pose)is not int or pose not in (0,1):raise ValueError('Unsupported Yuki pose')
+         with self.lock:self.pose=pose
+-    def offer(self,core,now,gain,level,audio_sample,track):
++    def offer(self,core,now,gain,level,audio_sample,track,*,waiting_for_answer=False):
+         if not all(math.isfinite(float(v)) for v in (now,gain,level)):raise ValueError('Nonfinite avatar control')
+         if track not in ('none','answer','feedback')or type(audio_sample)is not int or audio_sample<0:raise ValueError('Invalid audio clock')
++        if type(waiting_for_answer)is not bool:raise ValueError('Expected an explicit waiting boolean')
++        snapshot=self.output.read()
++        actual_track=snapshot.get('track')
++        if actual_track not in ('answer','feedback'):actual_track='none'
+         with self.lock:
+             if self.closed or not self.enabled or not self.ready:return None
+-            identity=(core.talk_gen,track)
++            identity=(core.talk_gen,actual_track)
+             if self.identity and core.talk_gen<self.identity[0]:return None
+             if identity!=self.identity:self.identity=identity;self.owner+=1
+             if self.pending is not None:self.dropped+=1
+             self.sequence+=1;self.offered+=1
+             paused=bool(getattr(self.output,'paused',False))
+-            playing=bool(self.output.active and getattr(self.output,'ready',True) and not paused and track!='none')
++            # ready survives PCM gaps; active is also true before the first
++            # sample. Only the sink's current answer interval may speak.
++            playing=bool(self.output.active and snapshot.get('ready') is True and not paused
++                         and snapshot.get('audible') is True and actual_track==track=='answer'
++                         and not snapshot.get('done') and not snapshot.get('error'))
+             expression=self.expression_override if self.expression_override is not None else self.EMOTION.get(core.emotion,0)
+             state=core.fsm.state.label
+             if self.state_key!=(core.talk_gen,state):self.state_key=(core.talk_gen,state);self.state_at=now;self.completed_state=None
+             if self.expression_override is None and state=='PUZZLED':expression=4
+-            self.pending=Control(self.owner,self.sequence,audio_sample,24000,('none','answer','feedback').index(track),
+-              playing,paused,expression,self.pose,max(0,min(1,float(gain))),max(0,min(1,float(level))),self.clock())
++            waiting=waiting_for_answer or state=='THINKING' or self.output.active
++            eye_policy=EYES_ANSWER_OPEN if playing else EYES_THINKING_CLOSED if waiting else EYES_AUTHORED
++            safe_gain=max(0,min(1,float(gain))) if playing else 0.
++            safe_level=max(0,min(1,float(level))) if playing else 0.
++            self.pending=Control(self.owner,self.sequence,audio_sample,24000,('none','answer','feedback').index(actual_track),
++              playing,paused,expression|eye_policy,self.pose,safe_gain,safe_level,self.clock())
+             finished=state in ('ACK_NOD','DENY_SHAKE','AWAKE') and now-self.state_at>=.8 and self.completed_state!=self.state_key
+             if finished:self.completed_state=self.state_key
+             return dict(asset='yuki/native',index=self.sequence,display_state=state,target_state=state,
+               transitioning=False,mouth_level=round(max(0,min(1,float(level)))*5) if playing else 0,
+-              speech_gain=float(gain) if playing else 0,_portrait_burst=finished,_native_yuki=True)
++              speech_gain=float(gain) if playing else 0,eye_policy=eye_policy,answer_audible=playing,
++              _portrait_burst=finished,_native_yuki=True)
+     def consume(self):
+         with self.lock:value=self.pending;self.pending=None;return value
+     def reset_local_if_needed(self,core):pass
+--- a/native/yuki_host.cpp
++++ b/native/yuki_host.cpp
+@@ -29,6 +29,7 @@
+  std::unique_ptr<PlaybackInstance> instance;
+  std::unique_ptr<aura_yuki::Renderer> renderer;
+  std::array<ParamId,4> face{};ParamId talk{},arm{};
++ VariableSourceId facial_source{};
+  std::array<TimelineId,2> idle{};
+  YukiControl control{};YukiStats stats{};
+  std::uint32_t expression=UINT32_MAX,pose=UINT32_MAX;
+@@ -38,9 +39,14 @@
+   asset_io::ImportOptions options;options.json_path=model;options.resx_path=resx;options.resource_root=root;
+   auto imported=asset_io::import_emote(options);
+   if(!imported.ok){std::string e="EMS import failed";for(auto& v:imported.report.errors)e+="\n"+v;throw std::runtime_error(e);}
+-  auto compiled=compile_playback(imported.asset,PhysicsMode::Enabled);
++  const std::array<VariableSourceDefinition,1> sources{{
++   {"aura_dialogue_face",{"face_eye_open","face_talk","face_mouth"}}
++  }};
++  auto compiled=compile_playback(imported.asset,PhysicsMode::Enabled,sources);
+   if(!compiled.program){std::string e="Playback compile failed";for(auto& v:compiled.errors)e+="\n"+v;throw std::runtime_error(e);}
+   program=std::move(compiled.program);const auto& scene=program->scene();
++  facial_source=program->animation().find_variable_source("aura_dialogue_face");
++  if(!facial_source.valid())throw std::runtime_error("Yuki dialogue facial source missing");
+   const std::array<const char*,4> names{"face_eyebrow","face_mouth","face_eye_open","face_cheek"};
+   for(std::size_t i=0;i<names.size();++i){face[i]=scene.find_variable(names[i]);if(!face[i].valid())throw std::runtime_error("Required Yuki face parameter missing");}
+   talk=scene.find_variable("face_talk");arm=scene.find_variable("arm_type");
+@@ -57,11 +63,36 @@
+  }
+  void controls(bool initial=false){
+   if(pose!=control.pose){pose=control.pose;checked(instance->play(idle[pose],TimelinePlayMode::Replace));checked(instance->transition(arm,float(pose),0));}
+-  if(expression!=control.expression){expression=control.expression;for(std::size_t i=0;i<face.size();++i)checked(instance->transition(face[i],faces[expression][i],initial?0:6));}
++  const auto selected=control.expression&YUKI_EXPRESSION_MASK;
++  if(expression!=selected){expression=selected;for(std::size_t i=0;i<face.size();++i)checked(instance->transition(face[i],faces[expression][i],initial?0:6));}
++ }
++ bool answer_live() const noexcept {
++  return control.playing&&!control.paused&&control.track==1&&
++   (control.expression&YUKI_EYES_MASK)!=YUKI_EYES_THINKING_CLOSED&&control_age>=0&&control_age<=.150;
++ }
++ void apply_facials(){
++  const bool live=answer_live();
++  if(!live)mouth=0;
++  auto policy=control.expression&YUKI_EYES_MASK;
++  if(policy==YUKI_EYES_ANSWER_OPEN&&!live)policy=YUKI_EYES_THINKING_CLOSED;
++  const bool closed=policy==YUKI_EYES_THINKING_CLOSED;
++  const std::array<ParamId,3> ids{face[2],talk,face[1]};
++  const std::array<bool,3> override{policy!=YUKI_EYES_AUTHORED,true,closed};
++  const std::array<float,3> targets{closed?10.f:0.f,float(mouth),0.f};
++  std::array<float,3> observed{};
++  for(const auto p:instance->values())for(std::size_t i=0;i<ids.size();++i)if(p.id==ids[i])observed[i]=p.value;
++  // Add a final numeric difference after authored animation/blinking. Remove
++  // our previous difference first: no accumulated drift and no core changes.
++  // Three fixed parameters, no steady allocation, I/O, timer or extra tick.
++  for(std::size_t i=0;i<ids.size();++i){
++   const float previous=instance->difference_value(facial_source,ids[i]);
++   const float difference=override[i]?targets[i]-(observed[i]-previous):0.f;
++   if(previous!=difference)checked(instance->transition_difference(facial_source,ids[i],difference));
++  }
+  }
+  static PlaybackStatus author(void* pointer,std::uint64_t) noexcept {
+   auto& h=*static_cast<Host*>(pointer);
+-  const bool live=h.control.playing&&!h.control.paused&&h.control.track!=0&&h.control_age>=0&&h.control_age<=.150;
++  const bool live=h.answer_live();
+   const double target=live?std::clamp(double(h.control.gain*h.control.level),0.0,1.0)*5.0:0.0;
+   // Audio cancellation must close in the next author tick, independently of smoothing.
+   if(!live)h.mouth=0;else h.mouth+=(target-h.mouth)*(1-std::exp(-1.0/(60*.045)));
+@@ -75,6 +106,7 @@
+   control_age=now-control.captured_at;if(control_age<0||control_age>.150)++stats.stale_frames;
+   controls();
+   checked(instance->advance(elapsed,{},AuthorTickHandler{this,author}));
++  apply_facials();
+   // A zero-step first frame still has a prepared state from construction.
+   checked(instance->prepare_frame());
+   const auto evaluated=Clock::now();constexpr double view_top=-3500.0,view_bottom=-2090.0,view_center_x=-50.0;
+@@ -90,6 +122,7 @@
+ };
+ }
+ extern "C" {
++std::uint32_t yuki_control_features(void){return YUKI_FEATURE_DIALOGUE_FACIALS;}
+ void* yuki_create(const char* model,const char* resx,const char* root,std::uint32_t seed){
+  try{create_error.clear();if(!model||!resx||!root)throw std::runtime_error("Null asset path");return new Host(model,resx,root,seed);}
+  catch(const std::exception& e){create_error=e.what();return nullptr;}
+@@ -98,7 +131,10 @@
+ int yuki_control(void* ptr,const YukiControl* value){
+  if(!ptr||!value)return 0;
+  auto& h=*static_cast<Host*>(ptr);const auto& c=*value;
+- const bool valid=c.owner>0&&c.sequence>0&&c.sample_rate==24000&&c.track<=2&&c.playing<=1&&c.paused<=1&&c.expression<6&&c.pose<2&&
++ const auto eye_policy=c.expression&YUKI_EYES_MASK;
++ const bool valid=c.owner>0&&c.sequence>0&&c.sample_rate==24000&&c.track<=2&&c.playing<=1&&c.paused<=1&&
++  (c.expression&YUKI_EXPRESSION_MASK)<6&&(c.expression&~(YUKI_EXPRESSION_MASK|YUKI_EYES_MASK))==0&&
++  eye_policy!=YUKI_EYES_MASK&&c.pose<2&&
+   std::isfinite(c.gain)&&c.gain>=0&&c.gain<=1&&std::isfinite(c.level)&&c.level>=0&&c.level<=1&&std::isfinite(c.captured_at)&&c.captured_at>=0;
+  const bool same=c.owner==h.control.owner;
+  if(h.failed||!valid||c.owner<h.control.owner||(same&&c.sequence<=h.control.sequence)||
+--- a/native/yuki_host.h
++++ b/native/yuki_host.h
+@@ -4,6 +4,14 @@
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
++enum {
++ YUKI_EXPRESSION_MASK=0xff,
++ YUKI_EYES_AUTHORED=0,
++ YUKI_EYES_THINKING_CLOSED=0x100,
++ YUKI_EYES_ANSWER_OPEN=0x200,
++ YUKI_EYES_MASK=0x300,
++ YUKI_FEATURE_DIALOGUE_FACIALS=1
++};
+ typedef struct {
+  uint64_t owner,sequence,audio_sample;
+  uint32_t sample_rate,track,playing,paused,expression,pose;
+@@ -14,6 +22,10 @@
+  uint64_t frames,author_ticks,owner,sequence,audio_sample,rejected_controls,stale_frames;
+  double evaluate_ms,submit_ms,mouth,eye,elapsed_dropped_seconds;
+ } YukiStats;
++// The binary struct layouts stay unchanged. expression's low byte is the
++// original six-way expression; its eye-policy bits are the enum above.
++// A new adapter requires this capability before creating a native instance.
++uint32_t yuki_control_features(void);
+ // All API calls, including destroy, require the owning GTK/GL thread and context.
+ void* yuki_create(const char* model,const char* resx,const char* resource_root,uint32_t seed);
+ const char* yuki_error(void*);

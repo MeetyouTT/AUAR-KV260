@@ -1,0 +1,56 @@
+{
+  "schema": "aura.memory-observation-candidate-handoff.v2",
+  "status": "R2_SOURCE_AND_SYNTHETIC_PASS_NOT_DEPLOYED",
+  "created_utc": "2026-10-31T15:45:12.327822+00:00",
+  "supersedes_unsafe_b32_candidate": true,
+  "unsafe_prior_after_sha256": "b32b5b5efbc46d1b039d3cbc8d76b1fcd01a3009a43249cc16c5a73328f096f1",
+  "source_component_path": "board/runtime/board_memory_policy.py",
+  "before": {
+    "path": "before/board/runtime/board_memory_policy.py",
+    "sha256": "6050ed5e4dcfeb456c5d0969e257f624552f80ff722b3c3999a573f86cd933c2",
+    "bytes": 34811
+  },
+  "after": {
+    "path": "after/board/runtime/board_memory_policy.py",
+    "sha256": "410e5b3eaf7986be6baa68d148469eb33443654ed0db597004518877732533c5",
+    "bytes": 36376
+  },
+  "patch": {
+    "path": "candidate.patch",
+    "sha256": "91d44e2f27ef583760b2177d41fc510361649afa5a0770cd11a8c23cb99efeb5",
+    "bytes": 3721
+  },
+  "source_check": {
+    "path": "SOURCE_CHECK.json",
+    "sha256": "a9c79443419ed15b349568bb642c6dea40ccb495c8bd9865dc2cd6f7ce902bc8",
+    "bytes": 656
+  },
+  "test": {
+    "path": "tests/test_observation_origin.py",
+    "sha256": "9684b1f474f488b7b89dfaa7c135be3c7e10667d82c0548309c6d6f8332babf5",
+    "bytes": 18822
+  },
+  "test_result": {
+    "path": "TEST_RESULT.json",
+    "sha256": "43045658411666f9b1a09957c30a479cde9ae33df004ceeb8173370c29b4a254",
+    "bytes": 506
+  },
+  "counterexample": {
+    "path": "B32_COUNTEREXAMPLE.json",
+    "sha256": "3a8593faaf8e0d962aea377ff8f7c49d62d357dd86be9607f6f2f868a839f0c8",
+    "bytes": 474
+  },
+  "initial_non_reducing_attempt": {
+    "path": "B32_ATTEMPT_NO_REDUCTION.json",
+    "sha256": "257c3de1ef80a12f73d3947dc1d49f1ae8e9a0aa58d1733a7cd518b26eda2f5d",
+    "bytes": 362
+  },
+  "initial_attempt_is_not_the_confirmed_counterexample": true,
+  "explanation": "B32 board labels reentered reduction and could satisfy an unrelated protected name. R2 keeps evidence only as typed metadata during fragment validation, feeds no board labels to inference, validates the final untouched narrative against all original non-evidence protections, then adds origin once and invokes the unchanged complete Store validation.",
+  "source_files_changed": 1,
+  "labels_enter_partial_or_reduction_text": false,
+  "final_origin_counts_toward_existing_budget": true,
+  "real_model_or_hardware_or_private_database_actions": false,
+  "all_prior_discarded_same_cause_claimed": false,
+  "semantic_losslessness_guaranteed": false
+}

@@ -1,0 +1,74 @@
+--- previous/tools/board_avatar_gtk.py
++++ candidate/tools/board_avatar_gtk.py
+@@ -18,6 +18,32 @@
+     sys.path.insert(0, str(AURA))
+ DEFAULT_ROOT = AURA.parent / 'deliverables/2026-10-06_xilan_live'
+ DEFAULT_CONFIG = AURA / 'config/board_avatar_gtk.json'
++
++
++def voice_host_display(state, modules, fixture=False):
++    """Configuration is not a live health result; never infer READY from it."""
++    from board.interaction.ui_contract import display_state
++    service=state.get('local_transcription',{}).get('service',{})
++    if fixture or not service:
++        code=modules.get('host',{}).get('state')
++        return display_state('host',code),code
++    if not service.get('enabled'):return '未启用','DISABLED'
++    if state.get('local_transcription',{}).get('state')=='ERROR':return '请求失败','FAILED'
++    if service.get('feedback_error'):return '准备未完成','DEGRADED'
++    return '已配置','CONFIGURED'
++
++
++def avatar_rate_text(state):
++    """Use native handoff measurements, never the GTK label refresh interval."""
++    import math
++    display=state.get('avatar_display',{})
++    if display.get('kind')!='native_sink_handoff':return '画面速率待确认'
++    fps,age=display.get('fps'),display.get('age_ms')
++    if (isinstance(fps,bool) or not isinstance(fps,(int,float)) or not math.isfinite(fps)
++            or not 0<=fps<=240 or isinstance(age,bool) or not isinstance(age,(int,float))
++            or not math.isfinite(age) or age<0):return '画面速率待确认'
++    if age>=1000 or fps==0:return '画面待更新'
++    return '画面 '+format(fps,'.1f')+'fps'
+ 
+ 
+ def create_runtime_core(factory):
+@@ -1029,7 +1055,7 @@
+         elif automatic.get('error'): status = '对话已暂停，请检查后重新开始'
+         if handsfree:
+             hf_state=handsfree.get('state')
+-            if not handsfree.get('enabled'):status='免点击对话已暂停，麦克风已关闭'
++            if not handsfree.get('enabled') and not local_busy and not local_recording_active and transcription.get('state')!='TRANSCRIBING':status='免点击对话已暂停，麦克风已关闭'
+             elif hf_state=='WAITING_PERSON':status='正对汐蓝，开口就能聊'
+             elif hf_state=='WAITING_SPEECH':status='看见你了，正在等你开口…'
+             elif hf_state=='CHECKING_SPEECH':status='正在听清你的话…'
+@@ -1056,7 +1082,7 @@
+         self.insight_labels['target'].set_text(target_text)
+         self.insight_labels['identity'].set_text(identity_text)
+         self.insight_labels['identity'].set_tooltip_text(identity.get('detail', '身份服务尚未接入'))
+-        transcript = transcription.get('text') or interaction.get('transcript') or '等待你的声音…'
++        transcript = transcription.get('text') or interaction.get('transcript') or ('麦克风已关闭，恢复免点击后再说话。' if handsfree and not handsfree.get('enabled') else '等待你的声音…')
+         if local_recording_active:transcript = '正在聆听…'
+         elif transcription.get('state') == 'CANCELLED':transcript = '本轮已取消。'
+         elif transcription.get('state') == 'TRANSCRIBING':transcript = '正在识别这段录音…'
+@@ -1151,6 +1177,7 @@
+              if image and people is not None else '等待新鲜画面与检测结果。'))
+         values = {key:(display_state(key,modules.get(key,{}).get('state')), modules.get(key,{}).get('state'))
+                   for key in ('camera','vision','target','identity','motion','host','audio')}
++        values['host'] = voice_host_display(state,modules,fixture)
+         if not modules.get('camera') and self.device_inventory['camera_present']:
+             values['camera'] = ('已枚举','UNKNOWN')
+         if not audio and state['ui_settings']['available']:
+@@ -1190,11 +1217,9 @@
+                               '操作结果待确认' if result.get('outcome') == 'UNKNOWN' else
+                               result.get('detail') or '请求未被接受')
+                 self.toast_until = time.monotonic()+3
+-        recent = [row['interval_ms'] for row in list(self.samples)[-8:] if row['interval_ms']]
+-        fps = round(1000/(sum(recent)/len(recent)),1) if recent else 0
+         footer = ('相机 '+values['camera'][0]+'   DPU '+STATE_TEXT.get(modules.get('npu',{}).get('state'),'待接入')+
+                   '   PL '+STATE_TEXT.get(modules.get('pl',{}).get('state'),'待接入')+'   '+settings_text+'   LAN '+values['network'][0]+
+-                  '   保存 本地   隐私 待接入   模式 '+('测试' if fixture else '接入' if snapshot else '本地')+'   屏幕 '+str(fps)+'fps')
++                  '   保存 本地   隐私 待接入   模式 '+('测试' if fixture else '接入' if snapshot else '本地')+'   '+avatar_rate_text(state))
+         presentation_footer = ('演示层   ·   '+('视觉追踪' if self.page == 'vision' else '设置' if self.page == 'settings' else '玩偶交流')+
+                                '   ·   '+settings_text+'   ·   '+
+                                ('示例数据' if fixture else '语音主机 '+values['host'][0]))

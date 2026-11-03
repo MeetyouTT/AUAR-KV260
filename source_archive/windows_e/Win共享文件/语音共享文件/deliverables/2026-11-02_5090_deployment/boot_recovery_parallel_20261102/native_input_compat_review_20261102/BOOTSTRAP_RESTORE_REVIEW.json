@@ -1,0 +1,169 @@
+{
+  "schema": "aura-original-bootstrap-same-boot-final-local-review-1",
+  "updated_utc": "2026-11-02T18:57:13.980674+00:00",
+  "status": "PASS_STATIC_ORIGINAL_START_PATH_AND_SAME_BOOT_FINAL_MIGRATION_NO_NEW_FINDING",
+  "new_confirmed_code_defects": [],
+  "scope": "Bounded local source/receipt review of original camera bootstrap after actual wide+ID_STOP_ONLY. No Native execution or new approval gate.",
+  "source_pins": [
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_platform\\inspected_public_sources\\face_source_v17_entry.py",
+      "sha256": "f26be22cb640bf44a1bd81b66bb3fa014f5b847b13320781836bf3f173387623"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_platform\\inspected_public_sources\\native_entry_operator.py",
+      "sha256": "0576a388e2c17174b4102665602aa42fbf078a3f016bdfb641c269571ce13943"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_platform\\inspected_public_sources\\native_entry_pan_face_v5.py",
+      "sha256": "288f6b7b56702edf45b432686db4f77b156408c0b3f78fd31c05edb33df971c4"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_platform\\inspected_public_sources\\native_entry.py",
+      "sha256": "839df536696d16c3f538bb158edee80614fb0cef55def64d7e7849d412fa30d4"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_platform\\inspected_public_sources\\identity_recovery.py",
+      "sha256": "64831498d8497c2087b3bb1543367e8cc1917ca131694000884f2d58e60990f7"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_platform\\inspected_public_sources\\native_startup.py",
+      "sha256": "4a729a29c6e4c5d8e89c084867f8c7b972e38e4cf1a74177250cbb31a0396fcf"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_platform\\inspected_public_sources\\native_protection.py",
+      "sha256": "b8637c2aa387915a49ef0fd7a1c7cb9d015fb71802c4eaa11539a64466db1faa"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_platform\\inspected_public_sources\\native_binding.py",
+      "sha256": "5f385c03cf84b1f9ba3afe4d4a6cfd3022ba639aba06b8d923f83783bfd48da6"
+    }
+  ],
+  "evidence_pins": [
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\joint_acceptance_180s_20261102\\CPU_CAMERA_RESTORE_PHASE_HANDOFF.json",
+      "sha256": "79f47f1404c22f136bd595262c50c231b001170d12edd56c180876ae4c7bbcbd"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\wide_restore_20261102\\FULL_HISTORY_SEAL_RESULT.json",
+      "sha256": "9c38e6cefd2365be304939e2f3ad92e58458c6d73c5c7d1734e55f2bf724879c"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\wide_restore_20261102\\FRESH_INSPECTION.json",
+      "sha256": "15cb707c1bc37fcd7b2d658679b4bfa411bcef135a4ed910352f3322f316a96c"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\wide_restore_20261102\\ORIGINAL_MIGRATION_EVIDENCE_RESULT.json",
+      "sha256": "d28046e334a8dc687c68b9c01ca8a7e26312777a6bafcad42101cac45083d590"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\joint_acceptance_180s_20261102\\AXIS_WIDE_IDSTOP_RESULT.json",
+      "sha256": "7ceac5ccb00505f0ebf18ba9ab436c11e6c2e8cedbefa5e9f8680b3477ed5ee8"
+    }
+  ],
+  "bootstrap_trace": [
+    {
+      "step": 1,
+      "source": "face_source_v17_entry.py:12-14,40-42",
+      "behavior": "Verify existing face deployment pins and dispatch existing native_entry_operator.py; do not bypass this source wrapper"
+    },
+    {
+      "step": 2,
+      "source": "native_entry_operator.py:9-20",
+      "behavior": "Verify existing runtime7 members, read original settings, install original identity_recovery before dispatching existing native_entry_pan_face_v5.py"
+    },
+    {
+      "step": 3,
+      "source": "native_entry_pan_face_v5.py:38-71",
+      "behavior": "Verify existing Native entry/app/shadow source pins; run original native_entry.py while preserving the camera wrapper hook"
+    },
+    {
+      "step": 4,
+      "source": "native_entry.py:13-28",
+      "behavior": "Read meta candidate_config, then read exact current checkpoint_output bytes; replace seed in the NEW native-run-<actualboot>-<newPID>/config.json with that original shared path/raw SHA. This is original bootstrap behavior, not a manual rewrite of the stopped owner run-config."
+    },
+    {
+      "step": 5,
+      "source": "identity_recovery.py:126-140",
+      "behavior": "Require unchanged original old library/path/hash tuple c675; read/hash current seed; accept only original settings predecessor297 or actual running7cf checkpoint unit. Select704 library in RAM; temporarily use actual checkpoint unit for original preflight; finally retain running unit7cf."
+    },
+    {
+      "step": 6,
+      "source": "native_startup.py:70-92",
+      "behavior": "Exact final belongs to current a6 boot, so select original load_business_checkpoint, not new-kernel admission. Verify Python closure/current final/owner-dead/unconsumed/current monotonic scope and effective unit7cf."
+    },
+    {
+      "step": 7,
+      "source": "native_binding.py:157-175,268-280; native_startup.py:95-143; native_protection.py:177-185",
+      "behavior": "Original NativeContext validates704 library bytes and restores the exact final seed; original consume_checkpoint creates O_EXCL marker with final SHA after confirmed restore and BEFORE adopt_yolo/workers. It fsyncs the marker; no manual consumption or counter rewrite."
+    },
+    {
+      "step": 8,
+      "source": "native_startup.py:111-126; identity_recovery.py:91-95,145-150",
+      "behavior": "Keep exact same-boot predecessor counters, optional state and previous19-row kernel history; publish original migration audit/handoff for the NEW owner. Old settings request_boot_id differs from current boot, so original operator one-shot recovery returns without rearming; do not rewrite that boot or delete operator markers."
+    }
+  ],
+  "CPU_original_entry_and_minimal_inputs": {
+    "existing_service_request_argv": [
+      "systemctl",
+      "start",
+      "--no-block",
+      "aura-camera-ui.service"
+    ],
+    "request_scope": "Descriptive original single-start request for the CPU existing maintenance phase; never executed by this reviewer",
+    "observed_effective_ExecStart_argv": [
+      "/usr/bin/python3",
+      "-B",
+      "/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/face-source-v17/entry.py"
+    ],
+    "entry_cli_additions": [],
+    "genuine_current_checkpoint": {
+      "path": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/state/native-protection-checkpoint.json",
+      "sha256": "0f785e65fc26ceaa50fc70a8d4db4437e5c7853e0384ca41cbba2b8de9c5301b"
+    },
+    "expected_consumption_marker": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/state/native-protection-checkpoint.json.native-consumed-0f785e65fc26ceaa50fc70a8d4db4437e5c7853e0384ca41cbba2b8de9c5301b",
+    "actual_boot": "a6d4a069-e9b0-4065-8df7-dc23556b168e",
+    "startup_before_pin": "d667b871e159a9f2b52cfb48a16a31ba39847e4d68658a521aee006e7db915ef",
+    "original_wide_platform": {
+      "firmware": "aura-visual-servo-b4096-wide-v1.bit.bin",
+      "fpga_state": "operating",
+      "vart": "firmware: /lib/firmware/xilinx/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.xclbin\n",
+      "fdt_sha256": "ed0e2ace1f5bda2b937a61f5f8a5ef05cf01065a24627b23ca2de6614948542f",
+      "overlays": [
+        {
+          "name": "aura-visual-servo-b4096-wide-v1_image_1",
+          "status": "applied"
+        }
+      ],
+      "render_devices": [
+        {
+          "name": "renderD128",
+          "device": "/sys/devices/platform/axi/axi:zyxclmm_drm"
+        }
+      ]
+    },
+    "wide_context_pin": {
+      "path": "/home/root/aura-5090-recovery-20261102-a6d4a069/axis-wide-idstop-184011-v1/wide-context.json",
+      "sha256": "0e44b17a003e4fd4ce99278099573975b74d7519de906fcc46f19c1e289c06a5"
+    },
+    "source_closure": "Retain original face-v17/operator7/Native222/C6/library704 source closure and existing normal-stop/no-kill properties; use existing CPU phase fresh checks",
+    "migration_settings": "Retain existing settings5d5e, disk297/c675 and old request_boot_id; original RAM hook selects actual7cf/704. No --config to old1332 run, no seed argument override, no sealed-copy path substituted for checkpoint_output",
+    "single_submission": "Existing CPU phase submits original start once after its current checks; unknown result is observed, never resent or force-killed"
+  },
+  "original_outputs_to_observe_without_new_gate": [
+    "New actual camera PID/birth/command and native-run path, preserving original source closure",
+    "Original protection_handoff mode native_exact_same_boot, seed_sha2560f785e65..., predecessor1332/birth2236, inherited counters and previous19-row history",
+    "Original shared checkpoint consumption marker for0f, original704 mapping and new-owner original recovery audit with checkpoint0f and effective unit7cf",
+    "CPU existing selected-binding flow uses actual new run-config/source pins and original metadata verifier; layout and GUI start remain outside this review"
+  ],
+  "limits": {
+    "static_source_and_existing_public_receipts_only": true,
+    "actual_new_owner_or_consumption_not_observed_by_this_reviewer": true,
+    "new_approval_gate": false,
+    "device_calls": 0,
+    "models_or_Native_executed": 0,
+    "tests_executed": 0,
+    "old65_50_8_suites_rerun": false,
+    "R7_or_CPU_or_production_modified": false,
+    "only_write": "native_input_compat_review_20261102/BOOTSTRAP_RESTORE_REVIEW.json"
+  }
+}

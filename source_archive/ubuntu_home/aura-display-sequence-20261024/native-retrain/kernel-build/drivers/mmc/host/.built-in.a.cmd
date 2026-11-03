@@ -1,0 +1,1 @@
+cmd_drivers/mmc/host/built-in.a := echo >/dev/null; rm -f drivers/mmc/host/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/mmc/host/built-in.a drivers/mmc/host/sdhci.o drivers/mmc/host/sdhci-pltfm.o drivers/mmc/host/sdhci-of-arasan.o drivers/mmc/host/cqhci-core.o

@@ -1,0 +1,114 @@
+{
+  "schema": "aura-currentboot-visual-enrollment-gate-review-1",
+  "sealed_host_utc": "2026-11-02T11:36:26.464754+00:00",
+  "verdict": "CURRENT_VISUAL_ENTRY_GATES_PASS_HISTORICAL_CONFIRMATION_CAUSE_UNPROVED",
+  "observation_host_utc": "2026-11-02T11:32:43.637703+00:00",
+  "observation_sha256": "557a408cd0d67f15faf4df59be4a7cfcb68a1b78aa3a2198e828ac0b9bc339d9",
+  "camera_samples_count": 2,
+  "gui_cache_samples_count": 1,
+  "snapshot_camera_age_ms": [
+    14,
+    15
+  ],
+  "snapshot_camera_ttl_ms": [
+    2000,
+    2000
+  ],
+  "gui_cache_age_ms": 303,
+  "current_boot_selected_camera_birth_cmdline_and_identity_pin_checks_pass": true,
+  "current_camera_and_gui_visual_projection_pass_original_validator": true,
+  "current_gui_cache_context_and_full_owner_match_camera": true,
+  "current_face_count": 1,
+  "current_body_people_count": 2,
+  "body_count_two_is_not_multi_face_failure_in_original_face_mode": true,
+  "current_identity_state": "UNKNOWN",
+  "current_database_revision": 2,
+  "current_sampling_stage": "idle",
+  "current_sampling_total": 0,
+  "current_sample_start_capability": true,
+  "current_identity_enroll_capability": false,
+  "identity_enroll_false_is_expected_before_validated_sampling_ready": true,
+  "current_frontal_false_does_not_reject_original_entry_when_sample_start_capability_true": true,
+  "confirmation_capture_start_snapshot_inspected": false,
+  "historical_confirmation_same_owner_context_and_visual_boundary_evidence_proved": false,
+  "branches": [
+    {
+      "component": "VoiceEnrollment.handle",
+      "condition": "Current snapshot invalid or capture source/owner/single-target unavailable",
+      "code_if_workflow_active": "changed",
+      "code_if_workflow_inactive": "face_unavailable",
+      "resets_flow": true
+    },
+    {
+      "component": "VoiceEnrollment.handle",
+      "condition": "Active FSM owner differs from current owner, except original ready recovery",
+      "code": "changed",
+      "resets_flow": true
+    },
+    {
+      "component": "VoiceEnrollment.handle",
+      "condition": "Current identity KNOWN",
+      "code": "already_known",
+      "resets_flow": true
+    },
+    {
+      "component": "VoiceEnrollment.handle",
+      "condition": "Neither identity_enroll nor sampling plus identity_sample_start/FSM_sampling is allowed",
+      "code": "face_unavailable",
+      "resets_flow": true,
+      "current_condition_observed": false
+    },
+    {
+      "component": "UnifiedBindingRouter.route",
+      "condition": "Registry.confirm throws ValueError or TimeoutError",
+      "reason": "BINDING_CONFIRMATION_VISUAL_UNAVAILABLE",
+      "possible_fixed_causes": [
+        "UNAVAILABLE_VISUAL_ENVELOPE",
+        "NON_DISTINCT_CONFIRMATION_CAPTURE",
+        "EXPIRED_ATTEMPT",
+        "NOT_AWAITING_CONFIRMATION",
+        "REGISTRY_BUSY"
+      ],
+      "not_specific_evidence_of_bad_face_quality": true
+    },
+    {
+      "component": "IdentityLinkRegistry.confirm",
+      "condition": "Valid boundary guard differs from original guard",
+      "reason": "FACE_LIFECYCLE_CHANGED",
+      "cancels_attempt": true
+    },
+    {
+      "component": "speaker_visual.build_visual",
+      "condition": "Capture-start and current end boundary checks",
+      "checks": [
+        "ACTUAL_SOURCE",
+        "SAME_CURRENT_BOOT",
+        "SAME_CAMERA_SERVICE",
+        "CAMERA_READY",
+        "SINGLE_FACE",
+        "SAME_FACE_TARGET_AND_DATABASE_REVISION",
+        "SAME_PREVIEW_CAMERA_EPOCH",
+        "SOURCE_FRAME_AND_TIME_INCREASE",
+        "SOURCE_BOUNDARY_AGES_UNDER_3000MS"
+      ],
+      "does_not_require": [
+        "BODY_COUNT_ONE",
+        "FRONTAL_TRUE",
+        "KNOWN_IDENTITY"
+      ]
+    }
+  ],
+  "cache_source": {
+    "original_provider": "UiServiceClient.identity_snapshot",
+    "requires_link_READY": true,
+    "validates_original_gate_value_at_current_monotonic_time": true,
+    "presentation_read_masks_are_not_passed_to_identity_provider": true,
+    "default_cached_poll_seconds": 0.6,
+    "current_link_READY_and_error_absent": true
+  },
+  "next_safe_diagnostic": "At the next authorized confirmation retain only active_stage, original fixed reply_code, capture_snapshot_valid, owner_equal, source/preview age and build_visual fixed reason; root owns the live flow",
+  "existing_optional_public_diagnostic": "ChannelConversationJobs.last_voice_route has capture_snapshot_valid, capture_face_count, capture_identity_state and reply_code; availability on current BoardBusiness path is not assumed",
+  "recommended_product_change_now": "No threshold/quality/permission weakening justified by these observations; exact failing branch is still required",
+  "reviewer_more_gets_or_production_changes_planned": false,
+  "private_databases_photos_audio_transcripts_names_personids_axis_or_commands_accessed": false
+}

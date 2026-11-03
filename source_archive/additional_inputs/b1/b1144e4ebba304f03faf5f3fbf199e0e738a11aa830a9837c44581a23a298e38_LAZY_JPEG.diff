@@ -1,0 +1,127 @@
+--- deployed/ui_camera_service.py
++++ candidate/ui_camera_service.py
+@@ -28,6 +28,63 @@
+ from board.interaction.ui_contract import ACTIONS, PROTOCOL, integer, millis, validate_action
+ from board.vision.local_preview import RawFrameStore, TRANSPORT
+ from board.vision.camera_device import CAMERA_IDENTITY, PINNED_CAMERA, CameraUnavailable, resolve_camera_device
++
++
++class _PreviewJpeg:
++    """One immutable painted BGR frame, encoded only for a JPEG request.
++
++    The preview loop transfers its owned image here after publishing raw BGR.
++    CameraState retains at most eight frames. Retiring a frame never waits for
++    an encoder: only the one active encoder may retain one extra image.
++    """
++    def __init__(self, image, cv2, encode_lock):
++        if (image.shape != (480, 640, 3) or image.dtype.name != 'uint8'
++                or not image.flags.c_contiguous or not image.flags.owndata):
++            raise ValueError('Expected an owned contiguous 640x480 BGR preview')
++        self._image = image
++        self._cv2 = cv2
++        self._encode_lock = encode_lock
++        self._lock = threading.Lock()
++        self._retired = threading.Event()
++        self._jpeg = None
++        self._error = None
++
++    def retire(self):
++        self._retired.set()
++        if self._lock.acquire(blocking=False):
++            try:
++                self._image = self._jpeg = None
++            finally:
++                self._lock.release()
++
++    def resolve(self):
++        # Match the original single preview encoder's concurrency bound.
++        # Queued frames keep no per-frame lock, so eviction can free them.
++        with self._encode_lock:
++            with self._lock:
++                if self._retired.is_set():
++                    return None, 'retired', None
++                if self._error is not None:
++                    return None, 'failed_cached', self._error
++                if self._jpeg is not None:
++                    return self._jpeg, 'cached', None
++                image = self._image
++                self._image = None
++                try:
++                    ok, encoded = self._cv2.imencode('.jpg', image,
++                        [self._cv2.IMWRITE_JPEG_QUALITY, 72])
++                    if not ok or encoded.nbytes > 256*1024:
++                        raise ValueError('Preview encoding failed or exceeded size limit')
++                    jpeg = encoded.tobytes()
++                except Exception as exc:
++                    self._error = str(exc)[:150]
++                    return None, 'failed', self._error
++                finally:
++                    image = None
++                if self._retired.is_set():
++                    return None, 'encoded_retired', None
++                self._jpeg = jpeg
++                return jpeg, 'encoded', None
+ 
+ 
+ class CameraState:
+@@ -55,6 +112,8 @@
+         self.observation_fid = None
+         self.preview_error = ''
+         self.raw_preview = False
++        self._preview_encode_lock = threading.Lock()
++        self.preview_jpeg_encodes = self.preview_jpeg_cache_hits = self.preview_jpeg_failures = 0
+         self.selected_id = None
+         self.requested_target = None
+         self.requested_target_key = None
+@@ -73,7 +132,9 @@
+     def publish_preview(self,fid,stamp,jpeg):
+         with self.lock:
+             self.frames[fid] = (stamp,jpeg)
+-            while len(self.frames)>8:self.frames.popitem(last=False)
++            while len(self.frames)>8:
++                _, (_, retired) = self.frames.popitem(last=False)
++                if isinstance(retired, _PreviewJpeg):retired.retire()
+             self.preview_frames += 1
+             self.preview_error = ''
+ 
+@@ -155,7 +216,19 @@
+             value = self.frames.get(fid)
+             if (epoch != self.camera_epoch or value is None or not 0<=self.clock()-value[0]<1000
+                     or self.camera_error):return None
+-            return value[1]
++            frame = value[1]
++            if not isinstance(frame, _PreviewJpeg):return frame
++        # Encoding never holds the shared capture/identity state lock.
++        jpeg, outcome, error = frame.resolve()
++        with self.lock:
++            if outcome in ('encoded','encoded_retired'):self.preview_jpeg_encodes += 1
++            elif outcome == 'cached':self.preview_jpeg_cache_hits += 1
++            elif outcome == 'failed':self.preview_jpeg_failures += 1
++            if error is not None:self.preview_error = error
++            if (epoch != self.camera_epoch or self.frames.get(fid) is not value
++                    or not 0<=self.clock()-value[0]<1000 or self.camera_error):return None
++            if jpeg is not None:self.preview_error = ''
++            return jpeg
+ 
+     def command(self,command):
+         with self.lock:
+@@ -213,6 +286,8 @@
+                 'observation_age_ms':None if self.processed_stamp is None else now-self.processed_stamp,
+                 'capture_hz':round(self.capture_frames/seconds,2),'detection_hz':round(self.detected_frames/seconds,2),
+                 'preview_frames':self.preview_frames,'preview_hz':round(self.preview_frames/seconds,2),
++                'preview_jpeg_mode':'on_request_cache','preview_jpeg_encodes':self.preview_jpeg_encodes,
++                'preview_jpeg_cache_hits':self.preview_jpeg_cache_hits,'preview_jpeg_failures':self.preview_jpeg_failures,
+                 'observation_frame_id':self.observation_fid,'preview_error':self.preview_error,
+                 'last_inference_ms':self.inference_ms,'preview_buffers':len(self.frames),
+                 'camera_error':self.camera_error,'detector_error':self.detector_error,
+@@ -531,9 +606,7 @@
+                                 if state.detector_info['count_kind']=='people' else '#'+str(track['track_id']))
+                             cv2.putText(image,label,(x,max(18,y-6)),cv2.FONT_HERSHEY_SIMPLEX,.6,color,2)
+                     raw.publish(fid,stamp,image.tobytes())
+-                    ok,encoded=cv2.imencode('.jpg',image,[cv2.IMWRITE_JPEG_QUALITY,72])
+-                    if not ok or encoded.nbytes>256*1024:raise ValueError('Preview encoding failed or exceeded size limit')
+-                    state.publish_preview(fid,stamp,encoded.tobytes())
++                    state.publish_preview(fid,stamp,_PreviewJpeg(image,cv2,state._preview_encode_lock))
+                     state.pipeline_metrics.elapsed('preview.render_encode_publish',preview_started)
+                     state.pipeline_metrics.value('preview.publish_source_age',max(0,millis()-stamp))
+                 except Exception as exc:

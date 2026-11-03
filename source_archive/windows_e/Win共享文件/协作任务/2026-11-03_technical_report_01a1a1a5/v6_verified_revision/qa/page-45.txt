@@ -1,0 +1,48 @@
+44
+以上分组为原工具报告保留项，构建未将其改成 Error；本报告不将 Error 为 0 扩展为
+无告警。外部 I/O 的 no_input_delay、no_output_delay 与已约束内部路径分开审阅，新增
+外设或修改采样关系时须补齐相应约束。 新报告的无输入延迟端口为 iic_scl_io、
+iic_sda_io 及 mipi_phy_if_data_p[0] 至 [3]，共 6 个；无输出延迟端口为 iic_scl_io、
+iic_sda_io，共 2 个。原工具将两类均标为 HIGH，故内部时序通过的范围不包含这些外部接
+口假设。[E31]
+表 G-3 原生报告指纹
+报告 SHA256
+05e40685f38296e1aff912d401a8095e705beadd80c82d0ec1482fa
+implementation.json
+3305951b3
+d4fa2f59d91b630056879c8cef39e1d0ad9893bfac61a5f0c94c5f4
+timing.rpt
+fecf840a0
+9f323e5bbe7dff9349352bae0fcdbb16fb4eaed0b63a928f684612a
+utilization.rpt
+18f560161
+04627f4b8b7baa346ad4a4e0c97a78470ef42a91e278b8b8607c48a
+route.rpt
+a5e3d46f9
+f8075f999829c4827a71fa4f1f778aad9161f7170958b1f84c0775f
+drc.rpt
+3f3fbe310
+d964b52e32107449bcbfeed8872daa0a23939ea1c7f69c6a1dcc40a
+clocks.rpt
+2b5a1a771
+f2d57a253b9e41cf040da0e39b5e3df85c9304c346a2a6b7637d9f7
+check_timing.rpt
+60adb3cad
+新 BIT SHA 为 bfb57aea58fd0918d176cf2938465c5a79bb006aa38ead371fb2b36759582509，
+新 XSA SHA 为 26cf31e83102e5226844bb8512731f51b088a8bf21d4a21ad15c1e8d30e7ab04。
+firmware_fresh.json 记录两者配置载荷逐字节一致及 board_verified=false。物理优化的
+后续尝试没有形成另一份完成且合格的新结果，封版仍采用上述基线。
+表 G-4 已保存报告中最差十条 Setup 路径
+序号 余量 ns 时钟组简写 终点简写
+gen_multi_thread.gen_thread_loop[2].active_cnt_reg
+1 0.002 clk_300M
+[16]/CE
+gen_multi_thread.gen_thread_loop[2].active_cnt_reg
+2 0.002 clk_300M
+[17]/CE
+gen_multi_thread.gen_thread_loop[2].active_cnt_reg
+3 0.002 clk_300M
+[18]/CE
+gen_multi_thread.gen_thread_loop[2].active_cnt_reg
+4 0.002 clk_300M
+[19]/CE

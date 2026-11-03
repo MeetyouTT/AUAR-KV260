@@ -1,0 +1,14 @@
+--- before/board/runtime/board_dialogue.py
++++ after/board/runtime/board_dialogue.py
+@@ -519,8 +519,10 @@
+                 context_started = self.clock()
+                 messages = self._messages(turn, text, history_query)
+                 metrics['context_ms'] = (self.clock()-context_started)*1000
++                from common.thinking_policy import route as thinking_route
++                inference = {'options': {'think': True}} if thinking_route(text)['mode'] == 'reasoning' else {}
+                 for attempt in range(2):
+-                    result, _ = timed_request('llm', task='dialogue', messages=messages)
++                    result, _ = timed_request('llm', task='dialogue', messages=messages, **inference)
+                     try:
+                         reply = self.reply_validator(result['text'], text)
+                         break

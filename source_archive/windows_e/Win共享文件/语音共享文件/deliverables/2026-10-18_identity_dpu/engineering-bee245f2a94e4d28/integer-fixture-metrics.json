@@ -1,0 +1,37 @@
+{
+  "scope": "ENGINEERING_QUANTIZATION_ONLY_SINGLE_PUBLIC_REFERENCE_NOT_IDENTITY_ACCURACY",
+  "mode": "test",
+  "representative_calibration": false,
+  "independent_identity_evaluation": false,
+  "rewrites": {
+    "residual_prelu": 27,
+    "grouped_spatial_fc": 1,
+    "removed_flatten": 1,
+    "spatial_output_bn": 1
+  },
+  "data_sha256": "07c0c6ce230de9b284d06085b8a5c3e48480136097d366947662b3cb4791fd95",
+  "hardware_reference_input": "NHWC INT8 fix_point=7; floor(normalized*128+.5) clipped",
+  "hardware_reference_output": "INT8 fix_point=5",
+  "limited_fp32_quantized_metrics": [
+    {
+      "sample": "black",
+      "cosine": 0.5981684156689033,
+      "maximum_absolute_error": 0.5242749452590942
+    },
+    {
+      "sample": "gray",
+      "cosine": 0.6640057836831972,
+      "maximum_absolute_error": 0.7054683864116669
+    },
+    {
+      "sample": "random",
+      "cosine": 0.9095516250180967,
+      "maximum_absolute_error": 0.4973776340484619
+    },
+    {
+      "sample": "public_reference",
+      "cosine": 0.9703463775355026,
+      "maximum_absolute_error": 0.7614054679870605
+    }
+  ]
+}

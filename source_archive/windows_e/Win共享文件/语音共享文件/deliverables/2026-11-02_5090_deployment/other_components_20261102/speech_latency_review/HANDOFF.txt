@@ -1,0 +1,17 @@
+非UI语音链路与计时候选审阅（洛杉矶2026-11-02）
+
+本子任务只读板端公开源码/配置摘要、过滤后的API数值状态与8797健康；未读轴寄存器，未操作转轴、界面或任何服务，未开麦、重放音频/ACK、请求模型、打开真实记忆/身份库或写生产。候选及测试仅保存在本目录。
+
+新鲜实际来源：2026-11-02T08:04:07Z，startup ff7c0599d8b719b66dadee193553b937027de72867f266e1cb443320a9b5dc4e，380组件全SHA匹配，保存15份实际非UI链路公开源。原27B/IQ4_XS/2048及OmniVoice16配置保持；8797当时健康ok/tts_ready/voice alive、active=false/pending0。实际为paraformer_small、ASR2线程、combined前端1线程/独立前端进程、persistent_audio与streaming_conversation开启，early_listen与voice_barge_in为false；本任务未更改。API遗留最后一轮ASR1.864s/首PCM入队6.922s未对应新录音与ACK，不当成新测量，也不与两轮旧不同输入作性能A/B。
+
+当前实际通路仍为BoardDialogueJobs先完成ASR，controller等待完整LLM、原回复/权限/代数/反复述校验与generated记录，再逐句TTS；句级PCM可以边播边准备后句，LLM与首句TTS仍不重叠。8797虽接收Ollama token流，但到done才返回完整JSON，且只有一个执行通道。旧8792 early_sentence开关不进入此通路。没有找到可直接改变开关即可证明省秒、且不改变原完整校验保障的确定性能bug。
+
+可落实的小范围前置改动：计时元数据透传。8797已有first_packet/first_content/first_json_closed/backend_done/json_closed_to_done与Ollama load/prompt/eval/计数元数据，但controller原timed_request忽略result.metrics，Jobs又只公开总RPC。候选只改变board/runtime/board_dialogue.py与board/runtime/audio/board_dialogue_jobs.py，来自实际SHA c877cdee…和687b80cd…，不接回Windows业务，不改模型请求/输出、范围/权限、期限、语音分句、播放或ACK。
+
+新增字段语义：llm_last_backend_<原协议白名单键>只保存当前prepare最后一次已接受LLM结果的主机相对计时/计数，最多15个数值；llm_backend_metrics_calls统计完整成功prepare里有有效数值观测的LLM调用数（当前重试上限2）。主机时间与板端llm_rpc_ms严格分开；有多次LLM时last不是总耗时，RPC与backend的差也不能直接称纯网络。每次LLM尝试前清上次可选字段；无metrics的重试不沿用前次；失败/取消prepare清新backend观测及计数，本地直答与下一turn起始没有旧数据。TTS多句不覆盖LLM观测，原tts_calls/tts_rpc_ms/tts_max_rpc_ms保持。新字段只容有限0<=value<1e15的int/float，排除bool、NaN、Inf、负数、字符串、文本、ID与未知字段，Jobs再次独立严格过滤；没有新增无界列表。
+
+有效验证：专项21项candidate全通过，原基线5个断言失败/0errors；8个合成前后行为trace完全相同，比较原请求payload SHA/deadline、回复和PCM、完整/部分/外来ACK、权限拒绝、取消、模型失败和本地直答。AST确认原_check/_start/_request/acknowledge及其余方法不变，仅_prepare与Jobs._execute(投影白名单)有变。原60项回归在before/after均56通过，完全相同4个旧角色称呼fixture失败，未将其称通过；这些原测试仍使用西蓝/旧alias，而两版都加载同一份当前雪妃配置。最初测试运行的包导入、遗漏公开角色配置/内存模块夹具问题已纠正并保留日志，不计产品失败或有效基线。原回归包含新临时合成SQLite，不访问真实用户库。
+
+下一步证据用途：主机load/prompt/eval/JSON结束尾部计时可区分生成、驻留、格式尾部和端到端等待，再决定是否值得在原协议/单通道调度里实现首句提前准备。两轮原短回答TTS仅0.77/0.84s，保留完整回复通过后才播放时，理论隐藏空间至多约这段TTS，实际可能更小。ASR仍是1.1–1.4s离线CPU decode，转换/建流/解码分段计时尚缺；不能仅据此改线程或端点700ms。700ms属于录音完成之前，不能从‘录音完成→播放’5秒直接扣掉。当前没有新的真人/声学/A-B收益；本候选自身不提速。
+
+审阅入口：CANDIDATE.diff、CANDIDATE_MANIFEST.json、VALIDATION.json、BEHAVIOR_EQUIVALENCE.json及SPECIALIZED_*_FINAL日志/XML。暂不部署，不写startup或制作可直接应用的服务重启入口；两文件需作为一个后续审阅变更，实际部署另由root按当前所有权和用户安排处理。

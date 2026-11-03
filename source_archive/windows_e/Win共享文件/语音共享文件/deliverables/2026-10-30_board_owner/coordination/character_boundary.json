@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "state": "WAITING_FOR_CHARACTER_ACK_AND_PAIRED_PERFORMANCE",
+  "human_direction": "是否替换的决定性条件是新形象实际减少板端性能开销；验证后再确认最终是否替换",
+  "replacement_authorized_now": false,
+  "primary_baseline": "fresh_actual_r3_current_character_and_render_path",
+  "candidate": "native_yuki_character_candidate",
+  "comparison_requirements": {
+    "same_board_boot_and_firmware": true,
+    "same_viewport_and_resolution": true,
+    "same_frame_rate": true,
+    "same_idle_expression_and_public_pcm_clock_sequence": true,
+    "same_camera_and_business_workload": true,
+    "warmup_and_cold_start_separate": true,
+    "paired_repeated_order": "ABBA_or_equivalent_repeated_paired_runs",
+    "standalone_candidate_fps_is_not_replacement_benefit_proof": true
+  },
+  "report_metrics": [
+    "whole_board_and_renderer_process_family_CPU_time_per_second",
+    "RSS_and_PSS_when_available_with_shared_memory_accounting",
+    "GPU_utilization_and_memory_when_readable_otherwise_explicit_unknown",
+    "achieved_fps_and_frame_interval_P95_P99_and_dropped_frames",
+    "mouth_clock_pause_cancel_and_display_lifecycle_correctness",
+    "camera_detection_tracking_identity_cadence_and_errors",
+    "network_and_frame_transport_bytes_reported_separately"
+  ],
+  "decision_rule": "Show a repeatable reduction against the actual baseline beyond run-to-run variation, with stable audio/display/camera behavior. Report tradeoffs rather than label CPU-only savings as total-system savings. Submit evidence for the user's replacement decision.",
+  "ownership": {
+    "character_thread": "native_renderer_character_assets_and_GTK_render_candidate",
+    "business_thread": "board_ASR_frontend_speaker_memory_model_protocol_dialogue_candidates",
+    "shared_UI_and_runtime_entry": "fresh_actual_source_minimal_patch_and_one_coordinated_publisher"
+  },
+  "production_switch": "Not performed; await paired evidence and user decision"
+}

@@ -1,0 +1,32 @@
+{
+  "client_date": "2026-10-19",
+  "runtime": "/home/root/aura-natural-enrollment-20261019/candidate-76bd9de13628/runtime",
+  "user_feedback": "还是有问题，不知道是什么原因，第一次到最后验证的时候出错了",
+  "conversation_stopped_by_user": true,
+  "observed_first_attempt": {
+    "board_turn_generation": 10,
+    "identity_reply_code": "confirm_update_name",
+    "audio_complete": true,
+    "interpretation": "Board reached ready after collection and held-out validation; final enrollment was not completed."
+  },
+  "observed_next_turn": {
+    "board_turn_generation": 12,
+    "identity_reply_code": "face_unavailable",
+    "interpretation": "A current-frame capability failure discarded the ready voice workflow; no new identity write was observed."
+  },
+  "observed_later_attempt": {
+    "board_turn_generation": 31,
+    "identity_reply_code": "sample_failed",
+    "camera_last_failure": "人脸目标持续丢失，请重新面对镜头后采样",
+    "counts": {"collect": 3, "validate": 0}
+  },
+  "database_revision_observed": 8,
+  "registered_count_observed": 5,
+  "photos_exported": false,
+  "names_exported": false,
+  "templates_exported": false,
+  "required_fixes": [
+    "Retain a validated window when a confirmation frame is temporarily unusable; require a fresh explicit confirmation before any write.",
+    "Pause the video selection window across detector loss; a recovered new track must freshly match the fixed original SFace anchor at 0.85 and gallery margin 0.1 before continuation."
+  ]
+}

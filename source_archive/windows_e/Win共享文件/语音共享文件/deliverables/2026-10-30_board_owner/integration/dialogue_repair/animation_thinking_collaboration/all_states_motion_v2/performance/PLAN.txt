@@ -1,0 +1,53 @@
+v17旧库与全状态motion库：同条件短配对性能与可见动作检查（仅主窗口排期）
+
+当前设备正在由主窗口做真人对话/视觉/声纹测试；本目录不启动任何设备、推理或进程。
+motion三份native源和19KB构建包继续冻结，以下仅是独立测量脚本/计划。
+原v17 PAUSED是当时快照。用户后来已授权恢复聆听；测试前后由主窗口现读并保留最新偏好，不按旧快照强制暂停。
+
+前提
+先在独立目录完成motion native构建、全部眼嘴与多部件CPU测试并取回匹配的库/receipt，
+运行seal_motion_overlay.py得到一致的motion_overlay后再运行prepare_pair_packages.py。
+它会产生baseline/new各一包，脚本字节完全一致；只替换配套lib/pair/formal常量。
+没有模型、角色纹理副本、PCM或私有数据库。
+
+测试条件
+同一块板、同显示器、同423×516原生角色canvas，Gtk.Fixed抵抗WM最大化；GDK_SCALE=1。
+同seed1、同16fps目标，StrictLocalPortrait不允许降到8fps。
+同v4验证通过的24秒公共状态计划（9个阶段），同数值音量包络，ANSWER截图都等mouth>=3。
+head/body实际动作是比较对象，不强行让旧库生成新动作；其他配置、资源和背景服务保持。
+主窗口先正常关闭生产显示并持恢复guard，MainPID=0；不关相机/模型服务，不发模型任务、不采集/播放。
+每次仅一个预览进程/GTK/EGL owner，前次正常退出、进程组空后才启动下一次。
+相机PID/boot等由主窗口已有安全metadata工具前后核对，不在预览中读取真实状态正文。
+
+顺序与时间
+建议一次ABBA：A1旧v17→B1新motion→B2新motion→A2旧v17，每次同24秒，约96秒测量加启动/退出。
+如只有短窗口，可先A1/B1做48秒筛查；只能报告单对趋势，不当严格性能定论，不立即发布。
+没有新增性能心跳或常驻采样器；父窗口统一安排，避免与真人ASR、采集、模型或memory测试重叠。
+每包预检加对应--run-label，例如baseline --run-label A1 --validate-only。
+正式预览沿root现役DISPLAY/XAUTHORITY、独立新evidence目录和owned 80s+5s硬限：
+python3 -B preview_public_states.py --runtime <现读runtime/aura> --evidence ./evidence_A1 --owner-unit aura-avatar-ui.service --capture-character --run-label A1
+依次换到各自包、label及新evidence_B1/B2/A2，不能复用旧证据目录。
+
+指标
+预览自己的time.process_time差/实际wall秒：进程CPU%，100=占满1个CPU，可超过100。
+从首个真实swap开始、最后一个阶段结束时止，排除模型JSON/纹理/GL冷启动CPU；不包括生产其他进程。
+PNG capture及文件hash的CPU/wall单独计时，报告总CPU及扣除capture CPU的辅助值，不能只挑较好的值。
+内存仅读/proc/self/smaps_rollup的Rss/Pss/Private_Dirty/Swap数字，在0/12/24秒各一次，
+不读地址映射、环境、其他进程内存或任何业务数据。缺PSS会明确缺测，不填0。
+已有native frame observer记录所有swap时间：callback FPS、间隔P50/P95/P99/最大值，
+同时记录native elapsed丢弃量。没有第二高频poll；仍只有原16fps调度和一次粗deadline。
+保留首帧、capture附近长帧和完整帧间隔，不用删除坏帧证明16fps。
+这是纯角色进程比较，不是整板CPU、全部GPU内存、物理扫描帧率或全业务负载验收。
+
+图像与动作
+沿已验证的renderer.capture、swap前、423×516角色framebuffer，绝不抓桌面/相机/真实对话界面。
+本短测保留v4六张状态帧以复核眼嘴。新motion自然程度另需看屏幕连续动作，
+或在已确认资源开销后单独取每状态两个以上时间点的纯角色序列；不能用静态一图或数字变化冒充自然动作通过。
+暂停/取消继续自然头身动态，嘴必须闭合；头相对身体动，头发/衣饰有跟随，避免整图刚性摆动。
+
+结果与决定
+取回四份preview_result.json后用compare_pair_results.py --a1 ... --b1 ... --b2 ... --a2 ...。
+比较器核相同24秒计划/同测量脚本/同组pin，给出旧新中位数和CPU百分点、RSS/PSS MiB、FPS与P95/P99差值。
+主窗口结合单对波动、camera负载稳定性、CPU绝对余量和新动作视觉评审决定；明显降速或内存异常时保留v17。
+目标始终16fps；即使新旧相近，若callback未达到目标仍标待优化，不能写物理16fps通过。
+最后正常退出预览后恢复现役或发布经审的组合版本，保留最新监听偏好和feature v3，不恢复过时v16配置。

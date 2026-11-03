@@ -1,0 +1,34 @@
+--- before/stability_common.py
++++ final/stability_common.py
+@@ -114,7 +114,7 @@
+     startup=previous_publisher().inputs()[1]
+     startup['component_sha256']=spec['component_sha256']
+     spec['startup_sha256']=sha(encoded(startup));spec['source_manifest_sha256']='0'*64
+-    return spec
++    return json.loads(encoded(spec))
+ 
+ 
+ def validate_spec(spec,*,allow_baseline=False,allow_proposed=False):
+--- before/test_stability_release.py
++++ final/test_stability_release.py
+@@ -1,6 +1,7 @@
+ """Offline source and closure tests. No production/device imports or writes."""
+ import ast
+ import copy
++import json
+ import unittest
+ from unittest.mock import patch
+ 
+@@ -169,6 +170,12 @@
+         self.assertEqual(2,len(selected(before)))
+         self.assertEqual(selected(before),selected(after))
+ 
++    def test_added_component_spec_round_trip_keeps_identical_remote_bytes(self):
++        proposed=common.proposed()
++        restored=json.loads(common.encoded(proposed))
++        self.assertEqual(common.publisher_remote(proposed),common.publisher_remote(restored))
++        self.assertEqual(apply.build_remote(proposed),apply.build_remote(restored))
++
+ 
+ if __name__=='__main__':
+     unittest.main()

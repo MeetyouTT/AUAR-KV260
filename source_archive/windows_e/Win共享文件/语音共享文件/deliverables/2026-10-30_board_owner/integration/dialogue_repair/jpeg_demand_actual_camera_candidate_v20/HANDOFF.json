@@ -1,0 +1,46 @@
+{
+  "status": "LOCAL_CANDIDATE_FROZEN_FOR_INDEPENDENT_REVIEW",
+  "source_manifest_sha256": "b598afff1976c898bdb9839e0cbecb0eb65aaf0ffe28793432724c233da99a13",
+  "candidate_after_sha256": "44b02084cb5e80b12349892183b08e02563c4447e75c5e05276d52786b8a55c4",
+  "test_result_sha256": "2b5f185b212420d69db3c07dbeba5f94eda56f3d9dfc24b760db87cba1a789c3",
+  "test_source_sha256": "be81bc629ce15de1de5c068fc5a138fdc963163496b3b7e166023420fb64225f",
+  "cli": "& 'C:/Users/35870/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe' -B 'E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/jpeg_demand_actual_camera_candidate_v20/run_local_tests.py' --output REVIEW_RUN.json",
+  "contract": {
+    "status_preview_fields": [
+      "camera_epoch",
+      "frame_id",
+      "captured_mono_ms"
+    ],
+    "metadata_payload_size_or_digest_promised_before_get": false,
+    "ring_entries": 8,
+    "preview_ttl_ms_exclusive": 1000,
+    "raw_ttl_ms_exclusive": 250,
+    "raw_transport": "same f40212 atomic private /run BGR file; V4L2 capture io-mode=mmap unchanged",
+    "jpeg_quality": 72,
+    "max_jpeg_bytes": 262144,
+    "same_frame_pixels": "final overlaid immutable bytes shared with raw publication; exact requested frame only",
+    "single_flight": "one encoder lock per CameraState, cached success/failure; waits limited to original remaining TTL",
+    "revalidation": [
+      "epoch",
+      "camera_error",
+      "source age including future",
+      "entry revision after wait",
+      "entry object identity after encode",
+      "eight-frame retirement"
+    ],
+    "raw_display": "continues snapshot.preview publication even with no JPEG requests",
+    "visual_capture": "unmodified client computes digest after GET and retains 750ms including encode latency",
+    "cache_memory": "at most eight retained frame payloads; decoded BGR freed on successful JPEG cache; waiting requests retain only revision",
+    "worst_ring_bgr_bytes": 7372800,
+    "inflight_evicted_bgr_max_bytes": 921600,
+    "memory_limit_note": "Python/OpenCV/native scratch, source frame, raw transport file and temporary JPEG are additional; no real RSS claim",
+    "metric_scope": "existing preview.render_encode_publish producer key is retained for consumers; on-demand JPEG encode occurs in request thread and is excluded from that producer metric"
+  },
+  "limits": [
+    "No real OpenCV encode execution in Windows regression; cv2 is a bounded-contract fixture, NumPy bytes/shape real.",
+    "No actual camera/UI/native/DPU/model execution or deployed change. One original test uses a synthetic localhost ephemeral HTTP server.",
+    "Original native entry pins in meta.json and native_entry_pan_face_v5.APP_PINS reject a blind in-place replacement. Root must prepare a separately reviewed protected-chain release.",
+    "Previous GUI-copy candidate remains archived with WRONG_BASE status. Its results are not actual-camera validation."
+  ],
+  "arm_benchmark_preparation": "requested next, not yet prepared or executed"
+}

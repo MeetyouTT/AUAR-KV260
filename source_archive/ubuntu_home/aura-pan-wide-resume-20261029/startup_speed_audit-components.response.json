@@ -1,0 +1,641 @@
+{
+  "boot_id": "605eaf50-c66a-4559-bfc9-5ae177e0f305",
+  "uptime_seconds": 701.84,
+  "unit": {
+    "returncode": 0,
+    "output": "MainPID=1296\nNRestarts=0\nExecMainStartTimestampMonotonic=17895989\nExecStart={ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B /home/root/aura-boundary-nav-20261029/gui-page-sync-v2/startup/launcher.py --config /home/root/aura-boundary-nav-20261029/gui-page-sync-v2/startup/config.json ; ignore_errors=no ; start_time=[Fri 2021-11-19 09:19:37 PST] ; stop_time=[n/a] ; pid=1296 ; code=(null) ; status=0/0 }\nLoadState=loaded\nActiveState=active\nSubState=running\nFragmentPath=/etc/systemd/system/aura-avatar-ui.service\nDropInPaths=/etc/systemd/system/aura-avatar-ui.service.d/80-aura-pan-manual-20261020.conf /etc/systemd/system/aura-avatar-ui.service.d/99-aura-rgb565-trial.conf /etc/systemd/system/aura-avatar-ui.service.d/zz-aura-listening-timing-20261020.conf /etc/systemd/system/aura-avatar-ui.service.d/zz-aura-render-budget-trial.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzz-aura-echo-verify-20261021.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzz-aura-stable-fps-trial.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzz-aura-speech-motion-trial.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzz-aura-interaction-render-fix.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzz-native-maintenance-be72669aa53de735.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzz-aura-snapshot-budget.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzz-aura-audio-frontend-20261021.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzz-aura-audio-frontend-budget-20261021.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzz-aura-motion-binding.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzz-aura-reliability-f7624754038f.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzz-aura-video-66cde810eb059dce.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzz-aura-pan-ui-ecfbdef064d157b6.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzz-aura-pan-current-463c.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzz-aura-face-edge-v5.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzz-aura-pan-16a-manual.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-animation-dialogue.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-pan-da36-reference-merged.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-windows-portrait.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-pan-continuity-20261028.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-device-skills.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-pan-wide-20261029.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-boundary-page-sync-20261029.conf /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-boundary-page-sync-20261029.conf\nActiveEnterTimestampMonotonic=90788116\n"
+  },
+  "unit_files": {
+    "returncode": 0,
+    "output": "# /etc/systemd/system/aura-avatar-ui.service\n[Unit]\nDescription=AURA cached avatar touchscreen interface\nWants=xserver-nodm.service systemd-modules-load.service\nAfter=local-fs.target xserver-nodm.service systemd-modules-load.service\nRequiresMountsFor=/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime\nStartLimitIntervalSec=300\nStartLimitBurst=5\n\n[Service]\nType=notify\nNotifyAccess=main\nUser=root\nEnvironment=DISPLAY=:0 PYTHONUNBUFFERED=1\nWorkingDirectory=/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime/aura\nExecStart=/usr/bin/python3 -B /home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/startup/launcher.py --config /home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/startup/config.json\nRestart=on-failure\nRestartSec=5\nTimeoutStartSec=240\nTimeoutStopSec=25\nKillMode=mixed\nStandardOutput=journal\nStandardError=journal\nSyslogIdentifier=aura-avatar-ui\n\n[Install]\nWantedBy=graphical.target\n\n# /etc/systemd/system/aura-avatar-ui.service.d/80-aura-pan-manual-20261020.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-pan-manual-ui-20261020/camera-fix-v3/startup/launcher.py --config /home/root/aura-pan-manual-ui-20261020/camera-fix-v3/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/99-aura-rgb565-trial.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-render24-rgb565-20261020/887c4b6b2b5d/startup/launcher.py --config /home/root/aura-render24-rgb565-20261020/887c4b6b2b5d/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zz-aura-listening-timing-20261020.conf\n[Unit]\nRequiresMountsFor=/home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/runtime\n[Service]\nWorkingDirectory=/home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/runtime/aura\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/startup/launcher.py --config /home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zz-aura-render-budget-trial.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-render24-budget-20261020/e06409743174/startup/launcher.py --config /home/root/aura-render24-budget-20261020/e06409743174/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzz-aura-echo-verify-20261021.conf\n[Unit]\nRequiresMountsFor=/home/root/aura-echo-verify-20261021/candidate-a3c8e50c2797/runtime\n[Service]\nWorkingDirectory=/home/root/aura-echo-verify-20261021/candidate-a3c8e50c2797/runtime/aura\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-echo-verify-20261021/candidate-a3c8e50c2797/startup/launcher.py --config /home/root/aura-echo-verify-20261021/candidate-a3c8e50c2797/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzz-aura-stable-fps-trial.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-render24-budget-20261020/f8e48486023d/startup/launcher.py --config /home/root/aura-render24-budget-20261020/f8e48486023d/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzz-aura-speech-motion-trial.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-speech-motion-20261021/0e98f7830e27/startup/launcher.py --config /home/root/aura-speech-motion-20261021/0e98f7830e27/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzz-aura-interaction-render-fix.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-speech-motion-20261021/bd9e48cc658f/startup/launcher.py --config /home/root/aura-speech-motion-20261021/bd9e48cc658f/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzz-native-maintenance-be72669aa53de735.conf\n[Service]\nExecCondition=/usr/bin/python3 -B /home/root/aura-native-live-20261024/ops/be72669aa53de735/boot_ops.py --root /home/root/aura-native-live-20261024/ops/be72669aa53de735 condition gui\nRestart=no\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzz-aura-snapshot-budget.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-speech-motion-20261021/922dab49a74f/startup/launcher.py --config /home/root/aura-speech-motion-20261021/922dab49a74f/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzz-aura-audio-frontend-20261021.conf\n[Unit]\nRequiresMountsFor=/home/root/aura-audio-frontend-20261021/candidate-0a4d1ec72b51/runtime\n[Service]\nWorkingDirectory=/home/root/aura-audio-frontend-20261021/candidate-0a4d1ec72b51/runtime/aura\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-audio-frontend-20261021/candidate-0a4d1ec72b51/startup/launcher.py --config /home/root/aura-audio-frontend-20261021/candidate-0a4d1ec72b51/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzz-aura-audio-frontend-budget-20261021.conf\n[Unit]\nRequiresMountsFor=/home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/runtime\n[Service]\nWorkingDirectory=/home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/runtime/aura\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/startup/launcher.py --config /home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzz-aura-motion-binding.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-speech-motion-20261021/de989bf024a9/startup/launcher.py --config /home/root/aura-speech-motion-20261021/de989bf024a9/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzz-aura-reliability-f7624754038f.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/gui-startup/launcher.py --config /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/gui-startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzz-aura-video-66cde810eb059dce.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-video-cpu-20261023/66cde810eb059dce/startup/launcher.py --config /home/root/aura-video-cpu-20261023/66cde810eb059dce/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzz-aura-pan-ui-ecfbdef064d157b6.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-pan-ui-v2-20261024/observed-ecfbdef064d157b6/startup/launcher.py --config /home/root/aura-pan-ui-v2-20261024/observed-ecfbdef064d157b6/startup/config.json\nWorkingDirectory=/home/root/aura-pan-ui-v2-20261024/observed-ecfbdef064d157b6/runtime/aura\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzz-aura-pan-current-463c.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-pan-current-20261024/463c9307/gui-release/startup/launcher.py --config /home/root/aura-pan-current-20261024/463c9307/gui-release/startup/config.json\nWorkingDirectory=/home/root/aura-pan-current-20261024/463c9307/gui-release/runtime/aura\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzz-aura-face-edge-v5.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-pan-current-20261024/463c9307/gui-face-edge-v5/startup/launcher.py --config /home/root/aura-pan-current-20261024/463c9307/gui-face-edge-v5/startup/config.json\nWorkingDirectory=/home/root/aura-pan-current-20261024/463c9307/gui-face-edge-v5/runtime/aura\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzz-aura-pan-16a-manual.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-pan-current-20261024/16a07283/gui-manual-bound-v1/startup/launcher.py --config /home/root/aura-pan-current-20261024/16a07283/gui-manual-bound-v1/startup/config.json\nWorkingDirectory=/home/root/aura-pan-current-20261024/16a07283/gui-manual-bound-v1/runtime/aura\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-animation-dialogue.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-animation-dialogue-20261026/d6d1617467724213b3d9fd3d11530a47/startup/launcher.py --config /home/root/aura-animation-dialogue-20261026/d6d1617467724213b3d9fd3d11530a47/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-pan-da36-reference-merged.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-pan-current-20261024/da36c36a/gui-reference-bound-v2/startup/launcher.py --config /home/root/aura-pan-current-20261024/da36c36a/gui-reference-bound-v2/startup/config.json\nWorkingDirectory=/home/root/aura-pan-current-20261024/da36c36a/gui-reference-bound-v2/runtime/aura\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-windows-portrait.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-windows-portrait-20261027/handoff-31b0c262c5b74d52966c00b978dfef3f/startup/launcher.py --config /home/root/aura-windows-portrait-20261027/handoff-31b0c262c5b74d52966c00b978dfef3f/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-pan-continuity-20261028.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-system-pan-20261028/gui-continuity-v1/startup/launcher.py --config /home/root/aura-system-pan-20261028/gui-continuity-v1/startup/config.json\nWorkingDirectory=/home/root/aura-system-pan-20261028/gui-continuity-v1/runtime/aura\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-device-skills.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-device-skills-20261028/0cd7c3445a84475098b938d5b97175e0/startup/launcher.py --config /home/root/aura-device-skills-20261028/0cd7c3445a84475098b938d5b97175e0/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-pan-wide-20261029.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-pan-wide-resume-20261029/gui-wide-v1/startup/launcher.py --config /home/root/aura-pan-wide-resume-20261029/gui-wide-v1/startup/config.json\nWorkingDirectory=/home/root/aura-pan-wide-resume-20261029/gui-wide-v1/runtime/aura\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-boundary-page-sync-20261029.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-boundary-nav-20261029/gui-page-sync-v1/startup/launcher.py --config /home/root/aura-boundary-nav-20261029/gui-page-sync-v1/startup/config.json\nWorkingDirectory=/home/root/aura-boundary-nav-20261029/gui-page-sync-v1/runtime/aura\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-boundary-page-sync-20261029.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-boundary-nav-20261029/gui-page-sync-v2/startup/launcher.py --config /home/root/aura-boundary-nav-20261029/gui-page-sync-v2/startup/config.json\nWorkingDirectory=/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/aura\n"
+  },
+  "journal": {
+    "returncode": 0,
+    "output": "-- Journal begins at Fri 2021-11-19 09:19:30 PST, ends at Fri 2021-11-19 09:30:45 PST. --\n[   14.323700] xilinx-kv260-starterkit-20222 systemd[1]: Starting AURA cached avatar touchscreen interface...\n[   45.380459] xilinx-kv260-starterkit-20222 aura-avatar-ui[1296]: {\"event\": \"CHILD_STARTING\", \"pid\": 1477, \"args\": [\"/usr/bin/python3\", \"-B\", \"/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/aura/tools/board_avatar_pan.py\", \"--evidence-root\", \"/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784/evidence\"], \"evidence\": \"/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784/evidence\", \"log\": \"/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784/stage.log\", \"boot_id\": \"605eaf50-c66a-4559-bfc9-5ae177e0f305\", \"supervisor_pid\": 1296, \"service\": \"aura-avatar-ui.service\", \"session\": \"/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784\"}\n[   90.788208] xilinx-kv260-starterkit-20222 systemd[1]: Started AURA cached avatar touchscreen interface.\n[   90.803575] xilinx-kv260-starterkit-20222 aura-avatar-ui[1296]: {\"event\": \"READY\", \"pid\": 1477, \"volume\": 70}\n"
+  },
+  "xserver": {
+    "returncode": 0,
+    "output": "MainPID=1084\nExecMainStartTimestampMonotonic=14305547\nActiveState=active\n"
+  },
+  "active_config_path": "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/startup/config.json",
+  "active_config": {
+    "runtime": "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime",
+    "display_wait_seconds": 90,
+    "ready_wait_seconds": 90,
+    "edid_grace_seconds": 15,
+    "display_stable_seconds": 3,
+    "startup_display_retrain": true,
+    "display_retrain_off_seconds": 2,
+    "port": 8783,
+    "gui_sha256": "9bdc7ed97da9a3f33ba33604e3488d04165f603dd3b43f9f90f7c3032790c1a3"
+  },
+  "active_launcher": {
+    "path": "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/startup/launcher.py",
+    "sha256": "cd1680220b60f6120db1bc847ca59cfd445796ff37e48a3ba93efca65eddfd98",
+    "bytes": 16806,
+    "gzip_base64": "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"
+  },
+  "gui_config": {
+    "native_avatar": true,
+    "cache_sequences": 12,
+    "native_pixel_threads": 3,
+    "tick_ms": 33,
+    "stable_avatar_fps": 16,
+    "streaming_conversation": true,
+    "persistent_audio": true,
+    "handsfree_dialogue": true,
+    "voice_barge_in": true,
+    "audio_frontend": {
+      "enabled": true,
+      "host": "192.168.50.1",
+      "port": 8795,
+      "timeout_ms": 180
+    },
+    "portrait_offload": {
+      "enabled": true,
+      "host": "192.168.50.1",
+      "port": 8796,
+      "fps": 16,
+      "max_age_ms": 150,
+      "revision": "81fd019a7887bf5e93fc0686b5db2122a1be3fc36a59371de636e212c4027e52"
+    }
+  },
+  "launch": {
+    "pid": 1477,
+    "args": [
+      "/usr/bin/python3",
+      "-B",
+      "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/aura/tools/board_avatar_pan.py",
+      "--evidence-root",
+      "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784/evidence"
+    ],
+    "evidence": "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784/evidence",
+    "log": "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784/stage.log",
+    "boot_id": "605eaf50-c66a-4559-bfc9-5ae177e0f305",
+    "supervisor_pid": 1296,
+    "service": "aura-avatar-ui.service",
+    "session": "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784"
+  },
+  "setup": {
+    "display": "Screen 0: minimum 320 x 200, current 1024 x 600, maximum 4096 x 4096\nDP-1 connected primary 1024x600+0+0 150mm x 90mm\n   1024x600      59.85*+\n",
+    "edid_sha256": "727d3e1893df759c757c35232f9465b670a64d6de2011b586de48c6446e17c35",
+    "mode_source": "live_edid",
+    "edid_missing": false,
+    "startup_output_retrained": true,
+    "display_wait_elapsed_seconds": 26.182,
+    "physical_panel_verified": false,
+    "boot_id": "605eaf50-c66a-4559-bfc9-5ae177e0f305",
+    "touch_id": "6",
+    "supervisor_pid": 1296
+  },
+  "ready": {
+    "pid": 1477,
+    "args": [
+      "/usr/bin/python3",
+      "-B",
+      "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/aura/tools/board_avatar_pan.py",
+      "--evidence-root",
+      "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784/evidence"
+    ],
+    "evidence": "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784/evidence",
+    "log": "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784/stage.log",
+    "boot_id": "605eaf50-c66a-4559-bfc9-5ae177e0f305",
+    "supervisor_pid": 1296,
+    "service": "aura-avatar-ui.service",
+    "session": "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784",
+    "state": {
+      "phase": "IDLE",
+      "state": "IDLE",
+      "display_state": "IDLE",
+      "portrait_offload": {
+        "mode": "local",
+        "selected": true,
+        "target_fps": 16,
+        "fallback_fps": 8,
+        "sent": 0,
+        "accepted": 0,
+        "discarded": 10,
+        "failures": 3,
+        "error": "timeout: timed out",
+        "frame_age_ms": null,
+        "render_ms": null,
+        "max_accepted_audio_lag_ms": 0.0,
+        "pending": 1,
+        "inflight_limit": 1
+      },
+      "asset": "idle_normal",
+      "index": 31,
+      "transitioning": false,
+      "reply": "",
+      "audio_time": 0.0,
+      "duration": 0.0,
+      "playing": false,
+      "paused": false,
+      "speech_gain": 0.0,
+      "mouth_level": 0.0,
+      "blink_active": false,
+      "blink_phase": null,
+      "visual_time": 3.407818934000005,
+      "error": "",
+      "generation": 0,
+      "rejected_count": 0,
+      "pending_job": null,
+      "last_job": null,
+      "audio_output_state": "IDLE_READY",
+      "log": [],
+      "turns": [],
+      "metrics": {
+        "late_results_dropped": 0
+      },
+      "streaming_reply": false,
+      "audio_frontend": {
+        "enabled": true,
+        "current": {}
+      },
+      "local_recording": {
+        "state": "IDLE",
+        "sample_count": 0,
+        "duration_seconds": 0.0,
+        "error": "",
+        "result": null,
+        "can_start": true,
+        "can_stop": false,
+        "max_seconds": 20
+      },
+      "local_transcription": {
+        "state": "IDLE",
+        "capture_id": null,
+        "request_id": null,
+        "text": "",
+        "error": "",
+        "recognition_ms": null,
+        "model_id": null,
+        "service": {
+          "enabled": true,
+          "pending": false,
+          "conversation": true,
+          "host": "192.168.50.1",
+          "port": 8792,
+          "streaming": true,
+          "feedback_ready": false,
+          "persistent_conversation": true,
+          "profile_memory": {
+            "mode": "guest"
+          },
+          "feedback_error": "",
+          "last_playback_ack": null,
+          "voice_enrollment": {
+            "stage": "idle",
+            "active": false
+          },
+          "last_voice_route": null
+        }
+      },
+      "automatic_conversation": {
+        "enabled": false,
+        "state": "STOPPED",
+        "error": "",
+        "completed_turns": 0,
+        "speech_active": false,
+        "can_start": false,
+        "can_stop": false
+      },
+      "handsfree_dialogue": {
+        "enabled": false,
+        "state": "PAUSED",
+        "reason": "AUDIO_WAKE_WORD",
+        "error": "",
+        "visual_bound": false,
+        "conversation_entered": false,
+        "microphone_open": false,
+        "speech_detection": "vad_then_asr_wake_word",
+        "diagnostics": {
+          "armed": 0,
+          "speech_starts": 0,
+          "submitted": 0,
+          "entry_rejected": 0,
+          "visual_stops": 0
+        },
+        "speaker_binding_verified": false,
+        "voice_barge_in": true,
+        "listening_timing": {
+          "enabled": true,
+          "entry_confirmed": false,
+          "input_ready": false,
+          "holding_utterance": false,
+          "visual_hold": false,
+          "last_stop_reason": "",
+          "stop_reasons": {}
+        },
+        "entry_mode": "wake_word",
+        "visual_required": false,
+        "wake_words": [
+          "\u6c50\u84dd",
+          "\u6b38",
+          "\u54ce"
+        ]
+      },
+      "voice_barge_in": {
+        "enabled": true,
+        "listening": false,
+        "echo_reference_ready": false,
+        "echo_reference_gaps": null,
+        "interrupted_turns": 0,
+        "error": "",
+        "last_monitor": {},
+        "last_detection_to_stop_ms": null,
+        "continuation_listening": false,
+        "continuation_handoffs": 0,
+        "next_utterance_pending": false,
+        "speech_verification": {},
+        "echo_cancellation": "SpeexDSP reference from queued playback PCM",
+        "speaker_binding_verified": false
+      },
+      "device_observer": {
+        "enabled": false,
+        "interval_seconds": 15.0,
+        "sent": 0,
+        "error": "",
+        "last_sent_age_seconds": null,
+        "raw_image_storage": false,
+        "retention_seconds": 86400
+      },
+      "visual_social": {
+        "enabled": true,
+        "active": false,
+        "cues_played": 0
+      },
+      "avatar_command_pending": 0,
+      "avatar_renderer": {
+        "sequence": 14,
+        "render_ms": 39.38068400000816,
+        "frame_age_ms": 63,
+        "command_results": [],
+        "timings_ms": {
+          "target_fps": 8,
+          "core": 35.69217700000138,
+          "compose_resize": 1.4147239999999783,
+          "jpeg": 0.07177100000888004,
+          "public": 1.9453489999960993,
+          "total": 39.359322999999335,
+          "native_enqueue": 0.17207099999438924
+        },
+        "profile": {
+          "frames": 10,
+          "window_seconds": 1.0635558169999941,
+          "core": {
+            "p50": 81.55246500000146,
+            "p95": 224.76045799999156,
+            "max": 224.76045799999156
+          },
+          "compose_resize": {
+            "p50": 1.2570119999963936,
+            "p95": 3.752657999996245,
+            "max": 3.752657999996245
+          },
+          "jpeg": {
+            "p50": 0.12387200000318899,
+            "p95": 0.2744530000029499,
+            "max": 0.2744530000029499
+          },
+          "public": {
+            "p50": 1.4484240000030013,
+            "p95": 40.35829299999705,
+            "max": 40.35829299999705
+          },
+          "total": {
+            "p50": 83.6522959999968,
+            "p95": 227.6764979999939,
+            "max": 227.6764979999939
+          },
+          "interval": {
+            "p50": 109.64346699999794,
+            "p95": 262.2747039999922,
+            "max": 262.2747039999922
+          },
+          "native_push": {}
+        },
+        "presentation": {
+          "sequence": 14,
+          "lateness_ms": 0.15757400001348287,
+          "push_ms": 0.5619549999948958,
+          "presented": 14,
+          "dropped": 0,
+          "expired": 0,
+          "error": "",
+          "deliberate_hold_limit_ms": 85,
+          "performance_log": {
+            "path": "/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784/evidence/render_performance.jsonl",
+            "written": 0,
+            "dropped": 0,
+            "error": "",
+            "period_seconds": 5,
+            "max_total_bytes": 4194304
+          }
+        }
+      },
+      "avatar_display": {
+        "pushed": 4.0,
+        "received": 4.0,
+        "sequence": 14.0,
+        "fps": 8.501495777254856,
+        "p50_ms": 120.77409799999828,
+        "p95_ms": 124.85182899999359,
+        "p99_ms": 124.85182899999359,
+        "max_ms": 124.85182899999359,
+        "age_ms": 17.031630000005293,
+        "kind": "native_sink_handoff"
+      },
+      "ui_page": "main",
+      "ui_settings": {
+        "available": true,
+        "volume": 70,
+        "muted": false,
+        "pending": false,
+        "error": "",
+        "revision": 1,
+        "requested_version": 1,
+        "applied_version": 1,
+        "fullscreen": true,
+        "economy": false
+      },
+      "touch_devices": [
+        {
+          "event": "event1",
+          "name": "WaveShare WS170120"
+        }
+      ],
+      "character": "\u6c50\u84dd",
+      "dialogue_enabled": true,
+      "backend": "gtk3-gstreamer",
+      "cached_only": true,
+      "ui_runtime": {
+        "link": "READY",
+        "error": "",
+        "snapshot": {
+          "protocol_version": "aura-ui-1",
+          "board_boot_id": "605eaf50-c66a-4559-bfc9-5ae177e0f305",
+          "service_epoch": "d160506d5c7645f48b74fe89e9ebd544",
+          "sequence": 10,
+          "observed_mono_ms": 90446,
+          "ttl_ms": 2000,
+          "source_kind": "actual",
+          "context": {
+            "session_id": "030eb3672bcb42d78ad95edd04572c4f",
+            "request_id": "",
+            "generation": 0
+          },
+          "modules": {
+            "camera": {
+              "state": "READY",
+              "detail": "USB \u76f8\u673a \u00b7 640\u00d7480 \u00b7 \u955c\u50cf\u9884\u89c8",
+              "preview_transport": "aura-local-bgr-1"
+            },
+            "vision": {
+              "state": "READY",
+              "detail": "DPU YOLOX-Nano \u4eba\u4f53\u68c0\u6d4b + ByteTrack \u8ddf\u8e2a",
+              "count_kind": "people",
+              "people_count": 1
+            },
+            "target": {
+              "state": "CONFIRMED",
+              "selected": {
+                "camera_epoch": "b54d81c900974dceadeebd0a472312b1",
+                "track_id": 1,
+                "track_generation": 2
+              },
+              "tracks": [
+                {
+                  "key": {
+                    "camera_epoch": "b54d81c900974dceadeebd0a472312b1",
+                    "track_id": 1,
+                    "track_generation": 2
+                  },
+                  "label": "\u4eba\u4f53 #1"
+                }
+              ]
+            },
+            "npu": {
+              "state": "READY",
+              "detail": "YOLOX-Nano \u00b7 B4096 \u00b7 \u4eba\u4f53\u68c0\u6d4b"
+            },
+            "identity": {
+              "state": "UNKNOWN",
+              "person_id": "",
+              "display_name": "",
+              "db_version": 1,
+              "people": [
+                {
+                  "person_id": "f02fc2636d574ff397c51f75859d363a",
+                  "display_name": "\u8d75\u5fd7"
+                }
+              ],
+              "backend": "DPU_SFACE_INT8",
+              "detail": "\u672a\u767b\u8bb0 / UNKNOWN",
+              "target_kind": "face",
+              "face_target": {
+                "camera_epoch": "b54d81c900974dceadeebd0a472312b1",
+                "track_id": 3,
+                "track_generation": 3
+              },
+              "face_count": 1,
+              "face_targets": [
+                {
+                  "key": {
+                    "camera_epoch": "b54d81c900974dceadeebd0a472312b1",
+                    "track_id": 3,
+                    "track_generation": 3
+                  },
+                  "label": "\u4eba\u8138 #3"
+                }
+              ],
+              "face_attention": {
+                "version": 1,
+                "target": {
+                  "camera_epoch": "b54d81c900974dceadeebd0a472312b1",
+                  "track_id": 3,
+                  "track_generation": 3
+                },
+                "frame_id": 936,
+                "captured_mono_ms": 90357,
+                "ttl_ms": 1000,
+                "yaw_ratio": 0.3073044308281533,
+                "roll_degrees": 17.52559406577917,
+                "frontal": false
+              },
+              "source_frame_id": 931,
+              "source_mono_ms": 89954,
+              "target": {
+                "camera_epoch": "b54d81c900974dceadeebd0a472312b1",
+                "track_id": 3,
+                "track_generation": 3
+              },
+              "face_preview": {
+                "target": {
+                  "camera_epoch": "b54d81c900974dceadeebd0a472312b1",
+                  "track_id": 3,
+                  "track_generation": 3
+                },
+                "frame_id": 931,
+                "captured_mono_ms": 89954,
+                "ttl_ms": 3000
+              },
+              "enrollment_sampling": {
+                "session_id": "",
+                "stage": "idle",
+                "counts": {
+                  "collect": 0,
+                  "validate": 0
+                },
+                "bound_target": null,
+                "total": 0,
+                "total_required": 15,
+                "detail": "\u7b49\u5f85\u5f00\u59cb\u4eba\u8138\u91c7\u6837"
+              }
+            }
+          },
+          "capabilities": {
+            "record_start": false,
+            "record_stop": false,
+            "cancel": false,
+            "ask_frame": false,
+            "target_select": true,
+            "identity_enroll": false,
+            "identity_delete": true,
+            "motion_disarm": false,
+            "identity_sample_start": true,
+            "identity_sample_cancel": false
+          },
+          "preview": {
+            "camera_epoch": "b54d81c900974dceadeebd0a472312b1",
+            "frame_id": 936,
+            "captured_mono_ms": 90357
+          }
+        },
+        "connection": {
+          "enabled": true,
+          "host": "127.0.0.1",
+          "port": 8790
+        },
+        "preview_error": "",
+        "raw_preview": true,
+        "identity_face_reference": null,
+        "identity_face_error": "",
+        "pending_count": 0,
+        "ui_epoch": "ff67a3f135494c48bb317c1f7c0affae",
+        "ui_generation": 0,
+        "results": [],
+        "protocol_version": "aura-ui-1",
+        "frame_visible": false,
+        "frame_reference": null,
+        "preview_metrics": {
+          "frame_reference": null,
+          "frame_visible": false,
+          "error": "",
+          "displayed_frames": 0,
+          "update_hz": 0,
+          "entry_age_ms": null,
+          "sink_active": false,
+          "active_outputs": [],
+          "measurement_scope": "active_native_sink_entry_not_physical_scanout",
+          "measurement": "native_video_sink_entry",
+          "transport": "jpeg-http"
+        }
+      },
+      "ui_pages": [
+        "main",
+        "vision",
+        "demo",
+        "devices",
+        "connection",
+        "settings"
+      ],
+      "ui_layer": "presentation",
+      "manual_pan": {
+        "state": "FAULT",
+        "pulse_us": null,
+        "target_us": null,
+        "left_sign": -1,
+        "minimum_us": 500,
+        "maximum_us": 2500,
+        "mechanical_reference_calibrated": false,
+        "automatic_following": false,
+        "message": "\u8f6c\u8f74\u4e0d\u53ef\u8c03\u8282\uff0c\u8bf7\u68c0\u67e5\u8fde\u63a5",
+        "error": "Exact board/boot/firmware/VART context required; no MMIO",
+        "history": [],
+        "backend_pid": 1482,
+        "face_follow": {},
+        "panel_open": false
+      },
+      "native_canvas": {
+        "visible": true,
+        "mapped": false,
+        "placeholder_visible": true,
+        "double_buffered": true,
+        "width": 1,
+        "height": 1
+      },
+      "ui_tick_ms": 39.95,
+      "diagnostic_job": null,
+      "sequence": 1
+    }
+  },
+  "stage_log_tail": "READY {\"backend\": \"gtk3-gstreamer\", \"evidence\": \"/home/root/aura-boundary-nav-20261029/gui-page-sync-v2/runtime/managed-runs/605eaf50-c66a-4559-bfc9-5ae177e0f305-45340805784/evidence\", \"controls\": \"http://127.0.0.1:8783\"}\nFOREGROUND {\"own_window\": \"0x1400002\", \"own_frame\": \"0x80000a\"}\n",
+  "audio_worker_log_tail": "",
+  "audio_worker_log_bytes": 0,
+  "component_inventory": {
+    "count": 279,
+    "total_bytes": 2053383,
+    "largest": [
+      {
+        "bytes": 109703,
+        "path": "tools/board_avatar_gtk.py"
+      },
+      {
+        "bytes": 42289,
+        "path": "board/interaction/qt_widgets.py"
+      },
+      {
+        "bytes": 41704,
+        "path": "tools/libaura_pixels.so"
+      },
+      {
+        "bytes": 39391,
+        "path": "tools/demo_stage.py"
+      },
+      {
+        "bytes": 36666,
+        "path": "board/interaction/avatar_timing.py"
+      },
+      {
+        "bytes": 36646,
+        "path": "tools/demo_script.py"
+      },
+      {
+        "bytes": 34057,
+        "path": "tests/fixtures/vision/person_bus.jpg"
+      },
+      {
+        "bytes": 33096,
+        "path": "board/vision/ui_camera_service.py"
+      },
+      {
+        "bytes": 27136,
+        "path": "board/vision/native/libaura_yolox.so"
+      },
+      {
+        "bytes": 26160,
+        "path": "board/interaction/avatar_player.py"
+      },
+      {
+        "bytes": 24909,
+        "path": "tools/board_model_host.py"
+      },
+      {
+        "bytes": 23864,
+        "path": "board/runtime/audio/tts.py"
+      }
+    ],
+    "missing": []
+  }
+}

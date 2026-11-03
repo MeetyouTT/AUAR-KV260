@@ -1,0 +1,26 @@
+--- R5/manage_installation.py
++++ R6/manage_installation.py
+@@ -240,17 +240,20 @@
+     current_active = regular(active_path) if active_path.exists() else b'null\n'
+     committed_path = directory / 'committed.json'
+     committed = regular(committed_path) if committed_path.exists() else None
+-    require(current_active == prior_active or current_active == committed, 'NEWER_ACTIVE_LEDGER_CONFLICT')
++    sealed_after = regular(directory / 'active-source.after.json')
++    require(digest(sealed_after) == intent['active_after_sha256'], 'AFTER_ACTIVE_LEDGER_SEALED_BYTES_CHANGED')
++    require(committed is None or committed == sealed_after, 'COMMITTED_LEDGER_DIFFERS_FROM_SEALED_AFTER')
++    require(current_active == prior_active or current_active == sealed_after, 'NEWER_ACTIVE_LEDGER_CONFLICT')
+     for path, before, after in pairs:
+         if regular(path) == after:
+             replace_known(path, after, before)
+     if current_active != prior_active:
+         if prior_active == b'null\n':
+-            require(regular(active_path) == committed, 'ACTIVE_LEDGER_CHANGED')
++            require(regular(active_path) == sealed_after, 'ACTIVE_LEDGER_CHANGED')
+             active_path.unlink()
+             fsync_directory(active_path.parent)
+         else:
+-            replace_known(active_path, committed, prior_active)
++            replace_known(active_path, sealed_after, prior_active)
+     return dict(status='EXACT_BINDING_BYTES_RESTORED_GUI_LEFT_STOPPED', original_camera_reader_state_untouched=True,
+                 fresh_binding_required_before_next_gui_start=True, service_action_requested=False)
+ 

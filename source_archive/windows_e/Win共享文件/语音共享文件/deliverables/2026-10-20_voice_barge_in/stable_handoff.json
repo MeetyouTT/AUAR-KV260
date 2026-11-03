@@ -1,0 +1,25 @@
+{
+  "status": "PRE_TEST_MONITOR_CHOICE_RESTORED",
+  "runtime": "/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime",
+  "handsfree": {
+    "enabled": true,
+    "state": "WAITING_PERSON",
+    "reason": "NO_SINGLE_FACE",
+    "error": "",
+    "visual_bound": false,
+    "conversation_entered": false,
+    "microphone_open": false,
+    "speech_detection": "energy_vad_then_asr",
+    "diagnostics": {
+      "armed": 0,
+      "speech_starts": 0,
+      "submitted": 0,
+      "entry_rejected": 0,
+      "visual_stops": 0
+    },
+    "speaker_binding_verified": false,
+    "voice_barge_in": true
+  },
+  "ui_unit": "# /etc/systemd/system/aura-avatar-ui.service\n[Unit]\nDescription=AURA cached avatar touchscreen interface\nWants=xserver-nodm.service systemd-modules-load.service\nAfter=local-fs.target xserver-nodm.service systemd-modules-load.service\nRequiresMountsFor=/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime\nStartLimitIntervalSec=300\nStartLimitBurst=5\n\n[Service]\nType=notify\nNotifyAccess=main\nUser=root\nEnvironment=DISPLAY=:0 PYTHONUNBUFFERED=1\nWorkingDirectory=/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime/aura\nExecStart=/usr/bin/python3 -B /home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/startup/launcher.py --config /home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/startup/config.json\nRestart=on-failure\nRestartSec=5\nTimeoutStartSec=240\nTimeoutStopSec=25\nKillMode=mixed\nStandardOutput=journal\nStandardError=journal\nSyslogIdentifier=aura-avatar-ui\n\n[Install]\nWantedBy=graphical.target\n",
+  "services_restarted": false
+}

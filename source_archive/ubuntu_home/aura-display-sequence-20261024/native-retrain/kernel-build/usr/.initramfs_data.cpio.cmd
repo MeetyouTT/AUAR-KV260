@@ -1,0 +1,1 @@
+cmd_usr/initramfs_data.cpio := sh /home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux/usr/gen_initramfs.sh -o usr/initramfs_data.cpio -l usr/.initramfs_data.cpio.d   /home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux/usr/default_cpio_list

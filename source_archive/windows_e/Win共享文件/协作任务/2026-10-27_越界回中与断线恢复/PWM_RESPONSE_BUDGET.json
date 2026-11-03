@@ -1,0 +1,42 @@
+{
+  "status": "OFFLINE_TIMING_ANALYSIS_ONLY",
+  "production_changed": false,
+  "new_firmware_built": false,
+  "motor_commands_sent": 0,
+  "script": "/home/ghmd/aura-pan-follow-shadow-20261024/refresh_rate_review_20261027/pwm_response_budget.py",
+  "experiment": {
+    "implementation": "existing host Ruckig compatibility library and current v11 velocity/acceleration/jerk limits",
+    "planner_tick_ms": 1,
+    "initial_position_us": 1420,
+    "initial_velocity_us_s": 0,
+    "initial_acceleration_us_s2": 0,
+    "target_velocity_us_s": 30,
+    "maximum_acceleration_us_s2": 120,
+    "maximum_jerk_us_s3": 800,
+    "first_integer_target_change_ms": 156,
+    "first_three_us_target_change_ms": 275,
+    "excludes": ["camera", "transport", "face confirmation", "ARM", "OS scheduling delay", "PWM frame wait", "pulse decoding", "mechanical response"]
+  },
+  "candidate_frames": [
+    {"frequency_hz": 50, "period_ms": 20, "frame_step_limit_us": 4, "slew_cap_us_s": 200},
+    {"frequency_hz": 100, "period_ms": 10, "frame_step_limit_us": 2, "slew_cap_us_s": 200},
+    {"frequency_hz": 200, "period_ms": 5, "frame_step_limit_us": 1, "slew_cap_us_s": 200}
+  ],
+  "candidate_status": "100/200Hz are arithmetic profiles only; no new RTL build or compatibility/physical validation",
+  "current_range_us": [1400, 1600],
+  "supplier_record": {
+    "archive": "/home/ghmd/下载/项目.zip",
+    "member": "项目/方案/reference_round4_20260926/器件规格确认_麦克风INMP441_舵机DS3230_技术记录_v1_0.extracted.md",
+    "section": "3.3 control characteristics",
+    "claimed_control_frequency_hz": [50, 330],
+    "claimed_deadband_us": 3,
+    "evidence_type": "user-supplied supplier-page transcription; not a manufacturer datasheet or physical measurement",
+    "exact_installed_unit_high_rate_compatibility_verified": false,
+    "official_download_attempt": "https://www.dsservo.com/down.asp?id=22 returned HTTP 403 via local downloader; contents not verified"
+  },
+  "references": [
+    "https://www.pololu.com/blog/17/servo-control-interface-in-detail",
+    "https://docs.ruckig.com/example_05.html"
+  ],
+  "conclusion": "A faster planner or PWM frame alone cannot provide millisecond face-to-mechanical response under the current startup trajectory. First remove repeated restart causes and tune the verified startup profile; evaluate faster PWM separately with corresponding step-rate limits and servo compatibility. Preserve source expiry and explicit STOP."
+}

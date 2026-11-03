@@ -1,0 +1,15 @@
+--- production/tools/unified_identity_binding.py
++++ candidate/tools/unified_identity_binding.py
+@@ -87,6 +87,12 @@
+                     return self.decision('face_exchange',attempt_id=attempt,board_text='帮我登记身份，我叫'+row['name'],reason='EXISTING_FACE_LINK_CONFIRMED')
+             return self.decision('face_exchange',attempt_id=attempt,board_text=text,reason='ORIGINAL_FACE_WORKFLOW')
+         if state=='SAMPLING_VOICE':
++            from common.voice_enrollment import identity_query_requested
++            if identity_query_requested(text):
++                # A read-only identity question is not one of the three voice
++                # enrollment samples. The existing hub resolves this ordinary
++                # route with current face/voice evidence and its conflict rules.
++                return self.decision('ordinary',reason='IDENTITY_QUERY_DURING_VOICE_ENROLLMENT')
+             face=json.loads(row['face_receipt'])
+             try:
+                 current=_guard(visual,meta);original=json.loads(row['face_guard'])

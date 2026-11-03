@@ -1,0 +1,62 @@
+{
+  "boot_id": "25c4401f-471d-4383-8159-03b8bcaf480b",
+  "camera_unit": {
+    "exit_code": 0,
+    "output": "# /etc/systemd/system/aura-camera-ui.service\n[Unit]\nDescription=AURA shared USB camera preview and YOLOX person adapter\nAfter=local-fs.target\nStartLimitIntervalSec=90\nStartLimitBurst=3\n\n[Service]\nType=simple\nExecStart=/usr/bin/python3 -B /home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/board/vision/ui_camera_service.py\nWorkingDirectory=/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura\nEnvironment=PYTHONUNBUFFERED=1\nRestart=on-failure\nRestartSec=5\nTimeoutStopSec=10\nKillMode=control-group\nUMask=0077\n\n[Install]\nWantedBy=multi-user.target\n"
+  },
+  "camera_journal": {
+    "exit_code": 0,
+    "output": "-- Journal begins at Fri 2021-11-19 09:19:30 PST, ends at Fri 2021-11-19 09:22:45 PST. --\nNov 19 09:19:58 xilinx-kv260-starterkit-20222 python3[1394]: {\"event\": \"CAMERA_FAILED\", \"error\": \"Cannot start camera\"}\nNov 19 09:19:58 xilinx-kv260-starterkit-20222 python3[1394]: Traceback (most recent call last):\nNov 19 09:19:58 xilinx-kv260-starterkit-20222 python3[1394]:   File \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/board/vision/ui_camera_service.py\", line 479, in <module>\nNov 19 09:19:58 xilinx-kv260-starterkit-20222 python3[1394]:     if __name__=='__main__':main()\nNov 19 09:19:58 xilinx-kv260-starterkit-20222 python3[1394]:   File \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/board/vision/ui_camera_service.py\", line 476, in main\nNov 19 09:19:58 xilinx-kv260-starterkit-20222 python3[1394]:     else:run(config)\nNov 19 09:19:58 xilinx-kv260-starterkit-20222 python3[1394]:   File \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/board/vision/ui_camera_service.py\", line 427, in run\nNov 19 09:19:58 xilinx-kv260-starterkit-20222 python3[1394]:     if capture.set_state(Gst.State.PLAYING)==Gst.StateChangeReturn.FAILURE:raise RuntimeError('Cannot start camera')\nNov 19 09:19:58 xilinx-kv260-starterkit-20222 python3[1394]: RuntimeError: Cannot start camera\nNov 19 09:19:59 xilinx-kv260-starterkit-20222 systemd[1]: aura-camera-ui.service: Main process exited, code=exited, status=1/FAILURE\nNov 19 09:19:59 xilinx-kv260-starterkit-20222 systemd[1]: aura-camera-ui.service: Failed with result 'exit-code'.\nNov 19 09:20:04 xilinx-kv260-starterkit-20222 systemd[1]: aura-camera-ui.service: Scheduled restart job, restart counter is at 2.\nNov 19 09:20:04 xilinx-kv260-starterkit-20222 systemd[1]: Stopped AURA shared USB camera preview and YOLOX person adapter.\nNov 19 09:20:04 xilinx-kv260-starterkit-20222 systemd[1]: Started AURA shared USB camera preview and YOLOX person adapter.\nNov 19 09:20:08 xilinx-kv260-starterkit-20222 python3[1421]: {\"event\": \"CAMERA_FAILED\", \"error\": \"Cannot start camera\"}\nNov 19 09:20:09 xilinx-kv260-starterkit-20222 python3[1421]: Traceback (most recent call last):\nNov 19 09:20:09 xilinx-kv260-starterkit-20222 python3[1421]:   File \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/board/vision/ui_camera_service.py\", line 479, in <module>\nNov 19 09:20:09 xilinx-kv260-starterkit-20222 python3[1421]:     if __name__=='__main__':main()\nNov 19 09:20:09 xilinx-kv260-starterkit-20222 python3[1421]:   File \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/board/vision/ui_camera_service.py\", line 476, in main\nNov 19 09:20:09 xilinx-kv260-starterkit-20222 python3[1421]:     else:run(config)\nNov 19 09:20:09 xilinx-kv260-starterkit-20222 python3[1421]:   File \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/board/vision/ui_camera_service.py\", line 427, in run\nNov 19 09:20:09 xilinx-kv260-starterkit-20222 python3[1421]:     if capture.set_state(Gst.State.PLAYING)==Gst.StateChangeReturn.FAILURE:raise RuntimeError('Cannot start camera')\nNov 19 09:20:09 xilinx-kv260-starterkit-20222 python3[1421]: RuntimeError: Cannot start camera\nNov 19 09:20:09 xilinx-kv260-starterkit-20222 systemd[1]: aura-camera-ui.service: Main process exited, code=exited, status=1/FAILURE\nNov 19 09:20:09 xilinx-kv260-starterkit-20222 systemd[1]: aura-camera-ui.service: Failed with result 'exit-code'.\nNov 19 09:20:14 xilinx-kv260-starterkit-20222 systemd[1]: aura-camera-ui.service: Scheduled restart job, restart counter is at 3.\nNov 19 09:20:14 xilinx-kv260-starterkit-20222 systemd[1]: Stopped AURA shared USB camera preview and YOLOX person adapter.\nNov 19 09:20:14 xilinx-kv260-starterkit-20222 systemd[1]: aura-camera-ui.service: Start request repeated too quickly.\nNov 19 09:20:14 xilinx-kv260-starterkit-20222 systemd[1]: aura-camera-ui.service: Failed with result 'exit-code'.\nNov 19 09:20:14 xilinx-kv260-starterkit-20222 systemd[1]: Failed to start AURA shared USB camera preview and YOLOX person adapter.\n"
+  },
+  "camera_owners": {
+    "exit_code": 1,
+    "output": ""
+  },
+  "display": {
+    "exit_code": 0,
+    "output": "Screen 0: minimum 320 x 200, current 1024 x 600, maximum 4096 x 4096\nDP-1 connected primary 1024x600+0+0 150mm x 90mm\n   1024x600      59.85*+\n"
+  },
+  "windows": {
+    "error": "[Errno 2] No such file or directory: 'xwininfo'"
+  },
+  "ui": {
+    "ui_page": "vision",
+    "ui_layer": "presentation",
+    "error": "",
+    "ui_runtime": {
+      "link": "OFFLINE",
+      "error": "<urlopen error [Errno 111] Connection refused>",
+      "snapshot": null,
+      "connection": {
+        "enabled": true,
+        "host": "127.0.0.1",
+        "port": 8790
+      },
+      "preview_error": "",
+      "raw_preview": false,
+      "pending_count": 0,
+      "ui_epoch": "ebc976a22bad4cda9778a40875301d53",
+      "ui_generation": 0,
+      "results": [],
+      "protocol_version": "aura-ui-1",
+      "frame_visible": false,
+      "frame_reference": null,
+      "preview_metrics": {
+        "frame_reference": null,
+        "frame_visible": false,
+        "error": "",
+        "displayed_frames": 0,
+        "update_hz": 0,
+        "entry_age_ms": null,
+        "measurement": "native_video_sink_entry",
+        "transport": "jpeg-http"
+      }
+    },
+    "avatar_renderer": {
+      "sequence": 953,
+      "render_ms": 146.94550999999478,
+      "frame_age_ms": 119,
+      "command_results": []
+    }
+  }
+}

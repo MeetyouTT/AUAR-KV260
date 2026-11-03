@@ -1,0 +1,70 @@
+{
+  "schema_version": 2,
+  "status": "INDEPENDENT_REVIEW_FIXES_LOCAL_PASS_NO_DEVICE_ACTIONS",
+  "supersedes_executor_source_from": "executor_handoff.json (historical f9008dfc31a7507e71c1b09f09a71436bb8bcd428b9987487ae6080c43a9b8ac)",
+  "files": {
+    "serial_trial.py": "08348d996517ea78a438332b965839e886d6da5531ea5d13941eb46ccec711d2",
+    "test_serial_trial.py": "c42d4112918ad886c13962f6ef9c8154368183773ea99685b10ea229d1f8f3ce",
+    "executor_review_v2_tests.xml": "2a2fd535c7d3021c35d16e87fd0e921b7151606ca49711125067bd4da1947e25"
+  },
+  "candidate_manifest_unchanged": "b697628ac2588881628e809e207a8bbc5e88f9d0ab40a433749e1d875aa38ccd",
+  "actual_metadata_reviewed_read_only": [
+    "../resume_camera_pin/actual_metadata_snapshot_v4.json",
+    "../resume_camera_pin/native_schedule_metadata.json",
+    "../resume_camera_pin/actual_candidate_written.json",
+    "actual_unit_property_layout.json",
+    "actual_empty_stop_commands.json"
+  ],
+  "corrected_findings": [
+    {
+      "issue": "Six-z trial drop-in sorted before the current late r17 drop-ins; its candidate ExecStart would be overridden after the baseline stopped",
+      "fix": "Use one explicit 64-z owned prefix; require the new basename to sort after every original loaded drop-in before creating journal/drop-in, and retain that assertion on every action. Refuse other current-prefix or legacy six-z trial drop-ins. No other drop-in is removed."
+    },
+    {
+      "issue": "Actual systemd249 omits empty ExecStop/ExecStopPost command arrays even with --all; blindly substituting empty values would hide a real hook",
+      "fix": "Use --all and permit only exactly these two missing keys. Require a second complete unfiltered show --all to contain no ExecStop-prefixed property and the identical other selected properties. Read the actual fragment and every loaded drop-in, rejecting any ExecStop/ExecStopPost assignment or legacy .include, then explicitly represent the proven empty hooks. Any other missing property remains refused."
+    },
+    {
+      "issue": "Actual no-job property is empty while the original executor required literal zero",
+      "fix": "Accept only token arrays [] or ['0']; any nonzero job or additional token is refused."
+    },
+    {
+      "issue": "A second partial restoration retained the prior restored PID record and could refuse to normally stop the actual new owner",
+      "fix": "After validating the new handoff and before durably entering a new STARTING/RESTORING attempt, clear only that attempt's stale owner/health record. Its predecessor provenance remains in the durable handoff.source. Partial-stop then binds and checks the actual new sole owner."
+    }
+  ],
+  "dynamic_native_configuration_review": {
+    "on_disk_runtime": "Snapshot config.json keeps the original native library and predecessor unit29786434; regenerated runtime equality should compare these on-disk values except seed SHA",
+    "actual_in_process": "Pinned identity_recovery.preflight changes the RAM config to the approved native-operator library and final source unit7cf7eaeecd70e62301d3e12e95d5df6a23bd3e5847ed854200c712598b703c32",
+    "conclusion": "Existing NATIVE_UNIT=7cf7... and mapped operator-library checks are correct. Do not replace them with the on-disk predecessor unit/library.",
+    "original_native_health_shape_matches_projection": true
+  },
+  "tests": {
+    "command_scope": "test_serial_trial.py and test_face_budget.py only; synthetic OS/systemd/native metadata",
+    "passed": 87,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 0.32,
+    "python38_syntax_verified": true,
+    "added_coverage": [
+      "Second partial restoration, durable journal reload, normal stop of the new owner, another restore and final cleanup",
+      "Actual empty-hook source/full-property proof, altered effective owner/hook, any source hook/reset/include, additional missing property rejection",
+      "Empty/zero job accepted; nonzero/additional-token forms refused",
+      "Existing late28-z override plus 64-z trial ordering, too-late foreign drop-in refusal, current and legacy active-trial refusal"
+    ],
+    "initial_invocation_note": "An initial invocation named a nonexistent test_serial_plan.py and collected no tests. Corrected to the two existing test files; the 87-test result is the completed verification."
+  },
+  "remaining_explicit_recovery_limits": [
+    "A crash after durable stop_issued=true but before the systemctl stop request can leave observation pending without replaying stop. Root must audit and may explicitly request a normal stop of the exact same owner; no automatic resend was added in this narrow patch.",
+    "An ambiguous STARTING attempt with no owner is intentionally not blindly retried. No consumed marker may be cleared and no old checkpoint may be replayed.",
+    "Actual stop/checkpoint/candidate start/restored-owner validation are parent-owned and remain required; local fixtures are not hardware acceptance."
+  ],
+  "preserved": {
+    "original_native_and_candidate_sources": true,
+    "checkpoint_and_consumption_markers": true,
+    "no_forced_kill_or_parallel_owner": true,
+    "full_health_and_private_database_contents_not_emitted": true,
+    "no_device_or_service_actions_by_this_subtask": true
+  }
+}

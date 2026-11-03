@@ -1,0 +1,158 @@
+"""Face-only edge following math. This module has no actuator or IO imports."""
+from dataclasses import dataclass
+import math
+from common.motion_observation import MAX_AGE_MS, ObservationError, validate
+
+
+@dataclass(frozen=True)
+class EdgeConfig:
+    enter_margin: float = .08
+    exit_margin: float = .18
+    filter_tau_ms: float = 150.
+    gain_us_s: float = 100.
+    maximum_speed_us_s: float = 12.
+    minimum_speed_us_s: float = 2.
+    maximum_acceleration_us_s2: float = 40.
+    maximum_step_us: float = 2.
+    confirm_frames: int = 3
+    edge_confirm_frames: int = 2
+    minimum_score: float = .9
+    minimum_face_pixels: float = 48.
+    maximum_face_width_ratio: float = .7
+    minimum_us: int = 1425
+    maximum_us: int = 1445
+
+    def __post_init__(self):
+        values = (self.enter_margin, self.exit_margin, self.filter_tau_ms, self.gain_us_s,
+                  self.maximum_speed_us_s, self.minimum_speed_us_s,
+                  self.maximum_acceleration_us_s2, self.maximum_step_us,
+                  self.minimum_score, self.minimum_face_pixels, self.maximum_face_width_ratio)
+        if any(type(v) not in (int, float) or not math.isfinite(v) for v in values):
+            raise ValueError('Finite face control parameters required')
+        if not (0 < self.enter_margin < self.exit_margin < .35
+                and 30 <= self.filter_tau_ms <= 500 and 1 <= self.gain_us_s <= 200
+                and 0 < self.minimum_speed_us_s <= self.maximum_speed_us_s <= 20
+                and 1 <= self.maximum_acceleration_us_s2 <= 100
+                and 0 < self.maximum_step_us <= 2
+                and type(self.confirm_frames) is int and 2 <= self.confirm_frames <= 10
+                and type(self.edge_confirm_frames) is int and 2 <= self.edge_confirm_frames <= 5
+                and .9 <= self.minimum_score <= 1 and self.minimum_face_pixels >= 24
+                and .2 <= self.maximum_face_width_ratio <= .7
+                and type(self.minimum_us) is int and type(self.maximum_us) is int
+                and 1425 <= self.minimum_us < self.maximum_us <= 1445):
+            raise ValueError('Invalid observed-range face edge control parameters')
+
+
+class FaceEdgeController:
+    def __init__(self, boot, reference_us, *, polarity=1, config=None):
+        self.config = config or EdgeConfig()
+        if (not isinstance(boot, str) or not boot or type(reference_us) is not int
+                or not self.config.minimum_us <= reference_us <= self.config.maximum_us
+                or type(polarity) is not int or polarity not in (-1, 1)):
+            raise ValueError('Current stopped command and observed polarity required')
+        self.boot, self.polarity = boot, polarity
+        self.position, self.pulse_us = float(reference_us), reference_us
+        self.velocity = 0.
+        self.context = self.source = self.payload = self.last_now = None
+        self.filtered_center = self.filtered_width = None
+        self.warmup = self.edge_count = 0
+        self.edge_candidate = self.edge = 0
+        self.stopped = False
+        self.reason = 'WAITING_FOR_FACE'
+        self.new_source = False
+        self.proposals = 0
+
+    def status(self):
+        return {'state': 'DISARMED' if self.stopped else 'EDGE_FOLLOW' if self.edge else
+                'DECELERATING' if abs(self.velocity) > .001 else 'HOLD',
+                'reason': self.reason, 'pulse_us': self.pulse_us,
+                'velocity_us_s': self.velocity, 'edge': self.edge,
+                'filtered_center_ratio': self.filtered_center,
+                'filtered_width_ratio': self.filtered_width,
+                'source_mono_ms': self.source[1] if self.source else None,
+                'new_source': self.new_source, 'confirmed_sources': self.warmup,
+                'proposals': self.proposals, 'limits_us': [self.config.minimum_us, self.config.maximum_us]}
+
+    def stop(self, reason):
+        self.stopped, self.reason, self.velocity, self.edge = True, reason, 0., 0
+        return self.status()
+
+    def observe(self, value, now_ms, *, allow_fixture=False):
+        self.new_source = False
+        if self.stopped:
+            return self.status()
+        if type(now_ms) is not int or (self.last_now is not None and now_ms < self.last_now):
+            return self.stop('INVALID_CLOCK')
+        self.last_now = now_ms
+        if self.source is not None and now_ms-self.source[1] >= MAX_AGE_MS:
+            return self.stop('SOURCE_EXPIRED')
+        try:
+            packet = validate(value, self.boot, now_ms, allow_fixture=allow_fixture)
+        except ObservationError as exc:
+            if self.context is None and str(exc) in ('SOURCE_NO_TARGET', 'SOURCE_EXPIRED', 'SOURCE_MULTIPLE_FACES', 'SOURCE_UNCONFIRMED'):
+                self.reason = str(exc)
+                return self.status()
+            return self.stop(str(exc))
+        if packet.get('target_kind') != 'face':
+            return self.stop('FACE_SOURCE_REQUIRED')
+        t = packet['target']
+        context = (packet['service_epoch'], packet['camera_epoch'], t['track_id'],
+                   t['track_generation'], packet['frame_width'], packet['frame_height'])
+        if self.context is not None and self.context != context:
+            return self.stop('FACE_CONTEXT_CHANGED')
+        source = (packet['source_frame_id'], packet['source_mono_ms'])
+        payload = (context, tuple(t['box']), t['score'])
+        if self.source == source:
+            if self.payload != payload:
+                return self.stop('SOURCE_MUTATED')
+            self.reason = 'NO_NEW_SOURCE'
+            return self.status()
+        if self.source is not None and (source[0] <= self.source[0] or source[1] <= self.source[1]):
+            return self.stop('SOURCE_REORDERED')
+        x, y, w, h = t['box']
+        width = packet['frame_width']
+        if t['score'] < self.config.minimum_score or min(w, h) < self.config.minimum_face_pixels:
+            return self.stop('FACE_QUALITY')
+        if w/width > self.config.maximum_face_width_ratio:
+            return self.stop('FACE_TOO_LARGE')
+        center, span = (x+w/2)/width, w/width
+        dt = None if self.source is None else (source[1]-self.source[1])/1000.
+        if dt is not None and not 0 < dt < MAX_AGE_MS/1000.:
+            return self.stop('SOURCE_GAP')
+        alpha = 1. if dt is None else 1-math.exp(-dt*1000/self.config.filter_tau_ms)
+        self.filtered_center = center if self.filtered_center is None else self.filtered_center+alpha*(center-self.filtered_center)
+        self.filtered_width = span if self.filtered_width is None else self.filtered_width+alpha*(span-self.filtered_width)
+        self.context, self.source, self.payload = context, source, payload
+        self.new_source = True
+        self.warmup += 1
+        if self.warmup < self.config.confirm_frames:
+            self.reason = 'CONFIRMING_FACE'
+            return self.status()
+        left = self.filtered_center-self.filtered_width/2
+        right = 1-self.filtered_center-self.filtered_width/2
+        candidate = -1 if left <= self.config.enter_margin else 1 if right <= self.config.enter_margin else 0
+        if self.edge == 0:
+            self.edge_count = self.edge_count+1 if candidate and candidate == self.edge_candidate else 1 if candidate else 0
+            self.edge_candidate = candidate
+            if candidate and self.edge_count >= self.config.edge_confirm_frames:
+                self.edge = candidate
+        elif (left if self.edge == -1 else right) >= self.config.exit_margin:
+            self.edge = self.edge_count = self.edge_candidate = 0
+        desired = 0.
+        if self.edge:
+            margin = left if self.edge == -1 else right
+            speed = max(self.config.minimum_speed_us_s,
+                        min(self.config.maximum_speed_us_s, self.config.gain_us_s*(self.config.exit_margin-margin)))
+            desired = self.edge*self.polarity*speed
+        dt = dt or 0.
+        dv = self.config.maximum_acceleration_us_s2*dt
+        self.velocity += max(-dv, min(dv, desired-self.velocity))
+        delta = max(-self.config.maximum_step_us, min(self.config.maximum_step_us, self.velocity*dt))
+        position = max(self.config.minimum_us, min(self.config.maximum_us, self.position+delta))
+        if (position == self.config.minimum_us and self.velocity < 0 or
+                position == self.config.maximum_us and self.velocity > 0):
+            self.velocity = 0.
+        self.position, self.pulse_us = position, round(position)
+        self.proposals += 1
+        self.reason = 'AT_LIMIT' if self.edge and self.pulse_us in (self.config.minimum_us, self.config.maximum_us) else 'EDGE_FOLLOW' if self.edge else 'DECELERATING' if abs(self.velocity) > .001 else 'SAFE_ZONE_HOLD'
+        return self.status()

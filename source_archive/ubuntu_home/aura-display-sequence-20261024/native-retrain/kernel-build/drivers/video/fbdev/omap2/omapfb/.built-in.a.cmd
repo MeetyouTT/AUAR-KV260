@@ -1,0 +1,1 @@
+cmd_drivers/video/fbdev/omap2/omapfb/built-in.a := echo >/dev/null; rm -f drivers/video/fbdev/omap2/omapfb/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/video/fbdev/omap2/omapfb/built-in.a drivers/video/fbdev/omap2/omapfb/dss/built-in.a drivers/video/fbdev/omap2/omapfb/displays/built-in.a

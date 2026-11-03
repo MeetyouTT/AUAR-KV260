@@ -1,0 +1,364 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AURA touchscreen operation adapter v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "board_boot_id",
+    "service_epoch",
+    "command_id",
+    "ui_epoch",
+    "ui_generation",
+    "snapshot_sequence",
+    "context",
+    "issued_mono_ms",
+    "deadline_mono_ms",
+    "action",
+    "params"
+  ],
+  "properties": {
+    "protocol_version": {
+      "const": "aura-ui-1"
+    },
+    "board_boot_id": {
+      "type": "string",
+      "maxLength": 96,
+      "minLength": 1
+    },
+    "service_epoch": {
+      "type": "string",
+      "maxLength": 96,
+      "minLength": 1
+    },
+    "command_id": {
+      "type": "string",
+      "maxLength": 96,
+      "minLength": 1
+    },
+    "ui_epoch": {
+      "type": "string",
+      "maxLength": 96,
+      "minLength": 1
+    },
+    "ui_generation": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "snapshot_sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "session_id",
+        "request_id",
+        "generation"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "maxLength": 96,
+          "minLength": 1
+        },
+        "request_id": {
+          "type": "string",
+          "maxLength": 96
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "issued_mono_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "deadline_mono_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "action": {
+      "enum": [
+        "record_start",
+        "record_stop",
+        "cancel",
+        "ask_frame",
+        "target_select",
+        "identity_enroll",
+        "identity_collect",
+        "identity_cancel",
+        "identity_delete",
+        "motion_disarm"
+      ]
+    },
+    "params": {
+      "type": "object"
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "action": {
+          "const": "record_start"
+        },
+        "params": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "record_start parameters",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {}
+        }
+      }
+    },
+    {
+      "properties": {
+        "action": {
+          "const": "record_stop"
+        },
+        "params": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "record_stop parameters",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {}
+        }
+      }
+    },
+    {
+      "properties": {
+        "action": {
+          "const": "cancel"
+        },
+        "params": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "cancel parameters",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {}
+        }
+      }
+    },
+    {
+      "properties": {
+        "action": {
+          "const": "ask_frame"
+        },
+        "params": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "ask_frame parameters",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "frame"
+          ],
+          "properties": {
+            "frame": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "camera_epoch",
+                "frame_id",
+                "captured_mono_ms"
+              ],
+              "properties": {
+                "camera_epoch": {
+                  "type": "string",
+                  "maxLength": 96,
+                  "minLength": 1
+                },
+                "frame_id": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "captured_mono_ms": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "action": {
+          "const": "target_select"
+        },
+        "params": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "target_select parameters",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "target"
+          ],
+          "properties": {
+            "target": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "camera_epoch",
+                "track_id",
+                "track_generation"
+              ],
+              "properties": {
+                "camera_epoch": {
+                  "type": "string",
+                  "maxLength": 96,
+                  "minLength": 1
+                },
+                "track_id": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "track_generation": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "action": {
+          "enum": ["identity_enroll", "identity_collect"]
+        },
+        "params": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "identity enrollment parameters",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "target",
+            "display_name",
+            "confirmed"
+          ],
+          "properties": {
+            "target": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "camera_epoch",
+                "track_id",
+                "track_generation"
+              ],
+              "properties": {
+                "camera_epoch": {
+                  "type": "string",
+                  "maxLength": 96,
+                  "minLength": 1
+                },
+                "track_id": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "track_generation": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              }
+            },
+            "display_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 48
+            },
+            "confirmed": {
+              "const": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "action": {
+          "const": "identity_cancel"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enrollment_id"],
+          "properties": {
+            "enrollment_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 96
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "action": {
+          "const": "identity_delete"
+        },
+        "params": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "identity_delete parameters",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "person_id",
+            "db_version",
+            "confirmed"
+          ],
+          "properties": {
+            "person_id": {
+              "type": "string",
+              "maxLength": 96,
+              "minLength": 1
+            },
+            "db_version": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "confirmed": {
+              "const": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "action": {
+          "const": "motion_disarm"
+        },
+        "params": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "motion_disarm parameters",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {}
+        }
+      }
+    }
+  ],
+  "description": "Acceptance is not completion. Provider must recheck deadline, source context, capability, target lifetime and database transaction before applying. No ARM, PWM, raw register or fault clear command."
+}

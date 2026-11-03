@@ -1,0 +1,155 @@
+--- a/board/identity/camera_faces.py
++++ b/board/identity/camera_faces.py
+@@ -206,6 +206,11 @@
+         return ((self.producer is None or self.producer.stopped.is_set())
+                 and (self.shadow is None or self.shadow.stopped.is_set()))
+ 
++    def feature_status(self):
++        if self.local_dpu is not None:
++            return self.local_dpu.availability()
++        return {'ready': True, 'unavailable_reason': None, 'detail': '', 'recovery_required': False}
++
+     def health(self):
+         if self.shadow is not None or self.shadow_error:
+             try:
+--- a/board/identity/live.py
++++ b/board/identity/live.py
+@@ -45,6 +45,9 @@
+ 
+     def sample_start(self, params, command_id):
+         with self.lock:
++            feature = self._feature_status()
++            if not feature['ready']:
++                raise ValueError(feature['detail'])
+             key=target_key(params['target'])
+             if not self.sampling or not self._fresh(self.result) or key!=self.current_target():
+                 raise ValueError('请先正对镜头，等待清晰人脸')
+@@ -114,8 +117,25 @@
+                     and 0 <= self.clock()-result['stamp'] < self.ttl
+                     and result['revision'] == self.store.revision)
+ 
++    def _feature_status(self):
++        """Read only backend availability, without inference or diagnostics scans."""
++        provider = getattr(self.extractor, 'feature_status', None)
++        if not callable(provider):
++            return {'ready': True, 'unavailable_reason': None, 'detail': '', 'recovery_required': False}
++        try:
++            status = provider()
++            if (not isinstance(status, dict) or type(status.get('ready')) is not bool
++                    or not isinstance(status.get('detail'), str)
++                    or (not status['ready'] and not status['detail'])):
++                raise ValueError('Invalid feature availability')
++            return status
++        except Exception:
++            return {'ready': False, 'unavailable_reason': 'FEATURE_STATUS_FAILED',
++                    'detail': '人脸识别状态暂不可用，请恢复服务后重试', 'recovery_required': True}
++
+     def view(self):
+         with self.lock:
++            feature = self._feature_status()
+             people = self.store.people()
+             value = {'state': 'ERROR' if self.error else 'UNKNOWN', 'person_id': '', 'display_name': '',
+                      'db_version': self.store.revision, 'people': people, 'backend': self.backend,
+@@ -132,7 +152,7 @@
+             if self.ready and current:
+                 value['detail'] = self.reason or '等待当前对象的清晰正面人脸'
+             result = self.result
+-            fresh = self.ready and not self.error and self._fresh(result)
++            fresh = self.ready and not self.error and feature['ready'] and self._fresh(result)
+             if fresh:
+                 match = result['match']
+                 value.update(state='KNOWN' if match.state == 'KNOWN' else 'UNKNOWN',
+@@ -146,6 +166,8 @@
+                         'frame_id':result['fid'], 'captured_mono_ms':result['stamp'], 'ttl_ms':self.ttl}
+             elif result and current and not self.error:
+                 value['detail'] = '身份结果已过期，等待新的人脸'
++            if not feature['ready']:
++                value.update(state='ERROR', detail=feature['detail'])
+             if self.last_operation:
+                 value['last_operation'] = copy.deepcopy(self.last_operation)
+             can_enroll = bool(fresh and result['match'].state == 'UNKNOWN' and len(people) < self.max_people)
+@@ -164,13 +186,16 @@
+         """Only the current qualified model-input crop; never a whole frame."""
+         with self.lock:
+             result = self.result
+-            if (not self.ready or self.error or not self._fresh(result)
++            if (not self.ready or self.error or not self._feature_status()['ready'] or not self._fresh(result)
+                     or result['target'] != target or result['fid'] != fid):
+                 return None
+             return result.get('face_png')
+ 
+     def enroll(self, params, command_id):
+         with self.lock:
++            feature = self._feature_status()
++            if not feature['ready']:
++                raise ValueError(feature['detail'])
+             key = target_key(params['target'])
+             name = params['display_name'].strip()
+             if params.get('confirmed') is not True or not text(name, 48, False):
+@@ -300,9 +325,11 @@
+ 
+     def health(self):
+         with self.lock:
++            feature = self._feature_status()
+             face=self.face_targets.health() if self.face_targets else None
+-            return {'ready': self.ready and not self.error and (not face or face['ready']),
+-                    'error': self.error or (face['error'] if face else ''), 'face_targets':face,
++            return {'ready': self.ready and not self.error and feature['ready'] and (not face or face['ready']),
++                    'error': self.error or feature['detail'] or (face['error'] if face else ''), 'face_targets':face,
++                    'feature_status': feature,
+                     'backend': self.backend, 'processed': self.processed,
+                     'shutdown_incomplete':self.shutdown_incomplete,
+                     'feature_inference': self.extractor.health() if self.extractor is not None
+--- a/board/identity/spoken_query.py
++++ b/board/identity/spoken_query.py
+@@ -22,6 +22,7 @@
+         key=target_key(identity['face_target'])
+         if (key!=target_key(previous['face_target']) or identity['db_version']!=previous['db_version']
+                 or current['modules']['camera']['state']!='READY'):return unavailable()
++        if identity['state']=='ERROR':return unavailable()
+         if identity['state']!='KNOWN':return speech.result('identity_unknown')
+         fid,stamp=identity.get('source_frame_id'),identity.get('source_mono_ms')
+         if (identity.get('target')!=key or type(fid) is not int or fid<1 or type(stamp) is not int
+--- a/board/vision/dpu_sface.py
++++ b/board/vision/dpu_sface.py
+@@ -30,6 +30,7 @@
+         self.source_ttl = backend['max_source_age_ms']
+         self.requests = self.execution_attempts = self.completed = self.features_returned = 0
+         self.deferred = self.slot_denials = self.expired_after_admission = 0
++        self._closed = False
+         self.runner = PinnedRunner(backend['model'], backend['manifest'], owner)
+         if (self.runner.input_fix != 7 or list(self.runner.inputs[0].dims) != [1, 112, 112, 3]
+                 or len(self.runner.outputs) != 1 or list(self.runner.outputs[0].dims) != [1, 128]
+@@ -66,7 +67,7 @@
+ 
+     def feature(self, crop, *, source_mono_ms):
+         self.requests += 1
+-        if not self._fresh(source_mono_ms) or self.schedule.disabled('sface'):
++        if not self._fresh(source_mono_ms) or not self.availability()['ready']:
+             self._defer('SFace source expired or optional task disabled')
+ 
+         attempts_before=self.execution_attempts
+@@ -89,8 +90,17 @@
+         self.features_returned += 1
+         return result
+ 
++    def availability(self):
++        """Persistent protection is unavailable; ordinary slot contention is not."""
++        reason = ('DPU_SFACE_CLOSED' if self._closed else
++                  'DPU_SFACE_OPTIONAL_DISABLED' if self.schedule.disabled('sface') else None)
++        return {'ready': reason is None, 'unavailable_reason': reason,
++                'detail': '人脸识别服务暂不可用，请恢复服务后重试' if reason else '',
++                'recovery_required': reason == 'DPU_SFACE_OPTIONAL_DISABLED'}
++
+     def health(self):
+         return {'kind': self.kind, 'model_id': self.model_id,
++                **self.availability(),
+                 'requests': self.requests, 'execution_attempts': self.execution_attempts,
+                 'completed': self.completed, 'features_returned': self.features_returned,
+                 'deferred': self.deferred, 'slot_denials': self.slot_denials,
+@@ -99,4 +109,5 @@
+                 'scheduler_calls_mean_admissions': True}
+ 
+     def close(self):
++        self._closed = True
+         self.runner.close()

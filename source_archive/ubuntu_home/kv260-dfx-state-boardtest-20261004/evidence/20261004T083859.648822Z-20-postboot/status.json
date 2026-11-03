@@ -1,0 +1,38 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/20-postboot.json",
+  "manifest_sha256": "aa41e2c92c3fbafc3a6fd7c3888d0b6c6799c04a7e7345e493a3a448daee166a",
+  "started_utc": "2026-10-04T08:38:59.648969+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "postboot-validation",
+      "started_utc": "2026-10-04T08:39:00.182224+00:00",
+      "entry": {
+        "id": "postboot-validation",
+        "command": "python3 -B /home/root/kv260-dfx-state-boardtest-20261004/board/validate_v5.py postboot",
+        "timeout": 180
+      },
+      "exit_code": 0,
+      "output_sha256": "2f99ea96f93bcec5f71eb710fb31d4b02a429e71a19a221e9677b48d7a013440",
+      "bytes": 1160,
+      "finished_utc": "2026-10-04T08:39:07.863873+00:00"
+    },
+    {
+      "id": "boot-order-and-identity",
+      "started_utc": "2026-10-04T08:39:07.864240+00:00",
+      "entry": {
+        "id": "boot-order-and-identity",
+        "command": "python3 -B -c 'import sys,json; sys.path.insert(0,\"/home/root/kv260-dfx-state-boardtest-20261004/board\"); import validate_v5 as v; e=v.Evidence(\"coldboot-order\"); v.guard(e,allow_new_boot=True); v.require_phase(e,\"postboot\"); v.manager(e,v.NEW); data={}; fields=[\"ActiveState\",\"SubState\",\"Result\",\"ExecMainStatus\",\"MainPID\",\"UnitFileState\",\"ExecMainStartTimestampMonotonic\",\"ExecMainExitTimestampMonotonic\",\"ActiveEnterTimestampMonotonic\",\"InactiveExitTimestampMonotonic\",\"After\",\"Requires\",\"ExecStart\",\"DropInPaths\"]; argv=[\"systemctl\",\"show\"]; [argv.extend([\"-p\",f]) for f in fields]; units=[\"kv260-repaired-zocl.service\",\"dfx-mgr.service\"]; [(data.update({unit:dict(line.split(\"=\",1) for line in e.run(\"order-\"+unit,argv+[unit])[\"stdout\"].splitlines() if \"=\" in line)})) for unit in units]; loader=data[units[0]]; mgr=data[units[1]]; e.check(\"driver_completed_before_manager_exec\",0<int(loader[\"ExecMainExitTimestampMonotonic\"])<=int(mgr[\"ExecMainStartTimestampMonotonic\"])); e.check(\"manager_enabled\",mgr[\"UnitFileState\"]==\"enabled\"); e.run(\"root-mount\",[\"findmnt\",\"-n\",\"-o\",\"SOURCE,FSTYPE,TARGET\",\"/\"]); e.run(\"boot-mount\",[\"findmnt\",\"-n\",\"-o\",\"SOURCE,FSTYPE,TARGET\",\"/boot\"]); e.run(\"fstab\",[\"cat\",\"/etc/fstab\"]); e.run(\"preserved-runtime-hashes\",[\"sha256sum\",\"/usr/local/lib/kv260-runtime-repair/zocl.ko\",\"/etc/systemd/system/dfx-mgr.service.d/10-kv260-repaired.conf\",\"/usr/local/lib/kv260-runtime-repair/load-repaired-zocl.sh\",\"/etc/systemd/system/kv260-repaired-zocl.service\"]); v.stock(e); v.save(e.out/\"ordering.json\",data); print(\"ORDER \"+json.dumps(data)); e.finish()'",
+        "timeout": 120
+      },
+      "exit_code": 0,
+      "output_sha256": "3c95af9c6a5285967e312e75d0aa141832dd4183ae7dafc817d4c55a90be536f",
+      "bytes": 2663,
+      "finished_utc": "2026-10-04T08:39:11.302757+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T08:39:11.351668+00:00"
+}

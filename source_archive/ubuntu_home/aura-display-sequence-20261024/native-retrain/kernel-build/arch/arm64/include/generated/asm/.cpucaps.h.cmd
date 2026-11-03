@@ -1,0 +1,1 @@
+cmd_arch/arm64/include/generated/asm/cpucaps.h := mkdir -p arch/arm64/include/generated/asm/ && awk -f /home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux/arch/arm64/tools/gen-cpucaps.awk /home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux/arch/arm64/tools/cpucaps > arch/arm64/include/generated/asm/cpucaps.h

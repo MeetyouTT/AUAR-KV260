@@ -1,0 +1,1 @@
+cmd_lib/raid6/neon4.c := awk -v N=4 -f /home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux/lib/raid6/unroll.awk < /home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux/lib/raid6/neon.uc > lib/raid6/neon4.c

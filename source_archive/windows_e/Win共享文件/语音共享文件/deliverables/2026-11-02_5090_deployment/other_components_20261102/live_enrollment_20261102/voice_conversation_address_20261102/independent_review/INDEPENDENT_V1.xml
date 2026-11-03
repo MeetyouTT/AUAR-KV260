@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="21" time="11.211" timestamp="2026-11-02T09:11:06.504657-08:00" hostname="REVO1"><testcase classname="test_conversation_address" name="test_real_production_first_ordinary_statement_uses_one_encode_and_one_named_match" time="0.546" /><testcase classname="test_conversation_address" name="test_followup_uses_cached_name_while_new_encoder_is_still_pending" time="0.596" /><testcase classname="test_conversation_address" name="test_daily_identity_query_first_turn_uses_ordinary_context_not_face_or_three_probe[\u4f60\u77e5\u9053\u6211\u662f\u8c01\u5417]" time="0.537" /><testcase classname="test_conversation_address" name="test_daily_identity_query_first_turn_uses_ordinary_context_not_face_or_three_probe[\u6211\u662f\u8c01]" time="0.532" /><testcase classname="test_conversation_address" name="test_daily_identity_query_first_turn_uses_ordinary_context_not_face_or_three_probe[\u4f60\u8fd8\u8bb0\u5f97\u6211\u662f\u8c01\u5417]" time="0.535" /><testcase classname="test_conversation_address" name="test_daily_identity_query_first_turn_uses_ordinary_context_not_face_or_three_probe[\u4f60\u53ef\u4ee5\u6839\u636e\u6211\u7684\u58f0\u97f3\u8fa8\u522b\u6211\u662f\u8c01\u5417]" time="0.510" /><testcase classname="test_conversation_address" name="test_daily_identity_query_first_turn_uses_ordinary_context_not_face_or_three_probe[\u8fa8\u522b\u6211\u7684\u58f0\u97f3]" time="0.706" /><testcase classname="test_conversation_address" name="test_first_short_sentence_stays_normal_then_next_valid_sentence_acquires_name" time="0.565" /><testcase classname="test_conversation_address" name="test_short_followup_keeps_adopted_name" time="0.571" /><testcase classname="test_conversation_address" name="test_effective_unknown_clears_for_next_context" time="0.625" /><testcase classname="test_conversation_address" name="test_ambiguous_first_capture_does_not_produce_name" time="0.442"><failure message="InterruptedError: Speaker write has no current capture">c = &lt;base_composition.Composition object at 0x000001D49AA1EA70&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001D49ACA0EE0&gt;
+
+    def test_ambiguous_first_capture_does_not_produce_name(c,monkeypatch):
+        saved(c)
+        q=(.5,math.sqrt(.75));second=.45
+        v=(second*q[0]-math.sqrt(1-second*second)*q[1],second*q[1]+math.sqrt(1-second*second)*q[0])+(0.,)*190
+        def add():
+            store=c.business.hub.speaker.store
+            store.enroll('synthetic-other','合成其他人',v,consent=True,expected_revision=store.revision)
+&gt;       c.business.pool.submit(add).result(timeout=2)
+
+test_conversation_address.py:117: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\REVO1\AppData\Local\Programs\Python\Python310\lib\concurrent\futures\_base.py:458: in result
+    return self.__get_result()
+C:\Users\REVO1\AppData\Local\Programs\Python\Python310\lib\concurrent\futures\_base.py:403: in __get_result
+    raise self._exception
+C:\Users\REVO1\AppData\Local\Programs\Python\Python310\lib\concurrent\futures\thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+test_conversation_address.py:116: in add
+    store.enroll('synthetic-other','合成其他人',v,consent=True,expected_revision=store.revision)
+..\candidate_runtime\board\runtime\board_speaker_business.py:214: in enroll
+    return self._write('enroll',*args,**kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;board.runtime.board_speaker_business._GuardedStore object at 0x000001D49AC73760&gt;
+method = 'enroll'
+args = ('synthetic-other', '合成其他人', (-0.5483854149129009, 0.8362257091902912, 0.0, 0.0, 0.0, 0.0, ...))
+kwargs = {'consent': True, 'expected_revision': 1}
+
+    def _write(self, method, *args, **kwargs):
+        service = self.service
+        if not service._current():
+&gt;           raise InterruptedError('Speaker write has no current capture')
+E           InterruptedError: Speaker write has no current capture
+
+..\candidate_runtime\board\runtime\board_speaker_business.py:205: InterruptedError</failure></testcase><testcase classname="test_conversation_address" name="test_reset_synchronously_clears_lease_and_short_capture_does_not_restore" time="0.563" /><testcase classname="test_conversation_address" name="test_select_new_conversation_resets_name" time="0.563" /><testcase classname="test_conversation_address" name="test_foreign_conversation_id_cannot_read_name" time="0.499" /><testcase classname="test_conversation_address" name="test_profile_context_does_not_call_address_provider" time="0.133" /><testcase classname="test_conversation_address" name="test_cancel_after_worker_complete_before_adoption_never_creates_lease" time="0.435" /><testcase classname="test_conversation_address" name="test_analysis_retry_does_not_encode_again" time="0.432" /><testcase classname="test_conversation_address" name="test_template_deletion_invalidates_cached_address" time="0.749"><failure message="InterruptedError: Speaker write has no current capture">c = &lt;base_composition.Composition object at 0x000001D49AA1EB60&gt;
+
+    def test_template_deletion_invalidates_cached_address(c):
+        saved(c);c.say(STATEMENT)
+        def delete():
+            store=c.business.hub.speaker.store
+            store.delete(store.people()[0]['person_id'],expected_revision=store.revision)
+            c.business._refresh_public()
+&gt;       c.business.pool.submit(delete).result(timeout=2)
+
+test_conversation_address.py:164: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\REVO1\AppData\Local\Programs\Python\Python310\lib\concurrent\futures\_base.py:458: in result
+    return self.__get_result()
+C:\Users\REVO1\AppData\Local\Programs\Python\Python310\lib\concurrent\futures\_base.py:403: in __get_result
+    raise self._exception
+C:\Users\REVO1\AppData\Local\Programs\Python\Python310\lib\concurrent\futures\thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+test_conversation_address.py:162: in delete
+    store.delete(store.people()[0]['person_id'],expected_revision=store.revision)
+..\candidate_runtime\board\runtime\board_speaker_business.py:216: in delete
+    return self._write('delete',*args,**kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;board.runtime.board_speaker_business._GuardedStore object at 0x000001D49AA1F0A0&gt;
+method = 'delete', args = ('318fa12aee3e40eeaa4074b24f610624',)
+kwargs = {'expected_revision': 1}
+
+    def _write(self, method, *args, **kwargs):
+        service = self.service
+        if not service._current():
+&gt;           raise InterruptedError('Speaker write has no current capture')
+E           InterruptedError: Speaker write has no current capture
+
+..\candidate_runtime\board\runtime\board_speaker_business.py:205: InterruptedError</failure></testcase><testcase classname="test_conversation_address" name="test_model_or_dimension_mismatch_does_not_adopt_old_store_name[model_id-synthetic-different-model]" time="0.485"><failure message="AssertionError: assert '合成测试' is None&#10; +  where '合成测试' = hint(&lt;base_composition.Composition object at 0x000001D49AC7DF30&gt;)">c = &lt;base_composition.Composition object at 0x000001D49AC7DF30&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001D49AC7D600&gt;
+attribute = 'model_id', value = 'synthetic-different-model'
+
+    @pytest.mark.parametrize('attribute,value',[('model_id','synthetic-different-model'),('dimension',193)])
+    def test_model_or_dimension_mismatch_does_not_adopt_old_store_name(c,monkeypatch,attribute,value):
+        saved(c);monkeypatch.setattr(c.encoder,attribute,value)
+        c.say(STATEMENT)
+&gt;       assert hint(c) is None
+E       AssertionError: assert '合成测试' is None
+E        +  where '合成测试' = hint(&lt;base_composition.Composition object at 0x000001D49AC7DF30&gt;)
+
+test_conversation_address.py:172: AssertionError</failure></testcase><testcase classname="test_conversation_address" name="test_model_or_dimension_mismatch_does_not_adopt_old_store_name[dimension-193]" time="0.440"><failure message="AssertionError: assert '合成测试' is None&#10; +  where '合成测试' = hint(&lt;base_composition.Composition object at 0x000001D49B637640&gt;)">c = &lt;base_composition.Composition object at 0x000001D49B637640&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001D49B637760&gt;
+attribute = 'dimension', value = 193
+
+    @pytest.mark.parametrize('attribute,value',[('model_id','synthetic-different-model'),('dimension',193)])
+    def test_model_or_dimension_mismatch_does_not_adopt_old_store_name(c,monkeypatch,attribute,value):
+        saved(c);monkeypatch.setattr(c.encoder,attribute,value)
+        c.say(STATEMENT)
+&gt;       assert hint(c) is None
+E       AssertionError: assert '合成测试' is None
+E        +  where '合成测试' = hint(&lt;base_composition.Composition object at 0x000001D49B637640&gt;)
+
+test_conversation_address.py:172: AssertionError</failure></testcase><testcase classname="test_conversation_address" name="test_context_note_stays_inside_original_context_limit" time="0.435"><failure message="board.runtime.board_memory_policy.ContextLimitError: Current input exceeds the safe model context capacity">c = &lt;base_composition.Composition object at 0x000001D49B642AA0&gt;
+
+    def test_context_note_stays_inside_original_context_limit(c):
+        saved(c)
+        builder=BoardContextBuilder('合成人格。')
+        text='合成内容'*135
+&gt;       original=builder({},text)
+
+test_conversation_address.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;board.runtime.board_memory_policy.BoardContextBuilder object at 0x000001D49ABBB5B0&gt;
+context = {}
+text = '合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合...内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容合成内容'
+history = None
+
+    def __call__(self, context, text, history=None):
+        history_status = {}
+        if isinstance(history, dict):
+            if not isinstance(history.get('items'), list) or not isinstance(history.get('status'), dict):
+                raise ValueError('Invalid explicit history retrieval packet')
+            history_status = history['status']
+            history = history['items']
+        if history is not None and not isinstance(history, list):
+            raise ValueError('Explicit history must contain a list of records')
+        system = dict(role='system', content=self.system_prompt)
+        raw_current = dict(role='user', content=text)
+        current = dict(role='user', content=prepare_spoken_input(text)['text'])
+        def fits(notes, recent):
+            return message_cost([system] + notes + recent + [current], self.reserve) &lt;= self.maximum
+        if not fits([], []):
+&gt;           raise ContextLimitError('Current input exceeds the safe model context capacity')
+E           board.runtime.board_memory_policy.ContextLimitError: Current input exceeds the safe model context capacity
+
+..\candidate_runtime\board\runtime\board_memory_policy.py:81: ContextLimitError</failure></testcase></testsuite></testsuites>

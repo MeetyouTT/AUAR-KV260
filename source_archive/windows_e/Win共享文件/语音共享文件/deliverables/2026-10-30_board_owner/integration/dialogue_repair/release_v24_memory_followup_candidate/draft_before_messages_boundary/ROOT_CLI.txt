@@ -1,0 +1,17 @@
+v24 单源记忆修订发布骨架
+
+当前为本地dry阶段，PAYLOAD_FINALIZED=False，APPROVED_PAYLOAD_SHA=None。实际诊断、最终单源、root逐项审定和独立复核完成后再绑定执行包。
+
+本地检查入口为 prepare_followup.py，默认核验真实v23封存和当前canonical并报告选择待定。test_framework.py运行16项公开合成回归。
+
+基线为release_v23_memory_summary_candidate/memory_summary_evidence，spec8376770e832d82add3ae207da3228c46c34ada89b95830cdd7536f8291224ec2，startupd848dc90cf9a890fb8bc66b2c494b78c2ae39a7e22a4743fe0ab917ca3edbae8。
+
+待选择的APPROVED_PAYLOAD.json使用baseline_spec_sha256、sources、decision三个字段。sources只含common/board_memory.py或board/runtime/board_memory_policy.py之一，记录before_sha256、sha256、local_source。decision记录root决策文件的path和sha256。决策须逐项绑定同一源及schema、权限、事务提交、清理、截止检查的审阅结论。
+
+后续生命周期继续通过 publish_followup.py 的guard、window-inspect、normal-close、start、ready入口。关闭阶段使用实际v23基线，apply_followup_closed.py使用新PROPOSED，随后start/ready与seal_followup.py使用实际APPLIED和READY回执。各入口默认dry，实际参数仍为 --execute-root-only。
+
+事务键summary_followup独立于camera_rebind和summary_revision。旧相机事务固定ecdc034b，旧v23摘要事务固定8376770e，v24事务证明实际新spec。受控变更为单源、startup/config.json和production_source_manifest.json。中断后仅同一INTENT的已知old/new字节可续做。
+
+原WM_DELETE、正常关闭守卫、三writer锁、4库bootstrap、380组件、外部GUI配置、用户保存的暂停选择、22pin相机闭包均继承。封存仍按actual ready/source回读推进双canonical指针。
+
+本地测试中的ready指针中断夹具曾复用相同ready字节，记录在FRAMEWORK_ATTEMPT_01.json。夹具改用新合成进程ID后，16项回归全部通过。FRAMEWORK_TEST_RESULT.json保留详细输出。实际设备验收由root后续执行。

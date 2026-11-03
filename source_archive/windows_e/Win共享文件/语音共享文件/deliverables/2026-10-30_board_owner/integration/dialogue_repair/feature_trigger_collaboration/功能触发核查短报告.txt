@@ -1,0 +1,9 @@
+v17功能触发进度（仅本窗口独立报告，生产仍由主窗口维护）
+真人视觉人数回答正确；v17 gen42有queries0→1、current_person_count、ordinary_prepare=false、完整ACK和本轮欠载0的对应metadata。
+真人短答声音连续、等待可接受，仅限该次短对话。声纹尚未校准的回答获用户确认；随后3字普通轮ACK不能绑定到声纹询问，现场校准仍待验。
+root实际ARM独立临时公开库：23个断言22通过、历史来源H01失败。两项通过只是确认日期删除/推理handler缺失；实际功能分支20通过、1失败、2缺口。ASR/相机/编码器/模型/播放消费均为fixture，原路由/SQLite/ACK类实际在ARM运行，不能当真人模型校准或私库验收。
+H01精确两文件候选：在SQL限量与计数前排除当前查询；原worker23断言未改全过，172相关本地测试通过；独立板端overlay runner已交root。
+D01最小原27B推理接入：80相关本地测试通过，2048/120保持；真实think支持、完整JSON、正确率和延迟待root单独实测，未上线。
+M03单日日期预览/确认候选：16定向/183组合回归通过；原scope、60秒、预览完整ACK、同actor/grant、原事务指纹与幂等保留。未改原Store schema，未上线。
+声纹关闭另发现queued Future.cancel同步回调改动遍历字典；独立一行tuple快照候选，基线2例确定失败→25项通过。reset本身无此缺陷，未改。
+本窗口没有操作设备、模型、生产私库或发布。LLM权重仍项目外D:/AIModels。完整证据与候选指纹见PUBLIC_FEATURE_PROGRESS.json；既有文档原字节归档history_pre_public_progress_v17。

@@ -1,0 +1,41 @@
+5090 本机部署接续（2026-11-02）
+
+当前事实请读取同目录 STATUS.json；该文件由一次性后台部署进程实时更新。
+complete=false 或 phase!=READY_LOCAL_ONLY_BOARD_NOT_CONNECTED 时，不能称模型服务已部署完成。
+
+本机实读：NVIDIA GeForce RTX 5090 Laptop GPU，24463 MiB，驱动 621.01，GPU UUID GPU-545096ea-2253-8cb8-e6a6-7dd1969e5853。
+用户本轮确认：KV260 未连接，先完成本机部署。未连接板端、未录放音、未操作机构。
+Windows 仅恢复原 27B 与 OmniVoice16；不恢复旧 8792 业务/记忆写者。
+
+已经完成：
+- 原工作区 135927 项中 125174 项核验通过；10753 项因权限无法核验，没有缺失或已读文件的大小/SHA 差异。不得称全盘校验全通过。
+- 迁移包 534 项、外部依赖 111 项和正式 OmniVoice 的三个清单大文件均重新 SHA256 核验通过。
+- 原文件和旧配置已保存在 before/，旧证据与数据库均保留。
+- 已修复本机 Python、看板与 SSH 路径，并准备新主机 SSH 密钥；私钥仅在新用户 .ssh，公钥在迁移包。远端公钥尚未授权，未做 SSH 登录验收。
+- 项目独立 Ollama 11435 已启动；其他已有 11434 实例保持。本项目模型库 D:/AIModels/Ollama-AURA。
+- 10 项端点/生命周期标准库回归通过；另 4 项后台部署闸口、真实本地 HTTP 分段中断/续传测试通过。完整模型回归将在新环境就绪后自动执行。
+
+正在执行：
+- 原 27B 精确版本的后台分段下载与续传。最终 GGUF 与所有分段均位于 D:/AIModels/qwen3.8-27b-abliterated，禁止放入共享目录或创建目录联接。
+- 原 SHA256 d83adbbbaace8acdfcfe28004f779326176b9df00b4ec99dc6c24d749723d3b9，最终 14403496864 字节；通过前不导入或加载。
+- 新建运行环境 D:/AURARuntimes/voice-py310。原清单含未使用 Qwen-TTS 候选，与正式 OmniVoice 的 Transformers 要求冲突；新清单仅排除该候选，保留原清单与冲突日志。原模型/音色/步数不变。
+- 初次 CUDA 包下载网络超时已记录；后台先升级到清单所列 pip 26.2.1，再用更长超时及自动续传继续安装。
+
+后台完成条件和顺序：
+1. 安装依赖、恢复已保存的 OmniVoice 源码 wheel；pip check、真实小 CUDA 张量和 GPU 架构验证通过。
+2. 用公开文本在内存生成原 OmniVoice16 音频，验证 24kHz PCM 并测量新 GPU 显存峰值，不实际播放。
+3. 原 27B 下载完成且 SHA256 匹配后，导入独立 11435，保持 2048 上下文和原量化；测量冷加载/生成显存，正常卸载本轮拥有的模型。
+4. 保存新机测量与带余量的 GPU 调度配置；不沿用旧 5060Ti UUID/校准结论。
+5. 归档旧主机 owner 元数据，在 127.0.0.1:8797 启动正式模型服务，实际验证 LLM 与新 PCM。
+6. 全部通过后才产生 READY_LOCAL.json 并将 STATUS.json.complete 置为 true。该就绪范围仅为本机模型服务，不包括板端、实体听音/转轴或长稳验收。
+任一阶段失败会写 STATUS.json 的 FAILED 及日志，不伪造就绪；重新执行前先读失败原因和现有进程身份。
+
+入口：
+- start_deployment.ps1：启动一次性后台接续；已有同一 owner 时返回 ALREADY_RUNNING，避免并行重复安装。
+- deploy_5090.py：一次性安装、校准、服务启动与本机验证。
+- download_llm_ranges.py：当前唯一有效模型下载器；download_owner.json 记录 PID/出生时间，llm_download_progress.json 记录进度。
+- deployment_owner.json：后台部署 PID/出生时间与源码 SHA。
+- STATUS.json：当前阶段和明确的完成标志；READY_LOCAL.json 仅在全部本机验证成功后出现。
+- payload_verification_summary.json：迁移校验范围、权限限制与实际已验证数量。
+
+后续接板：先读 axis_priority_20261101/HANDOFF_5090.txt；现场核对供电、IP、可信主机指纹和新密钥授权，再只读核对真实 boot/固件/VART/FDT/相机/GUI。当前本机仅回环地址，未设置网卡 IP/防火墙，不把本机健康检查当板端可达。切换到专用 192.168.50.1:8797 前须正常停止本机实例并核实 192.168.50.2 peer。转轴仍需新的现场方向/短测验收，不能重放旧 repeat 或沿用旧 boot/PID。

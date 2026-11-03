@@ -1,0 +1,50 @@
+独立审阅：单次metadata projection候选
+
+结论：PASS_FIXED_380_COMPONENT_SCOPE。
+在当前bind_presentation直接创建未覆盖的PresentationLifecycle、通过channel维护字符串槽、普通状态树的范围内，没有发现新的隐私、TTL、失效或落盘回归。可以作为小候选继续由唯一设备执行者做ARM与整机验证。
+不能宣称对任意子类或替换_projection的实例严格等价。独立公开测试已复现该兼容性边界，见下文。未部署、未衡量CPU收益，本审阅不能代替ARM性能或生产稳定性验收。
+
+固定输入
+source_index启动：226b5a20f0089f5c534b1d540dd3605d805c17f7f1bd371a6ab5b3a4b287ad15。
+baseline presentation：414ed67c68ad5f6ad3e0f89608e4f7ccef71d7b8765dfffc4f071eb806cc081a。
+candidate presentation：984d3ca24067bf5129e9ce3b0054f32cced717b6b8824eab347476bef2f9e502。
+冻结公开包：61b816240e692844b8df71137feea6260e7b22153c0e5be9edcce28c6575f9ea。
+分别核对source_index、它引用的manifest、文件SHA及zip内两份presentation字节。除prepare脚本给定5次替换外没有其他变更；脚本只读检查，不运行prepare/package或写冻结文件。
+视觉联合基线LATEST为保存元数据入口，不是本轮现场探测。
+
+等价性的依据和范围
+_clean把dict/list/tuple复制成普通容器；正文键固定清空，error/detail归一成空串或operation_failed。对第一次_clean产生的这种容器，再次_clean是幂等的。
+旧_projection在第一次_clean后只补回reply/transcript字符串、voice_reply=None以及固定数字/布尔生命周期元数据。旧的外层_clean只会再次清掉这两个正文字符串。
+新metadata_only=True直接把这两个槽留空，其余元数据构造完全相同；默认False的普通显示路径仍补回有界当前文本。
+当前channel把正文转为字符串并限制长度，_expire/invalidate都清空槽；没有新增文本容器或历史副本。showing仍描述当前显示槽是否有内容，metadata_only输出正文空串时保持该布尔值，与旧路径相同。
+该证明以原清理器已支持的状态树为界；它不新增对未知键字符串、opaque对象、循环容器或任意自定义Python对象的安全保证。原清理器不是任意秘密内容探测器。
+
+逐路径检查
+1. 普通project/repaint：project调用仍不传metadata_only，显示槽/TTL到期/弱引用控件指纹去重方法均未改。
+2. bridge.publish：仍在lifecycle.lock内做投影并调用原publish，帧原样传递；候选省掉第二次全树清理，未把帧、用户输入或原文写入新位置。
+3. invalidate/purge：仍是presentation→bridge锁顺序；已失效后再次publish仍只含清理后的状态。没有反取worker condition或Store/job锁。
+4. 原Store correct/forget/clear/commit_compaction与history-delete postcommit hook：全部AST未变；只有事务成功后才失效，失败/未提交不新增失效。确认owner、取消、授权及源删除逻辑不改。
+5. close/playback invalidation：保留closed、blocked、confirmation_owner与迟到start检查；已关闭后发布旧状态不会恢复字幕。
+6. 输入异常：顶层非dict或已有local_transcription非dict，旧新仍以相同异常类型中断；原bridge状态不被异常投影覆盖，相关锁释放。候选未“修好”这些原本不支持的输入，也没有新增失败后发布。
+7. save_production_evidence：函数AST完全相同，仍固定数字白名单、body_saved=false/images_saved=false，原子replace路径与权限检查不改。公开临时目录实际写入的字节在旧新两版相同；没有读取真实private_root或数据库。
+8. retire_consumed/生命周期销毁：方法AST相同，仍以原前台idle/audio/ACK状态为条件；本轮未模拟真实音频ACK或驱动物理硬件，不以源码不变代替实机验收。
+
+子类/覆盖边界：可复现，不属于现役路径
+旧版元数据发布和purge会调用_projection(state)再_clean；候选调用_projection(state,metadata_only=True)且不再做外层清理。
+A. 覆盖旧签名_projection(self,state)的子类：旧版可发布，候选TypeError；purge同样有此风险。
+B. 覆盖接受**kwargs且在super返回后插入extension.body的子类：旧版外层_clean会清空body，候选保留该正文。
+两种情况已用纯公开RAM夹具复现。私有方法不等同外部扩展合同，但如果要求任意覆盖也严格等价，当前候选不满足。
+当前bind_presentation直接构造PresentationLifecycle，没有工厂或子类注入。已进一步逐SHA定位当前380组件中的全部340份Python源码：无缺失；AST扫描只发现基础类的一处_projection方法，没有PresentationLifecycle子类、直接_projection赋值或setattr替换点，详见CLOSURE_SCAN.json。此静态范围检查不承诺未映射的第三方动态猴子补丁。
+建议：本轮验收和说明明确限定具体基础类。若未来支持扩展，显式给覆盖路径保留旧的_projection(state)再_clean后备路径，再另做性能评估；不要让扩展把未清理正文直接接入公开bridge。
+
+主控已明确本次发布范围就是固定380组件闭包，不为未使用扩展增加分支。该范围下独立审阅结论为通过，无子类或运行时替换的静态阻断项；无需因上述扩展边界修改当前候选。
+
+独立新增公开测试
+没有重复运行原11项/500随机树，也未改它们的结果文件。
+test_lifecycle_paths.py共6项：前5项是新增生命周期/异常/并发/持久化回归；第6项专门验证并记录上述不等价边界，并不代表对子类兼容性通过。
+执行结果6项通过，0failure/0error；同模块多分支同时比较旧新。并发测试用Event固定顺序，只验证锁下发布完成后失效及后续迟到发布，没有用随机压力或把测试时长当性能数据。
+公开诊断文件仅在independent_review下TemporaryDirectory创建并清理；运行使用python -B且禁止bytecode写入，所以候选与baseline目录没有生成缓存文件。
+
+本轮操作边界
+只写independent_review内的审阅、测试和结果。未执行SSH/UART、模型、网络/服务、生产库、设备、发布器或候选生成器。候选、baseline、zip、原测试与manifest在结束时重新核对SHA保持一致。
+后续ARM由转轴窗口唯一操作者执行，本窗口不自行验证现场或上线。

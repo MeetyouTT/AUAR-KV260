@@ -1,0 +1,12 @@
+--- r1/worker.py
++++ r2/worker.py
+@@ -299,7 +299,8 @@
+ def readonly_audit(uri, connected):
+     def audit(event, values):
+         if event == 'sqlite3.connect':
+-            need(values[0] == uri and connected[0] == 0)
++            value = values[0]
++            need(type(value) in (str, bytes) and os.fsdecode(value) == uri and connected[0] == 0)
+             connected[0] += 1
+         if event == 'open' and isinstance(values[0], (str, bytes, os.PathLike)):
+             path = os.fsdecode(values[0])

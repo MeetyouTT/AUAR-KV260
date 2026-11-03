@@ -1,0 +1,13 @@
+只读源码审阅：尚未发现固定等待或时钟策略污染，精确运行时根因需分段测量。
+
+当前板卡公开源码 SHA 已核：client600e、clock93b6、runtimeb082、GUI构造b01f。startup680fd在读取期间稳定。生产调用 initialize_clock(timeout=3.)，runtime/client/timeline共享原 time.monotonic；StableTimelineClock沿用默认 max_rtt_seconds=1.，未传覆盖值。turn timeout_ms不参与该RTT策略。
+
+_ConnectionControl.start 先check再启动后台watcher，位于sample的sent时间戳之前。watcher每20ms等Event，不把连接锁持在等待期间。connect只在sock为空时调原HTTPConnection.connect，然后保留真实socket并check；没有固定1s sleep、join、重试或代理。连接timeout设为原启动deadline剩余值，不是新增等待。
+
+sample_rtt_exceeded只根据 received-sent>1s触发。sent在连接前，received在HTTP响应头完成后，所以此区间包括连接建立、请求发送、响应头等待及期间本进程被调度/阻塞的时间；不包括body读取/解析、observe_http_date、锚点保存、finally关闭或最多0.1s join。另一次独立http.client探针5–20ms，不能单凭此数值排除GUI请求当时的连接/调度/服务端延迟。
+
+最小下一步由root执行RAM-only原sample分段测量：connect、retain、request、getresponse，保留完整原sent→received时间。冷socket/getaddrinfo/首次codec导入、本地CPU/GIL争用、当次服务端头等待均只是待验证方向，当前没有足够证据选其一。审阅者不重复health探针，避免改变cold样本。
+
+恢复不改1s门槛、3s原期限、原source verifier、单调时钟/同boot策略；不把sent挪到连接后，不从样本RTT扣本地耗时，不替换/删除锚点或回退板卡墙钟。若测量证明冷初始化耗时，可在原采样事务开始前完成相关准备，再原样采样；若证明瞬态争用，先解决已证实的争用，再由root正常启动一次GUI。任何具体代码/启动顺序变更都需待分段证据。
+
+本轮只通过已核严格known-host SSH读取4份公开源码和startup manifest hash；无health/model探测、服务/模型/私库/轴动作或生产写入。未导出真实业务内容。

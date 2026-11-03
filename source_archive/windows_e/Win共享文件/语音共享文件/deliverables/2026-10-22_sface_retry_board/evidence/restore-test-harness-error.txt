@@ -1,0 +1,63 @@
+test_already_original_is_audited_without_another_restart (test_deployment_restore.FinalizerTests) ... ok
+test_candidate_restores_once (test_deployment_restore.FinalizerTests) ... ok
+test_failed_restoration_keeps_independent_timer_armed (test_deployment_restore.FinalizerTests) ... ok
+test_original_unit_is_valid (test_deployment_restore.RollbackTests) ... ERROR
+test_unit_changed_during_stop_is_not_overwritten (test_deployment_restore.RollbackTests) ... ERROR
+test_unrelated_unit_is_never_stopped_or_overwritten (test_deployment_restore.RollbackTests) ... ERROR
+test_variant_a_restores (test_deployment_restore.RollbackTests) ... ERROR
+test_variant_b_restores (test_deployment_restore.RollbackTests) ... ERROR
+
+======================================================================
+ERROR: test_original_unit_is_valid (test_deployment_restore.RollbackTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ghmd/aura-sface-ab-20261022/test_deployment_restore.py", line 46, in test_original_unit_is_valid
+    def test_original_unit_is_valid(self):self.exercise(b'original')
+  File "/home/ghmd/aura-sface-ab-20261022/test_deployment_restore.py", line 26, in exercise
+    script=namespace['rollback_program']({}).replace('ROOT_VALUE',repr(str(root)))
+UnboundLocalError: local variable 'namespace' referenced before assignment
+
+======================================================================
+ERROR: test_unit_changed_during_stop_is_not_overwritten (test_deployment_restore.RollbackTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ghmd/aura-sface-ab-20261022/test_deployment_restore.py", line 51, in test_unit_changed_during_stop_is_not_overwritten
+    self.assertEqual(len(self.exercise(b'variant A',change_during_stop=True)),1)
+  File "/home/ghmd/aura-sface-ab-20261022/test_deployment_restore.py", line 26, in exercise
+    script=namespace['rollback_program']({}).replace('ROOT_VALUE',repr(str(root)))
+UnboundLocalError: local variable 'namespace' referenced before assignment
+
+======================================================================
+ERROR: test_unrelated_unit_is_never_stopped_or_overwritten (test_deployment_restore.RollbackTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ghmd/aura-sface-ab-20261022/test_deployment_restore.py", line 49, in test_unrelated_unit_is_never_stopped_or_overwritten
+    def test_unrelated_unit_is_never_stopped_or_overwritten(self):self.assertFalse(self.exercise(b'unrelated'))
+  File "/home/ghmd/aura-sface-ab-20261022/test_deployment_restore.py", line 26, in exercise
+    script=namespace['rollback_program']({}).replace('ROOT_VALUE',repr(str(root)))
+UnboundLocalError: local variable 'namespace' referenced before assignment
+
+======================================================================
+ERROR: test_variant_a_restores (test_deployment_restore.RollbackTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ghmd/aura-sface-ab-20261022/test_deployment_restore.py", line 47, in test_variant_a_restores
+    def test_variant_a_restores(self):self.exercise(b'variant A')
+  File "/home/ghmd/aura-sface-ab-20261022/test_deployment_restore.py", line 26, in exercise
+    script=namespace['rollback_program']({}).replace('ROOT_VALUE',repr(str(root)))
+UnboundLocalError: local variable 'namespace' referenced before assignment
+
+======================================================================
+ERROR: test_variant_b_restores (test_deployment_restore.RollbackTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ghmd/aura-sface-ab-20261022/test_deployment_restore.py", line 48, in test_variant_b_restores
+    def test_variant_b_restores(self):self.exercise(b'variant B')
+  File "/home/ghmd/aura-sface-ab-20261022/test_deployment_restore.py", line 26, in exercise
+    script=namespace['rollback_program']({}).replace('ROOT_VALUE',repr(str(root)))
+UnboundLocalError: local variable 'namespace' referenced before assignment
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.002s
+
+FAILED (errors=5)

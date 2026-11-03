@@ -1,0 +1,12 @@
+AUAR · 雪妃 9a4f 上板资料扩充交付
+
+1. 工程包 auar_xuefei_board_enhanced.rar 是新的RAR5，唯一根目录 auar_xuefei。旁边提供同版解包目录以便直接查看。
+2. 先读 上板使用说明.md 和 实测与参考对照说明.md。原44MB纯源码RAR保留在原目录，本RAR加入候选硬件/固件、历史板端数据、运行入口和对照参考。
+3. 校验：在本目录运行 sha256sum -c archive.sha256；进入 auar_xuefei 后运行 sha256sum --quiet -c checksums.sha256。
+4. 离线实测复核：从工程根执行 python3 -B board/verify_evidence.py --out "$HOME/auar-evidence-$(date +%Y%m%d-%H%M%S)"。只回放已有历史数据。
+5. Skill Tcl验证：从本目录运行下面命令，输出目录必须尚不存在。
+   "$HOME/Xilinx_2022.2/Vivado/2022.2/bin/vivado" -mode batch -nolog -nojournal -source verify_skill.tcl -tclargs "$HOME/auar-skill-check-$(date +%Y%m%d-%H%M%S)"
+6. Tcl已实跑：15项单元测试及73项mock通过。真实PYNQ板测试未执行。Skill仍是28个普通源文件，没有内层Skill压缩包。
+7. 历史实测分组保留其日期与版本：9a4f发布回执、10月21日DPU固定输入、11月2日独立startup性能采样。新候选BIT/XSA及固件的 board_verified=false，不能把历史通过结果写成新固件实板通过。
+8. 本轮147项历史证据对照、439项离线文件检查、5项证据测试均通过；解包后软件、四台XSim及Vivado建工程已复跑。原冷实现的20项输入保持一致，原始时序/资源/DRC报告在 Vivado原始报告。最终记录为 archive_verification.json。
+9. 新的目标板采集入口、锁占用处理、安装路径和独立输出目录详见 上板使用说明.md。本交付没有执行新的固件加载、服务操作、实际板端推理或机械动作。

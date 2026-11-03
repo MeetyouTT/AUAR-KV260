@@ -1,0 +1,496 @@
+--- original/board/vision/dpu_protection_handoff.py
++++ candidate/board/vision/dpu_protection_handoff.py
+@@ -0,0 +1,181 @@
++"""Restore a hash-pinned same-boot protection snapshot before worker startup."""
++import copy
++import hashlib
++import json
++import math
++import os
++from pathlib import Path
++import time
++import uuid
++
++
++def _integer(value, name, minimum=0):
++    if type(value) is not int or value < minimum:raise ValueError('Invalid protection integer: '+name)
++    return value
++
++
++def _finite(value, name, minimum=0.):
++    if type(value) not in (int,float) or not math.isfinite(value) or value < minimum:
++        raise ValueError('Invalid protection number: '+name)
++    return value
++
++
++def _consume_marker(marker, digest):
++    try:
++        fd=os.open(str(marker),os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_CLOEXEC|os.O_NOFOLLOW,0o600)
++    except FileExistsError:
++        if marker.is_symlink() or marker.read_text().strip()!=digest:
++            raise ValueError('Protection handoff consumption marker differs')
++        return False
++    try:
++        stamp=(digest+'\n').encode()
++        if os.write(fd,stamp)!=len(stamp):raise OSError('Partial protection marker write')
++        os.fsync(fd)
++    finally:os.close(fd)
++    return True
++
++
++def _fresh_boot(schedule, seed, pin, path, boot_id):
++    if str(uuid.UUID(boot_id))!=boot_id or str(uuid.UUID(seed['boot']))!=seed['boot']:
++        raise ValueError('Canonical boot IDs required')
++    previous={kind:_integer(seed['schedule']['optional'][kind]['overruns'],kind+'.overruns')
++        for kind in ('yunet','sface')}
++    with schedule.condition:
++        if (schedule.jobs or schedule.primary_calls or schedule.active is not None or schedule._lease_sequence
++                or hasattr(schedule,'protection_handoff')):
++            raise ValueError('Fresh-boot state must precede all workers')
++        if schedule.yunet_recovery is None or schedule.sface_recovery is None:
++            raise ValueError('Independent recovery policies required')
++        first=_consume_marker(path.with_name(path.name+'.boot-'+boot_id+'.consumed'),pin['sha256'])
++        if not first:
++            for kind in ('yunet','sface'):
++                schedule.jobs[kind]={'calls':0,'skipped':0,'overruns':0,'budget_exceeded':0,
++                    'estimated_budget_ms':schedule.budget*1000.,'maximum_ms':0.,'disabled':True}
++                policy=schedule.yunet_recovery if kind=='yunet' else schedule.sface_recovery
++                policy.phase='LATCHED';policy.reason='uncheckpointed_same_boot_restart'
++        schedule.protection_handoff={'mode':'new_boot_fresh_process','source_boot':seed['boot'],
++            'current_boot':boot_id,'source_pid':seed['source_pid'],'seed_sha256':pin['sha256'],
++            'previous_snapshot_faults':previous,'first_use':first,
++            'counter_scope':'New kernel boot starts a new process/counter window; previous pinned snapshot remains archived, not replayed as current monotonic time'}
++        return copy.deepcopy(schedule.protection_handoff)
++
++
++def restore_protection(schedule, pin, *, boot_id, clock_ns=time.monotonic_ns, allow_new_boot=False):
++    """Pinned startup data is authority; incomplete/unconfirmed state never unlocks."""
++    if type(allow_new_boot) is not bool:raise ValueError('New-boot policy must be boolean')
++    if not isinstance(pin,dict) or set(pin)!={'path','sha256'}:
++        raise ValueError('Pinned protection handoff required')
++    path=Path(pin['path'])
++    if not path.is_absolute() or path.is_symlink() or path.resolve()!=path:
++        raise ValueError('Protection handoff path redirects')
++    raw=path.read_bytes()
++    if len(raw)>262144 or hashlib.sha256(raw).hexdigest()!=pin['sha256']:
++        raise ValueError('Protection handoff hash mismatch')
++    seed=json.loads(raw)
++    if seed['schema']!='aura-dpu-protection-handoff-1':raise ValueError('Protection handoff schema mismatch')
++    source_pid=_integer(seed['source_pid'],'source_pid',1)
++    _integer(seed['source_birth_ticks'],'source_birth_ticks',1)
++    captured=_integer(seed['captured_mono_ns'],'captured_mono_ns',1)
++    for name in ('source_unit_sha256','source_manifest_sha256'):
++        if not isinstance(seed[name],str) or len(seed[name])!=64 or any(c not in '0123456789abcdef' for c in seed[name]):
++            raise ValueError('Protection provenance hash missing')
++    if seed['boot']!=boot_id:
++        if not allow_new_boot:raise ValueError('Protection handoff boot mismatch')
++        return _fresh_boot(schedule,seed,pin,path,boot_id)
++    if captured>clock_ns():raise ValueError('Protection handoff is from the future')
++    old=seed['schedule']
++    if old['owner_fenced'] or old.get('owner_fault_reason'):
++        raise ValueError('Native owner completion is unconfirmed')
++    if old.get('active') is not None or old.get('waiting_primary')!=0:
++        raise ValueError('Protection snapshot must be taken while lease is idle')
++    if old['budget_ms']!=20. or old['guard_ms']!=5.:
++        raise ValueError('Protection budget changed')
++    jobs=copy.deepcopy(old['optional'])
++    if set(jobs)!={'yunet','sface'}:raise ValueError('Both optional jobs must be preserved')
++    diag=old['optional_diagnostics'];events=copy.deepcopy(diag['fault_events'])
++    if not diag['enabled'] or diag['diagnostic_errors'] or old['diagnostic_failures']:
++        raise ValueError('Fault provenance unavailable')
++    primary_calls=_integer(old['primary_calls'],'primary_calls',1)
++    primary_overruns=_integer(old['primary_period_overruns'],'primary_overruns')
++    clean=all(row.get('disabled') is False and row.get('overruns')==0 for row in jobs.values())
++    if not clean and not all(row.get('disabled') is True for row in jobs.values()):
++        raise ValueError('Unsupported mixed protection history')
++    max_sequence=0
++    for kind,code in (('yunet',1),('sface',2)):
++        row=jobs[kind]
++        if row['disabled'] is not (False if clean else True):raise ValueError('Inconsistent protection mode')
++        for key in ('calls','skipped','overruns','budget_exceeded'):_integer(row[key],kind+'.'+key)
++        if (not clean and row['overruns']<1) or row['calls']<row['overruns']:raise ValueError('Missing protected fault count')
++        _finite(row['maximum_ms'],kind+'.maximum_ms')
++        estimate=_finite(row['estimated_budget_ms'],kind+'.estimated_budget_ms')
++        if not 20.<=estimate<=30.:raise ValueError('Invalid inherited admission budget')
++        faults=[event for event in events if event['task_code']==code]
++        if len(faults)!=row['overruns']:raise ValueError('Fault evidence count mismatch')
++        sequences=[]
++        for event in faults:
++            sequence=_integer(event['event_sequence'],'event_sequence',1);sequences.append(sequence)
++            max_sequence=max(max_sequence,sequence)
++            if (event['native_completed']!=1 or event['native_attempts']!=1 or event['native_status']!=0
++                    or event['native_failed'] or event['body_failed'] or event['diagnostic_finished']!=1):
++                raise ValueError('Fault native completion is not proven')
++            end=_integer(event['lease_release_decision_mono_ns'],'release_ns',1)
++            if not event['lease_started_mono_ns']<end<=captured:raise ValueError('Fault outside snapshot')
++            if event['hardcap_exceeded'] not in (0,1) or event['guard_exceeded'] not in (0,1):
++                raise ValueError('Invalid protection decisions')
++            if not event['hardcap_exceeded'] and not event['guard_exceeded']:raise ValueError('No fault decision')
++        if len(set(sequences))!=len(sequences):raise ValueError('Duplicate fault evidence')
++    legacy=old['yunet_recovery']
++    if (legacy['phase']!=('RUNNING' if clean else 'LATCHED') or legacy['faults']!=jobs['yunet']['overruns']
++            or legacy['attempts']!=0 or legacy['recoveries']!=0 or legacy['attempts_in_window']!=0
++            or legacy['probe_successes']!=0):
++        raise ValueError('Unsupported YuNet recovery history; refusing reset')
++    last_sface=max((e for e in events if e['task_code']==2),key=lambda e:e['event_sequence']) if not clean else None
++    # The legacy SFace path had no automatic recovery: exactly one proven fault
++    # gives an unambiguous zero-attempt migration. Other history stays blocked.
++    if jobs['sface']['overruns']!=(0 if clean else 1):raise ValueError('Unsupported legacy SFace recovery history')
++    feature=seed['feature_inference']
++    feature_names=('requests','execution_attempts','completed','features_returned','deferred',
++                   'slot_denials','expired_after_admission')
++    inherited_feature={name:_integer(feature[name],'feature.'+name) for name in feature_names}
++    if not inherited_feature['features_returned']<=inherited_feature['completed']<=inherited_feature['execution_attempts']<=inherited_feature['requests']:
++        raise ValueError('Inconsistent inherited feature counters')
++    _integer(old['lease_sequence'],'lease_sequence',max_sequence)
++    marker=path.with_name(path.name+'.consumed')
++    first_use=_consume_marker(marker,pin['sha256'])
++    with schedule.condition:
++        if (schedule.jobs or schedule.primary_calls or schedule.active is not None
++                or schedule._lease_sequence or hasattr(schedule,'protection_handoff')):
++            raise ValueError('Protection handoff must precede all workers and leases')
++        if schedule.yunet_recovery is None or schedule.sface_recovery is None:
++            raise ValueError('Both independent recovery policies required')
++        schedule.jobs=jobs
++        schedule.inherited_sface_counters=inherited_feature
++        schedule.primary_calls=primary_calls;schedule.primary_overruns=primary_overruns
++        schedule.next_primary=0.;schedule._last_primary=None
++        schedule._lease_sequence=old['lease_sequence']
++        policy=schedule.yunet_recovery
++        policy.phase=legacy['phase'];policy.reason=legacy['reason'];policy.faults=legacy['faults']
++        policy.fault_primary_calls=primary_calls;policy.fault_primary_overruns=primary_overruns
++        policy.cooldown_until=legacy['cooldown_until_monotonic_s']
++        policy=schedule.sface_recovery
++        if not clean:
++            policy.fault(last_sface['lease_release_decision_mono_ns']/1e9,completed=True,body_failed=False,
++                hardcap=bool(last_sface['hardcap_exceeded']),guard=bool(last_sface['guard_exceeded']),
++                primary_calls=primary_calls,primary_overruns=primary_overruns)
++        if not first_use:
++            policy.phase='LATCHED';policy.reason='uncheckpointed_same_boot_restart'
++            schedule.yunet_recovery.phase='LATCHED';schedule.yunet_recovery.reason='uncheckpointed_same_boot_restart'
++            schedule.jobs['yunet']['disabled']=schedule.jobs['sface']['disabled']=True
++        diagnostics=schedule.diagnostics
++        if diagnostics is not None and diagnostics.enabled:
++            with diagnostics.lock:
++                diagnostics.sequence=old['lease_sequence']
++                diagnostics.events.extend(events)
++                diagnostics.counters=copy.deepcopy(diag['counters'])
++        schedule.protection_handoff={'source_pid':source_pid,'source_birth_ticks':seed['source_birth_ticks'],
++            'source_unit_sha256':seed['source_unit_sha256'],'seed_sha256':pin['sha256'],
++            'captured_mono_ns':captured,'counter_scope':'schedule and optional diagnostics include pinned predecessor; other process metrics start fresh',
++            'inherited_yunet_faults':jobs['yunet']['overruns'],'inherited_sface_faults':jobs['sface']['overruns']}
++        schedule.protection_handoff['first_use']=first_use
++        schedule.protection_handoff['mode']='clean_same_boot' if clean else 'protected_same_boot'
++    return copy.deepcopy(schedule.protection_handoff)
+--- original/board/vision/dpu_sface.py
++++ candidate/board/vision/dpu_sface.py
+@@ -10,7 +10,7 @@
+ 
+ from board.identity.deferred import DeferredIdentity
+ from board.identity.model_store import MODEL_ID, MODEL_SHA256
+-from board.vision.dpu_vision_runtime import PinnedRunner, encode, sface_feature
++from board.vision.dpu_vision_runtime import PinnedRunner, encode, sface_feature, AdmissionCancelled
+ 
+ 
+ class DpuSFace:
+@@ -30,6 +30,8 @@
+         self.source_ttl = backend['max_source_age_ms']
+         self.requests = self.execution_attempts = self.completed = self.features_returned = 0
+         self.deferred = self.slot_denials = self.expired_after_admission = 0
++        for name,value in getattr(schedule,'inherited_sface_counters',{}).items():
++            setattr(self,name,value)
+         self._closed = False
+         self.runner = PinnedRunner(backend['model'], backend['manifest'], owner)
+         if (self.runner.input_fix != 7 or list(self.runner.inputs[0].dims) != [1, 112, 112, 3]
+@@ -52,6 +54,9 @@
+                     if not fresh:self.expired_after_admission+=1
+                     else:self.execution_attempts+=1
+                     yield fresh
++                    if fresh:
++                        marker=getattr(self.schedule,'native_completed',None)
++                        if marker is not None:marker('sface',usable=self._fresh(stamp))
+                     return
+                 self.slot_denials+=1
+             # No slot or state lock is held while waiting for the same owner.
+@@ -67,7 +72,9 @@
+ 
+     def feature(self, crop, *, source_mono_ms):
+         self.requests += 1
+-        if not self._fresh(source_mono_ms) or not self.availability()['ready']:
++        probe=getattr(self.schedule,'recovery_probe_allowed',lambda kind:False)
++        if (not self._fresh(source_mono_ms) or
++                (not self.availability()['ready'] and not probe('sface'))):
+             self._defer('SFace source expired or optional task disabled')
+ 
+         attempts_before=self.execution_attempts
+@@ -77,12 +84,24 @@
+                 return None
+             # Encoding and runner output allocation/dequantization are outside
+             # the scheduling lock. Only execute_async/wait hold the DPU slot.
+-            result = self.runner.execute_encoded(source, slot=self._slot(source_mono_ms))
++            def before_native():
++                if not self._fresh(source_mono_ms):
++                    raise AdmissionCancelled('SFace source expired before native submission')
++                starting=getattr(self.schedule,'native_starting',None)
++                if starting is not None and not starting('sface'):
++                    raise AdmissionCancelled('SFace recovery admission withdrawn')
++            try:
++                result = self.runner.execute_encoded(source, slot=self._slot(source_mono_ms),
++                    pre_execute=before_native)
++            except AdmissionCancelled:
++                self._defer('SFace source or recovery admission expired before submission')
+             if result is not None:
+                 self.completed += 1
+             return result
+ 
+         result = sface_feature(crop, self.runner, execute=scheduled)
++        if not self.availability()['ready']:
++            self._defer('SFace protection or recovery probation; identity result withheld')
+         if result is None or not self._fresh(source_mono_ms):
+             self._defer('SFace optional slot unavailable or result expired',
+                 retryable=self.execution_attempts==attempts_before and self._fresh(source_mono_ms)
+@@ -92,11 +111,17 @@
+ 
+     def availability(self):
+         """Persistent protection is unavailable; ordinary slot contention is not."""
++        status=getattr(self.schedule,'optional_status',lambda kind:{})('sface')
++        recovery=status.get('recovery')
++        recovering=recovery is not None and recovery['phase'] in ('COOLDOWN','PROBATION')
+         reason = ('DPU_SFACE_CLOSED' if self._closed else
++                  'DPU_SFACE_RECOVERING' if recovering else
+                   'DPU_SFACE_OPTIONAL_DISABLED' if self.schedule.disabled('sface') else None)
+         return {'ready': reason is None, 'unavailable_reason': reason,
+-                'detail': '人脸识别服务暂不可用，请恢复服务后重试' if reason else '',
+-                'recovery_required': reason == 'DPU_SFACE_OPTIONAL_DISABLED'}
++                'detail': ('人脸识别服务正在受限恢复，请稍候' if recovering else
++                           '人脸识别服务暂不可用，请恢复服务后重试' if reason else ''),
++                'recovery_required': reason in ('DPU_SFACE_OPTIONAL_DISABLED','DPU_SFACE_RECOVERING'),
++                'recovery': recovery}
+ 
+     def health(self):
+         return {'kind': self.kind, 'model_id': self.model_id,
+--- original/board/vision/dpu_vision_schedule.py
++++ candidate/board/vision/dpu_vision_schedule.py
+@@ -7,11 +7,15 @@
+ 
+ class DpuVisionSchedule:
+     def __init__(self, *, budget_ms=20, guard_ms=5, clock=time.monotonic, diagnostics=None,
+-                 yunet_recovery=False, yunet_slot_wait_ms=0, sface_slot_wait_ms=0):
++                 yunet_recovery=False, yunet_slot_wait_ms=0, sface_slot_wait_ms=0,
++                 sface_recovery=False, admission_floor_ms=0):
+         if not 5 <= budget_ms <= 30 or not 1 <= guard_ms <= 20:
+             raise ValueError('Invalid DPU budget')
+         self.clock, self.budget, self.guard = clock, budget_ms / 1000., guard_ms / 1000.
+         self.condition = threading.Condition()
++        if type(admission_floor_ms) is not int or not 0 <= admission_floor_ms <= 30:
++            raise ValueError('Admission floor must be an integer in 0..30 milliseconds')
++        self.admission_floor = admission_floor_ms / 1000.
+         self.active, self.waiting_primary, self.next_primary = None, 0, 0.
+         self.primary_calls = self.primary_overruns = 0
+         self.jobs = {}
+@@ -22,6 +26,8 @@
+         self._last_primary = None
+         self._native_owner = None
+         self._native_completed = False
++        self._native_result_usable = True
++        self._native_started = False
+         self._lease_sequence = 0
+         self._diagnostic_failures = 0
+         self.owner_fenced = False
+@@ -29,6 +35,18 @@
+         if yunet_recovery:
+             from board.vision.dpu_recovery_policy import YuNetRecoveryPolicy
+             self.yunet_recovery = YuNetRecoveryPolicy()
++        if type(sface_recovery) is not bool:
++            raise ValueError('SFace recovery requires an explicit boolean')
++        self.sface_recovery = None
++        if sface_recovery:
++            from board.vision.dpu_recovery_policy import YuNetRecoveryPolicy
++            self.sface_recovery = YuNetRecoveryPolicy()
++        self._configure_slot_wait(yunet_slot_wait_ms, sface_slot_wait_ms)
++
++    def _policy(self, kind):
++        return self.yunet_recovery if kind == 'yunet' else self.sface_recovery if kind == 'sface' else None
++
++    def _configure_slot_wait(self, yunet_slot_wait_ms, sface_slot_wait_ms):
+         if type(yunet_slot_wait_ms) is not int or not 0 <= yunet_slot_wait_ms <= 100:
+             raise ValueError('YuNet slot wait must be an integer in 0..100 milliseconds')
+         self.yunet_slot_wait_ms = yunet_slot_wait_ms
+@@ -78,10 +96,12 @@
+                     self.primary_calls += 1
+                     primary_late = self.clock() > next_deadline
+                     self.primary_overruns += int(primary_late)
+-                    if self.yunet_recovery is not None:
++                    if self.yunet_recovery is not None or self.sface_recovery is not None:
+                         self._last_primary = self.clock()
+-                        if primary_late and self.yunet_recovery.primary_failed():
+-                            self.jobs['yunet']['disabled'] = True
++                        for kind in ('yunet', 'sface'):
++                            policy = self._policy(kind)
++                            if policy is not None and primary_late and policy.primary_failed():
++                                self.jobs[kind]['disabled'] = True
+                 finally:
+                     self.active = None
+                     self.condition.notify_all()
+@@ -93,13 +113,14 @@
+     def optional_status(self, kind):
+         with self.condition:
+             result = dict(self.jobs.get(kind, {}))
+-            if kind == 'yunet' and self.yunet_recovery is not None:
+-                result['recovery'] = self.yunet_recovery.snapshot()
++            policy = self._policy(kind)
++            if policy is not None:
++                result['recovery'] = policy.snapshot()
+             return result
+ 
+     def _recovery_due(self, kind):
+-        policy = self.yunet_recovery
+-        return (not self.owner_fenced and kind == 'yunet' and policy is not None and policy.due(self.clock(),
++        policy = self._policy(kind)
++        return (not self.owner_fenced and policy is not None and policy.due(self.clock(),
+                 primary_calls=self.primary_calls, primary_overruns=self.primary_overruns,
+                 last_primary=self._last_primary))
+ 
+@@ -109,13 +130,38 @@
+                     and self.active is None and not self.waiting_primary
+                     and self._recovery_due(kind))
+ 
+-    def native_completed(self, kind):
+-        if self.yunet_recovery is None or kind != 'yunet':
++    def recovery_probe_allowed(self, kind):
++        """Allow only real requests to attempt ordinary admission; not business ready."""
++        with self.condition:
++            policy = self._policy(kind)
++            return bool(not self.owner_fenced and policy is not None and (
++                (policy.phase == 'PROBATION' and not self.jobs.get(kind, {}).get('disabled', False))
++                or self._recovery_due(kind)))
++
++    def native_starting(self, kind):
++        """SFace spends a recovery round only immediately before native submission."""
++        with self.condition:
++            policy = self._policy(kind)
++            if policy is None:return True
++            if self.active != kind or self._native_owner != (kind, threading.get_ident()):
++                raise RuntimeError('Native start does not own the active slot')
++            if self.owner_fenced:return False
++            if kind == 'sface' and policy.phase == 'COOLDOWN':
++                if not self._recovery_due(kind):return False
++                policy.admitted(self.clock())
++            elif policy.phase == 'LATCHED':return False
++            self._native_started = True
++            return True
++
++    def native_completed(self, kind, *, usable=True):
++        if self._policy(kind) is None:
+             return
++        if type(usable) is not bool:raise ValueError('Native result usability must be boolean')
+         with self.condition:
+             if self.active != kind or self._native_owner != (kind, threading.get_ident()):
+                 raise RuntimeError('Native completion does not own the active slot')
+             self._native_completed = True
++            self._native_result_usable = usable
+ 
+     def wait_for_optional(self, kind, deadline):
+         """Wait for a scheduling opportunity; caller still acquires normally.
+@@ -141,7 +187,8 @@
+                     job = self.jobs.get(kind, {})
+                     if self.owner_fenced or (job.get('disabled', False) and not self._recovery_due(kind)):
+                         stats['disabled'] += 1; return False
+-                    estimate = max(self.budget, job.get('estimated_budget_ms', self.budget*1000.)/1000.)
++                    estimate = max(self.budget, self.admission_floor,
++                                   job.get('estimated_budget_ms', self.budget*1000.)/1000.)
+                     if (self.active is None and not self.waiting_primary
+                             and self.next_primary-now >= estimate+self.guard):
+                         stats['ready'] += 1; return True
+@@ -162,7 +209,7 @@
+             stats = self.jobs.setdefault(kind, {'calls': 0, 'skipped': 0, 'overruns': 0,
+                 'budget_exceeded': 0, 'estimated_budget_ms': self.budget * 1000.,
+                 'maximum_ms': 0., 'disabled': False})
+-            estimate = max(self.budget, stats['estimated_budget_ms'] / 1000.)
++            estimate = max(self.budget, self.admission_floor, stats['estimated_budget_ms'] / 1000.)
+             recovering = stats['disabled'] and self._recovery_due(kind)
+             acquired = (not self.owner_fenced and (not stats['disabled'] or recovering) and self.active is None and not self.waiting_primary
+                         and self.next_primary - self.clock() >= estimate + self.guard)
+@@ -172,11 +219,15 @@
+                 self._lease_sequence += 1
+                 lease_sequence = self._lease_sequence
+                 finish_deadline = self.next_primary - self.guard
+-                if self.yunet_recovery is not None and kind == 'yunet':
++                policy = self._policy(kind)
++                if policy is not None:
+                     self._native_owner = (kind, threading.get_ident())
+                     self._native_completed = False
++                    self._native_result_usable = True
++                    self._native_started = False
++                    if recovering and kind == 'yunet':
++                        policy.admitted(started)
+                     if recovering:
+-                        self.yunet_recovery.admitted(started)
+                         stats['disabled'] = False
+             else:
+                 stats['skipped'] += 1
+@@ -229,13 +280,16 @@
+                                 'finish_after_guard_ms': (self.clock() - finish_deadline) * 1000.,
+                                 'waiting_primary': self.waiting_primary}
+                         if failed_native:stats['disabled'] = True
+-                        if self.yunet_recovery is not None and kind == 'yunet':
++                        policy = self._policy(kind)
++                        if policy is not None:
+                             if hardcap_exceeded or guard_exceeded or failed_native:
+-                                self.yunet_recovery.fault(self.clock(), completed=self._native_completed,
++                                policy.fault(self.clock(), completed=self._native_completed,
+                                     body_failed=body_failed, hardcap=hardcap_exceeded, guard=guard_exceeded,
+                                     primary_calls=self.primary_calls, primary_overruns=self.primary_overruns)
+-                            elif self._native_completed:
+-                                self.yunet_recovery.success()
++                            elif self._native_completed and self._native_result_usable:
++                                policy.success()
++                            if kind == 'sface' and policy.phase in ('COOLDOWN', 'LATCHED'):
++                                stats['disabled'] = True
+                         finish_arguments = (kind, trace, elapsed*1000.,
+                             (self.clock()-finish_deadline)*1000.,self.waiting_primary,
+                             hardcap_exceeded,guard_exceeded,body_failed)
+@@ -247,6 +301,8 @@
+                         # aggregation runs after releasing the condition.
+                         self._native_owner = None
+                         self._native_completed = False
++                        self._native_started = False
++                        self._native_result_usable = True
+                         self.active = None
+                         self.condition.notify_all()
+                 if trace is not None and finish_arguments is not None:
+@@ -264,12 +320,17 @@
+                     'primary_period_overruns': self.primary_overruns,
+                     'waiting_primary': self.waiting_primary, 'budget_ms': self.budget * 1000.,
+                     'guard_ms': self.guard * 1000., 'optional': {k: dict(v) for k, v in self.jobs.items()},
++                    'admission_floor_ms':self.admission_floor*1000.,
+                     'lease_sequence':self._lease_sequence,'diagnostic_failures':self._diagnostic_failures,
+                     'owner_fenced':self.owner_fenced,'owner_fault_reason':self.owner_fault_reason,
+                     'diagnostic_snapshot_atomic_with_schedule':False,
+                     'occupancy_scope':'admission through pre-release protection decision; auxiliary finish runs after release'}
+             if self.yunet_recovery is not None:
+                 result['yunet_recovery'] = self.yunet_recovery.snapshot()
++            if self.sface_recovery is not None:
++                result['sface_recovery'] = self.sface_recovery.snapshot()
++            if hasattr(self, 'protection_handoff'):
++                result['protection_handoff'] = dict(self.protection_handoff)
+             if self.yunet_slot_wait_ms:
+                 result['yunet_slot_wait'] = dict(self._slot_wait_stats)
+             if self.sface_slot_wait_ms:
+--- original/board/vision/ui_camera_service.py
++++ candidate/board/vision/ui_camera_service.py
+@@ -391,8 +391,14 @@
+         from board.vision.dpu_vision_schedule import DpuVisionSchedule
+         state.dpu_schedule = DpuVisionSchedule(diagnostics=state.pipeline_metrics.optional_diagnostics,
+             yunet_recovery=config.get('yunet_dpu_recovery', False),
++            sface_recovery=config.get('sface_dpu_recovery', False),
++            admission_floor_ms=config.get('optional_admission_floor_ms', 0),
+             yunet_slot_wait_ms=config.get('yunet_slot_wait_ms', 0),
+             sface_slot_wait_ms=config.get('sface_slot_wait_ms', 0))
++        if config.get('dpu_protection_seed') is not None:
++            from board.vision.dpu_protection_handoff import restore_protection
++            restore_protection(state.dpu_schedule, config['dpu_protection_seed'], boot_id=state.boot,
++                allow_new_boot=config.get('dpu_protection_allow_new_boot',False))
+     if detector is not None:detector.pipeline_metrics=state.pipeline_metrics
+     stop=threading.Event();condition=threading.Condition();latest=[None]
+     capture=None;server=None;thread=None;worker=None;preview_worker=None;raw=None

@@ -1,0 +1,145 @@
+--- accepted-layout/face_zone_editor.py
++++ offline-freshness-v2/face_zone_editor.py
+@@ -49,6 +49,8 @@
+         self.path=path;self.closed=threading.Event();self.condition=threading.Condition()
+         self.pending=None;self.drag=False;self.timer=None;self.ratio=.75;self.last_slider_stop=0.
+         self.saved_fields={};self.left_camera_ratio=.1
++        self._display_lock=threading.Lock();self._display_pending=None;self._display_idle=None;self._display_generation=0
++        self._face_expiry_source=None;self._face_expiry_token=0
+         if path.is_file():
+             old=json.loads(path.read_text());self.saved_fields=dict(old)
+             self.ratio=float(old.get('right_ratio',.75));self.left_camera_ratio=float(old.get('left_camera_ratio',.1))
+@@ -69,6 +71,7 @@
+         self.hint_window.connect('realize',lambda widget:widget.get_window().set_pass_through(True))
+         self.boot=Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+         self.visibility_channel=None;self.poll_wakeup=threading.Event()
++        self.hint_window.connect('destroy',self.close)
+         self.position_counts=collections.Counter();self.position_events=collections.deque(maxlen=64)
+         self.last_position_source=None;self.last_position=None;self.next_position_write=0.
+         self.line.add_events(Gdk.EventMask.BUTTON_PRESS_MASK|Gdk.EventMask.BUTTON_RELEASE_MASK|Gdk.EventMask.POINTER_MOTION_MASK)
+@@ -168,9 +171,69 @@
+             except Exception:pass
+         threading.Thread(target=send,daemon=True).start()
+ 
+-    def update(self,active,face,hint='人脸位置：未确认'):
++    def enqueue_display(self,active,face,hint,packet,preview,visibility_revision):
++        # Separate from the original settings save queue and debounce timer.
++        with self._display_lock:
++            if self.closed.is_set():return
++            self._display_pending=(active,face,hint,packet,preview,visibility_revision)
++            if self._display_idle is None:
++                self._display_idle=GLib.idle_add(self._flush_display,self._display_generation)
++
++    def _flush_display(self,generation):
++        with self._display_lock:
++            if generation!=self._display_generation:return False
++            value=self._display_pending;self._display_pending=None;self._display_idle=None
++        if value is not None and not self.closed.is_set():self.update(*value)
++        return False
++
++    def _clear_display_pending(self):
++        with self._display_lock:
++            self._display_generation+=1
++            source=self._display_idle;self._display_idle=None;self._display_pending=None
++        if source is not None:GLib.source_remove(source)
++
++    def _cancel_face_expiry(self):
++        self._face_expiry_token+=1
++        if self._face_expiry_source is not None:GLib.source_remove(self._face_expiry_source)
++        self._face_expiry_source=None
++
++    def _expire_face(self,token,deadline,visibility_revision):
++        # A dispatched old timeout must not clear a newer timer or face.
++        if self.closed.is_set() or token!=self._face_expiry_token:return False
++        self._face_expiry_source=None
++        same_page=(self.visibility_channel is None or visibility_revision==self.visibility_channel.gate.snapshot()['revision'])
++        now=int(time.monotonic()*1000)
++        if same_page and now<deadline:
++            self._face_expiry_source=GLib.timeout_add(max(1,deadline-now),self._expire_face,token,deadline,visibility_revision)
++            return False
++        self._face_expiry_token+=1
++        for window in self.faces:window.hide()
++        self.hint_label.set_text('人脸位置：未确认')
++        return False
++
++    def close(self,*args):
++        if self.closed.is_set():return
++        self.closed.set();self._clear_display_pending();self._cancel_face_expiry();self.poll_wakeup.set()
++        with self.condition:self.condition.notify_all()
++        if self.visibility_channel is not None:self.visibility_channel.close()
++
++    def update(self,active,face,hint='人脸位置：未确认',packet=None,preview=None,visibility_revision=None):
++        if self.closed.is_set():return False
+         if self.visibility_channel is not None:
++            if visibility_revision is not None and visibility_revision!=self.visibility_channel.gate.snapshot()['revision']:return False
+             active=bool(active and self.visibility_channel.gate.allows_overlay())
++        self._cancel_face_expiry();deadline=None
++        if active and face is not None:
++            now=int(time.monotonic()*1000)
++            current,_,_=face_position(packet,self.boot,now,self.left_camera_ratio,image_ratio(self.ratio))
++            reference=preview.get('frame_reference') if isinstance(preview,dict) else None
++            valid_preview=(isinstance(reference,dict) and isinstance(packet,dict) and preview.get('frame_visible') is True
++                and isinstance(reference.get('camera_epoch'),str) and bool(reference['camera_epoch'])
++                and reference['camera_epoch']==(packet or {}).get('camera_epoch')
++                and type(reference.get('frame_id')) is int and reference['frame_id']>=0
++                and type(reference.get('captured_mono_ms')) is int and 0<=reference['captured_mono_ms']<=now)
++            if current!=face or not valid_preview:face=None;hint='人脸位置：未确认'
++            else:deadline=min(packet['source_mono_ms']+250,packet['face_detection_mono_ms']+500)
+         if active:
+             if not self.active:self.line.show_all();self.left_line.show_all()
+             if self.recenter_enabled:self.center_line.show_all()
+@@ -186,6 +249,8 @@
+         x=round(CONTENT[0]+x/640*CONTENT[2]);y=round(CONTENT[1]+y/480*CONTENT[3]);w=max(2,round(w/640*CONTENT[2]));h=max(2,round(h/480*CONTENT[3]))
+         rectangles=((x,y,w,2),(x,y+h-2,w,2),(x,y,4,h),(x+w-2,y,2,h),(x+w//2-2,y+h//2-2,5,5))
+         for window,(left,top,width,height) in zip(self.faces,rectangles):window.move(left,top);window.resize(width,height);window.show_all()
++        self._face_expiry_source=GLib.timeout_add(max(1,deadline-int(time.monotonic()*1000)),self._expire_face,
++            self._face_expiry_token,deadline,visibility_revision)
+         return False
+ 
+     def install_page_visibility(self):
+@@ -194,25 +259,26 @@
+ 
+     def page_visibility_applied(self,page):
+         if page!='vision':
+-            self.drag=False
++            self.drag=False;self._clear_display_pending()
+             self.update(False,None)
+             display=Gdk.Display.get_default()
+             if display is not None:display.sync()
+         self.poll_wakeup.set()
+ 
+     def poll(self):
+-        opener=urllib.request.build_opener(urllib.request.ProxyHandler({}));active=False;next_ui=0;following={};page_revision=-1
++        opener=urllib.request.build_opener(urllib.request.ProxyHandler({}));active=False;next_ui=0;following={};preview={};page_revision=-1
+         while not self.closed.is_set():
+             self.poll_wakeup.wait(.1);self.poll_wakeup.clear()
+             if self.closed.is_set():break
+             if self.visibility_channel is not None:
+                 revision=self.visibility_channel.gate.snapshot()['revision']
+                 if revision!=page_revision:next_ui=0;page_revision=revision
++            visibility_revision=page_revision if self.visibility_channel is not None else None
+             face=None;hint='人脸位置：未确认';position='UNCONFIRMED';packet={}
+             try:
+                 if time.monotonic()>=next_ui:
+                     state=self.get(opener,8783,'/api/state');metric=state['ui_runtime'].get('preview_metrics') or {}
+-                    active=state.get('ui_page')=='vision' and metric.get('sink_active') and 'large' not in metric.get('active_outputs',[]);next_ui=time.monotonic()+.5
++                    active=state.get('ui_page')=='vision' and metric.get('sink_active') and 'large' not in metric.get('active_outputs',[]);preview=metric;next_ui=time.monotonic()+.5
+                     following=(state.get('manual_pan') or {}).get('face_follow') or {}
+                 if active:
+                     packet=self.get(opener,8790,'/v1/motion/face/observation')
+@@ -239,11 +305,13 @@
+                     path=self.path.parent/'face-zone-display-status.json';tmp=path.with_name(path.name+'.'+str(os.getpid()))
+                     tmp.write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n');os.replace(tmp,path)
+                 except OSError:pass
+-            GLib.idle_add(self.update,active,face,hint)
++            self.enqueue_display(active,face,hint,packet,preview,visibility_revision)
+ 
+ 
+ def main():
+     p=argparse.ArgumentParser();p.add_argument('--settings',type=Path,required=True);args=p.parse_args()
+-    setup_font();editor=Editor(args.settings);editor.install_page_visibility();Gtk.main()
++    setup_font();editor=Editor(args.settings);editor.install_page_visibility()
++    try:Gtk.main()
++    finally:editor.close()
+ 
+ if __name__=='__main__':main()

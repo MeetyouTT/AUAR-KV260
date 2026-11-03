@@ -1,0 +1,142 @@
+--- E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v18_minor_ui_candidate\minor_common.py
++++ E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v19_stability_candidate\stability_common.py
+@@ -12,17 +12,18 @@
+ 
+ HERE = Path(__file__).resolve().parent
+ REPAIR = HERE.parent
+-PREVIOUS = REPAIR / 'release_v18_newboot_candidate'
+-BASE_SPEC_SHA = '07e7d0762c79ad76832fba5f33be25f0822b53963a1512e5f1eb26c2d8483e5b'
+-BASE_MAPPING_SHA = '7daeff19d784ba69d31bd9911ebd461a5b987e5a51f7da76d0a74f0bcab8a3a8'
+-BASE_STARTUP_SHA = '70a2f7fa5440f2b65004d66d5c4984b664ccc2b60131a0abd9a8351591c8d4e6'
+-BASE_MANIFEST_SHA = 'e105159fea9a71a347b6564ef77d1db23f6596199ed27a5e8684d6b025b5bacb'
++PREVIOUS = REPAIR / 'release_v18_minor_ui_candidate'
++BASE_SPEC_SHA = 'c46d44e8583a8ccb8e02d9321b5c6edb9a681474913ba2689dd681d912c50cb2'
++BASE_MAPPING_SHA = 'df6b26927ad60d6d3513429c697d70bd15c84cfdca6d16c5527e9992cb7b04e2'
++BASE_STARTUP_SHA = '90f6c6c40f6501362aa77483235a7260a212de6e3357615311bdaa5cc193ebbe'
++BASE_MANIFEST_SHA = '6d03c1d7aa95a9c5615f540606699f67c4ee7a44be1e50dcb2983c6c555e3637'
+ BASE_CONFIG_SHA = '5518b6705083eb9e2fae7e19a47c003182995fe8660cbc6031860c9905da9786'
+ PUBLISHER_SHA = 'af19ae0b99cde0307a58bae5c543ec8c67e9bda782e6294abae8dd492c228683'
+-MINOR_REVISION = 'response-latency-v18-ui-worker-followup'
+-ALLOWED_PATHS = {'tools/board_avatar_gtk.py','tools/production_business_ui.py','tools/board_avatar_worker.py'}
++MINOR_REVISION = 'response-stability-v19-social-off-audio-drain'
++ALLOWED_PATHS = {'tools/board_avatar_gtk.py','tools/board_recording.py'}
+ # Exact author manifests and source bytes reviewed before this closure was sealed.
+-APPROVED_PAYLOAD_SHA = '06fa0931fff7a6d0696c8357af44af1f69d1aece3d2114c71473daa0031b3917'
++APPROVED_PAYLOAD_SHA = 'cc782df3d1680ad4963c9c41d94498e0828ec38a03138a4889c534002e861819'
++PREFERENCE_SHA = '304af4e4aa4022797931111df47d0b4a8f5c8754a99b5076c50d95b77a684c69'
+ 
+ 
+ def sha(raw):
+@@ -42,7 +43,7 @@
+ 
+ 
+ def previous_publisher():
+-    path=PREVIOUS/'publish_newboot.py'
++    path=REPAIR/'release_v18_newboot_candidate/publish_newboot.py'
+     pinned(path,PUBLISHER_SHA)
+     spec=importlib.util.spec_from_file_location('_pinned_newboot_publisher_for_minor',path)
+     module=importlib.util.module_from_spec(spec)
+@@ -51,13 +52,17 @@
+ 
+ 
+ def baseline():
+-    spec=json.loads(pinned(PREVIOUS/'newboot_evidence/spec.json',BASE_SPEC_SHA))
+-    mapping=json.loads(pinned(PREVIOUS/'newboot_evidence/source_mapping.json',BASE_MAPPING_SHA))
++    spec=json.loads(pinned(PREVIOUS/'minor_evidence/spec.json',BASE_SPEC_SHA))
++    mapping=json.loads(pinned(PREVIOUS/'minor_evidence/source_mapping.json',BASE_MAPPING_SHA))
+     if (spec['startup_sha256']!=BASE_STARTUP_SHA or spec['source_manifest_sha256']!=BASE_MANIFEST_SHA
+             or spec['configuration_sha256']!=BASE_CONFIG_SHA or spec['component_pins']!=379
+             or mapping['component_pins']!=spec['component_sha256'] or len(spec['component_sha256'])!=379):
+         raise ValueError('current_sealed_379_baseline_required')
+-    spec.update(minor_state='BASELINE',minor_revision=MINOR_REVISION,minor_overrides={})
++    choice=json.loads(pinned(HERE/'FROZEN_LISTENING_PREFERENCE.json',PREFERENCE_SHA))
++    if (choice.get('preference')!={'version':1,'enabled':False} or choice.get('enabled') is not False
++            or choice.get('state')!='PAUSED' or choice.get('microphone_open') is not False):
++        raise ValueError('saved_user_pause_evidence_required')
++    spec.update(minor_state='BASELINE',minor_revision=MINOR_REVISION,minor_overrides={},expected_final_listening_enabled=False)
+     return spec
+ 
+ 
+@@ -68,7 +73,7 @@
+     if value.get('baseline_startup_sha256')!=BASE_STARTUP_SHA or value.get('minor_revision')!=MINOR_REVISION:
+         raise ValueError('approved_minor_baseline_changed')
+     sources=value.get('sources',{})
+-    if not isinstance(sources,dict) or not sources or not set(sources)<=ALLOWED_PATHS:
++    if not isinstance(sources,dict) or not sources or set(sources)!=ALLOWED_PATHS:
+         raise ValueError('approved_minor_source_paths_required')
+     pins=baseline()['component_sha256']
+     for rel,row in sources.items():
+@@ -95,6 +100,8 @@
+ 
+ 
+ def validate_spec(spec,*,allow_baseline=False,allow_proposed=False):
++    if type(spec.get('expected_final_listening_enabled')) is not bool:
++        raise ValueError('explicit_boolean_listening_preference_required')
+     state=spec.get('minor_state')
+     if state=='BASELINE' and allow_baseline:
+         expected=baseline()
+@@ -133,6 +140,16 @@
+     source=''.join(lines)
+     source=replace_once(source," if ACTION=='guard-failed':result=guard_failed()\n elif ACTION=='guard':result=guard()",
+         " if ACTION=='guard':result=guard()")
++    source=replace_once(source,
++        " if SPEC['release_stage']==V18_STAGE:need(enabled is True,'latest_user_listening_preference_true_required')",
++        " need(type(SPEC.get('expected_final_listening_enabled')) is bool,'valid_expected_listening_preference_required')\n"
++        " if SPEC['release_stage']==V18_STAGE:need(enabled is SPEC['expected_final_listening_enabled'],'latest_user_listening_preference_required')")
++    path=HERE/'ownerless_port_wait.py'
++    pinned(path,'c9d38b5c7a17ecea206af466c1728b5979bdff756d7e74cbfc0f3e5401283664')
++    module_spec=importlib.util.spec_from_file_location('_v19_pinned_port_release_wait',path)
++    module=importlib.util.module_from_spec(module_spec)
++    module_spec.loader.exec_module(module)
++    source=module.patch_ownerless(source)
+     ast.parse(source,feature_version=(3,9))
+     return source
+ 
+--- E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v18_minor_ui_candidate\apply_minor_closed.py
++++ E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v19_stability_candidate\apply_stability_closed.py
+@@ -1,4 +1,4 @@
+-"""Apply only the frozen GTK, business UI and worker sources after WM_DELETE.
++"""Apply only the frozen GTK and audio-consumer sources after WM_DELETE.
+ 
+ The original GUI configuration, face readback and all other components are
+ retained byte-for-byte. Partial failures retain the no-force guard and backups.
+@@ -9,7 +9,7 @@
+ from pathlib import Path
+ import time
+ 
+-import minor_common as common
++import stability_common as common
+ 
+ 
+ APPLY_REMOTE = r'''
+@@ -126,7 +126,7 @@
+         print(json.dumps(dict(status='DRY_MINOR_APPLY_VALIDATED_NO_SSH',remote_sha256=common.sha(remote.encode()),
+             source_files={rel:row['sha256'] for rel,row in payload.items()},source_count=len(payload))))
+         return
+-    result=common.execute_remote(remote,dict(SPEC=spec,ACTION='start',TOKEN=None,WINDOW=None,PAYLOAD=payload),timeout=180)
++    result=common.execute_remote(remote,dict(SPEC=spec,ACTION='start',TOKEN=None,WINDOW=None,PAYLOAD=payload),timeout=225)
+     suffix=str(time.time_ns());output=common.HERE/('actual_apply_'+suffix+'.json')
+     common.write_new_json(output,result)
+     if result.get('status')!='MINOR_SOURCES_APPLIED_UI_STOPPED':
+--- E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v18_minor_ui_candidate\publish_minor.py
++++ E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v19_stability_candidate\publish_stability.py
+@@ -4,7 +4,7 @@
+ from pathlib import Path
+ import time
+ 
+-import minor_common as common
++import stability_common as common
+ 
+ 
+ def main():
+--- E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v18_minor_ui_candidate\prepare_minor.py
++++ E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v19_stability_candidate\prepare_stability.py
+@@ -3,7 +3,7 @@
+ import json
+ from pathlib import Path
+ 
+-import minor_common as common
++import stability_common as common
+ 
+ 
+ def main():

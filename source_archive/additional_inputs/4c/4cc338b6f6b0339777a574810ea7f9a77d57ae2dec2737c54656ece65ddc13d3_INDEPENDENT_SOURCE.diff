@@ -1,0 +1,195 @@
+--- original5ca
++++ candidate60b52eV2
+@@ -85,6 +85,48 @@
+     return path
+ 
+ 
++class OriginalPublicSourcePins:
++    """Byte-only reads for the exact original manifests; no load or execution."""
++    LIMIT = 16 * 1024 * 1024
++
++    def __init__(self, allowed):
++        require(type(allowed) is dict and 1 <= len(allowed) <= 20, 'Bounded original source allowlist required')
++        self.allowed = dict(allowed)
++        for value in self.allowed.values():
++            digest(value)
++        self.files = {}
++
++    @staticmethod
++    def identity(value):
++        return (value.st_dev, value.st_ino, value.st_size, value.st_mtime_ns,
++                value.st_ctime_ns, value.st_mode, value.st_uid, value.st_gid)
++
++    def read(self, entry):
++        require(type(entry) is dict and set(entry) == {'path', 'sha256'}
++                and self.allowed.get(entry['path']) == entry['sha256'], 'Unreviewed original public source pin')
++        path = Path(entry['path'])
++        require(path.is_absolute() and str(path) == entry['path'] and path.resolve() == path
++                and not path.is_symlink(), 'Redirected original public source')
++        fd = os.open(str(path), os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
++        with os.fdopen(fd, 'rb') as stream:
++            before = os.fstat(stream.fileno())
++            require(stat.S_ISREG(before.st_mode) and before.st_size <= self.LIMIT, 'Nonregular or oversized original source')
++            raw = stream.read(self.LIMIT + 1)
++            after = os.fstat(stream.fileno())
++        current = os.stat(str(path), follow_symlinks=False)
++        require(len(raw) <= self.LIMIT and self.identity(before) == self.identity(after) == self.identity(current)
++                and sha(raw) == entry['sha256'], 'Original source changed or checksum differs')
++        record = (raw, self.identity(after))
++        if entry['path'] in self.files:
++            require(record == self.files[entry['path']], 'Original source changed since first read')
++        self.files[entry['path']] = record
++        return raw
++
++    def unchanged(self):
++        for path in list(self.files):
++            self.read({'path': path, 'sha256': self.allowed[path]})
++
++
+ class Snapshot:
+     """Bounded regular-file reads and end-to-end original-byte stability."""
+     def __init__(self):
+@@ -117,6 +159,9 @@
+     def unchanged(self):
+         for path in list(self.files):
+             self.read(path)
++        original_sources = getattr(self, '_original_operator_public_sources', None)
++        if original_sources is not None:
++            original_sources.unchanged()
+ 
+ 
+ def original_modules(snapshot):
+@@ -232,6 +277,115 @@
+     return value
+ 
+ 
++def validate_original_operator_migration(expected, snapshot, native, intent):
++    """Accept only the pinned original RAM migration, never a rewritten config."""
++    if native.get('source_unit_sha256') == SOURCE_UNIT:
++        return
++    operator = Path('/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/native-operator-v1')
++    old_unit = '29786434df9bb9b94a8e640a7a48db47019c224d3876037ce27d3467bb2f5512'
++    old_library_sha = 'c675ba698d45acd8742e52403e6186f43dc56d7d313d0e740896b19412bde656'
++    new_library_sha = '704f561a50b5f0fb8f9b4cf72c024acce0cdafd888cad0784507f484518fc224'
++    require(native.get('source_unit_sha256') == old_unit and native.get('library_sha256') == old_library_sha,
++            'Unknown config unit/library is not the approved original migration')
++    observation = snapshot.pinned(expected['original_operator_migration_pin'])
++    require(observation['schema'] == 'aura-original-operator-config-migration-observation-1'
++            and observation['boot_id'] == expected['boot_id']
++            and observation['source_owner'] == expected['camera_owner']
++            and observation['owner_run_config_pin'] == expected['owner_run_config_pin']
++            and type(observation['observed_mono_ns']) is int
++            and 0 < observation['observed_mono_ns'] < intent['stop_intent_mono_ns']
++            and observation['metadata_observation_only'] is True
++            and observation['original_migration_or_Native_code_executed_by_this_observer'] is False,
++            'Original migration observation is not from this owner before normal stop')
++    def read_bytes(entry):
++        scope = getattr(snapshot, '_original_operator_public_sources', None)
++        if scope is None:
++            fixed_runtime = {'path': str(operator / 'runtime-manifest.json'),
++                'sha256': '74e011db30a9d943a9512f7648190ac0c01060af06df1280d1e8ea006dc882ad'}
++            fixed_unit = {'path': str(operator / 'source-manifest.json'), 'sha256': SOURCE_UNIT}
++            require(observation['native_operator_manifest_pin'] == fixed_runtime
++                    and observation['native_c_unit_manifest_pin'] == fixed_unit, 'Fixed original source manifests required')
++            source_runtime = snapshot.pinned(fixed_runtime)
++            source_unit = snapshot.pinned(fixed_unit)
++            require(source_runtime['schema'] == 'aura-native-operator-runtime-1' and len(source_runtime['files']) == 7
++                    and source_unit['schema'] == 'aura-native-operator-source-unit-1'
++                    and source_unit['existing_abi'] == 2 and len(source_unit['files']) == 6, 'Fixed original source member sets differ')
++            fixed_settings = observation['settings_pin']
++            require(fixed_settings['path'] == str(operator / 'settings.json')
++                    and source_runtime['files'].get(fixed_settings['path']) == fixed_settings['sha256'], 'Fixed original settings pin differs')
++            source_settings = snapshot.pinned(fixed_settings)
++            require(source_settings['old_library_sha256'] == old_library_sha, 'Original predecessor library differs')
++            allowed = dict(source_runtime['files'])
++            for relative, checksum in source_unit['files'].items():
++                path = Path(relative)
++                require(not path.is_absolute() and '..' not in path.parts, 'Original C member escapes')
++                path = str(operator / path)
++                require(path not in allowed or allowed[path] == checksum, 'Conflicting original source manifests')
++                allowed[path] = checksum
++            predecessor = source_settings['old_library']
++            require(predecessor not in allowed or allowed[predecessor] == old_library_sha, 'Conflicting predecessor source pin')
++            allowed[predecessor] = old_library_sha
++            scope = OriginalPublicSourcePins(allowed)
++            snapshot._original_operator_public_sources = scope
++        return scope.read(entry)
++    runtime_pin = observation['native_operator_manifest_pin']
++    require(runtime_pin == {'path': str(operator / 'runtime-manifest.json'),
++                            'sha256': '74e011db30a9d943a9512f7648190ac0c01060af06df1280d1e8ea006dc882ad'},
++            'Original operator runtime manifest differs')
++    runtime = snapshot.pinned(runtime_pin)
++    require(runtime['schema'] == 'aura-native-operator-runtime-1' and len(runtime['files']) == 7,
++            'Original seven-member migration closure required')
++    for path, checksum in runtime['files'].items():
++        read_bytes({'path': path, 'sha256': checksum})
++    fixed_sources = {
++        str(operator / 'native_entry_operator.py'): '0576a388e2c17174b4102665602aa42fbf078a3f016bdfb641c269571ce13943',
++        str(operator / 'identity_recovery.py'): '64831498d8497c2087b3bb1543367e8cc1917ca131694000884f2d58e60990f7',
++    }
++    require(observation['original_migration_sources'] == fixed_sources
++            and all(runtime['files'].get(path) == checksum for path, checksum in fixed_sources.items()),
++            'Original entry/RAM-migration source differs')
++    settings_pin = observation['settings_pin']
++    require(settings_pin['path'] == str(operator / 'settings.json')
++            and runtime['files'].get(settings_pin['path']) == settings_pin['sha256'],
++            'Original migration settings are not in the pinned runtime')
++    settings = snapshot.pinned(settings_pin)
++    require(native['library'] == settings['old_library'] and native['library_sha256'] == settings['old_library_sha256'] == old_library_sha
++            and native['source_unit_sha256'] == settings['predecessor_unit_sha256'] == old_unit
++            and settings['unit_sha256'] == SOURCE_UNIT
++            and settings['library'] == str(operator / 'libaura_native_operator.so')
++            and settings['library_sha256'] == new_library_sha,
++            'Original approved migration input/output tuple differs')
++    read_bytes({'path': settings['old_library'], 'sha256': old_library_sha})
++    unit_pin = observation['native_c_unit_manifest_pin']
++    require(unit_pin == {'path': str(operator / 'source-manifest.json'), 'sha256': SOURCE_UNIT}, 'Original six-member C unit differs')
++    unit = snapshot.pinned(unit_pin)
++    require(unit['schema'] == 'aura-native-operator-source-unit-1' and unit['existing_abi'] == 2 and len(unit['files']) == 6,
++            'Original C ABI/source member set differs')
++    for path, checksum in unit['files'].items():
++        relative = Path(path)
++        require(not relative.is_absolute() and '..' not in relative.parts, 'Original C source path escapes')
++        read_bytes({'path': str(operator / relative), 'sha256': checksum})
++    library_pin = observation['native_library_pin']
++    require(library_pin == {'path': settings['library'], 'sha256': new_library_sha}, 'Actual original migrated library differs')
++    read_bytes(library_pin)
++    audit_pin = observation['original_audit_pin']
++    require(audit_pin['path'] == str(operator / ('recovery-audit-' + str(expected['camera_owner']['pid']) + '.json')),
++            'Original migration audit is not this owner')
++    audit = snapshot.pinned(audit_pin)
++    handoff = observation['original_live_handoff_migration']
++    require(audit['audit_path'] == audit_pin['path'] and audit['request'] == settings
++            and audit['artificial_counter_reset'] is False and type(audit['mechanical_actions']) is int and audit['mechanical_actions'] == 0
++            and audit['checkpoint_sha256'] == native['seed']['sha256']
++            and audit['checkpoint_unit_sha256'] in (old_unit, SOURCE_UNIT)
++            and audit['exact_seed_before_operator_request']['boot_id'] == expected['boot_id']
++            and handoff['operator_recovery_audit'] == audit_pin['path']
++            and handoff['native_abi_compatible_migration'] is True
++            and handoff['predecessor_unit_sha256'] == audit['checkpoint_unit_sha256']
++            and handoff['native_unit_sha256'] == SOURCE_UNIT
++            and observation['mapped_original_operator_library'] == settings['library'],
++            'Original audit and observed live migration linkage differs')
++
++
+ def validate_inputs(expected, snapshot):
+     require(expected['schema'] == 'aura-fresh-final-history-expected-1' and expected['all_other_writers_frozen'] is True,
+             'Explicit fresh validation contract and writer freeze required')
+@@ -252,8 +406,7 @@
+             'Actual stopped-owner run-config provenance required')
+     native = config['native_execution']
+     require(native['source_manifest'] == expected['source_manifest_pin']['path'] and
+-            native['source_manifest_sha256'] == expected['source_manifest_pin']['sha256'] and
+-            native['source_unit_sha256'] == SOURCE_UNIT, 'Stopped owner run-config/Python manifest/C-unit differs')
++            native['source_manifest_sha256'] == expected['source_manifest_pin']['sha256'], 'Stopped owner run-config/Python manifest differs')
+     intent = snapshot.pinned(expected['stop_intent_pin'])
+     result = snapshot.pinned(expected['stop_result_pin'])
+     require(intent['schema'] == 'aura-original-camera-stop-intent-2' and intent['boot_id'] == expected['boot_id'] and
+@@ -262,6 +415,7 @@
+             intent['all_other_writers_frozen'] is True and intent['action'] == 'systemctl stop --no-block aura-camera-ui.service',
+             'Pinned normal-stop intent does not bind this current run')
+     positive(intent['stop_intent_mono_ns'], 'stop intent mono')
++    validate_original_operator_migration(expected, snapshot, native, intent)
+     require(result['schema'] == 'aura-original-camera-normal-stop-2' and result['status'] == 'CAMERA_STOPPED_NEW_FINAL_PRESENT' and
+             result['intent'] == intent and result['normal_stop_submitted_once'] is True and result['forced_action'] is False and
+             result['checkpoint_or_marker_written_by_this_script'] is False and result['fresh_checkpoint'] == expected['checkpoint_pin'],

@@ -1,0 +1,72 @@
+v14同版本净消化积压已核实（2026-10-31；主对话发布和只读采样）
+
+最新结论：结构化视觉摘要正在实际提交并净消化积压；普通对话摘要和全库健康仍未由这段窗口证实，积压尚未清空。
+证据为../first_wait_integration/actual_memory_v14_initial.json与actual_memory_v14_followup.json。两份startup及全部已报告源码SHA完全相同，单调时间相隔187.1651秒。
+持久摘要/committed：287→298（+11）；当前worker completed：16→27，discarded始终0、failure_streak始终0。两次最近摘要方法都是structured_camera_counts，followup最近16条任务记录也全部committed。
+总积压：869→858（净-11）；camera_observed：618→607（净-11）。assistant_played保持68、device_event保持63、user_said保持120，非camera三类合计251未变。因此确认的是结构化视觉净消化，不能把普通对话摘要一并标为恢复。
+active_bodies：871→888，有新语音事件流入。active_bodies是全部尚有正文的事件计数，包含最近5分钟内新内容，不等于超时积压；不能用它的增加否定已测得的净积压下降。此窗口不是单独模型速度或连续空闲吞吐测试，不外推清空时间。
+followup compacted_bodies_remaining、失效摘要载荷残留、unexplained_missing均为0；已证明的1条合法迁移命令元数据仍保留。最老待处理年龄仍约50.4小时，全部858条清空门槛未过。
+精确对比和两份输入SHA保存在ACTUAL_PROGRESS_ASSESSMENT.json；本次只读取共享metadata并更新报告，没有修改候选源码、调用真实模型、连接板卡或重跑硬件测试。
+
+以下保留初始采样及前期定位，时间线以本段最新结果为准。
+
+v14初始线上结果已核实（2026-10-31；主对话发布）
+
+最新实际回执：../first_wait_integration/actual_memory_v14_initial.json；startup 39b102a4a505db491cf06b90e3a5232bfb656c79cb0a3c221551d76d414a9a0a。Store fe50db190aaafcb8841eaa132ed9ea218a80bc582efacb3c3c83e952bf985e9f、policy 6050ed5e4dcfeb456c5d0969e257f624552f80ff722b3c3999a573f86cd933c2、backoff 9710c079fc589eae8f2eb26fba7f0dd80038b66736b3e45e000a98904716ce82均与候选逐字节匹配。主对话的Client更新没有覆盖本候选策略源码。
+
+通过（实际初始快照）：当前worker running=true、completed=16、discarded=0，failure_streak=0、无待退避；最近16条任务记录全部committed；最近摘要方法为structured_camera_counts。持久committed和valid摘要均为287，较v13的270增加17；最近一次提交距采样3.69秒，证实后台已恢复成功提交。
+计数口径：worker计数是本进程口径，SQLite为历史总数；脚本先读/api/state，再开SQLite只读快照，两者也不是同一瞬间。不要强行把270+16解释为必须等于287，或把该差值当作重复/丢失证据。
+
+通过（实际快照结构）：compacted_bodies_remaining=0、失效摘要载荷残留=0、unexplained_missing_bodies=0。那1条无正文事件仍有完整的合法迁移排除命令/当前事实来源证明。单次计数是结构证据，原子提交顺序另有此前源码和合成回滚检查支撑。
+
+尚未通过清积压门槛：当前869条待整理，camera_observed 618、assistant_played 68、device_event 63、user_said 120；后3类合计251。最老待处理事件181379.72秒，约50.4小时。618只是视觉来源数量，未逐项核对是否全部符合严格producer契约，不能写成全部可走确定性摘要。
+未验证：积压净下降及最终清空、非视觉自由文本摘要质量、真人追问/更正/遗忘/权限撤销，以及长期稳定性。v13的796与现在869跨版本、跨采样且有持续流入，不能据此宣称积压改善或恶化；这份v14初始回执才是接下来同版本followup的基线。
+本地分析产物ACTUAL_INITIAL_ASSESSMENT.json已保存精确字段和输入SHA；assess_actual_progress.py可读取主对话随后保存的followup，要求startup、全部已报告源码SHA相同且单调时间向前，再报告净积压和持久提交变化，不连接板卡。
+
+以下为保留的v13问题定位和候选设计证据。
+
+v13内容校验拒绝：续查与候选（2026-10-31）
+
+实际结论
+
+v13首份回执startup ae47311619310420b3215770b676c48a9f1d8e3d33d02c72fa04e21186ec903b：请求已进入full_source_validation，当前worker六次CandidateRejected，库中仍270份已提交摘要，积压796；原文未提前删除。原四字段诊断没有具体拒绝子码，模型正文也未归档，不能从这些聚合值反推出六次分别缺了哪个字段。
+missing_body_classification已证明：1条无正文的valid事件是迁移时排除的记忆命令，仍关联current fact，unexplained=0。这是合法的仅保留来源元数据，不能当作数据丢失；不补回正文、不重新迁库。
+
+精确拒绝诊断
+
+新CandidateRejected只携带以下固定枚举，允许同时报告多个不满足项，不携带源值、事件/任务/身份ID、下标、模型正文或异常原文，也不解析异常字符串：
+protected_name_missing
+protected_number_missing_or_changed
+negation_missing
+planned_status_missing
+completed_status_missing
+cancelled_status_missing
+observation_evidence_missing
+
+validate_compaction_text仍使用v13完全相同的接受/拒绝条件；1500组可重复合成组合的接受结果逐项一致。变化只是收集全部失败类别并由现有worker health呈现。Store、worker、权限、事务、正文删除等其余全部AST均与v13一致，已有专门检查。
+board_readonly_metadata_v14.py会输出这些白名单枚举，还增加积压来源类型计数和任务attempts分桶。它可先在v13上执行：旧运行时没有子码时不伪造子码，但来源和attempts聚合可读。仍只读、固定字段、SQLite预算0.4秒，不调用模型或硬件。
+
+本地源结构可确定的摘要路径
+
+现有VisualTimelineCollector和当前画面查询只写几个固定格式的人体检测计数事件。对这些来源，模型可能把数字0转写成“未检测到”，或者用“摄像头”而没有相机/观察/看到/视觉标记；原校验会拒绝这种摘要。合成例子已复现这两种同时缺失的情形，但不宣称它们就是那六份真实模型输出。
+
+候选仅对device范围、视觉主题、camera_observed来源启用确定性路径，要求完整的现有producer元数据集合、actual来源、speaker_known=false、visual_observation、原time_basis，且四项claims、整数人数0—1000、metadata.numbers、固定producer句式全部一致。多余人名/字段/claims、自由文本、其他来源、其他范围、冲突计数或过长输出均退出此路径，走原有模型路径。
+
+输出只按记录顺序呈现结构化人体目标采样计数，保留“相机观察”归属，0明确只表示该采样未检出人体；不推断离开/到来、身份、房间真实无人或采样间持续存在。不复制原句、自由语音、source_id、帧ID进摘要叙述；原始claims和source_refs仍由板端原样构建。新输出的全部数字均来自源计数，合成0/1/42/1000均已检查，不新增模型请求。
+
+确定性摘要仍必须经过完整validate_compaction_text，再经原Store候选结构/完整claims和source_refs/源修订/租约/活动代次等检查，最终仍使用原原子写摘要→读回核验→删正文事务。新输入、遗忘、租约到期、SQL发布失败的测试均阻止摘要发布；遗忘之外的失败保留正文，不能用此路径绕过权限或删除规则。
+
+队列与attempts结论
+
+attempts=4没有“最多四次后丢弃”的含义。相同task_id每次重新租用会+1；选择源时先按该源历史任务的MAX(attempts)升序，再按时间排序。因此不同范围/主题/source分区的少尝试任务可在冷却后继续处理，不是永久全队列锁头。
+但退避确实是worker级别：一次失败会把其他分区也推迟3/6/12/24/48/60秒。同一原子段的坏源还能连带保留同段健康源。合成复现中，两条同分区独立事件连续5次被共同选择，attempts到5、两条正文都在、无摘要提交。不同分区的健康任务则在第一次3秒冷却后能提交。
+本候选未改变批次划分、公平顺序或退避；优先消除确定性视觉记录不必要的模型重述失败。其他类型仍拒绝时，需要按新子码和来源计数继续定位，不把反复失败当作正常积压。
+
+交付与验收
+
+候选两份文件：after/common/board_memory.py、after/board/runtime/board_memory_policy.py，必须成套；后者依赖前者新增的固定枚举。common/board_memory_backoff.py保持v13不变。所有精确SHA及基线SHA见HANDOFF.json，主对话发布前再核对最新实际回执，文件夹名不代表已占用下一正式版本号。
+34项本轮定向测试通过；完整相关回归270通过、1项Windows不适用POSIX权限检查跳过，原3项旧角色夹具按前轮已证明原因显式排除。
+通过：拒绝原因白名单；原验证接受集合不变；确定性已知源摘要无新数字/动作/身份；未知源不进入此路径；失败不静默删正文；原Store/worker/权限AST不变；既有检索、更正、遗忘、逐包fresh检查回归。
+未验证：v13六次拒绝的真实子码；实际积压中符合此producer的数量；候选线上提交和积压趋势；残留自由文本摘要的语义质量。普通自由文本摘要仍非可机械证明的语义无损，失败必须留正文和积压。
+
+本对话没有连接板卡、操作真实库、调用真实模型或采集音频/截图。主对话是唯一发布者。

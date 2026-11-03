@@ -1,0 +1,77 @@
+{
+  "schema": "aura-5090-lan-preparation-1",
+  "status": "PREPARED_CONTROLLED_RELEASE_VALIDATED_AWAITING_NEW_AUTHORIZATION",
+  "utc": "2026-11-02T03:12:47.9748092Z",
+  "validation": {
+    "python_tests_passed": 24,
+    "powershell_version": "5.1.26100.9711",
+    "powershell_parse_errors": 0,
+    "exact_firewall_scope_accepted": 1,
+    "changed_firewall_scopes_rejected": 13,
+    "exact_physical_adapter_accepted": 1,
+    "changed_physical_adapters_rejected": 5,
+    "real_loopback_acl_test": "GET health allowed; POST llm/tts/warmup403 with inference handler never entered",
+    "production_wire_owner_and_pcm_sha_test": "PASS",
+    "public_board_probe_simulation": "PASS; only boot file read; no devices/DB/file writes",
+    "full_ipv4_collection_guard": "PASS: all IPv4 collected on fixed physical interface23; an extra IPv4 is rejected; current read-only actual collection has only192.168.50.1/24 Preferred",
+    "remote_bytecode_write_guard": "PASS: board probe invokes python3 -B -; fake SSH regression verifies the exact no-bytecode invocation; no real board contact",
+    "explicit_controlled_release": "PASS: explicit flag required; owns_fixed_model/idle/daemon/unique MODEL2048 required; original manager release=True; release receipt plus empty actual residency required before original TTS-first start",
+    "rollback_tts_first": "PASS: healthy owned candidate controlled release; unfinished absent-model candidate normal cleanup; dead/unowned resident candidate and legacy transaction frozen with no start/unload"
+  },
+  "dedicated_adapter": {
+    "interface_index": 23,
+    "description": "Intel(R) Ethernet Controller I226-V",
+    "mac_address": "C8-53-09-B0-89-DA",
+    "interface_guid": "f14f89e5-18f4-483c-b22b-cd8010578636",
+    "host_address": "192.168.50.1/24",
+    "peer": "192.168.50.2",
+    "old_index22_reassignment_evidence_preserved": true,
+    "network_reconfigured": false,
+    "updated_identity_authorized_by": "root explicit coordination message after fresh physical inventory"
+  },
+  "actual_actions": {
+    "service_started_or_stopped": false,
+    "model_inference_request_sent": false,
+    "firewall_rule_added_or_removed": false,
+    "board_contacted": false,
+    "audio_device_opened": false,
+    "business_database_opened": false,
+    "network_modified": false,
+    "scope": "Current controlled-release preparation revision only; previous actual failed-stop attempt separately preserved in historical_execution"
+  },
+  "execution_gates": [
+    "Fresh complete local READY/STATUS and final actual 10+ source manifest after manager race repair",
+    "Model operations returned to root; coordinated exclusive window",
+    "Root NEW explicit execution authorization; old failed transaction not reused",
+    "New inspected session/config SHA and owns_fixed_model=true",
+    "Explicit --explicit-controlled-model-release for switch/rollback",
+    "Original manager release receipt and empty actual residency before original TTS-first startup",
+    "Administrator only for exact firewall Apply/Rollback"
+  ],
+  "entry_points": {
+    "inspection": "lan_control.py inspect",
+    "handoff": "lan_control.py switch --expected-session <local-session> --expected-config-sha <current-sha> --execute --explicit-controlled-model-release",
+    "firewall": "configure_model_firewall.ps1 -Action Apply -ExpectedSession <lan-session>",
+    "board_probe": "lan_control.py probe-board --transaction <id> --expected-session <lan-session> --execute",
+    "rollback": "lan_control.py rollback --transaction <new-maintenance-id> --expected-session <recorded-candidate-session> --execute --explicit-controlled-model-release"
+  },
+  "runbook": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_lan\\RUNBOOK.txt",
+  "source_manifest": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_lan\\prepared_source_manifest.json",
+  "earlier_ps51_stderr_runner_issue_preserved": "python_tests.ps51_native_stderr.log",
+  "runtime_guard_relaxed_for_tests": false,
+  "preparation_review_revision": "Explicit same-session controlled maintenance release before original TTS-first startup; healthy rollback releases through original manager; resident model with dead/unowned candidate is frozen",
+  "source_manifest_sha256": "a10cde416debbb5dc100430882e1e75a65cb591d8997ace5c5a1c46356028cd3",
+  "maintenance_contract": "explicit_same_session_owned_model_release_before_tts_first_v1",
+  "explicit_controlled_model_release": "Required explicit CLI authorization for future switch/rollback; no real release executed in this preparation revision",
+  "historical_execution": {
+    "transaction_id": "547dcb18385242fba3f991e4b9a5983e",
+    "status": "FAILED_RETAINED",
+    "original_normal_stop_attempted": true,
+    "actual_final_state": "CLOSED",
+    "lan_config_written": false,
+    "new_start_attempted": false,
+    "frozen_original_files": 8,
+    "all_original_file_shas_unchanged": true,
+    "proof": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_lan\\reviews\\before-controlled-release-20261102T030826-9e4b7bee10b945709aebb19a93227900\\frozen_failed_transaction_check.json"
+  }
+}

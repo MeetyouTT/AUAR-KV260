@@ -1,0 +1,149 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors",
+      "strength_model": 1.0
+    }
+  },
+  "5": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "doll_green_9x16.png"
+    }
+  },
+  "7": {
+    "class_type": "MiniMaxH3ImageToVideo",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ],
+      "prompt": "The exact same anime girl as the provided reference images, identical face, hairstyle, outfit and body proportions. Full body standing, identical framing and constant subject scale. Static locked camera, flat unchanged lighting and exposure. A solid uniform chroma key green background matching the reference, no background shadows or gradients. Keep the head, torso, hips and feet at the same screen positions; only the specifically requested local motion is allowed. Preserve clean stable fingers and garment details. No zoom, camera motion, body resizing, walking, scene changes, extra limbs, extra objects, text, overlays, glow, particles or motion blur. Small fluent movements with gentle acceleration and deceleration, no sudden pose changes. A calm neutral speaking loop. Both hands remain relaxed in precisely the same resting positions throughout; never raise, lower or gesture with the hands. Only the lips move in three to five small irregular open and closed cycles; closed lips recur between cycles. Maintain a friendly neutral face and open eyes, without blinking in this base clip. The head stays still; breathing is barely visible. The last frame matches the first resting pose, mouth shape and gaze. Do not perform an introduction or a recovery gesture inside this loop.",
+      "width": 864,
+      "height": 1536,
+      "length": 39,
+      "first_frame": [
+        "5",
+        0
+      ],
+      "last_frame": [
+        "5",
+        0
+      ]
+    }
+  },
+  "8": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 8,
+      "denoise": 1.0
+    }
+  },
+  "9": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "10": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "conditioning": [
+        "7",
+        0
+      ]
+    }
+  },
+  "11": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 421002
+    }
+  },
+  "12": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "11",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "9",
+        0
+      ],
+      "sigmas": [
+        "8",
+        0
+      ],
+      "latent_image": [
+        "7",
+        1
+      ]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "12",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    }
+  },
+  "14": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "13",
+        0
+      ],
+      "filename_prefix": "AURA_NATURAL_V3_TALKING_CALM_REST_V3_s421002"
+    }
+  }
+}

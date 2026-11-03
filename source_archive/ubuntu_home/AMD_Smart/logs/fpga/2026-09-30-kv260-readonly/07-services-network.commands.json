@@ -1,0 +1,12 @@
+[
+  {
+    "id": "services",
+    "command": "systemctl --failed --no-pager -l; systemctl list-units --type=service --all --no-pager -l; ps -eo pid,comm",
+    "timeout": 35
+  },
+  {
+    "id": "network",
+    "command": "ip -br address; ip route; ip -6 route; cat /sys/class/net/eth0/carrier; networkctl status eth0 --no-pager -l; cat /lib/systemd/network/80-wired.network; cat /proc/net/tcp /proc/net/tcp6; journalctl -b -u systemd-networkd -u kria-dashboard.service --no-pager -n 80",
+    "timeout": 35
+  }
+]

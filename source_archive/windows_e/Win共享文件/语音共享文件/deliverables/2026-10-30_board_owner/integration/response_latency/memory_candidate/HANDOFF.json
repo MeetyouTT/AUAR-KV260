@@ -1,0 +1,41 @@
+{
+  "schema": "aura.prepared-turn-read-check.v1",
+  "status": "SOURCE_ONLY_CANDIDATE_FAKE_STORE_PASS",
+  "saved_utc": "2026-10-31T06:36:12.202132+00:00",
+  "before_sha256": "19dabc48425ed711af17fc56929a0198067217c52593e157db23b8724ddffde3",
+  "files": [
+    {
+      "target": "common/board_memory.py",
+      "path": "deliverables/2026-10-30_board_owner/integration/response_latency/memory_candidate/after/common/board_memory.py",
+      "sha256": "943bf88c05400c49c76a1aee68a0bb242cb929cee3e213bc21f465ac3ef77d46",
+      "bytes": 94288
+    }
+  ],
+  "tests": {
+    "path": "deliverables/2026-10-30_board_owner/integration/response_latency/memory_candidate/tests/test_prepared_turn.py",
+    "sha256": "c9734e1eb3906334ad3fa34ae1dd0d5337436fa98764409ec0cc1eddb9892f4c",
+    "passed": 18,
+    "failed": 0,
+    "seconds": 1.32,
+    "command": "python -B -m pytest -p no:cacheprovider deliverables/2026-10-30_board_owner/integration/response_latency/memory_candidate/tests/test_prepared_turn.py --basetemp=deliverables/2026-10-30_board_owner/integration/response_latency/memory_candidate/test-run-1 -q"
+  },
+  "API": "BoardMemoryStore.check_prepared_turn_current(turn_id, *, generation) -> True",
+  "exact_other_AST_preserved": true,
+  "schema_or_state_machine_changed": false,
+  "api_is_read_only": true,
+  "checks": [
+    "original process-local profile grant and authorized scope",
+    "same generation awaiting_playback turn with no closure",
+    "same-scope valid admitted user event and same-turn pending assistant reply",
+    "all durable generated dependency references including expanded summary sources valid; admitted user reference required",
+    "clear/forget/correction/supersession/played/interrupted/reopened-profile revoked through original durable state"
+  ],
+  "limitations": [
+    "snapshot check is not a future playback lease; callers must check at bounded delivery points",
+    "cannot undo already played PCM; partial failed playback never becomes assistant_played",
+    "original API invalidates transitive source dependents; this check validates all recorded direct refs, not raw bodies or a new parallel provenance graph"
+  ],
+  "actual_private_DB_accessed": false,
+  "actual_models_devices_services_started": false,
+  "production_modified": false
+}

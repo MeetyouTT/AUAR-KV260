@@ -1,0 +1,52 @@
+--- e92.original
++++ 5ca.fixed
+@@ -193,10 +193,30 @@
+             require(not process.exists(), 'Unreadable live process prevents owner proof')
+ 
+ 
+-def referenced_value(reference, snapshot, forbidden):
++def reject_current_checkpoint_source(value, current_boot, current_owner):
++    # Inspect checkpoint objects before dereferencing the source pointer. This
++    # covers direct documents and JSON envelopes without authenticating root or
++    # rejecting independently accepted different-boot/different-owner history.
++    pending = [value]
++    while pending:
++        item = pending.pop()
++        if type(item) is dict:
++            seed = item.get('seed')
++            if item.get('schema') == 'aura-native-protection-checkpoint-2' and type(seed) is dict:
++                require(not (seed.get('boot_id') == current_boot and seed.get('source_pid') == current_owner['pid'] and
++                    seed.get('source_birth_ticks') in (int(current_owner['birth_ticks']), current_owner['birth_ticks'])),
++                    'History source contains current stopped-owner checkpoint')
++            pending.extend(child for child in item.values() if type(child) in (dict, list))
++        elif type(item) is list:
++            pending.extend(child for child in item if type(child) in (dict, list))
++
++
++def referenced_value(reference, snapshot, forbidden, forbidden_shas, current_boot, current_owner):
+     require(type(reference) is dict and set(reference) == {'pin', 'pointer'}, 'Exact history source reference required')
+     require(reference['pin']['path'] not in forbidden, 'History must not self-attest from this final/result')
++    require(reference['pin']['sha256'] not in forbidden_shas, 'History source SHA aliases final/result/provenance')
+     value = snapshot.pinned(reference['pin'])
++    reject_current_checkpoint_source(value, current_boot, current_owner)
+     pointer = reference['pointer']
+     require(type(pointer) is str and (pointer == '' or pointer.startswith('/')), 'Explicit JSON pointer required')
+     if pointer:
+@@ -260,14 +280,15 @@
+     require(type(sources) is dict and set(sources) == {'boot_id', 'source_owner', 'observed_mono_ns', 'head', 'archive_segments'},
+             'Traceable fresh history source bindings required')
+     forbidden = {str(CHECKPOINT), expected['stop_result_pin']['path'], history['provenance_pin']['path']}
++    forbidden_shas = {expected['checkpoint_pin']['sha256'], expected['stop_result_pin']['sha256'], history['provenance_pin']['sha256']}
+     values = {'boot_id': expected['boot_id'], 'source_owner': current,
+               'observed_mono_ns': history['observed_mono_ns'], 'head': history['head']}
+     for name, value in values.items():
+-        require(referenced_value(sources[name], snapshot, forbidden) == value, 'History source field differs: ' + name)
++        require(referenced_value(sources[name], snapshot, forbidden, forbidden_shas, expected['boot_id'], current) == value, 'History source field differs: ' + name)
+     require(type(sources['archive_segments']) is list and sources['archive_segments'], 'Accepted ordered history source segments required')
+     sourced_archives = []
+     for reference in sources['archive_segments']:
+-        segment = referenced_value(reference, snapshot, forbidden)
++        segment = referenced_value(reference, snapshot, forbidden, forbidden_shas, expected['boot_id'], current)
+         require(type(segment) is list and segment, 'Empty/invalid history source segment')
+         sourced_archives.extend(segment)
+     require(sourced_archives == history['archives'], 'History manifest differs from ordered accepted source segments')

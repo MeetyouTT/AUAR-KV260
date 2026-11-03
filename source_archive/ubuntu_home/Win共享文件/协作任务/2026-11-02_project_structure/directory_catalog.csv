@@ -1,0 +1,508 @@
+﻿path,type,subsystem,purpose,condition,state
+README.md,文件,README.md,唯一总入口：简介、硬件、环境、启动、复现、目录对照,按最终实现整理,设计项；本次未创建业务内容
+license,文件,license,队伍原创内容的正式开源许可全文,按最终实现整理,设计项；本次未创建业务内容
+third_party_notices.md,文件,third_party_notices.md,第三方代码、IP、模型、素材的来源与许可边界,按最终实现整理,设计项；本次未创建业务内容
+release.json,文件,release.json,源码、固件、模型、配置与报告的统一发布标识,按最终实现整理,设计项；本次未创建业务内容
+checksums.sha256,文件,checksums.sha256,本次交付文件的 SHA-256 校验清单,按最终实现整理,设计项；本次未创建业务内容
+.gitignore,文件,.gitignore,排除私库、缓存、权重下载、环境和临时构建,按最终实现整理,设计项；本次未创建业务内容
+.gitattributes,文件,.gitattributes,文本换行、二进制文件与跨平台处理约定,按最终实现整理,设计项；本次未创建业务内容
+src/,目录,src,实际参与作品的源码；按运行位置拆分,按最终实现整理,设计项；本次未创建业务内容
+src/fpga/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/fpga/readme.md,文件,src,PL 模块、输入、工具、构建入口与接口说明,按最终实现整理,设计项；本次未创建业务内容
+src/fpga/rtl/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/fpga/rtl/visual_servo.sv,文件,src,自研运动逻辑顶层；也可保留现有整块实现,按最终实现整理,设计项；本次未创建业务内容
+src/fpga/rtl/axi_lite_regs.sv,文件,src,[条件] 若独立拆分：寄存器与读写响应,按实际采用,设计项；本次未创建业务内容
+src/fpga/rtl/command_guard.sv,文件,src,[条件] 命令提交、范围、序号和会话监督,按实际采用,设计项；本次未创建业务内容
+src/fpga/rtl/lease_timer.sv,文件,src,[条件] 已接受命令的执行期限监督,按实际采用,设计项；本次未创建业务内容
+src/fpga/rtl/pwm_generator.sv,文件,src,[条件] PWM 周期、脉宽与输出使能,按实际采用,设计项；本次未创建业务内容
+src/fpga/rtl/reset_sync.sv,文件,src,[条件] 自研复位同步逻辑,按实际采用,设计项；本次未创建业务内容
+src/fpga/bd/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/fpga/bd/system.tcl,文件,src,重建 PS、DPU、互联及自研 IP 的 BD,按最终实现整理,设计项；本次未创建业务内容
+src/fpga/bd/address_map.json,文件,src,AXI 地址、寄存器窗口、中断及版本,按最终实现整理,设计项；本次未创建业务内容
+src/fpga/constraints/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/fpga/constraints/pins.xdc,文件,src,真实引脚、电平、驱动能力与边沿速率,按最终实现整理,设计项；本次未创建业务内容
+src/fpga/constraints/clocks.xdc,文件,src,时钟、生成时钟、外部时序要求,按最终实现整理,设计项；本次未创建业务内容
+src/fpga/constraints/exceptions.xdc,文件,src,[条件] 有依据的时序例外及对应说明,按实际采用,设计项；本次未创建业务内容
+src/fpga/ip/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/fpga/ip/custom/,目录,src,[条件] 自研封装 IP 的 RTL、component.xml 与脚本,按实际采用,设计项；本次未创建业务内容
+src/fpga/ip/configuration/,目录,src,工程确实依赖的 XCI 和 IP 参数,按最终实现整理,设计项；本次未创建业务内容
+src/fpga/hls/,目录,src,[条件] 实际使用 HLS 时放源码、测试与 directives,按实际采用,设计项；本次未创建业务内容
+src/common/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/common/pyproject.toml,文件,src,公共协议包的安装入口和依赖,按最终实现整理,设计项；本次未创建业务内容
+src/common/aura_contracts/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/common/aura_contracts/__init__.py,文件,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/common/aura_contracts/version.py,文件,src,双端协议版本与兼容规则,按最终实现整理,设计项；本次未创建业务内容
+src/common/aura_contracts/messages.py,文件,src,请求、响应、状态与错误的数据结构,按最终实现整理,设计项；本次未创建业务内容
+src/common/aura_contracts/request_identity.py,文件,src,request_id、session_id、取消代次等,按最终实现整理,设计项；本次未创建业务内容
+src/common/aura_contracts/deadlines.py,文件,src,时钟域、单位、期限与过期判断约定,按最终实现整理,设计项；本次未创建业务内容
+src/common/aura_contracts/audio_format.py,文件,src,PCM 参数、分包与序号约定,按最终实现整理,设计项；本次未创建业务内容
+src/common/aura_contracts/schemas/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/common/aura_contracts/schemas/inference_request.schema.json,文件,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/common/aura_contracts/schemas/inference_response.schema.json,文件,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/common/aura_contracts/schemas/playback_ack.schema.json,文件,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/common/aura_contracts/schemas/health.schema.json,文件,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/common/aura_contracts/schemas/visual_observation.schema.json,文件,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/readme.md,文件,src,板端程序入口、依赖及源码职责,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/pyproject.toml,文件,src,ARM Python 业务包安装信息,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/requirements.txt,文件,src,直接 Python 依赖,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/requirements.lock.txt,文件,src,板端实际验证过的固定版本,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/__init__.py,文件,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/main.py,文件,src,板端业务启动入口,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/app/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/app/lifecycle.py,文件,src,初始化、就绪、退出和恢复,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/app/state_machine.py,文件,src,聆听、思考、播放、暂停及故障,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/app/event_bus.py,文件,src,业务事件传递,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/app/service_registry.py,文件,src,相机、音频、推理客户端等实例管理,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/camera/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/camera/capture.py,文件,src,唯一相机采集所有者,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/camera/frame_buffer.py,文件,src,缓冲、帧号和采集时间,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/camera/camera_service.py,文件,src,向 UI、检测与跟随提供同一图像源,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/camera/recovery.py,文件,src,断连、重连与旧帧丢弃,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/vision/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/vision/dpu_runtime.py,文件,src,VART/XIR 加载、Tensor、Runner 和生命周期,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/vision/dpu_scheduler.py,文件,src,单 DPU 多任务准入、预算与调度,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/vision/yolox_person.py,文件,src,人体检测与实际模型预后处理,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/vision/yunet_face.py,文件,src,人脸检测与关键点处理,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/vision/sface_embedding.py,文件,src,对齐、人脸特征与有效性判断,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/vision/tracker.py,文件,src,ByteTrack 或最终实际跟踪实现,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/vision/observation.py,文件,src,检测结果、轨迹、帧龄与来源,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/vision/metrics.py,文件,src,调用计数、等待、耗时、超限与源龄,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/identity/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/identity/face_gallery.py,文件,src,人脸登记、查询、删除与 UNKNOWN,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/identity/enrollment.py,文件,src,登记步骤和质量筛选,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/identity/matching.py,文件,src,特征距离、阈值与拒识,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/identity/speaker_identity.py,文件,src,[条件] 独立声纹身份业务，按实际后端说明,按实际采用,设计项；本次未创建业务内容
+src/kv260/aura_board/motion/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/motion/service.py,文件,src,唯一正常运动命令写者,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/motion/follow_controller.py,文件,src,人脸位置到目标脉宽的控制,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/motion/target_selection.py,文件,src,同一目标锁定、丢失与重新选择,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/motion/input_freshness.py,文件,src,源帧龄、来源身份和过期拒绝,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/motion/trajectory.py,文件,src,[条件] 实际使用的平滑/轨迹算法,按实际采用,设计项；本次未创建业务内容
+src/kv260/aura_board/motion/fpga_driver.py,文件,src,寄存器读写、ABI、提交、STOP 和状态,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/motion/shutdown.py,文件,src,进程退出与控制租约收尾,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/audio/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/audio/alsa_device.py,文件,src,MCP01 稳定设备选择和格式检查,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/audio/capture.py,文件,src,USB 采集与队列,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/audio/frontend.py,文件,src,实际采用的降噪与前端流程,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/audio/vad.py,文件,src,实际采用的 VAD 与语音段判定,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/audio/asr.py,文件,src,Paraformer 或最终 ASR 的 CPU 调用,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/audio/speaker_embedding.py,文件,src,[条件] ECAPA 等 CPU 声纹特征,按实际采用,设计项；本次未创建业务内容
+src/kv260/aura_board/audio/playback.py,文件,src,实际播放、缓冲与设备状态,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/audio/playback_ack.py,文件,src,完整播放、取消、迟到结果的确认,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/dialogue/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/dialogue/controller.py,文件,src,板端语音轮次与半双工业务,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/dialogue/inference_client.py,文件,src,调用 Windows 模型服务,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/dialogue/context_builder.py,文件,src,经业务筛选的上下文与记忆,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/dialogue/reply_validation.py,文件,src,输出格式与可消费内容校验,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/dialogue/cancellation.py,文件,src,会话撤销、超时与旧结果丢弃,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/memory/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/memory/store.py,文件,src,板端记忆读写唯一入口,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/memory/summarizer.py,文件,src,摘要任务、失败重试与提交,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/memory/retrieval.py,文件,src,同会话与历史记忆查询,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/memory/retention.py,文件,src,原文保留期和清理策略,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/memory/provenance.py,文件,src,记忆来源、修正与派生关系,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/memory/forgetting.py,文件,src,撤销/删除后的后续使用约束,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/storage/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/storage/database.py,文件,src,SQLite 连接、事务及错误处理,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/storage/migrations/,目录,src,版本化建表与升级脚本,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/storage/bootstrap.py,文件,src,空白设备的首次数据初始化,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/ui/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/ui/main_window.py,文件,src,GTK 等实际板端界面入口,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/ui/avatar_view.py,文件,src,角色画面与渲染器连接,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/ui/vision_view.py,文件,src,预览、人脸框与边界显示,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/ui/subtitles.py,文件,src,用户/助手字幕与状态同步,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/ui/settings.py,文件,src,实际提供的设置和控制,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/ui/presentation.py,文件,src,单一状态投影和刷新节奏,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/avatar/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/avatar/native_bridge.py,文件,src,C/C++ 原生角色渲染调用,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/avatar/expression.py,文件,src,表情与动作选择,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/avatar/mouth_sync.py,文件,src,播放驱动口型与时间同步,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/avatar/character.py,文件,src,人格、台词与资源绑定,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/diagnostics/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/diagnostics/health.py,文件,src,业务状态及依赖健康,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/diagnostics/metrics.py,文件,src,板端计数、阶段耗时和资源,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/aura_board/diagnostics/log_export.py,文件,src,可公开运行证据的导出,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/native/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/native/makefile,文件,src,本地库的实际构建入口；可用现有构建系统,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/native/dpu_bridge/,目录,src,自研 VART/OpenCV C/C++ 适配层,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/native/motion_mmio/,目录,src,自研 MMIO/批量提交 C/C++ 实现,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/native/pixel_bridge/,目录,src,自研像素、画面合成与纹理接口,按最终实现整理,设计项；本次未创建业务内容
+src/kv260/native/avatar_renderer/,目录,src,自研渲染适配；上游完整代码在 third_party/,按最终实现整理,设计项；本次未创建业务内容
+src/windows/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/windows/readme.md,文件,src,Windows 环境、模型、端口和启动方法,按最终实现整理,设计项；本次未创建业务内容
+src/windows/pyproject.toml,文件,src,Windows 服务包安装信息,按最终实现整理,设计项；本次未创建业务内容
+src/windows/requirements.txt,文件,src,推理服务依赖,按最终实现整理,设计项；本次未创建业务内容
+src/windows/requirements.lock.txt,文件,src,与最终实际 GPU 环境匹配的版本锁,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/__init__.py,文件,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/main.py,文件,src,模型服务启动入口,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/server/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/server/api.py,文件,src,请求、健康和取消接口,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/server/request_router.py,文件,src,LLM / TTS 路由与队列,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/server/ownership.py,文件,src,实例锁、所有者和重复启动检查,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/server/cancellation.py,文件,src,请求取消与过期结果处理,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/server/health.py,文件,src,模型、服务和 GPU 就绪状态,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/llm/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/llm/ollama_client.py,文件,src,专用 Ollama 实例调用,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/llm/prompt_builder.py,文件,src,板端上下文到模型输入的适配,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/llm/output_parser.py,文件,src,实际约定的结构化输出处理,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/llm/model_profile.py,文件,src,模型标签、量化、上下文和参数,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/tts/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/tts/omnivoice_backend.py,文件,src,OmniVoice 推理接口,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/tts/reference_voice.py,文件,src,选定参考音色的读取与校验,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/tts/pcm_output.py,文件,src,PCM 格式、分段与交付,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/tts/cache.py,文件,src,[条件] 实际启用的 TTS 缓存,按实际采用,设计项；本次未创建业务内容
+src/windows/aura_host/runtime/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/runtime/gpu_policy.py,文件,src,真实 GPU 识别、显存和并发策略,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/runtime/model_manager.py,文件,src,加载、预热与退出,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/runtime/environment.py,文件,src,Python/CUDA/PyTorch/Ollama 核对,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/runtime/process_guard.py,文件,src,子进程管理与退出收尾,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/diagnostics/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/diagnostics/metrics.py,文件,src,RPC、首个内容、TTS、RTF 等计时,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/diagnostics/gpu_sampler.py,文件,src,实际 GPU 资源采样,按最终实现整理,设计项；本次未创建业务内容
+src/windows/aura_host/diagnostics/log_export.py,文件,src,请求与模型指标的公开导出,按最终实现整理,设计项；本次未创建业务内容
+src/windows/scripts/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/windows/scripts/setup.ps1,文件,src,后续实现：检查环境并准备依赖,按最终实现整理,设计项；本次未创建业务内容
+src/windows/scripts/start.ps1,文件,src,后续实现：启动本项目服务,按最终实现整理,设计项；本次未创建业务内容
+src/windows/scripts/stop.ps1,文件,src,后续实现：停止本项目拥有的进程,按最终实现整理,设计项；本次未创建业务内容
+src/windows/scripts/status.ps1,文件,src,后续实现：健康、所有者和模型状态,按最终实现整理,设计项；本次未创建业务内容
+src/windows/scripts/collect_environment.ps1,文件,src,后续实现：生成实际主机环境快照,按最终实现整理,设计项；本次未创建业务内容
+src/windows/ollama/,目录,src,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+src/windows/ollama/modelfile,文件,src,模型导入与推理参数；权重路径可配置,按最终实现整理,设计项；本次未创建业务内容
+config/,目录,config,可移机的配置模板；不保存个人状态,按最终实现整理,设计项；本次未创建业务内容
+config/readme.md,文件,config,各项参数、单位、默认值和覆盖顺序,按最终实现整理,设计项；本次未创建业务内容
+config/common/,目录,config,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+config/common/protocol.json,文件,config,协议版本、格式和超时约定,按最终实现整理,设计项；本次未创建业务内容
+config/common/logging.json,文件,config,日志级别、字段和保留策略,按最终实现整理,设计项；本次未创建业务内容
+config/common/network.example.json,文件,config,IP、端口与绑定方式的示例,按最终实现整理,设计项；本次未创建业务内容
+config/kv260/,目录,config,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+config/kv260/camera.example.json,文件,config,设备、格式、分辨率和帧率,按最终实现整理,设计项；本次未创建业务内容
+config/kv260/vision.example.json,文件,config,模型路径、任务预算与后处理,按最终实现整理,设计项；本次未创建业务内容
+config/kv260/identity.example.json,文件,config,阈值、登记规则与本地数据位置,按最终实现整理,设计项；本次未创建业务内容
+config/kv260/motion.example.json,文件,config,ABI、校准行程、方向、租约和控制参数,按最终实现整理,设计项；本次未创建业务内容
+config/kv260/audio.example.json,文件,config,MCP01、采样、前端和播放参数,按最终实现整理,设计项；本次未创建业务内容
+config/kv260/dialogue.example.json,文件,config,模型端点、轮次与输出策略,按最终实现整理,设计项；本次未创建业务内容
+config/kv260/memory.example.json,文件,config,保留期、摘要与查询参数,按最终实现整理,设计项；本次未创建业务内容
+config/kv260/display.example.json,文件,config,屏幕模式、刷新和 UI 参数,按最终实现整理,设计项；本次未创建业务内容
+config/kv260/character.example.json,文件,config,角色、动作、音色及提示音绑定,按最终实现整理,设计项；本次未创建业务内容
+config/windows/,目录,config,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+config/windows/host.example.json,文件,config,推理服务地址、队列与健康接口,按最终实现整理,设计项；本次未创建业务内容
+config/windows/models.example.json,文件,config,LLM/TTS 标签、外部权重路径,按最终实现整理,设计项；本次未创建业务内容
+config/windows/gpu.example.json,文件,config,实测硬件填入方式；不固定旧 GPU UUID,按最终实现整理,设计项；本次未创建业务内容
+config/windows/ollama.example.json,文件,config,独立服务端口、模型库与参数,按最终实现整理,设计项；本次未创建业务内容
+models/,目录,models,模型工件或可核验的取得方法,按最终实现整理,设计项；本次未创建业务内容
+models/readme.md,文件,models,每个模型在哪运行、是否随包、如何取得,按最终实现整理,设计项；本次未创建业务内容
+models/manifests/,目录,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/manifests/models.csv,文件,models,名称、任务、后端、来源、版本、许可、SHA、大小,按最终实现整理,设计项；本次未创建业务内容
+models/manifests/yolox.json,文件,models,实际部署的人体检测模型,按最终实现整理,设计项；本次未创建业务内容
+models/manifests/yunet.json,文件,models,实际部署的人脸检测模型,按最终实现整理,设计项；本次未创建业务内容
+models/manifests/sface.json,文件,models,实际部署的人脸特征模型,按最终实现整理,设计项；本次未创建业务内容
+models/manifests/asr.json,文件,models,实际 Paraformer 等 ASR 模型,按最终实现整理,设计项；本次未创建业务内容
+models/manifests/audio_frontend.json,文件,models,GTCRN、VAD 等实际模型,按最终实现整理,设计项；本次未创建业务内容
+models/manifests/speaker.json,文件,models,[条件] ECAPA 声纹模型，声明 CPU 后端,按实际采用,设计项；本次未创建业务内容
+models/manifests/llm.json,文件,models,27B 名称、仓库、revision、量化文件和 SHA,按最终实现整理,设计项；本次未创建业务内容
+models/manifests/tts.json,文件,models,OmniVoice、tokenizer 与音色依赖清单,按最终实现整理,设计项；本次未创建业务内容
+models/dpu/,目录,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/dpu/yolox_person.xmodel,文件,models,在许可和体积允许时提供实际部署字节,按最终实现整理,设计项；本次未创建业务内容
+models/dpu/yunet.xmodel,文件,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/dpu/sface.xmodel,文件,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/dpu/arch.json,文件,models,与实际 DPU 指纹一致的编译目标,按最终实现整理,设计项；本次未创建业务内容
+models/quantization/,目录,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/quantization/readme.md,文件,models,浮点来源、校准、量化、编译与精度口径,按最终实现整理,设计项；本次未创建业务内容
+models/quantization/yunet/,目录,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/quantization/yunet/calibration_manifest.csv,文件,models,公开校准数据来源和划分,按最终实现整理,设计项；本次未创建业务内容
+models/quantization/yunet/quant_info.json,文件,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/quantization/yunet/compile_config.json,文件,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/quantization/yunet/evaluation.json,文件,models,精度结果；明确模拟或板端,按最终实现整理,设计项；本次未创建业务内容
+models/quantization/sface/,目录,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/quantization/sface/calibration_manifest.csv,文件,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/quantization/sface/quant_info.json,文件,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/quantization/sface/compile_config.json,文件,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/quantization/sface/evaluation.json,文件,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/scripts/,目录,models,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+models/scripts/fetch_models.py,文件,models,后续实现：固定版本下载到明确目标位置,按最终实现整理,设计项；本次未创建业务内容
+models/scripts/verify_models.py,文件,models,后续实现：逐文件 SHA 和完整性检查,按最终实现整理,设计项；本次未创建业务内容
+models/scripts/quantize.py,文件,models,后续实现：实际采用模型的量化入口,按最终实现整理,设计项；本次未创建业务内容
+models/scripts/compile.py,文件,models,后续实现：实际 DPU 目标编译入口,按最终实现整理,设计项；本次未创建业务内容
+assets/,目录,assets,参与运行的非代码资源,按最终实现整理,设计项；本次未创建业务内容
+assets/readme.md,文件,assets,文件用途、资源寻址及授权说明,按最终实现整理,设计项；本次未创建业务内容
+assets/manifest.csv,文件,assets,资源来源、版本、SHA 与再分发条件,按最终实现整理,设计项；本次未创建业务内容
+assets/character/,目录,assets,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+assets/character/xuefei/,目录,assets,角色模型、纹理、表情和动作；只放有权交付内容,按最终实现整理,设计项；本次未创建业务内容
+assets/fonts/,目录,assets,实际字体及许可,按最终实现整理,设计项；本次未创建业务内容
+assets/ui/,目录,assets,图标、背景及显示资源,按最终实现整理,设计项；本次未创建业务内容
+assets/audio/,目录,assets,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+assets/audio/reference/,目录,assets,有授权的 TTS 参考音色、文本与说明,按最终实现整理,设计项；本次未创建业务内容
+assets/audio/cues/,目录,assets,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+assets/audio/cues/arrival.wav,文件,assets,[条件] 最终实际使用的固定问候音,按实际采用,设计项；本次未创建业务内容
+assets/audio/cues/invitation.wav,文件,assets,[条件] 最终实际使用的邀请音,按实际采用,设计项；本次未创建业务内容
+assets/audio/cues/thinking.wav,文件,assets,[条件] 最终实际使用的思考提示音,按实际采用,设计项；本次未创建业务内容
+assets/audio/cues/manifest.json,文件,assets,文本、采样率、声道、时长、SHA 与生成来源,按最终实现整理,设计项；本次未创建业务内容
+hardware/,目录,hardware,作品的电气与机械资料,按最终实现整理,设计项；本次未创建业务内容
+hardware/readme.md,文件,hardware,实物版本、供电与接线索引,按最终实现整理,设计项；本次未创建业务内容
+hardware/bom.csv,文件,hardware,型号、数量、用途与实际选用项,按最终实现整理,设计项；本次未创建业务内容
+hardware/wiring/,目录,hardware,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+hardware/wiring/system_connections.svg,文件,hardware,整机相机、屏幕、MCP01、网络与供电,按最终实现整理,设计项；本次未创建业务内容
+hardware/wiring/servo_connections.svg,文件,hardware,KV260、隔离、独立动力电源及舵机,按最终实现整理,设计项；本次未创建业务内容
+hardware/wiring/pin_map.csv,文件,hardware,接头位置、FPGA 引脚、网络、电平与方向,按最终实现整理,设计项；本次未创建业务内容
+hardware/schematics/,目录,hardware,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+hardware/schematics/readme.md,文件,hardware,实际电路原件格式与版本,按最终实现整理,设计项；本次未创建业务内容
+hardware/schematics/control_and_power.pdf,文件,hardware,公开可阅读的真实电路图,按最终实现整理,设计项；本次未创建业务内容
+hardware/schematics/source/,目录,hardware,[条件] 实际自制板/电路的 CAD 原件,按实际采用,设计项；本次未创建业务内容
+hardware/mechanical/,目录,hardware,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+hardware/mechanical/readme.md,文件,hardware,安装、零位定义、转轴和干涉说明,按最终实现整理,设计项；本次未创建业务内容
+hardware/mechanical/assembly.pdf,文件,hardware,装配图或带尺寸示意图,按最终实现整理,设计项；本次未创建业务内容
+hardware/mechanical/source/,目录,hardware,[条件] 实际 CAD/STEP/STL 原件,按实际采用,设计项；本次未创建业务内容
+hardware/mechanical/dimensions.csv,文件,hardware,实测尺寸、单位及测量方法,按最终实现整理,设计项；本次未创建业务内容
+hardware/calibration/,目录,hardware,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+hardware/calibration/pulse_angle.csv,文件,hardware,实测脉宽、角度、方向和测量条件,按最终实现整理,设计项；本次未创建业务内容
+hardware/calibration/travel_limits.json,文件,hardware,实体允许范围、中点与标定版本,按最终实现整理,设计项；本次未创建业务内容
+hardware/calibration/measurement_notes.md,文件,hardware,仪器、误差、波形和未测范围,按最终实现整理,设计项；本次未创建业务内容
+sim/,目录,sim,FPGA 仿真与执行器软件参考,按最终实现整理,设计项；本次未创建业务内容
+sim/readme.md,文件,sim,仿真工具、执行顺序和判断依据,按最终实现整理,设计项；本次未创建业务内容
+sim/rtl/,目录,sim,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+sim/rtl/tb_registers.sv,文件,sim,实际采用的 AXI 与寄存器测试台,按最终实现整理,设计项；本次未创建业务内容
+sim/rtl/tb_pwm.sv,文件,sim,周期、脉宽与使能,按最终实现整理,设计项；本次未创建业务内容
+sim/rtl/tb_command_guard.sv,文件,sim,提交、范围、序号、租约与停止,按最终实现整理,设计项；本次未创建业务内容
+sim/rtl/vectors/,目录,sim,固定与随机种子测试输入,按最终实现整理,设计项；本次未创建业务内容
+sim/rtl/reference/,目录,sim,独立期望输出,按最终实现整理,设计项；本次未创建业务内容
+sim/rtl/run.tcl,文件,sim,xvlog/xelab/xsim 等实际执行入口,按最终实现整理,设计项；本次未创建业务内容
+sim/software_model/,目录,sim,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+sim/software_model/fake_motion_device.py,文件,sim,不接执行器的寄存器/时钟模型,按最终实现整理,设计项；本次未创建业务内容
+sim/software_model/replay.py,文件,sim,控制输入和时效场景回放,按最终实现整理,设计项；本次未创建业务内容
+sim/software_model/golden.py,文件,sim,可说明来源的独立参考,按最终实现整理,设计项；本次未创建业务内容
+sim/results/,目录,sim,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+sim/results/baseline/,目录,sim,一次可追溯的已保存结果；后续大波形写项目外,按最终实现整理,设计项；本次未创建业务内容
+sim/results/baseline/manifest.json,文件,sim,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+sim/results/baseline/result.json,文件,sim,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+sim/results/baseline/run.log,文件,sim,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+sim/results/baseline/waveform.vcd,文件,sim,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/,目录,build,工程构建定义与已选定的构建证据,按最终实现整理,设计项；本次未创建业务内容
+build/readme.md,文件,build,干净目录构建、导出和复查的方法,按最终实现整理,设计项；本次未创建业务内容
+build/scripts/,目录,build,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/scripts/check_environment.py,文件,build,后续实现：工具、依赖和输入检查,按最终实现整理,设计项；本次未创建业务内容
+build/scripts/create_project.tcl,文件,build,后续实现：按相对路径创建 Vivado 工程,按最终实现整理,设计项；本次未创建业务内容
+build/scripts/build_fpga.tcl,文件,build,后续实现：综合、实现、时序、位流与导出,按最终实现整理,设计项；本次未创建业务内容
+build/scripts/export_hardware.tcl,文件,build,后续实现：XSA/HWH/位流配套导出,按最终实现整理,设计项；本次未创建业务内容
+build/scripts/build_native.sh,文件,build,后续实现：ARM 原生库构建,按最终实现整理,设计项；本次未创建业务内容
+build/scripts/package_firmware.py,文件,build,后续实现：生成和核验固件组合,按最终实现整理,设计项；本次未创建业务内容
+build/scripts/reproduce.py,文件,build,后续实现：按模式编排离线/硬件/部署复现,按最终实现整理,设计项；本次未创建业务内容
+build/manifests/,目录,build,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/manifests/toolchain.json,文件,build,Vivado/Vitis/PetaLinux/Vitis AI 及补丁,按最终实现整理,设计项；本次未创建业务内容
+build/manifests/platform.json,文件,build,器件、板卡、DPU、频率、指纹和 ABI,按最终实现整理,设计项；本次未创建业务内容
+build/manifests/dependency_sources.json,文件,build,IP/参考工程/镜像/SDK 的固定来源与 SHA,按最终实现整理,设计项；本次未创建业务内容
+build/manifests/build_inputs.sha256,文件,build,这次构建的完整输入指纹,按最终实现整理,设计项；本次未创建业务内容
+build/reports/,目录,build,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/reports/baseline/,目录,build,某一实际构建的结果；不同 build_id 分目录,按最终实现整理,设计项；本次未创建业务内容
+build/reports/baseline/manifest.json,文件,build,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/reports/baseline/synthesis.rpt,文件,build,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/reports/baseline/utilization.rpt,文件,build,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/reports/baseline/utilization_hierarchical.rpt,文件,build,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/reports/baseline/timing_summary.rpt,文件,build,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/reports/baseline/clocks.rpt,文件,build,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/reports/baseline/check_timing.rpt,文件,build,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/reports/baseline/route_status.rpt,文件,build,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/reports/baseline/drc.rpt,文件,build,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/reports/baseline/cdc.rpt,文件,build,[条件] 工具支持且实际执行时保存,按实际采用,设计项；本次未创建业务内容
+build/reports/baseline/build.log,文件,build,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+build/reports/baseline/metrics.json,文件,build,从原报告提取的数值和口径,按最终实现整理,设计项；本次未创建业务内容
+board/,目录,board,KV260 部署材料；与源码和配置分别保存,按最终实现整理,设计项；本次未创建业务内容
+board/readme.md,文件,board,新设备准备、部署顺序和运行说明,按最终实现整理,设计项；本次未创建业务内容
+board/firmware/,目录,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/firmware/release_v1/,目录,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/firmware/release_v1/overlay.bit.bin,文件,board,示例名；最终按加载器需要的名称统一生成,按最终实现整理,设计项；本次未创建业务内容
+board/firmware/release_v1/overlay.dtbo,文件,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/firmware/release_v1/overlay.xclbin,文件,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/firmware/release_v1/shell.json,文件,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/firmware/release_v1/pairing.json,文件,board,位流/XSA/设备树/XCLBIN/接口配对关系,按最终实现整理,设计项；本次未创建业务内容
+board/firmware/release_v1/checksums.sha256,文件,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/hardware_handoff/,目录,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/hardware_handoff/platform.xsa,文件,board,与本次固件对应的硬件交付,按最终实现整理,设计项；本次未创建业务内容
+board/hardware_handoff/platform.hwh,文件,board,[条件] 实际需要的硬件元数据,按实际采用,设计项；本次未创建业务内容
+board/binaries/,目录,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/binaries/aarch64/,目录,board,现役原生库；必须能追溯到源码和构建条件,按最终实现整理,设计项；本次未创建业务内容
+board/system/,目录,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/system/image_manifest.json,文件,board,原始镜像、内核、rootfs、XRT/VART 与 SHA,按最终实现整理,设计项；本次未创建业务内容
+board/system/boot_manifest.json,文件,board,实际 QSPI/启动方式与所需启动组件,按最终实现整理,设计项；本次未创建业务内容
+board/system/packages.txt,文件,board,系统依赖及实际版本,按最终实现整理,设计项；本次未创建业务内容
+board/system/sdk_manifest.json,文件,board,ARM SDK/sysroot 的来源与匹配关系,按最终实现整理,设计项；本次未创建业务内容
+board/system/petalinux/,目录,board,[条件] 自定义系统时附配置、recipes 和 patches,按实际采用,设计项；本次未创建业务内容
+board/systemd/,目录,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/systemd/aura-camera.service,文件,board,相机/视觉服务本体,按最终实现整理,设计项；本次未创建业务内容
+board/systemd/aura-business.service,文件,board,角色、对话与业务服务本体,按最终实现整理,设计项；本次未创建业务内容
+board/systemd/dropins/,目录,board,[条件] 最终有效追加配置及加载顺序,按实际采用,设计项；本次未创建业务内容
+board/udev/,目录,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/udev/99-aura-devices.rules,文件,board,[条件] 已采用的稳定设备规则,按实际采用,设计项；本次未创建业务内容
+board/config/,目录,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/config/deployment_manifest.json,文件,board,相对源文件到目标路径、权限和 SHA 的映射,按最终实现整理,设计项；本次未创建业务内容
+board/config/startup_manifest.json,文件,board,实际服务入口、源码/资源/配置锁,按最终实现整理,设计项；本次未创建业务内容
+board/config/device_binding.example.json,文件,board,boot/PID/源身份字段示例，真实值重新生成,按最终实现整理,设计项；本次未创建业务内容
+board/scripts/,目录,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/scripts/stage_rootfs.py,文件,board,后续实现：在普通电脑生成离线暂存树,按最终实现整理,设计项；本次未创建业务内容
+board/scripts/deploy.sh,文件,board,后续实现：按目标清单安装到确认的设备,按最终实现整理,设计项；本次未创建业务内容
+board/scripts/preflight.py,文件,board,后续实现：固件、模型、音频、显示与绑定检查,按最终实现整理,设计项；本次未创建业务内容
+board/scripts/start.sh,文件,board,后续实现：按依赖顺序启动,按最终实现整理,设计项；本次未创建业务内容
+board/scripts/stop.sh,文件,board,后续实现：停止业务及对应执行者,按最终实现整理,设计项；本次未创建业务内容
+board/scripts/status.sh,文件,board,后续实现：原样读取实际健康状态,按最终实现整理,设计项；本次未创建业务内容
+board/scripts/collect_evidence.py,文件,board,后续实现：收集本轮版本与板测证据,按最终实现整理,设计项；本次未创建业务内容
+board/evidence/,目录,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/evidence/acceptance_001/,目录,board,每轮独立保存；禁止覆盖历史失败结果,按最终实现整理,设计项；本次未创建业务内容
+board/evidence/acceptance_001/manifest.json,文件,board,release/boot/进程身份、时间及条件,按最终实现整理,设计项；本次未创建业务内容
+board/evidence/acceptance_001/firmware_readback.json,文件,board,实际加载项、DPU 指纹与自研 ABI,按最终实现整理,设计项；本次未创建业务内容
+board/evidence/acceptance_001/startup.log,文件,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/evidence/acceptance_001/health.jsonl,文件,board,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+board/evidence/acceptance_001/observation.jsonl,文件,board,实际观测记录与字段单位,按最终实现整理,设计项；本次未创建业务内容
+board/evidence/acceptance_001/verdict.md,文件,board,本轮通过、失败、未测及局限,按最终实现整理,设计项；本次未创建业务内容
+data/,目录,data,可公开的输入、参考与结果,按最终实现整理,设计项；本次未创建业务内容
+data/readme.md,文件,data,数据取得方式、许可、划分和评价方法,按最终实现整理,设计项；本次未创建业务内容
+data/manifest.csv,文件,data,数据文件、来源、用途、SHA 与发布条件,按最终实现整理,设计项；本次未创建业务内容
+data/input/,目录,data,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+data/input/vision_public/,目录,data,固定图像/向量；使用公开或有授权的数据,按最终实现整理,设计项；本次未创建业务内容
+data/input/audio_public/,目录,data,公开测试语音与人工转写,按最终实现整理,设计项；本次未创建业务内容
+data/input/dialogue_public.jsonl,文件,data,不含个人历史的对话用例,按最终实现整理,设计项；本次未创建业务内容
+data/input/motion_replay.jsonl,文件,data,固定视觉/控制回放输入,按最终实现整理,设计项；本次未创建业务内容
+data/input/faults.json,文件,data,断网、过期、取消等可复现场景,按最终实现整理,设计项；本次未创建业务内容
+data/reference/,目录,data,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+data/reference/vision_expected.json,文件,data,检测/识别参考及容差,按最终实现整理,设计项；本次未创建业务内容
+data/reference/audio_transcripts.txt,文件,data,ASR 人工参考,按最终实现整理,设计项；本次未创建业务内容
+data/reference/motion_expected.json,文件,data,软件参考和允许误差,按最终实现整理,设计项；本次未创建业务内容
+data/reference/dialogue_expectations.json,文件,data,对话、记忆与撤销的判定规则,按最终实现整理,设计项；本次未创建业务内容
+data/results/,目录,data,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+data/results/baseline/,目录,data,每次实验再增加唯一 run_id 子目录,按最终实现整理,设计项；本次未创建业务内容
+data/results/baseline/manifest.json,文件,data,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+data/results/baseline/environment.json,文件,data,实际板端/主机/模型/配置/版本,按最终实现整理,设计项；本次未创建业务内容
+data/results/baseline/raw/,目录,data,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+data/results/baseline/raw/vision.jsonl,文件,data,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+data/results/baseline/raw/voice.jsonl,文件,data,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+data/results/baseline/raw/resources.csv,文件,data,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+data/results/baseline/raw/motion.jsonl,文件,data,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+data/results/baseline/comparison.csv,文件,data,同条件基线与优化后结果,按最终实现整理,设计项；本次未创建业务内容
+data/results/baseline/summary.json,文件,data,样本数、均值、分位数和失败计数,按最终实现整理,设计项；本次未创建业务内容
+data/results/baseline/figures/,目录,data,由原始数值生成的 PNG/SVG,按最终实现整理,设计项；本次未创建业务内容
+data/results/baseline/verdict.md,文件,data,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+tests/,目录,tests,软件与系统测试；不与 RTL 仿真混计,按最终实现整理,设计项；本次未创建业务内容
+tests/readme.md,文件,tests,各级测试的前提和设备需求,按最终实现整理,设计项；本次未创建业务内容
+tests/protocol/,目录,tests,请求、格式、过期、取消、播放 ACK,按最终实现整理,设计项；本次未创建业务内容
+tests/kv260/,目录,tests,视觉、跟随、音频、UI、身份和记忆逻辑,按最终实现整理,设计项；本次未创建业务内容
+tests/windows/,目录,tests,推理 API、实例管理、输出与错误处理,按最终实现整理,设计项；本次未创建业务内容
+tests/integration/,目录,tests,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+tests/integration/test_inference_roundtrip.py,文件,tests,固定输入的双端请求链,按最终实现整理,设计项；本次未创建业务内容
+tests/integration/test_cancel_and_late_reply.py,文件,tests,取消、迟到结果及恢复,按最终实现整理,设计项；本次未创建业务内容
+tests/integration/test_disconnect_recovery.py,文件,tests,网络断开和恢复,按最终实现整理,设计项；本次未创建业务内容
+tests/integration/test_memory_lifecycle.py,文件,tests,原文、摘要、查询、修正和删除,按最终实现整理,设计项；本次未创建业务内容
+tests/integration/test_visual_motion_contract.py,文件,tests,视觉来源、期限和运动消费,按最终实现整理,设计项；本次未创建业务内容
+tests/hardware/,目录,tests,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+tests/hardware/camera.md,文件,tests,相机/框同步/图像质量实测步骤,按最终实现整理,设计项；本次未创建业务内容
+tests/hardware/audio.md,文件,tests,MCP01、识别、实际听音与完整播放,按最终实现整理,设计项；本次未创建业务内容
+tests/hardware/motion.md,文件,tests,无动力波形、有限运动与停止的步骤,按最终实现整理,设计项；本次未创建业务内容
+tests/hardware/cold_boot.md,文件,tests,冷启动、显示/USB/服务与绑定重建,按最终实现整理,设计项；本次未创建业务内容
+tests/hardware/joint_run.md,文件,tests,同版多功能运行、资源和失败记录,按最终实现整理,设计项；本次未创建业务内容
+tests/fixtures/,目录,tests,测试专用公开小样；不使用真实私库作默认输入,按最终实现整理,设计项；本次未创建业务内容
+skill/,目录,skill,官方要求的可复用经验包,按最终实现整理,设计项；本次未创建业务内容
+skill/README.md,文件,skill,每个 Skill 的范围、入口、效果和限制,按最终实现整理,设计项；本次未创建业务内容
+skill/command_guard_validation/,目录,skill,建议主题 A：FPGA 执行监督与故障验证,按最终实现整理,设计项；本次未创建业务内容
+skill/command_guard_validation/readme.md,文件,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/command_guard_validation/workflow.md,文件,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/command_guard_validation/prompts/,目录,skill,经核验的提示词模板,按最终实现整理,设计项；本次未创建业务内容
+skill/command_guard_validation/scripts/,目录,skill,可直接复用的校验或报告工具,按最终实现整理,设计项；本次未创建业务内容
+skill/command_guard_validation/examples/,目录,skill,正例、反例及期望输出,按最终实现整理,设计项；本次未创建业务内容
+skill/command_guard_validation/case_studies.md,文件,skill,真实失败、判断、修正和复测,按最终实现整理,设计项；本次未创建业务内容
+skill/command_guard_validation/evidence/,目录,skill,输入、原始日志、结果与环境,按最终实现整理,设计项；本次未创建业务内容
+skill/dpu_workflow_validation/,目录,skill,建议主题 B：模型适配、调度和感知时效,按最终实现整理,设计项；本次未创建业务内容
+skill/dpu_workflow_validation/readme.md,文件,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/dpu_workflow_validation/workflow.md,文件,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/dpu_workflow_validation/prompts/,目录,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/dpu_workflow_validation/scripts/,目录,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/dpu_workflow_validation/examples/,目录,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/dpu_workflow_validation/case_studies.md,文件,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/dpu_workflow_validation/evidence/,目录,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/voice_runtime_optimization/,目录,skill,建议主题 C：LLM/TTS、计时和记忆一致性,按最终实现整理,设计项；本次未创建业务内容
+skill/voice_runtime_optimization/readme.md,文件,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/voice_runtime_optimization/workflow.md,文件,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/voice_runtime_optimization/prompts/,目录,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/voice_runtime_optimization/scripts/,目录,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/voice_runtime_optimization/examples/,目录,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/voice_runtime_optimization/case_studies.md,文件,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/voice_runtime_optimization/evidence/,目录,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/pynq_contract_testgen/,目录,skill,[条件] 通用 PYNQ 补充，实际采用才建立,按实际采用,设计项；本次未创建业务内容
+skill/pynq_contract_testgen/readme.md,文件,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/pynq_contract_testgen/workflow.md,文件,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/pynq_contract_testgen/contracts/,目录,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/pynq_contract_testgen/templates/,目录,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/pynq_contract_testgen/examples/,目录,skill,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+skill/pynq_contract_testgen/evidence/,目录,skill,模拟、真板、跨板和他人复用分别标记,按最终实现整理,设计项；本次未创建业务内容
+report/,目录,report,面向评审的设计和提交素材,按最终实现整理,设计项；本次未创建业务内容
+report/readme.md,文件,report,正式文件、草稿及指标来源的索引,按最终实现整理,设计项；本次未创建业务内容
+report/design_report.md,文件,report,可维护的正文源稿,按最终实现整理,设计项；本次未创建业务内容
+report/design_report.docx,文件,report,按赛事模板填写的可编辑版本,按最终实现整理,设计项；本次未创建业务内容
+report/design_report.pdf,文件,report,最终上传的统一 PDF,按最终实现整理,设计项；本次未创建业务内容
+report/amd_supplement.md,文件,report,[条件] AMD 七项要求补充章节,按实际采用,设计项；本次未创建业务内容
+report/requirements_matrix.csv,文件,report,官方条款 → 文件 → 证据 → 状态,按最终实现整理,设计项；本次未创建业务内容
+report/metrics.csv,文件,report,报告数值、单位、样本、条件与来源,按最终实现整理,设计项；本次未创建业务内容
+report/figures/,目录,report,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+report/figures/system_architecture.svg,文件,report,整体数据流和部署位置,按最终实现整理,设计项；本次未创建业务内容
+report/figures/fpga_architecture.svg,文件,report,DPU、自研 IP、总线和时钟复位,按最终实现整理,设计项；本次未创建业务内容
+report/figures/dialogue_flow.svg,文件,report,采集、ASR、LLM、TTS、播放与 ACK,按最终实现整理,设计项；本次未创建业务内容
+report/figures/memory_flow.svg,文件,report,存储、摘要、检索和遗忘,按最终实现整理,设计项；本次未创建业务内容
+report/figures/performance/,目录,report,能追溯到原始数据的图表,按最终实现整理,设计项；本次未创建业务内容
+report/photos/,目录,report,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+report/photos/overall_front.jpg,文件,report,真实整机照片,按最终实现整理,设计项；本次未创建业务内容
+report/photos/overall_side.jpg,文件,report,真实侧面/结构照片,按最终实现整理,设计项；本次未创建业务内容
+report/photos/board_closeup.jpg,文件,report,开发板高清特写,按最终实现整理,设计项；本次未创建业务内容
+report/photos/wiring_closeup.jpg,文件,report,实际接线和动力/控制连接,按最终实现整理,设计项；本次未创建业务内容
+report/photos/display_running.jpg,文件,report,最终版本运行界面,按最终实现整理,设计项；本次未创建业务内容
+report/ai_collaboration/,目录,report,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+report/ai_collaboration/readme.md,文件,report,AI 工具、模型版本、角色和记录边界,按最终实现整理,设计项；本次未创建业务内容
+report/ai_collaboration/raw/,目录,report,可公开的真实历史问答导出；不事后编造,按最终实现整理,设计项；本次未创建业务内容
+report/ai_collaboration/prompts.md,文件,report,关键原始提示词与对应原记录,按最终实现整理,设计项；本次未创建业务内容
+report/ai_collaboration/responses.md,文件,report,关键原回答与来源,按最终实现整理,设计项；本次未创建业务内容
+report/ai_collaboration/corrections.md,文件,report,错误、判断依据、修正和复测,按最终实现整理,设计项；本次未创建业务内容
+report/ai_collaboration/case_index.csv,文件,report,案例 → 源码/工件/验证/Skill,按最终实现整理,设计项；本次未创建业务内容
+report/ai_collaboration/evidence_index.json,文件,report,来源、SHA、范围和缺失项,按最终实现整理,设计项；本次未创建业务内容
+report/demo/,目录,report,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+report/demo/storyboard.md,文件,report,演示顺序与每段要证明的功能,按最终实现整理,设计项；本次未创建业务内容
+report/demo/demo.mp4,文件,report,作品介绍视频；上传时独立提供,按最终实现整理,设计项；本次未创建业务内容
+report/demo/recording_conditions.md,文件,report,版本、环境、实物和剪辑说明,按最终实现整理,设计项；本次未创建业务内容
+report/poster/,目录,report,[条件] 按企业通知/决赛要求准备,按实际采用,设计项；本次未创建业务内容
+report/poster/poster_en.pptx,文件,report,AMD 模板的一页英文海报,按最终实现整理,设计项；本次未创建业务内容
+report/poster/poster_en.pdf,文件,report,便于检查与 A4 彩色打印,按最终实现整理,设计项；本次未创建业务内容
+report/submission/,目录,report,见所属子系统说明；按实际实现填写,按最终实现整理,设计项；本次未创建业务内容
+report/submission/checklist.csv,文件,report,后台各字段、格式、大小和最终文件名,按最终实现整理,设计项；本次未创建业务内容
+report/submission/repository.txt,文件,report,正式开源地址、tag、commit 与许可,按最终实现整理,设计项；本次未创建业务内容
+report/submission/authorization_template.pdf,文件,report,官方承诺/使用授权书原模板,按最终实现整理,设计项；本次未创建业务内容
+report/submission/readme.md,文件,report,签署件、回执的私下保存位置及最终提交说明,按最终实现整理,设计项；本次未创建业务内容
+docs/,目录,docs,使另一位开发者看懂并能复现的说明,按最终实现整理,设计项；本次未创建业务内容
+docs/architecture.md,文件,docs,整体部署、数据流和唯一所有者,按最终实现整理,设计项；本次未创建业务内容
+docs/feature_scope.md,文件,docs,最终功能、删项、候选与未验证边界,按最终实现整理,设计项；本次未创建业务内容
+docs/hardware.md,文件,docs,器件型号、外设、供电与接口,按最终实现整理,设计项；本次未创建业务内容
+docs/platform_lock.md,文件,docs,工具、系统、DPU、ABI 和版本选择理由,按最终实现整理,设计项；本次未创建业务内容
+docs/protocol.md,文件,docs,双端 API、错误、取消与播放确认,按最终实现整理,设计项；本次未创建业务内容
+docs/motion_contract.md,文件,docs,PS 源时效、PL 租约、范围与停止语义,按最终实现整理,设计项；本次未创建业务内容
+docs/model_pipeline.md,文件,docs,来源、量化、编译、预后处理和精度验证,按最终实现整理,设计项；本次未创建业务内容
+docs/runtime_layout.md,文件,docs,仓库文件到 KV260/Windows 运行目录的映射,按最终实现整理,设计项；本次未创建业务内容
+docs/windows_setup.md,文件,docs,从空白 Windows 准备依赖、模型和服务,按最终实现整理,设计项；本次未创建业务内容
+docs/kv260_setup.md,文件,docs,从匹配系统准备板端依赖与部署,按最终实现整理,设计项；本次未创建业务内容
+docs/quickstart.md,文件,docs,已准备环境下的日常启动与演示,按最终实现整理,设计项；本次未创建业务内容
+docs/reproduction.md,文件,docs,从取得源码到构建、部署、验证的完整步骤,按最终实现整理,设计项；本次未创建业务内容
+docs/test_plan.md,文件,docs,各级验证、输入、期望与实物前提,按最终实现整理,设计项；本次未创建业务内容
+docs/measurement_methods.md,文件,docs,延迟、资源、频率、精度和统计口径,按最终实现整理,设计项；本次未创建业务内容
+docs/known_issues.md,文件,docs,真实失败、影响、复现与尚未关闭的问题,按最终实现整理,设计项；本次未创建业务内容
+docs/release_notes.md,文件,docs,每次正式发布的变化与适用证据,按最终实现整理,设计项；本次未创建业务内容
+tools/,目录,tools,构建/取数/归档辅助，不能替代真实结果,按最终实现整理,设计项；本次未创建业务内容
+tools/validate_layout.py,文件,tools,后续实现：文件名、清单及必要路径检查,按最终实现整理,设计项；本次未创建业务内容
+tools/collect_versions.py,文件,tools,后续实现：实际环境快照,按最终实现整理,设计项；本次未创建业务内容
+tools/summarize_results.py,文件,tools,后续实现：从原始记录重算统计,按最终实现整理,设计项；本次未创建业务内容
+tools/render_figures.py,文件,tools,后续实现：从统计数据绘图,按最终实现整理,设计项；本次未创建业务内容
+tools/make_checksums.py,文件,tools,后续实现：生成交付 SHA 清单,按最终实现整理,设计项；本次未创建业务内容
+tools/export_submission.py,文件,tools,后续实现：按清单导出并检查提交体积,按最终实现整理,设计项；本次未创建业务内容
+third_party/,目录,third_party,实际使用的第三方输入；固定版本和原许可,按最终实现整理,设计项；本次未创建业务内容
+third_party/readme.md,文件,third_party,上游地址、revision、补丁与可再分发范围,按最终实现整理,设计项；本次未创建业务内容
+third_party/manifest.csv,文件,third_party,所有第三方依赖统一登记,按最终实现整理,设计项；本次未创建业务内容
+third_party/fpga_ip/,目录,third_party,[条件] 工程依赖且允许提供的非内置 IP,按实际采用,设计项；本次未创建业务内容
+third_party/bytetrack/,目录,third_party,[条件] 实际使用的跟踪源码,按实际采用,设计项；本次未创建业务内容
+third_party/trajectory/,目录,third_party,[条件] 实际采用的轨迹库,按实际采用,设计项；本次未创建业务内容
+third_party/avatar_runtime/,目录,third_party,[条件] 渲染器依赖与原许可证,按实际采用,设计项；本次未创建业务内容
+third_party/omnivoice/,目录,third_party,[条件] 固定 TTS 源码或可核验取得方法,按实际采用,设计项；本次未创建业务内容
+third_party/licenses/,目录,third_party,代码、模型、字体、素材等原许可,按最终实现整理,设计项；本次未创建业务内容

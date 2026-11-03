@@ -1,0 +1,10 @@
+--- aura/tools/barge_in_recording.py
++++ aura/tools/barge_in_recording.py
+@@ -10,6 +10,7 @@
+             from tools.barge_in_capture import BargeInCapture
+             from board.runtime.audio.barge_verify import InterruptionVerifier
+             barge_capture_factory=lambda:BargeInCapture(self.controller.output,
++                audio_frontend=self.audio_frontend,
+                 verifier=InterruptionVerifier(lambda:dict(self.transcriber.config),self.attention_gate.boot_id),
+                 spoken_text=lambda:getattr(self.controller,'reply',''))
+         self.barge_factory=barge_capture_factory;self.barge_capture=None

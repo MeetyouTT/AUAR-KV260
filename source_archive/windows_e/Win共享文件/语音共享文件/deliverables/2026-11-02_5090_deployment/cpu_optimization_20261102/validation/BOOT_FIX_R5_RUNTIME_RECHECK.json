@@ -1,0 +1,245 @@
+{
+  "schema": "aura-boot-fix-r5-runtime-recheck-1",
+  "status": "B01_STILL_BLOCKING_HISTORY_RUNTIME_PATHS_STATIC_REVIEW_NO_ADDITIONAL_BLOCKER",
+  "reviewed_snapshot": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\boot_review_inputs\\observed_revision5",
+  "source_sha256": {
+    "boot_recovery.py": "36970f82a694da89c42189f315047b8e9a1f8f877b5ffdc15b71543c376c8c0b",
+    "recovery_rules.py": "55bfc4db498be172beb040605dcae351c6f972e0df1371cecb48b7d1034ed268",
+    "original_history_gate.py": "735b0fb2f9bf696765c781f8f8573e8a368dacf916c58f5b0e556d1cde0e16d8",
+    "systemd/aura-camera-ui.service.d/90-aura-boot-recovery.conf": "570557a58250dfbd76f197681e9a75450833942e875234aa311316a0facda317",
+    "systemd/aura-avatar-ui.service.d/90-aura-boot-recovery.conf": "f8de5dd60bc6ab9c9062050d1ec40c38da337faacb75977559bc13ba6b278cb0",
+    "systemd/aura-boot-ready.service": "c5bdc5ddb67a680ef088c04f173fcf7bada0546a765f598d42e7c4b91a1a354a"
+  },
+  "scope": "Runtime call graph and pending queue only. Adapter API/field compatibility is reviewed independently by the GTK agent.",
+  "B01": {
+    "status": "STILL_OPEN",
+    "source_location": {
+      "file": "boot_recovery.py",
+      "quiet_lines": [
+        257,
+        306
+      ]
+    },
+    "r3_ast_equal": {
+      "quiet": true,
+      "daemon_owner": true,
+      "once": true,
+      "observe_job": true
+    },
+    "reused_evidence": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\validation\\BOOT_FIX_R3_RUNTIME_RECHECK.json",
+      "source_sha256": "e60d8f4ebf32f7ed738789d8e79a1e25d80881cb03fda90e5217880c3d70b9b7",
+      "test": "queued_original_idstop_without_live_process",
+      "recorded_accepted": true
+    },
+    "reexecuted": false,
+    "finding": "R5 quiet retains the exact R3 classifier. aura-boot-wide-<boot>-idstop.service with actual Python bench_identity_stop.py entry contains none of its loader keywords and remains accepted while queued with no process.",
+    "minimal_fix": "Explicitly classify every aura-boot-wide-* pending unit as relevant after the exact own-prepare exception and camera/GUI allowlist. Keep existing intent/InvocationID observation, never dispatch another action to bypass pending state. Add the one queued-original-idstop negative when the classifier changes."
+  },
+  "history_runtime_callgraph": {
+    "run_history_gate": {
+      "lines": [
+        350,
+        386
+      ],
+      "self_calls": []
+    },
+    "check_prestart_history": {
+      "lines": [
+        388,
+        398
+      ],
+      "self_calls": [
+        "run_history_gate"
+      ]
+    },
+    "history_bytes_unchanged": {
+      "lines": [
+        400,
+        406
+      ],
+      "self_calls": [
+        "pin"
+      ]
+    },
+    "verify_gate_history": {
+      "lines": [
+        408,
+        421
+      ],
+      "self_calls": [
+        "history_bytes_unchanged",
+        "pin"
+      ]
+    },
+    "accepted_live_history": {
+      "lines": [
+        423,
+        438
+      ],
+      "self_calls": [
+        "kernel_marker_path",
+        "run_history_gate",
+        "verify_gate_history"
+      ]
+    },
+    "prepare": {
+      "lines": [
+        515,
+        598
+      ],
+      "self_calls": [
+        "check_prestart_history",
+        "checkpoint_gate",
+        "daemon_owner",
+        "history_bytes_unchanged",
+        "once",
+        "original_release",
+        "prepared",
+        "quiet",
+        "source_snapshot"
+      ]
+    },
+    "camera_check": {
+      "lines": [
+        600,
+        620
+      ],
+      "self_calls": [
+        "check_prestart_history",
+        "checkpoint_gate",
+        "original_release",
+        "prepared",
+        "quiet",
+        "source_snapshot"
+      ]
+    },
+    "bind_camera": {
+      "lines": [
+        672,
+        752
+      ],
+      "self_calls": [
+        "accepted_live_history",
+        "camera_samples",
+        "check_camera_live",
+        "prepared",
+        "source_snapshot"
+      ]
+    },
+    "verify_gui": {
+      "lines": [
+        754,
+        806
+      ],
+      "self_calls": [
+        "accepted_live_history",
+        "camera_samples",
+        "check_camera_live",
+        "prepared",
+        "source_snapshot"
+      ]
+    }
+  },
+  "history_path_findings": [],
+  "history_path_assessment": [
+    {
+      "path": "prepare first execution",
+      "lines": [
+        515,
+        598
+      ],
+      "assessment": "checkpoint_gate binds current actual final bytes, predecessor and original boot route. check_prestart_history executes before any original DFX client. Each subsequent boundary compares actual checkpoint bytes to the original cp, repeats route gate and rehashes the exact request/result and full accepted archive/legacy byte pins."
+    },
+    {
+      "path": "prepare cached prepared branch",
+      "lines": [
+        518,
+        522
+      ],
+      "assessment": "Returns ALREADY_PREPARED without new DFX dispatch and does not claim a fresh final validation. It does not itself repeat history admission. This is not a camera-start bypass because the retained mandatory original camera ExecStartPre invokes camera_check on each normal start."
+    },
+    {
+      "path": "camera_check every original start",
+      "lines": [
+        600,
+        620
+      ],
+      "assessment": "Always reads actual fixed checkpoint, runs checkpoint_gate and check_prestart_history again, and stores that exact SHA/predecessor/history proof in current-camera-gate before the original Native entry. A failed helper exits prestart; no retry/forced substitute is added."
+    },
+    {
+      "path": "history request/result",
+      "lines": [
+        350,
+        386
+      ],
+      "assessment": "Request SHA covers route, current boot, actual final pin, source owner/boot/manifest and independently accepted history (plus genuine CPU expected pin for same boot). Isolated bridge runs the approved adapter. Result must match request SHA/route/boot/adapter/final/history and original-only/no-write/no-device flags before durable proof pins are returned."
+    },
+    {
+      "path": "cold predecessor vs same-boot resume",
+      "lines": [
+        388,
+        398
+      ],
+      "assessment": "Cold route calls original sealed-source and complete archive-chain APIs; same-boot route requires real normal-stop expected pin and original complete adapter main before consumption. No new stop/final/seed or approval boolean is fabricated by this runtime path."
+    },
+    {
+      "path": "bind and READY exact gate",
+      "lines": [
+        408,
+        438
+      ],
+      "assessment": "Both call verify_bootstrap_handoff and accepted_live_history. verify_gate_history binds pinned request/result to the gate exact final, original predecessor, boot and history, rereads the exact final bytes and all old archive/legacy pins. Mode is derived from real predecessor/current boot equality."
+    },
+    {
+      "path": "actual original consumption markers",
+      "lines": [
+        423,
+        438
+      ],
+      "assessment": "Same-boot route requires exact original .native-consumed-<gateSHA> marker bytes. New-kernel route requires original current-kernel marker schema/current boot/final SHA/archive path+SHA/captured mono and full running archive-chain validation. next_history_expected preserves old ordered rows and legacy anchor, extends only the actual new original edge, and is compared to active.history_expected in already-current bind and READY."
+    },
+    {
+      "path": "new binding and READY",
+      "lines": [
+        672,
+        806
+      ],
+      "assessment": "New bind persists accepted_history and its live proof in the CAS-protected active ledger. Already-current bind compares the existing ledger history instead of skipping history checks. READY independently repeats gate/actual marker/running history and ledger equality. Lifecycle and source guards remain around publication and final READY."
+    },
+    {
+      "path": "post-consumption semantic distinction",
+      "assessment": "Running bind/READY uses the pinned prestart final proof, actual original consumption marker and archive-only chain call. It does not rerun an unconsumed same-boot reader after the original camera has correctly consumed that final. The running-chain header is only traversal context, not persisted as a checkpoint and not passed to restore/sealed-source APIs."
+    },
+    {
+      "path": "original final pointer lifetime",
+      "assessment": "Original native_startup.shutdown is the reviewed writer of final checkpoint_output after workers/runners stop; it carries the protection_handoff history. Keeping the same original final bytes pinned while its successor is running is consistent with that source path."
+    }
+  ],
+  "pending_behavior": {
+    "once_observe_ast_equal_r3": true,
+    "assessment": "History failure/timeout occurs before any next client action and raises HOLD. Original once still retains durable intent/unit/InvocationID; pending or failed completion cannot cause resubmission. Explicit observe-job is no-submit. Existing queued original idstop remains the separate B01 classification blocker."
+  },
+  "deferred_to_adapter_review": [
+    "Exact CPU adapter function signatures and all request/result/auxiliary field compatibility",
+    "Cold/archive metadata validator coverage and sealed source policy",
+    "Real target Linux/systemd and original loader execution"
+  ],
+  "validation_scope": {
+    "only_stable_r5_snapshot_read": true,
+    "moving_author_tree_used": false,
+    "r3_idstop_negative_reused_by_exact_ast": true,
+    "new_concrete_history_negative_found": false,
+    "new_tests_executed": false,
+    "full65_or_other_suites_reexecuted": false,
+    "board_ssh_http_systemctl_proc_models_real_libraries_media_or_databases_accessed": false,
+    "author_production_global_or_other_branch_written": false,
+    "cross_dialogue_messages": false
+  },
+  "next_minimal_work": [
+    "Close B01 with explicit aura-boot-wide-* queued classification and verify only the changed small negative/control.",
+    "Combine this call-graph result with the independent adapter compatibility verdict before declaring an integrated candidate ready.",
+    "Keep fresh maintenance handoff, actual source/owner/unit/Job metadata and original history/consumption evidence as later Linux gates. No cold-boot acceptance produced here.",
+    "Preserve user-accepted smooth axis behavior and canceled face-voice association; no direction tuning/reference/center/follow or repeated mechanical acceptance is requested."
+  ]
+}

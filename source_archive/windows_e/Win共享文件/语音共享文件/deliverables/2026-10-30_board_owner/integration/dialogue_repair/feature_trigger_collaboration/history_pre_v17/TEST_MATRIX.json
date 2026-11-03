@@ -1,0 +1,640 @@
+{
+  "schema": "aura.feature-trigger-test-matrix.v3",
+  "status": "FROZEN_V3_NOT_DEPLOYED",
+  "latest_candidate": "candidate_v3",
+  "do_not_integrate_v1": true,
+  "baseline_startup_sha256": "bf6cdd70768ea5fac4e5be874a387f444c0834d67db5e7a2a744671d9019d63c",
+  "actual_architecture": "自然语言请求由板端确定路由和执行，真实结果直接回执或按授权进入模型；没有LLM function calling协议。",
+  "source_executor_binding": "ProductionGuiBoardBusiness -> bind_runtime_pair -> tools.yuki_jobs_candidate._route",
+  "local_receipt": {
+    "v2_historical_regression_passed": 265,
+    "v3_related_passed": 39,
+    "independent_unchanged_cases_replayed_passed": 3,
+    "evidence_levels": "All candidate tests are code_or_fake; real4model cases remain2strict/1qualified/1fail, not feature execution."
+  },
+  "evidence_levels": [
+    "real_verified",
+    "code_or_fake_verified",
+    "human_pending"
+  ],
+  "model_grounding": {
+    "status": "root_actual_partial_failure",
+    "script": "public_board_probe_v2/worker.py",
+    "pin": "public_board_probe_v2/STAGE_BUNDLE.json",
+    "no_feature_chat_inference": true,
+    "function_calling_verified": false,
+    "prior_attempt": {
+      "evidence": "PUBLIC_MODEL_GROUNDING.json",
+      "status": "transport_peer_denied_from_windows",
+      "not_model_or_feature_generation_failure": true
+    },
+    "focused_fake_transport_tests": {
+      "passed": 2,
+      "evidence": "public_board_probe_v2/TESTS.xml"
+    },
+    "actual_public_evidence": "PUBLIC_BOARD_GROUNDING_ACTUAL_1793455702380023100.json",
+    "root_manual_review": "ROOT_REVIEW.json",
+    "completed_model_requests": 4,
+    "strict_pass": 2,
+    "qualified": 1,
+    "failed": 1,
+    "route_comparison": [
+      "PAIRED_ROUTE_BASELINE.json",
+      "PAIRED_ROUTE_V1.json",
+      "PAIRED_ROUTE_V2.json"
+    ],
+    "note": "四题故意绕过板端功能路由；不是4个真实能力PASS。v16的Q2已有声纹路由，冻结v1反而漏Q2；v2本地恢复只读路径，尚未部署或实机复验。"
+  },
+  "public_human_script": "真人联合验收脚本.txt",
+  "rows": [
+    {
+      "id": "V01",
+      "public_example": "你现在看到了什么 / 现在镜头前有几个人",
+      "actual_executor": "paired._route -> LocalVisualQueries -> VisualTimelineWorker.record_current_observation",
+      "expected_real_result": "只能回答新鲜稳定的人体目标总数；无有效观察时明确不能判断。",
+      "model_visibility": "板端直接形成有来源的回执并请求TTS；27B不参与该结果判断，也没有工具调用。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "同boot/相机源与新鲜度、稳定计数、原设备scope和来源依赖保持。",
+      "gap": null
+    },
+    {
+      "id": "V02",
+      "public_example": "镜头左边有几个人 / 我左边有几个人",
+      "actual_executor": "paired._route -> LocalVisualQueries",
+      "expected_real_result": "明确没有方位计数能力，不能把整幅总数当左边人数。",
+      "model_visibility": "板端直接形成有来源的回执并请求TTS；27B不参与该结果判断，也没有工具调用。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "not_required_for_this_boundary"
+      },
+      "boundary": "目前相机投影不提供方位字段；候选不会从总数推断位置。",
+      "gap": "候选已修正错误总数解释；方位功能本身未实现。"
+    },
+    {
+      "id": "V03",
+      "public_example": "你能看见我吗",
+      "actual_executor": "paired._route -> LocalVisualQueries",
+      "expected_real_result": "不能由人体目标数证明看见提问者本人；说明能力范围。",
+      "model_visibility": "板端直接形成有来源的回执并请求TTS；27B不参与该结果判断，也没有工具调用。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "not_required_for_this_boundary"
+      },
+      "boundary": "目标检测不是说话者关联或身份认证。",
+      "gap": null
+    },
+    {
+      "id": "V04",
+      "public_example": "我手里是什么颜色的杯子",
+      "actual_executor": "paired._route -> LocalVisualQueries",
+      "expected_real_result": "明确不能判断任意物品/颜色；不编造所见。",
+      "model_visibility": "板端直接形成有来源的回执并请求TTS；27B不参与该结果判断，也没有工具调用。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "not_required_for_this_boundary"
+      },
+      "boundary": "没有Qwen视觉模型；本查询只接人员计数，不泛化YOLO类别能力。",
+      "gap": null
+    },
+    {
+      "id": "V05",
+      "public_example": "刚才看到几个人 / 最近五分钟镜头有没有人",
+      "actual_executor": "LocalVisualQueries -> device history_with_status",
+      "expected_real_result": "按明确时间范围检索真实计数或摘要，并说明限量/跨界/细节不可还原。",
+      "model_visibility": "板端直接形成有来源的回执并请求TTS；27B不参与该结果判断，也没有工具调用。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "历史不成为当前画面；空结果不等于当时没人；不可递归把旧答复当观察。",
+      "gap": null
+    },
+    {
+      "id": "V06",
+      "public_example": "查询昨天的视觉记录",
+      "actual_executor": "LocalVisualQueries -> legacy_history + structured history",
+      "expected_real_result": "旧视觉记录单独标明历史；新计数和旧语义记录不混作当前事实。",
+      "model_visibility": "板端直接形成有来源的回执并请求TTS；27B不参与该结果判断，也没有工具调用。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "同device scope；不读取私人对话当摄像头事件。",
+      "gap": null
+    },
+    {
+      "id": "V07",
+      "public_example": "摄像头断线后现在有人吗",
+      "actual_executor": "VisualTimelineWorker.current_observation",
+      "expected_real_result": "失效/过期/数量变化尚未稳定时不能判断，不沿用上个计数。",
+      "model_visibility": "板端直接形成有来源的回执并请求TTS；27B不参与该结果判断，也没有工具调用。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "旧缓存、新相机代次、过期帧都不制造无人事件。",
+      "gap": null
+    },
+    {
+      "id": "I01",
+      "public_example": "我是谁呀 / 我登记过身份吗",
+      "actual_executor": "LocalIdentityReplies -> original face query/binding proofs",
+      "expected_real_result": "仅同一新鲜可用人脸结果可给镜头内匹配称呼；UNKNOWN不取图库最近姓名。",
+      "model_visibility": "仅在板端受控流程读取结果；不向27B发送模板、私人库、图库身份ID或授权令牌。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "人脸匹配不等于画外说话者身份；“没认出”不等于“未登记”。",
+      "gap": null
+    },
+    {
+      "id": "I02",
+      "public_example": "帮我登记身份，我叫测试甲",
+      "actual_executor": "LocalIdentityReplies -> VoiceEnrollment -> original identity command",
+      "expected_real_result": "先复述姓名并取得明确确认，之后原采样/独立验证与token提交。",
+      "model_visibility": "仅在板端受控流程读取结果；不向27B发送模板、私人库、图库身份ID或授权令牌。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "仅真实COMMITTED保存回执可播成功；不接受LLM文本当数据库回执。",
+      "gap": null
+    },
+    {
+      "id": "I03",
+      "public_example": "确认更新登记",
+      "actual_executor": "Original face enrollment FSM",
+      "expected_real_result": "原ID明确更新确认、图库修订和目标一致性均通过后才允许保存。",
+      "model_visibility": "仅在板端受控流程读取结果；不向27B发送模板、私人库、图库身份ID或授权令牌。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "不自动重登记、不降原阈值/间隔/独立帧要求。",
+      "gap": null
+    },
+    {
+      "id": "I04",
+      "public_example": "取消登记 / 无新鲜人脸 / 多人 / 超时",
+      "actual_executor": "Original face enrollment FSM",
+      "expected_real_result": "取消/失败/目标换代不得保存，失败可解释；原已提交人脸不能虚称回滚。",
+      "model_visibility": "仅在板端受控流程读取结果；不向27B发送模板、私人库、图库身份ID或授权令牌。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "保留采样时段/来源/同意/活体原有边界；本轮不声称新增防伪认证。",
+      "gap": null
+    },
+    {
+      "id": "S01",
+      "public_example": "声纹现在可用吗 / 我登记过声纹吗",
+      "actual_executor": "paired._route -> LocalIdentityReplies -> BoardSpeakerBusiness.turn",
+      "expected_real_result": "读真实本机库/校准状态；有记录但未标定时不宣称当前说话者已登记或已识别。",
+      "model_visibility": "仅在板端受控流程读取结果；不向27B发送模板、私人库、图库身份ID或授权令牌。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v3/TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "ready、存在记录、现场标定、确认身份是不同状态。",
+      "gap": null
+    },
+    {
+      "id": "S02",
+      "public_example": "听声音知道我是谁吗 / 你能通过声音认出我吗",
+      "actual_executor": "Original speaker/query/proof path",
+      "expected_real_result": "未标定直接说明不能可靠确认；候选/临时代号不能变成认证或个人权限。",
+      "model_visibility": "仅在板端受控流程读取结果；不向27B发送模板、私人库、图库身份ID或授权令牌。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v3/TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "原阈值、分差、连续distinct capture和有效期不变；face与voice不自动视为同一人。",
+      "gap": null
+    },
+    {
+      "id": "S03",
+      "public_example": "记住我的声音，我叫测试甲",
+      "actual_executor": "paired._route -> original three-utterance SpeakerDevice",
+      "expected_real_result": "真实FSM开始登记，三段不同PCM经原质量/一致性检查；此时仍未保存。",
+      "model_visibility": "仅在板端受控流程读取结果；不向27B发送模板、私人库、图库身份ID或授权令牌。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v3/TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "不能被普通记忆指令截走；无真实模板测试仅fake encoder/合成PCM。",
+      "gap": null
+    },
+    {
+      "id": "S04",
+      "public_example": "确认保存声纹",
+      "actual_executor": "SpeakerDevice -> original consent/CAS enroll",
+      "expected_real_result": "仅已有有效三段待确认会话才能保存；无待确认会话必须说明没有保存。",
+      "model_visibility": "仅在板端受控流程读取结果；不向27B发送模板、私人库、图库身份ID或授权令牌。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v3/TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "同意、库修订、重复/过近模板、超时/取消边界保持。",
+      "gap": null
+    },
+    {
+      "id": "S05",
+      "public_example": "删除声纹，名字是测试甲 / 确认删除声纹",
+      "actual_executor": "SpeakerDevice -> original preview/confirm delete",
+      "expected_real_result": "先唯一名字预告并等待明确确认；取消保留模板，过期/无待确认不能虚报删除。",
+      "model_visibility": "仅在板端受控流程读取结果；不向27B发送模板、私人库、图库身份ID或授权令牌。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v3/TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "只操作原scope和CAS修订；本窗口从不操作真实库。",
+      "gap": null
+    },
+    {
+      "id": "S06",
+      "public_example": "帮我登记声纹 / 取消声纹登记",
+      "actual_executor": "Original SpeakerDevice controlled handler",
+      "expected_real_result": "缺姓名给原流程的明确用法，不虚称开始/保存；取消不保存新声纹。",
+      "model_visibility": "仅在板端受控流程读取结果；不向27B发送模板、私人库、图库身份ID或授权令牌。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v3/TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "没有名字/三段/确认不能制造成功。",
+      "gap": null
+    },
+    {
+      "id": "S07",
+      "public_example": "解释一下登记声纹是什么意思 / 不要识别我的声纹",
+      "actual_executor": "Narrow full-sentence intent policy",
+      "expected_real_result": "不进入登记/识别执行分支；普通模型也不得声称已有执行结果。",
+      "model_visibility": "没有工具结果，仅原978B设备诚实规则；实际27B公开诊断另列。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v3/TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "not_required_for_this_boundary"
+      },
+      "boundary": "引用、否定、假设和别人说的话不提供执行同意。",
+      "gap": null
+    },
+    {
+      "id": "M01",
+      "public_example": "记住：项目是海风 / 更正 / 忘记",
+      "actual_executor": "PairedMemoryCommands -> BoardMemoryCommands -> BoardMemoryStore",
+      "expected_real_result": "当前匿名会话明确事实按真实操作结果回答；保留原始输入和来源。",
+      "model_visibility": "当前有效明确事实/授权检索文本进入27B；无模板或授权令牌。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "not_required_for_this_boundary"
+      },
+      "boundary": "姓名陈述不是身份登记同意；个人范围仍要真实授权。",
+      "gap": null
+    },
+    {
+      "id": "M02",
+      "public_example": "我们昨天聊了什么",
+      "actual_executor": "paired._route -> trusted timeline query -> BoardContextBuilder",
+      "expected_real_result": "只有明确历史请求才检索，检索结果标来源/时间/不完整状态。",
+      "model_visibility": "本次明确查询的文本摘要与状态进入27B；当前视觉不自动混入。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "not_required_for_this_boundary"
+      },
+      "boundary": "不能用最近聊天补造过去、把空结果当事情未发生。",
+      "gap": null
+    },
+    {
+      "id": "M03",
+      "public_example": "删除昨天的记录 / 确认删除",
+      "actual_executor": "paired._route -> history_delete_preview (not registered)",
+      "expected_real_result": "当前会失败关闭；没有真正日期预览/删除回执，不得说已删除。",
+      "model_visibility": "此路径未执行27B或删除；现役缺口。",
+      "code_or_fake": {
+        "status": "confirmed_missing_handler",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "not_accepted",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "not_required_for_this_boundary"
+      },
+      "boundary": "必须保留原范围/预览期限/明确确认，不能直接按日期DELETE。",
+      "gap": "候选未实现日期删除预览handler，待根单独集成并验收。"
+    },
+    {
+      "id": "D01",
+      "public_example": "帮我计算58乘3",
+      "actual_executor": "paired._route -> reasoning_dialogue (not registered)",
+      "expected_real_result": "当前命中特殊推理路由会失败关闭，不能作为已接通功能。",
+      "model_visibility": "此路径在27B请求前失败；普通聊天仍走既有模型。",
+      "code_or_fake": {
+        "status": "confirmed_missing_handler",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "not_accepted",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "not_required_for_this_boundary"
+      },
+      "boundary": "不能静默改模型/思考配置冒充完整推理通道。",
+      "gap": "候选未接native reasoning handler，根需按原模型预算另行核对。"
+    },
+    {
+      "id": "A01",
+      "public_example": "播放完成 / 取消 / 迟到ACK",
+      "actual_executor": "BoardDialogueJobs + original player receipt controller",
+      "expected_real_result": "只有完整归属/样本数/哈希/播放token匹配才记助手已播；取消/过期不回写。",
+      "model_visibility": "仅板端已确认历史可参与后续模型上下文。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "半双工与原8帧队列不变；合成ACK不等于扬声器听感。",
+      "gap": null
+    },
+    {
+      "id": "P01",
+      "public_example": "访问个人记忆",
+      "actual_executor": "LocalProfileSelections + live ProfileAccess grant checks",
+      "expected_real_result": "真实授权才能进入个人scope；撤销后阻止继续生成/播放/写入。",
+      "model_visibility": "仅在板端受控流程读取结果；不向27B发送模板、私人库、图库身份ID或授权令牌。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "not_required_for_this_boundary"
+      },
+      "boundary": "声纹候选、人脸匹配、姓名或LLM文本都不能签发个人grant。",
+      "gap": null
+    },
+    {
+      "id": "L01",
+      "public_example": "保持用户手动暂停",
+      "actual_executor": "Root v16 saved startup/observation + existing preference owner",
+      "expected_real_result": "用户PAUSED/mic=false保持；只有用户要求恢复后才开麦。",
+      "model_visibility": "这不是语言模型授权开关。",
+      "code_or_fake": {
+        "status": "root_saved_metadata_only",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "root_v16_saved_metadata_verified",
+        "evidence": "../paraformer_small_validation/v16_evidence/observation.json",
+        "limitation": "Saved snapshot only; feature chat did not query the live device."
+      },
+      "human_acceptance": {
+        "status": "not_required_for_this_boundary"
+      },
+      "boundary": "本窗口未重启、发布、开麦、播放或改生产参数。",
+      "gap": null
+    },
+    {
+      "id": "H01",
+      "public_example": "跟随/机械运动",
+      "actual_executor": "Existing board hardware protection",
+      "expected_real_result": "跟随false、FAULT/null保持；本轮未测运动。",
+      "model_visibility": "模型没有运动执行权。",
+      "code_or_fake": {
+        "status": "not_executed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "not_accepted",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "不改boot/FDT/固件/VART/绑定，不绕过保护。",
+      "gap": null
+    },
+    {
+      "id": "R01",
+      "public_example": "16fps与长稳/真人听音",
+      "actual_executor": "Root-only physical acceptance",
+      "expected_real_result": "本轮功能候选没有提供新物理帧率/听音/长稳通过证据。",
+      "model_visibility": "不涉及模型功能执行。",
+      "code_or_fake": {
+        "status": "not_executed",
+        "evidence": "candidate_v2/REGRESSION_TESTS.xml"
+      },
+      "real_execution": {
+        "status": "not_accepted",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "原未通过门槛保留，不拿短计数/合成PCM冒充。",
+      "gap": null
+    },
+    {
+      "id": "S08",
+      "public_example": "你已经帮我把声纹登记保存成功了吗？",
+      "actual_executor": "paired read-only priority -> LocalIdentityReplies status bypass -> original SpeakerDevice state/actual-commit metadata",
+      "expected_real_result": "登记前无回执仅说不能判断；登记中只读进度不增加样本；实际事务后同actor/版本/60s内回执才可确认本会话已提交。",
+      "model_visibility": "真实状态直接TTS，不让27B猜FSM、不编设置确认流程。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": "candidate_v3/TESTS.xml"
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test",
+        "evidence": null
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "过期/重启/库改动/取消新尝试/失败事务不留有效成功回执；不能推断未保存，不授予身份或个人权限。",
+      "gap": null
+    },
+    {
+      "id": "S09",
+      "public_example": "同rid状态重试 / 61秒 / speaker库修订改变 / 保存提交后取消",
+      "actual_executor": "SpeakerDevice live-status cache policy + BoardSpeakerBusiness sole worker/adoption/metadata cleanup",
+      "expected_real_result": "重查当下TTL/revision/actor；取消/错误清临时回执，已提交身份行保留，不声称未保存。",
+      "model_visibility": "板端只读回执直接TTS，无27B猜测。",
+      "code_or_fake": {
+        "status": "passed",
+        "evidence": [
+          "candidate_v3/TESTS.xml",
+          "candidate_v3/INDEPENDENT_REPLAY.xml"
+        ]
+      },
+      "real_execution": {
+        "status": "pending_root_coordinated_test"
+      },
+      "human_acceptance": {
+        "status": "pending"
+      },
+      "boundary": "写操作原幂等与fingerprint拒绝保持；无模板/权限/模型/播放或驱动变更。"
+    }
+  ],
+  "independent_review": {
+    "status": "v2_failures_reproduced_v3_local_fix_pending_root_review",
+    "original_negative_evidence_preserved": true,
+    "v3_original_cases_replayed": "candidate_v3/INDEPENDENT_REPLAY.json",
+    "production_acceptance": false
+  },
+  "do_not_integrate_v2": true
+}

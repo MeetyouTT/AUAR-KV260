@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="5" time="0.457" timestamp="2026-10-31T03:20:08.688113-07:00" hostname="zhenghang"><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.v14_validation_candidate.tests.test_structured_camera" name="test_valid_structured_camera_compaction_needs_no_model[0]" time="0.050"><failure message="AssertionError: Known typed camera events must not dispatch inference">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/memory_health_collaboration/v14_validation_candidate/test_baseline/tmp/test_valid_structured_camera_c0')
+count = 0
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000204E84A0410&gt;
+
+    @pytest.mark.parametrize('count', [0,1,42,1000])
+    def test_valid_structured_camera_compaction_needs_no_model(tmp_path, count, monkeypatch):
+        store, now = fixture(tmp_path, count)
+        summary = BoardSummaryClient(NoModel(), board_boot_id='boot')
+        calls = []
+        original = policy.validate_compaction_text
+        def check(text, sources):
+            calls.append(True)
+            return original(text, sources)
+        monkeypatch.setattr(policy, 'validate_compaction_text', check)
+        worker = BoardMemoryWorker(store, summary, idle=lambda: True)
+&gt;       assert worker.step()
+               ^^^^^^^^^^^^^
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\tests\test_structured_camera.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\common\board_memory.py:1547: in step
+    candidate = self.summarize(prepared, cancelled)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\board\runtime\board_memory_policy.py:424: in __call__
+    result = self._summarize(prepared, cancelled)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\board\runtime\board_memory_policy.py:451: in _summarize
+    semantic = self._infer(sources, cancelled, deadline=deadline, keepalive=keepalive)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\board\runtime\board_memory_policy.py:299: in _infer
+    result = self.client.request('llm', payload, deadline=call_deadline,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;test_structured_camera.NoModel object at 0x00000204E84A0170&gt;
+args = ('llm', {'protocol_version': 1, 'request_id': '0e9f3de3e45a42f2a75295c98888f3d1', 'board_boot_id': 'boot', 'session_id': 'memory-worker', ...})
+kwargs = {'deadline': 27800.125, 'cancelled': &lt;function BoardMemoryWorker.step.&lt;locals&gt;.cancelled at 0x00000204E9F31800&gt;}
+
+    def request(self, *args, **kwargs):
+&gt;       raise AssertionError('Known typed camera events must not dispatch inference')
+E       AssertionError: Known typed camera events must not dispatch inference
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\tests\test_structured_camera.py:19: AssertionError</failure></testcase><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.v14_validation_candidate.tests.test_structured_camera" name="test_valid_structured_camera_compaction_needs_no_model[1]" time="0.051"><failure message="AssertionError: Known typed camera events must not dispatch inference">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/memory_health_collaboration/v14_validation_candidate/test_baseline/tmp/test_valid_structured_camera_c1')
+count = 1
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000204E849E3C0&gt;
+
+    @pytest.mark.parametrize('count', [0,1,42,1000])
+    def test_valid_structured_camera_compaction_needs_no_model(tmp_path, count, monkeypatch):
+        store, now = fixture(tmp_path, count)
+        summary = BoardSummaryClient(NoModel(), board_boot_id='boot')
+        calls = []
+        original = policy.validate_compaction_text
+        def check(text, sources):
+            calls.append(True)
+            return original(text, sources)
+        monkeypatch.setattr(policy, 'validate_compaction_text', check)
+        worker = BoardMemoryWorker(store, summary, idle=lambda: True)
+&gt;       assert worker.step()
+               ^^^^^^^^^^^^^
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\tests\test_structured_camera.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\common\board_memory.py:1547: in step
+    candidate = self.summarize(prepared, cancelled)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\board\runtime\board_memory_policy.py:424: in __call__
+    result = self._summarize(prepared, cancelled)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\board\runtime\board_memory_policy.py:451: in _summarize
+    semantic = self._infer(sources, cancelled, deadline=deadline, keepalive=keepalive)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\board\runtime\board_memory_policy.py:299: in _infer
+    result = self.client.request('llm', payload, deadline=call_deadline,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;test_structured_camera.NoModel object at 0x00000204E8485EB0&gt;
+args = ('llm', {'protocol_version': 1, 'request_id': 'c7f89231de2f49b0968742e5ebb25b33', 'board_boot_id': 'boot', 'session_id': 'memory-worker', ...})
+kwargs = {'deadline': 27800.25, 'cancelled': &lt;function BoardMemoryWorker.step.&lt;locals&gt;.cancelled at 0x00000204E9FFD440&gt;}
+
+    def request(self, *args, **kwargs):
+&gt;       raise AssertionError('Known typed camera events must not dispatch inference')
+E       AssertionError: Known typed camera events must not dispatch inference
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\tests\test_structured_camera.py:19: AssertionError</failure></testcase><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.v14_validation_candidate.tests.test_structured_camera" name="test_valid_structured_camera_compaction_needs_no_model[42]" time="0.051"><failure message="AssertionError: Known typed camera events must not dispatch inference">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/memory_health_collaboration/v14_validation_candidate/test_baseline/tmp/test_valid_structured_camera_c2')
+count = 42
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000204E7B7C230&gt;
+
+    @pytest.mark.parametrize('count', [0,1,42,1000])
+    def test_valid_structured_camera_compaction_needs_no_model(tmp_path, count, monkeypatch):
+        store, now = fixture(tmp_path, count)
+        summary = BoardSummaryClient(NoModel(), board_boot_id='boot')
+        calls = []
+        original = policy.validate_compaction_text
+        def check(text, sources):
+            calls.append(True)
+            return original(text, sources)
+        monkeypatch.setattr(policy, 'validate_compaction_text', check)
+        worker = BoardMemoryWorker(store, summary, idle=lambda: True)
+&gt;       assert worker.step()
+               ^^^^^^^^^^^^^
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\tests\test_structured_camera.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\common\board_memory.py:1547: in step
+    candidate = self.summarize(prepared, cancelled)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\board\runtime\board_memory_policy.py:424: in __call__
+    result = self._summarize(prepared, cancelled)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\board\runtime\board_memory_policy.py:451: in _summarize
+    semantic = self._infer(sources, cancelled, deadline=deadline, keepalive=keepalive)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\board\runtime\board_memory_policy.py:299: in _infer
+    result = self.client.request('llm', payload, deadline=call_deadline,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;test_structured_camera.NoModel object at 0x00000204E7B7E300&gt;
+args = ('llm', {'protocol_version': 1, 'request_id': '81713216aec24e29b84c1f34263c2b96', 'board_boot_id': 'boot', 'session_id': 'memory-worker', ...})
+kwargs = {'deadline': 27800.343, 'cancelled': &lt;function BoardMemoryWorker.step.&lt;locals&gt;.cancelled at 0x00000204E9FFCFE0&gt;}
+
+    def request(self, *args, **kwargs):
+&gt;       raise AssertionError('Known typed camera events must not dispatch inference')
+E       AssertionError: Known typed camera events must not dispatch inference
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\tests\test_structured_camera.py:19: AssertionError</failure></testcase><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.v14_validation_candidate.tests.test_structured_camera" name="test_valid_structured_camera_compaction_needs_no_model[1000]" time="0.036"><failure message="AssertionError: Known typed camera events must not dispatch inference">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/memory_health_collaboration/v14_validation_candidate/test_baseline/tmp/test_valid_structured_camera_c3')
+count = 1000
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000204E7B7F980&gt;
+
+    @pytest.mark.parametrize('count', [0,1,42,1000])
+    def test_valid_structured_camera_compaction_needs_no_model(tmp_path, count, monkeypatch):
+        store, now = fixture(tmp_path, count)
+        summary = BoardSummaryClient(NoModel(), board_boot_id='boot')
+        calls = []
+        original = policy.validate_compaction_text
+        def check(text, sources):
+            calls.append(True)
+            return original(text, sources)
+        monkeypatch.setattr(policy, 'validate_compaction_text', check)
+        worker = BoardMemoryWorker(store, summary, idle=lambda: True)
+&gt;       assert worker.step()
+               ^^^^^^^^^^^^^
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\tests\test_structured_camera.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\common\board_memory.py:1547: in step
+    candidate = self.summarize(prepared, cancelled)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\board\runtime\board_memory_policy.py:424: in __call__
+    result = self._summarize(prepared, cancelled)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\board\runtime\board_memory_policy.py:451: in _summarize
+    semantic = self._infer(sources, cancelled, deadline=deadline, keepalive=keepalive)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\before\board\runtime\board_memory_policy.py:299: in _infer
+    result = self.client.request('llm', payload, deadline=call_deadline,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;test_structured_camera.NoModel object at 0x00000204E7B7FC20&gt;
+args = ('llm', {'protocol_version': 1, 'request_id': 'f1a5fd7b8cff4f00988a11725eb00ba6', 'board_boot_id': 'boot', 'session_id': 'memory-worker', ...})
+kwargs = {'deadline': 27800.406, 'cancelled': &lt;function BoardMemoryWorker.step.&lt;locals&gt;.cancelled at 0x00000204E9FFD8A0&gt;}
+
+    def request(self, *args, **kwargs):
+&gt;       raise AssertionError('Known typed camera events must not dispatch inference')
+E       AssertionError: Known typed camera events must not dispatch inference
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\v14_validation_candidate\tests\test_structured_camera.py:19: AssertionError</failure></testcase><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.v14_validation_candidate.tests.test_structured_camera" name="test_known_camera_wording_can_fail_old_free_form_summary" time="0.000" /></testsuite></testsuites>

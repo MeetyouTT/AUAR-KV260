@@ -1,0 +1,106 @@
+{
+  "status": "LOCAL_METADATA_CANDIDATE_FROZEN_NOT_DEPLOYED",
+  "files": {
+    "board/runtime/audio/board_dialogue_jobs.py": {
+      "before_sha256": "43708b7fcbf72b11d7a37b01ae090c2cdb3e621b5f334151601206735a34a1fc",
+      "after_sha256": "580b2cf796275104cf15f2295afa2de29f82f32eabdd783a4b3aff858840a464",
+      "before_bytes": 49630,
+      "after_bytes": 54413
+    },
+    "board/runtime/board_business.py": {
+      "before_sha256": "ea4f4565f558e5e2b6a347360f362e7810dd5792b2d2fe7af3a26389e26514d7",
+      "after_sha256": "d034227118063dc4dbfb69f4bc735000980bd166e91262b4953f0db4b1baf5cc",
+      "before_bytes": 48404,
+      "after_bytes": 52237
+    }
+  },
+  "validation": {
+    "CANDIDATE_TRACE_TESTS": {
+      "tests": 19,
+      "passed": 19,
+      "failed": 0,
+      "skipped": 0,
+      "failure_names": [],
+      "sha256": "879463d6cc9fcd6518855deffec3ae4ef855855e0308ebadb956ea32b577afb0"
+    },
+    "BASELINE_TRACE_TESTS": {
+      "tests": 19,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 13,
+      "failure_names": [],
+      "sha256": "a7d3332d4572f583784c6dbd7f09d4a337a3cfd623636df32fd288cad4faa315"
+    },
+    "CANDIDATE_ORIGINAL_REGRESSION": {
+      "tests": 60,
+      "passed": 56,
+      "failed": 4,
+      "skipped": 0,
+      "failure_names": [
+        "test_board_dialogue_jobs::test_missing_sensitive_board_handlers_never_fall_back_to_model[\\u897f\\u84dd\\uff0c\\u8bb0\\u4f4f\\u6211-identity_enrollment]",
+        "test_board_dialogue_jobs::test_explicit_memory_precedes_reasoning_and_retains_raw_alias",
+        "test_board_dialogue_jobs::test_wake_alias_and_wake_only_follow_existing_audio_gate",
+        "test_board_dialogue_jobs::test_real_board_store_memory_and_history_flow_without_legacy_services"
+      ],
+      "sha256": "08351987cd5d05c58fab3547d128159cd6160bcd466520192e782ccafbae7c0b"
+    },
+    "BASELINE_ORIGINAL_REGRESSION": {
+      "tests": 60,
+      "passed": 56,
+      "failed": 4,
+      "skipped": 0,
+      "failure_names": [
+        "test_board_dialogue_jobs::test_missing_sensitive_board_handlers_never_fall_back_to_model[\\u897f\\u84dd\\uff0c\\u8bb0\\u4f4f\\u6211-identity_enrollment]",
+        "test_board_dialogue_jobs::test_explicit_memory_precedes_reasoning_and_retains_raw_alias",
+        "test_board_dialogue_jobs::test_wake_alias_and_wake_only_follow_existing_audio_gate",
+        "test_board_dialogue_jobs::test_real_board_store_memory_and_history_flow_without_legacy_services"
+      ],
+      "sha256": "e13b2210ac158589c9bde6c7bbbaa63cc0aae4a96de46167c943e7ca8d408c17"
+    }
+  },
+  "diff_sha256": "16c1b83e860a7557417d0e150b8353f3f32b844cef8347a69d1754808e118e4e",
+  "public_projection": [
+    "board_business.dialogue.last_voice_route.entry_trace",
+    "board_business.dialogue.voice_enrollment.entry_trace"
+  ],
+  "keywords": {
+    "has_register": "登记",
+    "has_voiceprint": "声纹",
+    "has_voice": "声音",
+    "has_warming": "升温",
+    "has_face": "人脸",
+    "has_my_name": "我叫",
+    "has_level": "等级",
+    "has_i_want": "我要",
+    "has_i_would_like": "我想",
+    "has_a_bit": "一下",
+    "has_voice_word": "声文",
+    "has_identity": "身份",
+    "has_name_word": "名字"
+  },
+  "semantics": [
+    "Code-constant flags inspect the actual function object imported by each route/handler; they are observations, not authorization or disk hash claims",
+    "parser_code_known=false means no parser code was observed in this trace, including no-speech paths that never route",
+    "enrollment_checked=false means original short circuit did not call enrollment state; false active alone is not an inactive proof",
+    "speaker_state_known/present/active read only original current-actor RAM membership and until; state() is not called, no session is expired or removed",
+    "ASR characters are exact for the existing <=4096 bound, with 4097 a saturated invalid-length marker",
+    "Business turn count is per handler invocation, capped at8; no transcript/IDs/PCM/exception message is persisted",
+    "An explicit reset retains last fixed trace with reset_since_trace=true; the next handler gets a new trace object",
+    "Jobs begin each executed capture with a fresh trace; old-generation completion cannot overwrite a newer processed generation",
+    "last_voice_route is last processed metadata and intentionally remains available while listener rearms; it is not a current authorization claim"
+  ],
+  "unchanged": [
+    "all original parser/grammar/standalone epochs and route decisions",
+    "all BoardBusinessRuntime methods including actual AAC initialize_clock",
+    "speaker/face sampler, gallery reads, quality thresholds, confirmation/save, owner/scope/deadline checks",
+    "ASR c514, original NoSpeech behavior, original TTS/LLM parameters, player/ACK and production service wiring"
+  ],
+  "limitations": [
+    "No live incident transcript or captured voice was accessed; grammar mismatch remains a hypothesis until fixed metadata is observed",
+    "Synthetic recognizer/store/PCM/provider fixtures only; tests do not claim hardware or model accuracy",
+    "Original60 do not all pass: both versions retain the same4 old alias/intent fixture failures",
+    "The6 baseline behavior tests pass;13 new metadata-only tests intentionally skip on baseline without projection",
+    "No UI/service/device action or SSH/GET/model/private-store access occurred in this task"
+  ],
+  "root_merge": "Root only: fresh CAS ea4f/43708 actual sources and preserve latest startup/UI/other modules; update only those two pins and normal root-managed GUI lifecycle."
+}

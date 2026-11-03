@@ -1,0 +1,74 @@
+{
+  "status": "LOCAL_STEPWISE_EXECUTOR_FIXTURE_VERIFIED_PARENT_REVIEW_REQUIRED_BEFORE_HARDWARE",
+  "saved_utc": "2026-10-30T23:53:43.015564+00:00",
+  "files": [
+    {
+      "path": "serial_trial.py",
+      "sha256": "f9008dfc31a7507e71c1b09f09a71436bb8bcd428b9987487ae6080c43a9b8ac",
+      "bytes": 42922
+    },
+    {
+      "path": "test_serial_trial.py",
+      "sha256": "b6457bf8656ac633a6ba66b2a00616e99daf856fe71f1bc4dec9a966508bf1cd",
+      "bytes": 21217
+    },
+    {
+      "path": "executor_combined_regression.xml",
+      "sha256": "f433ac29a656374b609a655be83c1ed500c612ed0e565c4a31716df10c4365ff",
+      "bytes": 13185
+    }
+  ],
+  "candidate_unchanged_manifest_sha256": "b697628ac2588881628e809e207a8bbc5e88f9d0ab40a433749e1d875aa38ccd",
+  "tests": {
+    "tests": "66",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.296"
+  },
+  "python38_syntax_verified": true,
+  "actual_systemd_or_hardware_actions_executed_by_this_agent": false,
+  "native_or_model_runner_loaded_by_this_agent": false,
+  "scope": "New standalone executor only; protected r17/candidate2 source and original guards untouched. Parent stages/reviews/executes through existing root SSH wrapper.",
+  "prepare_command": "python3 -B <private-executor>/serial_trial.py prepare --journal <private0700-trial-dir>/state.json --candidate-dir <private0700-candidate-dir> --manifest-sha256 b697628ac2588881628e809e207a8bbc5e88f9d0ab40a433749e1d875aa38ccd --readback /home/root/aura-board-owner-candidate-20261030/private-pin-8100a7fd-20261030/face_gallery_readback.local.json --readback-sha256 <exact current private file SHA> --expected-boot 8100a7fd-0c6a-46c4-82b8-f874988a1521 --expected-pid <reobserved current PID> --expected-birth <reobserved proc stat ticks>",
+  "other_action_command": "python3 -B <private-executor>/serial_trial.py <action> --journal <same private path>/state.json --wait-seconds 20",
+  "ordered_actions": [
+    "prepare",
+    "stop-baseline",
+    "start-candidate",
+    "parent bounded paired CPU/frontend measurements",
+    "stop-candidate",
+    "restore",
+    "finalize"
+  ],
+  "additional_actions": {
+    "status": "Whitelisted durable journal summary only; it is not a fresh hardware readiness claim.",
+    "stop-candidate": "Also allowed during a partial STARTING_CANDIDATE, with exact observed new owner and safe normal close.",
+    "stop-restored": "Also allowed during partial RESTORING; only a newly written exact final checkpoint permits explicit restoration again."
+  },
+  "next_action_gates": [
+    "Prepare must return GUARDED, exact baseline PID/birth/cmdline/readback/source/model/unit pins verified; it creates only its uniquely named runtime guard drop-in. It never stops or starts an owner.",
+    "STOPPING and STARTING PENDING do not authorize the next phase. Repeating the same action observes the recorded intent and never blindly resends a start.",
+    "stop-baseline/candidate/restored requires effective Restart=no, SendSIGKILL=no, TimeoutStopUSec=infinity, KillSignal=SIGTERM, no ExecStop/ExecStopPost helper and unchanged unit/source hashes.",
+    "Only a confirmed-dead exact predecessor plus a fresh sealed current-boot private checkpoint with unchanged native unit/source/history and original load_business_checkpoint validation permits a start.",
+    "New owner validation requires exact argv/PID/birth/approved mapped library, generated runtime differing ONLY in inherited seed SHA, exclusive consumed marker, original counters/SFace floors, unchanged history, fresh face/person health and stable epoch/frame progress.",
+    "finalize rechecks the restored original owner and health before deleting only this script own drop-in, then restores original effective unit settings and rechecks owner again."
+  ],
+  "safety_and_recovery": [
+    "Private root-owned atomic fsync journal, per-journal nonblocking writer lock, global per-unit action lock, and refusal of another active trial drop-in.",
+    "No kill command, SIGKILL, native reset, marker removal, checkpoint byte overwrite/reseed or parallel service exists.",
+    "A start-client interruption is treated as ambiguous. If no owner appears, the executor holds STARTING and does not auto-retry; parent must audit rather than replay a consumed SHA.",
+    "UNSAFE_OWNER_RETAINED or unconfirmed native close keeps the sole owner and guards in place. No automatic rollback or replacement.",
+    "An interrupted own drop-in write/reload/finalization can resume only its exact journaled bytes. Other drop-in or unit changes refuse further actions.",
+    "Full source/model hashes run at action boundaries and before success, rather than on every health poll; fixed loopback metadata HTTP has an absolute 750 ms deadline.",
+    "A restored entry uses the candidate NEW checkpoint; the original oldboot checkpoint and previous consumed markers are never replayed or removed.",
+    "After any new owner, old private face readback remains stale and unchanged; explicit fresh PID-bound readback remains a separate root action."
+  ],
+  "not_implemented_here": [
+    "Performance acceptance and automatic candidate selection",
+    "New GUI/production business deployment",
+    "Automatic new private readback installation",
+    "Microphone/playback/follow/FPGA/firmware/VART changes"
+  ],
+  "fixture_limit": "66 combined cases are simulated OS/systemd/native metadata plus inherited candidate tests. Actual Linux properties/file ownership/health shapes and native handoff still require parent review and serial execution. Nonempty original ExecStop/ExecStopPost, a noncanonical unit path, different original command or missing SFace health counters deliberately refuse."
+}

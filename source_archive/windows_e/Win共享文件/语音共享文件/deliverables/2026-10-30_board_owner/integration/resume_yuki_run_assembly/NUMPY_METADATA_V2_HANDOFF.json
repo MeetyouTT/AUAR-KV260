@@ -1,0 +1,79 @@
+{
+  "status": "INDEPENDENT_STATIC_NUMPY_VENDOR_METADATA_FIX_FROZEN_NOT_EXECUTED_ON_BOARD",
+  "saved_utc": "2026-10-31T01:35:47.767552+00:00",
+  "files": [
+    {
+      "path": "assemble_v2.py",
+      "bytes": 29479,
+      "sha256": "15da79abf924632e492092a098144787acebcd3d1d31223e1001231224b33456"
+    },
+    {
+      "path": "build_numpy_metadata_fix.py",
+      "bytes": 5691,
+      "sha256": "ca4ce382be62cb0634264dfb821aefc15ecfef897ae2852170ed0f2955e4252d"
+    },
+    {
+      "path": "test_numpy_metadata_fix.py",
+      "bytes": 4245,
+      "sha256": "c57783ff79234bdf0f8f948b2023ac9640822d02fa5252b94c85c7dde23cafbf"
+    },
+    {
+      "path": "test_assembly_v2.py",
+      "bytes": 15615,
+      "sha256": "067b6c45e5b4a96c56f0037ccdfcaacd96b004a9053a8f64bcb68f1770f838a3"
+    },
+    {
+      "path": "numpy_metadata_v2.patch",
+      "bytes": 5147,
+      "sha256": "f9174ac2b18f05858fcf4e2333ac209116a6b4d4cf3a4f7d12fc6fb8be5104b5"
+    },
+    {
+      "path": "numpy_v2_combined_tests.xml",
+      "bytes": 20160,
+      "sha256": "296b5a6feb11b14291859d844dc3746476f37ff5f31163e33265c5273fe77240"
+    }
+  ],
+  "preserved_original": {
+    "path": "assemble.py",
+    "bytes": 25941,
+    "sha256": "e7df025b3ae21ea0a82d16976bae5d767083aa424343cd1de32b817345c9324d"
+  },
+  "preserved_policy": {
+    "path": "assembly_policy.v2.final.json",
+    "bytes": 38520,
+    "sha256": "ffa2f3b1c063c3af51006c622d81684fdeb37cf19d8c7b0ac063325d0581f9ea"
+  },
+  "narrow_difference": "Add stdlib ast/email parser, replace only NumPy version regex with literal/known-vendor static metadata validation, attach its three public metadata SHA values to dependency evidence. Original assembler/source/model/config/stage behavior otherwise reconstructs byte-exact e7df.",
+  "reversible_original_source_proof": "build_numpy_metadata_fix.py strips its exact added helper/imports and reverses the two exact modified fragments, then requires recovered bytes == original e7df before creating the independent file.",
+  "root_cause": "Actual vendor version.py uses annotated version:str=vinfo[version] from _version.get_versions(), with no literal assignment. The original inspect correctly refused before staging.",
+  "static_vendor_authority": {
+    "/usr/lib/python3.9/site-packages/numpy/version.py": "f89c73ddd072eb0eb166095f2b8238bfb0a7baec6f1a63545e8e42ad55ba2314",
+    "/usr/lib/python3.9/site-packages/numpy/_version.py": "db1df0c97f67f72e474f2dbd77e4a2b049727c20e556fd1c24e988d41dbf3841",
+    "/usr/lib/python3.9/site-packages/numpy-1.21.2-py3.9.egg-info/PKG-INFO": "c29a04ebcd5571a84b995ceb79ab86f89bde0f8a0b5413c81c357ab72ed15352"
+  },
+  "requirements": [
+    "Expected version remains exactly1.21.2; other requested/observed versions including rc/local suffix refuse.",
+    "Vendor branch requires exact approved wrapper/source/egg SHA and original system root; AST accepts only importjson + version_json literal + exact get_versions returning json.loads(version_json).",
+    "The literal JSON version must equal1.21.2, dirty must befalse and errornull. Name/Version in the exact approved PKGINFO must uniquely equalnumpy/1.21.2.",
+    "No import/exec of NumPy/Versioneer, library load or package installation. All metadata remain current source/tree proof; sibling PKGINFO SHA is now explicitly included in the inspection evidence.",
+    "Literal metadata branch uses exact AST version and any full_version consistently; comments/dynamic expressions/duplicate assignments cannot satisfy the old regex by accident."
+  ],
+  "test_summary": "88 passed plus6 successful subtests; original33 assembly fixtures through the new standalone variant +36 frozen v2 contracts +19 new metadata cases.",
+  "junit_counts": {
+    "tests": "94",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "1.865"
+  },
+  "syntax": "CPython3.9 syntax checked",
+  "root_next": "Use assemble_v2.py in a new source-SHA transport directory, with the SAME ffa2 policy/sourcezip2c25/target/UTC arguments. Run default inspect first; review its new token before explicit stage. No prior target was created.",
+  "cli_arguments_changed": false,
+  "version_condition_loosened": false,
+  "new_numpy_installed": false,
+  "source_package_or_policy_changed": false,
+  "board_access_by_this_agent": false,
+  "gui_or_service_actions": false,
+  "model_or_native_imports_by_this_fix": false,
+  "remaining": "Root actual read-only inspect and stage; then separately controlled normal single-GUI trial. No hardware or performance acceptance is inferred from these fixtures."
+}

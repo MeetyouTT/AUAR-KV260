@@ -1,0 +1,590 @@
+{
+  "environment": "PC; actual StageCore and FSM; mock dialogue and scripted TTS; no microphone/board/real LLM",
+  "states": [
+    {
+      "state": "IDLE",
+      "label": "待机",
+      "asset": "idle_normal",
+      "frames": 39,
+      "fps": 24.0,
+      "burst": false,
+      "sample_indices": [
+        0,
+        5,
+        14,
+        31,
+        28
+      ],
+      "unique_frames_in_6s": 34,
+      "qt_label": "待机",
+      "load_ok": true
+    },
+    {
+      "state": "PRESENT",
+      "label": "有人",
+      "asset": "idle_present",
+      "frames": 39,
+      "fps": 24.0,
+      "burst": false,
+      "sample_indices": [
+        0,
+        5,
+        16,
+        17,
+        19
+      ],
+      "unique_frames_in_6s": 20,
+      "qt_label": "注视",
+      "load_ok": true
+    },
+    {
+      "state": "LISTENING",
+      "label": "聆听",
+      "asset": "idle_listening",
+      "frames": 39,
+      "fps": 24.0,
+      "burst": false,
+      "sample_indices": [
+        0,
+        5,
+        14,
+        18,
+        19
+      ],
+      "unique_frames_in_6s": 21,
+      "qt_label": "聆听",
+      "load_ok": true
+    },
+    {
+      "state": "THINKING",
+      "label": "思考",
+      "asset": "idle_thinking",
+      "frames": 39,
+      "fps": 24.0,
+      "burst": false,
+      "sample_indices": [
+        0,
+        5,
+        14,
+        13,
+        16
+      ],
+      "unique_frames_in_6s": 17,
+      "qt_label": "思考",
+      "load_ok": true
+    },
+    {
+      "state": "SPEAKING",
+      "label": "高情绪播报",
+      "asset": "talking_normal",
+      "frames": 39,
+      "fps": 24.0,
+      "burst": false,
+      "sample_indices": [
+        0,
+        5,
+        16,
+        16,
+        18
+      ],
+      "unique_frames_in_6s": 19,
+      "qt_label": "播报",
+      "load_ok": true
+    },
+    {
+      "state": "SPEAKING_NEUTRAL",
+      "label": "中性播报",
+      "asset": "talking_neutral",
+      "frames": 39,
+      "fps": 24.0,
+      "burst": false,
+      "sample_indices": [
+        0,
+        5,
+        16,
+        16,
+        18
+      ],
+      "unique_frames_in_6s": 19,
+      "qt_label": "待机",
+      "load_ok": true
+    },
+    {
+      "state": "SPEAKING_LOW",
+      "label": "低落播报",
+      "asset": "talking_low",
+      "frames": 39,
+      "fps": 24.0,
+      "burst": false,
+      "sample_indices": [
+        0,
+        5,
+        14,
+        31,
+        28
+      ],
+      "unique_frames_in_6s": 34,
+      "qt_label": "播报·低落",
+      "load_ok": true
+    },
+    {
+      "state": "AWAKE",
+      "label": "唤醒",
+      "asset": "emo_surprised",
+      "frames": 22,
+      "fps": 24.0,
+      "burst": true,
+      "sample_indices": [
+        0,
+        8,
+        21,
+        21,
+        21
+      ],
+      "unique_frames_in_6s": 22,
+      "qt_label": "待机",
+      "load_ok": true
+    },
+    {
+      "state": "PUZZLED",
+      "label": "困惑",
+      "asset": "emo_puzzled",
+      "frames": 39,
+      "fps": 24.0,
+      "burst": false,
+      "sample_indices": [
+        0,
+        5,
+        16,
+        17,
+        19
+      ],
+      "unique_frames_in_6s": 20,
+      "qt_label": "待机",
+      "load_ok": true
+    },
+    {
+      "state": "ACK_NOD",
+      "label": "点头",
+      "asset": "ack_nod",
+      "frames": 22,
+      "fps": 24.0,
+      "burst": true,
+      "sample_indices": [
+        0,
+        8,
+        21,
+        21,
+        21
+      ],
+      "unique_frames_in_6s": 22,
+      "qt_label": "待机",
+      "load_ok": true
+    },
+    {
+      "state": "DENY_SHAKE",
+      "label": "摇头",
+      "asset": "deny_shake",
+      "frames": 22,
+      "fps": 24.0,
+      "burst": true,
+      "sample_indices": [
+        0,
+        8,
+        21,
+        21,
+        21
+      ],
+      "unique_frames_in_6s": 22,
+      "qt_label": "待机",
+      "load_ok": true
+    },
+    {
+      "state": "CAMERA_LOST",
+      "label": "相机丢失",
+      "asset": "idle_offline",
+      "frames": 39,
+      "fps": 24.0,
+      "burst": false,
+      "sample_indices": [
+        0,
+        5,
+        14,
+        24,
+        22
+      ],
+      "unique_frames_in_6s": 25,
+      "qt_label": "摄像头丢失",
+      "load_ok": true
+    },
+    {
+      "state": "NETWORK_LOST",
+      "label": "断网",
+      "asset": "idle_offline",
+      "frames": 39,
+      "fps": 24.0,
+      "burst": false,
+      "sample_indices": [
+        0,
+        5,
+        14,
+        24,
+        22
+      ],
+      "unique_frames_in_6s": 25,
+      "qt_label": "本地模式",
+      "load_ok": true
+    },
+    {
+      "state": "CANCELLED",
+      "label": "取消",
+      "asset": "idle_normal",
+      "frames": 39,
+      "fps": 24.0,
+      "burst": false,
+      "sample_indices": [
+        0,
+        5,
+        14,
+        31,
+        28
+      ],
+      "unique_frames_in_6s": 34,
+      "qt_label": "已取消",
+      "load_ok": true
+    },
+    {
+      "state": "ERROR",
+      "label": "错误",
+      "asset": "emo_sad",
+      "frames": 39,
+      "fps": 24.0,
+      "burst": false,
+      "sample_indices": [
+        0,
+        5,
+        14,
+        31,
+        28
+      ],
+      "unique_frames_in_6s": 34,
+      "qt_label": "错误",
+      "load_ok": true
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "single_utterance_kws",
+      "trace": [
+        {
+          "event": "scene.person_enter",
+          "state": "PRESENT",
+          "asset": "idle_present",
+          "rejected": false
+        },
+        {
+          "event": "audio.kws_detected",
+          "state": "AWAKE",
+          "asset": "emo_surprised",
+          "rejected": false
+        },
+        {
+          "event": "audio.vad_end",
+          "state": "LISTENING",
+          "asset": "idle_listening",
+          "rejected": false
+        },
+        {
+          "event": "dialogue.response_received",
+          "state": "LISTENING",
+          "asset": "idle_listening",
+          "rejected": true
+        },
+        {
+          "event": "audio.playback_stopped",
+          "state": "LISTENING",
+          "asset": "idle_listening",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "name": "button_dialogue",
+      "trace": [
+        {
+          "event": "board.key_pressed",
+          "state": "LISTENING",
+          "asset": "idle_listening",
+          "rejected": false
+        },
+        {
+          "event": "audio.vad_end",
+          "state": "THINKING",
+          "asset": "idle_thinking",
+          "rejected": false
+        },
+        {
+          "event": "dialogue.response_received",
+          "state": "SPEAKING_NEUTRAL",
+          "asset": "talking_neutral",
+          "rejected": false
+        },
+        {
+          "event": "audio.playback_stopped",
+          "state": "IDLE",
+          "asset": "idle_normal",
+          "rejected": false
+        }
+      ]
+    },
+    {
+      "name": "high_emotion",
+      "trace": [
+        {
+          "event": "board.key_pressed",
+          "state": "LISTENING",
+          "asset": "idle_listening",
+          "rejected": false
+        },
+        {
+          "event": "audio.vad_end",
+          "state": "THINKING",
+          "asset": "idle_thinking",
+          "rejected": false
+        },
+        {
+          "event": "dialogue.response_received",
+          "state": "SPEAKING",
+          "asset": "talking_normal",
+          "rejected": false
+        },
+        {
+          "event": "audio.playback_stopped",
+          "state": "IDLE",
+          "asset": "idle_normal",
+          "rejected": false
+        }
+      ]
+    },
+    {
+      "name": "low_emotion",
+      "trace": [
+        {
+          "event": "board.key_pressed",
+          "state": "LISTENING",
+          "asset": "idle_listening",
+          "rejected": false
+        },
+        {
+          "event": "audio.vad_end",
+          "state": "THINKING",
+          "asset": "idle_thinking",
+          "rejected": false
+        },
+        {
+          "event": "dialogue.response_received",
+          "state": "SPEAKING_LOW",
+          "asset": "talking_low",
+          "rejected": false
+        },
+        {
+          "event": "audio.playback_stopped",
+          "state": "IDLE",
+          "asset": "idle_normal",
+          "rejected": false
+        }
+      ]
+    },
+    {
+      "name": "camera_recovery",
+      "trace": [
+        {
+          "event": "camera.lost",
+          "state": "CAMERA_LOST",
+          "asset": "idle_offline",
+          "rejected": false
+        },
+        {
+          "event": "camera.recovered",
+          "state": "IDLE",
+          "asset": "idle_normal",
+          "rejected": false
+        }
+      ]
+    },
+    {
+      "name": "network_recovery",
+      "trace": [
+        {
+          "event": "dialogue.network_lost",
+          "state": "NETWORK_LOST",
+          "asset": "idle_offline",
+          "rejected": false
+        },
+        {
+          "event": "dialogue.network_restored",
+          "state": "IDLE",
+          "asset": "idle_normal",
+          "rejected": false
+        }
+      ]
+    },
+    {
+      "name": "wake_completion",
+      "trace": [
+        {
+          "event": "audio.kws_detected",
+          "state": "AWAKE",
+          "asset": "emo_surprised",
+          "rejected": false
+        },
+        {
+          "event": "audio.playback_stopped",
+          "state": "AWAKE",
+          "asset": "emo_surprised",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "name": "cancel_with_presence",
+      "trace": [
+        {
+          "event": "scene.person_enter",
+          "state": "PRESENT",
+          "asset": "idle_present",
+          "rejected": false
+        },
+        {
+          "event": "board.key_pressed",
+          "state": "LISTENING",
+          "asset": "idle_listening",
+          "rejected": false
+        },
+        {
+          "event": "audio.vad_end",
+          "state": "THINKING",
+          "asset": "idle_thinking",
+          "rejected": false
+        },
+        {
+          "event": "audio.cancel_requested",
+          "state": "PRESENT",
+          "asset": "idle_present",
+          "rejected": false
+        }
+      ]
+    }
+  ],
+  "timed_mock_dialogue": {
+    "response": {
+      "protocol_version": "1.0",
+      "request_id": "runtime-check",
+      "scene_seq_used": 1,
+      "reply_text": "我看到画面左侧有一位来访者。",
+      "emotion": "friendly",
+      "avatar_action": "ack_nod",
+      "visual_claims": [
+        {
+          "fact": "person_on_left",
+          "source_track_id": 1
+        }
+      ]
+    },
+    "timeline": [
+      {
+        "seconds": 0.094,
+        "state": "ACK_NOD"
+      },
+      {
+        "seconds": 0.938,
+        "state": "SPEAKING_NEUTRAL"
+      },
+      {
+        "seconds": 3.328,
+        "state": "IDLE"
+      }
+    ],
+    "audio_backend": "scripted, no sound"
+  },
+  "repeatability": [
+    {
+      "state": "IDLE",
+      "entries": [
+        {
+          "phase": 0.4186293034631983,
+          "first": 0
+        },
+        {
+          "phase": 0.1126223549515837,
+          "first": 0
+        },
+        {
+          "phase": 0.056260940375590415,
+          "first": 0
+        }
+      ],
+      "same_30s_frame_sequence": false
+    },
+    {
+      "state": "LISTENING",
+      "entries": [
+        {
+          "phase": 0.3889250422691023,
+          "first": 0
+        },
+        {
+          "phase": 1.4776195464571118,
+          "first": 0
+        },
+        {
+          "phase": 1.273418246931962,
+          "first": 0
+        }
+      ],
+      "same_30s_frame_sequence": false
+    },
+    {
+      "state": "THINKING",
+      "entries": [
+        {
+          "phase": 1.1136959255168326,
+          "first": 0
+        },
+        {
+          "phase": 1.2579573929490016,
+          "first": 0
+        },
+        {
+          "phase": 0.6413810277967824,
+          "first": 0
+        }
+      ],
+      "same_30s_frame_sequence": false
+    },
+    {
+      "state": "SPEAKING_NEUTRAL",
+      "entries": [
+        {
+          "phase": 0.81910190445613,
+          "first": 0
+        },
+        {
+          "phase": 1.5711232984723429,
+          "first": 0
+        },
+        {
+          "phase": 1.0385090332915208,
+          "first": 0
+        }
+      ],
+      "same_30s_frame_sequence": false
+    }
+  ],
+  "source_fingerprints": {
+    "tools\\demo_stage.py": "e42d7d780906fb2efdd46c089158038070b639c25cd9f2ec7b664e03f7d08c95",
+    "board\\runtime\\fsm.py": "e23baa7011c3dc2409bad73709d0a5d7861217ec59b87ee383ef8611e0a71111",
+    "board\\interaction\\avatar_timing.py": "4f8bd81e036328d160dc921789162d27b67917afafe72db92482c5a9a4c0c841",
+    "board\\interaction\\avatar_assets.py": "78048f7e246fc228db755a66b3445aca9674aea968d61ab02adf0c8b8f9c7d65"
+  }
+}

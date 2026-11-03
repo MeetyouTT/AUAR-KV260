@@ -1,0 +1,314 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<style>html,body {margin:0;background:transparent} canvas {display:block}</style>
+<canvas id="canvas"></canvas>
+<script>
+window.ready = false;
+window.traceAtlasHashes=false;
+window.atlasHashPromises=[];
+window.requestAnimationFrame = () => 0; // fixed stepping only; no wall-clock loop
+window.mathTrace=[];
+window.fixedClockMs=null;
+if(window.fixedClockMs!==null) Date.now=()=>window.fixedClockMs;
+window.enableClockTrace=false;
+window.clockTrace=[];
+window.clockTraceTruncated=false;
+if(window.enableClockTrace) for(const [owner,name] of [[Date,"now"],[Date.prototype,"getTime"],[performance,"now"]]) {
+    const native=owner[name];
+    owner[name]=function(...args) {
+        const result=native.apply(this,args);
+        if(window.clockTrace.length<10000) window.clockTrace.push({step:window.authorStep||0,name,result,stack:new Error().stack});
+        else window.clockTraceTruncated=true;
+        return result;
+    };
+}
+window.enableRandomTrace=false;
+window.randomTrace=[];
+window.randomTraceTruncated=false;
+if(window.enableRandomTrace) {
+    const nativeRandom=Math.random;
+    Math.random=function() {
+        const result=nativeRandom();
+        if(window.randomTrace.length<10000)
+            window.randomTrace.push({step:window.authorStep||0,result,stack:new Error().stack});
+        else window.randomTraceTruncated=true;
+        return result;
+    };
+}
+window.enableMathTrace=false;
+if(window.enableMathTrace) for(const name of ['sqrt','sin','cos','tan','atan','atan2','asin','acos','pow']) {
+    const fn=Math[name];
+    Math[name]=function(...args) {
+        const result=fn(...args);
+        if(window.traceMath && (window.traceMathStep==null || window.authorStep===window.traceMathStep) && window.mathTrace.length<2000)
+            window.mathTrace.push({step:window.authorStep||0,name,args,result,stack:new Error().stack});
+        return result;
+    };
+}
+window.enableFloatStores=false;
+window.floatStores=[];
+window.floatStoresTruncated=false;
+window.floatReads=[];
+window.floatReadsTruncated=false;
+window.traceFloatReadIndices=new Set();
+window.floatReadLastValue=new Map();
+window.floatObservationSequence=0;
+if(window.enableFloatStores) {
+    const NativeFloat32Array=window.Float32Array;
+    // Observe full heap views only. Methods use the original typed-array receiver;
+    // subarrays passed to WebGL remain native views. No source core is inspected.
+    window.Float32Array=new Proxy(NativeFloat32Array, {construct(target,args) {
+        const view=Reflect.construct(target,args);
+        if(!(args[0] instanceof ArrayBuffer) || args.length!==1) return view;
+        return new Proxy(view, {
+            get(target,key) {
+                const value=Reflect.get(target,key,target);
+                if(window.traceFloatStores && (window.traceFloatReadIndices.has(key) ||
+                   (window.traceFloatAllReads && typeof key==='string' && /^[0-9]+$/.test(key))) &&
+                   (!window.traceFloatUniqueReads || window.traceFloatReadIndices.has(key) ||
+                    !window.floatReadLastValue.has(key) ||
+                    !Object.is(window.floatReadLastValue.get(key),value)) &&
+                   (window.traceFloatStep===null || window.traceFloatStep===(window.authorStep||0))) {
+                    if(window.floatReads.length>=window.traceFloatLimit) window.floatReadsTruncated=true;
+                    else {
+                        const stack=new Error().stack;
+                        if(!window.traceFloatStack || stack.includes(' at '+window.traceFloatStack+' (')) {
+                            window.floatReads.push({sequence:window.floatObservationSequence++,
+                                                    step:window.authorStep||0,index:Number(key),value,stack});
+                            if(window.traceFloatUniqueReads) window.floatReadLastValue.set(key,value);
+                        }
+                    }
+                }
+                return typeof value==='function' && key!=='constructor'?value.bind(target):value;
+            },
+            set(target,key,input) {
+                const old=target[key], success=Reflect.set(target,key,input,target);
+                if(window.traceFloatStores &&
+                   (window.traceFloatStep===null || window.traceFloatStep===(window.authorStep||0)) &&
+                   typeof key==='string' && /^[0-9]+$/.test(key)) {
+                    if(window.floatStores.length>=window.traceFloatLimit) window.floatStoresTruncated=true;
+                    else {
+                        const stack=new Error().stack;
+                        if(!window.traceFloatStack || stack.includes(' at '+window.traceFloatStack+' ('))
+                            window.floatStores.push({sequence:window.floatObservationSequence++,
+                                                     step:window.authorStep||0,index:Number(key),
+                                                     old,input,stored:target[key],stack});
+                    }
+                }
+                return success;
+            }
+        });
+    }});
+}
+window.enableIntegerStores=false;
+window.integerReads=[];
+window.integerReadsTruncated=false;
+window.integerStores=[];
+window.integerStoresTruncated=false;
+window.traceIntegerIndices=new Set();
+if(window.enableIntegerStores) for(const kind of ['Int32Array','Uint32Array']) {
+    const Native=window[kind];
+    window[kind]=new Proxy(Native,{construct(target,args) {
+        const view=Reflect.construct(target,args);
+        if(!(args[0] instanceof ArrayBuffer) || args.length!==1) return view;
+        return new Proxy(view,{
+            get(target,key) {
+                const value=Reflect.get(target,key,target);
+                if(window.traceIntegerReads &&
+                   (window.traceIntegerStep==null || window.traceIntegerStep===(window.authorStep||0)) &&
+                   typeof key==='string' && /^[0-9]+$/.test(key) &&
+                   (!window.traceIntegerIndices.size || window.traceIntegerIndices.has(key))) {
+                    const stack=new Error().stack;
+                    if(!window.traceIntegerStack || stack.includes(' at '+window.traceIntegerStack+' (')) {
+                        if(window.integerReads.length>=window.traceIntegerLimit) window.integerReadsTruncated=true;
+                        else window.integerReads.push({step:window.authorStep||0,kind,index:Number(key),value,stack});
+                    }
+                }
+                return typeof value==='function' && key!=='constructor'?value.bind(target):value;
+            },
+            set(target,key,input) {
+                const old=target[key], success=Reflect.set(target,key,input,target);
+                if(window.traceIntegerStores &&
+                   (window.traceIntegerStep==null || window.traceIntegerStep===(window.authorStep||0)) &&
+                   typeof key==='string' && /^[0-9]+$/.test(key) &&
+                   (!window.traceIntegerIndices.size || window.traceIntegerIndices.has(key))) {
+                    if(window.integerStores.length>=window.traceIntegerLimit) window.integerStoresTruncated=true;
+                    else {
+                        const stack=new Error().stack;
+                        if(!window.traceIntegerStack || stack.includes(' at '+window.traceIntegerStack+' ('))
+                            window.integerStores.push({step:window.authorStep||0,kind,index:Number(key),old,input,stored:target[key],stack});
+                    }
+                }
+                return success;
+            }
+        });
+    }});
+}
+var Module = {onRuntimeInitialized() { window.ready = true; }};
+</script>
+<script src="/trace.js"></script>
+<script src="/driver/FreeMoteDriver.js"></script>
+<script src="/driver/emoteplayer.js"></script>
+<script>
+window.capture = async function(options) {
+    window.traceIntegerReads=options.traceIntegerReads;
+    window.traceIntegerStores=options.traceIntegerStores;
+    window.traceIntegerStack=options.traceIntegerStack;
+    window.traceIntegerStep=options.traceIntegerStep;
+    window.traceIntegerLimit=options.traceIntegerLimit;
+    window.traceIntegerIndices=new Set((options.traceIntegerIndices||[]).map(String));
+    const canvas = document.getElementById('canvas');
+    canvas.width = options.width; canvas.height = options.height;
+    EmotePlayer.setRenderCanvas(canvas);
+    const player = new EmotePlayer(canvas);
+    console.info('reference phase: load model');
+    player.loadData(new Uint8Array(await (await fetch('/model.psb')).arrayBuffer()));
+    console.info('reference phase: model loaded');
+    const device = EmotePlayer.device;
+    const gl = device.gl;
+    const id = player.playerId;
+    EmotePlayer_SetHairScale(id, options.physics.hair);
+    EmotePlayer_SetPartsScale(id, options.physics.parts);
+    EmotePlayer_SetBustScale(id, options.physics.bust);
+    EmotePlayer_StopWind(id);
+    EmotePlayer_SetCoord(id, options.x, options.y, 0, 0);
+    EmotePlayer_SetScale(id, options.scale, 0, 0);
+    const variables = {};
+    for (let i=0; i<EmotePlayer_CountVariables(id); ++i) {
+        const label=EmotePlayer_GetVariableLabelAt(id,i);
+        variables[label]=EmotePlayer_GetVariable(id,label);
+    }
+    for(const label of options.observeVariables||[]) variables[label]=EmotePlayer_GetVariable(id,label);
+    window.traceMath=options.traceMath;
+    window.traceMathStep=options.traceMathStep;
+    window.traceFloatStores=options.traceFloatStores;
+    window.traceFloatStack=options.traceFloatStack;
+    window.traceFloatStep=options.traceFloatStep;
+    window.traceFloatLimit=options.traceFloatLimit;
+    window.traceFloatAllReads=options.traceFloatAllReads;
+    window.traceFloatUniqueReads=options.traceFloatUniqueReads;
+    window.traceFloatReadIndices=new Set((options.traceFloatReadIndices||[]).map(String));
+    for (const [label,value] of Object.entries(options.variables))
+        EmotePlayer_SetVariable(id,label,value,0,0);
+    for(const [label,request] of Object.entries(options.transitions||{}))
+        EmotePlayer_SetVariable(id,label,request.value,request.frames,request.easing);
+    EmoteDevice_SetMaskMode(1);
+    EmoteDevice_SetProtectTranslucentTextureColor(true);
+    EmoteDevice_SetMaskRegionClipping(true);
+    // Draw through the original player's render texture and original WebGL
+    // composition path. speed=0 prevents any dependence on elapsed real time.
+    player._coord=[options.x,options.y]; player._scale=options.scale;
+    EmotePlayer_SetVariable(id,"_globalA",255*options.opacity,0,0);
+    player._globalA=255*options.opacity;
+    player._speed=0; player._stepUpdate=false;
+    player._hairScale=options.physics.hair;
+    player._partsScale=options.physics.parts;
+    player._bustScale=options.physics.bust;
+    const timelineInfo=[];
+    for (const [count,label,diff] of [
+        [EmotePlayer_CountMainTimelines,EmotePlayer_GetMainTimelineLabelAt,false],
+        [EmotePlayer_CountDiffTimelines,EmotePlayer_GetDiffTimelineLabelAt,true]]) {
+        for(let i=0;i<count(id);i++) {
+            const name=label(id,i);
+            timelineInfo.push({label:name,diff,reportedLoop:EmotePlayer_IsLoopTimeline(id,name),
+                              reportedFrames:EmotePlayer_GetTimelineTotalFrameCount(id,name)});
+        }
+    }
+    const samples=[];
+    const differenceVariables=new Map();
+    for(const sources of [options.differences||{},...(options.events||[]).map(e=>e.differences||{})])
+        for(const [source,requests] of Object.entries(sources)) {
+            const names=differenceVariables.get(source)||new Set();
+            for(const name of Object.keys(requests)) names.add(name);
+            differenceVariables.set(source,names);
+        }
+    const differenceRequests=sources=>{
+        for(const [source,requests] of Object.entries(sources))
+            for(const [name,r] of Object.entries(requests))
+                EmotePlayer_SetVariableDiff(id,source,name,r.value,r.frames,r.easing);
+    };
+    const timelineRequest=request=>{
+        if(!timelineInfo.some(t=>t.label===request.label)) throw new Error('unknown timeline: '+request.label);
+        switch(request.kind) {
+            case 'play': EmotePlayer_PlayTimeline(id,request.label,request.flags); break;
+            case 'stop': EmotePlayer_StopTimeline(id,request.label); break;
+            case 'blend': EmotePlayer_SetTimelineBlendRatio(id,request.label,request.value,request.frames,request.easing,request.completion==='stop'); break;
+            case 'fade_in': EmotePlayer_FadeInTimeline(id,request.label,request.frames,request.easing); break;
+            case 'fade_out': EmotePlayer_FadeOutTimeline(id,request.label,request.frames,request.easing); break;
+            default: throw new Error('unknown timeline request kind');
+        }
+    };
+    const hasBlendQuery=typeof EmotePlayer_GetTimelineBlendRatio==='function';
+    const observeVariables=step=>{
+        const values={};
+        for(const name of Object.keys(variables)) values[name]=EmotePlayer_GetVariable(id,name);
+        samples.push({step,frame:step*options.stepFrames,values,
+                      blendRatios:hasBlendQuery?Object.fromEntries((options.timelines||[]).map(name=>[name,EmotePlayer_GetTimelineBlendRatio(id,name)])):null,
+                      differences:Object.fromEntries(Array.from(differenceVariables,([source,names])=>[source,Object.fromEntries(Array.from(names,name=>[name,EmotePlayer_GetVariableDiff(id,source,name)]))])),
+                      playing:(options.timelines||[]).map(name=>EmotePlayer_IsTimelinePlaying(id,name))});
+    };
+    for(const request of options.plays||[]) {
+        const name=request.label;
+        if(!timelineInfo.some(t=>t.label===name)) throw new Error('unknown timeline: '+name);
+        EmotePlayer_PlayTimeline(id,name,request.flags);
+    }
+    for(const request of options.timelineRequests||[]) timelineRequest(request);
+    differenceRequests(options.differences||{});
+    if(options.sampleVariables) observeVariables(0);
+    for (let i=0;i<options.steps;++i) {
+        window.authorStep=i+1;
+        for(const event of options.events||[]) if(event.step===i+1) {
+            for(const request of event.timeline_requests||[]) timelineRequest(request);
+            differenceRequests(event.differences||{});
+            for(const [name,value] of Object.entries(event.variables||{}))
+                EmotePlayer_SetVariable(id,name,value,0,0);
+            for(const [name,request] of Object.entries(event.transitions||{}))
+                EmotePlayer_SetVariable(id,name,request.value,request.frames,request.easing);
+            for(const [name,force] of Object.entries(event.forces||{}))
+                EmotePlayer_SetOuterForce(id,name,force[0],force[1],0,0);
+        }
+        EmotePlayer_Update(id,options.stepFrames);
+        if(options.sampleVariables) observeVariables(i+1);
+    }
+    device.animating=true;
+    device.lastAnimationTime=0;
+    window.traceEnabled=options.trace;
+    window.traceMaskPixels=options.traceMaskPixels;
+    window.isolateRect=options.isolateRect;
+    console.info('reference phase: draw');
+    device.drawAnimation(0);
+    console.info('reference phase: draw complete');
+    window.traceEnabled=false;
+    window.traceMath=false;
+    window.traceFloatStores=false;
+    window.traceIntegerStores=false;
+    window.traceIntegerReads=false;
+    const pixels=new Uint8Array(canvas.width*canvas.height*4);
+    gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
+    let visiblePixels=0;
+    for(let p=3;p<pixels.length;p+=4) if(pixels[p]) visiblePixels++;
+    if(!visiblePixels) throw new Error("reference produced an empty image");
+    const observedVariables={};
+    for(const label of Object.keys(variables))
+        observedVariables[label]=EmotePlayer_GetVariable(id,label);
+    const renderer=gl.getExtension('WEBGL_debug_renderer_info');
+    const metadata={defaults:variables, observedVariables, timelineInfo, variableSamples:samples,
+        atlasUploadHashes:await Promise.all(window.atlasHashPromises),
+        timelineBlendQueryAvailable:hasBlendQuery,
+        mathTrace:window.mathTrace, width:canvas.width,height:canvas.height,
+        clockTrace:window.clockTrace,clockTraceTruncated:window.clockTraceTruncated,
+        randomTrace:window.randomTrace,randomTraceTruncated:window.randomTraceTruncated,
+        randomInterfaces:options.traceRandom?{
+            global:Object.keys(window).filter(name=>/random|seed|srand/i.test(name) && typeof window[name]==='function'),
+            module:Object.keys(Module).filter(name=>/random|seed|srand/i.test(name) && typeof Module[name]==='function')
+        }:null,
+        floatStores:window.floatStores,floatStoresTruncated:window.floatStoresTruncated,
+        floatReads:window.floatReads,floatReadsTruncated:window.floatReadsTruncated,
+        integerReads:window.integerReads,integerReadsTruncated:window.integerReadsTruncated,
+        integerStores:window.integerStores,integerStoresTruncated:window.integerStoresTruncated,
+        renderer:renderer?gl.getParameter(renderer.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER),
+        version:gl.getParameter(gl.VERSION),glError:gl.getError(),visiblePixels};
+    return {png:canvas.toDataURL('image/png'),metadata,trace:window.drawTrace,stateTrace:window.stateTrace,maskPixels:window.maskPixels};
+};
+</script>

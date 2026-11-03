@@ -1,0 +1,1654 @@
+{
+  "schema": 1,
+  "reviewer": "assistant /root/memory_stability",
+  "review_kind": "independent_semantic_review_of_public_actual_model_outputs",
+  "generated_utc": "2026-11-01T07:23:12.226423+00:00",
+  "public_cases_only": true,
+  "reviewer_device_model_or_private_database_access": false,
+  "human_review_fields_modified": false,
+  "candidate_policy_sha256": "80de72bce6d816a4da52db1dadee4a2c27c5c59242a1929c6316b76071c3105a",
+  "unchanged_common_sha256": "8905770197f114cc063addb2dd40bc745d9af942f674140f43e597ff3a6b1905",
+  "assessment": {
+    "candidate_semantic": "PASS_15_OF_15_PUBLIC_CASES",
+    "candidate_mechanical": "PARTIAL_14_OF_15",
+    "before_semantic": "PASS_15_OF_15_PUBLIC_CASES",
+    "before_mechanical": "11_OF_15",
+    "ready_for_claim_all_public_cases_accepted": false,
+    "remaining_case": "negative_amid_context",
+    "remaining_issue": "忠实的未移动改写仍被固定否定词表拒绝，动态原词提示未使本例保留没有。",
+    "long_case": "before分片32+32遍，candidate分片35+29遍，两组共1344B完整覆盖64遍。全部4次片段输出及2条最终摘要均不含次数，无局部次数作用域误导。",
+    "limits": "本报告只判断这15个固定公开输入的本轮实际输出。模型结果可变化，生产推进率和通用语义正确性仍需后续运行证据。"
+  },
+  "arms": {
+    "before": {
+      "actual_file": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\memory_negation_model_validation_v24\\ACTUAL_BEFORE_ALL_1793517473207779600.json",
+      "actual_file_sha256": "5808159329d0b0a90d9cc0eb4c246a0a14f85f4ce547d6cc1d38f7be95a58f8d",
+      "payload_file": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\memory_negation_model_validation_v24\\BEFORE_ALL_PUBLIC_PAYLOAD.json",
+      "payload_sha256": "28082ef4e7b57bdcfb9acb17410384a9fc84a466204217e2589085721fb8fd45",
+      "case_count": 15,
+      "actual_model_calls": 16,
+      "semantic_pass": 15,
+      "semantic_fail": 0,
+      "semantic_uncertain": 0,
+      "mechanical_accepted": 11,
+      "mechanical_rejected": 4,
+      "all_sources_and_all_outputs_reviewed": true,
+      "all_human_review_fields_still_pending": true,
+      "runtime_claims_from_hashed_result": {
+        "actual_startup_sha256": "d848dc90cf9a890fb8bc66b2c494b78c2ae39a7e22a4743fe0ab917ca3edbae8",
+        "actual_board_boot_id": "bebd3e7d-e984-4517-8cbb-211df7f1c6dc",
+        "actual_camera_pid": 229296,
+        "actual_camera_birth_ticks": 2474670,
+        "three_writer_locks_held": true,
+        "full_source_guard_before_after": true,
+        "listening_enabled": false,
+        "production_changed": false,
+        "database_read": false,
+        "GUI_guard_retained": true
+      },
+      "cases": [
+        {
+          "case": "question_will",
+          "public_sources": [
+            {
+              "protected": {},
+              "source": "user_said",
+              "text": "你会不会唱歌？"
+            }
+          ],
+          "rubric": "保持提问，明确记作询问会不会唱歌，不能写成已确定会唱或不会唱。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "保留用户询问助手是否会唱歌，未将能力写成已确定事实。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 1,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 21,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户询问助手会不会唱歌。",
+                "keywords": [
+                  "唱歌",
+                  "能力询问"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "用户询问助手会不会唱歌。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 21,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "question_can",
+          "public_sources": [
+            {
+              "protected": {},
+              "source": "user_said",
+              "text": "你能不能识别声纹？"
+            }
+          ],
+          "rubric": "保持提问，明确记作询问能不能识别声纹，不能写成识别能力已确认。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "能否是能不能的有效疑问改写，未断言声纹识别能力已确认。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 2,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 27,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户询问能否识别声纹。",
+                "keywords": [
+                  "声纹识别"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "用户询问能否识别声纹。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 27,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "negative_capability",
+          "public_sources": [
+            {
+              "protected": {
+                "negated": true
+              },
+              "source": "user_said",
+              "text": "声纹尚未校准，不能可靠确认身份。"
+            }
+          ],
+          "rubric": "同时保留尚未校准和不能可靠确认身份，两项均不能变成已完成或可可靠确认。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "尚未校准与不能可靠确认身份两项均保留，主客体与能力状态一致。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 3,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 48,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "声纹尚未校准，不能可靠确认身份。",
+                "keywords": [
+                  "声纹",
+                  "校准",
+                  "身份确认"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "声纹尚未校准，不能可靠确认身份。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 48,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "contrasting_subjects",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "小林",
+                  "小王"
+                ]
+              },
+              "source": "user_said",
+              "text": "小林没有喝咖啡，小王已经喝了咖啡。"
+            }
+          ],
+          "rubric": "小林未喝与小王已喝应分别保留，不能调换主语或让无关否定词掩盖极性变化。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "小林没有喝咖啡与小王已经喝咖啡分别保留，人物和极性未交换。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 4,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 51,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "小林没有喝咖啡，小王已经喝了咖啡。",
+                "keywords": [
+                  "小林",
+                  "小王",
+                  "咖啡"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "小林没有喝咖啡，小王已经喝了咖啡。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 51,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "question_identity",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "雪妃"
+                ]
+              },
+              "source": "user_said",
+              "text": "你是不是雪妃？"
+            }
+          ],
+          "rubric": "保留询问是不是雪妃，不能把问题写成身份已确认。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "保留询问雪妃身份，未确认对方就是雪妃。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 5,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 21,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户询问对方是否为雪妃。",
+                "keywords": [
+                  "雪妃",
+                  "身份确认"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "用户询问对方是否为雪妃。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 21,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "cancelled_plan",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "小林"
+                ],
+                "negated": true,
+                "numbers": [
+                  3,
+                  42
+                ],
+                "status": "cancelled"
+              },
+              "source": "user_said",
+              "text": "小林原计划下午3点买42个杯子，后来取消了，尚未购买。"
+            }
+          ],
+          "rubric": "保留小林、3点、42个杯子、原计划后来取消及尚未购买，不能写成完成采购。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "小林、下午3点、42个杯子、先计划后取消和尚未购买均保留。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 6,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 75,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "小林原计划下午3点买42个杯子，后取消，尚未购买。",
+                "keywords": [
+                  "小林",
+                  "买杯子",
+                  "取消"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "小林原计划下午3点买42个杯子，后取消，尚未购买。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 75,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "question_have",
+          "public_sources": [
+            {
+              "protected": {},
+              "source": "user_said",
+              "text": "你有没有看到杯子？"
+            }
+          ],
+          "rubric": "保持询问及有没有形式，不写成已经看到或没有看到。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "是否看到杯子保留有没有看到的询问语义，未断言已看到或没看到。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 7,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 27,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户询问是否看到杯子。",
+                "keywords": [
+                  "询问",
+                  "杯子"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "用户询问是否看到杯子。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 27,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "metadata_only_negative",
+          "public_sources": [
+            {
+              "protected": {
+                "negated": true
+              },
+              "source": "user_said",
+              "text": "该项未准备就绪。"
+            }
+          ],
+          "rubric": "保持尚未准备就绪的状态，不补写无关否定或相反状态；另检查现有negation_missing是否仍拒绝。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "保留该项未准备就绪，未添加相反状态或无关否定。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 8,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 24,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户陈述该项未准备就绪。",
+                "keywords": [
+                  "准备状态",
+                  "否定"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "用户陈述该项未准备就绪。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 24,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "conditional_negative",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "小林"
+                ]
+              },
+              "source": "user_said",
+              "text": "如果小林不能到场，就取消会议；目前还没确认能否到场。"
+            }
+          ],
+          "rubric": "保留如果条件、到场状态尚未确认、取消会议尚未发生；不能把条件写成事实。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "取消会议仍以小林不能到场为条件，到场状态仍未确认，未写成会议已取消。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 9,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 78,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "若小林不能到场则取消会议；目前尚未确认其能否到场。",
+                "keywords": [
+                  "小林",
+                  "会议",
+                  "条件",
+                  "未确认"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "若小林不能到场则取消会议；目前尚未确认其能否到场。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 78,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "ordered_plan_cancellation",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "小林"
+                ],
+                "numbers": [
+                  3,
+                  42
+                ],
+                "status": "planned"
+              },
+              "source": "user_said",
+              "text": "小林计划下午3点买42个杯子。"
+            },
+            {
+              "protected": {
+                "names": [
+                  "小林"
+                ],
+                "negated": true,
+                "status": "cancelled"
+              },
+              "source": "user_said",
+              "text": "小林后来取消了这项购买计划，尚未购买。"
+            }
+          ],
+          "rubric": "保留小林、3点、42个杯子，以及先计划、后取消、尚未购买的时间顺序和最终状态。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "合并两条来源后，人物、时间、数量、计划随后取消及尚未购买的顺序与最终状态保留。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 10,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 39,
+                  "exact_source_verified": true
+                },
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 57,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "小林原计划下午3点买42个杯子，后取消该计划，尚未购买。",
+                "keywords": [
+                  "小林",
+                  "购买计划",
+                  "取消"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "小林原计划下午3点买42个杯子，后取消该计划，尚未购买。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 96,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "long_repeated_question",
+          "public_sources": [
+            {
+              "protected": {},
+              "source": "user_said",
+              "text": "你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？"
+            }
+          ],
+          "rubric": "记录重复询问会不会唱歌，保留提问性质，不把能力写成已确认事实。完整覆盖全部来源及时间范围。实际多段请求次数与reduction以运行metrics为准。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "各片段输出及最终拼接均仅描述重复询问，未统计次数或确认能力。实际请求完整覆盖64遍公开问句。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 11,
+              "stage": "fragment",
+              "request_source_review": [
+                {
+                  "alias": "s1",
+                  "part_start_character": 0,
+                  "text_characters": 224,
+                  "text_utf8_bytes": 672,
+                  "question_repeat_count": 32,
+                  "only_repeated_public_question": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户反复询问助手是否会唱歌。",
+                "keywords": [
+                  "唱歌",
+                  "询问"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            },
+            {
+              "index": 12,
+              "stage": "fragment",
+              "request_source_review": [
+                {
+                  "alias": "s1",
+                  "part_start_character": 224,
+                  "text_characters": 224,
+                  "text_utf8_bytes": 672,
+                  "question_repeat_count": 32,
+                  "only_repeated_public_question": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户连续多次询问助手会不会唱歌。",
+                "keywords": [
+                  "唱歌",
+                  "询问"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "用户反复询问助手是否会唱歌。\n用户连续多次询问助手会不会唱歌。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 1344,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "correction_not_a_b",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "小岚"
+                ]
+              },
+              "source": "user_said",
+              "text": "小岚说，展台上的盒子不是奖品，而是收纳盒。"
+            }
+          ],
+          "rubric": "保留小岚的陈述及盒子不是奖品、而是收纳盒两层含义。不是须仍修饰盒子的奖品属性，不能只写成盒子是收纳盒或把主客体颠倒。",
+          "mechanical_accepted": false,
+          "failure_metadata": {
+            "state": "failed",
+            "stage": "full_source_validation",
+            "code": "candidate_rejected",
+            "error_class": "CandidateRejected",
+            "rejection_reasons": [
+              "negation_missing"
+            ]
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "盒子非奖品及是收纳盒两层含义保留，陈述者仍为小岚，未交换对象或删去否定属性。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 13,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 63,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "小岚称展台上的盒子非奖品，是收纳盒。",
+                "keywords": [
+                  "小岚",
+                  "盒子",
+                  "非奖品",
+                  "收纳盒"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": null,
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 63,
+          "human_semantic_review_preserved": "PENDING",
+          "mechanical_and_semantic_distinction": "非奖品语义保留，固定词表不识别单字非。"
+        },
+        {
+          "case": "action_not_performed",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "阿泉"
+                ]
+              },
+              "source": "user_said",
+              "text": "阿泉今天没有给机器人更换电池，只擦拭了外壳。"
+            }
+          ],
+          "rubric": "保留阿泉没有更换机器人电池及已擦拭外壳。没有须对应更换电池，不能将擦拭也否定，不能把换电池写成已完成。",
+          "mechanical_accepted": false,
+          "failure_metadata": {
+            "state": "failed",
+            "stage": "full_source_validation",
+            "code": "candidate_rejected",
+            "error_class": "CandidateRejected",
+            "rejection_reasons": [
+              "negation_missing"
+            ]
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "未更换机器人电池与已经擦拭外壳分别保留，否定未扩展到擦拭动作。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 14,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 66,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "阿泉今日未给机器人换电池，仅擦拭外壳。",
+                "keywords": [
+                  "阿泉",
+                  "机器人",
+                  "未换电池",
+                  "擦拭外壳"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": null,
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 66,
+          "human_semantic_review_preserved": "PENDING",
+          "mechanical_and_semantic_distinction": "未给机器人换电池语义保留，固定词表不识别该未字词形。"
+        },
+        {
+          "case": "corrected_user_intent",
+          "public_sources": [
+            {
+              "protected": {},
+              "source": "user_said",
+              "text": "我不是让你关闭摄像头，而是想查看刚才的识别结果。"
+            }
+          ],
+          "rubric": "保留用户否认要求关闭摄像头，同时说明真正意图是查看刚才的识别结果。不是应属于原请求意图，不能写成已关闭摄像头或只保留正向请求。",
+          "mechanical_accepted": false,
+          "failure_metadata": {
+            "state": "failed",
+            "stage": "full_source_validation",
+            "code": "candidate_rejected",
+            "error_class": "CandidateRejected",
+            "rejection_reasons": [
+              "negation_missing"
+            ]
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "澄清的否定仍属于关闭摄像头这一请求意图，正向意图仍是查看刚才识别结果，未声称摄像头已经关闭。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 15,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 72,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户澄清非关闭摄像头，而是查看刚才的识别结果。",
+                "keywords": [
+                  "澄清",
+                  "摄像头",
+                  "识别结果"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": null,
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 72,
+          "human_semantic_review_preserved": "PENDING",
+          "mechanical_and_semantic_distinction": "非关闭保留否定意图，固定词表不识别单字非。",
+          "wording_note": "非关闭为压缩表达，澄清与而是查看的并列语境指向请求意图。候选并非要求关闭表达更明确。"
+        },
+        {
+          "case": "negative_amid_context",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "小禾"
+                ]
+              },
+              "source": "user_said",
+              "text": "小禾上午整理了工作台，把工具放回抽屉，随后没有移动左边的杯子。她接着合上右边的书，并确认台灯保持开启，最后坐回桌前继续画画。"
+            }
+          ],
+          "rubric": "保留小禾没有移动左边杯子这一中间事实及其对象和位置。前后的整理工具、合书、台灯开启与继续画画可以压缩，但不能让这些正向背景挤掉否定，也不能将没有错配到合书或台灯。",
+          "mechanical_accepted": false,
+          "failure_metadata": {
+            "state": "failed",
+            "stage": "full_source_validation",
+            "code": "candidate_rejected",
+            "error_class": "CandidateRejected",
+            "rejection_reasons": [
+              "negation_missing"
+            ]
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "未移动左侧杯子的中间事实与主体小禾保留，否定未错配到右侧书或台灯。前后正向背景压缩未改变该关系。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 16,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 186,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "小禾上午整理工作台，工具入抽屉，未移动左侧杯子；合上右侧书，确认台灯开启，坐回桌前继续画画。",
+                "keywords": [
+                  "小禾",
+                  "整理工作台",
+                  "未移动杯子",
+                  "台灯开启",
+                  "画画"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": null,
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 186,
+          "human_semantic_review_preserved": "PENDING",
+          "mechanical_and_semantic_distinction": "未移动左侧杯子语义保留，固定词表不识别未移动。"
+        }
+      ]
+    },
+    "candidate": {
+      "actual_file": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\memory_negation_model_validation_v24\\ACTUAL_CANDIDATE_ALL_1793517584698901600.json",
+      "actual_file_sha256": "522a5c3b9e0a63be3b1ecfbc5daf7236ff4187e67aabd5ea8b48a46a2bf15d7f",
+      "payload_file": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\memory_negation_model_validation_v24\\CANDIDATE_ALL_PUBLIC_PAYLOAD.json",
+      "payload_sha256": "7ad110c77765f13d1fc7c0f52ce2363c97d7236a6269568612251956deb38eec",
+      "case_count": 15,
+      "actual_model_calls": 16,
+      "semantic_pass": 15,
+      "semantic_fail": 0,
+      "semantic_uncertain": 0,
+      "mechanical_accepted": 14,
+      "mechanical_rejected": 1,
+      "all_sources_and_all_outputs_reviewed": true,
+      "all_human_review_fields_still_pending": true,
+      "runtime_claims_from_hashed_result": {
+        "actual_startup_sha256": "d848dc90cf9a890fb8bc66b2c494b78c2ae39a7e22a4743fe0ab917ca3edbae8",
+        "actual_board_boot_id": "bebd3e7d-e984-4517-8cbb-211df7f1c6dc",
+        "actual_camera_pid": 229296,
+        "actual_camera_birth_ticks": 2474670,
+        "three_writer_locks_held": true,
+        "full_source_guard_before_after": true,
+        "listening_enabled": false,
+        "production_changed": false,
+        "database_read": false,
+        "GUI_guard_retained": true
+      },
+      "cases": [
+        {
+          "case": "question_will",
+          "public_sources": [
+            {
+              "protected": {},
+              "source": "user_said",
+              "text": "你会不会唱歌？"
+            }
+          ],
+          "rubric": "保持提问，明确记作询问会不会唱歌，不能写成已确定会唱或不会唱。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "保留用户询问助手是否会唱歌，未将能力写成已确定事实。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 1,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 21,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户询问助手会不会唱歌。",
+                "keywords": [
+                  "唱歌",
+                  "能力询问"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "用户询问助手会不会唱歌。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 21,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "question_can",
+          "public_sources": [
+            {
+              "protected": {},
+              "source": "user_said",
+              "text": "你能不能识别声纹？"
+            }
+          ],
+          "rubric": "保持提问，明确记作询问能不能识别声纹，不能写成识别能力已确认。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "能否是能不能的有效疑问改写，未断言声纹识别能力已确认。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 2,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 27,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户询问助手能否识别声纹。",
+                "keywords": [
+                  "声纹识别"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "用户询问助手能否识别声纹。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 27,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "negative_capability",
+          "public_sources": [
+            {
+              "protected": {
+                "negated": true
+              },
+              "source": "user_said",
+              "text": "声纹尚未校准，不能可靠确认身份。"
+            }
+          ],
+          "rubric": "同时保留尚未校准和不能可靠确认身份，两项均不能变成已完成或可可靠确认。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "尚未校准与不能可靠确认身份两项均保留，主客体与能力状态一致。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 3,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 48,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "声纹尚未校准，不能可靠确认身份。",
+                "keywords": [
+                  "声纹",
+                  "身份确认"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "声纹尚未校准，不能可靠确认身份。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 48,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "contrasting_subjects",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "小林",
+                  "小王"
+                ]
+              },
+              "source": "user_said",
+              "text": "小林没有喝咖啡，小王已经喝了咖啡。"
+            }
+          ],
+          "rubric": "小林未喝与小王已喝应分别保留，不能调换主语或让无关否定词掩盖极性变化。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "小林没有喝咖啡与小王已经喝咖啡分别保留，人物和极性未交换。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 4,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 51,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "小林没有喝咖啡，小王已经喝了咖啡。",
+                "keywords": [
+                  "小林",
+                  "小王",
+                  "咖啡"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "小林没有喝咖啡，小王已经喝了咖啡。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 51,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "question_identity",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "雪妃"
+                ]
+              },
+              "source": "user_said",
+              "text": "你是不是雪妃？"
+            }
+          ],
+          "rubric": "保留询问是不是雪妃，不能把问题写成身份已确认。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "保留询问雪妃身份，未确认对方就是雪妃。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 5,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 21,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户问你是不是雪妃。",
+                "keywords": [
+                  "雪妃"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "用户问你是不是雪妃。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 21,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "cancelled_plan",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "小林"
+                ],
+                "negated": true,
+                "numbers": [
+                  3,
+                  42
+                ],
+                "status": "cancelled"
+              },
+              "source": "user_said",
+              "text": "小林原计划下午3点买42个杯子，后来取消了，尚未购买。"
+            }
+          ],
+          "rubric": "保留小林、3点、42个杯子、原计划后来取消及尚未购买，不能写成完成采购。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "小林、下午3点、42个杯子、先计划后取消和尚未购买均保留。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 6,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 75,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "小林原计划下午3点买42个杯子，后来取消了，尚未购买。",
+                "keywords": [
+                  "小林",
+                  "买杯子",
+                  "取消"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "小林原计划下午3点买42个杯子，后来取消了，尚未购买。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 75,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "question_have",
+          "public_sources": [
+            {
+              "protected": {},
+              "source": "user_said",
+              "text": "你有没有看到杯子？"
+            }
+          ],
+          "rubric": "保持询问及有没有形式，不写成已经看到或没有看到。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "是否看到杯子保留有没有看到的询问语义，未断言已看到或没看到。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 7,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 27,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户询问助手是否看到杯子。",
+                "keywords": [
+                  "杯子",
+                  "询问"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "用户询问助手是否看到杯子。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 27,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "metadata_only_negative",
+          "public_sources": [
+            {
+              "protected": {
+                "negated": true
+              },
+              "source": "user_said",
+              "text": "该项未准备就绪。"
+            }
+          ],
+          "rubric": "保持尚未准备就绪的状态，不补写无关否定或相反状态；另检查现有negation_missing是否仍拒绝。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "保留该项未准备就绪，未添加相反状态或无关否定。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 8,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 24,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户陈述：该项未准备就绪。",
+                "keywords": [
+                  "准备状态"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "用户陈述：该项未准备就绪。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 24,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "conditional_negative",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "小林"
+                ]
+              },
+              "source": "user_said",
+              "text": "如果小林不能到场，就取消会议；目前还没确认能否到场。"
+            }
+          ],
+          "rubric": "保留如果条件、到场状态尚未确认、取消会议尚未发生；不能把条件写成事实。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "取消会议仍以小林不能到场为条件，到场状态仍未确认，未写成会议已取消。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 9,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 78,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "若小林不能到场则取消会议，目前小林能否到场尚未确认。",
+                "keywords": [
+                  "小林",
+                  "会议",
+                  "条件",
+                  "未确认"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "若小林不能到场则取消会议，目前小林能否到场尚未确认。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 78,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "ordered_plan_cancellation",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "小林"
+                ],
+                "numbers": [
+                  3,
+                  42
+                ],
+                "status": "planned"
+              },
+              "source": "user_said",
+              "text": "小林计划下午3点买42个杯子。"
+            },
+            {
+              "protected": {
+                "names": [
+                  "小林"
+                ],
+                "negated": true,
+                "status": "cancelled"
+              },
+              "source": "user_said",
+              "text": "小林后来取消了这项购买计划，尚未购买。"
+            }
+          ],
+          "rubric": "保留小林、3点、42个杯子，以及先计划、后取消、尚未购买的时间顺序和最终状态。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "合并两条来源后，人物、时间、数量、计划随后取消及尚未购买的顺序与最终状态保留。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 10,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 39,
+                  "exact_source_verified": true
+                },
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 57,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "小林计划下午3点买42个杯子，后来取消了，尚未购买。",
+                "keywords": [
+                  "小林",
+                  "购买计划",
+                  "取消",
+                  "尚未购买"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "小林计划下午3点买42个杯子，后来取消了，尚未购买。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 96,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "long_repeated_question",
+          "public_sources": [
+            {
+              "protected": {},
+              "source": "user_said",
+              "text": "你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？你会不会唱歌？"
+            }
+          ],
+          "rubric": "记录重复询问会不会唱歌，保留提问性质，不把能力写成已确认事实。完整覆盖全部来源及时间范围。实际多段请求次数与reduction以运行metrics为准。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "各片段输出及最终拼接均仅描述重复询问，未统计次数或确认能力。实际请求完整覆盖64遍公开问句。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 11,
+              "stage": "fragment",
+              "request_source_review": [
+                {
+                  "alias": "s1",
+                  "part_start_character": 0,
+                  "text_characters": 245,
+                  "text_utf8_bytes": 735,
+                  "question_repeat_count": 35,
+                  "only_repeated_public_question": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户反复询问助手会不会唱歌。",
+                "keywords": [
+                  "唱歌",
+                  "询问"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            },
+            {
+              "index": 12,
+              "stage": "fragment",
+              "request_source_review": [
+                {
+                  "alias": "s1",
+                  "part_start_character": 245,
+                  "text_characters": 203,
+                  "text_utf8_bytes": 609,
+                  "question_repeat_count": 29,
+                  "only_repeated_public_question": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户重复询问助手是否会唱歌。",
+                "keywords": [
+                  "唱歌",
+                  "询问"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "用户反复询问助手会不会唱歌。\n用户重复询问助手是否会唱歌。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 1344,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "correction_not_a_b",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "小岚"
+                ]
+              },
+              "source": "user_said",
+              "text": "小岚说，展台上的盒子不是奖品，而是收纳盒。"
+            }
+          ],
+          "rubric": "保留小岚的陈述及盒子不是奖品、而是收纳盒两层含义。不是须仍修饰盒子的奖品属性，不能只写成盒子是收纳盒或把主客体颠倒。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "盒子非奖品及是收纳盒两层含义保留，陈述者仍为小岚，未交换对象或删去否定属性。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 13,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 63,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "小岚说，展台上的盒子不是奖品，而是收纳盒。",
+                "keywords": [
+                  "小岚",
+                  "展台",
+                  "盒子",
+                  "奖品",
+                  "收纳盒"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "小岚说，展台上的盒子不是奖品，而是收纳盒。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 63,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "action_not_performed",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "阿泉"
+                ]
+              },
+              "source": "user_said",
+              "text": "阿泉今天没有给机器人更换电池，只擦拭了外壳。"
+            }
+          ],
+          "rubric": "保留阿泉没有更换机器人电池及已擦拭外壳。没有须对应更换电池，不能将擦拭也否定，不能把换电池写成已完成。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "未更换机器人电池与已经擦拭外壳分别保留，否定未扩展到擦拭动作。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 14,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 66,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "阿泉今天没有给机器人更换电池，只擦拭了外壳。",
+                "keywords": [
+                  "阿泉",
+                  "机器人",
+                  "电池",
+                  "外壳"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "阿泉今天没有给机器人更换电池，只擦拭了外壳。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 66,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "corrected_user_intent",
+          "public_sources": [
+            {
+              "protected": {},
+              "source": "user_said",
+              "text": "我不是让你关闭摄像头，而是想查看刚才的识别结果。"
+            }
+          ],
+          "rubric": "保留用户否认要求关闭摄像头，同时说明真正意图是查看刚才的识别结果。不是应属于原请求意图，不能写成已关闭摄像头或只保留正向请求。",
+          "mechanical_accepted": true,
+          "failure_metadata": {
+            "state": "complete",
+            "stage": "complete",
+            "code": "none",
+            "error_class": "none"
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "澄清的否定仍属于关闭摄像头这一请求意图，正向意图仍是查看刚才识别结果，未声称摄像头已经关闭。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 15,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 72,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "用户澄清并非要求关闭摄像头，而是想查看刚才的识别结果。",
+                "keywords": [
+                  "摄像头",
+                  "识别结果"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": "用户澄清并非要求关闭摄像头，而是想查看刚才的识别结果。",
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 72,
+          "human_semantic_review_preserved": "PENDING"
+        },
+        {
+          "case": "negative_amid_context",
+          "public_sources": [
+            {
+              "protected": {
+                "names": [
+                  "小禾"
+                ]
+              },
+              "source": "user_said",
+              "text": "小禾上午整理了工作台，把工具放回抽屉，随后没有移动左边的杯子。她接着合上右边的书，并确认台灯保持开启，最后坐回桌前继续画画。"
+            }
+          ],
+          "rubric": "保留小禾没有移动左边杯子这一中间事实及其对象和位置。前后的整理工具、合书、台灯开启与继续画画可以压缩，但不能让这些正向背景挤掉否定，也不能将没有错配到合书或台灯。",
+          "mechanical_accepted": false,
+          "failure_metadata": {
+            "state": "failed",
+            "stage": "full_source_validation",
+            "code": "candidate_rejected",
+            "error_class": "CandidateRejected",
+            "rejection_reasons": [
+              "negation_missing"
+            ]
+          },
+          "assistant_semantic_verdict": "PASS",
+          "assistant_semantic_reason": "未移动左侧杯子的中间事实与主体小禾保留，否定未错配到右侧书或台灯。前后正向背景压缩未改变该关系。",
+          "all_model_outputs_reviewed": [
+            {
+              "index": 16,
+              "stage": "single",
+              "request_source_review": [
+                {
+                  "source": "user_said",
+                  "text_utf8_bytes": 186,
+                  "exact_source_verified": true
+                }
+              ],
+              "response_public_json": {
+                "summary": "小禾上午整理工作台，工具归抽屉，未移动左杯，合右书，确认台灯开启，坐回桌前继续画画。",
+                "keywords": [
+                  "小禾",
+                  "整理",
+                  "画画"
+                ]
+              },
+              "assistant_semantic_verdict": "PASS"
+            }
+          ],
+          "final_summary": null,
+          "complete_request_source_coverage_independently_verified": true,
+          "source_utf8_bytes": 186,
+          "human_semantic_review_preserved": "PENDING",
+          "mechanical_and_semantic_distinction": "动态提示包含须保留否定原词没有，模型仍改为未移动左杯。语义保留，固定词表不识别未移动。",
+          "wording_note": "左杯与合右书较简略，仍能对应左侧杯子及合上右侧书。机械拒绝使该摘要尚未成为可提交候选。"
+        }
+      ]
+    }
+  }
+}

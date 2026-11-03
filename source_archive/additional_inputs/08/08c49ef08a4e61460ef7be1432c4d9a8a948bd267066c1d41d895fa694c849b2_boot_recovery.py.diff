@@ -1,0 +1,198 @@
+--- R4/boot_recovery.py
++++ R5/boot_recovery.py
+@@ -27,7 +27,7 @@
+ from recovery_rules import (APP, BENCHMARK, CAMERA, CLIENT, CLIENT_SHA, DAEMON_SHA,
+                             GUI, IDSTOP_SHA, MANIFEST_SHA, VERIFIER_SHA, Hold,
+                             config_patch, digest, encoded, gui_projection,
+-                            loaded_app, make_binding, require, require_no_owners,
++                            loaded_app, make_binding, next_history_expected, require, require_no_owners,
+                             verify_final_pointer, verify_bootstrap_handoff, verify_idstop, verify_job,
+                             verify_platform, verify_ready, verify_unloaded)
+ 
+@@ -326,12 +326,15 @@
+                     and digest(regular(RELEASE / 'driver' / name)) == pin, 'ORIGINAL_DRIVER_CHANGED')
+         require(digest(regular(RELEASE / 'bench_identity_stop.py')) == IDSTOP_SHA, 'ORIGINAL_IDSTOP_CHANGED')
+ 
+-    def current_domain_consumed(self):
++    def kernel_marker_path(self):
+         policy = self.contract['native_boot_policy']
+         directory = Path(policy['new_boot_marker_directory'])
+         require(directory.is_absolute() and not directory.is_symlink() and directory.resolve() == directory,
+                 'ORIGINAL_NEW_BOOT_MARKER_DIRECTORY_REDIRECTED')
+-        marker = directory / ('kernel-boot-' + self.boot + '.consumed')
++        return directory / ('kernel-boot-' + self.boot + '.consumed')
++
++    def current_domain_consumed(self):
++        marker = self.kernel_marker_path()
+         # lexists includes an original partial record, symlink or any other
+         # path object. Neither marker family is changed by this wrapper.
+         return os.path.lexists(marker)
+@@ -343,6 +346,96 @@
+             snapshot['active']['predecessor'], current_boot=self.boot,
+             allow_new_kernel_boot=policy['allow_new_kernel_boot'],
+             current_domain_consumed=self.current_domain_consumed())
++
++    def run_history_gate(self, kind, history, *, checkpoint_pin=None, predecessor=None, normal_expected_pin=None):
++        request = dict(schema='aura-original-history-gate-request-1', kind=kind, boot_id=self.boot,
++                       adapter_pin=self.contract['history_adapter_pin'], history_expected=history)
++        if checkpoint_pin is not None:
++            request.update(checkpoint_pin=checkpoint_pin, source_boot=predecessor['boot_id'],
++                           source_owner=predecessor['camera_owner'], source_manifest_sha256=self.contract['native_manifest']['sha256'],
++                           new_boot_marker_directory=self.contract['native_boot_policy']['new_boot_marker_directory'])
++        if normal_expected_pin is not None:
++            request['normal_stop_expected_pin'] = normal_expected_pin
++        raw = encoded(request)
++        request_sha = digest(raw)
++        request_path = self.tx / ('history-request-' + request_sha + '.json')
++        if request_path.exists():
++            require(regular(request_path) == raw, 'ORIGINAL_HISTORY_REQUEST_CHANGED')
++        else:
++            create(request_path, raw)
++        recipe = regular(PACKAGE_ROOT / 'original_history_gate.py')
++        result = subprocess.run(['/usr/bin/python3', '-B', '-I', '-S', '-', '--request', str(request_path),
++                                 '--request-sha256', request_sha], input=recipe, capture_output=True, timeout=25)
++        require(result.returncode == 0 and not result.stderr and len(result.stdout) <= 2097152,
++                'EXACT_FINAL_OR_ORIGINAL_COMPLETE_HISTORY_NOT_VERIFIED')
++        value = json.loads(result.stdout)
++        require(value.get('schema') == 'aura-original-history-gate-result-1' and value.get('request_sha256') == request_sha
++                and value.get('kind') == kind and value.get('boot_id') == self.boot
++                and value.get('adapter_sha256') == self.contract['history_adapter_pin']['sha256']
++                and value.get('checkpoint_pin') == checkpoint_pin and value.get('history_expected') == history
++                and value.get('complete_ordered_history_verified') is True and value.get('original_calls_only') is True
++                and value.get('checkpoint_or_marker_written') is False and value.get('native_context_created') is False
++                and value.get('model_or_device_opened') is False, 'ORIGINAL_HISTORY_RESULT_NOT_BOUND_TO_REQUEST')
++        result_path = self.tx / ('history-result-' + request_sha + '.json')
++        result_raw = encoded(value)
++        if result_path.exists():
++            require(regular(result_path) == result_raw, 'ORIGINAL_HISTORY_RESULT_CHANGED')
++        else:
++            create(result_path, result_raw)
++        return dict(request_pin=dict(path=str(request_path), sha256=request_sha),
++                    result_pin=dict(path=str(result_path), sha256=digest(result_raw)), history_expected=history)
++
++    def check_prestart_history(self, snapshot, checkpoint):
++        history = snapshot['active']['history_expected']
++        source = snapshot['active']['predecessor']
++        pin = dict(path=str(CHECKPOINT), sha256=digest(checkpoint))
++        if source['boot_id'] != self.boot:
++            return self.run_history_gate('cold_predecessor', history, checkpoint_pin=pin, predecessor=source)
++        # This pin is supplied only by the existing CPU/main normal-stop flow.
++        # No stop intent, fresh final or approval boolean is fabricated here.
++        expected_pin = json.loads(regular(STATE_ROOT / 'same-boot-history.expected.pin.json'))
++        return self.run_history_gate('same_boot_resume', history, checkpoint_pin=pin, predecessor=source,
++                                     normal_expected_pin=expected_pin)
++
++    def history_bytes_unchanged(self, proof):
++        self.pin(proof['request_pin'])
++        self.pin(proof['result_pin'])
++        expected = proof['history_expected']
++        for row in expected['archives']:
++            self.pin(dict(path=row['path'], sha256=row['sha256']))
++        self.pin(expected['legacy_pin'])
++
++    def verify_gate_history(self, gate):
++        proof = gate['history_proof']
++        request = json.loads(self.pin(proof['request_pin']))
++        result = json.loads(self.pin(proof['result_pin']))
++        checkpoint_pin = dict(path=str(CHECKPOINT), sha256=gate['checkpoint_sha256'])
++        expected_kind = 'same_boot_resume' if gate['predecessor']['boot_id'] == self.boot else 'cold_predecessor'
++        require(request['kind'] == result['kind'] == expected_kind and request['checkpoint_pin'] == result['checkpoint_pin'] == checkpoint_pin
++                and request['boot_id'] == result['boot_id'] == self.boot
++                and request['source_owner'] == gate['predecessor']['camera_owner']
++                and request['source_boot'] == gate['predecessor']['boot_id']
++                and request['history_expected'] == result['history_expected'] == proof['history_expected']
++                and result['request_sha256'] == proof['request_pin']['sha256'], 'CAMERA_GATE_HISTORY_PROOF_NOT_EXACT_FINAL')
++        self.pin(checkpoint_pin)
++        self.history_bytes_unchanged(proof)
++
++    def accepted_live_history(self, gate, handoff):
++        self.verify_gate_history(gate)
++        history = next_history_expected(gate['history_proof']['history_expected'], gate, handoff, self.boot)
++        if gate['predecessor']['boot_id'] == self.boot:
++            marker = str(CHECKPOINT) + '.native-consumed-' + gate['checkpoint_sha256']
++            require(regular(marker, 256) == (gate['checkpoint_sha256'] + '\n').encode(), 'ORIGINAL_SAME_BOOT_CONSUMPTION_NOT_PROVEN')
++        else:
++            marker = json.loads(regular(self.kernel_marker_path(), 262144))
++            require(marker.get('schema') == 'aura-native-current-kernel-consumption-1' and marker.get('boot') == self.boot
++                    and marker.get('source_checkpoint_sha256') == gate['checkpoint_sha256']
++                    and marker.get('archive_path') == history['head']['archive_path']
++                    and marker.get('archive_sha256') == history['head']['archive_sha256']
++                    and type(marker.get('captured_mono_ns')) is int and 0 < marker['captured_mono_ns'] <= time.monotonic_ns(),
++                    'ORIGINAL_CURRENT_BOOT_COMMIT_LINK_NOT_PROVEN')
++        proof = self.run_history_gate('running_archive_chain', history)
++        return history, proof
+ 
+     def once(self, action, argv, allow_submit=True):
+         """Durable once-only submission; reentry observes the SAME transient unit."""
+@@ -431,6 +524,7 @@
+         cp = regular(CHECKPOINT, 262144)
+         cp_sha = self.checkpoint_gate(snapshot, cp)
+         require(json.loads(cp)['seed']['boot_id'] != self.boot, 'COLD_PREDECESSOR_BOOT_REQUIRED')
++        history_proof = self.check_prestart_history(snapshot, cp)
+         sealed = self.tx / ('predecessor-final-' + cp_sha + '.json')
+         if sealed.exists():
+             require(regular(sealed) == cp, 'SEALED_FINAL_CHANGED')
+@@ -442,6 +536,7 @@
+             now = self.source_snapshot()
+             require(now['startup_raw'] == snapshot['startup_raw'] and regular(CHECKPOINT, 262144) == cp, 'SOURCE_OR_FINAL_CHANGED_DURING_PREPARE')
+             require(self.checkpoint_gate(now, cp) == cp_sha, 'CHECKPOINT_ROUTE_CHANGED_DURING_PREPARE')
++            self.history_bytes_unchanged(history_proof)
+             require(self.daemon_owner() == daemon, 'DAEMON_OWNER_CHANGED')
+             self.quiet()
+ 
+@@ -496,6 +591,7 @@
+         verify_platform(platform_metadata(), APP)
+         receipt = dict(status='ORIGINAL_WIDE_READY_IDSTOP_ONLY', boot_id=self.boot, contract_sha256=self.contract_sha,
+                        context=context, predecessor_final_sha256=cp_sha, idstop_sha256=digest(report_raw),
++                       prestart_history=history_proof,
+                        reference_initialized=False, centered=False, follow_started=False,
+                        original_reader_and_camera_not_bypassed=True)
+         create(self.tx / 'prepared.json', encoded(receipt))
+@@ -510,8 +606,10 @@
+         require(all(current.get(k) == v for k, v in {'Restart': 'no', 'KillMode': 'process', 'SendSIGKILL': 'no', 'TimeoutStopUSec': 'infinity'}.items()), 'NATIVE_NORMAL_STOP_PROTECTION_CHANGED')
+         checkpoint = regular(CHECKPOINT, 262144)
+         checkpoint_sha = self.checkpoint_gate(snapshot, checkpoint)
++        history_proof = self.check_prestart_history(snapshot, checkpoint)
+         gate = dict(boot_id=self.boot, contract_sha256=self.contract_sha, checkpoint_sha256=checkpoint_sha,
+                     startup_sha256=digest(snapshot['startup_raw']), predecessor=snapshot['active']['predecessor'],
++                    history_proof=history_proof,
+                     checked_mono_ns=time.monotonic_ns())
+         create(self.tx / ('camera-gate-' + str(os.getpid()) + '.json'), encoded(gate))
+         gate_path = self.tx / 'current-camera-gate.json'
+@@ -590,12 +688,14 @@
+         handoff = health['dpu_schedule'].get('protection_handoff') or {}
+         gate = json.loads(regular(self.tx / 'current-camera-gate.json'))
+         verify_bootstrap_handoff(handoff, gate, self.boot, self.contract_sha)
++        accepted_history, live_history_proof = self.accepted_live_history(gate, handoff)
+         current_binding = snapshot['selected']
+         if (current_binding.get('board_boot_id') == self.boot and current_binding.get('camera_pid') == current_owner['pid']
+                 and current_binding.get('camera_start_ticks') == current_owner['birth_ticks']):
+             require(current_binding.get('camera_config') == str(run)
+                     and current_binding['source_sha256'].get(str(run)) == digest(run_raw), 'CURRENT_OWNER_RUN_CONFIG_CHANGED')
+             original_verify(snapshot['aura'], current_binding)
++            require(snapshot['active']['history_expected'] == accepted_history, 'CURRENT_BINDING_HISTORY_LEDGER_DIFFERS')
+             return dict(status='BINDING_ALREADY_CURRENT_NO_WRITE', boot_id=self.boot, camera_owner=current_owner)
+         candidate = make_binding(current_binding, self.boot, current_owner,
+                                  dict(path=str(run), sha256=digest(run_raw)), snapshot['active']['selected_sources'])
+@@ -636,6 +736,7 @@
+         active = dict(contract_sha256=self.contract_sha, startup_sha256=digest(new_startup), ui_sha256=digest(new_ui),
+                       selected_pin=selected_pin, selected_sources=candidate['source_sha256'],
+                       predecessor=dict(boot_id=self.boot, camera_owner=current_owner), transaction=str(directory))
++        active.update(history_expected=accepted_history, history_provenance=live_history_proof)
+         active_path = STATE_ROOT / 'active-source.json'
+         if prior_active_present:
+             replace_known(active_path, prior_active_raw, encoded(active))
+@@ -653,7 +754,12 @@
+     def verify_gui(self):
+         prepared = self.prepared()
+         snapshot = self.source_snapshot()
+-        current_owner, _ = self.camera_samples()
++        current_owner, camera_health = self.camera_samples()
++        gate = json.loads(regular(self.tx / 'current-camera-gate.json'))
++        handoff = camera_health['dpu_schedule'].get('protection_handoff') or {}
++        verify_bootstrap_handoff(handoff, gate, self.boot, self.contract_sha)
++        accepted_history, _ = self.accepted_live_history(gate, handoff)
++        require(snapshot['active']['history_expected'] == accepted_history, 'READY_COMPLETE_HISTORY_LEDGER_DIFFERS')
+         original_verify(snapshot['aura'], snapshot['selected'])
+         state = unit(GUI)
+         require(state['ActiveState'] == 'active' and state['SubState'] == 'running' and not state['Job'], 'ORIGINAL_GUI_NOT_RUNNING')

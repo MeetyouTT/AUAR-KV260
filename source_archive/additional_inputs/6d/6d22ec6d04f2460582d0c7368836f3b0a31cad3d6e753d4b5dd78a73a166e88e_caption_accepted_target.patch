@@ -1,0 +1,15 @@
+--- caption_552377.py
++++ caption_accepted.py
+@@ -26,7 +26,11 @@
+  last_probe=dict(wall_ms=(time.monotonic()-tick)*1000,cpu_ms=(time.process_time()-cpu)*1000)
+  print(json.dumps(dict(kind='observer_cost',**last_probe)),flush=True)
+  token=observed['request_token']
+- if ready and target_request is None and token and token!=initial_request:
++ accepted=(observed['latency'].get('asr_completed') is True
++           and observed['latency'].get('entry_rejected') is False
++           and (observed['transcription_state'] in ('GENERATING','PLAYING','ANSWERED')
++                or observed['latency'].get('ordinary_prepare') is True))
++ if ready and target_request is None and token and token!=initial_request and accepted:
+   target_request=token
+  if token==target_request and observed['latency'].get('complete') is True:
+   target_complete_latency=dict(observed['latency'])

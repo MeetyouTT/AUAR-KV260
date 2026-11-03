@@ -1,0 +1,635 @@
+{
+  "basis": [
+    {
+      "id": "O1",
+      "kind": "official",
+      "section": "AMD 指南 §3.3.5.1、§3.3.5.4",
+      "claim": "源码、验证、构建、上板与推荐七目录；其他组织须对照",
+      "paths": [
+        "/home/ghmd/aura-submission-framework-20261009/official_guide.pdf"
+      ]
+    },
+    {
+      "id": "O2",
+      "kind": "official",
+      "section": "AMD 指南 §3.3.5.2",
+      "claim": "技能包适用、方法、失效、效果、失败来源与可复用性",
+      "paths": [
+        "/home/ghmd/aura-submission-framework-20261009/official_guide.pdf"
+      ]
+    },
+    {
+      "id": "O3",
+      "kind": "official",
+      "section": "AMD 指南 §3.3.5.3",
+      "claim": "原理框图、软硬件接口、优化、AI 协作与复现",
+      "paths": [
+        "/home/ghmd/aura-submission-framework-20261009/official_guide.pdf"
+      ]
+    },
+    {
+      "id": "O4",
+      "kind": "official",
+      "section": "AMD 指南 §3.3.5.4",
+      "claim": "英文命名，目录结构为推荐；细分职责是本项目设计",
+      "paths": [
+        "/home/ghmd/aura-submission-framework-20261009/official_guide.pdf"
+      ]
+    },
+    {
+      "id": "P1",
+      "kind": "project_plan",
+      "section": "2026-10-08 当前框架 §4–5",
+      "claim": "KV260 PS/PL、Windows 模型主机、Ubuntu 构建与 M1–M8",
+      "paths": [
+        "/home/ghmd/Win共享文件/方案/aura_junior_project_framework_20261008.md"
+      ]
+    },
+    {
+      "id": "P2",
+      "kind": "project_plan",
+      "section": "2026-10-02 总包 §2.3、§4、§6.1",
+      "claim": "共享资源唯一所有者、板端服务职责与原 I01–I07",
+      "paths": [
+        "/home/ghmd/aura-submission-framework-20261009/references/manager_20261002.md"
+      ]
+    },
+    {
+      "id": "P3",
+      "kind": "project_plan",
+      "section": "2026-10-08 当前框架 §6–8",
+      "claim": "候选源期限/调度/新 PL 监督、实验、机构等待",
+      "paths": [
+        "/home/ghmd/Win共享文件/方案/aura_junior_project_framework_20261008.md"
+      ]
+    },
+    {
+      "id": "P4",
+      "kind": "project_plan",
+      "section": "2026-10-07 技能包方案",
+      "claim": "三项技能包是项目选择，最终需实际复用验证",
+      "paths": [
+        "/home/ghmd/Win共享文件/方案/aura_skill_package_plan_and_delivery_20261007.md"
+      ]
+    },
+    {
+      "id": "C1",
+      "kind": "code",
+      "section": "公共类型和路径计算",
+      "claim": "当前运行时依赖 common 与仓根资源路径",
+      "paths": [
+        "common/contracts.py",
+        "common/config.py",
+        "common/clock.py"
+      ]
+    },
+    {
+      "id": "C2",
+      "kind": "code",
+      "section": "组合入口与资源调用",
+      "claim": "AuraRuntime 组合检测、目标、身份、模拟监督、会话和客户端",
+      "paths": [
+        "board/runtime/application.py"
+      ]
+    },
+    {
+      "id": "C3",
+      "kind": "code",
+      "section": "媒体协议使用点",
+      "claim": "PS media_session 与 host pipeline 共用 protocol.py",
+      "paths": [
+        "board/runtime/media_session.py",
+        "host/model_service/protocol.py",
+        "host/model_service/pipeline.py"
+      ]
+    },
+    {
+      "id": "C4",
+      "kind": "code",
+      "section": "板端客户端的实际导入",
+      "claim": "client.py 导入板端 WebSocket 客户端；由 AuraRuntime 创建",
+      "paths": [
+        "host/model_service/client.py",
+        "board/runtime/application.py"
+      ]
+    },
+    {
+      "id": "C5",
+      "kind": "code",
+      "section": "模型与播放混合的旧音频目录",
+      "claim": "selected_voice 是 Qwen/Torch 合成；tts.py 同时含合成与播放类",
+      "paths": [
+        "board/runtime/audio/selected_voice.py",
+        "board/runtime/audio/asr.py",
+        "board/runtime/audio/tts.py"
+      ]
+    },
+    {
+      "id": "C6",
+      "kind": "code",
+      "section": "主机流水线与候选后端",
+      "claim": "流水线框架已有，RealBackendPlaceholder 明确占位",
+      "paths": [
+        "host/model_service/pipeline.py",
+        "host/model_service/backends.py"
+      ]
+    },
+    {
+      "id": "C7",
+      "kind": "code",
+      "section": "当前选定声线服务依赖",
+      "claim": "选定声线服务依赖演示/脸部工具；纯模型适配待整理",
+      "paths": [
+        "tools/selected_voice_service.py",
+        "tools/facial_layers.py"
+      ]
+    },
+    {
+      "id": "C8",
+      "kind": "code_and_reference",
+      "section": "旧平台能力与 VSRV",
+      "claim": "只有相对租约；新绝对源期限未实现",
+      "paths": [
+        "hardware/platform/platform_manifest.json",
+        "hardware/README.md",
+        "hardware/rtl/visual_servo.sv",
+        "board/motion/guard.py"
+      ]
+    },
+    {
+      "id": "C9",
+      "kind": "code",
+      "section": "UI 代码和素材路径",
+      "claim": "UI 源码在 board/interaction；ui 为配置；素材由仓根路径加载",
+      "paths": [
+        "board/interaction/avatar_assets.py",
+        "board/interaction/qt_app.py",
+        "ui/ui_state.schema.json"
+      ]
+    },
+    {
+      "id": "C10",
+      "kind": "build_reference",
+      "section": "既有构建脚本",
+      "claim": "依赖原工程、绝对路径、IP cache 和 routed DCP",
+      "paths": [
+        "/home/ghmd/kv260-visual-servo-20261007/scripts/implement_source_platform.py",
+        "/home/ghmd/kv260-visual-servo-20261007/SOURCE_PLATFORM_REPORT.md"
+      ]
+    },
+    {
+      "id": "C11",
+      "kind": "configuration",
+      "section": "配置和待冻结清单",
+      "claim": "runtime.*、模型、工具、机械标定与 G0–G5 声明",
+      "paths": [
+        "config/model_manifest.json",
+        "config/toolchain_lock.json",
+        "config/servo_calibration.json",
+        "config/experiments.json"
+      ]
+    },
+    {
+      "id": "C12",
+      "kind": "historical_document",
+      "section": "历史许可矩阵",
+      "claim": "9 月旧方案中含 LVGL、旧素材/模型/版本；最终需重核",
+      "paths": [
+        "docs/LICENSE_MATRIX.md"
+      ]
+    },
+    {
+      "id": "C13",
+      "kind": "software_evidence",
+      "section": "此前框架验证",
+      "claim": "41 项软件验证及合成样例，未替代真实系统",
+      "paths": [
+        "tests/framework",
+        "metrics/raw/framework-validation-20261009/validation.json"
+      ]
+    },
+    {
+      "id": "C14",
+      "kind": "packaging_code",
+      "section": "现有软件源包工具",
+      "claim": "按既有包路径打包；正式分层导出与整机包待验",
+      "paths": [
+        "scripts/package_project.py"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "basis_id": "O1",
+      "path": "/home/ghmd/aura-submission-framework-20261009/official_guide.pdf",
+      "exists": true,
+      "kind": "file",
+      "bytes": 950952,
+      "sha256": "c6ad82acd4f7bdcd13bd412e232ed85d05f2a87dd5e2cdd04f9d219f88b569fc"
+    },
+    {
+      "basis_id": "O2",
+      "path": "/home/ghmd/aura-submission-framework-20261009/official_guide.pdf",
+      "exists": true,
+      "kind": "file",
+      "bytes": 950952,
+      "sha256": "c6ad82acd4f7bdcd13bd412e232ed85d05f2a87dd5e2cdd04f9d219f88b569fc"
+    },
+    {
+      "basis_id": "O3",
+      "path": "/home/ghmd/aura-submission-framework-20261009/official_guide.pdf",
+      "exists": true,
+      "kind": "file",
+      "bytes": 950952,
+      "sha256": "c6ad82acd4f7bdcd13bd412e232ed85d05f2a87dd5e2cdd04f9d219f88b569fc"
+    },
+    {
+      "basis_id": "O4",
+      "path": "/home/ghmd/aura-submission-framework-20261009/official_guide.pdf",
+      "exists": true,
+      "kind": "file",
+      "bytes": 950952,
+      "sha256": "c6ad82acd4f7bdcd13bd412e232ed85d05f2a87dd5e2cdd04f9d219f88b569fc"
+    },
+    {
+      "basis_id": "P1",
+      "path": "/home/ghmd/Win共享文件/方案/aura_junior_project_framework_20261008.md",
+      "exists": true,
+      "kind": "file",
+      "bytes": 31872,
+      "sha256": "2d714b51a82ca8e4d931d6c317d3d71aa16a18702dd56ebe64143a4a5190dbdf"
+    },
+    {
+      "basis_id": "P2",
+      "path": "/home/ghmd/aura-submission-framework-20261009/references/manager_20261002.md",
+      "exists": true,
+      "kind": "file",
+      "bytes": 232763,
+      "sha256": "442d72d778ed9b788ee0c9015784571d76b0a86e412e5617b0f14e3a147842fc"
+    },
+    {
+      "basis_id": "P3",
+      "path": "/home/ghmd/Win共享文件/方案/aura_junior_project_framework_20261008.md",
+      "exists": true,
+      "kind": "file",
+      "bytes": 31872,
+      "sha256": "2d714b51a82ca8e4d931d6c317d3d71aa16a18702dd56ebe64143a4a5190dbdf"
+    },
+    {
+      "basis_id": "P4",
+      "path": "/home/ghmd/Win共享文件/方案/aura_skill_package_plan_and_delivery_20261007.md",
+      "exists": true,
+      "kind": "file",
+      "bytes": 44002,
+      "sha256": "aa26a2a606c4aee80d804b84bc82f40774062580b524656bff969a2337fb4789"
+    },
+    {
+      "basis_id": "C1",
+      "path": "common/contracts.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 3308,
+      "sha256": "66cb11a473638bc832131af5d56a3b45af168c1c4be9aff6528643fb6e0a8243"
+    },
+    {
+      "basis_id": "C1",
+      "path": "common/config.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 4397,
+      "sha256": "b179870a56e55a7b46a12e93e7d95b0aa80a4e6b51ffb60d5d08024955517a0d"
+    },
+    {
+      "basis_id": "C1",
+      "path": "common/clock.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 693,
+      "sha256": "ac2944ac84cd4f17cfe2d702c0de942f77189de0047e821a4516336dbd02452f"
+    },
+    {
+      "basis_id": "C2",
+      "path": "board/runtime/application.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 23173,
+      "sha256": "69b4f6d6c2713fba5a67c5f7e5f7e4c518af9cb318a675f97ac6e0220b408e16"
+    },
+    {
+      "basis_id": "C3",
+      "path": "board/runtime/media_session.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 6337,
+      "sha256": "49a25a2819373d5efcac2ef1c9b92c659e946a7dbb4c710853f5ce4a41c3e7c1"
+    },
+    {
+      "basis_id": "C3",
+      "path": "host/model_service/protocol.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 12369,
+      "sha256": "4906825b391422c23f55c0d73796906253f6279c5d45cdbf04c99a5e244b6e93"
+    },
+    {
+      "basis_id": "C3",
+      "path": "host/model_service/pipeline.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 11066,
+      "sha256": "20f689c016a5e9dbc11031ecd2005c7dc839545cb00a064c632e9c38fbcac44a"
+    },
+    {
+      "basis_id": "C4",
+      "path": "host/model_service/client.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 3284,
+      "sha256": "33aaa6c6437412194516926282289d9d1d4cdce1cb076a656ce31ac6eb8697e7"
+    },
+    {
+      "basis_id": "C4",
+      "path": "board/runtime/application.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 23173,
+      "sha256": "69b4f6d6c2713fba5a67c5f7e5f7e4c518af9cb318a675f97ac6e0220b408e16"
+    },
+    {
+      "basis_id": "C5",
+      "path": "board/runtime/audio/selected_voice.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 6542,
+      "sha256": "9bc2185f721eea529e1f873d3b235240f2b670b24ca7c2cedd0e7355dbc02f3f"
+    },
+    {
+      "basis_id": "C5",
+      "path": "board/runtime/audio/asr.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 5787,
+      "sha256": "a5571992fbca48fc7926ac58330e6dbe2cfec253602f4d370371a5578eb5e4e2"
+    },
+    {
+      "basis_id": "C5",
+      "path": "board/runtime/audio/tts.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 23864,
+      "sha256": "fc4fb63f6b7ef8a15e0b0b5360915a19d6d42168d0cb79a5ff1f932584541623"
+    },
+    {
+      "basis_id": "C6",
+      "path": "host/model_service/pipeline.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 11066,
+      "sha256": "20f689c016a5e9dbc11031ecd2005c7dc839545cb00a064c632e9c38fbcac44a"
+    },
+    {
+      "basis_id": "C6",
+      "path": "host/model_service/backends.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 10532,
+      "sha256": "2da47cc95c8146a52f548efaf0f95cbeeda1303adc60dffe43b301d8833bcd5c"
+    },
+    {
+      "basis_id": "C7",
+      "path": "tools/selected_voice_service.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 5401,
+      "sha256": "605b14decfcd939f08a25b8d5605bb6fc43e13db84c35d6dc57b8cd79a0f04dd"
+    },
+    {
+      "basis_id": "C7",
+      "path": "tools/facial_layers.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 7197,
+      "sha256": "43a1561f854514b9113b093aa38c2828d68ffa326256ed3c95271286b525bc91"
+    },
+    {
+      "basis_id": "C8",
+      "path": "hardware/platform/platform_manifest.json",
+      "exists": true,
+      "kind": "file",
+      "bytes": 725,
+      "sha256": "55b39294cb2b68c5a2274ab58fea73aa59041b6846712f78314d651193fd0290"
+    },
+    {
+      "basis_id": "C8",
+      "path": "hardware/README.md",
+      "exists": true,
+      "kind": "file",
+      "bytes": 1398,
+      "sha256": "fc9a6d347c0f6278b3bb898dcaee6333bff7bb8bc10194b3a6b03976361bcd42"
+    },
+    {
+      "basis_id": "C8",
+      "path": "hardware/rtl/visual_servo.sv",
+      "exists": true,
+      "kind": "file",
+      "bytes": 10534,
+      "sha256": "cc62cf5f71c2b76668417c0de49e95563d41a56f0d0fd702ac74fb465b7684f3"
+    },
+    {
+      "basis_id": "C8",
+      "path": "board/motion/guard.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 4590,
+      "sha256": "0f980ea153b5f06ac1bbb94b327d613f13f16eaf34b41da99916ae9792294275"
+    },
+    {
+      "basis_id": "C9",
+      "path": "board/interaction/avatar_assets.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 12664,
+      "sha256": "c93293644212aa7be4ccb094d6a6978c720a50327a752b8e9864b6f5ea5d0787"
+    },
+    {
+      "basis_id": "C9",
+      "path": "board/interaction/qt_app.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 4363,
+      "sha256": "faa178f800c879dab2e6c4f4f27156edd23382c415fe7f3cef0071c6f3adf519"
+    },
+    {
+      "basis_id": "C9",
+      "path": "ui/ui_state.schema.json",
+      "exists": true,
+      "kind": "file",
+      "bytes": 3174,
+      "sha256": "dd0ee97fd3b84591b86cd1ce7907b649c80cb7016e177f20b520c33ebd5b1aed"
+    },
+    {
+      "basis_id": "C10",
+      "path": "/home/ghmd/kv260-visual-servo-20261007/scripts/implement_source_platform.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 3037,
+      "sha256": "21b08fe180994315fad769a1424b2b715b4ecee0e261858630a692caa7d975a1"
+    },
+    {
+      "basis_id": "C10",
+      "path": "/home/ghmd/kv260-visual-servo-20261007/SOURCE_PLATFORM_REPORT.md",
+      "exists": true,
+      "kind": "file",
+      "bytes": 9116,
+      "sha256": "5bb4b1bc15ac42fc12165d28cc8601c9d98c33d8cdac7e8afbcbdbac5394c458"
+    },
+    {
+      "basis_id": "C11",
+      "path": "config/model_manifest.json",
+      "exists": true,
+      "kind": "file",
+      "bytes": 1194,
+      "sha256": "a87213b6be7965d5a7348966455c29f9df2b0135006ca63ec841a4e3406faf2f"
+    },
+    {
+      "basis_id": "C11",
+      "path": "config/toolchain_lock.json",
+      "exists": true,
+      "kind": "file",
+      "bytes": 387,
+      "sha256": "1bce3ac04b28e3cd727f41c66ebfcd83a7decfabdb9d1ecd12bbf13d8315f5f4"
+    },
+    {
+      "basis_id": "C11",
+      "path": "config/servo_calibration.json",
+      "exists": true,
+      "kind": "file",
+      "bytes": 308,
+      "sha256": "175f63e5ac8422083e89f40799bb42764e83e3f1ab87f38f80023aa5f2e3fee3"
+    },
+    {
+      "basis_id": "C11",
+      "path": "config/experiments.json",
+      "exists": true,
+      "kind": "file",
+      "bytes": 1242,
+      "sha256": "a2ff6ba195ae7d5f73c68134c3477638333c703209d863f603e23c45e2b788c8"
+    },
+    {
+      "basis_id": "C12",
+      "path": "docs/LICENSE_MATRIX.md",
+      "exists": true,
+      "kind": "file",
+      "bytes": 4451,
+      "sha256": "c5c88e68ba059a735fc93ef6950b722e153ce636090d8a24ee2f9696abd65a7c"
+    },
+    {
+      "basis_id": "C13",
+      "path": "tests/framework",
+      "exists": true,
+      "kind": "directory"
+    },
+    {
+      "basis_id": "C13",
+      "path": "metrics/raw/framework-validation-20261009/validation.json",
+      "exists": true,
+      "kind": "file",
+      "bytes": 10318,
+      "sha256": "638b2f87c727bb169398faea8bc5409b9a70fc099f2894635fb3a1b3c2a1c2a8"
+    },
+    {
+      "basis_id": "C14",
+      "path": "scripts/package_project.py",
+      "exists": true,
+      "kind": "file",
+      "bytes": 7560,
+      "sha256": "d682d6e953cfe3035db3b1b7c5cedb2b55b6528dac695bbe57554cc200a7cfba"
+    }
+  ],
+  "code_anchors": [
+    {
+      "finding": "F01",
+      "path": "board/runtime/media_session.py",
+      "line": 6,
+      "excerpt": "from host.model_service.protocol import ("
+    },
+    {
+      "finding": "F02",
+      "path": "board/runtime/application.py",
+      "line": 17,
+      "excerpt": "from host.model_service.client import AsyncModelClient"
+    },
+    {
+      "finding": "F02",
+      "path": "host/model_service/client.py",
+      "line": 5,
+      "excerpt": "from board.runtime.dialogue_client.ws_client import WebSocketClient"
+    },
+    {
+      "finding": "F03",
+      "path": "board/runtime/audio/selected_voice.py",
+      "line": 61,
+      "excerpt": "from qwen_tts import Qwen3TTSModel"
+    },
+    {
+      "finding": "F03",
+      "path": "board/runtime/audio/tts.py",
+      "line": 387,
+      "excerpt": "class TtsPlayer:"
+    },
+    {
+      "finding": "F03",
+      "path": "board/runtime/audio/tts.py",
+      "line": 250,
+      "excerpt": "class SherpaTtsBackend(TtsBackend):"
+    },
+    {
+      "finding": "F04",
+      "path": "board/runtime/application.py",
+      "line": 12,
+      "excerpt": "from board.motion.guard import SimulationGuard"
+    },
+    {
+      "finding": "F05",
+      "path": "hardware/platform/platform_manifest.json",
+      "line": 9,
+      "excerpt": "\"absolute_source_deadline_supported\": false,"
+    },
+    {
+      "finding": "F07",
+      "path": "/home/ghmd/kv260-visual-servo-20261007/scripts/implement_source_platform.py",
+      "line": 22,
+      "excerpt": "cache=Path('/home/ghmd/kv260-m3-axilite-20261002/src/kv260/overlays/examples/benchmark/binary_container_1/ip_cache')"
+    },
+    {
+      "finding": "F07",
+      "path": "/home/ghmd/kv260-visual-servo-20261007/scripts/implement_source_platform.py",
+      "line": 26,
+      "excerpt": "protected=[script,Path(__file__).resolve(),ROOT/'rtl/visual_servo.sv',Path(audit['generated_bd']),Path(audit['generated_hwh']),platform/'pin.xdc']"
+    },
+    {
+      "finding": "F08",
+      "path": "board/interaction/avatar_assets.py",
+      "line": 24,
+      "excerpt": "AVATAR_DIR = _ROOT / \"assets\" / \"avatar\""
+    },
+    {
+      "finding": "F09",
+      "path": "common/config.py",
+      "line": 7,
+      "excerpt": "PROJECT_ROOT = Path(__file__).resolve().parents[1]"
+    },
+    {
+      "finding": "F09",
+      "path": "board/interaction/avatar_assets.py",
+      "line": 23,
+      "excerpt": "_ROOT = Path(__file__).resolve().parents[2]"
+    },
+    {
+      "finding": "F10",
+      "path": "docs/LICENSE_MATRIX.md",
+      "line": 14,
+      "excerpt": "| PySide6 (Qt for Python) | 6.11.2 | **LGPL-3.0 / 商业双许可** | PC 侧 UI 原型与离屏渲染 | 否（板端为 LVGL，不装 Qt） | ✅ |"
+    }
+  ]
+}

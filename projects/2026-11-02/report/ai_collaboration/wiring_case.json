@@ -1,0 +1,22 @@
+{
+  "schema": "visible-ai-collaboration-excerpt-1",
+  "case_id": "ai06_wiring_documentation",
+  "date": "2026-11-02",
+  "source": "本对话可见用户消息、公开答复和工具反馈摘录",
+  "record_type": "verbatim_excerpts_and_observed_tool_feedback",
+  "tool": "Codex",
+  "model_build_version": null,
+  "user_prompt_excerpt": "这个怎么做，按照我这个盘里面的资料，你可以帮我做一下么",
+  "assistant_visible_reply_excerpt": "我会按盘里的接线资料和 FPGA 引脚约束，先做一份可放进报告的接线图和逐线接线表。资料能确认的内容会直接标出，尚未核实的实物端子会标为“待核对”，重点处理旧图 H12 与宽版约束 E10 的差异。",
+  "evidence_based_decision": "宽版约束确认servo_pwm在E10；J2.3仅按B03参考映射标注；不从资料推断实物已经核线。",
+  "observed_tool_error_excerpt": "ValueError: invalid literal for int() with base 10: 'white'",
+  "actual_correction": "c.setFillColor(colors.toColor(fill))",
+  "layout_corrections": [
+    "将电源域标题移出导线区",
+    "分开W10与W11标签",
+    "将舵机端口文字移入框内",
+    "将PWM/E10标签移离连线"
+  ],
+  "verification_source": "attachments/wiring/validation_original.json",
+  "scope": "证明本次文档生成与工具纠错；不是FPGA算法开发历史的逐字导出；未记录的模型构建版本保持未知"
+}

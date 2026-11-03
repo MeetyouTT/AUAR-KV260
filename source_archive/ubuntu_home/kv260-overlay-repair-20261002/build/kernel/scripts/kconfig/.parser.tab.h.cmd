@@ -1,0 +1,1 @@
+cmd_scripts/kconfig/parser.tab.h := bison -o scripts/kconfig/parser.tab.c --defines=scripts/kconfig/parser.tab.h -t -l /home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/scripts/kconfig/parser.y

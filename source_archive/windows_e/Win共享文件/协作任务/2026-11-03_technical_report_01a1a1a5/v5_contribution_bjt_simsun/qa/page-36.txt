@@ -1,0 +1,36 @@
+35
+附录 B 导出与排错命令
+在工程根、完成对应实现后使用真实工具路径导出配套固件。DTC17 为项目已有 dtc-
+1.7.2 目录；OUT、VIT 与 VIV 沿用第 8 章设置。仅元数据测试不得当作完整位流导出。
+export DTC17=/home/ghmd/kv260-dpu41-control-20261001/dependencies/dtc-1.7.2
+export LD_LIBRARY_PATH="$DTC17/libfdt${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+python3 -B build/export_firmware.py --out "$OUT/firmware" \
+--bit "$OUT/hardware/auar_source.bit" \
+--xsa "$OUT/hardware/auar_source.xsa" \
+--base-dtb /home/ghmd/aura-system-pan-20261028/fresh-base.dtb \
+--dtc "$VIT/bin/dtc" --fdtoverlay "$DTC17/fdtoverlay" \
+--xclbinutil "$VIT/bin/xclbinutil" --bootgen "$VIT/bin/bootgen"
+python3 -B build/prepare_models.py check
+python3 -B build/check_assets.py
+原 生 交 叉 构 建 需 要 固 定 EXT4 内 的 开 发 头 文 件 与 库 ， 包 内 入 口 为
+build/prepare_cross_sdk.py。缺依赖时先核对目标 sysroot 和链接路径，不复用未知旧对
+象来宣称源码已构建。
+python3 -B build/prepare_cross_sdk.py \
+--rootfs /home/ghmd/kv260-sd-backup-20261003/offline-inspection/root.original.ext4 \
+--vitis-root "$VIT" --out "$OUT/cross-sdk" --build-out "$OUT/native"
+若 RTL 缺标记或退出码非零，检查对应 bench 日志；若模型端口不匹配，核对运行器顺
+序与张量布局；若服务健康而无声音，分别检查 MCP01、播放设备和当前任务；若旧绑定失效，
+重新生成当前 boot 的绑定，不覆盖 boot 字段伪造通过。正式恢复按对应设备流程执行。
+附录 C 数据口径与证据索引
+报告包的 evidence/history 保留历史证据，evidence/live_board_samples.json 保留
+本次过滤采样，live_summary.json 保存计算值，evidence/ubuntu_rtl 保留本次 RTL 回执。
+data/live_resources.csv 与 live_rtt.csv 可直接重绘新曲线。完整路径与 SHA256 见
+sources/source_manifest.json 及最终 package_manifest.json。
+表 C-1 证据索引
+编号 报告包内依据 主要支持内容
+E01–E03 evidence/history/v01 至 v03 窄宽资源 独立实现审查
+E04–E07 evidence/history/v04 至 v07 模型实板短测 公开质量
+E08–E10 evidence/history/v08 至 v10 短字段 旧资源窗 自然到期存储
+E12 E13 E27 evidence/history/v12 v13 v27 Skill 离线验证 纠错 解压复现
+E15 E16 E28 evidence/history/v15 v16 v28 AI 案例 真摘录 来源索引
+E19–E25 evidence/history/v19 至 v25 模型身份 RTL 地址 引脚 时钟与时序

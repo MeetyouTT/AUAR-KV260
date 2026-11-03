@@ -1,0 +1,27 @@
+{
+  "title": "KV260 persistent runtime repair review plan",
+  "created_utc_date": "2026-10-03",
+  "board_mutation_performed": true,
+  "persistent_files_installed": true,
+  "reboot_verified": true,
+  "cold_boot_verified": true,
+  "deployment_status": "persistent_runtime_enabled; cold_boot_and_resnet18_functional_check_passed; system_warnings_remain",
+  "postboot_id": "0251d729-0d3c-44e8-abb9-27121306c081",
+  "board_backup_path": "/home/root/kv260-runtime-persistent-backup-20261003",
+  "candidate_inputs_are_previously_board_tested": true,
+  "source_revisions": {
+    "dfx_mgr": "bc06691eb35d7f0acb7c2508b6d050d77b0264a0",
+    "xrt": "43926231f7183688add2dccfd391b36a1f000bea",
+    "linux": "19984dd147fa7fbb7cb14b17400263ad0925c189"
+  },
+  "tested_kernel": "5.15.36-xilinx-v2022.2",
+  "expected_spare_card_cid": "0353445345333247805558c00401a100",
+  "expected_manager_sha256": "db9c25f09f1178177884b1114c57f32c076f1e7f9cdd0d12b7a896039038a46c",
+  "expected_zocl_sha256": "5cef5e0eba083419b3ece6fd4829a9f3112e3f0daaee513e1617d60ed1f7f412",
+  "expected_zocl_srcversion": "9BDC942A6014BCCBD1DCB78",
+  "required_module_parameter": "enable_xgq_ert=1",
+  "baseline_manager_sha256": "bdbd8ee09b3f767a53bd5111240c9ade3bb19b1da83d73bd06785ae86260e9a2",
+  "baseline_zocl_srcversion": "0991D1B457855C8987936E6",
+  "firmware": "kv260-benchmark-b4096",
+  "decision_gate": "Read-only UART inspection found no ZOCL in initramfs or boot DTBs and no explicit modules-load/modprobe/udev/systemd load rule. The manager's ExecStartPre only checks the default firmware marker and directory. Candidate loader is ordered after systemd-modules-load and udev-trigger/daemon but before dfx-mgr.service with Requires/After. Do not mark deployment complete until unit syntax/dependencies are statically checked and a reboot confirms candidate srcversion and parameter before the official app overlay is initialized."
+}

@@ -1,0 +1,81 @@
+{
+  "status": "FROZEN_PUBLIC_WORKER_READY_FOR_ROOT_REVIEW_NOT_DEPLOYED",
+  "created_utc": "2026-10-31T12:57:20.732962+00:00",
+  "files": {
+    "public_sensevoice_worker.py": {
+      "sha256": "04f8373cc5cfc084c2f04ccb2035c240d37dc778eb4faf70f8e0cc53e319d7e6",
+      "bytes": 14393
+    },
+    "public_quality_helper.py": {
+      "sha256": "293b23f5dd350e5f4d1cce1489120a44b2c4d743c1534080da496f3f58407176",
+      "bytes": 13458
+    },
+    "test_public_sensevoice_worker.py": {
+      "sha256": "ac09f7cc9e48ac13cbc1236f841f4059327a87b9be47f0d3c45474bd781f16b0",
+      "bytes": 12431
+    }
+  },
+  "local_checks": "LOCAL_CHECKS.json",
+  "local_checks_sha256": "2ce17f387b7622eb48f3a6b699821dfce6c14d0d0917fac8998f31bfe171905c",
+  "model_repository": "csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17",
+  "model_revision": "2365baeacb507f821a0c8120fcee3d484dba7a07",
+  "sensevoice_model_sha256": "c71f0ce00bec95b07744e116345e33d8cbbe08cef896382cf907bf4b51a2cd51",
+  "sensevoice_tokens_sha256": "f449eb28dc567533d7fa59be34e2abca8784f771850c78a47fb731a31429a1dc",
+  "baseline_adapter_sha256": "4edb865881c887d6a290a02e078e14386bd95d017b79820b143b5a1e329997c3",
+  "manifest_path": "/home/root/aura-public-streaming-validation-20261031/synthetic-8a9983b6bb9f42c6/manifest.json",
+  "manifest_sha256": "7109ee213126f098a3a3da08bbc521beb0db54a21e0911be02e04f2010b9a869",
+  "default_configuration": {
+    "threads": 3,
+    "rounds": 1,
+    "sample_rate": 16000,
+    "language": "zh",
+    "use_itn": false,
+    "provider": "cpu",
+    "max_seconds": 120
+  },
+  "execution_owner": "01a18bcd-1167-71a0-ba0b-d809148d39d9 only; this subagent never operates device",
+  "transport_contract": [
+    "Parent validates current boot/startup/config/source pins, same GUI/camera owners, paused microphone/no active dialogue; no concurrent extra ASR test.",
+    "Copy worker plus unchanged helper to isolated public board directory; their SHA must match this handoff.",
+    "Root externally bounds owned child lifetime. --external-deadline-managed is an explicit contract; native inference cannot be interrupted by the internal soft deadline.",
+    "Preserve GUI/camera and current production pipeline, record before/after CPU/background memory/load metadata; run model slots sequentially, never parallel.",
+    "Restore prior automatic listening after bounded test in parent finally; do not manipulate production Store or replay public memory commands."
+  ],
+  "args_common": [
+    "--manifest",
+    "<manifest_path>",
+    "--manifest-sha256",
+    "<manifest_sha256>",
+    "--threads",
+    "3",
+    "--rounds",
+    "1",
+    "--max-seconds",
+    "120",
+    "--external-deadline-managed"
+  ],
+  "args_sensevoice": [
+    "--engine",
+    "sensevoice",
+    "--model-dir",
+    "<isolated staged SenseVoice dir>"
+  ],
+  "args_paraformer": [
+    "--engine",
+    "paraformer",
+    "--model-dir",
+    "<formal existing Paraformer dir>",
+    "--paraformer-source",
+    "<current exact-pinned board_asr.py>"
+  ],
+  "report_semantics": {
+    "validation": "Model hash and overall fixture validation are timed before construction; runtime imports separately timed.",
+    "load": "load_* is only official recognizer factory call; constructor_total includes baseline adapter repeated resource hashes; constructor_nonfactory is the measured remainder, not claimed to be pure hashing.",
+    "decode": "Only PCM conversion + stream creation/accept + decode + result extraction; no model load/hash/warmup; check cancellation/deadline before and after.",
+    "cpu": "time.process_time includes the isolated process native threads; can exceed elapsed wall time.",
+    "rss": "Linux getrusage peak of whole child, not model-only memory.",
+    "quality": "References are eight authored public synthesis intents, not human-gold transcripts. Character error and spans are literal only; numerals/homophone names/punctuation require manual paired review. No automatic quality pass/fail or deployment."
+  },
+  "real_board_test_performed": false,
+  "production_changed": false
+}

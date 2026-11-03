@@ -1,0 +1,66 @@
+This is a source-only preparation. The updater was not executed by its author.
+Only CPython3.9 AST parsing was performed. The synthetic test source is supplied
+for root review/execution; it has not been run by the author either.
+
+Entry: update_verified_state.py. Default is a read-only plan printed to stdout.
+Add --apply only after root reviews the actual final receipts and planned diff.
+No deployment, SSH, model, microphone, playback, service or DB operations exist.
+
+Example (replace receipt paths with the actual final revision, not an old pass):
+  python -B update_verified_state.py --installed <final-installed.json>
+    --ready <actual_ready.json> --live <actual_live_listening.json>
+    --control-semantics <actual_control_semantics.json>
+  Repeat the exact command with --apply to update the eight fixed documents.
+All input JSON paths must reside under this project's public integration tree.
+No source hash, PID, frontend implementation or performance success is preset.
+
+Mandatory proof:
+  live continuous_capture_passed is True AND priority_scope_passed is True.
+  live physical_microphone_opened True; raw_audio_saved_or_transferred False.
+  installed automatic_listening True, retention_enabled True and valid current
+    target/startup_sha256/source_manifest_sha256/component_pins.
+  ready status PRODUCTION_BOARD_BUSINESS_READY, data_origin board,
+    guard_removed True, root/main_pid(or supervisor_pid)/gtk_pid.
+  live same root/startup/source manifest/pins, explicit current boot and camera
+    PID; live.unit MainPID must equal ready main_pid, ActiveState active and
+    live GTK PID must match ready. Optional ready/installed copies must agree.
+  At least two bounded live samples: actual open listening, no capture error,
+    original8-frame queue, stable armed count, increasing frontend frame count.
+  Current writer/receipt, selected character, visible native display and
+    following false/FAULT/null safety metadata must be present and consistent.
+Failure means no document or receipt-directory writes, even with --apply.
+
+Optional control semantics requires exact root/startup/main_pid/gtk_pid binding.
+Only these explicit actual flags are recognised:
+  pause_preference_false_observed and resume_preference_true_observed together:
+    actual on-disk preference roundtrip (not actual restart acceptance).
+  cancel_rearm_passed: actual cancel-current-turn followed by automatic rearm.
+  synthetic_restart_preference_check_passed: synthetic check, separately tagged.
+No flag is inferred from filenames, absence of errors, implemented code, or a
+previous candidate. Actual restart/coldboot acceptance always remains unclaimed.
+
+Physical microphone opened is true. Physical audio, operator ASR and operator
+playback acceptance remain false/pending. This updater refuses an input already
+claiming operator acceptance: that needs a separate broader verified update.
+
+Fixed targets:
+  integration/PRODUCTION_BUSINESS_LIVE.json
+  IMPLEMENTATION_STATE.json
+  integration/RESUME_VERIFICATION.json
+  integration/CHARACTER_SWITCH.json
+  coordination/runtime_windows.json
+  project AGENTS.md highest board-business-live block
+  板端业务正式接管与实测接续_20261030.txt
+  E:\Win共享文件\语言模型分析\README.md current board-business-live block
+
+Old JSON current metadata goes to listening_revision_history; other historical
+fields remain. Replaced text blocks are preserved as explicitly superseded
+history. A repeated identical receipt set is idempotent. Apply rechecks input
+and target hashes, saves all before documents and a plan under
+listening_entry_fix/state_update_receipts, writes only the fixed document set,
+and rolls back its own unchanged outputs on failure. It never overwrites an
+independent concurrent writer during rollback; conflicts require root review.
+
+Synthetic test command, prepared only (not run by author):
+  python -B -m unittest discover -s <listening_entry_fix directory>
+    -p test_update_verified_state.py -v

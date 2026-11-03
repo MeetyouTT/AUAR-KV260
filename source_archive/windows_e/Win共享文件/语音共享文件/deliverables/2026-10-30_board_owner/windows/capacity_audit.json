@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "utc": "2026-10-30T12:53:01.125931+00:00",
+  "source": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\windows\\real_acceptance_initial.json",
+  "statuses": {
+    "tts_standalone": "passed",
+    "llm_standalone": "passed",
+    "chain": "blocked"
+  },
+  "tts": {
+    "cold_elapsed_seconds": 117.593,
+    "cold_budget_ms": 120000,
+    "pcm_in_ram": true,
+    "duration_seconds": 2.88,
+    "cold_reserved_peak_mib": 4742.0,
+    "observed_device_minimum_free_mib": 7917,
+    "policy_cold_mib": 5120,
+    "reserve_mib": 768,
+    "measured_peak_below_declared_budget": true,
+    "own_worker_closed": true,
+    "after_close_free_mib": 12817,
+    "baseline_free_mib": 12808
+  },
+  "llm": {
+    "cold_elapsed_seconds": 17.672,
+    "subsequent_elapsed_seconds": 4.219,
+    "resident_gpu_bytes": 11579215051,
+    "configured_fit_target_mib": 4096,
+    "observed_final_free_mib": 1624,
+    "layout_metadata": [
+      {
+        "line_number": 42712,
+        "metadata": "cmn  common_param:   - CUDA0   : NVIDIA GeForce RTX 5060 Ti (16283 MiB, 15172 MiB free)"
+      },
+      {
+        "line_number": 42755,
+        "metadata": "common_params_fit_impl:   - CUDA0 (NVIDIA GeForce RTX 5060 Ti): 53 layers,  11042 MiB used,   4129 MiB free"
+      },
+      {
+        "line_number": 42826,
+        "metadata": "llama_prepare_model_devices: using device CUDA0 (NVIDIA GeForce RTX 5060 Ti) (0000:01:00.0) - 15172 MiB free"
+      },
+      {
+        "line_number": 42925,
+        "metadata": "load_tensors: offloaded 53/66 layers to GPU"
+      },
+      {
+        "line_number": 42926,
+        "metadata": "load_tensors:        CUDA0 model buffer size = 10665.30 MiB"
+      },
+      {
+        "line_number": 42927,
+        "metadata": "load_tensors:    CUDA_Host model buffer size =  2725.72 MiB"
+      },
+      {
+        "line_number": 42949,
+        "metadata": "llama_kv_cache:        CPU KV buffer size =    12.75 MiB"
+      },
+      {
+        "line_number": 42950,
+        "metadata": "llama_kv_cache:      CUDA0 KV buffer size =    55.25 MiB"
+      },
+      {
+        "line_number": 42954,
+        "metadata": "llama_memory_recurrent:        CPU RS buffer size =    31.17 MiB"
+      },
+      {
+        "line_number": 42955,
+        "metadata": "llama_memory_recurrent:      CUDA0 RS buffer size =   118.45 MiB"
+      },
+      {
+        "line_number": 42962,
+        "metadata": "sched_reserve:      CUDA0 compute buffer size =   203.80 MiB"
+      },
+      {
+        "line_number": 42963,
+        "metadata": "sched_reserve:  CUDA_Host compute buffer size =    42.40 MiB"
+      }
+    ]
+  },
+  "chain": {
+    "error": {
+      "code": "gpu_busy",
+      "retryable": true
+    },
+    "refusal_elapsed_seconds": 5.032,
+    "required_cold_tts_plus_reserve_mib": 5888,
+    "observed_free_mib": 1624,
+    "shortfall_mib": 4264,
+    "candidate_tts_spawned": false,
+    "thresholds_lowered": false
+  },
+  "runtime": {
+    "all_baseline_processes_preserved": false,
+    "baseline_critical_pids": [
+      2060,
+      13120,
+      5008,
+      7608,
+      8020,
+      26024,
+      21752,
+      29808,
+      29644,
+      22472,
+      30164,
+      24240,
+      28388
+    ],
+    "critical_rows_found": 13,
+    "critical_processes_preserved": true,
+    "exited_other_baseline_rows": [
+      {
+        "pid": 23144,
+        "ppid": 28780,
+        "name": "python.exe",
+        "exe": "D:\\py312\\python.exe",
+        "created_utc": "2026-10-30T12:33:55.5339580Z",
+        "role": "model_or_python",
+        "command_sha256": "8764cd18f751f95d50ceda7e3ccb1e8b19e70b23705843d9db84acafdd945f91"
+      }
+    ],
+    "added_rows": [
+      {
+        "pid": 18560,
+        "ppid": 21752,
+        "name": "llama-server.exe",
+        "exe": "C:\\Users\\35870\\AppData\\Local\\Programs\\Ollama\\lib\\ollama\\llama-server.exe",
+        "created_utc": "2026-10-30T12:37:44.7032650Z",
+        "role": "llm_runner",
+        "command_sha256": "246a5078af1a4606e62e4c7395c2662dced6ef7d8d9ce5585db37d96baaf5163",
+        "runner_args": {
+          "model": "D:\\AIModels\\Ollama-AURA\\blobs\\sha256-d83adbbbaace8acdfcfe28004f779326176b9df00b4ec99dc6c24d749723d3b9",
+          "port": "51416",
+          "host": "127.0.0.1"
+        }
+      }
+    ],
+    "candidate_ram_tts_remaining": [],
+    "final_gpu_matches_initial": false,
+    "final_gpu_difference_reason": "27B was initially absent from /api/ps; public inference loaded its existing project runner, which is deliberately not unloaded",
+    "other_models_or_services_stopped_by_test": false
+  },
+  "conclusion": "Single TTS and LLM passed; chain is capacity-blocked while original warm TTS remains. Do not lower the measured cold budget. No production cutover or shared-TTS replacement was performed.",
+  "startup_contract": {
+    "preflight_http": "GET /v1/inference/preflight",
+    "preflight_python": "backend.preflight(deadline=original_monotonic_deadline)",
+    "preflight_observation_only": true,
+    "preflight_reserves_memory": false,
+    "warmup_http": "POST /v1/inference/warmup",
+    "warmup_example": {
+      "protocol_version": 1,
+      "request_id": "fresh-startup-request-id",
+      "board_boot_id": "synthetic-boot",
+      "session_id": "startup-model-owner",
+      "generation": 1,
+      "budget_ms": 240000,
+      "target": "tts"
+    },
+    "warmup_python": "backend.warmup_tts(deadline=min(original_startup_deadline, monotonic()+240), cancelled=event, request_id=fresh_id)",
+    "warmup_result": {
+      "target": "tts",
+      "ready": true,
+      "num_step": 16,
+      "memory_only": true
+    },
+    "readiness": "GET /health -> backend.tts_ready; bound to the SAME alive proven owned worker object",
+    "default_model_loading": false,
+    "default_warmup": false,
+    "cold_tts_budget_mib": 5120,
+    "reserve_mib": 768,
+    "cold_start_owner_guard": "Read-only CIM logical-worker family guard before Popen; external or unknown TTS ownership fails closed. No PID from a file is stopped.",
+    "global_atomic_ownership_claim": false,
+    "external_switch_coordinator_must_serialize_owners": true,
+    "startup_order": [
+      "Externally confirm current runtime/process ownership, idle state, business single writer and rollback entry; this API does not grant stop authority",
+      "The authorized old TTS owner releases only its own worker at the controlled switch; no duplicate RAM worker and no unrelated model changes",
+      "Confirm no old/external OmniVoice family and no resident 27B for this TTS-first cold sequence; never unload a model automatically",
+      "Re-read preflight, then explicitly warm the unique RAM TTS under the existing cold GPU lease and original startup deadline",
+      "Verify tts_ready and unchanged owned-worker identity, then recheck original cold LLM admission; do not assume warmup guarantees that admission",
+      "Send the complete board-owned request to the existing 27B under its original remaining deadline; do not add context/persona on Windows",
+      "Recheck steady TTS admission and run a public LLM-to-board-validation-to-RAM-TTS test before business writer publication"
+    ],
+    "rollback_requirements": [
+      "If ownership, idle state, readiness, admission, deadline or public end-to-end validation fails, do not publish the new business writer",
+      "Close only the candidate host and its proven OwnedSpeechJob children; never stop processes by a discovered/stored PID",
+      "The external authorized coordinator may resume the exact previously verified entry only while preserving the latest board data and single writer",
+      "Do not restore an older database/snapshot, remove history, lower GPU protection or stop/unload unrelated models to obtain a pass"
+    ],
+    "current_runtime_action": "read-only diagnostics only after initial acceptance; no further candidate TTS creation or production switch",
+    "pending_acceptance": "The unique-owner TTS-first sequence and its final chain remain unexecuted; current original processes and loaded 27B are preserved"
+  },
+  "implementation_validation": {
+    "candidate_fake_tests": 67,
+    "combined_worker_omnivoice_gpu_regression_passed": 125,
+    "excluded_existing_test": "test_reply_preserved_until_controller_submits_to_speech: old __new__ fixture lacks pause_started",
+    "readonly_preflight_evidence": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\windows\\preflight_readonly.json",
+    "real_explicit_warmup_executed_after_guard": false,
+    "real_unique_owner_chain_executed": false,
+    "initial_real_smoke_precedes_unique_owner_guard": true,
+    "sources_sha256": {
+      "aura/common/model_inference_wire.py": "0786eb20e13b88c59572cde507532d760cd7d2eb24434e904845e73be99d7255",
+      "aura/tools/model_inference_host.py": "7dc21100fc0f08a40edd08fb3004858361f025101fc2d72c8400f12d8503585a",
+      "aura/tests/framework/test_model_inference.py": "eef142cc12f51dec8898c10aec23e9fc061f5800ebfd91b9c795f0d6b22cc43e",
+      "aura/board/runtime/audio/omnivoice_voice.py": "bd61f8e1c95d9663143ade7a188e882120aca45aa7a72383f9b82fff86c35c59",
+      "aura/tools/voice_worker_transport.py": "a69db2ed4ddf60405a9c81057dba22fdeba6d5937498df4e6d8cb12c98a9205c"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+--- R4/original_history_gate.py
++++ R5/original_history_gate.py
+@@ -54,8 +54,9 @@
+     if kind == 'same_boot_resume':
+         expected_pin = request['normal_stop_expected_pin']
+         expected = snapshot.pinned(expected_pin)
++        expected_history = {key: expected['history'][key] for key in ('head', 'archive_count', 'archives', 'legacy_pin')}
+         require(expected['boot_id'] == actual_boot and expected['checkpoint_pin'] == request['checkpoint_pin']
+-                and expected['camera_owner'] == request['source_owner'] and expected['history'] == history,
++                and expected['camera_owner'] == request['source_owner'] and expected_history == history,
+                 'Same-boot proof is not bound to the exact final/owner/history')
+         previous_argv = sys.argv
+         output = io.StringIO()

@@ -1,0 +1,111 @@
+--- a/aura/tools/board_avatar_gtk.py
++++ b/aura/tools/board_avatar_gtk.py
+@@ -299,6 +299,7 @@
+                'button.primary:disabled {background:#e4e8e3;color:#91969b;}'
+                'button.danger {color:'+colors['error']+';}'
+                'button.nav {font-size:17px;background-image:none;}'
++               'button.vision_action {font-size:16px;}'
+                'button.nav:hover {background:#e9f2f6;}'
+                'button.nav.selected, button.nav.selected:hover {background:'+colors['accent']+';}'
+                'button.selected label, button.primary label {color:white;text-shadow:none;}'
+@@ -362,9 +363,16 @@
+         self.fixed.put(self.pages, spec['page']['x'], spec['page']['y'])
+         page_widgets = {name:gtk.Fixed() for name in self.page_names}
+         for name,page in page_widgets.items():
++            if name == 'vision':
++                # Keep navigation on the left; only the camera page moves right.
++                page.set_size_request(self.geometry['w'],spec['page']['height'])
++                self.fixed.put(page,self.geometry['x'],spec['page']['y'])
++                self.pages.add_named(gtk.Fixed(),name)
++                continue
+             page.set_size_request(left_width,spec['page']['height'])
+             self.pages.add_named(page,name)
+         main, vision, demo, devices, connection, settings = [page_widgets[n] for n in self.page_names]
++        self.vision_page = vision
+         slots = spec['main']
+         self.status = self.label('等你开口', 0, slots['status']['y'], left_width, slots['status']['height'], 'status', main)
+         self.label('正对汐蓝开口即可，说完后自动接话。' if self.config.get('handsfree_dialogue') else
+@@ -373,9 +381,10 @@
+         self.label('你说',0,slots['transcript_title']['y'],left_width,slots['transcript_title']['height'],parent=main).get_style_context().add_class('section')
+         self.label('汐蓝的回答',0,slots['reply_title']['y'],left_width,slots['reply_title']['height'],parent=main).get_style_context().add_class('section')
+         video = spec['vision']
++        vision_width = self.geometry['w']
+         self.preview_box = gtk.EventBox()
+         self.preview_box.get_style_context().add_class('card')
+-        self.preview_box.set_size_request(left_width,video['preview']['height'])
++        self.preview_box.set_size_request(vision_width,video['preview']['height'])
+         overlay = gtk.Overlay()
+         self.preview_image = gtk.DrawingArea()
+         self.preview_image.set_size_request(video['preview']['image_width'],video['preview']['image_height'])
+@@ -387,9 +396,9 @@
+         overlay.add_overlay(self.preview_placeholder)
+         self.preview_box.add(overlay)
+         vision.put(self.preview_box,0,video['preview']['y'])
+-        self.preview_expand = self.button('放大画面',{'type':'preview_open'},left_width-112,
++        self.preview_expand = self.button('放大画面',{'type':'preview_open'},vision_width-112,
+             video['note']['y'],104,48,vision,'camera_expand')
+-        self.vision_note = self.label('画面中的人数、当前目标与身份显示在右侧。',0,video['note']['y'],left_width-124,video['note']['height'],parent=vision)
++        self.vision_note = self.label('画面中的人数、当前目标与身份显示在左侧。',0,video['note']['y'],vision_width-124,video['note']['height'],parent=vision)
+         self.vision_note.get_style_context().add_class('muted')
+         transcript_scroll = gtk.ScrolledWindow()
+         transcript_scroll.set_size_request(left_width,slots['transcript']['height'])
+@@ -416,7 +425,7 @@
+         main.put(scroll,0,slots['reply']['y'])
+         self.reply_text = None
+         third = (left_width-24)//3
+-        quarter = (left_width-36)//4
++        quarter = (vision_width-36)//4
+         action_y,action_h = slots['actions']['y'],slots['actions']['height']
+         self.record_button = self.button('开始录音',{'type':'record_toggle'},0,action_y,button_width,action_h,main,'record')
+         self.record_button.get_style_context().add_class('primary')
+@@ -428,6 +437,8 @@
+                     video['actions']['y'],quarter,video['actions']['height'],vision,'vision_identity')
+         self.button('设置',{'type':'ui_page','page':'settings'},3*(quarter+12),
+                     video['actions']['y'],quarter,video['actions']['height'],vision,'vision_settings')
++        for key in ('ask_frame','vision_target_select','vision_identity','vision_settings'):
++            self.controls[key].get_style_context().add_class('vision_action')
+         self.interaction_cancel = self.button('取消本轮',{'type':'event','event':'cancel'},button_width+12,
+                                                action_y,button_width,action_h,main,'interaction_cancel')
+         self.interaction_cancel.get_style_context().add_class('danger')
+@@ -515,13 +526,13 @@
+         self.portrait = gtk.Image()
+         self.fixed.put(self.portrait, self.geometry['x']+self.rect['x'], self.geometry['y']+self.rect['y'])
+         self.vision_insights = gtk.Fixed()
+-        self.vision_insights.set_size_request(self.geometry['w'],self.geometry['h'])
+-        self.fixed.put(self.vision_insights,self.geometry['x'],self.geometry['y'])
+-        insight_width = self.geometry['w']
+-        self.label('看见、选择，然后持续关注',12,8,insight_width-24,30,parent=self.vision_insights).get_style_context().add_class('muted')
++        self.vision_insights.set_size_request(left_width,spec['page']['height'])
++        self.fixed.put(self.vision_insights,spec['page']['x'],spec['page']['y'])
++        insight_width = left_width
++        self.label('视觉解读',12,0,insight_width-24,30,parent=self.vision_insights).get_style_context().add_class('insight_value')
+         self.insight_labels = {}
+-        for key,title,y,h in (('people','画面中的人',56,76),('target','当前跟随目标',144,88),
+-                              ('identity','目标身份',244,76)):
++        for key,title,y,h in (('people','画面中的人',40,66),('target','当前跟随目标',116,76),
++                              ('identity','目标身份',202,66)):
+             card = gtk.EventBox()
+             card.get_style_context().add_class('card')
+             card.set_size_request(insight_width,h)
+@@ -534,8 +545,8 @@
+             value.get_style_context().add_class('insight_value')
+             self.insight_labels[key] = value
+             self.vision_insights.put(card,0,y)
+-        self.label('画面解读',12,338,insight_width-24,26,parent=self.vision_insights).get_style_context().add_class('section')
+-        self.vision_summary = self.label('接入摄像头后，在这里了解当前画面。',12,374,insight_width-24,116,parent=self.vision_insights)
++        self.label('画面解读',12,282,insight_width-24,26,parent=self.vision_insights).get_style_context().add_class('section')
++        self.vision_summary = self.label('接入摄像头后，在这里了解当前画面。',12,316,insight_width-24,116,parent=self.vision_insights)
+         self.vision_summary.set_max_width_chars(22)
+         self.vision_summary.get_style_context().add_class('vision_summary')
+         bar = self.layout['bottom_bar']
+@@ -565,8 +576,9 @@
+             panel.set_visible(layer == self.ui_layer)
+         is_vision = page == 'vision'
+         self.portrait.set_visible(not is_vision)
++        self.vision_page.set_visible(is_vision)
+         self.vision_insights.set_visible(is_vision)
+-        self.avatar_title.set_text('视觉解读' if is_vision else self.character)
++        self.avatar_title.set_text('摄像头画面' if is_vision else self.character)
+         self.layer_button.set_label('返回' if self.ui_layer == 'debug' else '···')
+         self.layer_button.set_tooltip_text('返回演示层' if self.ui_layer == 'debug' else '切换到调试层')
+         for name in self.page_names:

@@ -1,0 +1,79 @@
+{
+  "status": "CHANGES_REQUESTED_BEFORE_APPLY_MODE_PRESERVATION",
+  "reviewer": "/root/camera_cpu_optimize",
+  "scope": "Independent local cross-review of GTK v2 publication/rollback template, payload and usage; no candidate algorithm expansion",
+  "reviewed": {
+    "gtk/v2/transaction_preview_projection.py": "da1f4f6b60f98da11e3c5275028a4c90c596fba33141c4c40bc113a474df6629",
+    "gtk/v2/transaction_payload.json": "778028b7d180b258e25b2639f3fe0e3024b3af0d031ac407b9474d533302d5da",
+    "gtk/v2/TRANSACTION_USAGE.txt": "51286027c0dbda958b986db1928640c870917be951bd1b27acc61db7aadb80f7"
+  },
+  "findings": [
+    {
+      "id": "GTK_TXN_MODE_01",
+      "severity": "medium",
+      "apply_blocker_until_fixed_or_explicitly_constrained": true,
+      "source_lines": [53, 55, 203, 206, 207, 208, 212, 213, 214],
+      "problem": "Stage creation passes the old mode to os.open but does not undo process umask. chown is followed by fsync, with no fchmod. The replacement verifies bytes and records the new identity, without checking old mode/uid/gid preservation. Linux umask 077 can therefore turn a 0644 source or startup file into 0600 and still be accepted as a successful replacement. chown may also clear setid bits.",
+      "evidence": "GTK_TRANSACTION_TARGETED_PROBES.json: exact AST-extracted replace_target returned success for explicit POSIX model umask077/original0644/result0600; context accepted the changed identity. umask022/original0755 control preserved0755. This is a local POSIX semantics model, not a native Linux or board run.",
+      "impact": "Bytes and source pins can agree while permissions change. Root-owned services may still read these files, so a current runtime failure is not claimed; other readers/executable entrypoints can lose their prior access. Rollback currently takes current target metadata, and the durable plan does not retain original fingerprints, so a mode already lost by installation is not restored from byte backups alone.",
+      "minimal_fix": "After chown, use fchmod(stage_fd, identity[4]) before fsync. Before rename and after replacement, require stage/target mode, uid and gid to equal the captured original metadata. Preserve the byte/fingerprint CAS and O_EXCL/fsync behavior. If any permission change has already occurred, reconcile it from separately preserved original metadata rather than assuming the byte rollback restores it.",
+      "alternative_constraint": "A root-controlled launch could prove current umask does not mask any original mode and all three original targets lack chown-sensitive bits, but current expected/preflight neither records nor enforces that condition; a code fix is simpler and auditable."
+    }
+  ],
+  "assessments": {
+    "linux_dry_run": {
+      "result": "Structurally satisfiable with fresh inputs; actual Linux CLI not run",
+      "evidence_lines": [160, 191, 231, 240, 281, 289, 301, 302],
+      "detail": "Linux fcntl/O_NOFOLLOW/O_DIRECTORY and systemd metadata are required. Default execute returns before lock/create/write. Dry-run still requires actual GUI normally stopped, current camera active, all380 source pins and complete pan/selected closure. The invalid example cannot run as supplied."
+    },
+    "fresh_dynamic_binding": {
+      "result": "PASS_STATIC",
+      "evidence_lines": [74, 75, 77, 79, 81, 83, 142, 143, 144, 146, 163, 166, 191, 251, 267, 271, 273],
+      "detail": "Boot, camera PID/birth/cmd and current startup byte SHA come from fresh expected. GUI is normally inactive/dead/MainPID0/noJob/success; prior GUI owners must be gone. Each closure phase rechecks these facts. Original380 is a deliberate business source contract. Selected count is dynamic1..512 and must equal expected; 26 is not hard-coded."
+    },
+    "two_source_and_startup_scope": {
+      "result": "PASS_STATIC",
+      "evidence_lines": [20, 25, 151, 157, 167, 172, 175, 179, 218, 230, 266, 272],
+      "detail": "Payload is restricted to the exact reviewed two original/new source pairs; ui_contract remains7f67e4. Runtime writes are those two source paths and current startup. Startup construction deep-copies current startup and changes only their two component SHA entries. No camera/config/model/axis/selected rebinding or service control path is added."
+    },
+    "later_identity_preservation": {
+      "result": "PASS_STATIC_AND_TARGETED_PARTIAL_CLOSURE_PROBE",
+      "detail": "All other378 pins and all other startup fields derive from current fresh startup and are fully rechecked. A legitimate later identity source/pin is preserved, including during rollback. If a later change modifies either of the two target files to unknown bytes, installation or rollback holds instead of overwriting that later version."
+    },
+    "partial_failure_rollback": {
+      "result": "PASS_FOR_KNOWN_BYTES_WITH_MODE_FINDING_ABOVE",
+      "evidence_lines": [180, 191, 223, 225, 226, 228, 229, 251, 259, 264, 266, 272, 275, 308],
+      "detail": "All source/startup backups and plan are durable before the first target replacement. Failure before plan leaves runtime untouched; after plan, a fresh rollback accepts known OLD/NEW source/pin combinations and rebases only two pins onto current startup. Unknown bytes hold. Reusing an install TX is prohibited; explicit rollback has a unique attempt ID and stage names. No automatic retry/reversal occurs. A crash after final rename but before receipt is an unknown outcome requiring fresh inspection, not a blind retry."
+    },
+    "writer_freeze_and_ownership": {
+      "result": "EXTERNAL_ROOT_PRECONDITION",
+      "detail": "A boolean declaration and cooperative flock cannot stop noncooperating writers. Root must first obtain the actual handover from the enrollment/identity chat and freeze all other writers. Transaction root should be existing root-owned0700 outside all AURA/runtime source trees; code checks directory/symlink shape but does not enforce root owner/mode or source-tree exclusion."
+    },
+    "camera_vs_gtk_phase_order": {
+      "result": "REQUIRED_COORDINATION",
+      "detail": "GTK transaction explicitly requires camera active/running with unchanged owner. Camera six-file transaction separately requires camera normally stopped and a fresh final. Run these phases serially under their separate guards; after any camera restart, rebuild selected binding from the new owner before GTK validation. Do not try this GTK apply while camera is stopped."
+    }
+  },
+  "existing_public_selected_snapshot": {
+    "path": "other_components_20261102/live_enrollment_20261102/new_boot_binding_review_a6d4/face_gallery_readback.26pin.candidate.json",
+    "sha256": "99c53c5992355a2a4dfdedceb3cc90d813981328456b987e503459fe6d0691b5",
+    "source_count": 26,
+    "two_gtk_source_overlap": [],
+    "startup_config_suffix_overlap": [],
+    "interpretation": "This archived public binding has no source-map conflict with the GTK three-target write set. It does pin camera/native files changed by the separate camera transaction, so it must not be assumed valid after camera publication/restart. Fresh selected configuration/path/hash/complete source map and new owner must still be checked at execution."
+  },
+  "targeted_checks": {
+    "probe_script": "review_gtk_transaction_targeted.py",
+    "results": "GTK_TRANSACTION_TARGETED_PROBES.json",
+    "permission_mode_probe": "confirmed mode-loss condition using exact helper plus explicit POSIX model",
+    "known_partial_rollback_closure": "PASS: actual380 closure on first-sourceNEW/second-sourceOLD/startup-bothOLD; rollback preserves later identity source and startup metadata",
+    "limits": "Service guards and selected acquisition are stubbed in the closure probe. Actual preflight/main, root Linux permissions and real systemd/filesystem behavior remain unexecuted. The transaction's existing8 pure checks were read, not rerun."
+  },
+  "boundaries": {
+    "board_network_or_services_contacted": false,
+    "native_linux_or_transaction_cli_executed": false,
+    "candidate_or_gtk_template_modified": false,
+    "existing_tests_rerun": false,
+    "media_private_identity_templates_or_memory_read": false
+  }
+}

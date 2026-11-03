@@ -1,0 +1,81 @@
+{
+  "schema": "aura.asr-threads-independent-review.v1",
+  "status": "SUPPORT_TWO_THREADS_FOR_NEXT_PRODUCTION_TRIAL",
+  "startup_sha256": "d24b0d0007e2aa2b417f459891c7f39f168502a58374334ceab69e31af5881dd",
+  "sources": {
+    "ACTUAL_ABBA_1793503211594742000.json": "c74f27e9c6ed76a0085b4060c2d041b1f0ba3f381663b4e58e8ee01482aea17d",
+    "ACTUAL_COMPARISON_01.json": "7ba2daefc00b32539ecd89dbbecca948450fdea8d9273418c3cc3b9410bde296"
+  },
+  "abba_order": [
+    3,
+    2,
+    2,
+    3
+  ],
+  "timed_samples": 8,
+  "warmup_samples": 8,
+  "all_input_and_raw_and_normalized_result_hashes_equal_within_case": true,
+  "aggregates_recomputed": {
+    "2": {
+      "samples": 4,
+      "mean_decode_wall_ms": 1669.5664009994289,
+      "mean_decode_process_cpu_ms": 2453.9073490000014
+    },
+    "3": {
+      "samples": 4,
+      "mean_decode_wall_ms": 2316.94821849851,
+      "mean_decode_process_cpu_ms": 3939.5180950000004
+    }
+  },
+  "observed_decode_wall_change_percent": -27.941143109301535,
+  "observed_accumulated_process_cpu_change_percent": -37.710468899369246,
+  "slot_measurement_contexts": [
+    {
+      "threads": 3,
+      "measurement_window_seconds": 4.944067317999725,
+      "native_completion_hz": 14.360645887953897,
+      "detector_hz": 9.708605670729396,
+      "memory_completed_delta": 0,
+      "memory_discarded_delta": 0,
+      "slot_peak_rss_mib": 194.82421875
+    },
+    {
+      "threads": 2,
+      "measurement_window_seconds": 3.508514760000253,
+      "native_completion_hz": 14.821086287804658,
+      "detector_hz": 9.975731155253136,
+      "memory_completed_delta": 1,
+      "memory_discarded_delta": 0,
+      "slot_peak_rss_mib": 197.25
+    },
+    {
+      "threads": 2,
+      "measurement_window_seconds": 3.641513571001269,
+      "native_completion_hz": 15.378220871109445,
+      "detector_hz": 9.8859991314275,
+      "memory_completed_delta": 0,
+      "memory_discarded_delta": 1,
+      "slot_peak_rss_mib": 199.05859375
+    },
+    {
+      "threads": 3,
+      "measurement_window_seconds": 4.8840820279983745,
+      "native_completion_hz": 15.560754214266709,
+      "detector_hz": 9.82784476690529,
+      "memory_completed_delta": 0,
+      "memory_discarded_delta": 0,
+      "slot_peak_rss_mib": 199.79296875
+    }
+  ],
+  "limitations": [
+    "Two public utterances, two timed repetitions per case and thread setting; no accuracy gold.",
+    "Independent test process while production ASR was resident and real capture paused.",
+    "Background memory counters varied; this pilot does not establish a whole-system causal percentage.",
+    "Process CPU time is accumulated computation, not total system CPU utilization.",
+    "Snapshot completion rates are not physical display FPS; no audio playback or endpoint-to-first-sound measurement.",
+    "Peak RSS ranges overlap; no demonstrated memory reduction."
+  ],
+  "recommendation": "Prefer two threads for next guarded production trial; preserve audio queues, 16fps target, identity freshness and paused preference; original owner publishes.",
+  "hardware_accessed_by_review": false,
+  "production_modified_by_review": false
+}

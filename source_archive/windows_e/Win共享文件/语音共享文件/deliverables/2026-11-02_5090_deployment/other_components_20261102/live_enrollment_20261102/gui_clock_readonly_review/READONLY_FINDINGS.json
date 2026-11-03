@@ -1,0 +1,97 @@
+{
+  "schema": "aura-gui-date-sample-static-readonly-review-1",
+  "sealed_utc": "2026-11-02T10:43:48.704624+00:00",
+  "status": "NO_FIXED_WAIT_OR_CLOCK_POLICY_POLLUTION_FOUND_PHASE_MEASUREMENTS_PENDING",
+  "fresh_public_source_metadata": {
+    "utc": "2026-11-02T10:40:00.837712+00:00",
+    "startup_sha256": "680fd752c74e75bfbbcd73a296f21f4f39134ce4863a6bc30643c7e77feae1c0",
+    "startup_unchanged_during_read": true,
+    "filtered_public_startup_options": [],
+    "sources": {
+      "runtime/aura/board/runtime/board_dialogue_client.py": {
+        "sha256": "600e044dedfc90c70e319e0e91999b8b4b7f648e0a5ca98e2a1bc0ab09a076b2"
+      },
+      "runtime/aura/common/board_timeline_clock.py": {
+        "sha256": "93b65ec3d9ca393b32499845297c78a2f1f71bc19e069b2ce3dc6f69e795af02"
+      },
+      "runtime/aura/board/runtime/board_business.py": {
+        "sha256": "b08209eca7979825e26845080bca5e1d64e065d3cabd1178df763a93540573f2"
+      },
+      "runtime/aura/tools/production_board_business_gui.py": {
+        "sha256": "b01f6edb9efe88cf95da60900e5ccc32eec93a24ef3f515ab08f51ae2ee6ada8"
+      }
+    },
+    "only_public_source_and_startup_reads": true,
+    "production_mutations": false
+  },
+  "source_references": {
+    "board/runtime/board_dialogue_client.py:_RetainedSocket.__init__": 29,
+    "board/runtime/board_dialogue_client.py:_ConnectionControl.__init__": 43,
+    "board/runtime/board_dialogue_client.py:_ConnectionControl.start": 62,
+    "board/runtime/board_dialogue_client.py:_ConnectionControl._watch": 66,
+    "board/runtime/board_dialogue_client.py:_ConnectionControl.retain_connected_socket": 72,
+    "board/runtime/board_dialogue_client.py:_ConnectionControl.connect": 83,
+    "board/runtime/board_dialogue_client.py:InferenceHttpClient.__init__": 122,
+    "board/runtime/board_dialogue_client.py:InferenceHttpClient.sample_health_date": 199,
+    "common/board_timeline_clock.py:StableTimelineClock.__init__": 103,
+    "common/board_timeline_clock.py:StableTimelineClock.observe_http_date": 241,
+    "board/runtime/board_business.py:LocalProfileSelections.__init__": 77,
+    "board/runtime/board_business.py:LocalIdentityReplies.__init__": 144,
+    "board/runtime/board_business.py:_BoardWriterLock.__init__": 309,
+    "board/runtime/board_business.py:BoardBusinessRuntime.__init__": 373,
+    "board/runtime/board_business.py:BoardBusinessRuntime.initialize_clock": 527,
+    "board/runtime/board_business.py:BoardBusinessRuntime.start": 568,
+    "tools/production_board_business_gui.py:ProductionGuiBoardBusiness.__init__": 21
+  },
+  "fixed_source_facts": {
+    "gui_initialize_clock_total_deadline_seconds": 3.0,
+    "timeline_default_max_rtt_seconds": 1.0,
+    "runtime_client_timeline_share_original_monotonic_callable": true,
+    "startup_passes_no_rtt_override": true,
+    "turn_timeout_ms_is_not_date_sample_rtt_policy": true,
+    "watcher_thread_start_is_before_sent_timestamp": true,
+    "watcher_event_wait_seconds": 0.02,
+    "connect_calls_original_http_connection_connect_once_if_sock_absent": true,
+    "connection_retention_has_no_fixed_sleep_or_join": true,
+    "timed_interval": "sent before connect through getresponse headers complete",
+    "included": [
+      "socket_connection_establishment",
+      "request_send",
+      "headers_wait",
+      "process_scheduling_within_interval"
+    ],
+    "excluded": [
+      "watcher_start",
+      "body_read_and_parse",
+      "clock_observe",
+      "anchor_save",
+      "close_and_join"
+    ],
+    "close_join_timeout_seconds_outside_rtt": 0.1,
+    "fixed_one_second_wait_found": false,
+    "application_proxy_or_redirect_in_this_client": false,
+    "client_uses_pinned_ipv4_endpoint": true,
+    "actual_startup_options_not_extracted_from_manifest": true
+  },
+  "interpretation": [
+    "sample_rtt_exceeded requires received_monotonic-sent_monotonic > default1s",
+    "Independent raw HTTP probes at other instants do not isolate time inside the failing GUI process",
+    "Code alone cannot determine which timed subphase consumed the second"
+  ],
+  "unproved_hypotheses_not_findings": [
+    "Cold socket/getaddrinfo or lazy codec import in the GUI process",
+    "Local CPU scheduling/GIL contention while model/GUI initialization is active",
+    "Transient server/header delay at the exact GUI request instant"
+  ],
+  "minimal_next_step": "Root RAM-only original sample probe should time connect/retain/request/getresponse and preserve full original sent-received RTT; reviewer sends no duplicate probes",
+  "recovery_policy": [
+    "Keep 1s RTT, original3s deadline, source verifier and same-boot monotonic policy unchanged",
+    "Do not move sent after connect or subtract local delay from the accepted clock sample",
+    "Do not replace/remove anchor or fallback to board wall clock",
+    "If a cold-import/setup cost is proved, prepare that setup before starting the untouched original sampled transaction, then root can perform one normal GUI restart",
+    "If transient CPU/server delay is proved, resolve that bounded contention before one normal GUI start rather than enlarging the time policy"
+  ],
+  "reviewer_board_actions": "Only four public-source file reads and startup manifest hash, via strict known-host SSH helper",
+  "reviewer_health_model_service_private_database_axis_or_production_mutations": false,
+  "unique_runtime_root_cause_proved": false
+}

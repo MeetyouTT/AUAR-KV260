@@ -1,0 +1,408 @@
+--- a/board/identity/voice_enrollment.py
++++ b/board/identity/voice_enrollment.py
+@@ -11,10 +11,23 @@
+         self.boot=boot_id;self.snapshot=snapshot;self.command=command;self.clock=clock
+         self.now_ms=now_ms
+         self.simple=simple
+-        self.lock=threading.RLock();self.reset()
+-
+-    def reset(self):
+-        with self.lock:
++        self.lock=threading.RLock();self.reset(trace_source='INITIALIZE')
++
++    def reset(self,*,trace_source='EXTERNAL'):
++        with self.lock:
++            # Keep the last failed handle trace visible after ordinary cleanup.
++            old=dict(getattr(self,'_reset_trace',{}))
++            source=trace_source if trace_source in ('INITIALIZE','INTERNAL','EXTERNAL') else 'other'
++            def count(key):
++                value=old.get(key,0)
++                return value if type(value) is int and 0<=value<2**53-1 else 0
++            phase=getattr(self,'stage',None)
++            self._reset_trace={'count':count('count')+1,'source':source,
++                'internal_count':count('internal_count')+int(source=='INTERNAL'),
++                'external_count':count('external_count')+int(source=='EXTERNAL'),
++                'phase':phase if phase in ('idle','name','authorize','sampling','confirm') else None,
++                'gate':self.confirmation_diagnostics()['gate'],
++                'had_sampling':bool(getattr(self,'sampling_id',''))}
+             sampling_id=getattr(self,'sampling_id','')
+             self.stage='idle';self.name='';self.owner=None;self.until=0;self.epoch=uuid.uuid4().hex
+             self.sampling_id=''
+@@ -62,7 +75,7 @@
+                             self.owner=copy.deepcopy(actual_owner);owner=copy.deepcopy(actual_owner)
+                     else:
+                         if stage=='failed':
+-                            self.reset();emit(speech.result('sample_failed'),True);return
++                            self.reset(trace_source='INTERNAL');emit(speech.result('sample_failed'),True);return
+                         if self.clock()>=self.until:raise ValueError('Sampling timeout')
+                         time.sleep(.15);continue
+                 if stage=='ready':
+@@ -73,14 +86,14 @@
+                             time.sleep(.15);continue
+                         if saved:
+                             with self.lock:self.sampling_id=''
+-                        self.reset();emit(speech.result('registered' if saved else 'failed'),True);return
++                        self.reset(trace_source='INTERNAL');emit(speech.result('registered' if saved else 'failed'),True);return
+                     with self.lock:
+                         if epoch!=self.epoch:raise InterruptedError('Sampling cancelled')
+                         self.stage='confirm';self.until=self.clock()+60;name=self.name
+                         code='confirm_update_name' if self.replace_id else 'confirm_name'
+                     emit(speech.result(code,name),True);return
+                 if stage=='failed':
+-                    self.reset();emit(speech.result('sample_failed'),True);return
++                    self.reset(trace_source='INTERNAL');emit(speech.result('sample_failed'),True);return
+                 if self.clock()>=self.until:raise ValueError('Sampling timeout')
+                 # Automatic save removes the last confirmation, not the cue
+                 # that tells a naturally turning user when to face the lens.
+@@ -89,12 +102,12 @@
+                 time.sleep(.15)
+             raise InterruptedError('Sampling request no longer current')
+         except (OSError,ValueError,KeyError,TypeError,RuntimeError):
+-            self.reset()
++            self.reset(trace_source='INTERNAL')
+             if is_current():
+                 try:emit(speech.result('sample_failed'),True)
+                 except (OSError,ValueError):pass
+         except InterruptedError:
+-            self.reset()
++            self.reset(trace_source='INTERNAL')
+ 
+     def _save_ready(self, snapshot, epoch, is_current):
+         """Use the upfront consent only for this name, revision and sample token."""
+@@ -130,7 +143,7 @@
+             # Never reset/cancel a later local workflow or an unrelated token.
+             if (epoch==self.epoch and self.owner==owner
+                     and self.sampling_id in ('',bound_id)):
+-                self.reset()
++                self.reset(trace_source='INTERNAL')
+         try:
+             if not is_current():raise InterruptedError('Stale sampling start')
+             params={'target':copy.deepcopy(self.selected_target(current))}
+@@ -215,8 +228,79 @@
+         return (snapshot['board_boot_id'],snapshot['service_epoch'],VoiceEnrollment.selected_target(snapshot),
+                 snapshot['modules'].get('identity',{}).get('db_version'))
+ 
++    def confirmation_diagnostics(self):
++        """Fixed enums/booleans only; no name, owner value, text, PCM or token."""
++        with self.lock:
++            value=dict(getattr(self,'_confirmation_trace',{}))
++        phases={'idle','name','authorize','sampling','confirm'}
++        gates={'HANDLE','IDENTITY_QUERY','CANCEL','EXPIRED','NOT_ENROLLMENT',
++            'CURRENT_SNAPSHOT','CAPTURE_MISSING','CAPTURE_NOT_ACTUAL','CURRENT_NOT_ACTUAL',
++            'CAPTURE_CURRENT_OWNER','CAPTURE_SINGLE','CURRENT_SINGLE','CURRENT_TARGET',
++            'READY_WINDOW_RETAINED','WORKFLOW_OWNER','KNOWN_FACE','CAPABILITY',
++            'ORIGINAL_FLOW','SAMPLING_START','ENROLL_SUBMIT','RAISED'}
++        def fixed(key,allowed):
++            item=value.get(key)
++            return item if type(item) is str and item in allowed else None
++        result={'version':1,'phase_enter':fixed('phase_enter',phases),'phase_exit':fixed('phase_exit',phases),
++            'gate':fixed('gate',gates),'reply_code':fixed('reply_code',speech.PROMPTS),
++            'exception':fixed('exception',{'ValueError','TypeError','KeyError','OSError','RuntimeError','InterruptedError','other'})}
++        for key in ('capture_present','capture_actual','current_snapshot_valid','current_actual',
++                    'capture_single','current_single','capture_current_owner_equal',
++                    'workflow_owner_equal','identity_enroll','identity_sample_start'):
++            result[key]=value.get(key) if type(value.get(key)) is bool else None
++        with self.lock:reset=dict(getattr(self,'_reset_trace',{}))
++        for key in ('count','internal_count','external_count'):
++            item=reset.get(key)
++            result['reset_'+key]=item if type(item) is int and 0<=item<2**53 else 0
++        result['reset_source']=reset.get('source') if reset.get('source') in ('INITIALIZE','INTERNAL','EXTERNAL','other') else None
++        result['reset_phase']=reset.get('phase') if reset.get('phase') in ('idle','name','authorize','sampling','confirm') else None
++        item=reset.get('gate');result['reset_gate']=item if type(item) is str and item in gates else None
++        result['reset_had_sampling']=reset.get('had_sampling') if type(reset.get('had_sampling')) is bool else None
++        return result
++
++    def _trace_confirmation(self,**values):
++        # Never retain a supplied snapshot, target, command, reply or exception.
++        enums={'phase_enter':{'idle','name','authorize','sampling','confirm'},
++            'phase_exit':{'idle','name','authorize','sampling','confirm'},
++            'gate':{'HANDLE','IDENTITY_QUERY','CANCEL','EXPIRED','NOT_ENROLLMENT','CURRENT_SNAPSHOT',
++                'CAPTURE_MISSING','CAPTURE_NOT_ACTUAL','CURRENT_NOT_ACTUAL','CAPTURE_CURRENT_OWNER',
++                'CAPTURE_SINGLE','CURRENT_SINGLE','CURRENT_TARGET','READY_WINDOW_RETAINED','WORKFLOW_OWNER',
++                'KNOWN_FACE','CAPABILITY','ORIGINAL_FLOW','SAMPLING_START','ENROLL_SUBMIT','RAISED'},
++            'reply_code':speech.PROMPTS,'exception':{'ValueError','TypeError','KeyError','OSError','RuntimeError','InterruptedError','other'}}
++        booleans={'capture_present','capture_actual','current_snapshot_valid','current_actual','capture_single',
++            'current_single','capture_current_owner_equal','workflow_owner_equal','identity_enroll','identity_sample_start'}
++        with self.lock:
++            old=dict(getattr(self,'_confirmation_trace',{}))
++            for key,value in values.items():
++                if key in booleans:old[key]=value if type(value) is bool else None
++                elif key in enums:old[key]=value if type(value) is str and value in enums[key] else None
++            self._confirmation_trace=old
++
+     def handle(self,text,capture_snapshot,*,is_current=lambda:True):
++        with self.lock:
++            previous_trace=dict(getattr(self,'_confirmation_trace',{}))
++            self._confirmation_trace={'phase_enter':self.stage if self.stage in ('idle','name','authorize','sampling','confirm') else None,'gate':'HANDLE',
++                'capture_present':capture_snapshot is not None,
++                'capture_actual':isinstance(capture_snapshot,dict) and capture_snapshot.get('source_kind')=='actual'}
++        try:
++            reply=self._handle(text,capture_snapshot,is_current=is_current)
++        except BaseException as error:
++            kind=type(error).__name__
++            self._trace_confirmation(phase_exit=self.stage,exception=kind if kind in
++                {'ValueError','TypeError','KeyError','OSError','RuntimeError','InterruptedError'} else 'other')
++            raise
++        if reply is None:
++            with self.lock:
++                if self._confirmation_trace.get('gate')=='NOT_ENROLLMENT':
++                    self._confirmation_trace=previous_trace
++                    return None
++        self._trace_confirmation(phase_exit=self.stage,
++            reply_code=reply.get('code') if isinstance(reply,dict) and type(reply.get('code')) is str and reply.get('code') in speech.PROMPTS else None)
++        return reply
++
++    def _handle(self,text,capture_snapshot,*,is_current=lambda:True):
+         if speech.identity_query_requested(text):
++            self._trace_confirmation(gate='IDENTITY_QUERY')
+             with self.lock:
+                 if not is_current():raise InterruptedError('Stale identity query')
+                 if self.stage!='idle':return speech.result('identity_busy')
+@@ -233,37 +317,61 @@
+         with self.lock:
+             if not is_current():raise InterruptedError('Stale enrollment turn')
+             active=self.stage!='idle'
+-            if speech.cancelled(text):self.reset();return speech.result('cancelled')
+-            if active and self.clock()>=self.until:self.reset();return speech.result('expired')
+-            if not active and not speech.enrollment_requested(text):return None
++            if speech.cancelled(text):
++                self._trace_confirmation(gate='CANCEL');self.reset(trace_source='INTERNAL');return speech.result('cancelled')
++            if active and self.clock()>=self.until:
++                self._trace_confirmation(gate='EXPIRED');self.reset(trace_source='INTERNAL');return speech.result('expired')
++            if not active and not speech.enrollment_requested(text):
++                self._trace_confirmation(gate='NOT_ENROLLMENT');return None
+             epoch=self.epoch
+         current=None
++        self._trace_confirmation(gate='CURRENT_SNAPSHOT',current_snapshot_valid=False)
+         try:
+             now=self.now_ms();current=validate_snapshot(self.snapshot(),self.boot,now)
++            self._trace_confirmation(current_snapshot_valid=True,current_actual=current['source_kind']=='actual',
++                identity_enroll=current['capabilities'].get('identity_enroll') is True,
++                identity_sample_start=current['capabilities'].get('identity_sample_start') is True)
+             # The capture-start snapshot was validated at capture start. It can
+             # now be older than its transport TTL; ownership must still match.
+-            if not capture_snapshot or capture_snapshot['source_kind']!='actual':raise ValueError('No capture-start owner')
+-            if current['source_kind']!='actual' or self.owner_of(capture_snapshot)!=self.owner_of(current):raise ValueError('Capture owner changed')
+-            if (not self.single_target(capture_snapshot) or not self.single_target(current)
+-                    or not self.selected_target(current)):raise ValueError('Ambiguous target')
++            if not capture_snapshot:
++                self._trace_confirmation(gate='CAPTURE_MISSING');raise ValueError('No capture-start owner')
++            if capture_snapshot['source_kind']!='actual':
++                self._trace_confirmation(gate='CAPTURE_NOT_ACTUAL');raise ValueError('No capture-start owner')
++            if current['source_kind']!='actual':
++                self._trace_confirmation(gate='CURRENT_NOT_ACTUAL');raise ValueError('Capture owner changed')
++            same=self.owner_of(capture_snapshot)==self.owner_of(current)
++            self._trace_confirmation(gate='CAPTURE_CURRENT_OWNER',capture_current_owner_equal=same)
++            if not same:raise ValueError('Capture owner changed')
++            capture_single=self.single_target(capture_snapshot);current_single=self.single_target(current)
++            self._trace_confirmation(capture_single=capture_single,current_single=current_single)
++            if not capture_single:
++                self._trace_confirmation(gate='CAPTURE_SINGLE');raise ValueError('Ambiguous target')
++            if not current_single:
++                self._trace_confirmation(gate='CURRENT_SINGLE');raise ValueError('Ambiguous target')
++            if not self.selected_target(current):
++                self._trace_confirmation(gate='CURRENT_TARGET');raise ValueError('Ambiguous target')
+         except (ValueError,KeyError,TypeError,OSError):
+             with self.lock:
+                 if epoch==self.epoch and is_current() and self._keep_ready(current):
++                    self._trace_confirmation(gate='READY_WINDOW_RETAINED')
+                     return speech.result('confirm_update_name' if self.replace_id else 'confirm_name',self.name)
+-            self.reset();return speech.result('changed' if active else 'face_unavailable')
++            self.reset(trace_source='INTERNAL');return speech.result('changed' if active else 'face_unavailable')
+         with self.lock:
+             if epoch!=self.epoch or not is_current():raise InterruptedError('Cancelled enrollment workflow')
+             owner=self.owner_of(current)
+             identity=current['modules'].get('identity',{})
+             sampling=identity.get('enrollment_sampling')
++            self._trace_confirmation(gate='WORKFLOW_OWNER',workflow_owner_equal=owner==self.owner)
+             if active and owner!=self.owner:
+                 if (self.stage=='confirm' and sampling and sampling.get('stage')=='ready'
+                         and sampling.get('session_id')==self.sampling_id and sampling.get('bound_target')==owner[2]
+                         and owner[:2]==self.owner[:2] and owner[3]==self.owner[3]
+                         and owner[2]['camera_epoch']==self.owner[2]['camera_epoch']):
+                     self.owner=copy.deepcopy(owner)
+-                else:self.reset();return speech.result('changed')
+-            if identity.get('state')=='KNOWN':self.reset();return speech.result('already_known')
++                else:self.reset(trace_source='INTERNAL');return speech.result('changed')
++            if identity.get('state')=='KNOWN':
++                self._trace_confirmation(gate='KNOWN_FACE');self.reset(trace_source='INTERNAL');return speech.result('already_known')
++            self._trace_confirmation(gate='CAPABILITY')
+             if not (current['capabilities'].get('identity_enroll') or
+                     sampling and (current['capabilities'].get('identity_sample_start') or self.stage=='sampling')):
+                 if (self.stage=='confirm' and sampling and sampling.get('stage')=='ready'
+@@ -272,7 +380,8 @@
+                     # low-score frame can block this write, but must not discard
+                     # that window or silently authorize a weaker match.
+                     return speech.result('confirm_update_name' if self.replace_id else 'confirm_name',self.name)
+-                self.reset();return speech.result('face_unavailable')
++                self.reset(trace_source='INTERNAL');return speech.result('face_unavailable')
++            self._trace_confirmation(gate='ORIGINAL_FLOW')
+             if not active:
+                 self.stage='name';self.owner=copy.deepcopy(owner);self.until=self.clock()+120
+                 name=speech.requested_name(text)
+@@ -288,22 +397,24 @@
+                     self.replace_id=existing['person_id'] if existing else ''
+                     if existing:params.update(replace_person_id=self.replace_id,db_version=identity['db_version'])
+                     ack=self._send('identity_sample_start',params,current)
+-                    if not ack.get('accepted'):self.reset();return speech.result('sample_failed')
++                    if not ack.get('accepted'):self.reset(trace_source='INTERNAL');return speech.result('sample_failed')
+                     sample=self.snapshot()['modules']['identity'].get('enrollment_sampling',{})
+-                    if not sample.get('session_id'):self.reset();return speech.result('sample_failed')
++                    if not sample.get('session_id'):self.reset(trace_source='INTERNAL');return speech.result('sample_failed')
+                     self.name=name;self.stage='sampling';self.sampling_id=sample['session_id'];self.until=self.clock()+90
+                     return speech.result('sample_front')
+                 self.name=name;self.stage='confirm';self.until=self.clock()+120
+                 if sampling:
+                     # Renaming an already sampled replacement could silently
+                     # change the future-gallery check. Re-sample instead.
+-                    self.reset();return speech.result('sample_failed')
++                    self.reset(trace_source='INTERNAL');return speech.result('sample_failed')
+                 return speech.result('confirm_name',name)
+             if self.stage=='name':return speech.result('bad_name')
+             if self.replace_id:
+                 if not speech.update_confirmed(text):return speech.result('retry_update')
+             elif not speech.confirmed(text):return speech.result('retry_confirm')
+-            if self.stage=='authorize':return self._start_simple(current,is_current=is_current)
++            if self.stage=='authorize':
++                self._trace_confirmation(gate='SAMPLING_START')
++                return self._start_simple(current,is_current=is_current)
+             name=self.name;target=copy.deepcopy(self.selected_target(current))
+             command_id='voice-enroll-'+uuid.uuid4().hex
+             now=self.now_ms()
+@@ -316,6 +427,7 @@
+         # Explicit oral confirmation authorizes this atomic transaction. A later
+         # playback cancellation does not undo an already committed enrollment.
+         try:
++            self._trace_confirmation(gate='ENROLL_SUBMIT')
+             ack=self.command(command)
+             latest=validate_snapshot(self.snapshot(),self.boot,self.now_ms())
+             state=latest['modules'].get('identity',{})
+@@ -328,6 +440,6 @@
+                         return speech.result('confirm_update_name' if self.replace_id else 'confirm_name',self.name)
+                 raise ValueError('Enrollment transaction not confirmed')
+         except Exception:
+-            self.reset();return speech.result('failed')
++            self.reset(trace_source='INTERNAL');return speech.result('failed')
+         with self.lock:self.sampling_id=''
+-        self.reset();return speech.result('registered')
++        self.reset(trace_source='INTERNAL');return speech.result('registered')
+--- a/common/identity_links.py
++++ b/common/identity_links.py
+@@ -141,18 +141,81 @@
+             db.execute('INSERT INTO binding_attempts(attempt_id,origin,name,anonymous_id,face_guard,face_gallery,voice_gallery,state,expires,person_id) VALUES(?,?,?,?,?,?,?,?,?,?)',
+              (attempt,_canonical(meta).decode(),name,alias,json.dumps(guard),json.dumps(face),json.dumps(voice),'AWAIT_CONFIRMATION',self.clock()+self.attempt_seconds,selected_person_id))
+             return {'attempt_id':attempt,'state':'AWAIT_CONFIRMATION','name':name,'face_already_saved':False,'unified_saved':False,'personal_memory_allowed':False}
++    def confirmation_diagnostics(self):
++        """Read RAM scalars only; never opens the registry or exports owners."""
++        value=dict(getattr(self,'_confirmation_trace',{}))
++        phases={'AWAIT_CONFIRMATION','SAMPLING_FACE','SAMPLING_VOICE','ACTIVE','CANCELLED','EXPIRED',
++                'PARTIAL_CANCELLED','PARTIAL_EXPIRED','PARTIAL_CONFLICT'}
++        gates={'CONTEXT','VISUAL','EXPIRE','ATTEMPT','STATE','DISTINCT_CAPTURE','EXPLICIT_CONFIRMATION',
++            'GUARD','LIFECYCLE_CHANGED','CONFIRMED','NOT_CONFIRMATION','FOREIGN_ATTEMPT','OLD_GENERATION'}
++        reasons={'NO_VISUAL_EVIDENCE','NO_SINGLE_FACE','MULTIPLE_FACES','FACE_LIFECYCLE_CHANGED',
++            'CAMERA_SERVICE_CHANGED','CAMERA_NOT_READY','CAMERA_EPOCH_CHANGED','FACE_IDENTITY_CHANGED',
++            'FACE_IDENTITY_UNVERIFIED','UNVERIFIED_VISUAL_SOURCE','VISUAL_STALE_OR_INVALID',
++            'VISUAL_PROVIDER_UNAVAILABLE','VISUAL_EXPIRED_BEFORE_ANALYSIS','NOT_ACTIVE_SPEAKER_PROOF'}
++        def fixed(key,allowed):
++            item=value.get(key)
++            return item if type(item) is str and item in allowed else None
++        result={'version':1,'gate':fixed('gate',gates),'phase':fixed('phase',phases),
++            'outcome':fixed('outcome',{'TRUE','FALSE','ValueError','TimeoutError','other'}),
++            'visual_state':fixed('visual_state',{'UNAVAILABLE','FACE_AT_CAPTURE_BOUNDARIES'}),
++            'visual_reason':fixed('visual_reason',reasons)}
++        for key in ('visual_present','visual_actual','visual_context_matches','visual_guard_valid',
++            'actor_matches','generation_not_old','request_distinct','capture_distinct','pcm_distinct',
++            'explicit_confirmation','service_epoch_same','camera_epoch_same','target_same',
++            'gallery_revision_same','face_identity_same','guard_same'):
++            result[key]=value.get(key) if type(value.get(key)) is bool else None
++        return result
++
+     def confirm(self,attempt_id,meta,text,visual):
+-        meta=context(meta);guard=_guard(visual,meta);self.expire()
+-        with self._db(write=True) as db:
+-            row=self._attempt(db,attempt_id,meta)
+-            if row['state']!='AWAIT_CONFIRMATION':raise ValueError('Binding is not awaiting confirmation')
+-            original=json.loads(row['origin'])
+-            if meta['request_id']==original['request_id'] or meta['capture_id']==original['capture_id'] or meta['pcm_sha256']==original['pcm_sha256']:
+-                raise ValueError('Confirmation must be a distinct capture')
+-            if not (confirmed(text) or update_confirmed(text)):return False
+-            if guard!=json.loads(row['face_guard']):
+-                db.execute("UPDATE binding_attempts SET state='CANCELLED',name=NULL,error='FACE_LIFECYCLE_CHANGED' WHERE attempt_id=?",(attempt_id,));return False
+-            db.execute("UPDATE binding_attempts SET state='SAMPLING_FACE',confirmed_context=? WHERE attempt_id=?",(_canonical(meta).decode(),attempt_id));return True
++        # Only one bounded RAM trace. No prompt, name, identifier or target value.
++        trace={'gate':'CONTEXT','visual_present':visual is not None}
++        self._confirmation_trace=trace
++        try:
++            meta=context(meta)
++            trace.update(gate='VISUAL',visual_actual=isinstance(visual,dict) and visual.get('source_kind')=='actual',
++                visual_context_matches=isinstance(visual,dict) and visual.get('context')==meta)
++            if isinstance(visual,dict):
++                # Filter these before retention, as well as at the public boundary.
++                state=visual.get('state');reason=visual.get('reason')
++                if type(state) is str and state in ('UNAVAILABLE','FACE_AT_CAPTURE_BOUNDARIES'):trace['visual_state']=state
++                allowed={'NO_VISUAL_EVIDENCE','NO_SINGLE_FACE','MULTIPLE_FACES','FACE_LIFECYCLE_CHANGED',
++                    'CAMERA_SERVICE_CHANGED','CAMERA_NOT_READY','CAMERA_EPOCH_CHANGED','FACE_IDENTITY_CHANGED',
++                    'FACE_IDENTITY_UNVERIFIED','UNVERIFIED_VISUAL_SOURCE','VISUAL_STALE_OR_INVALID',
++                    'VISUAL_PROVIDER_UNAVAILABLE','VISUAL_EXPIRED_BEFORE_ANALYSIS','NOT_ACTIVE_SPEAKER_PROOF'}
++                if type(reason) is str and reason in allowed:trace['visual_reason']=reason
++            guard=_guard(visual,meta);trace.update(visual_guard_valid=True,gate='EXPIRE');self.expire()
++            with self._db(write=True) as db:
++                trace['gate']='ATTEMPT'
++                try:row=self._attempt(db,attempt_id,meta)
++                except ValueError as error:
++                    if str(error)=='Foreign binding attempt':trace.update(gate='FOREIGN_ATTEMPT',actor_matches=False)
++                    elif str(error)=='Old binding generation':trace.update(gate='OLD_GENERATION',generation_not_old=False)
++                    raise
++                trace.update(gate='STATE',phase=row['state'],actor_matches=True,generation_not_old=True)
++                if row['state']!='AWAIT_CONFIRMATION':raise ValueError('Binding is not awaiting confirmation')
++                original=json.loads(row['origin'])
++                trace.update(gate='DISTINCT_CAPTURE',request_distinct=meta['request_id']!=original['request_id'],
++                    capture_distinct=meta['capture_id']!=original['capture_id'],pcm_distinct=meta['pcm_sha256']!=original['pcm_sha256'])
++                if meta['request_id']==original['request_id'] or meta['capture_id']==original['capture_id'] or meta['pcm_sha256']==original['pcm_sha256']:
++                    raise ValueError('Confirmation must be a distinct capture')
++                trace['gate']='EXPLICIT_CONFIRMATION'
++                explicit=confirmed(text) or update_confirmed(text);trace['explicit_confirmation']=bool(explicit)
++                if not explicit:
++                    trace.update(gate='NOT_CONFIRMATION',outcome='FALSE');return False
++                trace['gate']='GUARD';original_guard=json.loads(row['face_guard'])
++                for key,label in (('service_epoch','service_epoch_same'),('camera_epoch','camera_epoch_same'),
++                    ('target','target_same'),('gallery_revision','gallery_revision_same'),('face_identity_id','face_identity_same')):
++                    trace[label]=isinstance(original_guard,dict) and key in original_guard and guard[key]==original_guard[key]
++                trace['guard_same']=guard==original_guard
++                if guard!=original_guard:
++                    db.execute("UPDATE binding_attempts SET state='CANCELLED',name=NULL,error='FACE_LIFECYCLE_CHANGED' WHERE attempt_id=?",(attempt_id,))
++                    trace.update(gate='LIFECYCLE_CHANGED',phase='CANCELLED',outcome='FALSE');return False
++                db.execute("UPDATE binding_attempts SET state='SAMPLING_FACE',confirmed_context=? WHERE attempt_id=?",(_canonical(meta).decode(),attempt_id))
++                trace.update(gate='CONFIRMED',phase='SAMPLING_FACE',outcome='TRUE');return True
++        except BaseException as error:
++            kind=type(error).__name__
++            trace['outcome']=kind if kind in ('ValueError','TimeoutError') else 'other'
++            raise
+     def _receipt(self,row,envelope):
+         p=self.authority.verify(envelope)
+         required={'version','attempt_id','origin_context','commit_context','modality','state','operation_id','store_id','identity_id','model_id',
+--- a/board/runtime/board_speaker_business.py
++++ b/board/runtime/board_speaker_business.py
+@@ -353,6 +353,8 @@
+         value = dict(ready=hub is not None,active=bool(hub and (hub.speaker.sessions or binding and
+                     (binding.router.active or binding.router.name_waiting))),speaker_calibrated=False,
+                     automatic_profile_access=False,pcm_persisted=False,single_cpu_worker=True)
++        if binding is not None:
++            value['confirmation_trace']=binding.registry.confirmation_diagnostics()
+         with self.lock:
+             self.public_state = value
+ 
+--- a/board/runtime/board_business.py
++++ b/board/runtime/board_business.py
+@@ -167,9 +167,11 @@
+ 
+     def public(self):
+         state = self.flow.public()
++        state['confirmation_trace']={'face':self.flow.confirmation_diagnostics()}
+         if self.business is not None:
+             state = dict(state, active=state['active'] or self.business.public()['active'],
+                          speaker=self.business.public())
++            state['confirmation_trace']['unified']=copy.deepcopy(state['speaker'].get('confirmation_trace'))
+         return state
+ 
+     def _visual(self, job):

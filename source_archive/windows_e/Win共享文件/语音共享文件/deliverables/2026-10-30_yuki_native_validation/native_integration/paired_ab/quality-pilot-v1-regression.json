@@ -1,0 +1,847 @@
+{
+  "schema": "aura.paired_ab.quality.suite.v1",
+  "status": "UNKNOWN",
+  "suite_status": "COMPLETE",
+  "suite_checks": {
+    "formal_order": {
+      "status": "UNKNOWN",
+      "reason": "Formal order must be ABBAABBA C B B C; a short pilot is not formal evidence",
+      "evidence": {
+        "expected": [
+          "old",
+          "new",
+          "new",
+          "old",
+          "old",
+          "new",
+          "new",
+          "old",
+          "old_nojpeg",
+          "new",
+          "new",
+          "old_nojpeg"
+        ],
+        "observed": [
+          "old",
+          "new"
+        ],
+        "main_pairs": [
+          [
+            1,
+            2
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            8,
+            7
+          ]
+        ],
+        "control_pairs": [
+          [
+            9,
+            10
+          ],
+          [
+            12,
+            11
+          ]
+        ]
+      }
+    },
+    "common_camera_pid": {
+      "status": "PASS",
+      "reason": "Common camera process must not silently restart between paired runs",
+      "evidence": {
+        "pids": [
+          1333
+        ]
+      }
+    },
+    "common_inputs": {
+      "status": "PASS",
+      "reason": "All cases must use the same public workload/window/config hashes",
+      "evidence": {
+        "fields": {
+          "scenario_sha256": {
+            "values": [
+              "26474050aaa8802ae487449dd7ea0c374bc9e6662c8d4c7dcf06ce9890e00cdd"
+            ],
+            "complete": true
+          },
+          "pcm_sha256": {
+            "values": [
+              "042aaef5c97f12c8ff5eb49bcec0773b8e64fe26cfea05a26171ee20ca653958"
+            ],
+            "complete": true
+          },
+          "envelope_sha256": {
+            "values": [
+              "4d2d7b4810bcac974224fdaddb15b62dc12aa922707610c1fafef535760a610c"
+            ],
+            "complete": true
+          },
+          "window_sha256": {
+            "values": [
+              "9e0d8e45c03622bd2ff6e9f2a4b2de52f3143fd5da01cedf16b5310deb5ef627"
+            ],
+            "complete": true
+          },
+          "config_sha256": {
+            "values": [
+              "3ef876989cb00bfae637de48d45e19c9a8ec37fc228ae41747d70267f48722a1"
+            ],
+            "complete": true
+          }
+        }
+      }
+    }
+  },
+  "cases": [
+    {
+      "schema": "aura.paired_ab.quality.case.v1",
+      "index": 1,
+      "backend": "old",
+      "status": "UNKNOWN",
+      "checks": {
+        "source_evidence": {
+          "status": "PASS",
+          "reason": "All original files are read only; missing evidence does not remove the run",
+          "evidence": {
+            "read_errors": [],
+            "case_dir": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_yuki_native_validation\\evidence\\native_integration\\paired_ab\\pilot-v1-shutdown\\runs\\pilot-v1\\01-old",
+            "backend": "old",
+            "source_hashes": {
+              "board/runtime/fsm.py": "1d0f909764133c99e9dac3ea92ec469758aeedda2abafbb2c1feec43307e63c8",
+              "board/runtime/portrait_offload.py": "01f034c25bb2306294e4c496a76a969cb5cacc27cfde5198e3baf2b7e5268c4c",
+              "common/portrait_wire.py": "8079b5c23f40abfc90f88fa9141adb3b0e83ab07c8df87d6ef8e1fe3cf935550",
+              "tools/board_avatar_affine.py": "3428a613a9561b275f551c8f4163b5cd4160cacb0464b4d4e80986c20bcbaa3a",
+              "tools/board_avatar_gtk.py": "874f0075741b0794a6bed4ba8aab33dfd0280e57a899d63a38ffa70f76b3cda9",
+              "tools/board_avatar_worker.py": "3eff9cbda4705e18c799b0d0ace3a944f29dcf118ae8a8dfa0a24bb458d2e25e",
+              "tools/demo_script.py": "e5f37b604681127f6553df971bba5f96a8e89bb87c0fef60185dec1d403d166b",
+              "tools/demo_stage.py": "285b7036652fe77d10a94f8e37f399aa3b50aafa219d7a0f68bf257ff1c52448",
+              "tools/facial_layers.py": "6601c59b8e6bb99439ee20ae956c1c7c8f0f90f368afb3a33d878fbcf202cb7b",
+              "tools/gstreamer_audio_engine.py": "db81c4e510eb2323edbb59e962bad2fb1f6d7784c1f76db79b8f5baded515cad",
+              "tools/gstreamer_audio_worker.py": "63fd37185b6aa6909134945a440be2c33781ed95d2e81dfd95905afe4e17dce7",
+              "tools/idle_body_compositor.py": "b0fa6642d9836fffb5d18ecbb8122e9ebbc43351b3e954433d477db1534d9e3f",
+              "tools/native_pixels.py": "ccdc93a2432093387b45047d83775e593a59b6887a4ac7db84c3b5cec4c37742",
+              "tools/native_video.py": "21a658510062e519f00b38395eb393254203a9d8ee2cc1311cfabbcdb2bc5601",
+              "tools/pillow_compat.py": "3a0e77ac239e6c59fc184358f635cb7b6ef521d08adcade93827f265d4cad4c7",
+              "tools/realtime_controller.py": "0c4f77bdd5f639ec8efc174ba186ca9c6d8fc63ba811c9d66c35c1d204009a4d",
+              "tools/realtime_facials.py": "b7dadf10ffc0d91441029df77d0d7cde121b2b991b6d8c47fbea9a15f08d5036",
+              "tools/render_performance.py": "eec3d44c1e97a88a48d316f6634bf10f012f0b730b392590aa71711254fa0ea9",
+              "tools/libaura_pixels.so": "201adac318e23411e608556fce360a335c422b129f64fa56e4d908ba39ab958f"
+            },
+            "harness_hashes": {
+              "paired_renderer_harness.py": "ac9408c346f59c98bf8afec9615de9347807c1e507f921dcd832c2730da0523b",
+              "old_renderer_harness.py": "4da7c98151f633a5920818481dda4baacf977a31390a1a76b18f7b7f17652f81",
+              "old_harness_support.py": "0695c9b3f8732e1b9aaf7174e27000c92e09a7c2bfd19564d80ea59ebdd93f64"
+            },
+            "pcm_sha256": "042aaef5c97f12c8ff5eb49bcec0773b8e64fe26cfea05a26171ee20ca653958",
+            "envelope_sha256": "4d2d7b4810bcac974224fdaddb15b62dc12aa922707610c1fafef535760a610c"
+          }
+        },
+        "completed_expected_backend": {
+          "status": "PASS",
+          "reason": "Case completion and actual summary backend must match the selected backend",
+          "evidence": {
+            "row_status": "COMPLETE",
+            "summary_status": "COMPLETE",
+            "returncode": 0,
+            "actual_backend": "fresh-r3-remote16",
+            "expected_backend": "fresh-r3-remote16"
+          }
+        },
+        "scenario_binding": {
+          "status": "PASS",
+          "reason": "Scenario file hash binding",
+          "evidence": {
+            "expected_sha256": "26474050aaa8802ae487449dd7ea0c374bc9e6662c8d4c7dcf06ce9890e00cdd",
+            "actual_sha256": "26474050aaa8802ae487449dd7ea0c374bc9e6662c8d4c7dcf06ce9890e00cdd"
+          }
+        },
+        "commands_accepted_and_scheduled": {
+          "status": "PASS",
+          "reason": "Expected events, unique IDs, successful outcomes and coarse scheduling fidelity; accepting toggle_pause alone does not prove a pause",
+          "evidence": {
+            "expected": 5,
+            "observed": 5,
+            "expected_indexes": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "actual_indexes": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "wrong_events": [],
+            "missing_outcomes": [],
+            "rejected": [],
+            "late": [],
+            "allowed_enqueue_lateness_seconds": 0.5
+          }
+        },
+        "snapshot_and_duration_coverage": {
+          "status": "PASS",
+          "reason": "Only sampled state is verified; no sub-frame response or physical scanout/audio latency is claimed",
+          "evidence": {
+            "samples": 74,
+            "nominal_seconds": 0.2,
+            "observed_median_seconds": 0.20629081299557583,
+            "observed_maximum_gap_seconds": 0.22673698799917474,
+            "first_elapsed": 0.0,
+            "last_elapsed": 15.037185494998994,
+            "measured_duration_seconds": 15.037185494998994,
+            "requested_duration_seconds": 15
+          }
+        },
+        "common_live_ui_boundaries": {
+          "status": "PASS",
+          "reason": "Common production UI is checked at run boundaries only; this does not prove its state between them",
+          "evidence": {
+            "before": {
+              "available": true,
+              "portrait": {
+                "mode": "remote",
+                "selected": true,
+                "target_fps": 16,
+                "fallback_fps": 8
+              },
+              "display": {
+                "kind": "native_sink_handoff",
+                "fps": 15.737010316038916,
+                "age_ms": 59.36632300290512
+              },
+              "settings": {
+                "economy": false,
+                "fullscreen": true
+              },
+              "playing": false,
+              "paused": false
+            },
+            "after": {
+              "available": true,
+              "portrait": {
+                "mode": "remote",
+                "selected": true,
+                "target_fps": 16,
+                "fallback_fps": 8
+              },
+              "display": {
+                "kind": "native_sink_handoff",
+                "fps": 15.738605174450433,
+                "age_ms": 30.901168996933848
+              },
+              "settings": {
+                "economy": false,
+                "fullscreen": true
+              },
+              "playing": false,
+              "paused": false
+            }
+          }
+        },
+        "actual_pcm_per_submit": {
+          "status": "PASS",
+          "reason": "Each submit needs actual sampled playing/advancing audio clock and converted bytes at48k stereo S16LE; accepted commands alone are insufficient",
+          "evidence": {
+            "turns": [
+              {
+                "index": 1,
+                "at": 4,
+                "until": 12,
+                "status": "PASS",
+                "playing_samples": 29,
+                "clock_range": {
+                  "min": 0.17008593299999997,
+                  "max": 5.797258693,
+                  "span": 5.62717276
+                },
+                "converted_byte_delta": 1326844,
+                "expected_caps": {
+                  "format": "S16LE",
+                  "rate": 48000,
+                  "channels": 2
+                },
+                "exact_expected_caps_observed": true,
+                "unexpected_caps": []
+              }
+            ]
+          }
+        },
+        "pause_clock_and_resume": {
+          "status": "PASS",
+          "reason": "A pause is proved only at sampled paused points with an unchanged clock, followed by sampled resumed progress",
+          "evidence": {
+            "pairs": [
+              {
+                "pause_index": 2,
+                "resume_index": 3,
+                "status": "PASS",
+                "paused_samples": 4,
+                "paused_clock_range": {
+                  "min": 2.853824974,
+                  "max": 2.853824974,
+                  "span": 0.0
+                },
+                "resumed_playing_samples": 15,
+                "resumed_clock_range": {
+                  "min": 2.922486781,
+                  "max": 5.797258693,
+                  "span": 2.874771912
+                },
+                "numeric_equality_tolerance": 1e-06,
+                "note": "Stored-value equality is not microsecond response precision; paused playing may remain true in the real old controller"
+              }
+            ]
+          }
+        },
+        "cancel_stop_and_clear_mouth": {
+          "status": "PASS",
+          "reason": "After a conservative0.5s settling allowance, verify sampled stopped/clear-mouth state and no clock progress until the next turn; not a37ms cancellation claim",
+          "evidence": {
+            "events": [
+              {
+                "index": 0,
+                "at": 0,
+                "stable_window_begin": 0.5108523980015889,
+                "until": 4,
+                "status": "PASS",
+                "samples": 17,
+                "clock_range": {
+                  "min": 0.0,
+                  "max": 0.0,
+                  "span": 0.0
+                },
+                "violations": [],
+                "settle_allowance_seconds": 0.5
+              },
+              {
+                "index": 4,
+                "at": 12,
+                "stable_window_begin": 12.500707446000888,
+                "until": 15,
+                "status": "PASS",
+                "samples": 12,
+                "clock_range": {
+                  "min": 5.853498026,
+                  "max": 5.853498026,
+                  "span": 0.0
+                },
+                "violations": [],
+                "settle_allowance_seconds": 0.5
+              }
+            ]
+          }
+        },
+        "jpeg_feature_behavior": {
+          "status": "PASS",
+          "reason": "B/C require zero recorded JPEG bytes; A must actually retain its preview feature",
+          "evidence": {
+            "samples": 74,
+            "positive_samples": 74,
+            "maximum_bytes": 48832
+          }
+        },
+        "camera_availability_coverage": {
+          "status": "UNKNOWN",
+          "reason": "Camera availability/coverage is not fully proved; original run is retained",
+          "evidence": {
+            "raw_os_samples_available": true,
+            "attempted": 2,
+            "available": 2,
+            "unavailable": [],
+            "available_span_seconds": 5.040111129004799,
+            "measured_span_seconds": 15.037185494998994,
+            "coverage_fraction": 0.3351764950083923,
+            "minimum_coverage_fraction": 0.75,
+            "maximum_adjacent_gap_seconds": 5.040111129004799,
+            "edge_gaps_seconds": [
+              5.961292041996785,
+              4.0357823239974095
+            ],
+            "allowed_maximum_gap_seconds": 7.0
+          }
+        },
+        "camera_same_pid": {
+          "status": "PASS",
+          "reason": "Camera PID must remain observable and constant; restart prevents a same-workload claim",
+          "evidence": {
+            "pids": [
+              1333
+            ],
+            "missing_pid_samples": 0
+          }
+        },
+        "camera_error_flags": {
+          "status": "PASS",
+          "reason": "Explicit camera/detector/preview health flags; absence is not treated as no error",
+          "evidence": {
+            "error_samples": [],
+            "complete_flag_coverage": true
+          }
+        },
+        "camera_counter_continuity_and_work": {
+          "status": "PASS",
+          "reason": "Counter resets prevent a continuity claim; zero increments are UNKNOWN workload evidence, never a rule to delete a run. Identity zero is allowed when idle",
+          "evidence": {
+            "counters": {
+              "capture_frames": {
+                "samples": 2,
+                "delta": 63,
+                "span_seconds": 5.040111129004799,
+                "per_second": 12.499724388505642,
+                "resets": []
+              },
+              "detected_frames": {
+                "samples": 2,
+                "delta": 50,
+                "span_seconds": 5.040111129004799,
+                "per_second": 9.920416181353685,
+                "resets": []
+              },
+              "preview_frames": {
+                "samples": 2,
+                "delta": 62,
+                "span_seconds": 5.040111129004799,
+                "per_second": 12.30131606487857,
+                "resets": []
+              },
+              "identity.processed": {
+                "samples": 2,
+                "delta": 0,
+                "span_seconds": 5.040111129004799,
+                "per_second": 0.0,
+                "resets": []
+              }
+            },
+            "reset_counters": [],
+            "missing_counters": [],
+            "required_counters_with_zero_delta": []
+          }
+        },
+        "camera_people_context": {
+          "status": "UNKNOWN",
+          "reason": "Observed people-count context only; missing counts are not inferred as zero or an identical scene",
+          "evidence": {
+            "points": [],
+            "counts": [],
+            "available_samples": 2
+          }
+        }
+      },
+      "original_run_retained": true,
+      "status_meaning": "FAIL/UNKNOWN limits workload comparability conclusions; it does not delete or hide measurements. PASS is not a cost-reduction verdict.",
+      "automatic_replacement_authorized": false,
+      "observation_limits": [
+        "200ms sampled controller/renderer state; no between-sample response precision",
+        "A identity callback entry and B EGL swap completion are distinct stages; neither is scanout",
+        "Synchronous fakesink proves the public PCM pipeline, not physical speaker/audio acceptance",
+        "Camera health nominal5s; counters may describe different service work when scene/people context changes"
+      ]
+    },
+    {
+      "schema": "aura.paired_ab.quality.case.v1",
+      "index": 2,
+      "backend": "new",
+      "status": "UNKNOWN",
+      "checks": {
+        "source_evidence": {
+          "status": "PASS",
+          "reason": "All original files are read only; missing evidence does not remove the run",
+          "evidence": {
+            "read_errors": [],
+            "case_dir": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-10-30_yuki_native_validation\\evidence\\native_integration\\paired_ab\\pilot-v1-shutdown\\runs\\pilot-v1\\02-new",
+            "backend": "new",
+            "source_hashes": {
+              "board/runtime/fsm.py": "1d0f909764133c99e9dac3ea92ec469758aeedda2abafbb2c1feec43307e63c8",
+              "board/runtime/portrait_offload.py": "01f034c25bb2306294e4c496a76a969cb5cacc27cfde5198e3baf2b7e5268c4c",
+              "common/portrait_wire.py": "8079b5c23f40abfc90f88fa9141adb3b0e83ab07c8df87d6ef8e1fe3cf935550",
+              "tools/board_avatar_affine.py": "3428a613a9561b275f551c8f4163b5cd4160cacb0464b4d4e80986c20bcbaa3a",
+              "tools/board_avatar_gtk.py": "874f0075741b0794a6bed4ba8aab33dfd0280e57a899d63a38ffa70f76b3cda9",
+              "tools/board_avatar_worker.py": "3eff9cbda4705e18c799b0d0ace3a944f29dcf118ae8a8dfa0a24bb458d2e25e",
+              "tools/demo_script.py": "e5f37b604681127f6553df971bba5f96a8e89bb87c0fef60185dec1d403d166b",
+              "tools/demo_stage.py": "285b7036652fe77d10a94f8e37f399aa3b50aafa219d7a0f68bf257ff1c52448",
+              "tools/facial_layers.py": "6601c59b8e6bb99439ee20ae956c1c7c8f0f90f368afb3a33d878fbcf202cb7b",
+              "tools/gstreamer_audio_engine.py": "db81c4e510eb2323edbb59e962bad2fb1f6d7784c1f76db79b8f5baded515cad",
+              "tools/gstreamer_audio_worker.py": "63fd37185b6aa6909134945a440be2c33781ed95d2e81dfd95905afe4e17dce7",
+              "tools/idle_body_compositor.py": "b0fa6642d9836fffb5d18ecbb8122e9ebbc43351b3e954433d477db1534d9e3f",
+              "tools/native_pixels.py": "ccdc93a2432093387b45047d83775e593a59b6887a4ac7db84c3b5cec4c37742",
+              "tools/native_video.py": "21a658510062e519f00b38395eb393254203a9d8ee2cc1311cfabbcdb2bc5601",
+              "tools/pillow_compat.py": "3a0e77ac239e6c59fc184358f635cb7b6ef521d08adcade93827f265d4cad4c7",
+              "tools/realtime_controller.py": "0c4f77bdd5f639ec8efc174ba186ca9c6d8fc63ba811c9d66c35c1d204009a4d",
+              "tools/realtime_facials.py": "b7dadf10ffc0d91441029df77d0d7cde121b2b991b6d8c47fbea9a15f08d5036",
+              "tools/render_performance.py": "eec3d44c1e97a88a48d316f6634bf10f012f0b730b392590aa71711254fa0ea9",
+              "tools/libaura_pixels.so": "201adac318e23411e608556fce360a335c422b129f64fa56e4d908ba39ab958f"
+            },
+            "harness_hashes": {
+              "paired_renderer_harness.py": "ac9408c346f59c98bf8afec9615de9347807c1e507f921dcd832c2730da0523b",
+              "old_renderer_harness.py": "4da7c98151f633a5920818481dda4baacf977a31390a1a76b18f7b7f17652f81",
+              "old_harness_support.py": "0695c9b3f8732e1b9aaf7174e27000c92e09a7c2bfd19564d80ea59ebdd93f64"
+            },
+            "pcm_sha256": "042aaef5c97f12c8ff5eb49bcec0773b8e64fe26cfea05a26171ee20ca653958",
+            "envelope_sha256": "4d2d7b4810bcac974224fdaddb15b62dc12aa922707610c1fafef535760a610c"
+          }
+        },
+        "completed_expected_backend": {
+          "status": "PASS",
+          "reason": "Case completion and actual summary backend must match the selected backend",
+          "evidence": {
+            "row_status": "COMPLETE",
+            "summary_status": "COMPLETE",
+            "returncode": 0,
+            "actual_backend": "new-yuki-native16",
+            "expected_backend": "new-yuki-native16"
+          }
+        },
+        "scenario_binding": {
+          "status": "PASS",
+          "reason": "Scenario file hash binding",
+          "evidence": {
+            "expected_sha256": "26474050aaa8802ae487449dd7ea0c374bc9e6662c8d4c7dcf06ce9890e00cdd",
+            "actual_sha256": "26474050aaa8802ae487449dd7ea0c374bc9e6662c8d4c7dcf06ce9890e00cdd"
+          }
+        },
+        "commands_accepted_and_scheduled": {
+          "status": "PASS",
+          "reason": "Expected events, unique IDs, successful outcomes and coarse scheduling fidelity; accepting toggle_pause alone does not prove a pause",
+          "evidence": {
+            "expected": 5,
+            "observed": 5,
+            "expected_indexes": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "actual_indexes": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "wrong_events": [],
+            "missing_outcomes": [],
+            "rejected": [],
+            "late": [],
+            "allowed_enqueue_lateness_seconds": 0.5
+          }
+        },
+        "snapshot_and_duration_coverage": {
+          "status": "PASS",
+          "reason": "Only sampled state is verified; no sub-frame response or physical scanout/audio latency is claimed",
+          "evidence": {
+            "samples": 74,
+            "nominal_seconds": 0.2,
+            "observed_median_seconds": 0.207095321995439,
+            "observed_maximum_gap_seconds": 0.2255944259959506,
+            "first_elapsed": 0.0,
+            "last_elapsed": 15.222218716000498,
+            "measured_duration_seconds": 15.222218716000498,
+            "requested_duration_seconds": 15
+          }
+        },
+        "common_live_ui_boundaries": {
+          "status": "PASS",
+          "reason": "Common production UI is checked at run boundaries only; this does not prove its state between them",
+          "evidence": {
+            "before": {
+              "available": true,
+              "portrait": {
+                "mode": "remote",
+                "selected": true,
+                "target_fps": 16,
+                "fallback_fps": 8
+              },
+              "display": {
+                "kind": "native_sink_handoff",
+                "fps": 15.674590702554896,
+                "age_ms": 1.6593670006841421
+              },
+              "settings": {
+                "economy": false,
+                "fullscreen": true
+              },
+              "playing": false,
+              "paused": false
+            },
+            "after": {
+              "available": true,
+              "portrait": {
+                "mode": "remote",
+                "selected": true,
+                "target_fps": 16,
+                "fallback_fps": 8
+              },
+              "display": {
+                "kind": "native_sink_handoff",
+                "fps": 15.672436486683871,
+                "age_ms": 19.348502995853778
+              },
+              "settings": {
+                "economy": false,
+                "fullscreen": true
+              },
+              "playing": false,
+              "paused": false
+            }
+          }
+        },
+        "actual_pcm_per_submit": {
+          "status": "PASS",
+          "reason": "Each submit needs actual sampled playing/advancing audio clock and converted bytes at48k stereo S16LE; accepted commands alone are insufficient",
+          "evidence": {
+            "turns": [
+              {
+                "index": 1,
+                "at": 4,
+                "until": 12,
+                "status": "PASS",
+                "playing_samples": 28,
+                "clock_range": {
+                  "min": 0.0014234049999999332,
+                  "max": 5.743603846,
+                  "span": 5.742180441
+                },
+                "converted_byte_delta": 1326844,
+                "expected_caps": {
+                  "format": "S16LE",
+                  "rate": 48000,
+                  "channels": 2
+                },
+                "exact_expected_caps_observed": true,
+                "unexpected_caps": []
+              }
+            ]
+          }
+        },
+        "pause_clock_and_resume": {
+          "status": "PASS",
+          "reason": "A pause is proved only at sampled paused points with an unchanged clock, followed by sampled resumed progress",
+          "evidence": {
+            "pairs": [
+              {
+                "pause_index": 2,
+                "resume_index": 3,
+                "status": "PASS",
+                "paused_samples": 4,
+                "paused_clock_range": {
+                  "min": 2.847161227,
+                  "max": 2.847161227,
+                  "span": 0.0
+                },
+                "resumed_playing_samples": 14,
+                "resumed_clock_range": {
+                  "min": 2.994335659,
+                  "max": 5.743603846,
+                  "span": 2.749268187
+                },
+                "numeric_equality_tolerance": 1e-06,
+                "note": "Stored-value equality is not microsecond response precision; paused playing may remain true in the real old controller"
+              }
+            ]
+          }
+        },
+        "cancel_stop_and_clear_mouth": {
+          "status": "PASS",
+          "reason": "After a conservative0.5s settling allowance, verify sampled stopped/clear-mouth state and no clock progress until the next turn; not a37ms cancellation claim",
+          "evidence": {
+            "events": [
+              {
+                "index": 0,
+                "at": 0,
+                "stable_window_begin": 0.5103140630017151,
+                "until": 4,
+                "status": "PASS",
+                "samples": 17,
+                "clock_range": {
+                  "min": 0.0,
+                  "max": 0.0,
+                  "span": 0.0
+                },
+                "violations": [],
+                "settle_allowance_seconds": 0.5
+              },
+              {
+                "index": 4,
+                "at": 12,
+                "stable_window_begin": 12.508269190999272,
+                "until": 15,
+                "status": "PASS",
+                "samples": 13,
+                "clock_range": {
+                  "min": 5.851564016,
+                  "max": 5.851564016,
+                  "span": 0.0
+                },
+                "violations": [],
+                "settle_allowance_seconds": 0.5
+              }
+            ]
+          }
+        },
+        "jpeg_feature_behavior": {
+          "status": "PASS",
+          "reason": "B/C require zero recorded JPEG bytes; A must actually retain its preview feature",
+          "evidence": {
+            "samples": 74,
+            "positive_samples": 0,
+            "maximum_bytes": 0
+          }
+        },
+        "camera_availability_coverage": {
+          "status": "UNKNOWN",
+          "reason": "Camera availability/coverage is not fully proved; original run is retained",
+          "evidence": {
+            "raw_os_samples_available": true,
+            "attempted": 3,
+            "available": 3,
+            "unavailable": [],
+            "available_span_seconds": 10.979627573004109,
+            "measured_span_seconds": 15.222218716000498,
+            "coverage_fraction": 0.7212895687448714,
+            "minimum_coverage_fraction": 0.75,
+            "maximum_adjacent_gap_seconds": 5.9480853999994,
+            "edge_gaps_seconds": [
+              3.9423829000006663,
+              0.3002082429957227
+            ],
+            "allowed_maximum_gap_seconds": 7.0
+          }
+        },
+        "camera_same_pid": {
+          "status": "PASS",
+          "reason": "Camera PID must remain observable and constant; restart prevents a same-workload claim",
+          "evidence": {
+            "pids": [
+              1333
+            ],
+            "missing_pid_samples": 0
+          }
+        },
+        "camera_error_flags": {
+          "status": "PASS",
+          "reason": "Explicit camera/detector/preview health flags; absence is not treated as no error",
+          "evidence": {
+            "error_samples": [],
+            "complete_flag_coverage": true
+          }
+        },
+        "camera_counter_continuity_and_work": {
+          "status": "PASS",
+          "reason": "Counter resets prevent a continuity claim; zero increments are UNKNOWN workload evidence, never a rule to delete a run. Identity zero is allowed when idle",
+          "evidence": {
+            "counters": {
+              "capture_frames": {
+                "samples": 3,
+                "delta": 137,
+                "span_seconds": 10.979627573004109,
+                "per_second": 12.47765455513677,
+                "resets": []
+              },
+              "detected_frames": {
+                "samples": 3,
+                "delta": 109,
+                "span_seconds": 10.979627573004109,
+                "per_second": 9.927476981824146,
+                "resets": []
+              },
+              "preview_frames": {
+                "samples": 3,
+                "delta": 137,
+                "span_seconds": 10.979627573004109,
+                "per_second": 12.47765455513677,
+                "resets": []
+              },
+              "identity.processed": {
+                "samples": 3,
+                "delta": 0,
+                "span_seconds": 10.979627573004109,
+                "per_second": 0.0,
+                "resets": []
+              }
+            },
+            "reset_counters": [],
+            "missing_counters": [],
+            "required_counters_with_zero_delta": []
+          }
+        },
+        "camera_people_context": {
+          "status": "UNKNOWN",
+          "reason": "Observed people-count context only; missing counts are not inferred as zero or an identical scene",
+          "evidence": {
+            "points": [],
+            "counts": [],
+            "available_samples": 3
+          }
+        }
+      },
+      "original_run_retained": true,
+      "status_meaning": "FAIL/UNKNOWN limits workload comparability conclusions; it does not delete or hide measurements. PASS is not a cost-reduction verdict.",
+      "automatic_replacement_authorized": false,
+      "observation_limits": [
+        "200ms sampled controller/renderer state; no between-sample response precision",
+        "A identity callback entry and B EGL swap completion are distinct stages; neither is scanout",
+        "Synchronous fakesink proves the public PCM pipeline, not physical speaker/audio acceptance",
+        "Camera health nominal5s; counters may describe different service work when scene/people context changes"
+      ]
+    }
+  ],
+  "descriptive_A_C_only": {
+    "status": "UNKNOWN",
+    "reason": "A and C are unpaired and time separated; descriptive differences cannot identify an exact causal or additive JPEG contribution",
+    "A_indices": [
+      1
+    ],
+    "C_indices": [],
+    "metrics": {
+      "renderer_family_cpu_seconds_per_second": {
+        "A_values": [
+          0.28178629119510257
+        ],
+        "C_values": [],
+        "A_mean": 0.28178629119510257,
+        "C_mean": null,
+        "A_minus_C_descriptive": null
+      },
+      "whole_board_cpu_seconds_per_second": {
+        "A_values": [
+          2.483152291952782
+        ],
+        "C_values": [],
+        "A_mean": 2.483152291952782,
+        "C_mean": null,
+        "A_minus_C_descriptive": null
+      },
+      "board_excluding_collector_cpu_seconds_per_second": {
+        "A_values": [
+          2.3916075069959972
+        ],
+        "C_values": [],
+        "A_mean": 2.3916075069959972,
+        "C_mean": null,
+        "A_minus_C_descriptive": null
+      }
+    },
+    "paired_effect_estimate": false,
+    "exact_additive_constant": false,
+    "CB_scope": "C/B removes JPEG generation on both sides but still includes transport, presenter/Gst versus EGL, snapshot cadence, initialization and rendering differences",
+    "automatic_replacement_authorized": false
+  },
+  "original_runs_retained": true,
+  "automatic_replacement_authorized": false
+}

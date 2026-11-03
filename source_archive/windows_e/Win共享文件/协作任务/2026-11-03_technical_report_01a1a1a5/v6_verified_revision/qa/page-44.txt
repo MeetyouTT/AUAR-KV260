@@ -1,0 +1,33 @@
+43
+封面使用用户提供的 10 周年 PSD 合成图。参考验证报告仅提供版式参考，其光计算、
+MNIST 与得分数据没有用于本项目结论。模型、算法、字体、角色和第三方 IP 按各自来源与
+许可处理，正式角色与大权重的分发权限由权利人及队伍确认。
+交付包含技术报告 PDF 与 Word、Markdown 正文、figures 配图、data 数据、evidence
+回执、sources 来源索引和 tools 构建脚本。report_package.zip 方便整体归档，完整工程
+另行使用方案 A 工程包。实物整机照片、接线与机构尺寸图、物理波形以及完整原问答的追
+加事项见单独交付说明，不以渲染图或仿真图替代。
+附录 G 最新源码重建的原生报告摘录
+本附录对应 RAR SHA
+022422d9d1efa6106c2b247ac901dddd2f439a1a5e8eb19a22539010c3a944f4。原生报告由该源构
+建产生，摘要及报告 SHA 取自 hardware_results.json；报告采样时的现役板端和本次新构
+建尚未声明同版。以下字段沿用工具命名，便于与原件核对。
+表 G-1 原生时序与路由关键行
+原生字段 数值 范围与判定
+Setup failing endpoints 0 /
+WNS TNS 0.002 / 0.000 ns
+392134
+WHS THS 0.010 / 0.000 ns Hold failing endpoints 0 / 392085
+Pulse failing endpoints 0 /
+WPWS TPWS 0.071 / 0.000 ns
+137578
+Routable nets Fully routed nets 199333 / 199333 Routing errors 0
+DRC Error 0 Warning 仍保留
+Control DPU clock 约100 / 300 / 600 MHz HWH及原生时钟报告分别记录
+表 G-2 DRC Warning 分类与审阅关注
+类别 新构建数量 审阅关注
+AVAL-318 59 DSP动态级联端约束及目标器件使用条件
+DPIP-2 14 DSP输入流水配置与关键路径余量
+DPOP-3 1 DSP输出PREG流水配置
+DPOP-4 1 DSP乘法MREG流水配置
+REQP-1731 512 DSP操作模式及A端符号位限制
+RTSTAT-10 1 无可布线路径负载的网络

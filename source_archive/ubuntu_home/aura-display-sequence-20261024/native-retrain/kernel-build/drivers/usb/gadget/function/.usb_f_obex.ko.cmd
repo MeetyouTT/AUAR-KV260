@@ -1,0 +1,1 @@
+cmd_drivers/usb/gadget/function/usb_f_obex.ko := /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ld -r  -EL  -maarch64elf  --build-id=sha1  -T scripts/module.lds -o drivers/usb/gadget/function/usb_f_obex.ko drivers/usb/gadget/function/usb_f_obex.o drivers/usb/gadget/function/usb_f_obex.mod.o;  true

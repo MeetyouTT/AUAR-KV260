@@ -1,0 +1,33 @@
+--- a/tools/board_avatar_gtk.py
++++ b/tools/board_avatar_gtk.py
+@@ -932,10 +932,11 @@
+             self.Gdk.Display.get_default().sync()
+             bindings=getattr(self,'preview_bindings',{})
+             binding=(handle,width,height)
+-            if bindings.get(name)!=binding:
+-                self.preview_output.attach(name,handle,width,height)
+-                bindings[name]=binding
+-                self.preview_bindings=bindings
++            # A remapped XID can match the old value while ximagesink still
++            # retains the old drawable state. Rebind once per map event.
++            self.preview_output.attach(name,handle,width,height)
++            bindings[name]=binding
++            self.preview_bindings=bindings
+             return False
+         self.GLib.timeout_add(50,bind)
+ 
+@@ -1101,10 +1102,10 @@
+         for index in range(len(self.lines)):
+             self.controls['demo_'+str(index)].set_sensitive(not remote_busy and not local_recording_active)
+         image=display['frame_visible']
+-        # A hidden Stack page may not have realized this native window yet.
+-        # Keep it eligible for the first realization so attach_preview can
+-        # create the sink; otherwise no first frame can ever make it visible.
+-        self.preview_image.set_visible(bool(image) or not getattr(self,'preview_bindings',{}).get('vision'))
++        # Freshness controls the placeholder/actions, never the native XID.
++        # Hiding this canvas on a late frame can leave an obsolete drawable
++        # after remapping. The worker already clears expired pixels.
++        self.preview_image.set_visible(True)
+         if self.large_preview:
+             self.large_preview_note.set_text('实时画面 · '+count_label+str(people) if image and people is not None else
+                 '实时画面 · 等待检测结果' if image else '画面已失联或过期，等待重新连接')

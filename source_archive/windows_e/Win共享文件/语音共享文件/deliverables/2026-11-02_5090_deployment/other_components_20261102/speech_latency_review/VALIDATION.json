@@ -1,0 +1,56 @@
+{
+  "schema": "aura-numeric-timing-candidate-validation-1",
+  "utc": "2026-11-02T08:27:59.416680+00:00",
+  "base_startup_sha256": "ff7c0599d8b719b66dadee193553b937027de72867f266e1cb443320a9b5dc4e",
+  "specialized_baseline": {
+    "tests": 21,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0,
+    "failed_cases": [
+      "tests.framework.test_numeric_llm_metrics::test_actual_current_result_metrics_are_published_under_host_relative_names",
+      "tests.framework.test_numeric_llm_metrics::test_multiple_llm_calls_keep_only_last_result_without_stale_optional_keys",
+      "tests.framework.test_numeric_llm_metrics::test_empty_last_metrics_drop_first_attempt_values",
+      "tests.framework.test_numeric_llm_metrics::test_multiple_tts_chunks_do_not_overwrite_llm_or_unbound_metadata_size",
+      "tests.framework.test_numeric_llm_metrics::test_jobs_public_filters_numeric_values_and_retains_existing_flags"
+    ]
+  },
+  "specialized_candidate": {
+    "tests": 21,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failed_cases": []
+  },
+  "existing_regressions": {
+    "tests": 60,
+    "baseline_passed": 56,
+    "candidate_passed": 56,
+    "baseline_failures": 4,
+    "candidate_failures": 4,
+    "failure_set_unchanged": true,
+    "same_failures": [
+      "tests.framework.test_board_dialogue_jobs::test_explicit_memory_precedes_reasoning_and_retains_raw_alias",
+      "tests.framework.test_board_dialogue_jobs::test_missing_sensitive_board_handlers_never_fall_back_to_model[\\u897f\\u84dd\\uff0c\\u8bb0\\u4f4f\\u6211-identity_enrollment]",
+      "tests.framework.test_board_dialogue_jobs::test_real_board_store_memory_and_history_flow_without_legacy_services",
+      "tests.framework.test_board_dialogue_jobs::test_wake_alias_and_wake_only_follow_existing_audio_gate"
+    ],
+    "reason": "Four existing test inputs still use the previous character address/alias, while both isolated runs load the same current pinned character selection. No assertions or production character settings were changed."
+  },
+  "synthetic_behavior_trace_scenarios": 8,
+  "synthetic_requests_outputs_ack_permissions_cancellation_equal": true,
+  "real_models_or_private_databases_used": false,
+  "initial_fixture_setup_and_collection_errors_preserved_not_product_failures": true,
+  "deployment_or_service_action": false,
+  "speedup_claimed": false,
+  "candidate_files": {
+    "board/runtime/board_dialogue.py": {
+      "before_sha256": "c877cdee602ff0bda669cc2b2fefa77e9328ce205a744e317df82ffb17146de6",
+      "after_sha256": "bdaac7092ff889d9b2def4de8cfc5623a411046d2a072e39afc04c0838c436bf"
+    },
+    "board/runtime/audio/board_dialogue_jobs.py": {
+      "before_sha256": "687b80cde20d70e4de56dd71956683b9cec59f55bd25965491dc08d00c8cb248",
+      "after_sha256": "dc117b493047eecb4148450d4c8c1cafbbc1b30a377aaaf8b3aca0101694adff"
+    }
+  }
+}

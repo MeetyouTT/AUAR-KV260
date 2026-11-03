@@ -1,0 +1,89 @@
+--- before/common/board_memory.py
++++ after/common/board_memory.py
+@@ -954,16 +954,29 @@
+         BoardMemoryStore._release_tasks(db, "lease_until<=?", (now,))
+         db.execute("UPDATE bm_tasks SET status='expired',error_code='lease_expired' WHERE status='leased' AND lease_until<=?", (now,))
+ 
+-    def prepare_compaction(self, *, worker_id="board-memory", lease_seconds=60, max_events=32):
++    def prepare_compaction(self, *, worker_id="board-memory", lease_seconds=60, max_events=32,
++                           excluded_source_versions=()):
+         """Lease a bounded, same-scope/topic segment; return a RAM-only snapshot.
+ 
+         The last closure/ACK, not just creation time, must be five minutes old.
+         Incomplete assistant bodies are included only as deletion targets, with
+         text omitted from the model snapshot and no eligible source reference.
++        Internal exclusions are at most 64 batches of 64 (event_id, revision)
++        pairs. A batch delays its sources and whole turns only while every
++        version remains valid. No exclusion or source content is persisted.
+         """
+         _identifier(worker_id, "worker id")
+         if type(lease_seconds) is not int or not 1 <= lease_seconds <= 120 or type(max_events) is not int or not 1 <= max_events <= 64:
+             raise ValueError("Invalid compaction bounds")
++        if not isinstance(excluded_source_versions, tuple) or len(excluded_source_versions) > 64:
++            raise ValueError("Invalid compaction exclusions")
++        for batch in excluded_source_versions:
++            if not isinstance(batch, tuple) or not 1 <= len(batch) <= 64:
++                raise ValueError("Invalid compaction exclusion batch")
++            for event_id, revision in batch:
++                _identifier(event_id, "event id")
++                if type(revision) is not int or revision < 1:
++                    raise ValueError("Invalid compaction exclusion revision")
+         with self._db(True) as db:
+             now = self._now(); cutoff = now - self.window
+             self._expire(db, now)
+@@ -971,6 +984,25 @@
+                 return None
+             predicate = ("e.state='valid' AND e.compacted_summary_id IS NULL AND e.reserved_task IS NULL "
+                          "AND e.closed_utc<=? AND (e.turn_id IS NULL OR (t.closed_utc IS NOT NULL AND t.closed_utc<=?))")
++            deferred_versions = set()
++            deferred_turns = set()
++            for batch in excluded_source_versions:
++                current = []
++                for event_id, revision in batch:
++                    row = db.execute("SELECT e.event_id,e.revision,e.turn_id FROM bm_events e "
++                                     "JOIN bm_bodies b USING(event_id) WHERE e.event_id=? AND e.revision=? "
++                                     "AND e.state='valid' AND e.compacted_summary_id IS NULL",
++                                     (event_id, revision)).fetchone()
++                    if row is None:
++                        break
++                    current.append(row)
++                if len(current) == len(batch):
++                    deferred_versions.update((row['event_id'], row['revision']) for row in current)
++                    deferred_turns.update(row['turn_id'] for row in current if row['turn_id'] is not None)
++            if deferred_versions:
++                db.create_function("bm_source_deferred", 3, lambda event_id, revision, turn_id:
++                    (event_id, revision) in deferred_versions or turn_id in deferred_turns)
++                predicate += " AND NOT bm_source_deferred(e.event_id,e.revision,e.turn_id)"
+             # A repeatedly rejected/irreducible source must not starve unrelated
+             # closed groups forever. Retry every source, but prefer groups with
+             # fewer previous attempts before chronological order.
+@@ -1534,13 +1566,19 @@
+ 
+     def _fail_task(self, task_id, token, reason):
+         self.error = reason
++        self._failure_released = False
+         try:
+-            self.store.fail_compaction(task_id, token, reason)
++            result = self.store.fail_compaction(task_id, token, reason)
++            self._failure_released = isinstance(result, dict) and result.get('released') is True
+         except ClockUnavailable:
+             self.error = "clock_unverified"
+         except (MemoryBusy, sqlite3.Error):
+             pass  # Lease expiry recovers this without losing any body.
+         return False
++
++    def _prepare_compaction(self):
++        return self.store.prepare_compaction(worker_id=self.worker_id, max_events=self.max_events,
++                                             lease_seconds=self.lease_seconds)
+ 
+     def step(self):
+         try:
+@@ -1555,7 +1593,7 @@
+             # The factory and context implementation are outside broad model
+             # error handling. Programming errors in them must remain visible.
+             with self.compaction_guard_factory():
+-                prepared = self.store.prepare_compaction(worker_id=self.worker_id, max_events=self.max_events, lease_seconds=self.lease_seconds)
++                prepared = self._prepare_compaction()
+         except ClockUnavailable:
+             self.error = "clock_unverified"
+             return False

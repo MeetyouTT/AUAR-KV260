@@ -1,0 +1,85 @@
+{
+  "schema": "aura-editor-expiry-minimal-CPU-merge-notes-1",
+  "updated_utc": "2026-11-02T19:41:52.542204+00:00",
+  "status": "FROZEN_REFERENCE_NOT_AN_ACTIVE_MERGE_REQUEST",
+  "implementation_owner": "CPU prepares sole new editor diff; root sole board diagnoser/publisher",
+  "exact_base_sha256": "6a8bce7270534bb3b0f71dff657eac5da92b46855fdb7c9748a63b678be8ede4",
+  "reference_only_candidate_sha256": "501ccd664b3134cc18f407f5b8d25a4b4b4b2f8ba2cd414a0b9bb8dd9825d605",
+  "reference_not_for_publish": true,
+  "source_fields": {
+    "source_ms": "packet.source_mono_ms (integer board monotonic milliseconds)",
+    "anchor_ms": "packet.face_detection_mono_ms (integer board monotonic milliseconds)",
+    "optional_identity": "packet.camera_epoch and source_frame_id are existing metadata; retain them for trace/epoch gate, do not fabricate bbox history",
+    "GUI_now_ms": "int(time.monotonic()*1000), evaluated on GTK callback entry"
+  },
+  "exact_existing_acceptance_rule": "type(source) is int and type(anchor) is int and 0 <= now_ms-source <250 and 0 <= now_ms-anchor <500",
+  "deadline_ms": "min(source_mono_ms+250, face_detection_mono_ms+500); do not extend on receipt, enqueue, render, timer rearm or network timeout",
+  "queued_update_semantics": [
+    "Poll passes immutable source/anchor timestamps with face/hint; it never substitutes UI refresh time as a source timestamp.",
+    "Use one pending latest display record and at most one GTK delivery callback; a newer pending record replaces the older one. Keep this queue independent of existing settings-save pending/condition fields.",
+    "On GTK delivery, check existing visibility gate and the original250/500ms rule again. Expired/invalid/future timestamps yield face=None/uncertain label and hide all five blue windows. Geometry/threshold classification/control code stays unchanged."
+  ],
+  "timer_semantics": [
+    "All display generation/deadline/timer bookkeeping is owned by the GTK thread; poll only publishes the pending record.",
+    "For a valid rendered record, schedule timeout for max(1,deadline_ms-now_ms). A timeout is a wakeup, not additional source validity. Recheck now/deadline at callback entry.",
+    "If generation tokens are used, a timer tagged with an older generation returns False before hiding any current box OR clearing the handle of a newer timer.",
+    "Equivalent one-timer implementation may read the current display deadline when it fires: if a newer valid record extended it, rearm to that current deadline; never hide using the previous record deadline.",
+    "At actual expiry hide only the five blue face windows and set uncertain display text; do not hide/move boundary lines or call pan_stop/set_ratio/save/reset/any motor command.",
+    "On hide/page exit/close, invalidate display generation, clear deadline and latest pending face, remove its tracked timer on GTK if present and make stale delivery/timer callbacks no-ops. Check closed/active before re-showing or touching destroyed windows."
+  ],
+  "frame_pairing_scope": {
+    "strict_latest_frame_equality": false,
+    "arbitrary_new_skew_tolerance": false,
+    "existing_evidence": "Current preview references lag camera2-7 frames;12 points contain no bbox source-frame history and are not physical presentation ACKs.",
+    "feasible_minimum": "Independently of exact temporal pairing, hide only when no visible preview/reference exists or camera_epoch mismatches. Do not require latest bbox.source_frame_id==preview.frame_id. This is a visibility/epoch guard, not a claim of exact image/box synchronization.",
+    "true_pairing_gap": "Correct temporal matching needs boxes keyed by the displayed image frame (from an existing bounded source history) or image+box composition with original capture provenance. No such history is in the current12-point receipt, so this TTL patch must not claim to solve full pairing or moving-video pixel ghosting."
+  },
+  "requested_bounded_followup_cases": [
+    {
+      "case": "poll_valid_callback_expired",
+      "input": "At poll now1000 source900 anchor800 passes; deliver GTK at1300",
+      "expected": "Hide blue face windows and uncertainty text; original250ms limit is exceeded."
+    },
+    {
+      "case": "old_timer_cannot_clear_new_face",
+      "input": "Render A(source900,anchor900,deadline1150), then B(source1050,anchor1050,deadline1300); invoke A timer at1150",
+      "expected": "B remains visible. Older generation returns without touching B or one-timer scheme rearms to current1300 deadline; B hides only at its own deadline."
+    },
+    {
+      "case": "hide_close_invalidates_pending",
+      "input": "Hide/page exit or close while an old valid delivery/expiry is queued",
+      "expected": "No old callback re-shows boxes or touches destroyed windows; boundary/axis/control settings unchanged."
+    }
+  ],
+  "preservation": [
+    "Root new label placement retained; no edits to hint.move coordinates",
+    "Original face_position score/box bounds/orientation and250/500ms constants retained",
+    "Original geometry400x300 mapping and axis/follow settings/control functions retained",
+    "CPU/root existing video rendering candidate files unchanged"
+  ],
+  "scope": {
+    "board_calls": 0,
+    "models": 0,
+    "production_writes": 0,
+    "R7_changes": false,
+    "existing_CPU_candidates_modified": false,
+    "new_approval_gate": false,
+    "tests_run_now": 0
+  },
+  "branch_work_freeze": {
+    "state": "FROZEN_BY_USER_TIME_PRIORITY_OTHER_FUNCTIONS_FIRST",
+    "recorded_utc": "2026-11-02T20:53:26.223084+00:00",
+    "new_candidates_frozen": true,
+    "extra_analysis_frozen": true,
+    "visual_axis_audio_scheduling_work": "Paused; no new optimization or trials",
+    "main_current_scope": "Dialogue / ECAPA CPU voice identity / existing memory / character functions",
+    "R7_deployment": false,
+    "face_expiry_patch_deployment": false,
+    "blocks_main_validation": false,
+    "device_access": false,
+    "board_calls": 0,
+    "models_or_tests_run": 0,
+    "requires_explicit_new_task_to_resume": true,
+    "evidence_boundary": "Retain R7 offline independent pass as offline only; preserve visual timing source findings without calling them physical ghosting cause; preserve historical/current comparison without asserting exact morning-good binding or durable c386 fix"
+  }
+}

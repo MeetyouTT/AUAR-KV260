@@ -1,0 +1,100 @@
+{
+  "status": "PASS",
+  "steps": [
+    {
+      "argv": [
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/yuki_tile_uv_test"
+      ],
+      "returncode": 0,
+      "elapsed": 0.03805497100256616
+    },
+    {
+      "argv": [
+        "python3",
+        "/home/root/aura-yuki-validation-20261030/native_integration/validate_precision_images.py"
+      ],
+      "returncode": 0,
+      "elapsed": 17.486441610999464
+    },
+    {
+      "argv": [
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/yuki_runtime_audit",
+        "/home/root/aura-yuki-validation-20261030/native_integration/runtime_assets/model.runtime.json",
+        "/home/root/aura-yuki-validation-20261030/native_integration/runtime_assets/yuk_0.ems.resx.json",
+        "--resource-root",
+        "/home/root/aura-yuki-validation-20261030/native_integration/runtime_assets",
+        "--output",
+        "/home/root/aura-yuki-validation-20261030/native_integration/results/runtime-audit.json",
+        "--steps",
+        "360"
+      ],
+      "returncode": 0,
+      "elapsed": 6.8386604670013185
+    },
+    {
+      "argv": [
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/yuki_frame_export",
+        "/home/root/aura-yuki-validation-20261030/native_integration/runtime_assets/model.runtime.json",
+        "/home/root/aura-yuki-validation-20261030/native_integration/runtime_assets/yuk_0.ems.resx.json",
+        "/home/root/aura-yuki-validation-20261030/probe_build/scenario-validation.json",
+        "/home/root/aura-yuki-validation-20261030/native_integration/results/final-profile-frames.json",
+        "--resource-root",
+        "/home/root/aura-yuki-validation-20261030/native_integration/runtime_assets"
+      ],
+      "returncode": 0,
+      "elapsed": 1.7851608040000428
+    },
+    {
+      "argv": [
+        "python3",
+        "/home/root/aura-yuki-validation-20261030/native_integration/host/validate_native.py",
+        "continuous",
+        "35"
+      ],
+      "returncode": 0,
+      "elapsed": 37.129682254002546
+    },
+    {
+      "argv": [
+        "python3",
+        "/home/root/aura-yuki-validation-20261030/native_integration/host/validate_gtk_clock.py",
+        "90"
+      ],
+      "returncode": 0,
+      "elapsed": 97.68108049299917
+    },
+    {
+      "argv": [
+        "python3",
+        "/home/root/aura-yuki-validation-20261030/native_integration/host/validate_gtk_clock.py",
+        "300"
+      ],
+      "returncode": 0,
+      "elapsed": 308.71254077699996
+    }
+  ],
+  "source_profile": "fuyukiss-yuki-freemote39-frame-mesh",
+  "binary_sha256": {
+    "libaura_yuki.so": "788ef5bb6b434ccf83c780059cb1dbb9246275fa8abc88e52d57a1d8c6042276",
+    "yuki_runtime_audit": "28d21d8c588a689479777663f2b6e49368c9d39845500af215fa95db95d71667",
+    "yuki_frame_export": "2e0483b1e570d422a8a4065c0e77aa53b59a605a8e6b211e49f9b1438b13a3d0",
+    "yuki_tile_uv_test": "056bfcb899c54f508d11fb57095769b44a8dd69117e61fbe5ccc20b1aa7fe398"
+  },
+  "production_deployed": false,
+  "frame_scheduler": "one-shot monotonic GLib deadlines on GTK owner; no queue_draw frame-clock phase",
+  "source_hashes": {
+    "test_mailbox.py": "32c368036fefc40d577f76bed0d8e1d8f5d9be9abf65cea54a5388804505aa3d",
+    "validate_gtk_clock.py": "0073ca7797445452310a421998d47849d3f548d42030d571797d20f629fb52e4",
+    "native_yuki.py": "b5193b8766bb3bfe58f748affefbb0cebda9da6e33703dbef41833dfd789e8a4",
+    "yuki_host.h": "91064e3c0a12dcf195fbfb867623d7cd06e65477749e9f0b6cbe524b60c4aa54",
+    "validate_state_cache.py": "333c416053c9fd19d407c0ee95e74144db3533919eb63627a0d45298f72d828b",
+    "egl_window.py": "6b95345e7017f681d063ba7766ee238f62e5d618422a02e47ce34f75f9aa970b",
+    "validate_native.py": "6b1314fd381079f11e5b0062c82c966df2a441d846c8a50eed91856c32c89419",
+    "gles2_renderer.cpp": "224299c3107c47c892ed34f05c8e8af984a11b04fa3967380dedb1dd90fbb98d",
+    "diagnostic_api.cpp": "18ceabe89e1d7b3eaaadf356c2ad05e07ee804f99cbcd1f48a64ae62e0abd1b4",
+    "yuki_host.cpp": "015c22b2c81ef366874b36f3324d897e0166e8288d1a96f838180c922d7ded73",
+    "gles2_renderer.hpp": "9c6bd0156949904cb1baab29d4d7a210e602fb60b2435700139eb6b9ebccf325",
+    "tile_uv.hpp": "fc1783b92c12ffb131ee31504bbb713343b33002596724033e8dc0bf25718e90",
+    "test_preparation.py": "59fb1b952778757add6fac1c8aa67e8c4912ef0484dda627dc5ba99106cf062a"
+  }
+}

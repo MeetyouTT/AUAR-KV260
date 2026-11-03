@@ -1,0 +1,109 @@
+{
+  "schema": "aura-boot-fix-r3-runtime-recheck-1",
+  "status": "PARTIAL_FIX_B01_NOT_CLOSED_QUEUED_ORIGINAL_IDSTOP_STILL_ACCEPTED",
+  "input_scope": "Root stable observed_revision3 snapshot only; moving author directory not used.",
+  "source": {
+    "boot_recovery.py": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\boot_review_inputs\\observed_revision3\\candidate\\boot_recovery.py",
+      "sha256": "e60d8f4ebf32f7ed738789d8e79a1e25d80881cb03fda90e5217880c3d70b9b7"
+    },
+    "recovery_rules.py": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\boot_review_inputs\\observed_revision3\\candidate\\recovery_rules.py",
+      "sha256": "72492c2d50c746b2f26b3292beff189bd76d7d39be04515baab13dbc881c7284"
+    }
+  },
+  "method_lines": {
+    "quiet": [
+      257,
+      306
+    ],
+    "daemon_owner": [
+      308,
+      314
+    ],
+    "once": [
+      347,
+      389
+    ],
+    "observe_job": [
+      391,
+      409
+    ]
+  },
+  "reused_three_queue_cases": [
+    {
+      "case": "ordered_start_control",
+      "accepted": true,
+      "hold_reason": null,
+      "queue_queried": true,
+      "extra_job": null,
+      "all_callbacks_in_memory": true
+    },
+    {
+      "case": "queued_load_with_camera_gui_jobs",
+      "accepted": false,
+      "hold_reason": "OTHER_PLATFORM_OR_DAEMON_JOB_PENDING_NO_DFX",
+      "queue_queried": true,
+      "extra_job": "aura-boot-wide-11111111-2222-4333-8444-555555555555-load.service",
+      "all_callbacks_in_memory": true
+    },
+    {
+      "case": "queued_load_without_camera_gui_jobs",
+      "accepted": false,
+      "hold_reason": "OTHER_PLATFORM_OR_DAEMON_JOB_PENDING_NO_DFX",
+      "queue_queried": true,
+      "extra_job": "aura-boot-wide-11111111-2222-4333-8444-555555555555-load.service",
+      "all_callbacks_in_memory": true
+    }
+  ],
+  "daemon_pending_job_case": {
+    "accepted": false,
+    "hold_reason": "DAEMON_JOB_PENDING_NO_DFX",
+    "process_probe_reached": false
+  },
+  "new_classifier_edge_case": {
+    "case": "queued_original_idstop_without_live_process",
+    "accepted": true,
+    "hold_reason": null,
+    "queue_queried": true,
+    "extra_job": "aura-boot-wide-11111111-2222-4333-8444-555555555555-idstop.service",
+    "all_callbacks_in_memory": true
+  },
+  "closed_parts": [
+    "Job queue is now queried even without camera/GUI jobs.",
+    "Queued original load units are rejected when their actual ExecStart exposes dfx-mgr-client.",
+    "Daemon with pending Job is rejected before process/executable proof.",
+    "Exact existing ordered camera/GUI start control still passes."
+  ],
+  "remaining_blocking": [
+    {
+      "id": "B01-R3-OWN-PREFIX-IDSTOP",
+      "file": "boot_recovery.py",
+      "lines": [
+        278,
+        290
+      ],
+      "problem": "Loader-name regex excludes aura-boot-wide-* itself. The real original idstop transient unit is a Python command without dfx-mgr-client/dfx-mgrd/xmutil in ExecStart. A queued same-boot idstop unit with no live process passes quiet(), so the bounded platform queue guard is not complete.",
+      "minimal_fix": "After the exact own prepare exception and camera/GUI allowlist, explicitly classify every aura-boot-wide-* unit as relevant pending work, independent of ExecStart keyword. Reject an unexplained queued job or direct user to observe the existing intent/invocation; preserve observe-job no-submit behavior.",
+      "minimal_test": "One pure case using queued aura-boot-wide-<boot>-idstop.service and its actual Python bench_identity_stop.py --execute ID_STOP_ONLY entry must HOLD before any new stage; retain the original valid ordered-start case."
+    }
+  ],
+  "scope_not_rechecked": [
+    "R3 ledger CAS/source changes",
+    "R3 camera exiting/quiesced changes",
+    "Native archive-only route proof",
+    "Installer/packaging/released65 suite"
+  ],
+  "validation_actions": {
+    "actual_ast_methods_in_memory": true,
+    "full65_suite_run": false,
+    "board_ssh_systemctl_proc_http_or_models_called": false,
+    "candidate_or_author_directory_modified": false,
+    "cross_dialogue_messages": false
+  },
+  "remaining_runtime_gates": [
+    "After this minimal fix, recheck the same small cases against exact stable new SHA.",
+    "Original actual Linux systemd Job/list-jobs formats/dependency/options and fresh owner handoff remain later runtime gates; this is not a live or cold-boot pass.",
+    "Do not reopen user-accepted axis smoothness/direction tuning or canceled face-voice association."
+  ]
+}

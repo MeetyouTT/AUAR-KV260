@@ -1,0 +1,22 @@
+[
+  {
+    "id": "identity_runtime",
+    "command": "python3 -B -c 'import os,platform,hashlib,json,subprocess\nfrom pathlib import Path\nassert os.geteuid()==0, \"Not the board root shell\"\ncid=Path('\"'\"'/sys/class/block/mmcblk1/device/cid'\"'\"').read_text().strip()\nassert cid=='\"'\"'0353445345333247805558c00401a100'\"'\"', \"Unexpected test card: \"+cid\nassert platform.release()=='\"'\"'5.15.36-xilinx-v2022.2'\"'\"', \"Unexpected kernel\"\nmodel=Path('\"'\"'/proc/device-tree/model'\"'\"').read_bytes().replace(b'\"'\"'\\0'\"'\"',b'\"'\"''\"'\"').decode()\nassert '\"'\"'K26'\"'\"' in model, \"Unexpected device model\"\nprint(json.dumps({'\"'\"'cid'\"'\"':cid,'\"'\"'model'\"'\"':model,'\"'\"'uname'\"'\"':platform.uname()._asdict()},indent=2))\nprint(Path('\"'\"'/proc/version'\"'\"').read_text())\nprint(Path('\"'\"'/etc/os-release'\"'\"').read_text())\nmodule=Path(subprocess.check_output(['\"'\"'modinfo'\"'\"','\"'\"'-n'\"'\"','\"'\"'zocl'\"'\"'],text=True).strip())\nfor p in (module,Path('\"'\"'/usr/lib/libxrt_core.so.2.14.0'\"'\"'),Path('\"'\"'/usr/bin/dfx-mgrd'\"'\"'),Path('\"'\"'/usr/lib/libdfx.so.1.0'\"'\"')):\n print(json.dumps({'\"'\"'path'\"'\"':str(p),'\"'\"'bytes'\"'\"':p.stat().st_size,'\"'\"'sha256'\"'\"':hashlib.sha256(p.read_bytes()).hexdigest()}))\nsubprocess.run(['\"'\"'modinfo'\"'\"','\"'\"'zocl'\"'\"'],check=True)\nsubprocess.run(['\"'\"'xmutil'\"'\"','\"'\"'listapps'\"'\"'],check=True)\nsubprocess.run(['\"'\"'systemctl'\"'\"','\"'\"'is-active'\"'\"','\"'\"'dfx-mgr'\"'\"'],check=True)\n'",
+    "timeout": 180
+  },
+  {
+    "id": "kernel_config",
+    "command": "gzip -dc /proc/config.gz",
+    "timeout": 180
+  },
+  {
+    "id": "open_drm_clients",
+    "command": "python3 -B -c 'import os,json\nfrom pathlib import Path\nclients=[]\nfor proc in Path('\"'\"'/proc'\"'\"').iterdir():\n if not proc.name.isdigit(): continue\n try:\n  for fd in (proc/'\"'\"'fd'\"'\"').iterdir():\n   try: target=os.readlink(fd)\n   except OSError: continue\n   if target.startswith('\"'\"'/dev/dri/'\"'\"'):\n    clients.append({'\"'\"'pid'\"'\"':int(proc.name),'\"'\"'comm'\"'\"':(proc/'\"'\"'comm'\"'\"').read_text().strip(),'\"'\"'fd'\"'\"':fd.name,'\"'\"'target'\"'\"':target})\n except OSError: continue\nmodule=Path('\"'\"'/sys/module/zocl'\"'\"')\nprint(json.dumps({'\"'\"'drm_clients'\"'\"':clients,'\"'\"'zocl_holders'\"'\"':[p.name for p in (module/'\"'\"'holders'\"'\"').iterdir()] if (module/'\"'\"'holders'\"'\"').exists() else None,'\"'\"'zocl_refcnt'\"'\"':(module/'\"'\"'refcnt'\"'\"').read_text().strip() if (module/'\"'\"'refcnt'\"'\"').exists() else None},indent=2))\n'",
+    "timeout": 180
+  },
+  {
+    "id": "kernel_before",
+    "command": "dmesg",
+    "timeout": 180
+  }
+]

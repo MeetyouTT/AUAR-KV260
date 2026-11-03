@@ -1,0 +1,17 @@
+视觉→身份→语言协同，只读审阅（2026-11-02，洛杉矶）
+
+本次严格不检查转轴，不改GUI/相机/模型服务或任何生产源码、配置、真实库；没有抓图、读姓名/personID/模板/特征，也没有导出语音或对话原文。
+
+新鲜来源：boot903cfade…，camera79866/birth2265436/cmdacf3ee…，GUI supervisor97308、GTK97312。自然观察时startup ff7c0599d8b719b66dadee193553b937027de72867f266e1cb443320a9b5dc4e，selected9ab2533d2c3000d61095f54de2e8199f53461ac085e2f58230ab36149be6af1f，25项来源实读匹配，camera绑定为当前owner。两次自然窗口内来源分别稳定；后来独立来源核验时startup变为bcb773cd5bf306ac536df0373d1c1b27d01b6564a35839f2623b274442c13a59，GUI进程相同。此为并行维护事实，不输出或评判主页面改动，不能把最新整个startup称为已被此GUI加载。
+
+实际识别观察：首窗口约6.38秒/5点均face_count0，SFace4631未增，不能以这个窗口说识别故障或gallery为空。第二窗口28.63秒/25点，25点均有效face，采集+462/检测+277，SFace completed5147→5192（+45），无采集或身份错误；4点为当前目标/TTL内KNOWN，20点为当前目标/TTL内UNKNOWN，另1点未达新鲜身份条件。最后一帧KNOWN，源龄750ms。说明实际人脸推理在自然推进，而且确实返回过KNOWN；没有真人核对姓名，所以“认对具体人”和稳定识别尚未验收。
+
+UNKNOWN原因边界：当前实际IdentityService源码d639c4e5…只公开match_diagnostics的counts/last_state/last_score，没有旧观测器预期的recognition_diagnostics.reason_code/threshold字段。本轮只读取状态和聚合计数，不输出last_score。API未给每次UNKNOWN的具体原因，因此不判定为阈值、光照、模板或源过期中的任何一种，不读模板补猜，也不改0.50/0.10/3000ms。历史last_state不等于当前目标的新鲜识别，KNOWN统计采用原snapshot校验+实际当前目标+3000ms TTL。首版观测器把缺失diagnostic_policy写false，已保留原文件并用新v2以availability=false、policy_match=null纠正，缺失不算策略错误。
+
+身份查询补丁：tools/unified_identity_binding.py当前pin及实读仍为85e415d00daa770d4d94ae58006a23ed9700067651a0448de80c99eb33ed1809。该源06:02写入，早于当前GTK07:44启动；实际launch/runtime/argv一致，原launcher核组件后才启动；绑定工厂enabled=true，speaker worker已ready。因此当前身份导入链支持已加载V2。15项既有合成query/router/hub测试在隔离本地重新全部通过，0失败/0错误/0跳过；实际导入31份模块与最新实板pin和文件SHA全部一致。覆盖“我是谁”“听声音我是谁”等在SAMPLING_VOICE不再被当作样本、取消/确认/引用否定、冲突不报姓名、可见人脸候选不开放私人记忆、请求缓存与内容变化拒绝。本测试没有模型、设备或真实库，不代替真人ARM听音。未发现新增确定路由缺陷。
+
+权限与观测字段：当前公开speaker完成2/提交2，evidence_errors0，profile_grants_issued=false、automatic_profile_access=false、profile_grant_imported=false。登记流程inactive。speaker_calibrated=false是原BoardSpeakerBusiness._refresh_public固定保守投影，不能据此推断声纹库空或已登记人数为0。匿名候选、联合身份候选与单独个人档案授权在源码中保持分离；面部/声音候选不自动发放个人记忆grant。个人档案数0来自之前06:31聚合，不是本轮重新读取，也不能等同人脸/声纹库为空。
+
+剩余非转轴验收：用户确认KNOWN对应正确已登记人；同人持续正脸/未知人/多人及换源过期的误识与稳定性；真实身份问答结合当前face/voice证据、冲突拒绝和完整播放ACK；统一声纹录入中询问身份不消耗采样段；匿名声音候选→明确身份关联→另行授权个人记忆的全流程。当前readiness和一次KNOWN都不替代这些验收。
+
+附带观察器记录：launch argv原本不带--config，使用原runtime入口和默认配置，因此第一辅助probe的config_path_present=false不表示加载错误；后续改核实际runtime入口和完整argv。测试闭包初始只允许common/tools的本地保护也曾拒绝纯board包，原探针保留；新v2仅增加已导入且无转轴的纯board模块白名单后通过，没有板端变更。

@@ -1,0 +1,65 @@
+{
+  "schema": "aura.prepared-read-session-candidate.v1",
+  "status": "SOURCE_FROZEN_SYNTHETIC_CONTRACTS_PASS",
+  "files": {
+    "common/board_memory.py": {
+      "path": "after/common/board_memory.py",
+      "before_sha256": "33cb8cedd191382967884850a31e8d106dc41a20b5deee493e23168c8c13b3b0",
+      "sha256": "6e62b109f429c8b8ebb11b1bcf45258be08f5dd659c778e51bd1d95123ee5735",
+      "bytes": 100845
+    },
+    "board/runtime/audio/board_dialogue_jobs.py": {
+      "path": "after/board/runtime/audio/board_dialogue_jobs.py",
+      "before_sha256": "1536fe63361a9f971a22a0bcfd93145f9f8316607dc7a344b298933f1253672f",
+      "sha256": "71fd1ac8e2ddb2e20eeb572063cc69e370e18f40af4a97fb65e2d8258bae45a0",
+      "bytes": 49157
+    }
+  },
+  "API": {
+    "default_unchanged": "check_prepared_turn_current(turn_id, *, generation) still opens one new connection and fresh transaction per call",
+    "scoped": "with store.prepared_turn_checker(turn_id, generation=...) as check: check()",
+    "lifetime": "One ordinary audio-production invocation and owner thread; Jobs ExitStack opens on first ordinary reply_sink and closes in _execute finally",
+    "per_call": "Validate DB dev/ino; original live grant lock; BEGIN; unchanged joined snapshot validation; COMMIT. No transaction or validity remains between packets.",
+    "connection": "One URI mode=ro SQLite connection, explicit finite context; no global/persistent pool or stored grant",
+    "fallback": "Store implementations without the scoped API retain their original standalone durable checker; local FSM generating streams and explicit rate-converter path do not acquire a prepared read session"
+  },
+  "preserved": [
+    "Per-packet and post-backpressure fresh durable checks",
+    "Original live ProfileAccess grant and grant-lock before each transaction",
+    "Exact joined source/scope/generation/pending/playback/closure/identifier validation",
+    "Atomic source invalidation, compaction, TTL, schema and all unrelated Store methods",
+    "Original complete plan/hash/samples/token binding and actual complete player ACK",
+    "In-memory generation/cancel check under Jobs condition after each durable check before append"
+  ],
+  "bounded_cleanup": [
+    "Owner is fixed on context creation; foreign enter/call/close rejects before touching SQLite",
+    "No retained read transaction during TTS, queue waits or between calls",
+    "Check failure rolls back, revokes the session and closes even if a caller catches it",
+    "Context-body failure, cancellation, successful production and __enter__ initialization failure close the owned connection",
+    "If close itself raises, the revoked session retains the handle for its owner's outer ExitStack cleanup retry",
+    "Missing/replaced database or symlink fails closed by dev/ino and regular-file checks; size/mtime changes from legitimate writes are allowed"
+  ],
+  "metadata": {
+    "guard_total_ms": "Existing guard wall time, unchanged",
+    "guard_thread_cpu_total_ms": "Sum of thread_time deltas inside the guard, excluding queue wait and other threads' CPU",
+    "guard_thread_cpu_max_ms": "Maximum single guard thread CPU time",
+    "error_policy": "Close failure sets phase.complete=false and fixed error_class; no raw exception strings or identifiers are added"
+  },
+  "tests": {
+    "path": "tests/test_session.py",
+    "sha256": "8cefeb0a9c10a4aa2775f34b1c29f1987733ee3268ed4974b0b953d8c1aca28e",
+    "passed": 72,
+    "failed": 0,
+    "seconds": 5.17,
+    "command": "python -B -m pytest -p no:cacheprovider deliverables/2026-10-30_board_owner/integration/dialogue_repair/guard_session_candidate/tests/test_session.py --basetemp=deliverables/2026-10-30_board_owner/integration/dialogue_repair/guard_session_candidate/test-run-final -q",
+    "covers": ["55 prior real synthetic Store/Jobs contracts", "One connection across 12 independent read transactions", "No DB byte changes", "External clear, per-packet forget/correct/revoke and backpressure checks", "Enforced readonly URI", "Foreign-thread misuse", "Exceptions/rollback/reader lock release", "Missing/inode/symlink identity changes", "Legitimate unrelated writes", "Grant lock before each BEGIN and revocation", "Jobs success/TTS failure/cancel cleanup and full ACK", "Thread CPU excludes sleep", "__enter__ failure closes", "Partial close failure owner retry", "Exact original joined validation AST and unrelated Store AST preserved"]
+  },
+  "independent_source_review": {"reviewer": "runtime_completion", "result": "No authority, lifecycle or unchanged Jobs check-point blocker found"},
+  "limits": [
+    "The first connection is initialized once at the first ordinary sink; controller's sentence-level standalone checks remain unchanged",
+    "No future playback lease is granted and already emitted/played PCM cannot be retracted",
+    "Root alone measures ARM and performs any production publication; these tests do not establish actual listening quality or final performance"
+  ],
+  "actual_devices_models_private_databases_accessed": false,
+  "production_modified": false
+}

@@ -1,0 +1,20 @@
+本地相机A/B/A数值比较
+
+本目录只读取已保存的三臂sample_camera回执。试验包与实际服务由root维护。当前尚无本轮真实三臂结果。
+
+PowerShell示例。将三份输入路径替换为root保存的真实回执。output使用尚不存在的新文件。
+
+& 'C:\Users\35870\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -B 'E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\jpeg_demand_camera_trial_analysis_v21\compare_aba.py' --a1 '<A1.json绝对路径>' --b '<B.json绝对路径>' --a2 '<A2.json绝对路径>' --output '<新比较回执.json绝对路径>'
+
+输入若是root封装的JSON，且原始sample_camera对象位于result字段，额外传入 --result-member result。输入记录完整文件SHA256，输出不会覆盖已有文件。
+
+脚本验证固定manifest、boot、A1原owner、三臂标签、原入口/候选入口argv、顺序与代次、GUI关闭状态、零采样器JPEG请求、无私库/帧读取、样本与汇总一致。CPU单位沿用sampler汇总，原采样器未保存SC_CLK_TCK，因此仅反推并校验三臂的单位一致性。
+
+报告列出各臂CPU核当量、全机busy核当量、RSS、采集/检测/preview完成速率、每次完成的CPU时间、人数直方图及脸源时效。B分别与A1及A2比较。人数或吞吐等变化达到公开描述阈值时标注混杂。即使没有触发阈值，场景运动、纹理、光照与其他JPEG客户端负载仍可能变化。结果不授予B常驻操作。
+
+公开数值回归
+
+在本目录运行
+& 'C:\Users\35870\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -B -m unittest -v test_compare_aba.py
+
+测试夹具仅包含构造数值，独立临时目录在测试结束时清理。其结果与真实硬件测量分开保存。

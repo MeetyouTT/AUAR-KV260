@@ -1,0 +1,137 @@
+{
+  "backup": "/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/ui-backup-ebb3f364d4",
+  "runtime": "/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime",
+  "previous_camera_pid": 106060,
+  "monitor_enabled_preserved": true,
+  "monitor_was_enabled_before": false,
+  "monitor_choice_source": "restore_pre_test_choice",
+  "preference_path": "/root/.local/share/aura/handsfree_dialogue.json",
+  "camera_modified": false,
+  "pc_restarted": false,
+  "live_hearing_verified": false,
+  "acoustic_probe": {
+    "passed": true,
+    "speech_starts": 0,
+    "plays": 2,
+    "baseline_speech_starts": 0,
+    "input": {
+      "frames": 1263,
+      "mean": 37.75,
+      "p95": 89,
+      "max": 536
+    },
+    "clean": {
+      "frames": 1263,
+      "mean": 20.2,
+      "p95": 78,
+      "max": 527
+    },
+    "reference_frames": 1267,
+    "reference_gaps": 0,
+    "healthy": true,
+    "prewarmed_start_control": true,
+    "trigger_to_playback_loop_ms": 0,
+    "playback_loop_seconds": 9.22,
+    "strongest_reference_lags": [
+      {
+        "delay_ms": 60,
+        "correlation": -0.0218
+      },
+      {
+        "delay_ms": 120,
+        "correlation": -0.0193
+      },
+      {
+        "delay_ms": 250,
+        "correlation": 0.0169
+      },
+      {
+        "delay_ms": -10,
+        "correlation": 0.0164
+      },
+      {
+        "delay_ms": 20,
+        "correlation": -0.0135
+      }
+    ],
+    "blocks": [
+      {
+        "second": 0,
+        "input_mean": 26.98,
+        "clean_mean": 6.0
+      },
+      {
+        "second": 1,
+        "input_mean": 27.08,
+        "clean_mean": 7.0
+      },
+      {
+        "second": 2,
+        "input_mean": 38.72,
+        "clean_mean": 18.44
+      },
+      {
+        "second": 3,
+        "input_mean": 33.86,
+        "clean_mean": 10.4
+      },
+      {
+        "second": 4,
+        "input_mean": 27.3,
+        "clean_mean": 5.4
+      },
+      {
+        "second": 5,
+        "input_mean": 23.84,
+        "clean_mean": 4.68
+      },
+      {
+        "second": 6,
+        "input_mean": 21.38,
+        "clean_mean": 5.24
+      },
+      {
+        "second": 7,
+        "input_mean": 29.0,
+        "clean_mean": 13.86
+      },
+      {
+        "second": 8,
+        "input_mean": 29.1,
+        "clean_mean": 13.46
+      }
+    ],
+    "microphone_audio_saved": false,
+    "actual_asr_or_model_called": false,
+    "scope": "Real selected-voice loudspeaker echo only; no human interruption acceptance"
+  },
+  "status": "UI_ONLY_DEPLOYED",
+  "camera_pid": 106060,
+  "camera_service_unchanged": true,
+  "identity_database_unchanged": true,
+  "identity_threshold": 0.5,
+  "handsfree": {
+    "enabled": true,
+    "state": "WAITING_PERSON",
+    "reason": "NO_SINGLE_FACE",
+    "error": "",
+    "visual_bound": false,
+    "conversation_entered": false,
+    "microphone_open": false,
+    "speech_detection": "energy_vad_then_asr",
+    "diagnostics": {
+      "armed": 0,
+      "speech_starts": 0,
+      "submitted": 0,
+      "entry_rejected": 0,
+      "visual_stops": 0
+    },
+    "speaker_binding_verified": false,
+    "voice_barge_in": true
+  },
+  "ui_unit": "# /etc/systemd/system/aura-avatar-ui.service\n[Unit]\nDescription=AURA cached avatar touchscreen interface\nWants=xserver-nodm.service systemd-modules-load.service\nAfter=local-fs.target xserver-nodm.service systemd-modules-load.service\nRequiresMountsFor=/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime\nStartLimitIntervalSec=300\nStartLimitBurst=5\n\n[Service]\nType=notify\nNotifyAccess=main\nUser=root\nEnvironment=DISPLAY=:0 PYTHONUNBUFFERED=1\nWorkingDirectory=/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime/aura\nExecStart=/usr/bin/python3 -B /home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/startup/launcher.py --config /home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/startup/config.json\nRestart=on-failure\nRestartSec=5\nTimeoutStartSec=240\nTimeoutStopSec=25\nKillMode=mixed\nStandardOutput=journal\nStandardError=journal\nSyslogIdentifier=aura-avatar-ui\n\n[Install]\nWantedBy=graphical.target\n",
+  "identity_db_sha256": "e0d2113eb51171079978b1e63eb4263d5fb13235fec1839f7be778dab1520aa1",
+  "camera_unit": "# /etc/systemd/system/aura-camera-ui.service\n[Unit]\nDescription=AURA shared USB camera preview and YOLOX person adapter\nAfter=local-fs.target\nStartLimitIntervalSec=0\n\n[Service]\nType=simple\nExecStart=/usr/bin/python3 -B /home/root/aura-handsfree-dialogue-20261020/candidate-0c0a8ab46ec2/runtime/aura/tools/board_camera_motion.py --config /home/root/aura-handsfree-dialogue-20261020/candidate-0c0a8ab46ec2/camera_live_config/board_camera_ui.json\nWorkingDirectory=/home/root/aura-handsfree-dialogue-20261020/candidate-0c0a8ab46ec2/runtime/aura\nEnvironment=PYTHONUNBUFFERED=1\nRestart=on-failure\nRestartSec=3\nTimeoutStopSec=10\nKillMode=control-group\nUMask=0077\n\n[Install]\nWantedBy=multi-user.target\n",
+  "camera_config_sha256": "26d737705363b6590c747497513d5388681ebdc81ec1175c7aa6ebebdaf1aa97",
+  "identity_config_sha256": "350c0475d653aa5d6034c76a64317eaac1bd578a4e610e2f892bf124d186258e"
+}

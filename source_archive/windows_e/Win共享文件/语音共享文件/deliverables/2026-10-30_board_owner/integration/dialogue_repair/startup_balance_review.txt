@@ -1,0 +1,39 @@
+v10 启动采集负载只读审查（2026-10-31）
+
+范围：startup 1129a2a7af2b401537710d1a67651c79961c1b10198f5625ae6802e7ac99fd77，375 pins，manifest c575f5fc8eb55536e4ea1a8b926d5843e54f2068337691bba7bab61c8a3f01a5。frontend_balance_candidate/baseline_manifest.json 与 before/9 份源码逐一核 SHA，全部相符。未访问硬件、模型服务或真实库，未改运行源码；combined worker 接入仍由 runtime_completion 负责。
+
+一、确定的初始化顺序
+
+1. GTK Stage 调用 prepare_board_business，随后才构造 RecordingController/AvatarRenderWorker。ProductionGuiBoardBusiness 在第49行同步构造 Paraformer，第55行创建前端池；可信时间初始化、原声纹业务构造、反馈素材准备也在该构造函数返回前完成。现役 ASR 源 4edb8658… 的识别器在 __init__ 构造，decode_stream 只在 transcribe 中调用。没有“自动录音启动后才执行 Paraformer 构造”的源码路径。
+
+2. 前端进程的初始化也早于采集。BoardProcessSpeechGate 构造函数等待 HELLO；子进程 serve_shared 第359行先完成 gate_factory 和 pool 构造，第363行才发成功 HELLO。现役 BoardFftSpeechGate 第156行已经执行32个640-byte零PCM帧的真实 _process 预热，第157行重置 denoiser/vad。不能把这次故障描述为“尚未预热就开麦”，也不应再加一次固定长等待或重复模型预热。
+
+3. 麦克风开始还受原配对就绪门控制。board_avatar_gtk.py 第331—353行先绑定 recording、生产自动监听与 AvatarRenderWorker，注册 character_pair.on_ready(business.activate)；formal_native_yuki 的 GL frame_observer 只在真实成功 swap 后调用 pair.observe_native_frame，随后激活业务。production_listening 的 monitor_tick 继续要求 runtime.started、pair.ready_now、原反馈/空闲/冷却条件。此后才经 RemoteAutomaticCapture → AUTO_START → ChildAutomaticSession.start 第264行调用原 capture.start。
+
+4. 原 Mcp01Capture.start 确实先 Popen arecord，再 _capture_timer 准备本轮 endpoint/取得已加载前端 lease，再起 reader。这里有短的端点准备窗口，但没有再加载 GTCRN/Silero/ASR模型；ChildAutomaticSession 已有 start 失败时退还麦克风/进程/endpoint 的清理。8帧 pump 在 consumer 的 _read_pcm 内创建并 start；超过8帧仍拒绝整轮，不把丢帧当完整录音。
+
+二、GTK首次刷新能确认到什么程度
+
+AvatarRenderWorker 构造时启动自身线程；GTK随后建立 mixer、services、window，并开始 GUI tick。pair 第一次真实 swap 激活 jobs、记忆 worker 和视觉时间轴 worker。GTK runtime/settings 刷新限10Hz，首次会扫描 /sys/class/input、video4linux 和网口状态，混音服务首次读取在其后台线程。源码没有把“第一次完整 UI 状态刷新完成”作为 AUTO_START 的额外条件，所以这些启动阶段工作没有被明确串行隔开。
+
+但源码与现有证据都没有给出首次 UI 刷新、AUTO_START、每个 endpoint feed 的统一时间线，不能据此断言 GTK 首刷新造成了溢出。ASR模型加载与前端32帧预热已经在开麦前完成，这一点应与仍可能并行的 UI/后台状态工作区分。
+
+核对来源：GTK 4c3e692a…；formal_yuki 610696bf…；formal_native_yuki 25e648a9…；AvatarRenderWorker e2699071…；board_ui_settings 43531713…；capture 0b32186b…；board_pcm_queue b38c922d…，均与 v10 manifest 对应项相符。
+
+三、已有计数更支持“持续处理余量小”，不能只归因于启动瞬间
+
+dialogue_repair/STATUS.json 保留的第一代失败，在溢出前已处理388次 endpoint feed：wall累计7828.20ms，约20.18ms/次；thread CPU累计7315.31ms，约18.85ms/次；最大单次 wall约40.53ms。它发生在已处理约7.8秒PCM之后，并非只处理第一个输入帧。
+
+后续274.383秒窗口虽成功，13696次 feed 的 wall均值仍19.1071ms、CPU均值17.8744ms。20ms输入节拍的平均wall余量仅约0.89ms；这不能证明任何一种具体调度突发的来源，但足以说明稳定余量很小。根代理最新元数据报告累计采集失败已从1升为3；因此不能把那个274秒窗口扩写为“启动溢出已消失”或长稳验收。
+
+四、最小可行建议与验证顺序
+
+首版沿用已有启动门和32帧预热，不新增 sleep、不假报 READY、不扩大8帧队列。先完成正在进行的同权重 combined worker 接入，单变量核对完整 endpoint（不只模型 kernel）每20ms帧的 wall/thread CPU、queue峰值和失败增量。这里尚无该候选已降低负载的结论。
+
+启动验证至少记录有限的 metadata 时点：ASR构造完成、前端32帧预热完成/HELLO、首次成功native swap、runtime激活、首次完整UI刷新、AUTO_START、首个 input_ready、首个 endpoint feed，以及失败发生时的帧数。只需时间、布尔状态和数值计数，不含PCM/正文/身份ID；检查基准启动中仍只有一个模型子进程、一个模型实例和一个采集owner。
+
+在当前原8帧条件下，分别看第一代与重臂后的连续窗口；采集覆盖至少应超过已失败的约8秒，并比较同相机/显示/监听状态下的 endpoint mean/p95/max、thread CPU、consumer_gap、queue峰值与失败增量。保留真实失败记录，不能用后续自动恢复冒充该轮成功。
+
+只有新增时点证明失败与一次性UI初始化重合、且combined之后仍存在该问题时，才考虑小范围启动串行化：让第一次静态设备清单/完整UI状态刷新在开麦前完成，并在原自动监听ready判断上增加明确完成标志。未完成时继续显示“准备中”，暂停/退出/配对失效仍必须阻止启动，不设固定延时。它会推迟首次开麦到真实准备完成，不降低长期GUI帧率；目前没有证据证明它会消除现有失败，所以不建议与combined首版同时加入。
+
+本轮没有修改或发布任何业务源码，也没有执行设备/模型/真实数据库操作。

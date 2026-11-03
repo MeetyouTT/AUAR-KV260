@@ -1,0 +1,124 @@
+--- a/common/feature_intents.py
++++ b/common/feature_intents.py
+@@ -7,6 +7,57 @@
+ 
+ from common.character_profile import strip_character_address
+ from common.spoken_input import prepare_spoken_input
++
++
++def _speaker_enrollment_value(text):
++    """Only enrollment/name intent: preserve questions and reject quoted speech."""
++    if not isinstance(text, str) or not 1 <= len(text) <= 2000:
++        return None
++    if any(ord(char) < 32 for char in text) or re.search(r'[？?"\'“”‘’「」『』]', text):
++        return None
++    value = strip_character_address(prepare_spoken_input(text)['text'].strip())
++    return value.strip(' ，,。！!')
++
++
++def speaker_enrollment_name(text):
++    """Exact self-name slot; callers still need an already explicit voice entry.
++
++    Only whitespace between Chinese name characters is formatting. Punctuation,
++    spelling, Latin word boundaries and arbitrary sentence tails are not guessed.
++    The original name validator and SpeakerDevice's original 20-char slot apply.
++    """
++    from common.voice_enrollment import valid_name
++    value = _speaker_enrollment_value(text)
++    if value is None:return None
++    match = re.fullmatch(r'(?:我叫|我的名字是|名字是|叫我)[ 　]*[：:]?[ 　]*(.+)', value)
++    if match is None:return None
++    name = match[1].strip()
++    if re.fullmatch(r'[\u4e00-\u9fff 　]+', name):
++        name = re.sub(r'[ 　]+', '', name)
++    if (not 1 <= len(name) <= 20 or re.search(r'\s', name)
++            or re.search(r'[吗呢么嘛]$|是不是|能不能|可不可以|要不要|好不好', name)
++            or re.match(r'(?:不是|不叫|不要|不想|不需要)', name)
++            or not valid_name(name)):
++        return None
++    return name
++
++
++def _speaker_enrollment_start(text):
++    value = _speaker_enrollment_value(text)
++    if value is None:return None
++    # Whole self-directed commands only, not keyword extraction or prefix erase.
++    prefix = r'(?:(?:我要|我想))?(?:请)?(?:帮我|给我)?'
++    action = r'(?:(?:登记|注册|录入)(?:一下)?(?:我的)?声纹|登记(?:一下)?(?:我的)?声音)'
++    slot = r'(?:我叫|我的名字是|名字是).+'
++    match = re.fullmatch(prefix + action + r'(?:[，,。 ：:]*(' + slot + r'))?', value)
++    if match is None:
++        # Preserve the original explicit, named legacy wording; a bare request
++        # here has never been a standalone start and remains unchanged.
++        match = re.fullmatch(r'(?:请)?(?:帮我)?记住我的声音[，, ]*(' + slot + r')', value)
++    if match is None:return None
++    if match[1] is None:return {'name': None}
++    name = speaker_enrollment_name(match[1])
++    return {'name': name} if name is not None else None
+ 
+ 
+ def speaker_text(text, *, active=False):
+@@ -26,14 +77,13 @@
+     if active and value in ('取消登记', '取消', '不保存'):
+         return value
+     name = r'([^，,。！？!?\s]{1,20})'
+-    found = re.fullmatch(r'(?:请)?(?:帮我)?(?:登记我的声纹|记住我的声音|登记声纹)[，, ]*(?:我叫|名字是)'+name, value)
+-    if found:
+-        return '登记我的声纹，我叫'+found[1]
++    enrollment = _speaker_enrollment_start(text)
++    if enrollment is not None:
++        return ('登记我的声纹' if enrollment['name'] is None else
++                '登记我的声纹，我叫' + enrollment['name'])
+     found = re.fullmatch(r'(?:请)?删除声纹[，, ]*(?:名字是|名为)?'+name, value)
+     if found:
+         return '删除声纹，名字是'+found[1]
+-    if re.fullmatch(r'(?:请)?(?:帮我)?(?:登记|注册)(?:我的)?声纹', value):
+-        return '登记我的声纹'
+     # Read-only questions use the existing readiness/calibration/match path.
+     # Full matches prevent quotations and negation from executing an action.
+     question = value
+--- a/board/runtime/board_business.py
++++ b/board/runtime/board_business.py
+@@ -357,8 +357,10 @@
+                                        '登记我的声纹，我叫' + intent['name'])
+                         if intent['name'] is not None:entry['awaiting_name'] = False
+                     elif entry['awaiting_name'] and not cancel:
+-                        if intent['kind'] == 'name_hint' and not self.business.public()['active']:
+-                            interpreted = '登记我的声纹，我叫' + intent['name']
++                        from common.feature_intents import speaker_enrollment_name
++                        waiting_name = speaker_enrollment_name(text)
++                        if waiting_name is not None and not self.business.public()['active']:
++                            interpreted = '登记我的声纹，我叫' + waiting_name
+                             entry['awaiting_name'] = False
+                         elif speaker_query_requested(text) or query_reply(text, {'state':'UNKNOWN'}) is not None:
+                             interpreted = '查询我的声纹'
+@@ -370,6 +372,9 @@
+                         is_current=current, cancel_event=cancel_event, deadline=job.deadline)
+                     if cancel:self._standalone_entry = None
+                     if spoken is None:return DIALOGUE_ROUTE
++                    if (entry['awaiting_name'] and not cancel and interpreted == '登记我的声纹'
++                            and not self.business.public()['active']):
++                        spoken = '请告诉我这次声纹登记的称呼。直接说“我叫”，再加上你的称呼。'
+                     emit(BoardReply(spoken, 'friendly'), final_cue=True)
+                     return
+                 if entry is not None and entry['mode'] == 'face':
+--- a/tools/yuki_jobs_candidate.py
++++ b/tools/yuki_jobs_candidate.py
+@@ -62,7 +62,7 @@
+     command_text = re.sub(r'^\s*' + re.escape(CHARACTER_NAME) + r'[\s，,：:]*', '', intent_text, count=1)
+     command, _ = scoped_command(command_text, job.scope.get('kind') == 'profile')
+     if (command is not None and not speaker_requested_by_policy
+-            and binding['kind'] not in ('remember_self', 'name_hint', 'invalid_name')):
++            and binding['kind'] not in ('remember_self', 'name_hint', 'invalid_name', 'face_only', 'voice_only')):
+         if self.controller.command_handler is None:
+             raise BoardCapabilityNotReady('explicit_memory_commands')
+         return None, None
+@@ -72,7 +72,7 @@
+         capability = 'speaker_identity'
+     elif (self._enrollment_state().get('active') or enrollment_requested(text)
+             or cancelled(text) or confirmed(text) or update_confirmed(text)
+-            or binding['kind'] in ('remember_self', 'name_hint', 'invalid_name')):
++            or binding['kind'] in ('remember_self', 'name_hint', 'invalid_name', 'face_only')):
+         capability = 'identity_enrollment'
+     elif identity_query_requested(text):
+         capability = 'identity_query'

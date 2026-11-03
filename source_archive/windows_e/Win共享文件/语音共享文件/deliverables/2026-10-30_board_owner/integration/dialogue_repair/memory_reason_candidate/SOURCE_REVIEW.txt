@@ -1,0 +1,20 @@
+v16记忆错误最小原因探针（仅本地源码审查）
+
+确定发现
+pre_v17_animation.json mono59947.292463729：完成160/丢弃106，streak5、48秒退避、error other/长度16。时钟当时safe_for_compaction=true。以上只属封存观测，不能据此确认底层错误。
+
+production_memory_presentation.py:29–30将任意非空error折叠为operation_failed（固定16字符）；:319–325在最终bridge.publish上清理整个state。board_business.py:598将memory_worker.health放进board_business.memory。原probe.py:36–45仅保留数字/布尔及几个状态字段，既把operation_failed变成other，又漏掉last_failure_code字符串与summary_diagnostics字典。所以扩大原error allowlist无法找回已被上游折叠的原因。
+
+最窄接线
+无需修改生产，独立探针只读一次127.0.0.1:8783/api/state，严格提取现存的memory.retry_backoff.last_failure_code，以及memory.summary_diagnostics的state/stage/code/error_class/method/7类rejection_reasons。源代码6文件已逐项匹配v16真实component pins。现有_clean不会折叠这些键，都是源码明确的固定词表。任意新词只计unknown，不透传字符串。
+
+原始分类与限制
+BoardMemoryWorker.step :1562–1585：ClockUnavailable→clock_unverified；CandidateRejected/ValueError→candidate_rejected；MemoryBusy→database_busy；其它可处理异常→model_failed；commit阶段拒绝→candidate_rejected、SQLite错误→database_busy。编程错误显式重抛。Backoff :57–68把明确Interrupted/已失效predicate归cancelled，把明确Timeout归deadline_exceeded；只有5类真实失败增加退避，成功清零，取消/时钟/纯idle不增加。
+BoardSummaryClient :471–491提供有限阶段和异常类；validated wire response的错误code只取固定allowlist。semantic_json/shape/bounds可区分模型返回结构失败，fragment/reduction/full_source_validation配合7类拒绝项可区分保真校验失败。若summary显示complete但worker last_failure仍失败，应继续调查commit/后续失败，不能直接断言模型失败。
+
+单次health不是事务级原子快照。last_failure_code可能来自上次失败，summary可能来自另一次已完成摘要；探针明确snapshot_atomicity_verified=false。退避期单次读有助定位，但不能把相关字段强行串成同一任务，也不读任务ID或数据库。若结果缺字段/unknown则保持未知，不解析异常消息或放宽删除校验。
+
+执行边界
+探针的main才会使用既有SSH入口；本代理没有执行它。仅在root明确执行时读取boot、公开startup/config.json SHA与localhost状态；没有SQLite/模型请求、麦克风、播放、文件改写或生产部署。输出只含固定枚举、数字、布尔、null及unknown计数，不含对话、模型response、业务ID、身份模板或原异常字符串。配置/boot不符即拒绝，原probe不改，文件存在不覆盖。
+
+8项离线测试通过：真实_clean折叠但安全元数据保留；七类拒绝；恶意字符串/正文/ID不外泄；NaN/bool/超大数拒绝；缺字段明确未知；一次HTTP假调用；错boot在HTTP前拒绝；前后配置改变拒绝。没有任何真实设备或私库调用。

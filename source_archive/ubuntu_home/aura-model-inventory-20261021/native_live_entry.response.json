@@ -1,0 +1,20 @@
+{
+  "files": {
+    "runtime_entry.py": {
+      "sha256": "c270e4ce9e794754ed6195202b8a00b74650bd6edc740099bf664a5e06d884cd",
+      "source": "\"\"\"Stable entrypoint for the byte-identical validated process-local GIL wrapper.\"\"\"\nimport hashlib\nimport importlib.util\nfrom pathlib import Path\nimport sys\nimport tempfile\nimport uuid\n\nWRAPPER_SHA='0cec741d143a012b5d5aa5808f404e7b818510d2773f3b122dd1fb639222ae02'\n\n\ndef load_wrapper(path):\n    if path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest()!=WRAPPER_SHA:\n        raise RuntimeError('Validated runtime wrapper differs')\n    spec=importlib.util.spec_from_file_location('_validated_camera_wrapper',path)\n    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)\n    return module\n\n\ndef launch(argv,*,root=None,boot_id=None,loader=load_wrapper):\n    root=Path(root) if root is not None else Path(__file__).resolve().parent\n    boot_id=boot_id if boot_id is not None else Path('/proc/sys/kernel/random/boot_id').read_text().strip()\n    if str(uuid.UUID(boot_id))!=boot_id:raise ValueError('Canonical boot UUID required')\n    if not argv:raise ValueError('Camera entrypoint required')\n    if root.resolve()!=root or (root/'process-settings').is_symlink():\n        raise ValueError('Runtime record parent redirects outside release')\n    directory=root/'process-settings'/boot_id\n    directory.mkdir(parents=True,exist_ok=True,mode=0o700)\n    if directory.resolve()!=directory:raise ValueError('Runtime record path redirects outside release')\n    # PID values can repeat across boots or after PID wrap. Keep every launch\n    # in an owned directory; never overwrite an older validation record.\n    record=Path(tempfile.mkdtemp(prefix='launch-',dir=str(directory)))\n    wrapper=loader(root/'gil_camera_launcher.py')\n    return wrapper.launch(argv,record_directory=record)\n\n\nif __name__=='__main__':launch(sys.argv[1:])\n"
+    },
+    "board_camera_ui.json": {
+      "sha256": "edd75843cda1aef7d0567dfc9c787cb2f8d29c3e4bb76bc18c3c0e8c7b128c8a",
+      "identity": {
+        "enabled": true,
+        "config": "/home/root/aura-dpu-vision-20261021/postpower-retry-live/release-sface-int8-9025bd49fe52-333217/board_identity.sface_int8.json"
+      },
+      "thread_waits": {
+        "yunet_slot_wait_ms": 100,
+        "sface_slot_wait_ms": 100,
+        "optional_admission_floor_ms": 30
+      }
+    }
+  }
+}

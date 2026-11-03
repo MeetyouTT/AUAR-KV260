@@ -1,0 +1,65 @@
+{
+  "schema": "aura.animation-thinking-independent-review.v1",
+  "reviewer": "/root/github_comment",
+  "status": "PASS_SOURCE_REVIEW_NO_BLOCKER_FOR_CONTROLLED_PREVIEW",
+  "blocking_findings": [],
+  "scope": "Independent local source reading, hashes and AST comparison only; no rerun of the 25 tests, native execution, device/model/private-store access or candidate modification.",
+  "reviewed_artifacts": {
+    "HANDOFF.json": "75e80fefba9519c77ed6bcb54e7293791c6a2f5944f404842aa0171a5ba69b54",
+    "SOURCE_MANIFEST.json": "ac34e8c51b988d69110e1c82d9fc1c11ec8c6ab39cd08a5deae95a2260b52dea",
+    "paired_overlay/PAIRING_RECEIPT.json": "04ea05e54da8a83837ea6072ae540c5078373fa2901570e246f475507d2cc838",
+    "native_build_result/native_build_receipt.json": "85579d297cc61b1f52a241267c415500bd4fb4493689ca1dd6dd5f4f22d7cd79",
+    "paired_overlay/aura/tools/libaura_yuki.so": "b2432e75a75e4dbdebee8e89a141a68ba00671c33b2b258b81ce16794b2c73d2",
+    "paired_overlay/aura/config/yuki_pair.formal.json": "998710fc12bf442d6baea501bab0234665b666caa29f4be8f685741d50d82099"
+  },
+  "findings": [
+    {
+      "topic": "Cached output reads and IPC",
+      "result": "No additional IPC, capture, sink query or audio-worker timer is introduced. SelectedAudioOutput.read returns a shallow copy under its local lock; GStreamerAudioOutput.position consumes the same cached state. In the ordinary active/ready path the new LocalPortrait.read replaces the old ready property's own read. In idle there is one additional small cached-dict copy. Wall/CPU cost has not been measured.",
+      "sources": ["runtime_v16/tools/realtime_audio.py:42", "runtime_v16/tools/realtime_audio.py:46", "runtime_v16/tools/gstreamer_audio.py:50", "runtime_v16/tools/gstreamer_audio_worker.py:189", "runtime_v16/tools/gstreamer_audio_worker.py:217", "paired_overlay/aura/tools/native_yuki.py:102"]
+    },
+    {
+      "topic": "Actual audio and waiting state",
+      "result": "TRANSCRIBING/GENERATING/PLAYING supply display-only waiting before or between stream events. Active sink + ready + audible + matching answer track + not paused/done/error is required to open eyes and forward the mouth envelope. Text/PCM arrival alone, feedback, PCM gaps and pauses remain closed with zero gain/level. Audio_sample comes from cached sink position; no wall-clock estimate or guessed answer track was added.",
+      "sources": ["paired_overlay/aura/tools/formal_yuki.py:256", "paired_overlay/aura/tools/formal_yuki.py:357", "paired_overlay/aura/tools/formal_yuki.py:366", "paired_overlay/aura/tools/native_yuki.py:113", "runtime_v16/tools/gstreamer_persistent_engine.py:162", "runtime_v16/tools/gstreamer_persistent_engine.py:224"]
+    },
+    {
+      "topic": "Cancel, completion and ownership",
+      "result": "Cancel clears transcription_waiting then inherits stream removal, portrait invalidation, audio stop and generation change. Existing full-playback completion and acknowledgement remain inherited. StrictLocalPortrait rejects older generations; native owner/sequence/sample monotonic checks remain. The two cached snapshots are not atomic; a track transition can conservatively close one visual offer, but cannot authorize a mismatched answer interval. Completion can remain visually closed until the next existing transcription poll clears PLAYING; this does not hold the audio/ACK path.",
+      "sources": ["paired_overlay/aura/tools/formal_yuki.py:253", "paired_overlay/aura/tools/formal_native_yuki.py:40", "runtime_v16/tools/streaming_controller.py:30", "runtime_v16/tools/streaming_controller.py:124", "runtime_v16/tools/board_recording.py:299", "candidate/native/yuki_host.cpp:139"]
+    },
+    {
+      "topic": "Native high-bit compatibility",
+      "result": "Control/Stats layouts are preserved. Low-byte expressions remain 0..5; only authored/closed/open eye policies are allowed, with conflicting or unknown high bits rejected. New Python requires the exported capability before create. Native answer policy also requires answer track and a fresh <=150ms control, and stale/open-but-not-live controls close eyes and mouth. The matching new Python/library pair must be installed together.",
+      "sources": ["paired_overlay/aura/tools/native_yuki.py:33", "candidate/native/yuki_host.h:7", "candidate/native/yuki_host.cpp:69", "candidate/native/yuki_host.cpp:73", "candidate/native/yuki_host.cpp:131"]
+    },
+    {
+      "topic": "Merge with functionality Version2",
+      "result": "The five-file renderer overlay has no file overlap with feature_trigger_collaboration/candidate_v2's seven files. Pair JSON differs from baseline only in tools/native_yuki.py and tools/libaura_yuki.so runtime pins; yuki_jobs_candidate.py is not a pair runtime pin. Formal image/persona code does not replace its instance-bound routing. Root must merge both overlays into the freshest runtime and update the combined source/config/startup fingerprints, including character_pair.selection_sha256=998710fc12bf442d6baea501bab0234665b666caa29f4be8f685741d50d82099. This is merge compatibility review, not independent functional acceptance of Version2.",
+      "sources": ["paired_overlay/PAIRING_RECEIPT.json", "paired_overlay/aura/config/yuki_pair.formal.json", "paired_overlay/aura/tools/formal_yuki.py:14", "../feature_trigger_collaboration/candidate_v2/SOURCE_MANIFEST.json", "../feature_trigger_collaboration/candidate_v2/after/tools/yuki_jobs_candidate.py:43"]
+    }
+  ],
+  "verified_read_only_checks": {
+    "candidate_sources_match_frozen_manifest": true,
+    "all_five_overlay_files_match_pair_receipt": true,
+    "native_build_receipt_matches_source_header_library": true,
+    "native_create_gl_area_and_prepare_portrait_ast_unchanged": true,
+    "renderer_feature_source_file_overlap": [],
+    "proxy_hashes_match_v16_mapping": {
+      "tools/realtime_audio.py": "f09ca66a99e3866e188ef2dda6b82c641d35a8802665031555335890fc00a542",
+      "tools/gstreamer_audio.py": "f6bf258c1a4d3b7a7c5ec9b9fbd3ae253e36ebce4a58148454bb70ea140491fd",
+      "tools/gstreamer_audio_worker.py": "a454792d11e2e308dfebfa3e963ac73fa13a887485b7804d52a8a2bd162fd466",
+      "tools/gstreamer_persistent_engine.py": "0e73a064f2014e12f4e90323618c9d04de6a23b0220c138d9d9ff1f8240cc95b"
+    }
+  },
+  "acceptance_limits": [
+    "Existing native receipt is a real Host CPU parameter-policy test with a GPU-free Renderer substitute: 640 thinking, 64 answer, 640 idle frames; it is not rendered image, wall-clock 16fps, EGL swap or physical lip-sync acceptance.",
+    "The native frame scheduler is AST-identical and target remains 16fps. Added three-parameter facial adjustment cost is unmeasured; no FPS or CPU improvement is claimed.",
+    "Frozen initial HANDOFF/source manifest predate the successful build/seal. Use the separately verified build and pairing receipts for those later facts.",
+    "Proceed only to the root-owned controlled preview/integration window while preserving explicit PAUSED and mic=false; production visual/acoustic acceptance remains pending."
+  ],
+  "production_modified": false,
+  "candidate_modified": false,
+  "device_or_model_access": false,
+  "tests_rerun": false
+}

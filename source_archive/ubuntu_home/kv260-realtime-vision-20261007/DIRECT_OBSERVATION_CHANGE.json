@@ -1,0 +1,130 @@
+{
+  "old_sha256": "9b0a3ccbf3a0a9f641321d18bce903d565990cf51c875b55c43c37b96e088e9a",
+  "new_sha256": "4dad96bbf9591e09e6073c4d6cb313c14a3b10c43e2b77a102a2a1520dfa720f",
+  "edits": [
+    [
+      "    stop = threading.Event()\n",
+      "    stop = threading.Event()\n    observation_path = Path('/run/aura-vision-observation')/(epoch+'.json')\n    observation_path.parent.mkdir(parents=True, exist_ok=True)\n    observation_lock = threading.Lock()\n"
+    ],
+    [
+      "    def failure(error):\n",
+      "    def publish_observation(snapshot=None, error=None, stopped=False):\n        # Inference completion publishes to RAM; rendering never delays control data.\n        with observation_lock:\n            atomic_json(observation_path, {\n                'boot_id':boot, 'epoch':epoch, 'mirror_horizontal':mirror_horizontal,\n                'capture_size':[640,480], 'snapshot':snapshot,\n                'publication_time':time.monotonic(),\n                'stopped':stopped or stop.is_set(), 'error':error,\n                'scope':'VISION_OBSERVATION_ONLY', 'motion_command_emitted':False})\n    publish_observation()\n\n    def failure(error):\n"
+    ],
+    [
+      "            lock.notify_all()\n\n    def sample(sink):\n",
+      "            lock.notify_all()\n        publish_observation(error=str(error), stopped=True)\n\n    def sample(sink):\n"
+    ],
+    [
+      "                if event != previous_event:\n",
+      "                publish_observation(snapshot)\n                if event != previous_event:\n"
+    ],
+    [
+      "                      reference_x_px=320, physical_direction_calibration_valid=False,\n",
+      "                      reference_x_px=320, physical_direction_calibration_valid=False,\n                      control_observation_path=str(observation_path),\n"
+    ],
+    [
+      "if now-last_record >= .05:",
+      "if now-last_record >= 1.:"
+    ],
+    [
+      "        atomic_json(root/'status.json',status(time.monotonic()))\n",
+      "        publish_observation(stopped=True)\n        atomic_json(root/'status.json',status(time.monotonic()))\n"
+    ]
+  ],
+  "scope": "BOARD_DEPLOYED_PREVIEW_AND_PUBLICATION_VERIFIED_CONTINUOUS_CONTROL_NOT_PASSED",
+  "freshness_guard_unchanged_ms": 250,
+  "deployment": {
+    "evidence": "/home/ghmd/kv260-adaptation-check-20261006/evidence/20261008T143152.812792Z-direct_observation_start",
+    "rc": 0,
+    "output_sha256": "9ce8bb939e1b60019bf58c2241741859596ad4a05a1eb14003d278ef339a2c4a",
+    "source_sha256": "03186ae9b87ecbcdd9144c2daf3d98da7043f53b9224d120d4e00e84003c8548",
+    "console_echo_restored": true
+  },
+  "age_probe": {
+    "evidence": "/home/ghmd/kv260-adaptation-check-20261006/evidence/20261008T143524.539898Z-direct_coordinate_age_probe",
+    "rc": 0,
+    "output_sha256": "ae342779ac29ee58cad7d1829ac4cf2db3aeca767776c131181d0ca06ed10e8b",
+    "source_sha256": "1303d275517b3979a3a2e13a97227d124f6462992efa1eb164f456e1fe822a58",
+    "console_echo_restored": true
+  },
+  "age_result": {
+    "scope": "READ_ONLY_COORDINATE_AGE_PROBE",
+    "pid": 21340,
+    "epoch": "2599308c0d3d4cdf960826b5cca5f31c",
+    "samples": 240,
+    "age_median_ms": 194.03995999891777,
+    "age_max_ms": 303.4538049978437,
+    "samples_above_250ms": 15,
+    "samples_above_400ms": 0,
+    "detection_update_gap_max_ms": 125.6169560001581,
+    "detection_updates": 45,
+    "worst": {
+      "age_ms": 303.4538049978437,
+      "status_observation": null,
+      "capture_age_ms": null,
+      "capture_hz": 15.611687132722281,
+      "detection_hz": 8.985568034828818,
+      "detection_median_ms": null,
+      "detection_age_p95_ms": null
+    },
+    "last_error": null,
+    "last_stopped": false
+  },
+  "visual_direction_test": {
+    "evidence": "/home/ghmd/kv260-adaptation-check-20261006/evidence/20261008T143554.295630Z-direct_visual_direction_start",
+    "rc": 0,
+    "output_sha256": "ed3b9a247073538ab836debbe7c0529444a13ab85084af0c4da52e449f5fa9f6",
+    "source_sha256": "172c70850c7191e99cd0a0e9b4a7831bb60888e8311a69ec06ef7f5f0217ee7f",
+    "console_echo_restored": true
+  },
+  "visual_direction_result": {
+    "scope": "FINITE_VISUAL_DIRECTION_BENCH_NOT_FORMAL_TRACKING",
+    "command_transport_passed": true,
+    "stop_verified": true,
+    "stop_reason": "HARDWARE_LEASE_ENDED",
+    "commands": 1,
+    "duration_s": 0.7916319879986986,
+    "requested_left": "COUNTERCLOCKWISE",
+    "requested_right": "CLOCKWISE",
+    "user_reported_pulse_increase": "COUNTERCLOCKWISE",
+    "polarity": -1,
+    "test_reference_us": 1500,
+    "range_us": [
+      1480,
+      1520
+    ],
+    "mapping_is_measured_pointing": false,
+    "source": "MIRRORED_FACE_CENTER_RELATIVE_TO_BLUE_LINE",
+    "speed_tuning_performed": false,
+    "physical_reference_calibrated": false,
+    "formal_tracking_started": false,
+    "boot_id": "f7a3ff07-fc20-4804-af12-c314a7a1847a",
+    "camera_epoch": "2599308c0d3d4cdf960826b5cca5f31c",
+    "preview_pid": 21340,
+    "final_stop": {
+      "flags": 0,
+      "width_us": 1500,
+      "lease_left_ms": 0,
+      "session": 4168530347,
+      "epoch": 630796428,
+      "reference_us": 1500,
+      "target_us": 1500,
+      "ack_seq": 1,
+      "active": false,
+      "armed": false,
+      "referenced": false,
+      "bound": false,
+      "reason": 0
+    },
+    "directions_commanded": [
+      "CENTER"
+    ],
+    "target_range_us": [
+      1500,
+      1500
+    ],
+    "evidence": "/home/root/aura-adaptation-20261006/visual-direction-08b40216d6874aadb26406f264d0284f",
+    "mechanical_following_confirmation": "AWAITING_USER"
+  },
+  "updated_utc": "2026-10-08T14:37:46.899117+00:00"
+}

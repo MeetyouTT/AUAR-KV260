@@ -1,0 +1,7 @@
+[
+  {"id":"unload-original-output","command":"python3 -B -c 'import pathlib,json; p=pathlib.Path(\"/home/root/kv260-dfx-state-boardtest-20261004/evidence/start-64247855753408\"); print(json.dumps({x.name:x.read_text() for x in p.iterdir() if x.suffix in (\".stdout\",\".stderr\")},indent=2))'"},
+  {"id":"current-apps","command":"xmutil listapps"},
+  {"id":"restore-official","command":"xmutil loadapp kv260-benchmark-b4096","timeout":90},
+  {"id":"restored-query","command":"xdputil query","timeout":90},
+  {"id":"restored-classification","command":"/home/root/Vitis-AI/examples/vai_library/samples/classification/test_jpeg_classification /usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel /home/root/kv260-test-20261001/pytorch-resnet-dog.jpg","timeout":90}
+]

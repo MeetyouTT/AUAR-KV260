@@ -1,0 +1,34 @@
+--- reviewed/summary_common.py
++++ frozen/summary_common.py
+@@ -25,9 +25,9 @@
+ }
+ ALLOWED_PATHS = set(OLD_SOURCE_PINS)
+ REVISION = 'memory-summary-v23'
+-PAYLOAD_FINALIZED = False
++PAYLOAD_FINALIZED = True
+ # Root supplies this SHA only after selecting a source using real public cases.
+-APPROVED_PAYLOAD_SHA = None
++APPROVED_PAYLOAD_SHA = '7a44c5d9fa115fa4be319184b215b8f1c4fd0e92746bd9f9aee15a0991c3e809'
+ # Exact snippets from R3 manifest 447390dc and root-reviewed source 89057701.
+ # Binding these guards does not select a product or enable device execution.
+ R3_REVIEWED_POLAR_DECLARATION = r'''POLAR_QUESTION = re.compile(r"(?<![不没])(?:去不去|买不买|做不做|要不要|能不能|会不会|是不是|有没有|可不可以)")'''
+--- reviewed/test_framework.py
++++ frozen/test_framework.py
+@@ -49,12 +49,11 @@
+ 
+ class SourceClosureTests(unittest.TestCase):
+     def test_unselected_package_refuses_proposal_and_execution(self):
+-        self.assertIs(common.PAYLOAD_FINALIZED, False)
+-        self.assertIsNone(common.APPROVED_PAYLOAD_SHA)
+-        with self.assertRaisesRegex(ValueError, 'selection_pending'):
+-            common.proposed()
+-        with self.assertRaisesRegex(ValueError, 'final_root_selected'):
+-            common.execute_remote('', {})
++        with patch.object(common, 'PAYLOAD_FINALIZED', False), patch.object(common, 'APPROVED_PAYLOAD_SHA', None):
++            with self.assertRaisesRegex(ValueError, 'selection_pending'):
++                common.proposed()
++            with self.assertRaisesRegex(ValueError, 'final_root_selected'):
++                common.execute_remote('', {})
+ 
+     def test_actual_380_sameboot_baseline(self):
+         base = common.baseline()

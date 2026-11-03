@@ -1,0 +1,80 @@
+[
+  {
+    "name": "help-board_preflight",
+    "argv": [
+      "/usr/bin/python3",
+      "-B",
+      "/home/ghmd/kv260-runtime-submission-20261002/payload/scripts/board_preflight.py",
+      "--help"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "usage: board_preflight.py [-h] --config CONFIG\n\nFresh target-board inventory and checks only. Does not switch apps, services\nor drivers.\n\noptional arguments:\n  -h, --help       show this help message and exit\n  --config CONFIG  Annex config directory containing source_lock.json and\n                   baseline_inputs.json\n",
+    "stderr": ""
+  },
+  {
+    "name": "help-build_dfx",
+    "argv": [
+      "/usr/bin/python3",
+      "-B",
+      "/home/ghmd/kv260-runtime-submission-20261002/payload/scripts/build_dfx.py",
+      "--help"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "usage: build_dfx.py [-h] --workspace WORKSPACE --sdk SDK --libdfx LIBDFX\n                    --chrpath CHRPATH [--jobs JOBS]\n                    [--runtime-root RUNTIME_ROOT] [--qemu QEMU]\n\nRebuild the fixed DFX source using an explicit installed SDK; never install\noutputs.\n\noptional arguments:\n  -h, --help            show this help message and exit\n  --workspace WORKSPACE\n  --sdk SDK\n  --libdfx LIBDFX\n  --chrpath CHRPATH\n  --jobs JOBS\n  --runtime-root RUNTIME_ROOT\n  --qemu QEMU\n",
+    "stderr": ""
+  },
+  {
+    "name": "help-build_zocl",
+    "argv": [
+      "/usr/bin/python3",
+      "-B",
+      "/home/ghmd/kv260-runtime-submission-20261002/payload/scripts/build_zocl.py",
+      "--help"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "usage: build_zocl.py [-h] --workspace WORKSPACE --sdk SDK\n                     [--kernel-git KERNEL_GIT] [--jobs JOBS]\n                     {prepare,kernel,module}\n\nPrepare a separate matching kernel and build ZOCL; never load or install\nmodules.\n\npositional arguments:\n  {prepare,kernel,module}\n\noptional arguments:\n  -h, --help            show this help message and exit\n  --workspace WORKSPACE\n  --sdk SDK\n  --kernel-git KERNEL_GIT\n                        Required for prepare; fixed, clean linux-xlnx checkout\n  --jobs JOBS\n",
+    "stderr": ""
+  },
+  {
+    "name": "help-prepare_sources",
+    "argv": [
+      "/usr/bin/python3",
+      "-B",
+      "/home/ghmd/kv260-runtime-submission-20261002/payload/scripts/prepare_sources.py",
+      "--help"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "usage: prepare_sources.py [-h] --workspace WORKSPACE\n\nReconstruct fixed patched sources in a fresh directory; no network or board\naccess.\n\noptional arguments:\n  -h, --help            show this help message and exit\n  --workspace WORKSPACE\n",
+    "stderr": ""
+  },
+  {
+    "name": "skill-structure",
+    "argv": [
+      "/usr/bin/python3",
+      "/home/ghmd/.codex/skills/.system/skill-creator/scripts/quick_validate.py",
+      "/home/ghmd/kv260-runtime-submission-20261002/payload/skill/kv260-runtime-review"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "Skill is valid!\n",
+    "stderr": ""
+  },
+  {
+    "name": "target-preflight-host-refusal",
+    "argv": [
+      "/usr/bin/python3",
+      "-B",
+      "/home/ghmd/kv260-runtime-submission-20261002/payload/scripts/board_preflight.py",
+      "--config",
+      "/home/ghmd/kv260-runtime-submission-20261002/payload/config"
+    ],
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "stdout": "{\n  \"observed_utc\": \"2026-10-03T07:35:43.621508+00:00\",\n  \"read_only\": true,\n  \"board_switch_executed\": false,\n  \"checks_passed\": false,\n  \"issues\": [\n    \"Run on the target as root to read all process occupancy\",\n    \"Kernel differs from the tested release\"\n  ],\n  \"files\": {},\n  \"kernel\": \"5.15.0-139-generic\"\n}\n",
+    "stderr": ""
+  }
+]

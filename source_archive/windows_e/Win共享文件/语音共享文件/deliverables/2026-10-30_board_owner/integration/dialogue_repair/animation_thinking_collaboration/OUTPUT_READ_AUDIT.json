@@ -1,0 +1,12 @@
+{
+  "schema": "aura.animation-thinking-output-read-audit.v1",
+  "source": "Pinned v16 Python source inspection; no process/IPC benchmark",
+  "selected_audio_output_sha256": "f09ca66a99e3866e188ef2dda6b82c641d35a8802665031555335890fc00a542",
+  "read_line": 42,
+  "read_body": "    def read(self):\n        with self.lock:return dict(self.snapshot)",
+  "gstreamer_audio_sha256": "f6bf258c1a4d3b7a7c5ec9b9fbd3ae253e36ebce4a58148454bb70ea140491fd",
+  "gstreamer_facade_overrides_read": false,
+  "conclusion": "Additional output.read copies the in-process cached snapshot under its lock; it does not send a worker command, read a pipe, open a socket or invoke a model",
+  "caveat": "One additional lock/dict copy in the display frame path; exact board CPU cost not benchmarked",
+  "frozen_candidate_modified": false
+}

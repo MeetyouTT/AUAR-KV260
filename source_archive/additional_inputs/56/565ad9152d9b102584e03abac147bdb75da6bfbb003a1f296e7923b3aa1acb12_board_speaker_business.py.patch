@@ -1,0 +1,11 @@
+--- before/board/runtime/board_speaker_business.py
++++ after/board/runtime/board_speaker_business.py
+@@ -637,7 +637,7 @@
+         if not self.closing.is_set():
+             self.closing.set()
+             with self.lock:
+-                for job in self.jobs.values():
++                for job in tuple(self.jobs.values()):
+                     job['cancelled'].set(); job['pcm'] = None
+                     if job.get('future') is not None:
+                         job['future'].cancel()

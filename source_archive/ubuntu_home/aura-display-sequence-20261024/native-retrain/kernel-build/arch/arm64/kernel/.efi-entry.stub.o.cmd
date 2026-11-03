@@ -1,0 +1,1 @@
+cmd_arch/arm64/kernel/efi-entry.stub.o := /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-objcopy --prefix-symbols=__efistub_  arch/arm64/kernel/efi-entry.o arch/arm64/kernel/efi-entry.stub.o

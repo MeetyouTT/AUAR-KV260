@@ -1,0 +1,14 @@
+v22 原相机方案恢复并完成界面重绑定，当前保持暂停
+
+运行根 /home/root/aura-board-business-20261030/production-5259eab11e42af13。startup SHA 48cb1a3a1fc62eae32c93a5be02df0bd60926cd064884a06990dd24b62762885，manifest SHA e3afb1f52a7fd8eb8382e50c7c084f22099930252359e098f4c594987163453b，config SHA e0762cbfb88fd77238b5b1b3562fd00005bc505395867e96cfc8b1b6651fb135，380份组件。
+封存boot bebd3e7d-e984-4517-8cbb-211df7f1c6dc，supervisor 229842，GTK 229850，原A相机 229296。本次仅更新face_readback的路径和SHA，379份其他组件原样保持。操作前现读入口与owner。
+用户最新选择“暂时保持暂停”，enabled=false、PAUSED、mic=false，界面已可见。ASR 2线程、GTCRN 1线程与原8帧队列、GTK每5秒保活继续使用。
+实际相机A/B/A已完成并恢复原A。B观测CPU比两端A低22.83%和34.56%，每次采集完成CPU低22.71%和20.24%。A1人数混合、B无人、A2一人，A2采集吞吐高约22%，结果存在混杂。早一轮A1完整保留。B峰值RSS比重启后的A2高7.50MiB，本轮继续使用原A。
+B首次停止回执为stop_owner_reused_or_changed，继续观察后确认CANDIDATE_STOPPED，最终COMPLETE。新checkpoint已由恢复A消费，全程forced_kill=false、old_checkpoint_restored=false。GUI恢复使用新的22pin私有readback闭包。
+v21暂停保活已完成635.886秒、651样本的软件观察。v22恢复后另有31样本、6次idle下降、最大4928ms，原600秒屏保和DPMS策略保持，观察器复位0次。外部输入未排除，物理面板未摄取。相机维护时的单次wake单独记录。首个v22显示探针缺少执行参数而拒绝，补齐后通过，失败回执保留。
+新进程快照mono25357.989，GUI故障0、worker故障未取得。记忆完成45/丢弃5，连续失败5次、退避48.0秒，计数仅属于本进程。
+worker故障字段当前available=false，无法确认其故障计数。早期探针曾把缺失字段默认记为0，此值不能作为worker无异常的证据。
+当前固定诊断仍为full_source_validation/negation_missing。摘要完成45批并伴随5批拒绝，完成批数不能推作模型调用次数，成功压缩前保留失败批次原文。声纹未标定，新的真人听音与端点至首声继续待验。
+Windows最新健康回执为model_inference_only，27B与OmniVoice16就绪，active=true、pending=0。
+v20单日对话删除、自然身份查询、同轮图库证据和声纹事务检查的六份功能源码保持，历史92项公开ARM验证继续独立保留。自然解绑/重关联和单独登记统一命名仍有缺口。两个旧记忆测试模块缺依赖的收集失败、11个临时目录约10.3MB清理被自动审批拒绝的记录继续保留。
+接续入口 E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\current_observation_v22.json。完整证据与原文档字节归档在 E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\docs_state_v22，旧v21快照和追加回执保持独立。

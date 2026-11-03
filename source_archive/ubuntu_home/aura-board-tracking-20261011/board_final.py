@@ -1,0 +1,29 @@
+STAGE='/home/root/aura-bytetrack-20261011/update-ea926df36eb116cd'
+import json,subprocess
+from pathlib import Path
+root=Path(STAGE)
+original=Path('/home/root/aura-bytetrack-20261011/update-33fd4bc855871500')
+# This package repairs acceptance helpers only; runtime bytes and startup
+# version are identical. Preserve the actual applied update ID in the record.
+applied=json.loads((original/'APPLIED.json').read_text())
+applied['acceptance_package']=str(root)
+applied['adopted_existing_runtime_for_validation']=True
+(root/'APPLIED.json').write_text(json.dumps(applied,indent=2)+'\n')
+(root/'camera-check.json').write_bytes((original/'camera-check.json').read_bytes())
+results={}
+for label,name,args in [('status','board_status.py',[]),('camera_ui','board_camera_control.py',['--phase','camera-test']),
+                        ('target','board_acceptance.py',[]),('profile','board_profile.py',[])]:
+    result=subprocess.run(['python3','-B',str(root/'payload'/name)]+args,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=110)
+    assert result.returncode==0,(label,result.stdout)
+    value=json.loads(result.stdout)
+    if label=='camera_ui':
+        import base64,hashlib
+        artifacts={}
+        for key in ['screenshot','main_screenshot']:
+            shot=value[key];blob=base64.b64decode(shot.pop('jpeg_base64'))
+            artifacts[key+'.jpg']={'base64':base64.b64encode(blob).decode(),'bytes':len(blob),'sha256':hashlib.sha256(blob).hexdigest()}
+        results['artifacts']=artifacts
+    if label=='target':
+        results.setdefault('artifacts',{}).update(value.pop('artifacts',{}))
+    results[label]=value
+print(json.dumps(results,ensure_ascii=False))

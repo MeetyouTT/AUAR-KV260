@@ -1,0 +1,102 @@
+{
+  "exceptions": [],
+  "clock_source_sha256": "93b65ec3d9ca393b32499845297c78a2f1f71bc19e069b2ce3dc6f69e795af02",
+  "clock_source_lines": [
+    {
+      "line": 259,
+      "code": "                    raise ClockUnavailable(\"invalid_date_sample\")"
+    },
+    {
+      "line": 260,
+      "code": "                if sample.boot_id != self.boot_id:"
+    },
+    {
+      "line": 261,
+      "code": "                    self.fatal = True"
+    },
+    {
+      "line": 262,
+      "code": "                    raise ClockUnavailable(\"sample_boot_mismatch\")"
+    },
+    {
+      "line": 263,
+      "code": "                if sample.source_id != self.source_id:"
+    },
+    {
+      "line": 264,
+      "code": "                    raise ClockUnavailable(\"source_not_verified\")"
+    },
+    {
+      "line": 265,
+      "code": "                try:"
+    },
+    {
+      "line": 266,
+      "code": "                    verified = self.source_validator(sample)"
+    },
+    {
+      "line": 267,
+      "code": "                except Exception:"
+    },
+    {
+      "line": 268,
+      "code": "                    verified = False"
+    },
+    {
+      "line": 269,
+      "code": "                if verified is not True:"
+    },
+    {
+      "line": 270,
+      "code": "                    raise ClockUnavailable(\"source_not_verified\")"
+    },
+    {
+      "line": 271,
+      "code": "                sent = _number(sample.sent_monotonic); received = _number(sample.received_monotonic)"
+    },
+    {
+      "line": 272,
+      "code": "                if sent > received or received > now:"
+    },
+    {
+      "line": 273,
+      "code": "                    raise ClockUnavailable(\"invalid_sample_monotonic_order\")"
+    },
+    {
+      "line": 274,
+      "code": "                rtt = received - sent"
+    },
+    {
+      "line": 275,
+      "code": "                if rtt > self.policy[\"max_rtt\"]:"
+    },
+    {
+      "line": 276,
+      "code": "                    raise ClockUnavailable(\"sample_rtt_exceeded\")"
+    },
+    {
+      "line": 277,
+      "code": "                if now - received > self.policy[\"max_sample_age\"]:"
+    },
+    {
+      "line": 278,
+      "code": "                    raise ClockUnavailable(\"sample_too_old\")"
+    },
+    {
+      "line": 279,
+      "code": "                if not isinstance(sample.date_header, str) or not DATE_FORMAT.fullmatch(sample.date_header):"
+    },
+    {
+      "line": 280,
+      "code": "                    raise ClockUnavailable(\"invalid_http_date\")"
+    },
+    {
+      "line": 281,
+      "code": "                try:"
+    },
+    {
+      "line": 282,
+      "code": "                    parsed = parsedate_to_datetime(sample.date_header)"
+    }
+  ]
+}

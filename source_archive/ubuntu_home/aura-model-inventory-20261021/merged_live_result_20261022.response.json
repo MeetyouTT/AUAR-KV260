@@ -1,0 +1,365 @@
+{
+  "launch": {
+    "finished": true,
+    "scope": "Read merged-live deployment-result for outcome and restoration"
+  },
+  "report_path": "/home/root/aura-dpu-vision-20261021/merged-live/0dd98eee68320ec7-315952/deployment-result.json",
+  "summary": {
+    "scope": "MERGED_13_SOURCE_LIVE_60S_SHADOW_ALWAYS_RESTORED",
+    "phase": "FINISHED",
+    "passed": true,
+    "complete": true,
+    "error": null,
+    "rollback_error": null,
+    "observation_status": "MERGED_THREE_MODEL_SHORT_WINDOW",
+    "elapsed_s": 60.2762111660013,
+    "observed_seconds": 60.68583844300156,
+    "observed_yolo_hz": 9.854028803798505,
+    "observed_capture_hz": 12.457601631557976,
+    "observed_yunet_hz": 2.109223556665901,
+    "shadow_completed_window": 4,
+    "sface_live_verified": true,
+    "usb_warning_count": 0,
+    "rollback_verified": true,
+    "restored": {
+      "pid": 316838,
+      "capture_frames": 11,
+      "detected_frames": 10,
+      "capture_hz": 3.61,
+      "detection_hz": 3.28,
+      "observation_age_ms": 99,
+      "camera_error": "",
+      "detector_error": "",
+      "dpu_schedule": {
+        "active": null,
+        "primary_calls": 10,
+        "primary_period_overruns": 1,
+        "waiting_primary": 0,
+        "budget_ms": 20.0,
+        "guard_ms": 5.0,
+        "optional": {
+          "yunet": {
+            "calls": 1,
+            "skipped": 3,
+            "overruns": 0,
+            "budget_exceeded": 0,
+            "estimated_budget_ms": 20.0,
+            "maximum_ms": 2.461124000546988,
+            "disabled": false
+          }
+        }
+      },
+      "pipeline_metrics": null,
+      "identity_backend": "WINDOWS_CPU_SFACE_ORT",
+      "face_targets": {
+        "ready": true,
+        "error": "",
+        "backend": "DPU_YUNET_INT8",
+        "processed": 1,
+        "discarded": 3,
+        "last_inference_ms": 57.28,
+        "source_age_ms": 399
+      },
+      "shadow": null,
+      "producer": null
+    }
+  },
+  "samples": 13,
+  "latest_camera": {
+    "pid": 316073,
+    "shadow": {
+      "enabled": true,
+      "mode": "SHADOW_ONLY_WINDOWS_IDENTITY",
+      "model_id": "sface-int8-12b2ff5c7de15713",
+      "ready": true,
+      "closed": false,
+      "stop_requested": false,
+      "stopped": false,
+      "pending_frames": 1,
+      "inflight_frames": 0,
+      "offered": 109,
+      "enqueued": 109,
+      "replaced": 49,
+      "producer_dropped": 0,
+      "processed": 4,
+      "accepted": 4,
+      "stale": 2,
+      "deferred": 53,
+      "failures": 0,
+      "last_error": "",
+      "accepted_latency_ms": {
+        "count": 4,
+        "mean": 15.07940325063828,
+        "min": 13.244342000689358,
+        "max": 17.90609900126583
+      },
+      "same_crop_cosine": {
+        "count": 0,
+        "mean": null,
+        "min": null,
+        "max": null
+      },
+      "execution": {
+        "kind": "DPU_SFACE_INT8",
+        "model_id": "sface-int8-12b2ff5c7de15713",
+        "requests": 57,
+        "execution_attempts": 4,
+        "completed": 4,
+        "features_returned": 4,
+        "deferred": 53,
+        "slot_denials": 53,
+        "expired_after_admission": 0,
+        "last_dpu_wait_ms": 8.087420999800088,
+        "scheduler_calls_mean_admissions": true
+      },
+      "identity_decisions_from_shadow": 0,
+      "templates_written": 0,
+      "calibration_observer_errors": 0
+    },
+    "producer": {
+      "enabled": true,
+      "mode": "INDEPENDENT_CROP_PREPARATION",
+      "ready": true,
+      "closed": false,
+      "stop_requested": false,
+      "pending_frames": 0,
+      "inflight_frames": 0,
+      "interval_ms": 500,
+      "offered": 129,
+      "enqueued": 122,
+      "replaced": 12,
+      "dropped": 7,
+      "unready": 0,
+      "prepared": 109,
+      "submitted": 109,
+      "stale": 0,
+      "failures": 0,
+      "last_error": ""
+    },
+    "face_targets": {
+      "ready": true,
+      "error": "",
+      "backend": "DPU_YUNET_INT8",
+      "processed": 129,
+      "discarded": 112,
+      "last_inference_ms": 61.47,
+      "source_age_ms": 386
+    },
+    "dpu_schedule": {
+      "active": null,
+      "primary_calls": 603,
+      "primary_period_overruns": 1,
+      "waiting_primary": 0,
+      "budget_ms": 20.0,
+      "guard_ms": 5.0,
+      "optional": {
+        "yunet": {
+          "calls": 129,
+          "skipped": 112,
+          "overruns": 0,
+          "budget_exceeded": 1,
+          "estimated_budget_ms": 25.854978000599658,
+          "maximum_ms": 23.854978000599658,
+          "disabled": false
+        },
+        "sface": {
+          "calls": 4,
+          "skipped": 53,
+          "overruns": 0,
+          "budget_exceeded": 0,
+          "estimated_budget_ms": 20.0,
+          "maximum_ms": 8.969160000560805,
+          "disabled": false
+        }
+      },
+      "optional_diagnostics": {
+        "enabled": true,
+        "schema_version": "aura-optional-diagnostics-1",
+        "clock": "monotonic_ns",
+        "started_mono_ns": 31239598471323,
+        "snapshot_mono_ns": 31303016468432,
+        "thread_clock_available": true,
+        "thread_cpu_scope": "calling thread only; excludes other native/runtime/kernel threads",
+        "wall_scope": "optional gate and VART API walls; includes wait/descheduling/GIL; not pure hardware time",
+        "numeric_missing_value": -1,
+        "task_codes": {
+          "yunet": 1,
+          "sface": 2
+        },
+        "normal_timing_schema_version": "aura-optional-normal-timings-1",
+        "normal_timing_scope": "completed native wait with status 0; no body failure, hard-cap or guard overrun",
+        "normal_timing_unit": "milliseconds",
+        "normal_trace_scope": "one maximum optional wall trace across both tasks; first wins ties",
+        "normal_success_timings": {
+          "yunet": {
+            "execute_wall_ms": {
+              "count": 129,
+              "sum_ms": 431.2466639999999,
+              "min_ms": 2.168682,
+              "max_ms": 23.522535
+            },
+            "execute_thread_cpu_ms": {
+              "count": 129,
+              "sum_ms": 100.229086,
+              "min_ms": 0.620817,
+              "max_ms": 1.023528
+            },
+            "wait_wall_ms": {
+              "count": 129,
+              "sum_ms": 9.726097999999995,
+              "min_ms": 0.060071,
+              "max_ms": 0.115761
+            },
+            "wait_thread_cpu_ms": {
+              "count": 129,
+              "sum_ms": 9.733145999999993,
+              "min_ms": 0.06007,
+              "max_ms": 0.116271
+            },
+            "optional_wall_ms": {
+              "count": 129,
+              "sum_ms": 481.15663800000004,
+              "min_ms": 2.453165,
+              "max_ms": 23.862229
+            },
+            "optional_thread_cpu_ms": {
+              "count": 129,
+              "sum_ms": 143.28175999999996,
+              "min_ms": 0.89413,
+              "max_ms": 1.387182
+            }
+          },
+          "sface": {
+            "execute_wall_ms": {
+              "count": 4,
+              "sum_ms": 32.145691,
+              "min_ms": 7.832219,
+              "max_ms": 8.562585
+            },
+            "execute_thread_cpu_ms": {
+              "count": 4,
+              "sum_ms": 1.9876589999999998,
+              "min_ms": 0.476384,
+              "max_ms": 0.521955
+            },
+            "wait_wall_ms": {
+              "count": 4,
+              "sum_ms": 0.346814,
+              "min_ms": 0.06648,
+              "max_ms": 0.141772
+            },
+            "wait_thread_cpu_ms": {
+              "count": 4,
+              "sum_ms": 0.34750400000000004,
+              "min_ms": 0.066861,
+              "max_ms": 0.141871
+            },
+            "optional_wall_ms": {
+              "count": 4,
+              "sum_ms": 33.746248,
+              "min_ms": 8.232763,
+              "max_ms": 8.9747
+            },
+            "optional_thread_cpu_ms": {
+              "count": 4,
+              "sum_ms": 3.503853,
+              "min_ms": 0.843808,
+              "max_ms": 0.910528
+            }
+          }
+        },
+        "maximum_normal_trace": {
+          "event_sequence": 62,
+          "task_code": 1,
+          "calling_thread_native_id": 316088,
+          "diagnostic_finished": 1,
+          "optional_start_mono_ns": 31267986496748,
+          "optional_start_thread_cpu_ns": 4070363920,
+          "optional_end_mono_ns": 31268010358977,
+          "optional_end_thread_cpu_ns": 4071494691,
+          "last_mark_mono_ns": 31268010268906,
+          "last_mark_thread_cpu_ns": 4071404830,
+          "phase_code": 4,
+          "guard_deadline_mono_ns": 31268032646989,
+          "estimated_budget_ms": 20.0,
+          "execute_start_mono_ns": 31267986618619,
+          "execute_return_mono_ns": 31268010141154,
+          "execute_start_thread_cpu_ns": 4070475371,
+          "execute_return_thread_cpu_ns": 4071285889,
+          "wait_start_mono_ns": 31268010194205,
+          "wait_end_mono_ns": 31268010268906,
+          "wait_start_thread_cpu_ns": 4071329750,
+          "wait_end_thread_cpu_ns": 4071404830,
+          "native_attempts": 1,
+          "native_completed": 1,
+          "native_failed": 0,
+          "native_status": 0,
+          "native_failure_phase_code": 0,
+          "optional_wall_ms": 23.862229,
+          "optional_thread_cpu_ms": 1.130771,
+          "scheduler_occupancy_ms": 23.854978000599658,
+          "finish_after_guard_ms": -22.293612997600576,
+          "waiting_primary": 0,
+          "hardcap_exceeded": 0,
+          "guard_exceeded": 0,
+          "body_failed": 0,
+          "execute_wall_ms": 23.522535,
+          "execute_thread_cpu_ms": 0.810518,
+          "wait_wall_ms": 0.074701,
+          "wait_thread_cpu_ms": 0.07508
+        },
+        "phase_codes": {
+          "before_native": 0,
+          "execute_entered": 1,
+          "execute_returned": 2,
+          "wait_entered": 3,
+          "wait_returned": 4,
+          "native_exception": 5
+        },
+        "event_capacity": 8,
+        "evicted_events": 0,
+        "diagnostic_errors": 0,
+        "counters": {
+          "yunet": {
+            "requests": 241,
+            "admitted": 129,
+            "rejected": 112,
+            "rejected_disabled": 0,
+            "rejected_active": 42,
+            "rejected_primary_waiting": 0,
+            "rejected_deadline": 70,
+            "native_attempts": 129,
+            "native_execute_returned": 129,
+            "native_wait_entered": 129,
+            "native_wait_returned": 129,
+            "native_completed": 129,
+            "native_failed": 0,
+            "admitted_without_native": 0,
+            "optional_finished": 129,
+            "faults": 0
+          },
+          "sface": {
+            "requests": 57,
+            "admitted": 4,
+            "rejected": 53,
+            "rejected_disabled": 0,
+            "rejected_active": 8,
+            "rejected_primary_waiting": 0,
+            "rejected_deadline": 45,
+            "native_attempts": 4,
+            "native_execute_returned": 4,
+            "native_wait_entered": 4,
+            "native_wait_returned": 4,
+            "native_completed": 4,
+            "native_failed": 0,
+            "admitted_without_native": 0,
+            "optional_finished": 4,
+            "faults": 0
+          }
+        },
+        "active_optional": {},
+        "fault_events": []
+      }
+    }
+  }
+}

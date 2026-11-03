@@ -1,0 +1,65 @@
+{
+  "started_utc": "2026-10-03T07:43:03.294680+00:00",
+  "scope": "Isolated host kernel/ZOCL build; no module installation",
+  "commands": [
+    {
+      "name": "compiler",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-gcc",
+        "--version"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_kernel/compiler.log",
+      "sha256": "ee2c2cdcd3e65f25d3cc1bbdae6f9643bc678266cb809a5f91e1bfb429c32896",
+      "elapsed_seconds": 0.01
+    },
+    {
+      "name": "vmlinux-modules",
+      "argv": [
+        "make",
+        "-C",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/linux",
+        "O=/home/ghmd/kv260-runtime-reproduce-20261003c/build/kernel",
+        "ARCH=arm64",
+        "CROSS_COMPILE=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-",
+        "-j8",
+        "vmlinux",
+        "modules"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_kernel/vmlinux-modules.log",
+      "sha256": "36831ca52b33c84d2a1d531c361fd5aa8a8eaf575231fba4d0f4aa06a155de7e",
+      "elapsed_seconds": 477.246
+    }
+  ],
+  "passed": true,
+  "board_verified_this_run": false,
+  "runner_sources": {
+    "board_preflight.py": "05254991e395bdd32d386e74b965685394e121bc1155a541ad20b8127f8f92b2",
+    "build_dfx.py": "0a98347c271834842f9696ecf3ac2ebebb61384587c538c49169a959322eb8e6",
+    "build_zocl.py": "7188d0018e29bbe0b49d66ef0ce575254caa01626e1672be46e747845c3fd9b6",
+    "common.py": "c321a0e824353053fb1edb4a57d4022f615f1a5acb67d2001cdacf751235ea4e",
+    "prepare_sources.py": "7871e054a337a3b9f7dba052705a6a2bcea73513475811f95c56fb13e78dee3b"
+  },
+  "kernel_dependencies": {
+    "vmlinux": {
+      "sha256": "a271d38ef744ab64c814b1a433843f7071681cbe92e7a5063a81067d2dbddbfe",
+      "bytes": 330283096
+    },
+    "Module.symvers": {
+      "sha256": "6e582b60f2a379055924117f930e5ca0fac44c98d56f3b374dc3ce278da7b8ed",
+      "bytes": 774177
+    },
+    "System.map": {
+      "sha256": "29ddcb91745ecd4afb51129d29b97873b904efec304156490a245155ed72eb8b",
+      "bytes": 5553531
+    },
+    ".config": {
+      "sha256": "3e4da163cd12d3be4c76ac458b55aad47f3c5c47269b53aac4305d9b3a643d2b",
+      "bytes": 190811
+    }
+  },
+  "finished_utc": "2026-10-03T07:51:00.810498+00:00"
+}

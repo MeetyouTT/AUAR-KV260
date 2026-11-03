@@ -1,0 +1,216 @@
+按2026 AMD选题指南审查AUAR·雪妃9a4f工程包
+
+结论　源码与本机构建/仿真验证已完成；不能认定满足3.3全部提交要求。主要待补为封版关联的板测对照、从零部署闭环、完整设计报告和更完整AI交互记录。
+审查赛道　3.3 自主选题赛道。初级组与高级组的技术提交要求相同，本审查不核验学籍资格。
+指南　C:/Users/REVO1/Downloads/全国大学生嵌入式芯片与系统设计竞赛'2026FPGA赛道选题指南-AMD.pdf
+指南SHA-256　c6ad82acd4f7bdcd13bd412e232ed85d05f2a87dd5e2cdd04f9d219f88b569fc
+RAR SHA-256　022422d9d1efa6106c2b247ac901dddd2f439a1a5e8eb19a22539010c3a944f4
+RAR大小　44475833 字节，文件数 1687，1686条文件校验匹配。
+方法　核对Ubuntu最终RAR SHA，并在Windows使用同SHA副本独立解包，1686条文件校验全部匹配。未以可能继续变化的工作目录作为封版依据。
+
+优先补齐的内容
+1. 封版相关的板测输入、真实输出、参考输出、比对规则和结果。历史结果可先收回，需标明版本，本轮新产物另做板测。
+2. 可公开取得的外置依赖、环境安装、现场配置和新产物部署步骤，串成评委从零能走通的流程。
+3. 按3.3.5.3七类内容完成正式设计报告。当前design_report.md为取数页。
+4. 补实有的AI交互原片段、模型/工具版本和纠错证据；将已有Skill案例纳入报告。
+5. 收入现存综合/实现报告，修正DSP统计空白行，整理时序约束、警告及历史基线对比。
+
+以下逐项列出审查结果。PDF页码为阅读器物理页码，正文页码列在括号内。
+
+g01　3.3.5.1　完整工程与实际采用的源码
+依据页码　PDF 24（正文 21）
+状态　基本具备
+核对结果　RTL、BD/IP、XDC、PS/主机 Python、原生 C/C++、部署定义均有。380 项正式业务与224 项相机有封版清单。未采用的 HLS 无须额外补造。
+包内证据　src/fpga; src/third_party/dpu; src/board; src/host; src/native; board/release_9a4f.json
+补齐方式　外置输入及源码构建结果到正式部署的连接见 g04/g05。
+
+g02　3.3.5.1　仿真/验证结果及正确性依据
+依据页码　PDF 24（正文 21）
+状态　已具备对应验证范围
+核对结果　4 个 XSim 测试台的 xvlog/xelab/xsim 共12步均为0；有通过标记、源码/日志SHA和失败门禁反例。Skill与模型/原生构建有回执。
+包内证据　sim/rtl; report/evidence/rtl_xsim.json; report/evidence/rtl_negative.json; report/validation_summary.md
+补齐方式　保留模拟、编译和板测的验证层级。
+
+g03　3.3.5.1　综合与实现报告，含资源、时钟和关键指标
+依据页码　PDF 24（正文 21）
+状态　摘要具备，归档待完善
+核对结果　包内有资源表、时钟报告摘录、WNS/WHS、路由、DRC及原报告SHA。WNS +0.002 ns、WHS +0.010 ns、199333条网络完全布通。RAR内没有.rpt，6份实现报告和1份综合利用率原件位于Ubuntu包外。
+包内证据　report/evidence/hardware_results.json; report/validation_summary.md
+补齐方式　将精简综合/实现报告收进下一版build/reports；更正DSP48E2 only的空白可用量/利用率单元格；解释DRC告警和外部I/O约束假设。
+
+g04　3.3.5.1 / 3.3.3.2　上板工程、运行脚本、实测输出与参考对照
+依据页码　PDF 24（正文 21）
+状态　尚未形成完整包内证据
+核对结果　部署/驱动/验收脚本已收录，18条历史性能摘要已提供。本轮新固件、SO和xmodel的回执均明确未实板验证。包内未收原始板测输入输出与黄金结果配对记录。
+包内证据　board; src/tests/bench_identity_stop.py; data/metrics.csv; report/validation_summary.md
+补齐方式　先收回可公开的既有板测原件并标记版本；对本轮新产物补目标板验证和实测/参考对照，保留设备、版本、输入、输出、判定规则。
+
+g05　3.3.5.1 / 3.3.4　可复现构建脚本及从零复现
+依据页码　PDF 24（正文 21）
+状态　本机已通过，从零部署部分具备
+核对结果　冷启动Vivado构建及解包复跑通过。board/stage.py仍要求21个固定外置输入及现场字段，原镜像/角色原件缺公开取得路线。8个新SO中仅3个与历史输入同SHA，两份新xmodel也与旧部署图不同。
+包内证据　build/reproduce.py; build/build_native.sh; build/prepare_models.py; board/stage.py; board/deploy.json; board/readme.md
+补齐方式　补授权输入的取得或公开示例profile，统一环境安装，完成新产物→候选清单→上板验证→封版流程；不要求评委先持有旧交付目录。
+
+s01　3.3.5.2　skill目录和README入口
+依据页码　PDF 24（正文 21）
+状态　满足
+核对结果　skill/README.md索引28文件的pynq-contract-testgen。目录内直接是源码、示例、模板、文档和原证据。
+包内证据　skill/README.md; skill/pynq-contract-testgen
+补齐方式　保持源码目录直接收录。
+
+s02　3.3.5.2　Skill适用场景、用法和失效条件
+依据页码　PDF 24（正文 21）
+状态　满足基础要求
+核对结果　子readme与contract_format明确AXI4-Lite、uint32、启动/完成合同、元数据缺失/冲突、超时以及不支持的接口条件，含可执行命令。
+包内证据　skill/pynq-contract-testgen/readme.md; contract_format.md
+补齐方式　顶层README可增加一张范围/用法/失效/效果索引表，减少跨文件查找。
+
+s03　3.3.5.2　已验证效果与失败观察来源
+依据页码　PDF 24（正文 21）
+状态　满足对应软件范围
+核对结果　15项单元测试、adder36例和CRC3237例通过。case_studies记录HWH缺寄存器定义、迟到完成反例和修复，再用两种接口布局验证。
+包内证据　skill/pynq-contract-testgen/case_studies.md; tests/test_generator.py; evidence
+补齐方式　在设计报告内归纳提炼过程，保持原错误和修复后结果。
+
+s04　3.3.5.2　陌生题目可复用
+依据页码　PDF 24（正文 21）
+状态　具有基础证据
+核对结果　同一生成器处理不同IP名、寄存器偏移、完成位和读清除条件，无算法专用分支；需要使用者提供可信合同、元数据和参考。
+包内证据　skill/pynq-contract-testgen/scripts/generate.py; examples/adder; examples/crc32
+补齐方式　可补一页独立使用示例和来源说明。
+
+s05　3.3.2 / 3.3.5.2　通用PYNQ额外加分
+依据页码　PDF 22（正文 19）
+状态　证据有限，不能预判得分
+核对结果　已有可生成PYNQ调用代码的通用工具及两例mock证明。真实PYNQ环境、真实bit/HWH和跨板使用未验证。指南未给出本材料可获多少分的确定规则。
+包内证据　skill/pynq-contract-testgen/readme.md; report/evidence/software_skill_deploy.json
+补齐方式　若主张换板可用，补对应环境或真实PYNQ复用证据。该加分项与基本Skill提交要求分别判断。
+
+r01　3.3.5.3　选题背景、实际问题、前人工作和创新点
+依据页码　PDF 24（正文 21）
+状态　待补完整论述
+核对结果　design_report.md标题为技术文档取数页，只有系统组成及取数位置。
+包内证据　report/design_report.md
+补齐方式　按应用问题、已有方案、工程创新和可验证收益形成正文。
+
+r02　3.3.5.3　设计原理和功能框图
+依据页码　PDF 24（正文 21）
+状态　部分材料具备
+核对结果　源码、BD和文字分工已在，report目录没有系统功能框图，整个RAR没有已绘制的系统图或Mermaid图。
+包内证据　report/design_report.md; src/fpga/bd
+补齐方式　补系统功能框图、数据流、状态/时序与原理说明。
+
+r03　3.3.5.3　软硬件划分依据与接口设计
+依据页码　PDF 24（正文 21）
+状态　部分材料具备
+核对结果　DPU/PS/主机职责和寄存器地址、时钟、PWM参数已有取数表，划分依据和端到端接口论证尚未成稿。
+包内证据　report/design_report.md; src/fpga/bd/address_map.json
+补齐方式　补功能选择依据、寄存器/协议、跨端数据流和异常处理设计。
+
+r04　3.3.5.3 / 3.3.4　优化过程及前后性能、资源对比
+依据页码　PDF 24（正文 21）
+状态　部分具备
+核对结果　AI历史审阅稿中有LLM字段优化前后延迟数据。metrics.csv是历史测量摘要，本轮PL资源是单次结果，缺统一版本与条件的完整优化前后资源/性能表。
+包内证据　report/ai_evidence/ai_learning_record_review.md; data/metrics.csv; report/evidence/hardware_results.json
+补齐方式　按基线/优化版/平台/输入/指标/资源/来源/局限整理，不能跨版本直接拼接出优化收益。
+
+r05　3.3.5.3 / 3.3.3.1　提示词、模型回答与自我纠错记录
+依据页码　PDF 24（正文 21）
+状态　部分具备
+核对结果　已有真实范围指令、回答摘录、Skill纠错摘要和工程证据索引；conversation_excerpts和ai_learning_record_review明确历史逐轮问答未全部归档，AI工具/模型版本仍待补。
+包内证据　report/ai_collaboration.md; report/ai_evidence/conversation_excerpts.md; skill/pynq-contract-testgen/evidence/ai_collaboration.md
+补齐方式　补能核对的原始交互片段、模型/工具版本、错误、人工判断、修改和验证的对应关系。工作流提示词模板单独标注为模板。
+
+r06　3.3.5.3　Skill提炼过程、验证和边界
+依据页码　PDF 24（正文 21）
+状态　素材已具备，待并入完整报告
+核对结果　case_studies、workflow、合同说明和测试可支撑提炼过程。
+包内证据　skill/pynq-contract-testgen/case_studies.md; workflow.md; contract_format.md
+补齐方式　整合为设计报告的一节，并引用原始反例与复跑结果。
+
+r07　3.3.5.3　他人从零完整执行的复现说明
+依据页码　PDF 24（正文 21）
+状态　部分具备
+核对结果　README给出可执行构建命令和目录对照。工具、EXT4、底图、外部旧输入及模型依赖仍依赖作者现存目录；主机准备说明残留src/windows旧目录。
+包内证据　README.md; board/readme.md; src/models/readme.md; src/host/model_service/prepare/readme.md
+补齐方式　补全依赖取得/环境安装/配置生成/部署/验收顺序，移除失效路径或明确外置资料来源。
+
+c01　3.3.3.1　工具版本
+依据页码　PDF 23（正文 20）
+状态　允许采用当前版本，说明可完善
+核对结果　指南推荐2026.1或2025.2，同时允许说明并保证复现的其他版本。本包在README、env和验证摘要明确2022.2，并有实际构建回执。
+包内证据　build/env.json; report/validation_summary.md; report/evidence/implementation_receipt.json
+补齐方式　在正式报告写明采用2022.2及平台兼容依据；无须仅为推荐版本强行升级。
+
+c02　3.3.3.2　AMD器件范围及型号声明
+依据页码　PDF 23（正文 20）
+状态　满足型号声明
+核对结果　Kria KV260/K26及器件xck26-sfvc784-2LV-c已在正文、Tcl和环境锁声明，属于适用器件范围。
+包内证据　report/design_report.md; src/fpga/ip/ip_config.tcl; build/env.json
+补齐方式　实际器件运行证据按g04补齐。
+
+c03　3.3.3.3　公开仓库和允许再分发的项目许可
+依据页码　PDF 23（正文 20）
+状态　包内未能确认，属指南强烈要求
+核对结果　有第三方许可和权利说明。根license仅保留各权利人声明，未授予项目新增公开再分发许可；包内未找到项目公开仓库地址。
+包内证据　license; third_party_notices.md
+补齐方式　队伍确认原创部分许可、第三方和素材分发范围，并在README注明公开仓库或发布状态。此条按指南“强烈要求”记录，未改写为绝对硬性。
+
+c04　3.3.5.4　目录和文件命名
+依据页码　PDF 24（正文 21）
+状态　英文与无空格满足，大小写需说明
+核对结果　所有2017条文件/目录条目无中文、空格或其他特殊字符。70条路径含大写，包括README.md及CMake/IP/第三方原名。指南文字要求小写，示例同时使用README.md。
+包内证据　完整RAR路径清单；README.md；第三方CMake/IP文件
+补齐方式　保留工具必需的原名并解释适用范围，整理可控命名。长路径解压需采用较短路径，避免Windows路径上限。
+
+c05　3.3.5.4　推荐布局及目录对照
+依据页码　PDF 25（正文 22）
+状态　满足
+核对结果　采用src/sim/build/board/data/skill/report，README已有用途对照。指南明确该树为推荐结构。
+包内证据　README.md
+补齐方式　原始报告与板测数据按现有目录增加即可。
+
+c06　3.3.5.5　评分权重
+依据页码　PDF 25（正文 22）
+状态　不能据工程审查预估分数
+核对结果　创新30、优化20、正确性20、AI/Skill15、文档复现15。多项依赖评审与实测，当前不作得分保证。
+包内证据　指南PDF第25页
+补齐方式　补证据后再对照评分细则核查。
+
+c07　第六节　决赛一页英文PPT海报
+依据页码　PDF 28（正文 25）
+状态　条件事项，工程RAR之外
+核对结果　进入决赛的自主选题队伍按AMD模板提交一页英文海报并A4彩印，海报不含队伍信息。当前RAR未含此材料。
+包内证据　指南PDF第28页
+补齐方式　进入决赛后按官方附件模板准备。
+
+c08　第六节 / 3.3.6　后续评分细则与时间节点
+依据页码　PDF 28（正文 25）
+状态　本审查未覆盖
+核对结果　指南要求评分公式、判定阈值与提交条件以赛道评分细则为准，当前仅提供选题指南。
+包内证据　指南PDF第28页
+补齐方式　取得本赛道评分细则后另核。
+
+已经找到、可补入的历史原始记录（均与包内索引SHA相符）
+E17　board-three-fixed.json　SHA匹配
+/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/evidence/board-three-fixed.json
+E21　paired_profile.json　SHA匹配
+/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-18_compact_reply_fields/paired_profile.json
+E27　public_gpu_final_adaptive.json　SHA匹配
+/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-29_parallel_interaction/public_gpu_final_adaptive.json
+E35　RETENTION_RESULT.json　SHA匹配
+/home/ghmd/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/joint_balance_20261101/continued_validation_20261101/RETENTION_RESULT.json
+
+现成的原始Vivado报告目录
+/home/ghmd/下载/AUAR_方案A源码交付_9a4f_20261103/Vivado原始报告
+综合利用率报告
+/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/run01/hardware/project/platform.runs/synth_1/kv260_ispMipiRx_vcu_DP_wrapper_utilization_synth.rpt
+
+审查范围与说明
+- 未修改封版RAR。审查结果不是评委评分。
+- 指南3.3没有工程包最低体积或必须达到100MB/200MB的要求。
+- 指南未要求所有队伍提交HLS或Jupyter文件，按实际采用的实现提交。
+- 指南3.3未单独规定设计报告必须为PDF或演示必须为MP4，正式后台如另有要求再核。
+- 只检查包中证据不能断言团队历史上从未做过实板测试；已找到与索引SHA匹配的历史板测原件。
+- 报告发现DSP48E2 only一行的available/util_percent为空，应按原始利用率报告更正或仅列实际支持的字段。

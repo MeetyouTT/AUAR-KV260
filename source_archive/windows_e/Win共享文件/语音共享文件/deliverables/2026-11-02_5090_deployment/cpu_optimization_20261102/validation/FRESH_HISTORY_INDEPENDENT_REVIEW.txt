@@ -1,0 +1,48 @@
+Independent offline review: PASS_OFFLINE_SOURCE_ALIAS_FIX
+
+Reviewed candidate SHA256:
+5ca99d4231c686de0f89dac5792299bec13af517a5c6e2b8f73c4cc66b9285c9
+Previous e92 review and its HOLD evidence remain in local .e92.before.bin copies.
+
+The source-alias blocker is resolved in this offline scope. Independent review of
+the exact diff confirms one new function (reject_current_checkpoint_source) and
+changes only to referenced_value and validate_inputs. All other function and
+top-level ASTs, including original reader/loader, guard, current bounds and full
+ordered archive traversal, are identical to e92. The original source-reference
+path and JSON-pointer rules are preserved, with new source SHA exclusions and a
+checkpoint-object gate before dereferencing a pointer.
+
+Eight independent directed public in-memory probes passed:
+  baseline receipt: accepted
+  same SHA final copy: rejected by SHA alias gate
+  reserialized same-owner final: rejected by checkpoint-object gate
+  same-owner final inside checkpoint envelope: rejected by checkpoint-object gate
+  same SHA stop-result copy: rejected by SHA alias gate
+  same boot, different PID source: accepted
+  same boot/PID, different birth source: accepted
+  prior-boot archive checkpoint envelope: accepted
+The three original final-alias cases therefore fail at the intended source gate,
+while demonstrated older/different-owner sources remain usable. No candidate
+file was modified by the reviewer. The JSON walk only visits decoded JSON dicts
+and lists; real source files remain subject to the existing bounded snapshot.
+
+Independent evidence:
+  FRESH_HISTORY_ALIAS_FIX_INDEPENDENT_PROBES.json
+  FRESH_HISTORY_ALIAS_FIX_INDEPENDENT_DIFF.txt
+  check_fresh_history_source_aliases_fixed.py
+
+The original16 test suite was not rerun and its report still belongs to e92.
+Unchanged AST plus these directed probes supports the limited offline result;
+it is not a real board CLI or current-owner/readiness result. NativeContext,
+original_modules, guard, SSH, services, proc, camera, axis, DB and model paths were
+not executed. No stop/start/restore permission or device ownership is implied.
+
+Root must still capture and pin genuine original public metadata before normal
+stop and combine it with previously accepted ordered history receipts. The fix
+addresses accidental current-final self-attestation; it does not authenticate
+metadata against a malicious root who controls all source files and pins. A thin
+receipt does not substitute for that trusted capture procedure.
+
+Nonblocking observation from the prior review remains: adapter stop_intent <=
+capture differs from original strict <; no real-clock false pass was demonstrated.
+No new blocker was found within this requested small-diff/source-alias scope.

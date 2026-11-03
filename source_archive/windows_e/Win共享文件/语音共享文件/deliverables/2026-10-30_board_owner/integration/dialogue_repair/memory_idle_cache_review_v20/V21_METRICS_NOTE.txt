@@ -1,0 +1,37 @@
+v21接续：保留未证实边界，先用已有数值缩小原因
+
+v21 startup 94f665cf69e861d4f3d625dd627116218120cdbbef2244aa4cf2b63c39b9f1c7；mapping bff1b76381914cfa070c617e21ce091e8b97a8b7062f408c842cbcf03bc5dee2。
+9份记忆/对话/活动时间相关组件与上一核对逐SHA一致，原调度结论继续适用。新映射保存PAUSED/microphone_open=false。只是封存文件检查，本窗口没有实时设备调用。
+
+新确认的可观测性缺口
+Windows model_inference_host._ollama已经把后端返回的load_duration、prompt_eval_duration、eval_duration、total_duration转成毫秒，连同prompt_eval_count/eval_count放入result.metrics。
+BoardDialogueController._request会返回校验后的result，不会删除该metrics；但_prepare.timed_request只累计kind_rpc_ms和calls，后续主要使用result['text']，没有把后端分阶段数值放入last_prepare_metrics。
+所以当前llm_rpc_ms=约4秒不能直接称作“27B生成用了4秒”。它包含进入/等待主机执行通道、后端、响应传输等整个RPC；缺少逐请求后端分段就无法区分主因。
+
+最小观测路径
+第一步直接在主控公共A/B runner读取现有LLM响应result.metrics，无需改生产源码。模型调用仍只能由原主窗口安排，本分析窗口不执行。
+若后续需要自然对话数据，可在下个独立小改动中，仅在board_dialogue.py的timed_request成功返回后，提取已校验LLM metrics的数字白名单。不要复制text/提示词/上下文/音频，也不要新增每帧统计或网络轮询。
+字段：load_duration_ms、prompt_eval_duration_ms、eval_duration_ms、total_duration_ms、prompt_eval_count、eval_count；prompt_eval_cached_count只在确实收到时保留，缺失仍unknown。
+当前question_echo最多会重试一次。应按最多两个attempt分别保留数字，或明确字段仅指最后一次；不能拿累计llm_rpc_ms与最后一次backend total相减后当作网络耗时。
+即使只有一次调用，RPC与backend total之差也混合主机排队、校验、协议与调度，不能直接叫“网线延迟”。
+
+公共A/B的必要隔离
+PAUSED不等于后台摘要停用，单看active=false的瞬间也不足以保证整块无背景调用。
+已有ModelBroker.health公开counts.accepted_llm、active、pending，且health不会触发warmup。由主控在每block边界取该现有元数据：A(W→D)预期accepted_llm差2；B(W→S→D)预期差3。
+出现额外accepted_llm、取消/失败、模型重启、S未完成、或中途有其他客户端请求，标记污染/不完整，不能并入缓存差异结论。后台纯本地结构化摘要可使completed增加，但不增加accepted_llm；记录它的CPU负载变化，不能误判成模型缓存污染。
+健康计数是已受理数，不是已开始GPU推理数；差值检测只能保守筛掉额外任务，不能据此精确计算summary实际prefill次数。绕过该broker的其他Ollama客户端也需由主控排除。
+保持原公共ABBA计划，每block重新primer，S先完成再D，不把抢占等待和缓存复用混在同一组。
+
+结果如何决定下一步
+1. B相对A的prefill显著增加且缓存命中减少：支持摘要干扰prefix复用，评估30秒安静准入。
+2. cached高且prefill相近，但D总耗时或首内容增加并伴RAM恢复：评估恢复开销；不能叫“整段KV丢失”。RAM恢复未必记入prompt_eval_duration，需同时看总耗时与现有日志数字。
+3. eval_duration占大头：重点是回答生成量与当前模型推理速度，记忆延后不会直接加速每个输出token。
+4. load_duration升高：核模型驻留/后端调度，并结合实际reload记录；单个load数值不能独立证明重新装载权重。
+5. 后端分段变化小但RPC很长：再查通道排队/取消确认/主机处理。不能未测RTT就归因以太网。
+
+当前仍是只读分析与待执行计划：没有新模型请求、设备连接或产品改动。ASR2已由主控发布，GTCRN仍1线程/raw8，本窗口不重复这些试验或重新启用已淘汰候选。
+
+后续决策边界
+DECISION_BOUNDARIES.json区分已核对事实、主控报告的JPEG组件筛选、尚未证实的缓存假设。
+屏幕5秒保活、GUI刷新、相机/视觉时间轴推进均不算用户对话活动。quiet计时使用业务单调活动/前台结束标记，不能借用可能被保活影响的操作系统输入空闲时间。
+等主控完成真实camera可恢复A/B/A并选择固定版本后，再安排记忆/缓存对照。不要跨ASR或JPEG版本比较整条对话延迟后归因缓存。

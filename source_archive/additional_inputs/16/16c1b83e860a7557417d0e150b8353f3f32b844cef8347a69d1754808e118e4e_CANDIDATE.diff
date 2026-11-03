@@ -1,0 +1,342 @@
+--- a/board/runtime/audio/board_dialogue_jobs.py
++++ b/board/runtime/audio/board_dialogue_jobs.py
+@@ -25,6 +25,43 @@
+ from board.runtime.audio.board_asr import BoardNoSpeech
+ from common.asr_wire import PROTOCOL as ASR_PROTOCOL, context as validate_capture
+ from common.voice_channel import ChannelState, PROTOCOL as CHANNEL_PROTOCOL, MAX_SAMPLES, PACKET_SAMPLES
++
++
++def _entry_parser_flags(parser):
++    # Only fixed code-constant membership is exposed, never code paths/text.
++    code = getattr(parser, '__code__', None)
++    constants = getattr(code, 'co_consts', ())
++    pending = list(constants[:128]) if type(constants) is tuple else []
++    face = voice = False
++    for _ in range(256):
++        if not pending:break
++        value = pending.pop()
++        if type(value) is str:
++            face = face or value == 'face_only'
++            voice = voice or value == 'voice_only'
++        elif type(value) in (tuple, frozenset):
++            pending.extend(list(value)[:128])
++    return dict(parser_code_known=code is not None,parser_face_only_const=face, parser_voice_only_const=voice)
++
++
++def _entry_route_trace():
++    return dict(version=1,asr_characters=0,asr_result_seen=False,binding_kind='not_evaluated',
++        speaker_requested=False,enrollment_checked=False,enrollment_active=False,
++        capability='not_selected',handler_available=False,handler_called=False,
++        handler_result='not_called',error_class='none',outcome='started',
++        parser_code_known=False,parser_face_only_const=False,parser_voice_only_const=False,
++        has_register=False,has_voiceprint=False,has_voice=False,has_warming=False,
++        has_face=False,has_my_name=False,has_level=False,has_i_want=False,has_i_would_like=False,
++        has_a_bit=False,has_voice_word=False,has_identity=False,has_name_word=False)
++
++
++def _entry_asr_trace(trace, raw):
++    if not isinstance(raw,str):return
++    trace.update(asr_characters=min(len(raw),4097),asr_result_seen=True,
++        has_register='登记' in raw,has_voiceprint='声纹' in raw,has_voice='声音' in raw,
++        has_warming='升温' in raw,has_face='人脸' in raw,has_my_name='我叫' in raw,has_level='等级' in raw,
++        has_i_want='我要' in raw,has_i_would_like='我想' in raw,has_a_bit='一下' in raw,
++        has_voice_word='声文' in raw,has_identity='身份' in raw,has_name_word='名字' in raw)
+ 
+ 
+ class BoardCapabilityNotReady(RuntimeError):
+@@ -460,6 +497,12 @@
+         # apply conservative vocative interpretation only to model input.
+         return text
+ 
++    def _publish_entry_route_trace(self, job, trace):
++        with self.condition:
++            last = self.last_voice_route
++            if isinstance(last,dict) and last.get('generation') == job.meta['generation']:
++                last['entry_trace'] = copy.deepcopy(trace)
++
+     def _route(self, job, text, *, reply_sink=None):
+         from common.voice_enrollment import (
+             enrollment_requested, identity_query_requested, cancelled, confirmed, update_confirmed,
+@@ -472,15 +515,30 @@
+         from common.visual_question import requested as visual_requested
+         from common.spoken_input import prepare_spoken_input
+         from board.runtime.character import CHARACTER_NAME
++        trace = getattr(job,'entry_route_trace',None)
++        if trace is None:
++            trace = _entry_route_trace();_entry_asr_trace(trace,text);job.entry_route_trace = trace
++        trace.update(_entry_parser_flags(binding_intent))
++        def enrollment_active():
++            active = self._enrollment_state().get('active')
++            trace.update(enrollment_checked=True,enrollment_active=bool(active))
++            return active
+         intent_text = prepare_spoken_input(text)['text']
+         visual_requested_by_policy = bool(self.visual_intent_matcher is not None and
+                                           self.visual_intent_matcher(intent_text))
+         binding = binding_intent(intent_text)
+         speaker_requested_by_policy = speaker_requested(intent_text)
++        kind = binding.get('kind')
++        trace.update(binding_kind=kind if type(kind) is str and kind in
++            ('ordinary','remember_self','name_hint','invalid_name','face_only','voice_only') else 'other',
++            speaker_requested=bool(speaker_requested_by_policy))
++        self._publish_entry_route_trace(job,trace)
+         command_text = re.sub(r'^\s*' + re.escape(CHARACTER_NAME) + r'[\s，,：:]*', '', intent_text, count=1)
+         command, _ = scoped_command(command_text, job.scope.get('kind') == 'profile')
+         if (command is not None and not speaker_requested_by_policy
+                 and binding['kind'] not in ('remember_self', 'name_hint', 'invalid_name', 'face_only', 'voice_only')):
++            trace['capability'] = 'explicit_memory_commands'
++            self._publish_entry_route_trace(job,trace)
+             if self.controller.command_handler is None:
+                 raise BoardCapabilityNotReady('explicit_memory_commands')
+             return None, None
+@@ -488,7 +546,7 @@
+         capability = None
+         if speaker_query_requested(intent_text):
+             capability = 'speaker_identity'
+-        elif (self._enrollment_state().get('active') or enrollment_requested(text)
++        elif (enrollment_active() or enrollment_requested(text)
+                 or cancelled(text) or confirmed(text) or update_confirmed(text)
+                 or binding['kind'] in ('remember_self', 'name_hint', 'invalid_name', 'face_only')):
+             capability = 'identity_enrollment'
+@@ -503,8 +561,12 @@
+             capability = 'structured_visual_query'
+         elif route(text)['mode'] == 'reasoning':
+             capability = 'reasoning_dialogue'
++        trace['capability'] = capability or 'ordinary_dialogue'
++        self._publish_entry_route_trace(job,trace)
+         if capability:
+             handler = self.special_handlers.get(capability)
++            trace['handler_available'] = handler is not None
++            self._publish_entry_route_trace(job,trace)
+             if handler is None:
+                 raise BoardCapabilityNotReady(capability)
+             self._check(job)
+@@ -512,7 +574,19 @@
+                           is_current=lambda: self._current(job), cancel_event=job.cancelled)
+             if getattr(handler, 'streaming_reply', False):
+                 kwargs['reply_sink'] = reply_sink
+-            return handler(text, **kwargs), None
++            trace['handler_called'] = True
++            trace['handler_result'] = 'calling'
++            self._publish_entry_route_trace(job,trace)
++            try:
++                value = handler(text, **kwargs)
++            except BaseException as exc:
++                trace['handler_result'] = 'error'
++                trace['error_class'] = self._diagnostic_error_class(exc)
++                self._publish_entry_route_trace(job,trace)
++                raise
++            trace['handler_result'] = 'none' if value is None else 'returned'
++            self._publish_entry_route_trace(job,trace)
++            return value, None
+         if self.history_router is not None:
+             return None, self.history_router(text, scope=dict(job.scope),
+                                              now=self.wall_clock() if self.wall_clock else None)
+@@ -555,8 +629,13 @@
+         job_started = self.clock()
+         phase = dict(metadata_only=True,speaker_first_audio_measured=False,asr_calls=0,
+                      asr_completed=False,wake_only=False,entry_rejected=False,complete=False,error_class='none')
++        trace = _entry_route_trace();job.entry_route_trace = trace
+         with self.condition:
+             self.progress_diagnostics = job.diagnostics
++            if (not self.closed and job.meta['generation']==self.generation
++                    and job.meta['session_id']==self.session_id):
++                self.last_voice_route = dict(generation=job.meta['generation'],transcript_characters=0,
++                    board_owned=True,history_requested=False,entry_trace=copy.deepcopy(trace))
+         def publish():
+             self.latency_metrics = copy.deepcopy(phase)
+         publish()
+@@ -578,6 +657,8 @@
+             except BoardNoSpeech as exc:
+                 self._check(job)
+                 raise self._entry_error() from exc
++            _entry_asr_trace(trace,raw)
++            self._publish_entry_route_trace(job,trace)
+             phase['asr_ms'] = (self.clock()-stage_started)*1000
+             phase['asr_completed'] = True
+             publish()
+@@ -690,7 +771,8 @@
+                 if not streamed:
+                     self._invalidate_presentation('playback_token_changed', job.meta, plan.playback_token)
+                 self.last_voice_route = dict(generation=job.meta['generation'], transcript_characters=len(raw),
+-                                             board_owned=True, history_requested=history is not None)
++                                             board_owned=True, history_requested=history is not None,
++                                             entry_trace=copy.deepcopy(trace))
+             if streamed:
+                 if (tuple(chunk for chunk, _ in streamed) != plan.chunks
+                         or any(token != plan.playback_token for _, token in streamed)
+@@ -709,8 +791,11 @@
+                  playback_token=plan.playback_token)
+             self._put(job, dict(network_complete=result),admission_guard=ordinary_guard)
+             phase['complete'] = True
++            trace['outcome'] = 'complete'
+ 
+         except Exception as exc:
++            trace.update(outcome='rejected' if getattr(exc,'entry_rejected',False) else 'error',
++                         error_class=self._diagnostic_error_class(exc))
+             phase['entry_rejected'] = bool(getattr(exc,'entry_rejected',False))
+             phase['error_class'] = self._diagnostic_error_class(exc)
+             raise
+@@ -723,6 +808,7 @@
+                 raise
+             finally:
+                 phase['worker_total_ms'] = (self.clock()-job_started)*1000
++                self._publish_entry_route_trace(job,trace)
+                 publish()
+ 
+     def run_next(self):
+--- a/board/runtime/board_business.py
++++ b/board/runtime/board_business.py
+@@ -15,7 +15,7 @@
+ import time
+ import uuid
+ 
+-from board.runtime.audio.board_dialogue_jobs import BoardDialogueJobs, BoardCapabilityNotReady
++from board.runtime.audio.board_dialogue_jobs import BoardDialogueJobs, BoardCapabilityNotReady, _entry_parser_flags
+ from board.runtime.board_dialogue import BoardDialogueController, BoardReply, StaleGeneration, DIALOGUE_ROUTE
+ from board.runtime.board_dialogue_client import InferenceHttpClient, ModelRequestError
+ from board.runtime.board_memory_policy import BoardContextBuilder, BoardMemoryCommands, BoardSummaryClient
+@@ -150,6 +150,7 @@
+         self.business = self.bridge = None
+         self._standalone_entry = None
+         self._standalone_epoch = 0
++        self._entry_trace = dict(version=1,observed=False,reset_since_trace=False)
+         self.flow = (enrollment_factory or VoiceEnrollment)(boot_id, snapshot, command,
+             simple=True, clock=clock, now_ms=now_ms or millis)
+ 
+@@ -164,6 +165,7 @@
+ 
+     def reset(self):
+         with self.flow.lock:
++            if getattr(self,'_entry_trace',None) is not None:self._entry_trace['reset_since_trace'] = True
+             self._standalone_entry = None
+             self._standalone_epoch = getattr(self, '_standalone_epoch', 0) + 1
+             self.flow.reset()
+@@ -175,7 +177,8 @@
+         entry = getattr(self, '_standalone_entry', None)
+         pending = bool(entry and entry['awaiting_name'] and self.clock() < entry['until'])
+         # Polling never mutates routing ownership or the original biometric FSM.
+-        state.update(entry_mode=entry['mode'] if entry else None, entry_name_pending=pending)
++        state.update(entry_mode=entry['mode'] if entry else None, entry_name_pending=pending,
++                     entry_trace=copy.deepcopy(getattr(self,'_entry_trace',dict(version=1,observed=False))))
+         state['active'] = state['active'] or pending
+         if self.business is not None:
+             state = dict(state, active=state['active'] or self.business.public()['active'],
+@@ -203,6 +206,18 @@
+             self._standalone_entry = entry
+         return entry
+ 
++    def _entry_speaker_presence(self, meta):
++        # Observe only original RAM membership/expiry. Do not invoke state(),
++        # which can expire and remove a session, or read any gallery/store.
++        speaker = getattr(getattr(self.business, 'hub', None), 'speaker', None)
++        sessions = getattr(speaker, 'sessions', None)
++        if type(sessions) is not dict:return dict(known=False,present=False,active=False)
++        row = sessions.get((meta['board_boot_id'],meta['session_id']))
++        if type(row) is not dict:return dict(known=True,present=False,active=False)
++        until = row.get('until')
++        return dict(known=True,present=True,
++            active=bool(type(until) in (int,float) and self.clock() < until))
++
+     def _visual(self, job):
+         from common.speaker_visual import build_visual, unavailable
+         try:
+@@ -221,6 +236,37 @@
+     def __call__(self, text, *, job, controller, is_current, cancel_event, reply_sink=None):
+         from common.binding_intent import binding_intent, face_enrollment_text
+         from common.voice_enrollment import render, result
++        trace = dict(version=1,observed=True,input_mode='none',resolved_mode='none',binding_kind='not_evaluated',
++            parser_code_known=False,parser_face_only_const=False,parser_voice_only_const=False,face_active_before=False,face_active_after=False,
++            speaker_state_known=False,speaker_present_before=False,speaker_active_before=False,
++            speaker_present_after=False,speaker_active_after=False,business_turn_calls=0,
++            business_turn_result='not_called',error_class='none',phase='entered',reset_since_trace=False)
++        entry_before = getattr(self,'_standalone_entry',None)
++        if entry_before is not None and entry_before.get('mode') in ('face','voice'):
++            trace['input_mode'] = entry_before['mode']
++        trace.update(_entry_parser_flags(binding_intent))
++        trace['face_active_before'] = bool(self.flow.public()['active'])
++        before = self._entry_speaker_presence(job.meta)
++        trace.update(speaker_state_known=before['known'],speaker_present_before=before['present'],
++                     speaker_active_before=before['active'])
++        self._entry_trace = trace  # A new object prevents an older turn overwriting the next trace.
++        def traced_business_turn(*args,**kwargs):
++            trace['business_turn_calls'] = min(8,trace['business_turn_calls']+1)
++            trace['business_turn_result'] = 'calling'
++            trace['phase'] = 'business_turn'
++            try:
++                value = self.business.turn(*args,**kwargs)
++            except BaseException as exc:
++                trace['business_turn_result'] = 'error'
++                trace['error_class'] = BoardDialogueJobs._diagnostic_error_class(exc)
++                raise
++            else:
++                trace['business_turn_result'] = 'none' if value is None else 'reply'
++                return value
++            finally:
++                after = self._entry_speaker_presence(job.meta)
++                trace.update(speaker_state_known=after['known'],speaker_present_after=after['present'],
++                             speaker_active_after=after['active'])
+         def current():
+             if not is_current() or cancel_event.is_set() or self.clock() >= job.deadline:
+                 return False
+@@ -269,6 +315,10 @@
+                 from common.feature_intents import speaker_requested, speaker_query_requested
+                 from tools.provisional_voice import query_reply
+                 intent = binding_intent(text)
++                kind = intent.get('kind')
++                trace['binding_kind'] = kind if type(kind) is str and kind in (
++                    'ordinary','remember_self','name_hint','invalid_name','face_only','voice_only') else 'other'
++                trace['phase'] = 'producer'
+                 requested = {'face_only':'face', 'voice_only':'voice'}.get(intent['kind'])
+                 if entry is not None and (requested is not None and requested != entry['mode']
+                         or intent['kind'] == 'remember_self'):
+@@ -281,6 +331,7 @@
+                     entry = self._new_entry(job.meta, requested,
+                         awaiting_name=requested == 'voice' and intent['name'] is None,
+                         epoch=entry_epoch, is_current=current)
++                trace['resolved_mode'] = entry['mode'] if entry is not None and entry.get('mode') in ('face','voice') else 'none'
+                 if intent['kind'] == 'invalid_name':
+                     emit(BoardReply(render(result('bad_name')), 'friendly'), final_cue=True)
+                     return
+@@ -315,7 +366,7 @@
+                             interpreted = '登记我的声纹'
+                     elif query_reply(text, {'state':'UNKNOWN'}) is not None:
+                         interpreted = '查询我的声纹'
+-                    spoken = self.business.turn(job.meta, interpreted, job.pcm,
++                    spoken = traced_business_turn(job.meta, interpreted, job.pcm,
+                         is_current=current, cancel_event=cancel_event, deadline=job.deadline)
+                     if cancel:self._standalone_entry = None
+                     if spoken is None:return DIALOGUE_ROUTE
+@@ -333,7 +384,7 @@
+                     if speaker_query_requested(text):
+                         # Skip the unified enrollment router: a status question
+                         # must not become one of its three captured samples.
+-                        spoken=self.business.turn(job.meta,text,job.pcm,**options)
++                        spoken=traced_business_turn(job.meta,text,job.pcm,**options)
+                         if spoken is None:
+                             raise BoardCapabilityNotReady('speaker_status_result')
+                         emit(BoardReply(spoken,'friendly'),final_cue=True)
+@@ -353,7 +404,7 @@
+                                     job.capture_snapshot, text, **options)
+                         board_text = routed['binding_request']['board_text']
+                     else:
+-                        spoken = self.business.turn(job.meta, text, job.pcm, **options)
++                        spoken = traced_business_turn(job.meta, text, job.pcm, **options)
+                         if spoken is not None:
+                             emit(BoardReply(spoken, 'friendly'), final_cue=True)
+                             return
+@@ -373,11 +424,14 @@
+                     deliver(value, not guiding)
+                     if guiding:
+                         self.flow.guide(deliver, is_current=current)
+-            except BaseException:
++            except BaseException as exc:
++                trace.update(phase='error',error_class=BoardDialogueJobs._diagnostic_error_class(exc))
+                 if entry is not None and self._standalone_entry is entry:
+                     self._standalone_entry = None
+                 raise
+             finally:
++                trace['face_active_after'] = bool(self.flow.public()['active'])
++                if trace['phase'] != 'error':trace['phase'] = 'finished'
+                 if exchange is not None:
+                     exchange.cancel()
+                 if entry is not None and self._standalone_entry is entry:

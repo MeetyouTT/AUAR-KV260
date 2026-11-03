@@ -1,0 +1,38 @@
+5090 Windows → Ubuntu 远程协作接入
+用户日期/时区：2026-11-01，America/Los_Angeles。证据文件同时保留 UTC 时间。
+最终状态：REMOTE_COLLABORATION_READY；SSH 与应用接入全部验收完成。
+
+已验收：
+1. ssh aura-ubuntu 可以使用新机密钥免密登录 ghmd@192.168.137.117:22。
+2. BindAddress=192.168.137.1，SSH_CONNECTION 和 Ubuntu 回程路由均证实热点物理路径；没有把 TUN 的 TCP Connected 当作 SSH 成功。
+3. StrictHostKeyChecking=yes，HostKeyAlias=192.168.137.141，复用迁移中已信任的 Ubuntu 主机公钥；指纹 SHA256:tNZ7GjGBvS/wQDcvA2omrWvQAKLYIaR4/a2WaBf/Mrs。
+4. 新公钥 SHA256:gxVMk7ciwUOXO8slnAUvaUWlt5hxR62rctfL4P+P3zA 已追加到 ghmd 的 authorized_keys；旧条目保留，远端备份路径见 authorization_result.json。
+5. 远端主机 ghmd-MRA-XXX，Codex 0.166.0 已登录，命令 shell 和登录 shell 均可调用，实际可执行文件入口 /home/ghmd/.local/bin/codex。
+6. 原项目 /home/ghmd/Win共享文件/语音共享文件 存在且可访问。
+7. 新 Windows 应用连接 hostId=remote-ssh-discovered:aura-ubuntu 已启用。应用工具成功读取其历史和现有聊天“查看整个项目文件”（01a1999d-061a-7b00-a5f2-f3886ebd0fe9）。只读验证，没有向该聊天发送消息。
+8. 应用 list_projects 已返回“语音共享文件”的 remote 条目：projectId=68667d27-c670-4646-be87-73fab1b237dc，hostId 正确，路径与上项完全匹配。
+
+配置与证据：
+- Windows SSH 配置 C:\Users\REVO1\.ssh\config 仅改 aura-ubuntu 条目；原配置备份及前后 SHA 见 ssh_config_preparation.json。
+- 用户在可见本机 SSH 终端输入了 Ubuntu 密码；没有记录密码、复制私钥或认证数据库。
+- ssh_verification.json 与 ssh_verification.log：新机严格主机校验、key-only 登录、远端 Codex 与项目只读检查。
+- app_connection_verification.json：首次应用连接与现有聊天读取。
+- app_remote_project_verification.json：最终应用 remote 项目条目，以及热点恢复后的聊天重新读取。
+- project_api_registration.json：已有 Ubuntu Codex daemon 的原生 project/create 和 project/read 结果。原生项目 ID 01a199f8-c288-7271-a7e6-4a414c4bd561 与应用保存的项目 ID 是不同层的标识，不要互换。
+- network_interruption.json：中途热点地址消失的历史事件；后续热点恢复、免密 SSH 和应用连接均重新通过，当前不构成阻塞。
+- STATUS.json：机器可读最终状态，complete=true 仅表示本远程协作接入任务完成。
+
+日后使用：
+- 命令行：ssh aura-ubuntu。
+- 应用：运行位置选择 aura-ubuntu，再选远程项目“语音共享文件”。现有 Ubuntu 聊天可从该连接的历史中读取和接续。
+- 当前地址固定为 192.168.137.117；若热点 DHCP 日后改变，重新核对地址和相同可信主机指纹后，仅更新 Ubuntu SSH 条目。不要关闭主机校验。
+- 不需要重装或重新登录已验收的远端 Codex，也不需要重新输入密码安装这把公钥。
+
+本任务边界：没有启动/停止本机模型、下载器或安装器；没有修改模型运行配置、板卡服务、FPGA、相机、音频、机构或真实私库；没有用 Ubuntu 开始板卡部署。
+
+官方接入依据：
+https://learn.chatgpt.com/docs/remote-connections#connect-to-an-ssh-host
+https://learn.chatgpt.com/docs/reference/commands
+https://learn.chatgpt.com/docs/app-server
+
+应用内必要点击由用户完成：Computer Use 技能引用的 guidance.md 明确禁止自动操作 ChatGPT 桌面应用 UI。原生项目登记使用已有 daemon 的本地 Unix WebSocket 接口，没有启动新聊天、开网络监听或重启 daemon。

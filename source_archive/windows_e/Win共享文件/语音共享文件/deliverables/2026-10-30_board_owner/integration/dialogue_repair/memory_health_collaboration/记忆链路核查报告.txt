@@ -1,0 +1,45 @@
+最新结果：主对话v14已部署匹配候选。同版本187.16秒内持久摘要287→298、worker16→27且丢弃始终0；总积压869→858，视觉来源618→607，已确认结构化视觉正在净消化积压。其余三类来源未变，普通对话摘要与全库健康仍未证实，尚余858条。最新报告见v14_validation_candidate/核查与候选说明.txt及ACTUAL_PROGRESS_ASSESSMENT.json。下文为前期保留的诊断基线，不再代表当前运行状态。
+
+记忆链路独立核查（2026-10-31；离线候选与只读回执）
+
+结论：目前不能称后台记忆正常。历史摘要确实成功过；近期摘要处理停滞与错误分类缺陷必须分开判断。
+
+实际证据
+
+主对话执行的 actual_metadata_v11.json：startup e2bbe5e6ea101247e7b74585df670a56530c953e8dc9a7e681820e8871a0dd1d。
+库中270个committed任务、270条valid摘要；当前worker的completed=0只是本进程计数。
+当前622条积压，最老177726.52秒；最近成功距采样3173.90秒（约53分钟）。最近16个任务为model_failed 10、cancelled 4、candidate_rejected 2。
+已摘要事件仍有正文的计数为0；失效摘要保留正文/关键词/claims计数为0。单次快照不能证明积压下降，也不等于线上每项功能验收。
+另有1条state=valid、无正文、未关联摘要的事件。暂不将它判作丢失：迁移实现明确允许被原记忆命令隐私规则排除的用户正文不迁入，同时保留其有效事实来源元数据。更新后的只读脚本会要求“迁移完成＋精确排除规则＋当前事实来源”三种关联同时存在，才归为预期；不会补回原文或操作真实库。
+
+已确认的代码缺陷
+
+1. 高优先级：同boot重启摘要worker时，BoardSummaryClient.generation从0重置，而session固定为memory-worker。Windows InferenceHost按(board_boot_id, session_id)保留最高代次。旧worker至少发过两次请求后，新实例的generation=1会收到stale_generation；原实现将它统一抛为RuntimeError，再记成model_failed。使用真实调度器类与合成后端、直接内存调用，已确定性复现。线上最近这10次model_failed的确切子码在原实现中被丢弃，尚不能仅由聚合计数断言全部属于该原因。
+2. Windows返回preempted/superseded/cancelled/foreground_busy时，只要板端本地取消谓词恰好仍为false，原实现也会记model_failed并累加退避。远端deadline_exceeded也丢失超时分类。5个独立合成用例复现。
+3. 展示层把error改成operation_failed；旧公开probe又跳过字符串last_failure_code。新的只读脚本保留白名单枚举，候选在现有worker health中增加白名单摘要失败阶段、结构化子码和异常类，不输出异常原文。
+
+可审查候选
+
+after/board/runtime/board_memory_policy.py：同boot单调时钟微秒序号用作摘要代次，保持固定owner槽及原53位协议上限；结构化取消/超时分类；固定阶段诊断。
+after/common/board_memory_backoff.py：通过现有health暴露摘要器固定诊断，原退避算法不变。
+基线文件SHA与v10公开manifest及v11实际回执逐项一致；精确候选SHA见HANDOFF.json。主对话是唯一发布者，本对话未发布、重启、暂停任何生产服务。
+
+不变条件
+
+未修改BoardMemoryStore、库schema、事务、5分钟门槛、权限、源覆盖或语义验证、完整播放ACK、逐包fresh事务检查、模型参数与超时。摘要写入/读回校验/正文删除仍在同一个原子事务；失败或撤销不提前删正文。未新增原文归档、服务、模型或生产业务写者。
+
+逐项结论
+
+通过（离线）：最近5分钟边界、进行中轮次保护；摘要提交与删除的原子性及失败回滚；摘要后检索；更正/遗忘后派生摘要与事实失效；授权撤销；输出逐包新事务；过期租约与新前台输入取消；空闲合成积压消化；无模型调用持有SQL写事务。最终相关回归236通过、1项Windows不适用的POSIX权限检查跳过。
+通过（候选定向）：20项。覆盖上述重启代次缺陷、远端取消/超时分类、真实后端失败仍失败、JSON/格式/受保护数字拒绝、失败留正文、成功清积压、只读诊断和迁移隐私元数据分类。
+失败（未改基线）：同boot重启代次用例；5项结构化错误分类用例。
+不适用旧夹具：原3个固定汐蓝同音称呼用例在未改基线也失败，因为现选角色为雪妃且无该同音别名。证据保留在test_baseline_regression；最终回归显式排除这3项，并通过3项当前角色等价检查，未修改原测试或恢复旧角色。
+未验证（线上）：最新model_failed的确切子码；候选实际部署效果；近期追问与跨5分钟检索真人体验；线上更正/遗忘/权限撤销；622积压的下降和最终清空；那1项无正文事件的迁移证明关联。不能把离线通过写成生产验收完成。
+
+主对话下一步
+
+按当次实际startup SHA执行更新后的board_readonly_metadata.py，取得missing_body_classification。脚本只读固定字段，SQLite mode=ro＋query_only、忙等待0.15秒、虚拟机预算0.4秒；不导入生产模块、调用推理或输出正文/身份ID。
+候选在主对话发布后，核对当次startup与候选源码SHA；利用自然空闲worker观察summary_diagnostics、completed、总committed、last_commit_age_seconds与backlog趋势。允许真实新输入优先并取消摘要；不额外压测或并发写库。无法在短采样内清完积压时，保留明确待处理数和限制。
+回退注意：Windows仍驻留时不能把代次恢复为从1计数，否则会再次被其高水位拒绝。可回退其他代码，但保留本代次修复；rollback_safe/generation_only.patch给出最小保留改动。不要为回退覆盖业务库、更正或删除结果，也不要擅自重启模型服务。
+
+边界：本对话只读本地源码和主对话脱敏回执，临时合成SQLite测试。没有直接连接板卡、打开真实业务库、采集音频/截图、访问模型或复制权重/虚拟环境。

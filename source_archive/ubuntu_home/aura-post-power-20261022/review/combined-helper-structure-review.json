@@ -1,0 +1,71 @@
+{
+  "schema": "aura-combined-helper-structure-review-1",
+  "reviewed_utc": "2026-10-22T22:47:54.697122+00:00",
+  "helper": "/home/ghmd/aura-identity-dpu-check-20261018/board_postpower_combined_live_20261022.py",
+  "helper_sha256": "2e8756f0345011b28d45f2347dcea6eabebeab2700fdfe0b89c19c05ee0bc1fb",
+  "builder_sha256": "a172d144047c44b34c541515c1926e0812e3176a17c77edb4805e6674ddb8f67",
+  "review_passed": false,
+  "allow_launch": false,
+  "read_only": true,
+  "board_operations": 0,
+  "payload": {
+    "candidate/aura/board/identity/face_freshness_metrics.py": {
+      "sha256": "4fdc28ea3505864551c90ea252a1a12bccce21ab1a1ccbdc2edbbb2242a89596",
+      "bytes": 9853
+    },
+    "candidate/aura/board/identity/face_targets.py": {
+      "sha256": "407cc5ee9e20ef6f08647117cc94b6ed3a88cb277d74e393f31eea92dd8cd809",
+      "bytes": 17639
+    },
+    "candidate/aura/board/vision/dpu_vision_runtime.py": {
+      "sha256": "e3b2d11140838fdf0eb548f8def033da5930ec46dfa72ae27f098c03e801c9d3",
+      "bytes": 9998
+    },
+    "candidate/aura/board/vision/dpu_yunet.py": {
+      "sha256": "23ea72f8380e7205fafb0d1b28b692a4780f1c9a51e221d04609843bbf0c309b",
+      "bytes": 3429
+    },
+    "tests/bootstrap.py": {
+      "sha256": "07c311d0bc14cf7648ab41d3c5f05cc801998cb82f4818cb87d4016c28d2a039",
+      "bytes": 928
+    },
+    "tests/test_yunet_retry.py": {
+      "sha256": "1654d19a27309bb316ecbd467f4d8604b3e9358f03d7d388c0f2ff448f9cb532",
+      "bytes": 24489
+    },
+    "tests/test_light.py": {
+      "sha256": "bab093ff51b75a8a6793b0b96993d460676d3bb54b24dcc4aa0e03d61dd3fa6f",
+      "bytes": 5076
+    },
+    "tests/test_service.py": {
+      "sha256": "20bdef3b24e741889e9c3562c9ec9d34af06463bb3379966fab2fbfb66c34c9d",
+      "bytes": 17086
+    },
+    "tests/test_combined.py": {
+      "sha256": "82def528563339c371780f9fdff507985478db6806a3e478dac4dd0b7af4fbbf",
+      "bytes": 8410
+    }
+  },
+  "restore_finalizer_ast_identical_to_a439": true,
+  "fake82_gate_precedes_service_stop": true,
+  "actual_cost_four_source_pins_match": true,
+  "native_failure_count_semantics": "Payload runtime equals independently reviewed e3b2: only pre_execute AdmissionCancelled has native_not_submitted; API/status failures do not increment withdrawn_after_slot. Helper requires absolute native_failed == withdrawn and diagnostic_errors == 0.",
+  "blocking_findings": [
+    {
+      "id": "FAKE82_DIRECT_PATH_LAYOUT",
+      "files": [
+        "tests/test_light.py",
+        "tests/test_service.py"
+      ],
+      "actual_source_root": "folder/aura",
+      "test_direct_source_root": "folder/candidate/aura",
+      "baseline_root": "folder/baseline/aura (correct)",
+      "impact": "Fake suite fails safely before production service mutation; bootstrap env cannot fix direct pathlib loads."
+    }
+  ],
+  "recommendations": [
+    "At runtime compare all four merged source SHA against measured cost report, not only observer module.",
+    "For freshness acceptance reject invalid_source_ages/source_clock_pairs_rejected/counter_saturation; do not call missing gap samples proof of zero gap."
+  ],
+  "test_scope": "Static AST, payload SHA/bytes/syntax and local saved cost evidence only. No helper/build execution, fake82 rerun or board actions."
+}

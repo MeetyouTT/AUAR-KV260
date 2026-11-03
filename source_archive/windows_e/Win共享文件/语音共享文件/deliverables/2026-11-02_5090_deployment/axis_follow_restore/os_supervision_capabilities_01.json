@@ -1,0 +1,57 @@
+{
+  "host_utc": "2026-11-02T06:02:30.208278+00:00",
+  "board_result": {
+    "board_utc": "2026-11-02T06:02:29.842435+00:00",
+    "boot_id": "903cfade-b93c-48fa-804e-379be1967313",
+    "commands": [
+      {
+        "argv": [
+          "systemd-run",
+          "--version"
+        ],
+        "returncode": 0,
+        "stdout": "systemd 249 (249.7+)\n+PAM -AUDIT -SELINUX -APPARMOR +IMA -SMACK +SECCOMP -GCRYPT -GNUTLS -OPENSSL +ACL +BLKID -CURL -ELFUTILS -FIDO2 -IDN2 -IDN -IPTC +KMOD -LIBCRYPTSETUP +LIBFDISK -PCRE2 -PWQUALITY -P11KIT -QRENCODE -BZIP2 -LZ4 -XZ -ZLIB +ZSTD +XKBCOMMON +UTMP +SYSVINIT default-hierarchy=hybrid\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "systemd-run",
+          "--help"
+        ],
+        "returncode": 0,
+        "stdout": "systemd-run [OPTIONS...] COMMAND [ARGUMENTS...]\n\nRun the specified command in a transient scope or service.\n\n  -h --help                       Show this help\n     --version                    Show package version\n     --no-ask-password            Do not prompt for password\n     --user                       Run as user unit\n  -H --host=[USER@]HOST           Operate on remote host\n  -M --machine=CONTAINER          Operate on local container\n     --scope                      Run this as scope rather than service\n  -u --unit=UNIT                  Run under the specified unit name\n  -p --property=NAME=VALUE        Set service or scope unit property\n     --description=TEXT           Description for unit\n     --slice=SLICE                Run in the specified slice\n     --slice-inherit              Inherit the slice\n     --no-block                   Do not wait until operation finished\n  -r --remain-after-exit          Leave service around until explicitly stopped\n     --wait                       Wait until service stopped again\n     --send-sighup                Send SIGHUP when terminating\n     --service-type=TYPE          Service type\n     --uid=USER                   Run as system user\n     --gid=GROUP                  Run as system group\n     --nice=NICE                  Nice level\n     --working-directory=PATH     Set working directory\n  -d --same-dir                   Inherit working directory from caller\n  -E --setenv=NAME=VALUE          Set environment\n  -t --pty                        Run service on pseudo TTY as STDIN/STDOUT/\n                                  STDERR\n  -P --pipe                       Pass STDIN/STDOUT/STDERR directly to service\n  -q --quiet                      Suppress information messages during runtime\n  -G --collect                    Unload unit after it ran, even when failed\n  -S --shell                      Invoke a $SHELL interactively\n\nPath options:\n     --path-property=NAME=VALUE   Set path unit property\n\nSocket options:\n     --socket-property=NAME=VALUE Set socket unit property\n\nTimer options:\n     --on-active=SECONDS          Run after SECONDS delay\n     --on-boot=SECONDS            Run SECONDS after machine was booted up\n     --on-startup=SECONDS         Run SECONDS after systemd activation\n     --on-unit-active=SECONDS     Run SECONDS after the last activation\n     --on-unit-inactive=SECONDS   Run SECONDS after the last deactivation\n     --on-calendar=SPEC           Realtime timer\n     --on-timezone-change         Run when the timezone changes\n     --on-clock-change            Run when the realtime clock jumps\n     --timer-property=NAME=VALUE  Set timer unit property\n\nSee the systemd-run(1) man page for details.\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "systemctl",
+          "show",
+          "aura-camera-ui.service",
+          "--property=Restart,KillMode,SendSIGKILL,TimeoutStopUSec,ExecStart,ExecCondition"
+        ],
+        "returncode": 0,
+        "stdout": "Restart=no\nTimeoutStopUSec=infinity\nExecCondition={ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B /home/root/aura-native-live-20261024/ops/be72669aa53de735/boot_ops.py --root /home/root/aura-native-live-20261024/ops/be72669aa53de735 condition camera ; ignore_errors=no ; start_time=[Fri 2021-11-19 09:19:33 PST] ; stop_time=[Fri 2021-11-19 09:19:37 PST] ; pid=1016 ; code=exited ; status=0 }\nExecStart={ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B /home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/face-source-v17/entry.py ; ignore_errors=no ; start_time=[Fri 2021-11-19 09:19:42 PST] ; stop_time=[n/a] ; pid=1333 ; code=(null) ; status=0/0 }\nKillMode=process\nSendSIGKILL=no\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "systemctl",
+          "show",
+          "--property=DefaultTimeoutStartUSec,DefaultTimeoutStopUSec"
+        ],
+        "returncode": 0,
+        "stdout": "DefaultTimeoutStartUSec=1min 30s\nDefaultTimeoutStopUSec=1min 30s\n",
+        "stderr": ""
+      }
+    ],
+    "client_sha256": "a37d8449c3362a509d459f9e57aa3711314602369354f7d98ca60c3e51607ad7",
+    "systemd_binary_path": "/lib/systemd/systemd",
+    "systemd_binary_sha256": "6950f8fcc1f7bc392e50ee1e3dc53fe44902f7c53aac009df9542aac9b75a3da",
+    "systemd_binary_contains_append_prefix": true,
+    "systemd_binary_contains_runtime_max": true,
+    "systemd_binary_contains_standard_output": true,
+    "transient_service_created": false,
+    "client_executed": false,
+    "board_mutations": false
+  }
+}

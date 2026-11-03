@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "status": "REAL_CAPTURE_QUEUE_IMPLEMENTED_LOCAL_PASS_ARM_PROBE_PREPARED_NOT_RUN",
+  "saved_utc": "2026-10-30T22:26:14.586004+00:00",
+  "sources": [
+    {
+      "path": "aura/board/runtime/audio/board_pcm_queue.py",
+      "bytes": 9710,
+      "sha256": "b38c922d3c7446458bbd0ca4bf99316ec769fb52f3baf4525aa24923cccf300d"
+    },
+    {
+      "path": "aura/tests/framework/test_board_pcm_queue.py",
+      "bytes": 8403,
+      "sha256": "4b93f34b694d62480a83b2ae3ba01fa78f956036f06abcf8c0b24d5573e6cba0"
+    },
+    {
+      "path": "aura/tests/framework/test_board_audio_pipeline_probe.py",
+      "bytes": 2117,
+      "sha256": "ccc4bd78c4e4a8f48be5e0fc563fe0c52576d9d52ef72379a3d22a929de91ba4"
+    },
+    {
+      "path": "deliverables/2026-10-30_board_owner/integration/resume_inference/board_audio_pipeline_probe.py",
+      "bytes": 12755,
+      "sha256": "f9a7c68dd3849096099d65b18af9ccf358efaa44bcb5b7d2ba7b9969f4b240d3"
+    }
+  ],
+  "tests": {
+    "tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 1.53,
+    "evidence": "audio_pipeline_local_tests.xml"
+  },
+  "integration": {
+    "module": "board.runtime.audio.board_pcm_queue",
+    "mixin": "BoundedPcmCaptureMixin",
+    "adopted_by_runtime_agent": [
+      "BoardAutomaticCapture",
+      "BoardBargeCapture"
+    ],
+    "producer": "Only stream.read(640), bounded insertion; never calls model or endpoint",
+    "consumer": "The original AutomaticMcp01Capture or BargeInCapture read loop, unmodified endpoint/echo/verifier semantics",
+    "default_capacity_frames": 8,
+    "default_capacity_ms": 160,
+    "overflow": "Fail whole capture, clear queued frames, never drop-and-rejoin or submit ASR",
+    "cancel": "Wake consumer and signal only original owner source; no cross-thread BufferedReader.close",
+    "cleanup": "Join at most0.5seconds; unresolved reader rejects turn, original capture owner retains final SIGINT/kill/process-pipe cleanup",
+    "tests_cover": [
+      "Exact PCM frame order",
+      "Original normal and barge read loops/240ms barge onset",
+      "Original endpoint offset and original contiguous PCM",
+      "Overflow while slow consumer runs",
+      "Overflow concurrent with final decision",
+      "Partial or malformed frame",
+      "Read failure",
+      "EOF",
+      "Cancel wakes blocked source and consumer",
+      "Uncooperative source cleanup bounded and result rejected"
+    ]
+  },
+  "arm_probe": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_inference\\board_audio_pipeline_probe.py",
+    "argv": [
+      "/usr/bin/python3",
+      "-B",
+      "<staged board_audio_pipeline_probe.py>",
+      "--code-root",
+      "<staged aura source root>",
+      "--resources-root",
+      "/home/root/aura-board-owner-candidate-20261030"
+    ],
+    "source": "Only pinned upstream public test_wavs/0.wav, final frame pad and1.4seconds endpoint silence",
+    "uses_actual_factory_and_pump": true,
+    "deps": "Isolated ORT1.17.3 and sherpa1.13.8 with original pinned GTCRN/Silero/Paraformer/tokens SHA",
+    "timeout_seconds": 90,
+    "queue_frames": 8,
+    "accepted_scope": "Finite paced public-file input through actual production-candidate factory/queue/endpoint, then real Paraformer; no physical microphone/playback acceptance",
+    "metrics": [
+      "Producer supply lateness including >20ms counts",
+      "Frontend frame mean/p95/max and >20ms counts",
+      "Bounded queue peak/age/fault",
+      "Contiguous original captured PCM SHA and sample offset",
+      "ASR result SHA and decode time",
+      "Peak RSS",
+      "Fresh unchanged boot/PIDs/IDLE/mic-off/follow-off protection"
+    ],
+    "hard_20ms_realtime_assertion": false
+  },
+  "actions": {
+    "board_accessed": false,
+    "uart_opened": false,
+    "real_models_loaded": false,
+    "device_process_started": false,
+    "production_database_opened": false,
+    "service_restarted": false,
+    "configs_or_firmware_changed": false
+  }
+}

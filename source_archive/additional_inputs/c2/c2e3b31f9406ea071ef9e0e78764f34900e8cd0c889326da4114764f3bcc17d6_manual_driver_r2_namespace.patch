@@ -1,0 +1,68 @@
+--- r1_frozen.py
++++ r2_isolated.py
+@@ -1,4 +1,4 @@
+-"""Prepare by default. Explicit execution uses one SSH/control stream and public UI only."""
++"""R2 isolates guard, control and observer namespaces; one SSH/public UI stream only."""
+ from pathlib import Path
+ import argparse
+ import hashlib
+@@ -42,13 +42,13 @@
+     controls = (HERE / 'remote/manual_one_turn_control.py').read_text('utf-8')
+     source = (camera + '\n' + common + '\nSTARTUP_SHA=' + repr(spec['startup_sha256'])
+               + '\nEXPECTED_OWNERS=' + repr(owners) + '\n'
+-              + controls + '\nOBSERVER_SOURCE=' + repr(observer.decode('utf-8')) + '\n' + REMOTE)
++              + 'MANUAL_CONTROL_SOURCE=' + repr(controls) + '\nOBSERVER_SOURCE=' + repr(observer.decode('utf-8')) + '\n' + REMOTE)
+     compile(source, '<manual-public-ui-observer>', 'exec')
+     return source.encode('utf-8'), owners, sha(observer)
+ 
+ 
+ def verify_frozen_manifest():
+-    manifest = json.loads((HERE / 'manual_driver/FROZEN_MANIFEST.json').read_bytes())
++    manifest = json.loads((HERE / 'manual_driver_r2/FROZEN_MANIFEST.json').read_bytes())
+     for row in manifest['files']:
+         path = Path(row['path']).resolve()
+         assert path.is_relative_to(PROJECT)
+@@ -69,7 +69,7 @@
+     verify_frozen_manifest()
+     sys.path.insert(0, str(PROJECT / 'deliverables/2026-10-18_board_dialogue'))
+     from board_ssh import KEY
+-    folder = HERE / 'evidence' / ('manual_trial_' + str(time.time_ns()))
++    folder = HERE / 'evidence' / ('manual_trial_r2_' + str(time.time_ns()))
+     folder.mkdir(parents=True)
+     evidence = folder / 'metadata.jsonl'
+     control_file = folder / 'STOP.json'
+@@ -161,17 +161,21 @@
+         r=c.getresponse();raw=r.read(100001)
+         assert r.status==200 and len(raw)<=100000 and json.loads(raw).get('ok') is True
+     finally:c.close()
+-live_ns=globals()
+-live_ns.update(EXPECTED_STARTUP=STARTUP_SHA,EXPECTED_BOOT=BOOT)
++control_ns=dict(get_json=get_json,ui_command=ui_command,time=time)
++exec(compile(MANUAL_CONTROL_SOURCE,'<isolated-manual-control>','exec'),control_ns)
++live_ns=dict(EXPECTED_STARTUP=STARTUP_SHA,EXPECTED_BOOT=BOOT,
++    poll_manual_control=control_ns['poll_manual_control'],
++    require_manual_sample=control_ns['require_manual_sample'],
++    manual_metadata=control_ns['manual_metadata'])
+ try:
+-    start_receipt=manual_start()
++    start_receipt=control_ns['manual_start']()
+     print(json.dumps(dict(kind='manual_start',**start_receipt)),flush=True)
+     exec(compile(OBSERVER_SOURCE,'<manual-accepted-caption-observer>','exec'),live_ns)
+ except Exception as exc:
+     print(json.dumps(dict(kind='observer_exception',error_class=type(exc).__name__)),flush=True)
+ one_complete=bool(live_ns.get('completed'))
+ try:
+-    cleanup=settle_manual_without_cancel()
++    cleanup=control_ns['settle_manual_without_cancel']()
+     print(json.dumps(dict(kind='observation_cleanup',**cleanup)),flush=True)
+ except Exception as exc:
+     print(json.dumps(dict(kind='cleanup_error',error_class=type(exc).__name__)),flush=True)
+@@ -179,7 +183,7 @@
+     after,value,_=preflight()
+     assert value.get('automatic_conversation',{}).get('enabled') is False
+     print(json.dumps(dict(kind='final_guard',proof=after,one_new_turn_complete=one_complete,
+-        manual_metadata=manual_metadata(value),cancel_or_pause_command_sent=False,
++        manual_metadata=control_ns['manual_metadata'](value),cancel_or_pause_command_sent=False,
+         acoustic_first_sound_measured=False)),flush=True)
+ except Exception as exc:
+     print(json.dumps(dict(kind='final_guard',status='FAILED',error_class=type(exc).__name__,one_new_turn_complete=one_complete)),flush=True)

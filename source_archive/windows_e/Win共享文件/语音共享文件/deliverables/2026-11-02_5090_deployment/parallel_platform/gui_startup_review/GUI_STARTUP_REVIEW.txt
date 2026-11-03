@@ -1,0 +1,42 @@
+板卡 GUI 正常启动审查与交接（软件状态，不代替物理面板观察）
+
+结论：当前 boot 903cfade-b93c-48fa-804e-379be1967313 下，实际选用的人脸回读绑定已由 root 完成修复。若新鲜核对仍是 benchmark 固件、保存聆听 false，且 192.168.50.1:8797 的原模型 health/HTTP Date 可从板端正常取得，则可由 root 调用原 aura-avatar-ui.service 正常启动，再验证软件页面。此结论不放行转轴、跟随或 PL 切换。
+
+本次专项只执行了板端只读脚本及本地草稿生成，没有执行板端配置写入、服务启动/停止、MMIO、模型管理、数据库访问或媒体导出。实际配置写入由 root 唯一执行，回执在部署根 gui_selected_binding_applied.json。
+
+实际生产绑定修复
+- 旧 GUI 明确选择外部冻结绑定，SHA a7402eb0f3e8d5391a95136d65759569be86eceeb75d830146a4b1d14cc81667。其旧 boot/PID 与当前不符。单独修复默认 14-pin 文件不能修复该明确选择。
+- 新候选保留原 23 项 source pins，追加当前 camera1333 实际 run-config 为第 24 项，并将 camera_config 指向该文件。原 DPU_SFACE_INT8、身份库路径、阈值、result_ttl_ms=3000 与其余参数保持。
+- 当前 run-config SHA 6c9928fa49db7ef34ecc4d8854f3a456468fa72aa1faf7cdf1b7466cf2d2148a。
+- 新 selected SHA 4d8f0c2bccea1c7a56761fbcb204f40ba3b3c2fc9efad76af778aff535d378ac。
+- root 实际新 GUI config SHA fc21e6f2ef831442b08966957fa7aeb744a9b74124ee8778edc40397285626cd。
+- root 实际新 startup SHA 3fd124287463650f48232cb387c78d01399bad7ddcda483db725163298de4591，380 组件中只更新 GUI config 这 1 项；已刷新的默认 14-pin SHA e203e6ffe973397464791eb07f12e0bd0c24658988c119e9d7d75685c4e41986 保持。
+- 新绑定位于 /home/root/aura-5090-recovery-20261102-903cfade/gui-selected-1333-24pins-v1/face_gallery_readback.local.json。原 23-pin 冻结文件及所有旧证据保持原字节。
+- 本专项新鲜 RAM 候选原 _verify、380 组件、222 Native Python 和 7 operator 文件均通过。相机 PID1333/birth2359/command SHA acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd，帧与检测数连续推进，motion_command_emitted=false。
+
+构造与动作路径：行号均指 installed_source 中已通过板端 SHA 验证的源码，不是推测的本机副本
+- tools/board_avatar_pan.py:15 的 factory 创建 FacePanProcess；tools/pan_controls.py:9 在主 GTK 构造前调用该 factory。
+- tools/face_pan_controls.py:14 创建 ManualPanProcess，同时 running=false。其 start() 在第78行开始，真正的跟随 worker 只由第248行的 UI pan_face_follow 事件调用。automatic_following_enabled=true 本身不会自动调用 start。
+- board/motion/manual_process.py:12 的 backend 使用原 current_config pin guard，随后创建 ManualPan。board/motion/manual.py:85 的后台工作进入 transport context；没有自动 jog intent，pending 初值为 None。
+- board/motion/manual_vsrv.py:98 的 __enter__ 第99行首先 verify_platform()；NativeRegisters 构造在第102行。verify_platform 第83–96行检查 release 及精确 boot/CID/FDT/firmware/VART/FPGA 状态。现行配置保留旧 bebd3e7d boot/FDT/wide 要求，而当前为 903cfade/benchmark，因此最迟在第96行拒绝，在 NativeRegisters 之前停止。load_release、rated_range_release、manual_release、current_reference_release 仅检查文件哈希与 JSON 证据，没有打开设备。
+- board/motion/vsrv_transport.py 顶层只有导入、常量、类定义；ctypes.CDLL 位于 NativeRegisters.__init__ 第22行，vsrv_open 在第29行；vsrv_driver 顶层也没有硬件调用。导入上述模块不会加载 libvsrv 或打开寄存器。
+- manual_vsrv.py:163 begin() 才包含第173/177/180行 BIND/REFERENCE/ARM；第199行 COMMIT 位于 commit()。它们需要由原新鲜 UI 请求经 ManualPan.run_step 到达。当前后台连接在 verify_platform 拒绝，不到达这些函数，也不到达 __exit__ STOP。
+- 不修改旧机械 config/release 的 boot 或 hash 以绕过拒绝。正常页面启动后预期机械状态为 FAULT/UNAVAILABLE、pulse=null、readback 不存在、automatic_following=false；此为当前平台未恢复的真实状态。
+
+麦克风、输出和业务构造
+- tools/board_recording.py:12 的初始 capture=None，无采集开始。tools/handsfree_recording.py:29–32 首先读取保存的 false 并置 PAUSED。tools/formal_yuki.py:335–344 再强制初始 monitor_enabled=false。
+- tools/board_avatar_gtk.py:340 在第343行 AvatarRenderWorker 构造前调用 bind_automatic_listening；tools/production_listening.py:137–145 读取原保存 false 并维持 PAUSED。tools/voice_first_recording.py:168–170 的 tick 在 enabled=false 时直接返回，不进入 _listen。social 分支同样由 enabled=false 拦截。
+- board/runtime/device_observer.py 是已退役的无操作 stub，enabled 永远 false，不创建上传或采集工作。
+- 原 GStreamer 持久音频输出正常构造会打开既有 ALSA 静音 pipeline：gstreamer_persistent_engine.py:58 初始 active=false，第63行 pipeline PLAYING 保持设备准备。这不表示内容音频正在播放；启动后必须读取 playing=false/phase=IDLE，而不能声称 GUI 完全没有打开音频设备。
+- ProductionGuiBoardBusiness 第87行在构造时调用 runtime.initialize_clock(timeout=3)。board_business.py:527–534 经现有客户端对 192.168.50.1:8797 /health 取有效 HTTP Date，无本地时钟降级。LAN 尚不通会使页面构造失败，所以 root 须先完成网络和模型公开探测再正常 start。
+- 原 native pair 成功绘制后才触发业务 activate；正常启动将恢复原板端单 writer、摘要/视觉后台 worker。原业务数据库、身份、内容保留和摘要规则没有改动；本专项没有手工开库、改库或导出业务文本。
+
+交付与验证
+- apply_gui_selected_binding.py SHA 90457b126404264977345c186c8ce9aa6f36c6973c4f76e696043cb722fb05b6：有显式 apply 参数的自包含配置事务，默认仅 RAM dry-run。root 已应用，不能再用要求旧 startup 的前置脚本重放。
+- gui_binding_transaction_dryrun_01.json：本专项实板默认只读 dry-run 通过。gui_candidate_precheck_24_01.json：24-pin 新鲜 RAM 候选通过。gui_safety_closure_01.json：额外启动依赖源码 SHA 验证读回。
+- collect_gui_post_start_metadata.py SHA 654fa4eaee282d7c85b60d66a89df4ed732e5fe8cc60b7c584c50e6e12575824：只读启动后过滤读回。使用当前实际 3fd124/fc21e6/4d8f0c 哈希，复核 380/24 pins 及原隔离 _verify，连续三点观察。只输出白名单布尔/数字/枚举、进程 birth 与 cmd SHA；原始 API state 只在板端 RAM，不序列化对话、称呼、身份 ID、截图、预览或模板。
+- gui_post_binding_before_start_01.json：本专项已实板运行上述过滤脚本，正确报告 GUI 仍 failed/MainPID0、API拒绝；新绑定/380闭包验证通过，相机连续推进，无 libvsrv 或 /dev/mem 映射。这个启动前回执不冒作页面成功。
+- root 正常启动后可通过现有 run_readonly.py 运行 collect_gui_post_start_metadata.py，指定新的输出文件。期望 status=GUI_SOFTWARE_READY_PAUSED_PLATFORM_LOCKED，所有 checks=true。若有 false，保留真实状态并针对具体条件排查，不放宽这些判定。
+- 成功软件状态包括：systemd active/running、稳定 supervisor/GTK owner、API序列推进、main页、原pair READY、native帧增加及可见投影、运行故障0、PAUSED/mic=false/noPlaying、原业务writer/时钟就绪、相机推进、机械连接被原guard拒绝且无寄存器库映射。软件可见投影不代替用户对物理面板的观察。
+
+本专项到此交接，不继续扩大审计。板端服务启动、防火墙和模型链路探测统一由 root 串行协调。

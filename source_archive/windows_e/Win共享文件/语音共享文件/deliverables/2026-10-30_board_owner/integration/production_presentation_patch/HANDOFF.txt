@@ -1,0 +1,87 @@
+Production presentation overlay (source only, not deployed by this agent)
+
+Base: production_business_overlay/production_business.manifest.json
+SHA256: 6925a7262db0a34d4e129f5a1976e82f08d6b10c552e4eb577f33685a143f8c1
+The frozen candidate is unchanged. Merge only the three after/aura files listed
+in overlay_manifest.json into root's final source closure/startup pins.
+
+Hooks/API
+  bind_presentation(stage, recording): after board_business.bind_recording and
+    before AvatarRenderWorker creation. Startup-only instance binding.
+  attach_presentation(stage): after build_window; binds bridge/worker reads.
+  project_presentation(stage,state): after existing project_business_ui.
+  save_production_evidence(stage): first operation in save_evidence. None only
+    for nonproduction. Board-production never reaches legacy screenshot code.
+  close_presentation(stage): cleanup clears the display epoch.
+
+Lifetime
+  A single display slot admits only accepted channel events from its original
+  owner. Deadline is request's original monotonic requested_at + at most300s;
+  repaint cannot extend it. Long active generation/playback keeps internal
+  audio/barge/ACK state even if display expires. Only canonical foreground idle,
+  no stream/pending/ready/audio_waiting, output idle/unpaused and phase IDLE can
+  retire duplicate visual history/log/core reply. ANSWERED capture PCM and text
+  then retire; manually recorded, unsubmitted audio is preserved. Request and
+  capture IDs/auto-turn state are retained for normal rearm/ACK provenance.
+
+  Store correct/forget/clear methods are wrapped on this instance after normal
+  return (transaction already committed). Successful commit_compaction likewise
+  invalidates the slot. Failures and uncommitted compaction do not invalidate.
+  Invalidation is conservative across the visible presentation, independent of
+  which scope was affected; no DB read or fact/name parsing. Current command
+  confirmation is permitted only when operation_turn_id exactly matches both
+  jobs.active and _active_job.meta.request_id, and jobs._current(job) succeeds.
+  That complete owner tuple may display its postcommit reply, never its raw
+  transcript. An already admitted confirmation keeps its earlier hard deadline;
+  an eligible queued start uses the original requested_at. A duplicate start
+  cannot renew it. Original unrelated queued starts predating invalidation
+  remain rejected. Compaction never receives this command exception. No audio
+  is cancelled/truncated, its contents modified, or an ACK manufactured.
+
+  Worker read reprojects after releasing its condition. Existing owner writes
+  replace packet state on the next public refresh. Invalidation never acquires
+  worker.condition: the original worker calls public while holding it. GTK
+  widget clearing is queued on its own event loop. No reverse job/Store/clock
+  mutex acquisition occurs while holding the presentation mutex.
+
+  Production localhost StageBridge never serves user subtitles (metadata state
+  and public portrait frame only), so no HTTP cached body can survive expiry.
+  Gtk alone shows the bounded current slot. UiServiceClient.read is masked for
+  presentation; identity_snapshot/source-validation remains unchanged.
+
+  board_dialogue_jobs.py has one additional finally line, action=None after
+  the existing task_done(). It releases the last consumed Plan/PCM from the
+  action worker's otherwise idle stack. Its original queue, ACK/cancel/commit
+  operations and ordering are unchanged.
+
+Diagnostics
+  Board-production manual and close diagnostics write one bounded atomic file:
+    <verified private_root>/diagnostics/latest_metadata.json
+  Whitelist: schema, fixed privacy flags, TTL, epoch/counts, ui_closed and
+  monotonic diagnostic timestamp. No arbitrary state/config/error/owner IDs,
+  transcript/reply/log/turns, names, settings, PCM or images. Private canonical
+  owner/permissions and non-symlink file checks apply. No window/frame capture
+  subprocess is called. Production GTK exception logging retains only the
+  exception class. Other render/audio metrics are existing scalar diagnostics.
+
+Validation
+  D:\AIModels\speaker-identity\venv\Scripts\python.exe -B -m unittest discover
+    -s deliverables\2026-10-30_board_owner\integration\production_presentation_patch
+    -p test_presentation.py -v
+  19 tests passed in0.208s. Pure fake stage/Store/clock and one bounded synthetic
+  action-worker thread, which joined before test completion. Tests extract the
+  actual patched GTK.save_evidence/close, action worker and BoardMemoryCommands
+  from their AST. Actual scoped_command/prepare_spoken_input parse only public
+  command fixtures. Confirmation tests cover remember/forget/clear and both
+  consumed and queued-start order, foreign owner rejection and hard deadlines.
+  Generated files parse as CPython3.9. No real GUI/DB/socket/model/board/device,
+  microphone, playback or benchmark was used. Root still performs its normal
+  source-closure and basic startup verification before real user speech.
+
+Limits
+  This does not delete historical legacy archives, alter Store retention or
+  compaction retries, promise heap zeroisation, or erase active playback input.
+  Existing bounded audio echo-reference buffers are unchanged; no dynamic audio
+  files are introduced. No current service/DB/settings or identity grants were
+  touched. Frozen runtime/source and source-only pack are separate from this
+  metadata-only diagnostic format.

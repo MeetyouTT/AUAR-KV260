@@ -1,0 +1,227 @@
+﻿AUAR·雪妃：RAR源码复现包目录
+按用户提供的赛事方老师说明：完整源码＋重建脚本＋精简关键说明。
+以下是设计；目录应收齐实际源码，所有脚本均为建议目标。
+未收集真实源码，未生成业务占位文件，未制作RAR。
+
+auar_xuefei/
+├── README.md                              # 一页总入口：简介、环境、复现命令、正常结果和目录对照
+├── license                                # 队伍原创内容的正式许可全文
+├── third_party_notices.md                  # 代码、IP、模型、字体与角色资源的来源和许可
+├── release.json                            # 源码版本、协议、目标平台、模型版本和关键SHA
+├── package_manifest.csv                    # 实际装包文件及用途、大小、SHA；按真实内容生成
+├── checksums.sha256                        # 包内文件校验；不把本校验文件自身列入
+│
+├── src/                                   # 全部实际使用的实现源码
+│   ├── fpga/
+│   │   ├── readme.md                       # PL模块、接口、工具版本和源码输入说明
+│   │   ├── rtl/                            # 完整自研RTL；保留最终使用的实现
+│   │   ├── include/                        # [条件] RTL头文件、参数与寄存器定义
+│   │   ├── bd/
+│   │   │   ├── create_bd.tcl               # 从零创建PS、DPU、互联、自研IP与连线
+│   │   │   └── address_map.json            # 地址、中断、接口和ABI
+│   │   ├── constraints/
+│   │   │   ├── pins.xdc                    # 实际引脚、电平、驱动和速率
+│   │   │   ├── clocks.xdc                  # 时钟及外部时序要求
+│   │   │   └── exceptions.xdc              # [条件] 有依据的时序例外
+│   │   ├── ip/
+│   │   │   ├── custom/                     # [条件] 自定义IP源文件、封装元数据和Tcl
+│   │   │   ├── ip_config.tcl               # 实际采用的IP版本、参数和生成步骤
+│   │   │   └── dependencies.json           # 工具自带/外部IP的固定版本与取得方法
+│   │   └── init/                          # [条件] 真正参与设计的MEM/COE等初始化输入
+│   ├── common/
+│   │   ├── pyproject.toml
+│   │   └── aura_contracts/                 # 完整双端协议、结构、期限、错误和播放ACK源码
+│   ├── kv260/
+│   │   ├── readme.md
+│   │   ├── pyproject.toml
+│   │   ├── requirements.lock.txt           # ARM Python及实际依赖版本
+│   │   ├── aura_board/
+│   │   │   ├── __init__.py
+│   │   │   ├── main.py                     # 板端业务入口
+│   │   │   ├── app/                        # 完整生命周期、业务状态机与事件源码
+│   │   │   ├── camera/                     # 完整采集、缓冲、服务入口和恢复源码
+│   │   │   ├── vision/                     # 完整YOLOX/YuNet/SFace、VART、调度及跟踪源码
+│   │   │   ├── identity/                   # 完整人脸身份、登记、匹配、删除及拒识源码
+│   │   │   ├── motion/                     # 完整目标选择、跟随、源时效、驱动和停止源码
+│   │   │   ├── audio/                      # 完整MCP01、前端、VAD、ASR、播放和ACK源码
+│   │   │   ├── dialogue/                   # 完整轮次、模型客户端、上下文与取消源码
+│   │   │   ├── memory/                     # 完整摘要、检索、保留、来源和遗忘源码
+│   │   │   ├── storage/                    # 建表、迁移、首次初始化和存储源码
+│   │   │   ├── ui/                         # 完整GUI、视觉预览、字幕和设置源码
+│   │   │   ├── avatar/                     # 完整角色、表情、口型与原生调用源码
+│   │   │   └── diagnostics/                # 健康、指标、错误和公开日志导出源码
+│   │   └── native/
+│   │       ├── makefile                    # 或最终采用的原生构建定义
+│   │       ├── dpu_bridge/                 # 实际自研C/C++源码与头文件
+│   │       ├── motion_mmio/                # 实际自研C/C++源码与头文件
+│   │       ├── pixel_bridge/               # 实际自研C/C++源码与头文件
+│   │       └── avatar_renderer/            # 实际自研适配源码；外部依赖见third_party
+│   └── windows/
+│       ├── readme.md
+│       ├── pyproject.toml
+│       ├── requirements.lock.txt           # 最终Windows环境的实际依赖锁
+│       ├── aura_host/
+│       │   ├── __init__.py
+│       │   ├── main.py
+│       │   ├── server/                     # 完整API、路由、队列、实例和取消源码
+│       │   ├── llm/                        # 完整27B/Ollama调用、提示与输出适配源码
+│       │   ├── tts/                        # 完整OmniVoice、参考音色和PCM输出源码
+│       │   ├── runtime/                    # 完整模型加载、GPU策略和进程管理源码
+│       │   └── diagnostics/                # 完整计时、资源和健康源码
+│       ├── scripts/
+│       │   ├── setup.ps1                   # 后续实现：环境与依赖准备
+│       │   ├── start.ps1                   # 后续实现：启动本项目服务
+│       │   ├── stop.ps1                    # 后续实现：停止本项目所属进程
+│       │   └── status.ps1                  # 后续实现：读取实际健康状态
+│       └── ollama/
+│           └── modelfile                   # 实际模型导入参数，权重位置通过配置指定
+│
+├── build/                                 # 只交重建定义，不交生成工程和构建输出
+│   ├── readme.md                           # 构建前提、步骤、正常输出与失败说明
+│   ├── scripts/
+│   │   ├── check_environment.py            # 后续实现：核对工具、依赖和输入
+│   │   ├── prepare_dependencies.py         # 后续实现：取得并校验固定公开依赖
+│   │   ├── create_project.tcl              # 后续实现：在新输出目录创建工程
+│   │   ├── build_fpga.tcl                  # 后续实现：综合、实现、报告、位流
+│   │   ├── export_firmware.py              # 后续实现：生成并核对同次固件组合
+│   │   ├── build_native.sh                 # 后续实现：ARM原生库构建
+│   │   ├── reproduce.py                    # 后续实现：编排离线、硬件构建及验证模式
+│   │   └── verify_package.py               # 后续实现：装包文件、SHA和输入检查
+│   └── manifests/
+│       ├── toolchain.json                  # 实际工具、补丁、容器和依赖版本
+│       ├── platform.json                   # 器件、板卡、DPU指纹、频率与ABI
+│       └── dependency_sources.json         # SDK、系统镜像、IP及参考源码的固定来源
+│
+├── board/                                 # 板端部署定义；固件与SO由脚本生成
+│   ├── readme.md
+│   ├── system/
+│   │   ├── image_manifest.json             # 系统镜像、内核、XRT/VART、Python和固定来源
+│   │   ├── packages.txt                    # 系统依赖及实际版本
+│   │   └── patches/                       # [条件] 自定义系统、驱动和设备树的真实修改
+│   ├── systemd/
+│   │   ├── aura-camera.service             # 最终相机服务本体
+│   │   ├── aura-business.service           # 最终GUI/业务服务本体
+│   │   └── dropins/                       # [条件] 最终有效追加配置与加载顺序
+│   ├── udev/                              # [条件] 实际采用的设备规则
+│   ├── manifests/
+│   │   ├── deployment.json                # 源码/资源/构建输出到目标路径的映射
+│   │   └── startup.json                   # 服务、依赖、资源与初始化顺序
+│   └── scripts/
+│       ├── stage_rootfs.py                 # 后续实现：在空白目录生成部署树
+│       ├── install.sh                      # 后续实现：安装已生成的程序与工件
+│       ├── preflight.py                    # 后续实现：平台、模型、设备与绑定检查
+│       ├── start.sh                        # 后续实现：按依赖顺序启动
+│       ├── stop.sh                         # 后续实现：退出和执行者收尾
+│       └── status.sh                       # 后续实现：读取状态
+│
+├── config/                                # 实际参数模板；不含个人库和本机密钥
+│   ├── readme.md                           # 字段、单位、默认值与覆盖顺序
+│   ├── common.example.json                 # 协议、网络、期限与日志
+│   ├── camera.example.json                 # 相机格式、分辨率与帧率
+│   ├── vision.example.json                 # 模型、调度与后处理
+│   ├── identity.example.json               # 登记、阈值及设备数据目录
+│   ├── motion.example.json                 # ABI、实测方向/行程、期限及控制参数
+│   ├── audio.example.json                  # MCP01、ASR、前端和播放
+│   ├── memory.example.json                 # 摘要、检索与保留策略
+│   ├── character.example.json              # 角色、动作、提示音和渲染
+│   └── windows.example.json                # 推理端点、解释器、GPU及共享目录外的权重路径
+│
+├── models/                                # 模型取得/适配/编译定义；不装大权重或xmodel
+│   ├── readme.md                           # 模型位置、固定来源、准备和校验步骤
+│   ├── manifest.csv                        # 模型、任务、后端、revision、文件、SHA和许可
+│   ├── recipes/
+│   │   ├── yolox.json                      # 实际采用模型的固定取得/提取及校验办法
+│   │   ├── yunet.json                      # 浮点输入、预处理、校准、量化和编译配置
+│   │   ├── sface.json                      # 浮点输入、对齐、校准、量化和编译配置
+│   │   ├── audio_frontend.json             # 实际ASR/VAD/降噪/声纹依赖与CPU后端
+│   │   ├── llm.json                        # 27B来源、revision、量化文件、参数及SHA
+│   │   └── tts.json                        # OmniVoice与tokenizer的完整必要文件定义
+│   ├── calibration/
+│   │   ├── data_manifest.csv               # 公开校准集、划分、取得方式和固定输入
+│   │   └── quantization_config.json        # 实际量化参数与编译目标
+│   └── scripts/
+│       ├── prepare_models.py               # 后续实现：下载/提取到指定模型专用目录
+│       ├── verify_models.py                # 后续实现：逐文件校验
+│       ├── quantize.py                     # 后续实现：实际采用的量化/适配源码
+│       └── compile.py                      # 后续实现：生成与DPU匹配的编译模型
+│
+├── assets/                                # 必要原始资源；只保留最终使用的一套
+│   ├── readme.md                           # 资源位置、用途、来源与许可
+│   ├── manifest.csv                        # 资源文件、SHA与授权；大公开资源注明固定取得方法
+│   ├── character/                         # 有权提交的角色模型、纹理、表情和动作原件
+│   ├── fonts/                             # 实际字体及原许可
+│   └── audio/
+│       ├── reference/                     # 有权分发的选定参考音色与文本
+│       └── cues/                          # 必要固定提示音，或其可验证的生成输入和脚本
+│
+├── sim/                                   # 测试台、输入和独立参考，不装大波形
+│   ├── readme.md
+│   ├── rtl/                               # 完整实际RTL测试台
+│   ├── vectors/                           # 小型固定向量、随机种子与参数
+│   ├── golden/                            # 可说明来源的参考结果或黄金模型
+│   └── run.tcl                            # 后续采用的实际仿真入口
+│
+├── tests/                                 # 可复用的软件测试源码
+│   ├── readme.md
+│   ├── protocol/                          # 请求、取消、期限和播放ACK
+│   ├── kv260/                             # 板端实际软件测试
+│   ├── windows/                           # Windows实际软件测试
+│   ├── integration/                       # 双端往返、断线、记忆和视觉运动接口
+│   └── fixtures/                          # 小型公开/合成样例，不使用个人私库
+│
+├── data/                                  # 最小复现输入和关键结论数据
+│   ├── readme.md
+│   ├── public_data_manifest.csv            # 大公开数据的版本、划分、取得与校验
+│   ├── small_samples/                     # 少量必要公开图像/音频/向量
+│   ├── reference/                         # 期望输出、人工参考与容差
+│   └── metrics.csv                        # 与报告结论对应的数值、条件和来源
+│
+├── skill/                                 # 实际提炼的可复用内容；数量按实际
+│   ├── README.md                           # 范围、入口、效果、失效条件与来源
+│   ├── command_guard_validation/           # 建议主题：执行监督；说明/流程/脚本/小样
+│   ├── dpu_workflow_validation/            # 建议主题：模型适配、调度及时效
+│   ├── voice_runtime_optimization/         # 建议主题：LLM/TTS、计时与记忆一致性
+│   └── pynq_contract_testgen/              # 已有通用PYNQ离线初版，面向契约和调用/测试生成
+│       ├── readme.md                       # 用法、适用范围及未验证边界
+│       ├── workflow.md                     # 合同、HWH检查、生成、参考比对和复用流程
+│       ├── contract_format.md              # AXI4-Lite uint32寄存器合同格式
+│       ├── case_studies.md                 # 元数据缺项、迟到完成及两种布局的真实案例
+│       ├── scripts/                       # 原有生成器、离线复现与打包脚本源码
+│       ├── templates/                     # PYNQ驱动和测试脚本模板
+│       ├── examples/
+│       │   ├── adder/                     # 加法合同、合成HWH测试输入、模拟及参考
+│       │   └── crc32/                     # CRC合同、合成HWH测试输入、模拟及参考
+│       ├── tests/                         # 原有15项单元测试源码
+│       ├── evidence/                      # 精简已有离线结果；不得写成已真板/跨板通过
+│       └── license                        # 原有许可全文
+│
+├── report/                                # 提炼关键内容；正式报告PDF按后台独立交
+│   ├── engineering_summary.md              # 架构、创新、设计取舍、结果与边界
+│   ├── validation_summary.md               # 每项测试的输入、方法、结果、失败和局限
+│   ├── optimization_summary.csv            # 同条件基线/优化后性能和资源对照
+│   ├── tool_reports/                      # 精选综合/时序/资源报告或关键原文片段及来源
+│   ├── ai_collaboration.md                 # 真实提示、关键回答、错误、修正与验证的摘录
+│   ├── evidence_index.csv                  # 指标/结论到原记录、版本、命令与SHA的映射
+│   └── requirements_matrix.csv             # 条款与包内材料的对应
+│
+├── docs/                                  # 精简而可完整执行的复现说明
+│   ├── architecture.md                     # FPGA/板端/Windows职责与数据流
+│   ├── interfaces.md                       # API、寄存器、时钟、期限和错误
+│   ├── environment.md                      # 工具版本、2022.2选择理由与双端安装
+│   ├── reproduction.md                     # 取得源码到构建、模型、部署及验证的完整顺序
+│   ├── hardware.md                         # 器件型号、接线、供电、行程与标定
+│   ├── measurement.md                      # 指标定义、测量方法、样本与统计
+│   └── known_issues.md                     # 实际未完成项和重现条件
+│
+├── hardware/                              # 少量必要实物设计输入与参数
+│   ├── bom.csv                             # 实际型号、数量和用途
+│   ├── wiring.svg                          # 实际控制/供电与外设连接
+│   ├── calibration.csv                     # 实测方向、脉宽、位置、范围和方法
+│   └── source/                            # [条件] 实际自制电路/机构的小型原始设计
+│
+└── third_party/                           # 依赖来源、原许可与项目实际修改
+    ├── readme.md
+    ├── manifest.csv                        # 固定上游、commit、许可、SHA和取得步骤
+    ├── patches/                           # [条件] 队伍对上游源码的真实修改
+    ├── source/                            # [条件] 无法由固定公开来源取得的必要可分发源码
+    └── licenses/                          # 实际依赖的原始许可

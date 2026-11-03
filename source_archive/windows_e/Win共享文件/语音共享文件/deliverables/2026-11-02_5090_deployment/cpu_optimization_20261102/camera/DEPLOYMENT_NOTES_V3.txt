@@ -1,0 +1,36 @@
+相机最小CPU候选v3交付（2026-11-02，root负责部署）
+
+候选 candidate_v3/ui_camera_service.py，SHA 7d4773b8ff527773eefc90aa2443dd4bfae801f07c6fcde672af65dd22ff8f66。原相机UI源SHA 9d714b9bd00ea1da12088fa1e22100d7bdb689d0cac10332c3933b31e4f4d2df。v2 0bf23f…已被独立审查拒绝并原样归档，不能发布。
+
+这项改动保持原采集640×480/30Hz、人体推理10Hz、同一镜像BGR来源、叠框绘制、RawFrameStore本机路径、原身份/跟随输入、HTTP JPEG/人脸PNG入口、8帧缓存、原1000ms JPEG有效期、质量72和256KiB大小限制。仅在真实HTTP JPEG请求时为同一已画且独占的BGR帧编码，后续请求复用字节。本机raw预览不需要JPEG，因而不再为无人请求的每一帧编码。收益要由root实板同场景复测确认。
+
+v3纠正了独立审查发现的健康错误顺序和缓存内存边界：HTTP只允许当前最新fid且value tuple仍同一项的请求更新全局preview_error；producer_failed标志由真正的preview worker异常置位、由下一次成功publish清除。旧帧请求在producer失败之前或之后到达，都能返回自己仍有效的缓存但不能抹掉producer错误。samefid换另一个provider时先retire旧对象。所有JPEG解析统一先全局编码锁、再帧锁，退休缓存不等待编码，排队旧请求不保留像素；缓存最多8个owned BGR（7,372,800字节），一个正在编码的退休帧可额外保留921,600字节，producer正在绘制/发布的当前帧也最多一帧。HTTP已返回的JPEG响应缓存遵循原服务器行为。
+
+27项本地纯测试全部通过，见LOCAL_TESTS_V3.json/log、test_lazy_jpeg_v3.py。原20项之外加入两种旧fid健康barrier、producer错误发生在请求开始前/后、producer恢复、12个同fid排队请求退休、同对象重发。采集callback、推理、原handler及关闭流程AST未改（run中的变化仅限preview worker）。真实OpenCV字节等价尚由root执行probe_real_cv2_v3.py；它只对5个公开合成640×480图案做原编码/候选编码比对，不读相机、Native模型或文件中的图像。
+
+Native source unit 7cf7eaeecd70e62301d3e12e95d5df6a23bd3e5847ed854200c712598b703c32 的真实定义已核：它是native-operator-v1/source-manifest.json原始字节SHA，schema aura-native-operator-source-unit-1、existing_abi=2，只包含native_bridge.cpp/.h、native_bridge.operator.aarch64.o、native_lease_v2.hpp、native_recovery.hpp、tensor_layout.hpp六个C/C++/object文件。六个实文件SHA和operator.so SHA704f561a…均已只读核对，见NATIVE_UNIT_PROVENANCE.json及NATIVE_UNIT_FILES_VERIFIED.json。因此这是Native C/C++单元标识，不是systemd服务文件或全222 Python源码标识；preview-only Python变化在保持这六个文件/库不变时应继续记录同一C-unit，同时单独记录新Python manifest。不能仅因loader比较字符串就任意保留unit id。
+
+原loader合同证据：baseline/4a729a29c6e4__native_startup.py的verify_runtime_manifest按原source_manifest独立核整个AURA *.py闭包；preflight核精确final、原来源unit与当前boot/消费标记。baseline/64831498d849__identity_recovery.py中preflight仅接受settings中的原old_library c675…，从checkpoint检查297864…或7cf7…原ABI2允许列表，调用原preflight后恢复运行期unit7cf7…。磁盘proposed/run config仍是old_library c675/source_unit297…；运行时由这个原wrapper使用operator.so704及unit7cf。因此proposed config不要直接改库为704或改变unit字符串，保留原正式迁移。请求boot仍属旧boot，原operator worker在boot检查处直接返回，不重复解锁。
+
+最小发布可采用原路径六文件事务。原代码不强制新版本root；相关原字节应全部按SHA保存在AURA外独占事务目录，事务失败时服务保持停止。六项如下：
+1. candidate root/aura/board/vision/ui_camera_service.py：唯一功能源改为v3。
+2. candidate root/camera-python-manifest.json：schema/222成员集合不变，只有UI成员SHA更新。
+3. candidate root/board_camera_ui.proposed.json：只更新native_execution.source_manifest_sha256和root已验证的最新final seed pin；source_manifest路径、checkpoint_output目录、库/Native unit、模型/阈值/调度/恢复全部保持。
+4. OPS/meta.json：candidate_ui_sha256更新；protected中仅该UI、Python manifest、proposed config三项SHA更新，其他保护路径/源pin保持。
+5. OPS/native_entry_pan_face_v5.py：仅APP_PINS中的UI SHA常量更新，原函数/影子控制/原wrapper保持。
+6. native-operator-v1/runtime-manifest.json：7成员集合保持，仅第5项源码SHA更新；其source-manifest7cf、lib704、settings5d、identity_recovery648、native_entry_operator0576和rollback5ad都保持。
+candidate root=/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix；OPS=/home/root/aura-native-live-20261024/ops/be72669aa53de735。
+
+外层face-source-v17/entry.py f26be22…及11项deployment-manifest84d735…不需要变：它们钉住native_entry_operator.py源码0576而不是其runtime-manifest原字节；原operator会读取更新后的7项manifest。camera_wrapper.py 065c465…通过meta取得原同一路径的candidate root并导入UI，源码不用改。原systemd argv和工作目录也无需改变，真实新PID/birth/config仍须启动后读回，不能假定旧进程仍在。
+
+prepare_transaction_payload.py是本地payload生成器，不会应用、SSH或接触设备。输入root新鲜采集的六文件原字节、meta原SHA、经原reader验证的最新final路径/SHA，输出六个新文件和TRANSACTION_PLAN.json。它严格核原基线SHA、222与op7集合、C-unit/lib保持和配置目录不变；拒绝旧已消费c6 final。若当前文件已变化应停止并重新审查，不能放宽固定guard去迁就旧快照。
+
+备份不能放在AURA内部：verify_runtime_manifest以AURA.rglob('*.py')扫描全闭包；ui_camera_service.before.py这类备份会成为第223项，使原guard拒绝。备份目录应在AURA外，包含原六文件完整字节、对应before SHA、旧manifest原字节和逐文件映射。不得复制整棵state、数据库、模板、模型、图像或媒体资产。
+
+启动后的GUI绑定依赖：先读真实新boot/PID/birth/argv SHA/实际native-run config路径与SHA，并验证原checkpoint恢复audit、全部历史下界和原消费marker。新建selected readback，依据实际source map更新上述已变文件pin并保留所需历史证明；当前source数可能为26或以后，不能固定25。新run config加入实际闭包，camera_config指向实际文件。原FaceGalleryReadback verifier必须通过，source manifest222及operator7也须全量核；再将新spec path/SHA并入最新GTK/身份/声纹版的380组件闭包。不得用旧startup复写其他对话已部署的登记/语音修复。
+
+当前板已由root获知进入新boot；本交付任何模板都不固定903c/79866、GUI PID或25项计数。此时身份(2)优先恢复登记，所有板端读写/负载均冻结，本子代理继续仅本地工作。部署必须由root在协调解除后，正常停止届时实际相机owner、取得新boot当前owner的fresh final；不得复用已消费c6、旧boot seed或历史PID。保留完整archive/恢复历史、Native计数和marker，不改检查点内容。
+
+回滚也必须延续新历史：若候选已启动，先正常停止候选owner并取得它的最新final，再还原原UI/APP/manifest等源码，并为原配置安排这个最新fresh seed（或由原entry在同一checkpoint_output自动读这个新final）；相应config/meta pin要一致。不能将旧c6或其他已消费seed/marker恢复来重放历史。GUI再按回滚后的真实新owner重绑。
+
+诊断口径：保留的旧preview.render_encode_publish阶段名称在候选下代表绘制/raw发布/准备按需JPEG的路径，不再含每帧JPEG编码；不要将该新阶段时间冒称完整JPEG请求时延。以整进程/整机CPU、相同页面同负载的采集/处理吞吐、源龄、JPEG能力和真人对话/跟随结果判断收益。

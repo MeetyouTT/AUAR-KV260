@@ -1,0 +1,73 @@
+转轴专用新对话交接（洛杉矶2026-11-02）
+
+用户明确要求：转轴工作迁入新对话继续；原窗口继续梳理项目整体进程。新对话取得板卡转轴的唯一写入权，原窗口从交接起只做整体审查，不再操作转轴或竞争修改生产配置。使用当前E盘目录，不新建worktree，不改模型服务或相机/native恢复链。
+
+最新要解决的问题
+用户已现场确认原方向正确、能够跟随。随后要求左右转完都停在中央白线略左；先已将共享停点从0.5改为0.45。右侧用户认为合理，但左侧转完仍偏右。原窗口曾误按触发线处理，把左触发线0.1→0.075→0.05；这两次没有解决“转完停点”问题。最新用户原话：“左边依然转完后偏右，再优化一下”。本轮已明确应改左触发后的停止目标，不再挪触发线，右侧保持0.45。
+
+已准备但尚未测试、尚未发布的本轮候选
+目录：E:/Win共享文件/语音共享文件/deliverables/2026-11-02_5090_deployment/maintenance_original_axis_20261101/left_stop40_20261102
+before/：从板端实际现役25项逐一核SHA后取回的完整字节。
+candidate/：基于before，仅改3个Python文件；另22项保持原字节。
+build_patch.py、PATCH_REVIEW.json：候选生成与哈希。
+continuous_face_control.py SHA 4b370831e4c0957179d60f8498c727e5dabee5c28bddb9b04949455e6648a0ec
+continuous_session.py SHA 555f0d5e75a13ab6b8836dc0615d435a5db4df3b0bbec9d36c05be2da7cc5585
+run_face_motion.py SHA aaaa15bf6ec8d3856a3c40455010b3d5e679fe35b73625b2f01ae723946a88d7
+
+改法：原EdgeConfig新增可选left_target_center_ratio，默认None仍继承原目标。原入口增加可选--left-target-center-ratio，拟部署0.40；原--target-center-ratio保持0.45。根据最初真实左/右触发锁存recenter_trigger_side和recenter_target_center_ratio，整轮保持，不按当前center、pulse方向或polarity重选。左停止带[0.37,0.43]，右仍[0.42,0.48]，原容差0.03、白线0.5、原速度/行程/4us每20ms/250ms源与500ms检测锚/STOP均不变。
+目标引用已覆盖正常band/crossed、单双程距离/方向、jump pending、status、ARM前后inherit_perception，以及2秒原semantic intent缓存/恢复；三个原丢弃分支reset side/target。hardware_slew_session.py未改。
+子代理axis_follow_restore已完成3文件独立静审，消息结论“未发现发布阻塞，须纯测试PASS后发布”，正在将复核落盘。完整设计复核在axis_follow_restore/left_episode_target_review/REVIEW.txt；新候选独立结论预计本目录INDEPENDENT_REVIEW.json/txt。本轮纯测试尚未运行，不能当已通过；本轮候选没有传到生产目录，板端仍运行上一版共享目标0.45。
+
+接续应完成
+1. 读取本交接、PATCH_REVIEW和独立复核；新鲜只读核板端boot/实际owner/当前startup，不能盲用PID。
+2. 复用纯测试验证左右目标差异、右侧兼容、默认None兼容、ARM继承、短失脸/源过期后恢复、intent超期/换epoch/track/多脸清除、jump跨越、不反向。旧硬件slew测试与纯fixture可用：
+E:/Win共享文件/语音共享文件/deliverables/2026-10-31_visual_axis_maintenance/candidate/controller/test_hardware_slew.py
+E:/Win共享文件/语音共享文件/deliverables/2026-10-31_visual_axis_maintenance/tests/fixtures/test_recenter.py
+纯fixture用Python替代未使用的native trajectory，硬件slew路径不应调用它；不要为跑测试在Windows装Linux native或打开设备。
+3. 纯测试通过后沿原版本化发布模式复制25项到新root，仅3文件候选替换；manifest的25个destination必须指向新root，含common子目录、两个原so。旧root保持。GUI pan_face配置改release_root/manifest SHA，增加参数left-target-center-ratio='0.40'（字符串），保留target-center-ratio='0.45'。更新startup中唯一face-config pin，380组件/实际selected25闭包核对；旧STOP路径通过stopped_readback_predecessors保留。
+4. 原GUI的FacePanProcess.arguments每次读取face配置并泛型传CLI；base boot/FDT/face_follow_config路径不变，因此不需要重启整个GUI或相机。务必先原pan_stop确认READY/flags0/lease0，再改配置；不要对pan_face_follow反复发toggle来停止。
+5. 从原UI显式开启一次并读实际新report，确认左目标.40/右.45与锁存side，交用户观察。原用户一直要求沿原Ubuntu程序优化，不写新控制器、不另做往返初始化。
+
+本次最后实际板端动作
+preflight_stopped.json：08:24:23 UTC（洛杉矶00:24:23）原pan_stop发送一次，确认READY、flags=0、lease_left_ms=0、pulse_width=1628us。之前跟随已false。最后原report为STOPPED/OPERATOR_STOP，33次已接受命令、2次visual completions；纯数字轨迹留在该文件。GUI和相机未停止。之后只有本地候选生成和只读源码快照，无板端发布或新运动。
+
+最近已核现役（接续必须新鲜复核）
+boot 903cfade-b93c-48fa-804e-379be1967313
+业务根 /home/root/aura-board-business-20261030/production-5259eab11e42af13
+当前startup bcb773cd5bf306ac536df0373d1c1b27d01b6564a35839f2623b274442c13a59
+GUI supervisor97308/birth2694906/cmd48a28efa32b2050901e73e85a80a30a90dcfbce0b7249bde5d6d90902740631d
+GTK97312/birth2695022/cmdbb612bf74a9fefd8528337b6d907298563a3c7abe1703b53e54db32971fef121
+相机79866/birth2265436/cmdacf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd
+现役控制root /home/root/aura-pan-wide-20261028/control-10282601-target45-9adb90c3
+控制manifest cfe36df907fc195b083cbf6b44c7e120cbf613324e821c626bac169ad77a5d8b；25项新鲜逐项校验已通过。
+现役entry SHA9adb90c31efbf9c57d5e60f497c429bfcb3523be04ea6503d37552cfba3d4be9
+现役core SHA79bd5380068fbf3729144ec0b7ab9607e16e24d492081d59bcd0c85a98429b81
+现役session SHA2f805b17d39ede6518f8082f4553b0010cb59a28c395b006d0ec28def2793f03
+face配置775fa3c5d5f694ff8d9eadffb03fe7180935812cc4ab8b55eaa70105a0be66ed
+当前左触发0.05，右camera0.8064720153808593/screen0.7158253629442671，共享停点0.45、容差0.03。
+原editor与controller共享设置：/home/root/aura-pan-wide-resume-20261029/55152f95/face-zone-settings.json；目录是历史名，内容是当前903c boot，由原editor生成。不要再只改单独的旧zone副本导致显示与控制分叉。
+边界原独立服务aura-face-zone-editor.service，最近PID138556/birth2885873，原源码6a8bce7270534bb3b0f71dff657eac5da92b46855fdb7c9748a63b678be8ede4。此次不改触发线，毋需重启editor。
+
+固定保护及已完成的链路
+原wide固件aura-visual-servo-b4096-wide-v1.bit.bin已原client一次remove/load恢复；FDT d68bc147f22f5ab23bc60f0c2762af4bcd7b64340953e9c948e28ffa6b80f7ca；原ID_STOP通过，实际VART/overlay/render/ZOCL匹配。不要重刷固件或重启板卡来调此停点。
+相机从原sealed final c6c8baab1de423e27740137330f8315796a7778e36735c93a0c87f2a56029471精确恢复，18层archive、exact seed/原marker/累计计数已验，勿重写seed/计数/marker。
+GUI选用25来源readback SHA9ab2533d2c3000d61095f54de2e8199f53461ac085e2f58230ab36149be6af1f；身份单组件v2 SHA85e415d00daa770d4d94ae58006a23ed9700067651a0448de80c99eb33ed1809已加载，勿覆盖。相机身份阈值0.5/margin0.1/TTL3000是用户最新选择。
+模型Windows192.168.50.1:8797（原27B IQ4_XS、OmniVoice16），只允许板192.168.50.2推理。其他模型/进程/权重、业务库不动；权重不得进E:/Win共享文件。
+用户确认安装未动、动力已接好、可观察、空间线缆余量充足。上轮原随动曾实际109.352秒/386命令/17次visual completions并STOP，用户确认“方向正确，能够跟随”。新左停点仍待现场反馈，不要把原方向确认当新停点验收。
+GUI曾因网络health RTT长尾两次触发原1秒时钟guard退出，之后原保护正常通过。别为调转轴重启GUI或放宽时钟门槛。
+
+SSH与工具
+Windows Python D:/AURARuntimes/voice-py310/Scripts/python.exe
+已核transport E:/Win共享文件/语音共享文件/deliverables/2026-10-18_board_dialogue/board_ssh.py
+SHA6aefec94f620c6c86fa6b17c83613b22c8599e899cb2c2fcaf36c9cdd17c7373
+module.ssh('python3 -B -',script,timeout=...)；严格root@192.168.50.2/new-hostkey校验已配置，不打印凭证或私钥。无需用户重新输密码。
+本机权限danger-full-access、approval never，不传sandbox_permissions。只保存代码/数值元数据，不导出现场图像、姓名、声纹、人脸模板或原对话。
+
+已有版本化事务样板
+maintenance_original_axis_20261101/left_bias/apply_original_target45.py（保持common子目录的实际修正版本）
+maintenance_original_axis_20261101/left_bias/left_line/applied.json
+maintenance_original_axis_20261101/left_bias/left_line050/LIVE_LEFT050.json
+原UI POST http://127.0.0.1:8783/api/command，Origin/Host均http://127.0.0.1:8783；明确STOP type=pan_stop。pan_face_follow是toggle，enabled字段不起作用，只在新鲜READY/follow=false/flags0/lease0后发一次来启动。
+
+协作文档
+DEPLOYMENT_CURRENT.json有部分早期字段互相矛盾（如老axis_gui_state仍FAULT_OLD_CONTEXT、motor DISCONNECTED），以最新axis_current字段和新鲜实读为准。原主窗口将负责整体状态统一梳理；新对话只维护本轮转轴交付与最新AXIS_CURRENT_HANDOFF.json，不要并发重写根AGENTS/README/全局DEPLOYMENT_CURRENT。不要重复create新chat。

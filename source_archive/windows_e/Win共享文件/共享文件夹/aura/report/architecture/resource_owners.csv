@@ -1,0 +1,11 @@
+resource,owner,consumer_rule,invariant,module_ids,basis
+相机和帧池,B / camera_service,检测、UI、VLM、ASD 通过帧引用/副本读取,重连换 camera_epoch；来源时间语义真实,camera ; snapshot,P2
+DPU 提交,B / 单 CU 调度,检测/身份统一准入，A 提供匹配平台,在途任务不可假设抢占；成本必须测量,scheduler ; person ; id_dpu,P2
+目标与轨迹代次,B / target_manager,C 只提交手动/说话人建议,重新出现换代；不以身份姓名替代轨迹,tracking ; target ; speaker,P2
+身份数据库,B / identity_service,C 经授权 API 登记/删除,修订号更新，旧缓存/在途结果失效,identity ; enrollment,P2
+运动寄存器,B / motion_service；A 提供访问库,UI/主机消费状态或建议对象,维护与正式服务互斥；新源期限/恢复合同待冻结,motion ; vsrv ; source_guard,P2
+音频采录播放,C / 音频服务,媒体/ASD 使用有时标的样本接口,取消先废止代次并真实停声；采样格式来自设备,mcp_capture ; mcp_play,P2
+会话和取消代次,C / 板端会话,Windows 回显请求归属与板端期限,旧结果不恢复字幕/音频/动画,media_session ; transport,P2
+模型流水线,C / Windows 服务,接收明确媒体，返回文字/PCM/分数,不得操作板端运动或数据库,asr ; vlm ; tts ; asd,P2
+显示与动画,C / UI,订阅单一事件总线/状态快照,口型跟实际播放；不再开一套设备或业务状态机,avatar ; ui ; fsm,P2
+PL/系统发布,A / 平台入口,B/C 使用相同 release 和指纹,不是三人分别加载三个 bitstream,platform ; hardware_build ; release,P2

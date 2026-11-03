@@ -1,0 +1,76 @@
+{
+  "schema": "aura.frontend-process-handoff.v1",
+  "status": "FROZEN_SOURCE_ONLY_ROOT_ACTUAL_ACCEPTANCE_REQUIRED",
+  "hardware_executed": false,
+  "files": {
+    "aura/board/runtime/audio/board_frontend_process.py": "8b5db6681e7ae1dd7040ab9aa2247ba59efb515286feebed5956034a6993dd63",
+    "aura/tools/production_board_business_gui.py": "911ee09873a84d4c4c176e3798749a1813bee4d42dd05c6fc0ed108c6c7cfe2a",
+    "aura/tools/production_frontend_selection.py": "bfef18d9ccd06e39357f5f375e6dc4c1d5d187bed51787e78206018658bb1a1b"
+  },
+  "manifest_sha256": "ae50e658d74f75e7243fd2cf87e42fa0b76aff3d0d6735bdd76b2fefd5b60ccf",
+  "zip_sha256": "7c5cedd9ffc33282f230854930731f06b55ac213dc15d206d410120bce44d02f",
+  "entry": "create_frontend_pool(directory, optimization='baseline', num_threads=1, frontend_process=True)",
+  "configuration": {
+    "frontend_process": true,
+    "frontend_optimization": "baseline",
+    "frontend_threads": 1,
+    "capture_priority_nice": -10
+  },
+  "default_frontend_process": false,
+  "shutdown": {
+    "lease_close": "pool.gate.close() cancels only the current generation; keeps the sole model child",
+    "gui_close": "pool.close(); require pool.gate.shutdown(timeout=2.) == True before original runtime close",
+    "failure": "No fallback or automatic respawn; failed shutdown raises before writer release",
+    "owned_process": "Graceful STOP IPC, bounded wait, owned Popen.terminate, bounded wait; no force-kill",
+    "construction": "Proxy reaps startup failures; factory try/close covers pool and config construction after spawning"
+  },
+  "protocol": {
+    "transport": "Anonymous inherited AF_UNIX socketpair only; no ports, HTTP or audio files",
+    "frame_payload": "Exactly 1280 bytes: 320 little-endian float32 samples; unchanged normalized 20ms input",
+    "reply_payload_bytes": 92,
+    "header_bytes": 28,
+    "ownership": "Version/kind/generation/monotonic request sequence; incomplete reply buffering; cancelled reply exclusion",
+    "timeout": "60s initial model readiness; 500ms per reset/frame RPC; read cancellation polls at most 20ms",
+    "idle": "No one-hour process expiry; idle socket receive waits without creating audio/model work"
+  },
+  "model": {
+    "instances": "Exactly one BoardFftSpeechGate created inside the explicit Python child; none in parent",
+    "baseline_unchanged": true,
+    "combined_allowed": false,
+    "child_nice": -10,
+    "child_nice_verified": "Before model initialization and on every response",
+    "single_pool_and_original_lease": true,
+    "original_eight_frame_queue": true,
+    "pcm_endpoint_ack_thresholds_weights": "Unchanged"
+  },
+  "public_metrics_path": "audio_frontend.current in existing recording/public/API projection",
+  "public_metrics": [
+    "worker_process_alive", "worker_pid", "worker_nice", "worker_generation",
+    "worker_frame_wall_last_ms", "worker_frame_wall_max_ms", "worker_frame_wall_total_ms",
+    "worker_frame_cpu_last_ms", "worker_frame_cpu_max_ms", "worker_frame_cpu_total_ms",
+    "ipc_rpc_last_ms", "ipc_rpc_max_ms", "ipc_rpc_total_ms"
+  ],
+  "tests": {
+    "passed": 16,
+    "failed": 0,
+    "seconds": 0.38,
+    "evidence": "tests.xml",
+    "scope": "Real socketpair/protocol and original BoardFrontendPool, fake model/process wrapper; no ARM/POSIX spawn, microphone or model inference acceptance",
+    "coverage": [
+      "One gate model reused across leases, fixed frame serialization and scalar metrics",
+      "Cancellation before late result, discarded old-generation reply and clean next lease",
+      "Partial header/body cancellation buffering and payload bound",
+      "Timeout, model error, owner mismatch, startup failure, priority failure and changed priority",
+      "Default/explicit baseline selection; no combined process mode",
+      "Real GUI close method ordering and failed shutdown blocks runtime release",
+      "Actual constructor config rejection after worker creation invokes original cleanup",
+      "Python 3.9 AST and original pool/queue source remains untouched"
+    ]
+  },
+  "limitations": [
+    "The GTK-process raw producer, consumer scheduling and RPC serialization still require parent GIL time",
+    "Process separation is a hypothesis to test, not a throughput or real-time acceptance claim",
+    "Root must verify ARM subprocess/pass_fds/import/nice and owned process teardown before normal GUI publication",
+    "No BargeCapture protocol changes or extra model/queue/player are introduced"
+  ]
+}

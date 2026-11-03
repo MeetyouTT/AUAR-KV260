@@ -1,0 +1,48 @@
+Public streaming ASR candidate — source only, not deployed
+
+Authority and limits
+- Root alone decides the hardware window, copies the reviewed script, supplies exact absolute paths/hashes, and executes it.
+- This helper never opens a microphone, camera, audio output, network, production config, Store, or database. No subprocess or process signals. It reads only the three explicit pinned inputs; stdout contains numeric metrics and hashes, never decoded text. It creates no files.
+- Linux AArch64 and sherpa-onnx exactly 1.13.8 required. Runtime imports numpy and existing sherpa-onnx only. No runtime/package/model install or download.
+- Model, tokens, WAV must be regular, non-symlink files outside a Win共享文件 path. Root supplied model/WAV pins are checked in full before model construction.
+- The WAV must be PCM16 mono 16 kHz, exactly 89834 samples (5.614625 s). This does not use the new model archive's different 0.wav.
+
+Root-supplied known pins (2026-10-31)
+model: 68c9c943840f7d9cf3e8a4970ba50f404feb5277f611fa82b7e72267786fa84a
+tokens: 6fed8c6c248516f38e7faa19404b57413e8ce259f1cbc1fa4aebc86eac32fdfd
+old public Paraformer WAV: 1a6bf94091d9c35e11aea5d494d05e3287b8f5c767f6de3bfd796d91b637500c
+old ASR exact output (NOT gold): cbe36e837e51a8636d1042b26557822c053c2f9626345d73f760f63078b11b3a
+
+Invocation fields (root fills exact paths, never infer the WAV path)
+python3 -B public_streaming_probe.py
+  --model ABSOLUTE_ISOLATED_MODEL_PATH --model-sha256 MODEL_PIN
+  --tokens ABSOLUTE_ISOLATED_TOKENS_PATH --tokens-sha256 TOKENS_PIN
+  --wav ABSOLUTE_EXISTING_PUBLIC_WAV_PATH --wav-sha256 WAV_PIN
+  --baseline-output-sha256 OLD_ASR_OUTPUT_PIN
+  --public-input-confirmed
+  --schedule-ms 20 160 160 20
+
+Alternatively supply --public-reference 'reviewed public gold text' instead of --baseline-output-sha256. No reliable gold was established by this task. Baseline-hash equality is same-output comparison, NOT an accuracy claim. If gold is absent, accuracy=null; if supplied, CER preserves all letters/numbers and normalizes only NFKC/case/punctuation/spacing.
+
+Protocol
+- One constant 1-thread OnlineRecognizer.from_zipformer2_ctc; each round creates a fresh stream. First round explicitly marked; no hidden warmup. Model load time/CPU reported separately.
+- Inputs are offered at the exact end-time of each real 20/160ms block. A late decoder catches up without discarding samples. The final short block is retained (234 samples for this WAV).
+- No VAD implementation/configuration is changed: WAV end is the externally supplied endpoint. This is not live Silero or capture-queue integration.
+- After real input draining, add 10560 zeros (0.66s) in RAM, call input_finished(), drain while is_ready(), then get_result(). Do NOT sleep an extra 0.66s. Zero padding is never counted as real audio. This follows the version-pinned official example.
+- The last real accept timestamp is recorded before its decode, so final_after_last_real_accept_ms includes that decode and flush. final_after_scheduled_input_end_ms additionally includes accumulated real-time input lag; it is the main endpoint-relative tail metric. flush_wall_ms alone must not be used to hide backlog.
+- unfed_elapsed_audio_peak_ms is virtual audio already elapsed but not yet offered; no physical capture queue was opened/tested. feed_lateness and decode-call p95/max show whether the synchronous consumer can keep up.
+- Model CPU is total process CPU including native worker threads; elapsed sleeps are not CPU. RSS is whole-process peak, not model-only incremental allocation. No whole-board CPU/fps claims.
+- Default four rounds take at least 22.46s plus model loading and any lag. Up to four explicitly selected rounds allowed. Per-round decode loops are bounded to 2000 calls/120s between native calls; a single native call cannot be interrupted by this Python budget. Root retains ordinary external job timeout control; helper never kills any process.
+- Status MEASURED means inference completed, not speed/accuracy acceptance. If target files/version/format do not match, REFUSED with fixed code. Unexpected exceptions emit only PROBE_FAILED. Native runtime may print its own diagnostics about these verified public input files.
+
+Necessary offline checks
+python -B -m unittest -v test_public_streaming_probe.py
+2 tests PASS (includes 20/160ms subcases): exact final-partial input and finish/padding ordering without artificial tail wait; slow-consumer backlog and post-end latency without fabricated gold/CER. No actual inference or devices used.
+
+Official sources
+https://github.com/k2-fsa/sherpa-onnx/blob/v1.13.8/python-api-examples/online-decode-files.py#L410
+https://github.com/k2-fsa/sherpa-onnx/blob/v1.13.8/sherpa-onnx/python/sherpa_onnx/online_recognizer.py#L521
+https://github.com/k2-fsa/sherpa-onnx/blob/v1.13.8/sherpa-onnx/csrc/online-zipformer2-ctc-model.cc
+https://k2-fsa.github.io/sherpa/onnx/pretrained_models/online-ctc/zipformer-ctc-models.html#sherpa-onnx-streaming-zipformer-small-ctc-zh-int8-2025-04-01
+
+Not validated here: KV260 model compatibility, real-time factor, accuracy, final-tail word completeness, full GTCRN/Silero integration, CPU competition with camera/UI, physical listening/playback or end-to-end response time. Do not deploy this as a production ASR replacement from these offline checks.

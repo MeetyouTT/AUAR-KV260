@@ -1,0 +1,33 @@
+--- original/board/interaction/ui_services.py
++++ candidate/board/interaction/ui_services.py
+@@ -152,6 +152,30 @@
+                     'pending_count': len(self.waiting)+bool(self.inflight),
+                     'ui_epoch': self.ui_epoch, 'ui_generation': self.ui_generation,
+                     'results': copy.deepcopy(list(self.results))}
++
++    def read_preview(self):
++        """Copy only display-source fields, under the same snapshot/connection lock.
++
++        Ingest already validates this source. Match SnapshotGate.read's source
++        expiry exactly; its cancellation mask only changes interaction fields.
++        The original full read() remains the UI/action/identity API.
++        """
++        with self.condition:
++            value = self.gate.value if self.link == 'READY' else None
++            if value is None or self.clock() >= value['observed_mono_ms']+value['ttl_ms']:
++                return {'snapshot': None, 'preview': None, 'raw_preview': False}
++            camera = value['modules'].get('camera', {})
++            snapshot = copy.deepcopy({
++                'board_boot_id': value['board_boot_id'],
++                'service_epoch': value['service_epoch'],
++                'source_kind': value['source_kind'],
++                'preview': value.get('preview'),
++                'modules': {'camera': {key: camera[key] for key in ('state', 'preview_transport') if key in camera}}})
++            preview = self.preview if snapshot.get('preview') == self.preview_key else None
++            if preview and self.clock()-self.preview_key['captured_mono_ms'] > 1500:
++                preview = None
++            return {'snapshot': snapshot, 'preview': copy.deepcopy(preview),
++                    'raw_preview': self.use_raw(snapshot, self.connection)}
+ 
+     def identity_snapshot(self):
+         """Fresh source protocol state for capture binding, without display masks.

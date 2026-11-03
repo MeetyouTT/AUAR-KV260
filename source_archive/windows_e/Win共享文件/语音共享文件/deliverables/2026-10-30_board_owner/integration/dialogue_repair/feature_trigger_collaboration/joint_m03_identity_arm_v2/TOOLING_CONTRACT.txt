@@ -1,0 +1,62 @@
+六源联合ARM构建工具：结构就绪，最终source pins和memory回归模块待root提供。
+
+此目录是新的工具修订；joint_m03_identity_arm/stage_v19及其17个artifact保持原字节。
+未建新stage，未运行ARM、模型、设备或真实私库，不改变root保存的false/PAUSED状态。
+
+构建约束
+
+--stage必须显式指定不存在的新目录，禁止覆盖冻结stage。
+--mapping须为实际v19的完整mapping，匹配applied spec49ff...及startup de777...，
+当前379个pins逐项相同。正式worker仍先校验当前boot/startup与全部379实际组件，
+再导入任何应用模块，不能把组合后380误作发布前的当前组件数。
+
+--composed-manifest必须有且只有6份源，每项含source绝对路径、before_sha256、sha256：
+board/runtime/board_business.py
+board/runtime/board_speaker_business.py
+common/board_memory.py
+board/runtime/history_delete.py
+tools/production_memory_presentation.py
+tools/provisional_voice.py
+
+所有before SHA须等于实际v19 mapping，只有history_delete允许before=null且实际不存在。
+集合并集必须恰好380。worker会核对common.board_memory实际从六源overlay载入的SHA，
+与其它五份候选同等保护，不再使用原c27d内存模块冒充追加guard版本。
+
+原67例保持
+
+所有原M03、身份47、独审12、两个公开fixture及标准库适配器，直接从冻结stage_v19
+复制并核对冻结清单9b3798...。原67套件计数检查保留，memory只能追加。
+原四项测试继续使用tree/a/b/c/d/review_m03_win_inference/嵌套布局。
+
+memory模块预留
+
+--memory-regression指向自包含的标准库公开回归模块，须声明：
+PUBLIC_REGRESSION_API = 'aura-memory-public-regression-1'
+EXPECTED_CASES = N
+N必须是1至256的整数；不能用空占位套件当memory回归。
+
+模块提供build_suite(*, args, public)，返回(unittest.TestSuite, proof_dict)。
+args有已验证的runtime_root、candidate_root及测试资源路径；public是已冻结的公开
+输入helper模块，提供Mono、PublicTimeline、SyntheticEncoder、ScriptedAsr、假模型client等。
+模块只使用公开合成Store/PCM及假服务，不读取生产私库、模板、实际模型或物理设备。
+
+worker在导入应用前核对memory模块SHA；在设置自建0700 /dev/shm临时根之后才导入它、
+构建套件。必须严格返回N例，最终总数必须67+N；随后统一检查临时库删除和线程残留。
+模块的build_suite阶段不应先执行用例或在其外创建持久资源。
+若现有memory回归仍为pytest文件，可由本窗口另做标准库适配，原函数体/断言保持。
+最终必须包含真实两SQLite连接锁等待下的取消/过期回滚反例，不能只模拟抛MemoryBusy。
+
+结构检查
+
+check_structure.py只在内存中渲染一个不可运行的未绑定worker做检查：六源集合、
+379→380/唯一新增路径、原67输入hash、M03 paired测试AST、memory SHA/计数及临时根位置。
+结构探针N=2不代表两项memory回归，更不代表最终67+N通过。没有生成stage或执行应用。
+结果见STRUCTURE_CHECK.json。
+
+最终构建形态
+
+D:/py312/python.exe -B -X utf8 joint_m03_identity_arm_v2/build_stage.py --mapping V19_MAPPING --composed-manifest FINAL_SIX_SOURCE_MANIFEST --memory-regression PUBLIC_MEMORY_MODULE --stage NEW_ABSOLUTE_STAGE
+
+run_local.py会为新stage增加--memory-regression，先做本地公开复验。
+ROOT_RUN最终命令、最终worker/SHA、用例数及19个artifact清单须在真实pins到齐后另行封存，
+当前工具和结构结果不能当作已准备好的最终部署包。

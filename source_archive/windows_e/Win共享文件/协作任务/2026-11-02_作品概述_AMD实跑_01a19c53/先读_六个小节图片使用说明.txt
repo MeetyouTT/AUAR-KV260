@@ -1,0 +1,43 @@
+﻿作品概述配图与AMD软件实跑结果
+
+本次工作
+实际连接Ubuntu ghmd-MRA-XXX，运行Vivado 2022.2和XSim 2022.2。
+Vivado重新分析2026-10-28联合wide工程既有的最终布线检查点，生成九项报告；没有从RTL重新综合或布局布线，也没有生成或下载新固件。
+XSim重新编译、展开、执行四套实际RTL测试台，四套均通过，保留WDB/VCD和逐阶段日志。
+九项源输入事后SHA全部保持；原工程在GUI中以只读方式打开。
+按用户确认，KV260仍在其他对话维护，本轮未连接板卡、触发模型推理、录放音或机械动作。
+
+先查看 report_figures 文件夹
+03_vivado_block_design.svg/png：Vivado对真实工程的原生导出。SVG保持工具原字节，PNG由同一SVG栅格化。
+03_vivado_block_design_native.png：实际Ubuntu Vivado窗口截图。
+04_vivado_resource_utilization.svg/png：根据本次重新生成的资源报告绘图。
+04_05_historical_model_latency.svg/png：根据历史实板固定输入JSON绘图，本轮未重跑板端模型性能。
+05_xsim_native_wave_panel.png：Vivado实际显示本次WDB的窗口区域截图，像素内容未改写。
+05_xsim_pwm_from_actual_vcd.svg/png：根据本次VCD重绘，周期与脉宽由VCD独立计算。
+06_design_workflow.svg/png：设计过程示意图，属于说明图，不是软件运行结果。
+
+六个小节怎样使用
+1.1 功能与特性：正式稿优先使用当前角色/字幕界面与视觉检测界面的实板截图。historical_ui里有2026-10-16真实板端截图，源验证记录确认相机画面真实，但当时Windows语音主机未连接、角色和界面属于旧版；只能标历史展示，不用来证明当前完整语音链已经通过。新界面截图待维护交接后采集。
+1.2 应用领域：这一节可不配图。若配图，使用实际桌面安装/展示场景照片，需要现场相机拍摄，Vivado不能生成这类实物证据。
+1.3 主要技术特点：可用03工程框图；概述中只需说明单DPU与自研运动监督IP，完整复杂图更适合第二部分。图中audio_ss_0是aura_disabled_audio占位模块，实际USB录放音位于PS/Linux，不能把此框图解读为PL已实现语音识别或双麦定位。
+1.4 主要性能指标：采用简短Word表格，资源和时序可引用本次Vivado结果；如加图，可用04资源图。历史模型耗时需保留固定输入、样本数、预后处理及FP32/INT8口径。
+1.5 主要创新点：用05本次仿真波形支持命令监督和逐帧限速的实现说明；历史模型耗时图可用于说明已有加速结果。不要将RTL波形称为示波器实测，也不把不同负载CPU数字当作优化前后收益。
+1.6 设计流程：使用06流程图；它描述研发步骤，不表示所有整机验收已完成。
+
+本次结果
+LUT 66,960/117,120（57.17%）；FF 124,192/234,240（53.02%）。
+BRAM 93.5/144（64.93%）；URAM 56/64（87.50%）；DSP 710/1248（56.89%）。
+WNS 0.001ns，WHS 0.000ns；setup/hold失败端点均0。
+可布线网络200,473，全部布线，路由错误0。
+DRC保留663条Warning；CDC保留4条Critical；6个输入和2个输出缺少IO延迟约束。
+上述时序结论覆盖已有约束，不能写为所有硬件检查零告警。
+PWM nominal仿真：100MHz，20ms周期（50Hz），四个完整脉宽1450/1454/1458/1460us。
+原生波形窗口默认十六进制：5aa/5ae/5b2/5b4分别对应1450/1454/1458/1460。
+
+来源与复查
+RESULT_SUMMARY.json汇总本次结果及边界。
+input_manifest.json与INPUT_INTEGRITY_AFTER.json记录原始输入及事后SHA复核。
+vivado_reports保留九份原始工具报告和命令状态；SIM_STATUS.json及simulations保留四套仿真及原始波形。
+historical_benchmarks保留旧模型性能JSON；historical_ui保留旧实板截图及当时验证记录。
+rerun_reports.tcl、run_reports.py与run_xsim.py是本次实际运行脚本。重新分析仍需Ubuntu原始DCP与对应工具路径，125MB DCP未放入图片包。
+Ubuntu当前可见GUI是只读工程和本次波形查看器。GUI顶部原项目“Synthesis Complete”属于保存的工程run状态；实际布线结论以重新打开source_routed.dcp生成的报告为准。

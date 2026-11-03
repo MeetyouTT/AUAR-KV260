@@ -1,0 +1,246 @@
+--- reviewed-business/tools/board_avatar_gtk.py
++++ yuki-candidate/tools/board_avatar_gtk.py
+@@ -106,6 +106,10 @@
+         self.geometry = avatar_board.avatar_box(self.layout)
+         self.rect = avatar_board.contain_rect(464, 480, self.geometry['w'], self.geometry['h'])
+         self.source_hashes = {}
++        from tools.yuki_business_candidate import prepare_pair
++        self.character_pair = prepare_pair(config, AURA, self.source_hashes)
++        if self.character_pair is not None:
++            self.lines, self.character = self.character_pair.demo_lines, self.character_pair.identity.display_name
+         for name in ('board_avatar_gtk.py', 'gstreamer_audio.py', 'gstreamer_audio_engine.py',
+                      'gstreamer_audio_worker.py', 'realtime_audio.py', 'realtime_controller.py',
+                      'realtime_facials.py', 'facial_layers.py', 'pillow_compat.py', 'selected_voice_service.py',
+@@ -113,7 +117,8 @@
+                      'board_camera_preview.py', 'board_recording.py'):
+             self.source_hashes['tools/' + name] = hashlib.sha256((AURA/'tools'/name).read_bytes()).hexdigest()
+         reuse = AURA.parent/'deliverables/2026-10-06_avatar_reuse/preview_script.py'
+-        self.source_hashes['../deliverables/2026-10-06_avatar_reuse/preview_script.py'] = hashlib.sha256(reuse.read_bytes()).hexdigest()
++        if self.character_pair is None:
++            self.source_hashes['../deliverables/2026-10-06_avatar_reuse/preview_script.py'] = hashlib.sha256(reuse.read_bytes()).hexdigest()
+         for name in ('ui_contract.py', 'ui_services.py'):
+             rel = 'board/interaction/'+name
+             self.source_hashes[rel] = hashlib.sha256((AURA/rel).read_bytes()).hexdigest()
+@@ -152,6 +157,7 @@
+         self.board_business = None
+         self.jobs = self.output = self.bridge = self.mixer = self.services = self.preview_output = self.transcriber = None
+         self.native_pixels = self.native_video = None
++        self.native_yuki = self.yuki_portrait = self.native_yuki_config = None
+         self.settings_store = SettingsStore(settings_file or AURA.parent/'avatar_user_settings.json')
+         self.preferences = self.settings_store.read()
+         if windowed:
+@@ -183,18 +189,22 @@
+         self.diagnostic_thread = self.diagnostic_result = self.diagnostic_job = None
+         self.timer = self.foreground_timer = self.controller = None
+         try:
+-            core = create_runtime_core(create_demo_core)
++            if self.character_pair is not None:
++                from tools.yuki_business_candidate import create_native_core
++                core = create_native_core()
++            else:
++                core = create_runtime_core(create_demo_core)
+             from tools.board_avatar_affine import configure_board_rendering
+-            if config.get('native_avatar'):
++            if config.get('native_avatar') and self.character_pair is None:
+                 from tools.native_pixels import NativePixels
+                 from tools.native_video import NativeVideo
+                 library=AURA/'tools/libaura_pixels.so'
+                 self.native_pixels=NativePixels(library,self.tokens['colors']['panel_bg'],(self.rect['w'],self.rect['h']),threads=int(config.get('native_pixel_threads',2)))
+                 self.native_pixels.configure(core)
+                 self.native_video=NativeVideo(library,(self.rect['w'],self.rect['h']))
+-            else:configure_board_rendering(core,self.tokens['colors']['panel_bg'])
++            elif self.character_pair is None:configure_board_rendering(core,self.tokens['colors']['panel_bg'])
+             core.MAX_CACHED_SEQUENCES = int(config['cache_sequences'])
+-            if config.get('native_avatar'):
++            if config.get('native_avatar') and self.character_pair is None:
+                 for name in ('IDLE','PRESENT','LISTENING','THINKING','ACK_NOD','DENY_SHAKE','AWAKE','PUZZLED'):
+                     core.sequence(name);core.sop(name)
+             self.jobs = SpeechJobs(self.root, VoiceWorker(self.root, cached_only=True))
+@@ -211,7 +221,10 @@
+                     raise ValueError('Board business requires the existing persistent streaming player')
+                 if config.get('portrait_offload',{}).get('enabled'):
+                     raise ValueError('Board business requires local rendering; no character substitution is implied')
+-                from tools.board_business_gui import prepare_board_business
++                if self.character_pair is not None:
++                    from tools.yuki_business_gui import prepare_board_business
++                else:
++                    from tools.board_business_gui import prepare_board_business
+                 self.board_business=prepare_board_business(self,config['board_business'],AURA)
+                 self.transcriber=self.board_business.jobs
+             elif conversation_store.read()['enabled']:
+@@ -225,6 +238,9 @@
+             if streaming:
+                 from tools.streaming_controller import StreamingController
+                 controller_type=StreamingController
++                if self.character_pair is not None:
++                    from tools.yuki_business_candidate import native_controller_type
++                    controller_type=native_controller_type()
+             recording_type=RecordingController;recording_options={'audio_frontend':config.get('audio_frontend')}
+             if config.get('handsfree_dialogue'):
+                 if not hasattr(self.transcriber,'select_conversation'):raise ValueError('Hands-free entry needs persistent channel conversations')
+@@ -245,17 +261,24 @@
+                                    'attention_provider':lambda:self.transcriber.identity_snapshot()
+                                    if self.transcriber.identity_snapshot else None}
+             visual_controller=controller_type(core,self.jobs,self.output)
+-            if config.get('portrait_offload',{}).get('enabled'):
++            if self.character_pair is not None:
++                from tools.native_yuki_candidate import prepare_portrait
++                self.native_yuki,self.native_yuki_config=prepare_portrait(AURA,config['native_yuki'],self.output,self.source_hashes,self.character_pair)
++                visual_controller.portrait_offload=self.native_yuki
++            elif config.get('portrait_offload',{}).get('enabled'):
+                 from board.runtime.portrait_offload import PortraitOffload
+                 visual_controller.portrait_offload=PortraitOffload(config['portrait_offload'],(self.rect['w'],self.rect['h']))
+             if self.board_business is not None:
+                 recording_options.update(self.board_business.recording_options(visual_controller))
++            if self.character_pair is not None and config.get('handsfree_dialogue'):
++                from tools.yuki_business_candidate import CandidateMonitorChoice
++                recording_options['monitor_settings']=CandidateMonitorChoice(self.character_pair)
+             recording=recording_type(visual_controller,transcriber=self.transcriber,**recording_options)
+             if self.board_business is not None:
+                 self.board_business.bind_recording(recording)
+             self.controller = AvatarRenderWorker(recording,
+                 self.tokens['colors']['panel_bg'],(self.rect['w'],self.rect['h']),
+-                .25 if self.preferences['economy'] else (1/24 if config.get('native_avatar') else config['tick_ms']/1000),native_video=self.native_video,visual_fps=config.get('stable_avatar_fps',8) if config.get('native_avatar') else None,performance_path=self.evidence_root/'render_performance.jsonl')
++                (1/24 if self.character_pair is not None else .25 if self.preferences['economy'] else (1/24 if config.get('native_avatar') else config['tick_ms']/1000)),native_video=self.native_video,visual_fps=16 if self.character_pair is not None else config.get('stable_avatar_fps',8) if config.get('native_avatar') else None,performance_path=self.evidence_root/'render_performance.jsonl')
+             self.mixer = MixerService(self.settings_store)
+             defaults = json.loads((AURA/'config/board_ui_services.json').read_text(encoding='utf-8'))
+             self.connection_store = ConnectionStore(AURA.parent/'avatar_service_settings.json', defaults['connection'])
+@@ -263,7 +286,11 @@
+             if hasattr(self.transcriber,'identity_snapshot'):
+                 self.transcriber.identity_snapshot=self.services.identity_snapshot
+             if self.board_business is not None:
+-                self.board_business.activate()
++                if self.character_pair is not None:
++                    self.character_pair.invalidators.append(self.controller.cancel)
++                    self.character_pair.on_ready(self.board_business.activate)
++                else:
++                    self.board_business.activate()
+             self.preview_output = CameraPreviewWorker(self.services)
+             self.bridge = StageBridge(self.root, int(config['browser_port']),
+                                       extra_commands=('ui_settings', 'ui_page', 'ui_service_config',
+@@ -326,7 +353,7 @@
+         # Economy slows the avatar worker, never the camera or touch event loop.
+         interval = int(self.config['tick_ms'])
+         if self.controller:
+-            self.controller.set_interval(.25 if self.preferences['economy'] else (1/24 if self.config.get('native_avatar') else interval/1000))
++            self.controller.set_interval(1/24 if self.character_pair is not None else .25 if self.preferences['economy'] else (1/24 if self.config.get('native_avatar') else interval/1000))
+         if self.config.get('native_avatar'):interval=max(100,min(200,int(self.config.get('native_ui_tick_ms',100))))
+         self.timer = self.GLib.timeout_add(interval, self.tick,
+                                          priority=self.GLib.PRIORITY_DEFAULT_IDLE)
+@@ -577,7 +604,15 @@
+         panel = self.layout['right_panel']
+         self.avatar_title = self.label(self.character, panel['x0']+panel['padding'], panel['y0']+panel['padding'],
+                    panel['x1']-panel['x0']-2*panel['padding'], self.layout['right_inner']['label_h'], 'avatar_title')
+-        self.portrait = gtk.DrawingArea() if self.native_video else gtk.Image()
++        if self.character_pair is not None:
++            from tools.native_yuki_candidate import create_gl_area
++            self.yuki_portrait=create_gl_area(self.native_yuki_config,self.native_yuki,self.character_pair)
++            self.yuki_portrait.set_size_request(self.rect['w'],self.rect['h'])
++            self.portrait=self.yuki_portrait
++            self.controls['portrait_toggle'].set_sensitive(False)
++            self.controls['portrait_toggle'].set_label('雪妃 · 本地16fps候选')
++        else:
++            self.portrait = gtk.DrawingArea() if self.native_video else gtk.Image()
+         if self.native_video:
+             self.portrait.set_size_request(self.rect['w'],self.rect['h'])
+             self.portrait.connect('map',self.attach_native_portrait)
+@@ -1306,8 +1341,11 @@
+                                    ('触摸已连接' if self.touch_inputs else '未检测到触摸设备'))
+         portrait=state.get('portrait_offload',{})
+         mode=portrait.get('mode','disabled')
+-        self.controls['portrait_toggle'].set_label('画面：电脑' if mode=='remote' else
+-            '画面：电脑连接中，板卡显示' if portrait.get('selected') else '画面：板卡')
++        if self.character_pair is not None:
++            self.controls['portrait_toggle'].set_label('雪妃 · 本地16fps候选' if self.native_yuki.ready else '雪妃 · 渲染未就绪')
++        else:
++            self.controls['portrait_toggle'].set_label('画面：电脑' if mode=='remote' else
++                '画面：电脑连接中，板卡显示' if portrait.get('selected') else '画面：板卡')
+         self.pause_button.set_label('继续' if state['paused'] else '暂停')
+         self.pause_button.set_sensitive(state['playing'] or state['paused'])
+         self.cancel_button.set_sensitive(state['phase'] != 'IDLE' or state['playing'])
+@@ -1335,10 +1373,14 @@
+         if data.get('type') == 'preview_open':
+             return self.open_preview()
+         kind = data['type']
++        if self.character_pair is not None and kind in ('demo','speak'):
++            self.character_pair.require_ready()
+         if kind == 'asr_config':
+             values = self.transcription_store.update(data['values'])
+             command = self.controller.configure_transcription(values)
+             return {'ok':True,'queued':True,'command_id':command,'message':'转写服务设置已保存'}
++        if self.character_pair is not None and kind in ('portrait_fps','portrait_toggle'):
++            raise ValueError('雪妃候选固定16fps；切换须空闲退出并恢复完整配对')
+         if kind == 'portrait_fps':
+             return {'ok':True,'queued':True,'command_id':self.controller.portrait_fps(data['fps']),'message':'正在调整画面流畅度'}
+         if kind == 'portrait_toggle':
+@@ -1504,7 +1546,7 @@
+             if self.native_video:
+                 self.last_image=packet['image']
+                 self.last_avatar_sequence=packet['sequence']
+-            if not self.native_video and packet['rgb'] and packet['sequence'] != self.last_avatar_sequence:
++            if self.character_pair is None and not self.native_video and packet['rgb'] and packet['sequence'] != self.last_avatar_sequence:
+                 self.last_image = packet['image']
+                 self.current_pixbuf = self.Pixbuf.Pixbuf.new_from_bytes(self.GLib.Bytes.new(packet['rgb']),
+                     self.Pixbuf.Colorspace.RGB,False,8,self.rect['w'],self.rect['h'],self.rect['w']*3)
+@@ -1518,7 +1560,11 @@
+             self.last_runtime_refresh = time.monotonic()
+             state = packet['state']
+             state['avatar_display']={'frames':self.displayed_frames,'sequence':self.last_avatar_sequence,'at':time.monotonic()}
+-            if self.native_video:state['avatar_display']=dict(self.native_video.read(),kind='native_sink_handoff')
++            if self.character_pair is not None:
++                from tools.native_yuki_candidate import display_status
++                state['avatar_display']=display_status(self.native_yuki)
++                state['character_pair']=self.character_pair.status()
++            elif self.native_video:state['avatar_display']=dict(self.native_video.read(),kind='native_sink_handoff')
+             settings_text = self.refresh_settings(state)
+             state.update(character=self.character, dialogue_enabled=bool(state.get('local_transcription',{}).get('service',{}).get('conversation')), backend='gtk3-gstreamer', cached_only=True)
+             status = '已暂停' if state['paused'] else {'IDLE':'等你开口','VOICE_PREPARING':'正在准备声音…',
+@@ -1610,6 +1656,8 @@
+         return dict(self.diagnostic_job,ok=True,queued=True,message='正在保存诊断')
+ 
+     def cleanup(self):
++        if getattr(self,'character_pair',None) is not None:
++            self.character_pair.fail('candidate_shutdown')
+         self.close_identity_face_dialog()
+         if self.diagnostic_thread:
+             self.diagnostic_thread.join(timeout=4)
+
+--- reviewed-business/tools/board_avatar_worker.py
++++ yuki-candidate/tools/board_avatar_worker.py
+@@ -76,7 +76,7 @@
+                        'image':None,'rgb':None,'jpeg':b'','render_ms':None,'at':time.monotonic()}
+ 
+         from tools.render_performance import PerformanceRecorder
+-        performance=PerformanceRecorder(performance_path) if performance_path else None
++        performance=PerformanceRecorder(performance_path) if performance_path and not getattr(getattr(self.visual_owner,'portrait_offload',None),'candidate_fixed_native',False) else None
+         self.presenter=FramePresenter(native_video,self.presentation_generation,self.condition,performance) if native_video and self.visual_period else None
+ 
+         self.thread = threading.Thread(target=self.work, name='aura-avatar-render', daemon=True)
+@@ -246,7 +246,7 @@
+ 
+                     offload=getattr(self.visual_owner,'portrait_offload',None)
+                     if offload:
+-                        fps=offload.target_fps if offload.status()['mode']=='remote' else 8
++                        fps=16 if getattr(offload,'candidate_fixed_native',False) else offload.target_fps if offload.status()['mode']=='remote' else 8
+                         period=1/fps
+                         if period!=self.visual_period:
+                             self.visual_period=period;self.next_visual=started
+@@ -281,6 +281,9 @@
+                                 stream=io.BytesIO();image.save(stream,format='JPEG',quality=85);jpeg=stream.getvalue()
+                         else:jpeg=self.packet['jpeg']
+                         resized=time.monotonic()
++                    elif meta and meta.get('_native_yuki'):
++                        # The single GTK/EGL sink owns all pixels.
++                        pass
+                     elif meta:
+ 
+                         if meta['image'].mode == 'RGB':
+@@ -332,7 +335,7 @@
+                                     expires=meta.get('_portrait_expires'))
+                                 remote_enqueued=True
+ 
+-                    if not self.native_video or time.monotonic()-self.last_state_time>=.1:
++                    if (not self.native_video and not getattr(offload,'candidate_fixed_native',False)) or time.monotonic()-self.last_state_time>=.1:
+ 
+                         state = snapshot_copy(self.controller.public())
+ 

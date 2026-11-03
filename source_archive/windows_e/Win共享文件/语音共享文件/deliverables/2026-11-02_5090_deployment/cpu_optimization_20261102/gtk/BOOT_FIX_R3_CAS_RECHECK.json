@@ -1,0 +1,102 @@
+{
+  "schema": "aura-boot-fix-r3-cas-independent-recheck-1",
+  "verdict": "PASS_B03_ACTIVE_LEDGER_CAS_FIX_OFFLINE_ONLY",
+  "candidate_sha256": "e60d8f4ebf32f7ed738789d8e79a1e25d80881cb03fda90e5217880c3d70b9b7",
+  "rules_sha256": "72492c2d50c746b2f26b3292beff189bd76d7d39be04515baab13dbc881c7284",
+  "unchanged_manage_installation_sha256": "de31f75b2aac3296861cbdb80a075dd5f3762eff93d885a8c6b9af95462ad975",
+  "snapshot": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\boot_review_inputs\\observed_revision3\\SNAPSHOT.json",
+  "snapshot_sha256": "4dada26537008b94d0d8c5cdbc5e4a83790deb12cda54d3753aaf5a38cd2f67a",
+  "tested_exact_methods": [
+    "Recovery.pin",
+    "Recovery.source_snapshot",
+    "Recovery.bind_camera"
+  ],
+  "cases_run": 2,
+  "results": [
+    {
+      "case": "unchanged_baseline",
+      "passed": true,
+      "outcome_status": "ORIGINAL_VERIFIER_CURRENT_BINDING_COMMITTED",
+      "source_snapshot_calls": 3,
+      "intent_active_before_sha256": "d62498e8eda53bcb8e3c927e23073e0ed98a2370503fff66e0cfa69b13d4ce55",
+      "CAS_target_write_count": 3,
+      "UI_unchanged": false,
+      "startup_unchanged": false,
+      "intervening_newer_ledger_preserved": null,
+      "committed_record_present": true
+    },
+    {
+      "case": "newer_ledger_after_prior_snapshot",
+      "passed": true,
+      "outcome_status": "SOURCE_CHANGED_BEFORE_BINDING_CAS",
+      "source_snapshot_calls": 2,
+      "intent_active_before_sha256": "d62498e8eda53bcb8e3c927e23073e0ed98a2370503fff66e0cfa69b13d4ce55",
+      "CAS_target_write_count": 0,
+      "UI_unchanged": true,
+      "startup_unchanged": true,
+      "intervening_newer_ledger_preserved": true,
+      "committed_record_present": false
+    }
+  ],
+  "source_review": {
+    "source_snapshot_lines": [
+      220,
+      221,
+      222,
+      223,
+      253
+    ],
+    "publication_lines": [
+      595,
+      596,
+      605,
+      606,
+      607,
+      610,
+      611,
+      618,
+      619,
+      621,
+      622,
+      624,
+      625
+    ],
+    "finding": "Exact source_snapshot now retains raw active ledger bytes and existence. Before any UI/startup replace, bind_camera recaptures and checks both against the initial snapshot. Existing-ledger publication uses the original captured raw bytes, and absence uses lexists plus O_EXCL create. A final full source snapshot is compared before the committed record. The original reproduced drift is refused before either original UI/startup target is touched."
+  },
+  "fixture_adaptations_only": [
+    "Use observed_revision3 exact pinned methods/rules.",
+    "Stub os.path.lexists against the same RAM file map so the real new source_snapshot returns active_source_raw/present.",
+    "Change expected drift result to HOLD and assert zero target CAS calls plus unchanged original UI/startup and preserved intervening ledger."
+  ],
+  "baseline_behavior": "Unchanged case commits and its ledger expected SHA equals intent.active_before_sha256.",
+  "B03_resolved": true,
+  "commit_gap_manual_HOLD_limitation_preserved": {
+    "prior_evidence": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\BOOT_BINDING_COMMIT_GAP_CASE.json",
+    "prior_evidence_sha256": "1df30e047c59d20b5a4a8fd981c3b570e5959e7a884cf2ee7b6c5df29d3413dc",
+    "status": "SAFE_HOLD_RECOVERY_COMPLETENESS_LIMITATION_UNCHANGED",
+    "locations": {
+      "boot_recovery.py": [
+        619,
+        622,
+        626
+      ],
+      "manage_installation.py": [
+        240,
+        241,
+        242,
+        243
+      ]
+    },
+    "finding": "manage_installation is unchanged. Crash after active ledger publication but before committed record can still require manual reconciliation; no presealed active-after ledger was added and already-current reentry does not write the missing committed record. This result does not claim automatic rollback coverage for that point."
+  },
+  "scope": "Only the original baseline and ledger-drift RAM cases. Exact ASTs with explicit prepared/health/original metadata verifier/process/unit/filesystem stubs; no real Native approval. The65 baseline was not rerun and its receipt was not reassigned to revision3.",
+  "remaining_external_gates": [
+    "Fresh dpu-auto-config merged unit/helper source and ordering proof or actual absence remains required.",
+    "Fresh exclusive handoff and actual source/owner/platform/Native/systemd/READY evidence remain required."
+  ],
+  "candidate_or_author_files_modified": false,
+  "board_SSH_HTTP_model_or_real_store_access": false,
+  "production_or_Native_execution_authorized": false,
+  "full65_suite_rerun": false,
+  "cross_conversation_messages_sent": false
+}

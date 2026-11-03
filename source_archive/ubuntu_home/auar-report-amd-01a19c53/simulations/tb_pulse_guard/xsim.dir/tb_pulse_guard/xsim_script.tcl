@@ -1,0 +1,1 @@
+xsim {tb_pulse_guard} -wdb {/home/ghmd/auar-report-amd-01a19c53/simulations/tb_pulse_guard/actual_wave.wdb} -autoloadwcfg -tclbatch {/home/ghmd/auar-report-amd-01a19c53/simulations/tb_pulse_guard/run_wave.tcl}

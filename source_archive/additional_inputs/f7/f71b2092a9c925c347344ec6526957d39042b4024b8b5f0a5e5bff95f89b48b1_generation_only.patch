@@ -1,0 +1,10 @@
+--- a/board/runtime/board_memory_policy.py
++++ b/board/runtime/board_memory_policy.py
+@@
+-        self.generation += 1
++        # The model-only host survives this worker; retain same-boot ordering.
++        ordinal = int(self.clock() * 1000000)
++        self.generation = max(self.generation + 1, ordinal)
++        if not 0 <= self.generation < 2 ** 53:
++            raise ValueError('Summary generation exceeds the wire bound')
+         owner = Owner(self.id_factory(), self.boot, 'memory-worker', self.generation)

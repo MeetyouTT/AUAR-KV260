@@ -1,0 +1,83 @@
+{
+  "phase": "inventory",
+  "evidence": "/home/ghmd/kv260-fpga-environment-review-20261004/evidence/20261004T113003.187945Z-inventory",
+  "started_utc": "20261004T113003.187945Z",
+  "complete": true,
+  "commands": [
+    {
+      "id": "host-version",
+      "argv": [
+        "uname",
+        "-srmo"
+      ],
+      "rc": 0,
+      "timeout": false,
+      "elapsed_seconds": 0.0024982330069178715,
+      "stdout_sha256": "42ec93ac9482b7e7dc8d68a0963052fb2f6db7cf15361ac84587024ed0a7718a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "host-os",
+      "argv": [
+        "cat",
+        "/etc/os-release"
+      ],
+      "rc": 0,
+      "timeout": false,
+      "elapsed_seconds": 0.0020525529980659485,
+      "stdout_sha256": "ec6fae43dcfdd8efcba9fde72ce22fe728844732445d492b3d0d2fae7974aed9",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "host-build-dependencies",
+      "argv": [
+        "dpkg-query",
+        "-W",
+        "-f=${Package} ${Status} ${Version}\n",
+        "build-essential",
+        "flex",
+        "bison",
+        "libssl-dev",
+        "git",
+        "python3"
+      ],
+      "rc": 0,
+      "timeout": false,
+      "elapsed_seconds": 0.03256403899285942,
+      "stdout_sha256": "be20ea624049e320016a90c240fa99881ebfefd13b1146f9b5ace10dd15d67ba",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "checks": {
+    "artifact_new_platform_xpfm": true,
+    "artifact_new_platform_xsa": true,
+    "artifact_new_platform_spfm": true,
+    "artifact_new_xo": true,
+    "artifact_new_link_xsa": true,
+    "artifact_new_metadata_xclbin": true,
+    "artifact_new_bit": true,
+    "artifact_new_hwh": true,
+    "artifact_new_arch": true,
+    "artifact_new_routed_dcp": true,
+    "artifact_new_full_pl_bin": true,
+    "input_rtl/aura_m3_regs.v": true,
+    "input_scripts/package_m3.tcl": true,
+    "input_scripts/integrate_m3.tcl": true,
+    "input_scripts/build_identity.py": true,
+    "input_src/kv260/platforms/vivado/kv260_ispMipiRx_vcu_DP/scripts/main.tcl": true,
+    "input_src/kv260/platforms/vivado/kv260_ispMipiRx_vcu_DP/scripts/config_bd.tcl": true,
+    "input_src/kv260/overlays/examples/benchmark/dpu_conf.vh": true,
+    "input_src/kv260/overlays/examples/benchmark/prj_conf/prj_config_1dpu": true,
+    "input_src/kv260/overlays/examples/benchmark/kernel_xml/dpu/kernel.xml": true,
+    "input_src/kv260/overlays/examples/benchmark/scripts/bip_proc.tcl": true,
+    "input_src/kv260/overlays/examples/benchmark/scripts/package_dpu_kernel.tcl": true,
+    "all_four_settings_files_present": true,
+    "host-version_rc": true,
+    "host-os_rc": true,
+    "host-build-dependencies_rc": true
+  },
+  "controller_sha256": "633bea0e5124e66a8dde3a1045c24900ed061b1ed1563a7e6ce9241b269b043e",
+  "board_accessed": false,
+  "existing_project_modified": false,
+  "finished_utc": "2026-10-04T11:30:03.378424+00:00"
+}

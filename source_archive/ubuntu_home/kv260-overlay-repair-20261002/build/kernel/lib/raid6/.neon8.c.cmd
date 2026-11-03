@@ -1,0 +1,1 @@
+cmd_lib/raid6/neon8.c := awk -v N=8 -f /home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/lib/raid6/unroll.awk < /home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/lib/raid6/neon.uc > lib/raid6/neon8.c

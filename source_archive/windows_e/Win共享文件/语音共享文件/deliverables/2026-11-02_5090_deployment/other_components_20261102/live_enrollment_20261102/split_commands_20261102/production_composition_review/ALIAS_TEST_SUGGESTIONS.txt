@@ -1,0 +1,57 @@
+Offline alias contract suggestions, no product changes
+
+Consider an alias repair only after fixed route evidence shows an enrollment
+utterance misses the current narrow command recognizer. The user's live text is
+unknown and none is inferred or requested by this review.
+
+If justified, change the shared common.feature_intents.speaker_text full-match
+grammar, rather than separately teaching only binding_intent a new voice_only
+kind. Both Jobs.speaker_requested and LIR.binding_intent must agree on routing.
+Keep the raw ASR unchanged and return only the same original canonical start.
+Retain the existing self-name validation, bare-command original name prompt,
+three samples, time windows, cancel semantics and final confirmation.
+
+Candidate positive contracts (all names synthetic):
+- 我要登记声纹，我叫合成测试
+- 我想登记声纹，我叫合成测试
+- 我要登记我的声纹，我叫合成测试
+- 我想登记我的声纹，我叫合成测试
+- 登记我的声音，我叫合成测试
+- 帮我登记我的声音，我叫合成测试
+- 我要登记声纹 (only original name prompt; no sample or stored voice)
+- 我想登记我的声音 (only original name prompt)
+
+Nontechnical aliases such as “声音” need an explicit self-directed enrollment
+verb and full utterance match. Generic “录入声音”, “记录声音”, “保存声音” or ordinary
+statements about someone's voice can mean recording or dictation; do not broadly
+search for a keyword and silently interpret it as biometric consent.
+
+Required non-enrollment contracts remain ordinary/query/help as appropriate:
+- 我不想登记声纹，我叫合成测试
+- 不要登记我的声音
+- 我不要登记声纹
+- 取消登记声纹
+- 如果我想登记声纹会怎样
+- 我要登记声纹吗
+- 我可以登记声纹吗
+- 怎么登记声纹
+- 帮助我了解登记声纹
+- 你刚才说“我要登记声纹”
+- 请重复“登记声纹，我叫合成测试”
+- 帮他登记声纹，我叫合成测试
+- 我要登记你的声纹
+- 我的朋友想登记声纹
+- 我叫合成测试 (without a previously explicit pending-name entry)
+
+Additional meaningful integration cases:
+- Each accepted alias uses actual Jobs -> actual LIR -> actual business worker.
+- Bare aliases across repeated public polling preserve the bounded original
+  pending-name mode; cancel/reset/expiry/new session remove it.
+- While the other modality is active, aliases do not consume a voice sample,
+  cancel the other workflow, or open parallel workflows.
+- Invalid names do not create a speaker session; quoted/negative commands do
+  not arm name-followup, call enrollment, save a template, or create a link.
+- No alias changes final confirm/save/delete commands or opens private memory.
+- Existing status queries and original combined “记住我” retain their semantics.
+
+This is a test specification, not a candidate patch or approval to deploy.

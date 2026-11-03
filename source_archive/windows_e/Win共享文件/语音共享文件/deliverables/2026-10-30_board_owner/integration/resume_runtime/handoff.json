@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "status": "LOCAL_INTEGRATION_VERIFIED_PRODUCTION_GATES_PENDING",
+  "frozen_utc": "2026-10-30T22:55:07.063462+00:00",
+  "owner": "runtime_completion",
+  "production_entry_changed": false,
+  "real_databases_migrated": false,
+  "changes": [
+    "Explicit board factory: same boot/time source, board-private POSIX kernel writer lock, shared local Store/ProfileAccess, summary budget derived from real persona.",
+    "Existing worker before_step refreshes pinned Date health every ten minutes with one-second original deadline, foreground cancellation and bounded retry backoff; idle/clock guards never perform network IO.",
+    "Board ASR, local preloaded FFT frontend leases, bounded raw PCM producer queue, existing one capture/echo/barge/player owners. No Windows ASR/frontend business calls.",
+    "Original face enrollment FSM and 90-second guide stream bounded by the original turn deadline, same playback owner, immediate per-cue PCM, combined final hash/sample receipt. Source/grant revocation stops further cues and successful completion.",
+    "Local authenticated profile list/create/select/revoke is connected to the real GTK dialog and same-process grants; no Windows grant file fallback in board mode.",
+    "Profile recent dialogue is partitioned by conversation source; long-term facts/history remain profile-scoped.",
+    "Board speaker route and exact original face receipt bridge compose with the same guide; original three-sample voice enrollment tested through actual jobs/TTS/player receipt with a fake encoder.",
+    "Visual worker and query policy are wired to one configured device scope. SourcedBoardReply validates same-scope dependencies; normalized device queries are device_event, never fabricated user_said.",
+    "Fresh r3 GTK/profile selector candidate generated only against independently hashed original snapshot. Existing owner-thread cleanup precedes bundle shutdown. Local rendering is a required gate; no character substitution or frame-rate downgrade."
+  ],
+  "validation": {
+    "tests": "173",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "10.128",
+    "evidence": "deliverables\\2026-10-30_board_owner\\integration\\resume_runtime\\final_integration_tests.xml",
+    "evidence_sha256": "beb8d27e822ac79b9224a5211b25f9d881aaba31b104dcbd54055eb001bae6b9",
+    "real_models_executed": false,
+    "real_devices_opened": false,
+    "real_biometric_stores_accessed": false
+  },
+  "source_files": [
+    {
+      "path": "aura/board/runtime/board_business.py",
+      "bytes": 31682,
+      "sha256": "5b5fe61959c19a3ea4eccf8401ebf8e3772e4135ff985ddd3a4a9979687448b7"
+    },
+    {
+      "path": "aura/board/runtime/board_dialogue.py",
+      "bytes": 28416,
+      "sha256": "bcaef073a6bcecfe33097074f1de5e16bb121b57d0c3c8d59ec6384435ed6f30"
+    },
+    {
+      "path": "aura/board/runtime/audio/board_dialogue_jobs.py",
+      "bytes": 41879,
+      "sha256": "f94efcdb1d1c8ec36be0d9c61467b6c27d32de72a042b832e9706613d20ba884"
+    },
+    {
+      "path": "aura/board/runtime/audio/board_capture.py",
+      "bytes": 4784,
+      "sha256": "61859c4af6ccfdd3d583c07d681d4d5b4e8f1a1f076fa5059ede4f8c008117be"
+    },
+    {
+      "path": "aura/tools/board_business_gui.py",
+      "bytes": 9579,
+      "sha256": "8aa7e8c674d16e58c0c4530108fc7a716fefaa0f3ee0c456bf33b64d992552ca"
+    },
+    {
+      "path": "aura/tools/board_profile_dialog.py",
+      "bytes": 4252,
+      "sha256": "d8fdc7a93900d770592dd388062b3f8d30dca8ce1db44211f64483c059744ba3"
+    },
+    {
+      "path": "aura/tests/framework/test_board_business.py",
+      "bytes": 18148,
+      "sha256": "f231d196786d32fd5dfb2986451fc18c6a35f66c196349c81a9d5afcf44f62a1"
+    },
+    {
+      "path": "aura/tests/framework/test_board_identity_sequence.py",
+      "bytes": 7969,
+      "sha256": "9839da5369eb15980fea76ecb99f3414b989b849d280a0b15010b5578fcfe312"
+    },
+    {
+      "path": "aura/tests/framework/test_board_dialogue_jobs.py",
+      "bytes": 22294,
+      "sha256": "145531f2064305a29cc254b3f6416a77a48354e028f2abee97e3bc0e740443a4"
+    },
+    {
+      "path": "deliverables/2026-10-30_board_owner/integration/resume_runtime/build_gui_candidate.py",
+      "bytes": 5778,
+      "sha256": "3c825ccfb3d6a79631f1a30ae86565d24b94e8c69dfacfc47bf1e721f2048be7"
+    },
+    {
+      "path": "deliverables/2026-10-30_board_owner/integration/resume_runtime/posix_factory_smoke.py",
+      "bytes": 4004,
+      "sha256": "b57a59378678d2e5fa36d3fb59d9ddf13197cf26a02023c9adc10b3ecfaeb18a"
+    },
+    {
+      "path": "deliverables/2026-10-30_board_owner/integration/resume_runtime/gui_candidate/aura/tools/board_avatar_gtk.py",
+      "bytes": 110897,
+      "sha256": "9d726a75541f9961e1b8ac7887b73fab9f51ba5c66992e4dc8b52c12faa50503"
+    },
+    {
+      "path": "deliverables/2026-10-30_board_owner/integration/resume_runtime/gui_candidate/aura/tools/profile_selection_ui.py",
+      "bytes": 2254,
+      "sha256": "e536ba077b0a53604f6c8a1b32560fbb4f54f7cb197435b3477c06685b1076ca"
+    }
+  ],
+  "dependency_manifests": [
+    "deliverables/2026-10-30_board_owner/integration/resume_runtime/fresh_source/manifest.json",
+    "deliverables/2026-10-30_board_owner/integration/resume_speaker/source_dependencies.json",
+    "deliverables/2026-10-30_board_owner/integration/resume_speaker/handoff.json"
+  ],
+  "config_contract": {
+    "board_business_required": [
+      "enabled",
+      "private_root",
+      "utc_bounds",
+      "data_origin",
+      "asr_directory",
+      "frontend_directory",
+      "feedback_manifest"
+    ],
+    "board_business_optional": [
+      "model_port",
+      "timeout_ms",
+      "timezone",
+      "entry_mode",
+      "asr_threads",
+      "frontend_threads",
+      "visual_device_id",
+      "speaker"
+    ],
+    "production_requires": "data_origin=board; local render readiness; same-process speaker business attached; fresh face-gallery source pin; serial real-data migration/handoff performed by root.",
+    "frontend_defaults": {
+      "threads": 1,
+      "producer_queue_frames": 8,
+      "silent_overflow_drop": false
+    },
+    "speaker_config_required": [
+      "enabled=true",
+      "model_directory",
+      "manifest_sha256",
+      "expected_model_id",
+      "anonymous_config"
+    ],
+    "visual_scope": "runtime.visual_memory.scope == {kind:device,id:config.visual_device_id}; GUI default board-camera",
+    "operator_control": "Existing board-local private credential configuration. GTK masks credential, requires explicit click/create consent, never prints or persists the input.",
+    "approved_feedback": "Version1 local assets manifest with thinking cue mandatory, optional arrival/invitation, each entry path plus original voice_wire metadata; verified SHA/native 24k mono16/<=5sec."
+  },
+  "remaining_gates": [
+    "Root actual board combined frontend throughput/ASR/speaker performance evidence overrides synthetic tests. Do not deploy while that gate fails.",
+    "Actual ARM current clock/Date and natural five-minute source retention tests are root-owned.",
+    "Current production remote16 render cannot silently become local8. Local render at required performance and separate user character decision remain necessary.",
+    "Fresh actual face gallery /proc+boot+source/model pins and all-board camera feature backend verification; preserve original failed cross-machine authorization boundary.",
+    "Real consistent snapshots for existing conversation/speaker/anonymous/link/observation data, original key and namespace preservation, stop old writer before exact single-writer activation; this subtask performed no real migration.",
+    "Original WebRTC dependency and approved same ECAPA export on ARM; no quality substitute.",
+    "Physical microphone, playback/listening, interruption acoustics and final human selection acceptance remain untested here."
+  ],
+  "posix_writer_smoke": {
+    "status": "PREPARED_NOT_EXECUTED_BY_THIS_AGENT",
+    "script": "integration/resume_runtime/posix_factory_smoke.py",
+    "network_or_devices": false
+  },
+  "privacy": {
+    "llm_weights_copied_to_shared_tree": false,
+    "ssh_keys_read_or_copied": false,
+    "real_face_ids_sent_to_windows_8792": false,
+    "model_payload_contains_profile_grants_or_template_vectors": false
+  },
+  "notes": "173-case merged component validation uses synthetic fixtures/fake models and real loopback deadline fixtures. Counts overlap other reports and must not be added to them."
+}

@@ -1,0 +1,111 @@
+{
+  "schema": "aura-no-speech-two-file-independent-review-1",
+  "sealed_host_utc": "2026-11-02T12:08:59.085461+00:00",
+  "verdict": "PASS_FINAL_TWO_FILE_CANDIDATE_NO_CODE_BLOCKER",
+  "candidate_sha256": {
+    "board/runtime/audio/board_asr.py": "c51488ac6bd3563bc3dc42934b321e98e26cb2b58d700318765a60ca4908ef60",
+    "board/runtime/audio/board_dialogue_jobs.py": "01b27ede0d8889c35fc9ac990e03538a55fecc7c6a604fb6f781bc5d54c09087"
+  },
+  "before_sha256": {
+    "board/runtime/audio/board_asr.py": "4edb865881c887d6a290a02e078e14386bd95d017b79820b143b5a1e329997c3",
+    "board/runtime/audio/board_dialogue_jobs.py": "687b80cde20d70e4de56dd71956683b9cec59f55bd25965491dc08d00c8cb248"
+  },
+  "source_manifest_sha256": "6876a5a63ed7a76c221ca7500e5c28fa330e7ec20e01f8b1932cff14bce5fdd3",
+  "diff_sha256": "6183c207ef2fccea2f48a862715c8977ec9358b82f1c76f207c0671a394b1d7b",
+  "independent_counterexamples": {
+    "file": "independent_review\\INDEPENDENT_COUNTEREXAMPLES.xml",
+    "sha256": "74739a84d1221e85a3b5dc4c066a38835768a44a9031beddecd2d8119fd5eb81",
+    "tests": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failed_cases": []
+  },
+  "author_actual_pipeline": {
+    "BASELINE": {
+      "file": "BASELINE_PIPELINE.xml",
+      "sha256": "9d947eb8f8b81d6901cb92600245a2380cd3bab49acf0767b656785358d0245f",
+      "tests": 31,
+      "failures": 8,
+      "errors": 0,
+      "skipped": 0,
+      "failed_cases": [
+        "test_no_speech_pipeline.test_changed_target_after_benign_blank_is_still_rejected",
+        "test_no_speech_pipeline.test_missing_new_capture_proof_is_still_rejected_after_no_speech",
+        "test_no_speech_pipeline.test_original_authorize_expiry_is_not_extended_by_empty_result",
+        "test_no_speech_pipeline.test_prepare_blank_relisten_independent_confirmation_completes_original_face_flow[   -False]",
+        "test_no_speech_pipeline.test_prepare_blank_relisten_independent_confirmation_completes_original_face_flow[ \\u3000 -True]",
+        "test_no_speech_pipeline.test_prepare_blank_relisten_independent_confirmation_completes_original_face_flow[-False]",
+        "test_no_speech_pipeline.test_prepare_blank_relisten_independent_confirmation_completes_original_face_flow[-True]",
+        "test_no_speech_pipeline.test_repeated_empty_results_do_not_extend_consent_or_consume_voice_samples"
+      ]
+    },
+    "CANDIDATE": {
+      "file": "CANDIDATE_PIPELINE.xml",
+      "sha256": "49d7bd7a9336ab219363b04819796a3e543968b6957ffc3827f6967146dfabe2",
+      "tests": 31,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "failed_cases": []
+    }
+  },
+  "author_original_regression": {
+    "BASELINE": {
+      "file": "BASELINE_ORIGINAL_REGRESSION.xml",
+      "sha256": "b108ce554160ae96b0da79f6e9fe417b86ce3af16390d3ee39afe7e6928572de",
+      "tests": 70,
+      "failures": 7,
+      "errors": 0,
+      "skipped": 0,
+      "failed_cases": [
+        "test_board_dialogue_jobs.test_explicit_memory_precedes_reasoning_and_retains_raw_alias",
+        "test_board_dialogue_jobs.test_missing_sensitive_board_handlers_never_fall_back_to_model[\\u897f\\u84dd\\uff0c\\u8bb0\\u4f4f\\u6211-identity_enrollment]",
+        "test_board_dialogue_jobs.test_real_board_store_memory_and_history_flow_without_legacy_services",
+        "test_board_dialogue_jobs.test_wake_alias_and_wake_only_follow_existing_audio_gate",
+        "test_board_recording.RoutingTests.test_active_local_capture_blocks_remote_image_question",
+        "test_board_recording.RoutingTests.test_camera_only_service_uses_local_record_toggle",
+        "test_board_recording.RoutingTests.test_remote_recording_stop_keeps_its_existing_owner"
+      ]
+    },
+    "CANDIDATE": {
+      "file": "CANDIDATE_ORIGINAL_REGRESSION.xml",
+      "sha256": "bcb24a5dcf37c0eae5cb0c20f42ca3751fddd656035d060b0bb93dba34f5ffe7",
+      "tests": 70,
+      "failures": 7,
+      "errors": 0,
+      "skipped": 0,
+      "failed_cases": [
+        "test_board_dialogue_jobs.test_explicit_memory_precedes_reasoning_and_retains_raw_alias",
+        "test_board_dialogue_jobs.test_missing_sensitive_board_handlers_never_fall_back_to_model[\\u897f\\u84dd\\uff0c\\u8bb0\\u4f4f\\u6211-identity_enrollment]",
+        "test_board_dialogue_jobs.test_real_board_store_memory_and_history_flow_without_legacy_services",
+        "test_board_dialogue_jobs.test_wake_alias_and_wake_only_follow_existing_audio_gate",
+        "test_board_recording.RoutingTests.test_active_local_capture_blocks_remote_image_question",
+        "test_board_recording.RoutingTests.test_camera_only_service_uses_local_record_toggle",
+        "test_board_recording.RoutingTests.test_remote_recording_stop_keeps_its_existing_owner"
+      ]
+    }
+  },
+  "original_regression_boundary": "Both70:63pass/same7fail/0error; author classifies4old-character-alias and3missing-character_pair GUI fixtures",
+  "rejected_intermediate_jobs_sha256": "2d68450e72916310595334dfa54a2471540c3cf0fb884a6080ee76d53dda55ee",
+  "intermediate_review_boundary": "Four exception cases passed on intermediate2d684; final verdict uses only01b27 with control-character order preserved",
+  "static_audit": {
+    "exact_whole_module_ast_equal_after_reversing_only_declared_changes": true,
+    "asr_added_only_typed_subclass_and_existing_empty_raise_type": true,
+    "asr_lock_pcm_decode_cancel_deadline_and_normal_return_ast_unchanged": true,
+    "jobs_added_only_typed_import_two_localized_method_changes": true,
+    "typed_catch_encloses_only_original_transcribe_call": true,
+    "typed_catch_rechecks_original_job_cancel_owner_deadline_before_entry_rejected": true,
+    "blank_direct_text_check_after_original_type_length_and_control_character_rejection": true,
+    "all_other_jobs_methods_exact_ast_unchanged": true,
+    "sql_guard_lock_order_ttl_face_owner_ack_and_playback_logic_changed": false,
+    "new_network_devices_models_private_store_or_axis_calls_added": false
+  },
+  "content_write_boundary": "Blank ASR does not reach dialogue begin/generated/ACK, LLM, identity commands or voice sample collection in synthetic pipeline",
+  "existing_housekeeping_sql_boundary": "Original preempt_compaction still executes before ASR and writes bm_tasks/bm_meta activity_revision; no zero-SQL claim; code and order unchanged",
+  "no_author_candidate_or_producer_test_modification_by_reviewer": true,
+  "devices_network_model_private_database_axis_accessed_by_reviewer": false,
+  "reviewer_actual_files_touched": "Only independent_review artifacts",
+  "four_file_confirmation_trace_candidate": "NOT_REVIEWED_NOT_APPROVED_FOR_PRODUCTION",
+  "live_boundary": "Review is synthetic/local. Root still owns exact-source deployment and live enrollment acceptance"
+}

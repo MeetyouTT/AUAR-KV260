@@ -1,0 +1,177 @@
+{
+  "checks": {
+    "version": {
+      "returncode": 0,
+      "output": "systemd 249 (249.7+)\n+PAM -AUDIT -SELINUX -APPARMOR +IMA -SMACK +SECCOMP -GCRYPT -GNUTLS -OPENSSL +ACL +BLKID -CURL -ELFUTILS -FIDO2 -IDN2 -IDN -IPTC +KMOD -LIBCRYPTSETUP +LIBFDISK -PCRE2 -PWQUALITY -P11KIT -QRENCODE -BZIP2 -LZ4 -XZ -ZLIB +ZSTD +XKBCOMMON +UTMP +SYSVINIT default-hierarchy=hybrid\n"
+    },
+    "units": {
+      "returncode": 0,
+      "output": "UNIT FILE               STATE    VENDOR PRESET\ndisplay-manager.service alias    -\nxserver-nodm.service    enabled  enabled\ngraphical.target        indirect disabled\nmulti-user.target       static   -\n\n4 unit files listed.\n"
+    },
+    "xserver": {
+      "returncode": 0,
+      "output": "# /lib/systemd/system/xserver-nodm.service\n[Unit]\nDescription=Xserver startup without a display manager\nStartLimitBurst=5\nStartLimitIntervalSec=100\n\n[Service]\nEnvironmentFile=/etc/default/xserver-nodm\nUser=root\nExecStart=/etc/xserver-nodm/Xserver\nRestart=always\n\n[Install]\nAlias=display-manager.service\n"
+    },
+    "default": {
+      "returncode": 0,
+      "output": "graphical.target\n"
+    },
+    "failed": {
+      "returncode": 0,
+      "output": "  UNIT                                 LOAD   ACTIVE SUB    DESCRIPTION\n* kria-dashboard.service               loaded failed failed kria-dashboard-init\n* systemd-networkd-wait-online.service loaded failed failed Wait for Network to be Configured\n\nLOAD   = Reflects whether the unit definition was properly loaded.\nACTIVE = The high-level unit activation state, i.e. generalization of SUB.\nSUB    = The low-level unit activation state, values depend on unit type.\n2 loaded units listed.\n"
+    }
+  },
+  "files": {
+    "/etc/init.d/xserver-nodm": "#!/bin/sh\n#\n### BEGIN INIT INFO\n# Provides: xserver\n# Required-Start: $local_fs $remote_fs dbus\n# Required-Stop: $local_fs $remote_fs\n# Default-Start:     5\n# Default-Stop:      0 1 2 3 6\n### END INIT INFO\n\nkillproc() {            # kill the named process(es)\n        pid=`/bin/pidof $1`\n        [ \"$pid\" != \"\" ] && kill $pid\n}\n\nread CMDLINE < /proc/cmdline\nfor x in $CMDLINE; do\n        case $x in\n        x11=false)\n\t\techo \"X Server disabled\" \n\t\texit 0;\n                ;;\n        esac\ndone\n\ncase \"$1\" in\n  start)\n       . /etc/profile\n\n       #default for USER\n       . /etc/default/xserver-nodm\n       echo \"Starting Xserver\"\n       if [ \"$USER\" != \"root\" ]; then\n           # setting for rootless X\n           chmod o+w /var/log\n           chmod g+r /dev/tty[0-3]\n           # hidraw device is probably needed\n           if [ -e /dev/hidraw0 ]; then\n               chmod o+rw /dev/hidraw*\n           fi\n           # Make sure that the Xorg has the cap_sys_admin capability which is\n           # needed for setting the drm master\n           if ! grep -q \"^auth.*pam_cap\\.so\" /etc/pam.d/su; then\n               echo \"auth\toptional\tpam_cap.so\" >>/etc/pam.d/su\n           fi\n           if ! /usr/sbin/getcap $XSERVER |  grep -q cap_sys_admin; then\n               /usr/sbin/setcap cap_sys_admin+eip $XSERVER\n           fi\n       fi\n\n       # Using su rather than sudo as latest 1.8.1 cause failure [YOCTO #1211]\n       su -l -c '/etc/xserver-nodm/Xserver &' $USER\n       # Wait for the desktop to say its finished loading\n       # before loading the rest of the system\n       # dbus-wait org.matchbox_project.desktop Loaded\n  ;;\n\n  stop)\n        echo \"Stopping XServer\"\n        killproc xinit\n        sleep 1\n        chvt 1 &\n  ;;\n\n  restart)\n\t$0 stop\n        $0 start\n  ;;\n\n  *)\n        echo \"usage: $0 { start | stop | restart }\"\n  ;;\nesac\n\nexit 0\n",
+    "/etc/default/xserver-nodm": "# common environment file for sysvinit and systemd\n\nXSERVER=/usr/bin/Xorg\nDISPLAY=:0\nARGS=\" -br -pn   \"\nHOME=/home/root\nUSER=root\n",
+    "/etc/X11/Xsession": "#!/bin/sh\n\nif [ -x /usr/bin/dbus-launch ]; then\n    # As this is the X session script, always start a new DBus session.\n    eval `dbus-launch --sh-syntax --exit-with-session </dev/null`\n    echo \"D-BUS per-session daemon address is: $DBUS_SESSION_BUS_ADDRESS\"\nfi\n\n. /etc/profile\n\nif [ -f $HOME/.profile ]; then\n    . $HOME/.profile\nfi\n\nSYSSESSIONDIR=/etc/X11/Xsession.d\n\nexport CLUTTER_DISABLE_MIPMAPPED_TEXT=1\n\nfor SESSIONFILE in $SYSSESSIONDIR/*; do\n    set +e\n    case \"$SESSIONFILE\" in\n        *.sh)\n            . \"$SESSIONFILE\"\n            ;;\n        *.shbg)\n            \"$SESSIONFILE\" &\n            ;;\n        *~)\n            # Ignore backup files\n            ;;\n        *)\n            \"$SESSIONFILE\"\n            ;;\n    esac\n    set -e\ndone\n\nexit 0\n"
+  },
+  "processes": [
+    {
+      "pid": 1059,
+      "args": [
+        "xinit",
+        "/etc/X11/Xsession",
+        "--",
+        "/usr/bin/Xorg",
+        ":0",
+        "-br",
+        "-pn"
+      ],
+      "environment": {
+        "USER": "root",
+        "DISPLAY": ":0"
+      }
+    },
+    {
+      "pid": 1142,
+      "args": [
+        "/usr/bin/Xorg",
+        ":0",
+        "-br",
+        "-pn"
+      ],
+      "environment": {
+        "USER": "root",
+        "DISPLAY": ":0"
+      }
+    },
+    {
+      "pid": 2175,
+      "args": [
+        "python3",
+        "-B",
+        "/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/tools/board_avatar_gtk.py",
+        "--evidence-root",
+        "/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/run-evidence-0ecc7063-1b99-4bca-9e9c-d9f8026732f5"
+      ],
+      "environment": {
+        "USER": "root",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/0/bus",
+        "DISPLAY": ":0"
+      }
+    }
+  ],
+  "autostart": {
+    "/etc/xdg/autostart": [
+      "at-spi-dbus-bus.desktop",
+      "gsettings-data-convert.desktop",
+      "pulseaudio.desktop"
+    ],
+    "/etc/systemd/system": [
+      "banner.service",
+      "bootmisc.service",
+      "checkfs.service",
+      "checkroot.service",
+      "ctrl-alt-del.target",
+      "dbus-1.service",
+      "dbus-org.freedesktop.network1.service",
+      "dbus-org.freedesktop.resolve1.service",
+      "dbus-org.freedesktop.timesync1.service",
+      "default.target",
+      "devpts.service",
+      "dfx-mgr.service.d",
+      "display-manager.service",
+      "dmesg.service",
+      "getty.target.wants",
+      "hostname.service",
+      "hwclock.service",
+      "kv260-repaired-zocl.service",
+      "local-fs.target.wants",
+      "modutils.service",
+      "mountall.service",
+      "mountnfs.service",
+      "multi-user.target.wants",
+      "network-online.target.wants",
+      "networking.service",
+      "nfscommon.service",
+      "nfsserver.service",
+      "populate-volatile.service",
+      "proc-fs-nfsd.mount.d",
+      "read-only-rootfs-hook.service",
+      "rmnologin.service",
+      "sockets.target.wants",
+      "sysfs.service",
+      "sysinit.target.wants",
+      "syslog.service",
+      "systemd-random-seed.service.wants",
+      "timers.target.wants",
+      "urandomreboot_init.service"
+    ]
+  },
+  "state": {
+    "phase": "IDLE",
+    "state": "IDLE",
+    "display_state": "IDLE",
+    "asset": "idle_normal",
+    "index": 33,
+    "transitioning": false,
+    "reply": "",
+    "audio_time": 0.0,
+    "duration": 0.0,
+    "playing": false,
+    "paused": false,
+    "speech_gain": 0.0,
+    "mouth_level": 0.0,
+    "blink_active": false,
+    "blink_phase": null,
+    "visual_time": 489.370872662,
+    "error": "",
+    "generation": 0,
+    "rejected_count": 0,
+    "pending_job": null,
+    "last_job": null,
+    "audio_output_state": "NULL",
+    "log": [],
+    "turns": [],
+    "metrics": {
+      "late_results_dropped": 0
+    },
+    "ui_page": "main",
+    "ui_settings": {
+      "available": true,
+      "volume": 18,
+      "muted": false,
+      "pending": false,
+      "error": "",
+      "revision": 305,
+      "requested_version": 694,
+      "applied_version": 694,
+      "fullscreen": true,
+      "economy": false
+    },
+    "touch_devices": [
+      {
+        "event": "event5",
+        "name": "WaveShare WS170120"
+      }
+    ],
+    "character": "汐蓝",
+    "dialogue_enabled": false,
+    "backend": "gtk3-gstreamer",
+    "cached_only": true,
+    "sequence": 2726
+  },
+  "boot_id": "0ecc7063-1b99-4bca-9e9c-d9f8026732f5",
+  "disk_free": 21264052224
+}

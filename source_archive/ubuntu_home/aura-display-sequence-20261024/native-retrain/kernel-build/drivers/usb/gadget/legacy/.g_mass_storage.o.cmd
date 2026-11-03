@@ -1,0 +1,1 @@
+cmd_drivers/usb/gadget/legacy/g_mass_storage.o := /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ld  -EL  -maarch64elf    -r -o drivers/usb/gadget/legacy/g_mass_storage.o drivers/usb/gadget/legacy/mass_storage.o

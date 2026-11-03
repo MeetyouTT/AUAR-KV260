@@ -1,0 +1,149 @@
+STATUS: LOCAL PREPARATION ONLY. NO DEVICE OR NETWORK COMMAND WAS EXECUTED.
+The files in this directory cannot start a service or enable listening.
+
+Scope and current gate
+----------------------
+The current local PHASE_CURRENT.json says
+PREPARING_ORIGINAL_WIDE_PROTECTED_RECOVERY. That phase grants no GUI start.
+CPU has the protective stop/seal window. The original-axis operator then has
+the original wide/ID_STOP_ONLY window. CPU must next restore the camera and
+its current owner/bindings and return explicit metadata-only receipts. Root
+alone can then perform GUI recovery, after ownership has actually returned.
+Nothing in this directory grants a phase or changes PHASE_CURRENT.json.
+
+Reusable originals (reference only; NEVER run their historical bytes)
+-------------------------------------------------------------------
+All paths below are relative to:
+E:/Win共享文件/语音共享文件/deliverables/2026-11-02_5090_deployment/
+other_components_20261102/live_enrollment_20261102/
+
+1. voice_conversation_address_20261102/release/start_gui_once.py
+   SHA256 4e8f786c9fb8c67ea60281a805f7840dbe7b1b0f0097438e17ac71d5f3270074
+   Original normal systemctl start --no-block, one submission; O_EXCL intent,
+   original temporary stop-guard removal/property readback, full 380 check,
+   four core pins, paused preference, camera owner, 8797 Date/health guard.
+   It contains old owner, startup, TX and override constants. Rebase these
+   only from new receipts. Reuse the guard-restoration branch ONLY if CPU's
+   new stop receipt proves this exact current guard belongs to this recovery.
+
+2. new_boot_binding_review_a6d4/start_gui_current_boot_once.py
+   SHA256 2658b3e7593f1593f78ada3e86c542df05a6be32e4d49c9160b70b715731ea15
+   Original normal-start-only variant when original service properties are
+   already restored. It also contains old owner/startup/TX constants.
+
+3. voice_conversation_address_20261102/release/read_post_readiness.py
+   SHA256 d09f61b9a773830f8bceebd70fd2007df9abc1c0d667d084c9ecc5f9bf46de92
+   Reference for metadata projection and AST-only extraction of the original
+   FaceGalleryReadback._verify. Do not instantiate FaceGalleryReadback,
+   IdentityStore, timeline/anchor or writer merely to verify a binding.
+   Adapt expected hashes to the new receipt; omit historical mtime reasoning.
+
+4. voice_conversation_address_20261102/release/enable_once.py
+   SHA256 4154595912b09e792d35ed32294985b037593b6d64f1c84d6d3c4b3a90014842
+   Reference for the original conversation_toggle command and bounded GET
+   reconciliation. It has old GUI/GTK/camera owners and startup hardcoded.
+   The actual recovered GUI/GTK owners do not exist until the new launch.
+   Add a separate durable toggle intent before the eventual single POST.
+
+Fresh expected inputs required after CPU recovery
+------------------------------------------------
+Do not fill these from the historical scripts, their old manifests, or a
+pre-stop receipt. Use the actual post-restoration CPU receipt and hash each
+receipt. Do not copy the entire historical 380 manifest into a new expected
+file. The four-core paths are retained in expected.template.json but every
+hash and owner field is deliberately empty.
+
+* Explicit root handback phase: CPU and axis exclusive windows both ended,
+  other board writers frozen, boot/startup/receipt hashes bound, bounded host
+  UTC expiry. phase.template.json is UNGRANTED and intentionally fails.
+  ROOT_GUI_RECOVERY_READY is this preparation's required future gate name;
+  it is not a claim that an existing phase has been granted. Root may create
+  a dedicated local phase wrapper from actual handback, without altering
+  another operator's receipt or treating the wrapper as board proof.
+* New CPU protected camera restoration audit: same boot, actual camera
+  PID/birth ticks/cmdline hash, active owner, actual native run-config path
+  and SHA, source progression, genuine protected history/checkpoint audit.
+  No old seed/checkpoint is replayed by the GUI recovery scripts.
+* Post-binding startup SHA, runtime path, verified full 380 source closure,
+  canonical component-map SHA and exact current four-core SHA values.
+* Selected GUI face_readback path/SHA, GUI config SHA, original verifier
+  source SHA and complete source closure; pure original _verify passes
+  against exactly the new camera owner. Require the reviewed 26-pin
+  contract and current run-config membership. If CPU produces 27 pins or
+  another count, stop for a concrete closure review; never remove a pin or
+  append blindly simply to manufacture the expected count.
+* Normal GUI stop proof: inactive/dead/MainPID0/Job empty, saved listening
+  disabled and mic closed. Original unit properties or an exact current
+  temporary guard plus its original-properties receipt. No force stop.
+* New transaction directory absent; no unresolved prior start/toggle intent.
+* Original 8797 model-inference-only health and Date proof within the
+  original RTT policy. Keep Qwen27B IQ4_XS/2048, OmniVoice16 and all original
+  reference/seed/voice parameters. Do not issue a model request or replace
+  the original business clock/anchor with an externally synthesized Date.
+
+Offline check
+-------------
+prepare_plan.py is a local JSON/hash/phase contract validator, not a board
+preflight or a start script. It has no device execution code and no execute
+option. All input paths must resolve inside this JOINT directory. It reads
+and hashes the three referenced local receipts but cannot establish their
+physical truth; root must review the original receipts and then perform
+fresh live guards in its actual ownership window. A successful result is
+LOCAL_CONTRACT_VALIDATED_NOT_DEVICE_READY with may_execute=false.
+
+Use a separate completed expected JSON and phase JSON, both from new facts:
+python prepare_plan.py --expected ABSOLUTE_EXPECTED_PATH \
+  --expected-sha256 EXACT_FILE_SHA --phase ABSOLUTE_PHASE_PATH \
+  --phase-sha256 EXACT_FILE_SHA
+
+The template cannot pass. Missing parameters, SHA mismatch, old/wrong phase,
+expired handoff, absent receipt, wrong owner or pins, unknown prior intent,
+or a changed model fails. Host metadata must be at most 10 minutes old and
+phase expiry at most 15 minutes after issue. If expired, obtain a new fresh
+read-only receipt; do not merely rewrite its timestamp.
+
+Root-only actual sequence after a validated fresh handback
+--------------------------------------------------------
+1. Review the fresh receipts and compare fresh boot, startup byte SHA, all
+   380 actual file SHA values, current four core pins, camera owner/unit/
+   run-config/source progression, pure selected binding closure/26 pins,
+   original service guard restoration plan, paused preference and 8797
+   Date/health. Do not read names, templates, private rows, images or audio.
+   No axis register/command/readback is part of this GUI preflight.
+2. Prepare a newly reviewed root-only normal-start script based on (1) or
+   (2), with no retry loop and no product/config change. Pin its expected
+   JSON SHA and explicit phase/receipt SHA. Use a new guarded transaction.
+   Before any relevant mutation write an O_EXCL/O_NOFOLLOW durable intent;
+   fsync the file and its parent directory. Restore only the exact owned
+   temporary guard if necessary and verify original unit properties.
+   Immediately before the single normal start, recheck startup, camera,
+   GUI0 and phase, and durably create a submission intent. Submit the
+   original normal systemctl start --no-block once. No restart/reset-failed/
+   kill/force/second start is implied. A timeout or lost result is UNKNOWN:
+   reconcile with read-only unit/launch metadata and keep the intent; do
+   not delete it, reuse its path, or send a second start.
+3. Original GUI readiness is a separate read-only step. Bind its new GUI
+   supervisor and GTK pid/birth/cmdline to actual launch.json + service,
+   verify startup unchanged/all380/four core, camera and _verify unchanged,
+   pair READY/avatar visible/ui_page=main, business started, original clock
+   anchored/writer held/runtime fault0. Listening remains disabled/micfalse.
+   Use causality/current pins/launch ownership; board RTC and file mtimes
+   from another year cannot establish whether source was loaded.
+4. If main page is not visible, stop before listening and report metadata.
+   Any original page navigation is an explicitly separate root action;
+   this preparation invents no new page command or layout/config patch.
+5. Root may then separately prepare the ordinary listen enable. Fresh GET
+   must confirm the same new GUI/GTK/camera owners and startup, READY/main,
+   anchored/writerheld/fault0, idle no pending/no playback/no active sampler
+   or registration queue. If already enabled do not toggle. If paused,
+   durable separate enable intent + one original conversation_toggle POST,
+   then bounded GET metadata reconciliation. Unknown POST result means GET
+   only, never resend. Do not set preference JSON or create capture/ACK.
+6. Start the joint 180-second timer only after the acceptance owner records
+   GUI/main/listening readiness and its other required handbacks. This
+   preparation makes no 180-second acceptance or functional-success claim.
+
+No rollback action is automated. An unknown/failed normal start is a
+metadata reconciliation problem first. There is no board/app/backend write,
+service command, microphone access, model request, identity/library/memory
+change, private-content export or axis action in this local preparation.

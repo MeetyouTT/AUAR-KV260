@@ -1,0 +1,31 @@
+# 同进程DPU身份后端
+
+2026-10-18 Ubuntu候选，UTC2026-10-19实板固定输入通过；正式相机/界面服务切换尚待完成，用户结束正在进行的对话后再继续。完整状态以 `deliverables/2026-10-18_identity_dpu_runtime/README.md` 为准。
+
+## 处理位置
+
+- DPU：原YOLOX-Nano人体检测，以及新增SFace INT8特征提取，同一相机服务进程内运行。
+- ARM CPU：YuNet人脸/五点检测、裁剪对齐/质量筛选、输入量化、输出反量化/归一化、匹配和SQLite。
+- Windows：Paraformer、27B和OmniVoice16；语音模型/权重路径及音色参数保持。
+
+SFace工程模型SHA为 `bee245f2a94e4d28cc00d7f367fa08c7c375feee2081267c8e414033067df3d8`，目标指纹 `0x101000056010407`。输入NHWC `[1,112,112,3]` INT8/fix_point7，输出 `[1,128]` INT8/fix_point5。BGR裁剪转RGB后按 `(x-127.5)/128` 和既有量化舍入规则处理，输出除以32后交给原归一化匹配。
+
+`DpuSFace` 要求相机进程已验证的DPU所有者/指纹与共享调度器，拒绝SHA、张量布局、量化点或模型标识不匹配。这里不启动第二个DPU进程、不在YOLO占用时再次执行 `xdputil query`，也不静默改用CPU SFace。
+
+## 检测优先调度
+
+`DpuSchedule` 串行化两类提交。等待中的检测优先；身份不排队，若DPU忙、检测即将到期或身份被暂停，就丢掉本次身份任务。初始身份时隙预算20ms，保留5ms裕量。已提交的硬件任务不能抢占；实测一次身份调用超过预算后停止后续身份提交，并让检测继续。此机制不是硬件超时中断或经过证明的实时保证。
+
+身份候选仍为latest-only，结果带源帧时间、相机/轨迹代次和库版本。过期、换人及删除会失效。DPU配置要求3个不同新鲜帧连续匹配才显示姓名；语音登记使用5帧采样后聚合，一次事务写入。
+
+独立配置为 `config/board_identity.dpu_engineering.json`；模型ID `sface-int8-bee245f2a94e4d28`，设备本地库 `~/.local/share/aura/identities-sface-int8-bee245f2a94e4d28.sqlite3`。不能把旧CPU模板直接写入此模型空间。阈值0.85/间隔0.1及采样一致性0.8仍为工程初值，未经过真人独立评估。
+
+## 实测与限制
+
+新适配器的4组公开/合成输入与主机量化输出逐字节一致；同进程80次检测+16次SFace短测无100ms周期超时，SFace中位7.86ms。用公开参考人脸在内存中完成五帧登记事务，未存真人照片、未登记真人。
+
+这不等于真人识别准确率、实时摄像头混跑长期稳定或语音登记已上线。首次候选切换因38秒期限短于现有端口释放等待而回退；复制来的日志文件已保留并修正启动准备。随后切换在执行前检测到用户正在交互而拒绝，原连续对话服务保持。不能把暂存源码、固定图模型通过或启动预检通过写成新业务服务已经验收。
+
+已回收实机 `/home/root/aura-automatic-conversation-20261018/candidate-b1b08f8b0b2b` 的连续对话源码，与语音身份补丁三方合并，保留“开始对话→停顿自动提交→播完继续听”。`automatic_capture.py` 依赖对应新版 `capture.py` 钩子和worker方法，更新时须配套，不能只复制单个GTK文件。
+
+Python动作定义与JSON命令/状态schema已同步 `identity_collect` 和 `identity_cancel`。Windows新文本流接口就绪后再开启 `voice_identity_enrollment`；此开关当前默认false，现有按键式旧文档不代表实机已经回退到手动逐句录音。

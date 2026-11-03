@@ -1,0 +1,19 @@
+纯语音人脸采样启动缓存竞态 V2（仅本地候选；root唯一发布者）
+
+修复对象仅board/identity/voice_enrollment.py。实际生产原SHA83796dd78c57555ea66eeb2b745a89f8b3670945a4406176cb3486111d9466b8；V2候选SHA a9113ba40efc49828ee158554b2dae70485858396680918458f6f96bba16bacb。只改_start_simple与handle调用时透传原is_current，并导入原validate_ack。_send、reset、guide、_save_ready、确认/质量/权限及其余方法AST保持。阈值、margin、模型、样本10+5、采样/ready超时和明确确认授权都没有改。
+
+原缺陷：start HTTP accepted后，直接读UiServices约0.6s刷新一次的缓存。旧snapshot没本次session，FSM立即reset/sample_failed且sampling_id尚未记住，无法取消真正开始的采样。camera可以继续collect/validate到ready再超时。此代码竞态由旧源确定复现，不把它冒称现场唯一原因。
+
+V1 4a93…已被独审拒绝并保留原字节。其只认sid!=pre，会把迟发布的中间旧B当本次C，failed/ready时误cancel旧B。相关反例在independent_review/V1_PRECOMMAND_SESSION_COUNTEREXAMPLE.json，绝不能部署V1。
+
+V2只发一次原identity_sample_start，原ACK严格按8字段/六归属及原2.5s截止校验。ACK没有new session_id，不能从detail编造。随后在min(原authorize截止,发请求前clock+2.5s)内最多50次、每次最多50ms等缓存；持续旧状态/未知/错误会失败，绝不重发start。
+
+认领之前同时要求：原validate_snapshot通过；actual来源；boot/service/context/dbversion相同；最新sequence>请求前sequence；最新原observed_mono_ms严格大于ACK接收时刻且小于原命令deadline（不把读取时刻写成源stamp）；完整owner与原target相同；bound_target为原target；stage为collect/front；SID非空且不等于请求前旧SID。旧failed/ready、命令前或preACK生成的B缓存只继续有界等，不认领也不cleanup。ACK仍没有SID原子回执，SID归属依据是上述新源状态约束，而非声称ACK返回了SID。
+
+满足来源/阶段证明后才记录本次sampling_id，接着检查原is_current及等待截止；这之后取消/过期可只清理该已认领ID。reset若local epoch/owner/token已换，不清别人的本地workflow；原_cancel_sample仍会再读状态，只有当前session_id等于明确ID才发送cancel。没有可认领ID时不会猜当前camera ID取消，仍由原camera租约清理未知结果。client90s采样截止从发命令之前计，等待发布不会延长它。
+
+有效测试：V2专项race32/32通过，原83796的8个对应即时/延迟/A-B-C子例1pass/7个有效断言fail、0errors。独审另13场景复核无blocker（独审文件由另一代理封存）。覆盖错ACK六归属、持续旧缓存、旧A/B/C和preACK时刻、目标/context/dbversion替换、取消认领前后、无未知ID取消、外来epoch/token、90s不延长等。
+
+原可在Windows执行的37项流程/采样回归，before与V2各35pass、2个相同旧汐蓝称呼fixture失败；未将它们记通过。旧假ACK只含accepted/command_id、fake source钟不走，因此通过独立测试fixture适配为真实ACK8字段及明确的下一逻辑源帧；原测试断言未改，生产没有时钟/快照伪造。两条旧alias失败分别是SimpleFlowTests.test_combined_request_requires_explicit_name_confirmation_before_collection及test_only_explicit_combined_requests_route_away_from_chat，当前角色配置为雪妃且不认可旧汐蓝别名。1个合成HTTP集成例未运行；POSIX camera integration在Windows缺fcntl，不提供假fcntl、不称实板/完整ARM通过。初始夹具/平台收集失败日志完整保留，不计产品失败或有效基线。
+
+发布交接：本子代理不写板卡、不控制服务、不录音、不调用模型、不读真实库。root若发布，只能针对届时原源仍精确83796的该单文件CAS，基于最新startup原字节只更新这一component pin；不能整体覆盖1177/主页面任何并行改动。正常停机保护与实际空闲/无登记由root新鲜核验；本目录没有执行发布。历史failed采样不可复用，载入后须由用户重新纯语音启动新session，再由原流程完成质量与登记验收。没有把合成测试当现场录入成功。

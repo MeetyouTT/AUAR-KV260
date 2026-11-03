@@ -1,0 +1,1 @@
+cmd_/home/ghmd/aura-waveshare-touch-20261009/module-build/driver/modules.order := {   echo /home/ghmd/aura-waveshare-touch-20261009/module-build/driver/hid-multitouch.ko; :; } | awk '!x[$$0]++' - > /home/ghmd/aura-waveshare-touch-20261009/module-build/driver/modules.order

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="7" time="0.452" timestamp="2026-10-31T02:39:56.233512-07:00" hostname="zhenghang"><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_structured_reply_classification_preserves_sources[preempted-cancelled-0]" time="0.060"><failure message="AssertionError: assert 'model_failed' == 'cancelled'&#10;  &#10;  - cancelled&#10;  + model_failed">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/memory_health_collaboration/test_baseline/tmp/test_structured_reply_classifi0')
+code = 'preempted', expected = 'cancelled', streak = 0
+
+    @pytest.mark.parametrize('code,expected,streak', [
+        ('preempted', 'cancelled', 0),
+        ('foreground_busy', 'cancelled', 0),
+        ('superseded', 'cancelled', 0),
+        ('cancelled', 'cancelled', 0),
+        ('deadline_exceeded', 'deadline_exceeded', 1),
+        ('backend_failed', 'model_failed', 1),
+    ])
+    def test_structured_reply_classification_preserves_sources(tmp_path, code, expected, streak):
+        now = [1000.]
+        store = BoardMemoryStore(tmp_path/'synthetic-wire-error.sqlite3', clock=lambda: now[0])
+        store.append_event(dict(kind='conversation', id='synthetic-scope'), 'synthetic-event', 'user_said', '公开的合成记录。')
+        now[0] += 301
+        client = Client(code)
+        summary = BoardSummaryClient(client, board_boot_id='synthetic-boot')
+        worker = BoardMemoryBackoffWorker(store, summary, idle=lambda: True)
+        assert worker.step() is False
+        assert client.calls == 1
+&gt;       assert worker.error == expected
+E       AssertionError: assert 'model_failed' == 'cancelled'
+E         
+E         - cancelled
+E         + model_failed
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\tests\test_classification.py:44: AssertionError</failure></testcase><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_structured_reply_classification_preserves_sources[foreground_busy-cancelled-0]" time="0.047"><failure message="AssertionError: assert 'model_failed' == 'cancelled'&#10;  &#10;  - cancelled&#10;  + model_failed">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/memory_health_collaboration/test_baseline/tmp/test_structured_reply_classifi1')
+code = 'foreground_busy', expected = 'cancelled', streak = 0
+
+    @pytest.mark.parametrize('code,expected,streak', [
+        ('preempted', 'cancelled', 0),
+        ('foreground_busy', 'cancelled', 0),
+        ('superseded', 'cancelled', 0),
+        ('cancelled', 'cancelled', 0),
+        ('deadline_exceeded', 'deadline_exceeded', 1),
+        ('backend_failed', 'model_failed', 1),
+    ])
+    def test_structured_reply_classification_preserves_sources(tmp_path, code, expected, streak):
+        now = [1000.]
+        store = BoardMemoryStore(tmp_path/'synthetic-wire-error.sqlite3', clock=lambda: now[0])
+        store.append_event(dict(kind='conversation', id='synthetic-scope'), 'synthetic-event', 'user_said', '公开的合成记录。')
+        now[0] += 301
+        client = Client(code)
+        summary = BoardSummaryClient(client, board_boot_id='synthetic-boot')
+        worker = BoardMemoryBackoffWorker(store, summary, idle=lambda: True)
+        assert worker.step() is False
+        assert client.calls == 1
+&gt;       assert worker.error == expected
+E       AssertionError: assert 'model_failed' == 'cancelled'
+E         
+E         - cancelled
+E         + model_failed
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\tests\test_classification.py:44: AssertionError</failure></testcase><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_structured_reply_classification_preserves_sources[superseded-cancelled-0]" time="0.045"><failure message="AssertionError: assert 'model_failed' == 'cancelled'&#10;  &#10;  - cancelled&#10;  + model_failed">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/memory_health_collaboration/test_baseline/tmp/test_structured_reply_classifi2')
+code = 'superseded', expected = 'cancelled', streak = 0
+
+    @pytest.mark.parametrize('code,expected,streak', [
+        ('preempted', 'cancelled', 0),
+        ('foreground_busy', 'cancelled', 0),
+        ('superseded', 'cancelled', 0),
+        ('cancelled', 'cancelled', 0),
+        ('deadline_exceeded', 'deadline_exceeded', 1),
+        ('backend_failed', 'model_failed', 1),
+    ])
+    def test_structured_reply_classification_preserves_sources(tmp_path, code, expected, streak):
+        now = [1000.]
+        store = BoardMemoryStore(tmp_path/'synthetic-wire-error.sqlite3', clock=lambda: now[0])
+        store.append_event(dict(kind='conversation', id='synthetic-scope'), 'synthetic-event', 'user_said', '公开的合成记录。')
+        now[0] += 301
+        client = Client(code)
+        summary = BoardSummaryClient(client, board_boot_id='synthetic-boot')
+        worker = BoardMemoryBackoffWorker(store, summary, idle=lambda: True)
+        assert worker.step() is False
+        assert client.calls == 1
+&gt;       assert worker.error == expected
+E       AssertionError: assert 'model_failed' == 'cancelled'
+E         
+E         - cancelled
+E         + model_failed
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\tests\test_classification.py:44: AssertionError</failure></testcase><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_structured_reply_classification_preserves_sources[cancelled-cancelled-0]" time="0.046"><failure message="AssertionError: assert 'model_failed' == 'cancelled'&#10;  &#10;  - cancelled&#10;  + model_failed">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/memory_health_collaboration/test_baseline/tmp/test_structured_reply_classifi3')
+code = 'cancelled', expected = 'cancelled', streak = 0
+
+    @pytest.mark.parametrize('code,expected,streak', [
+        ('preempted', 'cancelled', 0),
+        ('foreground_busy', 'cancelled', 0),
+        ('superseded', 'cancelled', 0),
+        ('cancelled', 'cancelled', 0),
+        ('deadline_exceeded', 'deadline_exceeded', 1),
+        ('backend_failed', 'model_failed', 1),
+    ])
+    def test_structured_reply_classification_preserves_sources(tmp_path, code, expected, streak):
+        now = [1000.]
+        store = BoardMemoryStore(tmp_path/'synthetic-wire-error.sqlite3', clock=lambda: now[0])
+        store.append_event(dict(kind='conversation', id='synthetic-scope'), 'synthetic-event', 'user_said', '公开的合成记录。')
+        now[0] += 301
+        client = Client(code)
+        summary = BoardSummaryClient(client, board_boot_id='synthetic-boot')
+        worker = BoardMemoryBackoffWorker(store, summary, idle=lambda: True)
+        assert worker.step() is False
+        assert client.calls == 1
+&gt;       assert worker.error == expected
+E       AssertionError: assert 'model_failed' == 'cancelled'
+E         
+E         - cancelled
+E         + model_failed
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\tests\test_classification.py:44: AssertionError</failure></testcase><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_structured_reply_classification_preserves_sources[deadline_exceeded-deadline_exceeded-1]" time="0.045"><failure message="AssertionError: assert 'model_failed' == 'deadline_exceeded'&#10;  &#10;  - deadline_exceeded&#10;  + model_failed">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/memory_health_collaboration/test_baseline/tmp/test_structured_reply_classifi4')
+code = 'deadline_exceeded', expected = 'deadline_exceeded', streak = 1
+
+    @pytest.mark.parametrize('code,expected,streak', [
+        ('preempted', 'cancelled', 0),
+        ('foreground_busy', 'cancelled', 0),
+        ('superseded', 'cancelled', 0),
+        ('cancelled', 'cancelled', 0),
+        ('deadline_exceeded', 'deadline_exceeded', 1),
+        ('backend_failed', 'model_failed', 1),
+    ])
+    def test_structured_reply_classification_preserves_sources(tmp_path, code, expected, streak):
+        now = [1000.]
+        store = BoardMemoryStore(tmp_path/'synthetic-wire-error.sqlite3', clock=lambda: now[0])
+        store.append_event(dict(kind='conversation', id='synthetic-scope'), 'synthetic-event', 'user_said', '公开的合成记录。')
+        now[0] += 301
+        client = Client(code)
+        summary = BoardSummaryClient(client, board_boot_id='synthetic-boot')
+        worker = BoardMemoryBackoffWorker(store, summary, idle=lambda: True)
+        assert worker.step() is False
+        assert client.calls == 1
+&gt;       assert worker.error == expected
+E       AssertionError: assert 'model_failed' == 'deadline_exceeded'
+E         
+E         - deadline_exceeded
+E         + model_failed
+
+deliverables\2026-10-30_board_owner\integration\dialogue_repair\memory_health_collaboration\tests\test_classification.py:44: AssertionError</failure></testcase><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_structured_reply_classification_preserves_sources[backend_failed-model_failed-1]" time="0.057" /><testcase classname="deliverables.2026-10-30_board_owner.integration.dialogue_repair.memory_health_collaboration.tests.test_classification" name="test_unknown_server_error_code_is_never_exported_verbatim" time="0.046" /></testsuite></testsuites>

@@ -1,0 +1,145 @@
+{
+  "status": "PASS",
+  "tested_cases": 5,
+  "cases": [
+    {
+      "case": "ordinary_polar_question",
+      "public_source": "你会不会唱歌？",
+      "public_summary": "用户询问助手是否会唱歌。",
+      "metadata_keys": [
+        "evidence",
+        "source_id"
+      ],
+      "metadata_negated_true": false,
+      "worker_completed": true,
+      "model_calls": 1,
+      "rejection_reasons": [],
+      "pending_bodies": 0,
+      "persisted_summaries": 1,
+      "summary_attempt": {
+        "state": "complete",
+        "stage": "complete",
+        "code": "none",
+        "error_class": "none"
+      }
+    },
+    {
+      "case": "explicit_negated_question_control",
+      "public_source": "你会不会唱歌？",
+      "public_summary": "用户询问助手是否会唱歌。",
+      "metadata_keys": [
+        "evidence",
+        "negated",
+        "source_id"
+      ],
+      "metadata_negated_true": true,
+      "worker_completed": false,
+      "model_calls": 1,
+      "rejection_reasons": [
+        "negation_missing"
+      ],
+      "pending_bodies": 1,
+      "persisted_summaries": 0,
+      "summary_attempt": {
+        "state": "failed",
+        "stage": "full_source_validation",
+        "code": "candidate_rejected",
+        "error_class": "CandidateRejected",
+        "rejection_reasons": [
+          "negation_missing"
+        ]
+      }
+    },
+    {
+      "case": "genuine_negative_reversal",
+      "public_source": "我不会唱歌。",
+      "public_summary": "用户会唱歌。",
+      "metadata_keys": [
+        "evidence",
+        "source_id"
+      ],
+      "metadata_negated_true": false,
+      "worker_completed": false,
+      "model_calls": 1,
+      "rejection_reasons": [
+        "negation_missing"
+      ],
+      "pending_bodies": 1,
+      "persisted_summaries": 0,
+      "summary_attempt": {
+        "state": "failed",
+        "stage": "full_source_validation",
+        "code": "candidate_rejected",
+        "error_class": "CandidateRejected",
+        "rejection_reasons": [
+          "negation_missing"
+        ]
+      }
+    },
+    {
+      "case": "genuine_negative_preserved",
+      "public_source": "我不会唱歌。",
+      "public_summary": "用户不会唱歌。",
+      "metadata_keys": [
+        "evidence",
+        "source_id"
+      ],
+      "metadata_negated_true": false,
+      "worker_completed": true,
+      "model_calls": 1,
+      "rejection_reasons": [],
+      "pending_bodies": 0,
+      "persisted_summaries": 1,
+      "summary_attempt": {
+        "state": "complete",
+        "stage": "complete",
+        "code": "none",
+        "error_class": "none"
+      }
+    },
+    {
+      "case": "unrecognized_faithful_negative_wording",
+      "public_source": "小林没有喝咖啡。",
+      "public_summary": "小林没喝咖啡。",
+      "metadata_keys": [
+        "evidence",
+        "source_id"
+      ],
+      "metadata_negated_true": false,
+      "worker_completed": false,
+      "model_calls": 1,
+      "rejection_reasons": [
+        "negation_missing"
+      ],
+      "pending_bodies": 1,
+      "persisted_summaries": 0,
+      "summary_attempt": {
+        "state": "failed",
+        "stage": "full_source_validation",
+        "code": "candidate_rejected",
+        "error_class": "CandidateRejected",
+        "rejection_reasons": [
+          "negation_missing"
+        ]
+      }
+    }
+  ],
+  "actual_spec_sha256": "8376770e832d82add3ae207da3228c46c34ada89b95830cdd7536f8291224ec2",
+  "source_sha256": {
+    "common/board_memory.py": "8905770197f114cc063addb2dd40bc745d9af942f674140f43e597ff3a6b1905",
+    "board/runtime/board_memory_policy.py": "a862cc22f6c23ae90d17ef06614cdf90fa0eb4605ad0a8b74766d102aad404aa",
+    "board/runtime/board_business.py": "b08209eca7979825e26845080bca5e1d64e065d3cabd1178df763a93540573f2",
+    "board/runtime/board_dialogue.py": "c877cdee602ff0bda669cc2b2fefa77e9328ce205a744e317df82ffb17146de6",
+    "board/runtime/audio/board_dialogue_jobs.py": "687b80cde20d70e4de56dd71956683b9cec59f55bd25965491dc08d00c8cb248",
+    "board/runtime/visual_memory.py": "ddfff3ed68ecc1e7586f9c7d3a10e489a981301970220f1fbdfcde96b39ae090",
+    "board/runtime/visual_policy.py": "e8e80e0d92c889e5533aa84c4abf7782d7424d8658783d64acac2d17ea2a147e",
+    "board/visual_timeline.py": "45990ec15e61aad99e05b47a021dfeda3cde01bf150eef21a515ce2a129a61e3"
+  },
+  "ordinary_ingestion_metadata_automatically_negated": false,
+  "metadata_true_control_is_explicitly_injected": true,
+  "actual_remaining_live_failure_cause": "UNDETERMINED_WITHOUT_FAILED_SOURCE_SHAPE_COUNTERS",
+  "faithful_negative_paraphrase_rejection_reproduced": true,
+  "production_source_modified": false,
+  "private_database_accessed": false,
+  "model_or_device_accessed": false
+}

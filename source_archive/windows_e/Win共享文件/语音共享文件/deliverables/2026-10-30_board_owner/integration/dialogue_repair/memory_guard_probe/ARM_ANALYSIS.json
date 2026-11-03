@@ -1,0 +1,21 @@
+{
+  "schema": "aura.public-guard-arm-analysis.v1",
+  "status": "MEASURED_SOURCE_COST_NO_SOURCE_CHANGE",
+  "evidence": {"path": "actual_board.json", "sha256": "9b10ead3e6920895fbec901098586ee5ca938fa4b6371ef345853ae9cb765331"},
+  "measured": [
+    {"dependencies": 1, "iterations": 100, "mean_wall_ms": 13.156, "median_wall_ms": 8.567, "p95_wall_ms": 30.358, "max_wall_ms": 40.428, "over_20ms": 20, "mean_process_CPU_ms": 7.09049, "wall_fraction_of_20ms_packet": 0.6578},
+    {"dependencies": 8, "iterations": 100, "mean_wall_ms": 12.283, "median_wall_ms": 9.142, "p95_wall_ms": 25.841, "max_wall_ms": 34.978, "over_20ms": 15, "mean_process_CPU_ms": 7.63005, "wall_fraction_of_20ms_packet": 0.6142}
+  ],
+  "inferences": [
+    "Guard work is material: approximately 61-66% of each 20ms packet budget in measured wall time, and about 35-38% of one CPU core if called 50 times per second, before additional events/backpressure retries.",
+    "In this separate synthetic process, average guard-only throughput is approximately 76-81 checks per second, above 50 packets per second. This by itself does not establish that SQL causes all 840 output underruns.",
+    "Fifteen to twenty percent of individual checks exceed 20ms, with a 35-40ms maximum. Tail latency and other producer/GTK/barge work can erode buffering margin.",
+    "Eight dependencies were not slower on average than one in this run. These results do not identify per-source SELECT count as the dominant component; connection setup, OS scheduling and other shared load remain plausible contributors.",
+    "The script ran as a separate process alongside existing UI/listening/camera, without models/playback or the real database. The actual GUI producer also shares its own GIL and event loop; its cost may differ.",
+    "first_chunk_emitted_ms is measured after the entire first sentence is queued. The observed sink span and prepare_total include 128-entry queue backpressure and cannot be treated as pure SQL CPU time."
+  ],
+  "decision": "Keep the current guard unchanged for root's single-variable half-duplex validation (disable generation/playback barge capture). If starvation persists, measure/implement a separately reviewed anonymous single fresh-read transaction and batched dependency query, preserving every-packet and post-wait invalidation checks.",
+  "check_frequency_or_authorization_semantics_changed": false,
+  "production_modified": false,
+  "private_database_accessed": false
+}

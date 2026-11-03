@@ -1,0 +1,76 @@
+Detached native GUI public pipe capacity helper — local source candidate
+
+No board / SSH / model / GUI / microphone / playback / identity / database action
+was executed by this agent. Root is the sole actual publisher and executor.
+
+Entry: public_pipe_capacity.py. Default action is inspect. All required arguments
+must be explicit. Inspect reads only frozen public files, proc/systemd metadata,
+the existing handoff journal/launch receipt and one fixed loopback GET. It does
+not load the original probe or any audio/model/GUI package. Run explicitly calls
+the original reviewed b53803ca probe.main. The ONLY monkeypatched probe attribute
+is safety_snapshot, installed for that call and restored in finally.
+
+Frozen dependencies:
+  original resume_inference/board_audio_pipeline_probe.py b53803ca... (unchanged)
+  independent resume_ui_trial/restore_v2.py 1d4b0a2e... (unchanged)
+  independent resume_ui_trial/ui_trial_policy.v2.json 77fd6821... (unchanged)
+The v2 read_policy initializer must run before inactive/proof. This seals exactly
+71 reviewed aliases (including both path and canonical SHA); no generic symlink
+follow or fallback to v1 read is allowed. The helper calls only the existing
+read-only inactive/proof/process/command/candidate_owner interfaces, never
+restore/lock/launch/save or any systemd mutation.
+
+Additional admission, before and after run and in every patched safety_snapshot
+(including original include_service_pids=False calls):
+  - Boot8100a7fd; explicit candidate PID, proc birth and NUL-cmdline SHA; argv must
+    exactly equal the pinned 356-file assembled launch using board_avatar_pan.
+  - Exact reviewed assembly d199cd30...; all356 files rehash, data_origin synthetic,
+    fixed ASR/frontend threads2/1 and model_port8797; no original assets/config edits.
+  - Original UI service inactive/MainPID0/no Job; Restart=no, SendSIGKILL=no,
+    TimeoutStopUSec=infinity; existing proof checks journal guard + original unit
+    sources/dropins/argv + original startup286pins including exact aliases.
+  - Candidate launch receipt, inherited lock descriptor to the same root-owned
+    inode, and one exact exclusive FLOCK in /proc/locks. No lock acquisition,
+    release or signal. A stale launcher PID in the inherited FLOCK is expected;
+    candidate FD + locked inode, not launcher PID, is the proof.
+  - Camera service MainPID260102 and current proc birth784437, repeated after GET.
+  - Explicit IDLE, not playing/listening/recording/following, mechanical FAULT and
+    both pulse/target null; native_yuki_egl visible/scheduling true, target16, frozen
+    pair READY/persona and board_owned service enabled with no pending job.
+  - Candidate owner checked twice; any failed postcheck invalidates a probe PASS.
+
+Actual run arguments are fixed pipeline/runs1/frontend1/nice0/8frame queue.
+No larger queue, negative nice, ORT upgrade, altered thresholds, silence fixture
+substitution or alternate audio path is exposed. Original public WAV/model/tokens
+and original capture+endpoint+ASR remain byte-exact. Result also requires original
+ORT1.17.3/sherpa1.13.8/NumPy1.21.2 and clean stopped8frame pump. No live tuning.
+
+Capacity interpretation:
+The full GUI constructs BoardParaformer and BoardFftSpeechGate at startup. The
+separate public probe constructs additional frontend and ASR instances. This is
+an intentionally conservative DUPLICATE-MODEL-RESIDENCY measurement, not GUI's
+single in-process live microphone path. No claim of real microphone, playback,
+calibrated identity, old-character matched A/B, final16fps or final replacement
+acceptance. Original probe production_context only recognizes its historical
+display kind; use the independent native state sampler for delta successful-swap
+FPS. Target16 is an admission setting, not a measured16fps result. The hard20ms
+model flag remains the original probe's reported result and is not promoted.
+
+Example root-only inspect (use root's current freshly verified numeric owner):
+  /usr/bin/python3 -B <private>/public_pipe_capacity.py
+    --probe-file <private>/probe.py
+    --control-file <private>/restore_v2.py
+    --policy <private>/ui_trial_policy.v2.json
+    --candidate-pid <PID> --candidate-birth <PROC_START_TICKS>
+    --candidate-cmdline-sha256 <EXACT_NUL_CMDLINE_SHA256>
+To run add the literal positional action "run". All pins are embedded; never use
+the old v1 helper/policy. Parent should preserve complete stdout/return code in
+its existing bounded resource-trial wrapper, with >=120s command timeout and its
+existing single-publisher performance window. This helper creates no files and
+has no automatic stage/start/stop/recovery behavior.
+
+Synthetic evidence: synthetic_tests.xml. Tests exercise guard refusal, PID reuse,
+71-alias initialization, precise assembler encoding, private data projection,
+HTTP trickle timeout/framing/redirect rejection, inherited lock absence/mismatch,
+inspect without model/probe loading, sole monkeypatch/finally restoration,
+runtime mismatch and postcheck failure. All sources parse as Python3.9.

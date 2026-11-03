@@ -1,0 +1,5 @@
+{
+  "path": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/camera_wrapper.py",
+  "sha256": "065c465e0ad0d8cf3ada4b69dcc422a4f85a286b1a7be1536e29d4aeac562df8",
+  "text": "\"\"\"Use existing camera/model owners with anonymous face edge observations.\"\"\"\nimport json\nfrom pathlib import Path\nimport sys\nROOT = Path(__file__).resolve().parent\nmeta = json.loads((ROOT.parent/'meta.json').read_text())\nsys.path.insert(0, str(Path(meta['candidate_root'])/'aura'))\nsys.path.insert(0, str(ROOT))\nfrom board.vision import ui_camera_service as camera\nfrom board.motion.camera_feed import install as install_body_observation\nfrom motion_stream import install as install_body_stream\nfrom face_source import install as install_face_source\ninstall_body_observation(camera)\ninstall_body_stream(camera)\ninstall_face_source(camera, interval_ms=100, optical_flow=True)\ncamera.main()\n"
+}

@@ -1,0 +1,47 @@
+五源联合公开ARM验证结构稿：M03 8例 + 身份协作47例 + root独审12例 = 67例。
+
+本stage尚未ARM执行，不能用于发布。root正在准备evidence有界重试增量，business/speaker
+最终两份源可能变化；当前17个运行artifact和五份产品源保持冻结，只作结构/测试审查。
+最终pins到齐后另建stage，不覆盖本目录或任何原M03/身份候选。
+
+已绑定实际v19：startup de7772b898378d2263b0809d18c095a60585a672690371d2f072b2e04c2f574f；
+manifest e1e5947f6f054760650f36fb51726305478dbd394cb89096a0338aeb92989c41；
+mapping ef8db220fde3b70a62ff1ff7cf2e9471a199a6d43b9234a18f8701eff58448f7；
+applied spec 49ffbc82a4b9543d92234f055fce8af055de29764ca6f688ae0a36fe7a35a904。
+
+只按STAGING_MANIFEST.json的files复制17个artifact，保留各relative key的位置。
+不要传public_runtime_v19/343份本地复验快照、任何环境、模型、私库或生成音频。
+after/必须恰好五份manifest中的源文件，不带pycache。原M03四例必须放在：
+S/tree/a/b/c/d/review_m03_win_inference/test_delete_boundaries.py
+这样原COLLAB.parents[4]推导为S，不再触发首个flat布局错误。原四例字节/断言不改。
+
+R=实际生产根；S=新的绝对公开stage路径；OUT=绝对且不存在的新回执路径。
+root负责现场核验freshowner/空闲及协调本隔离进程，尊重已保存false/PAUSED/micfalse。
+worker不查询/切换真实UI或监听，不要求关闭UI、暂停/恢复聆听或设备停机。
+--root-coordinated-slot只是root测试进程的归属标记，不是硬件门槛。
+
+命令（正式ARM绝不能使用--local-replay；ROOT_SLOT由root命名）：
+python3 -B S/arm_public_worker.py --runtime-root R/runtime/aura --startup-config R/startup/config.json --candidate-root S/after --mapping S/source_mapping.v19.json --candidate-manifest S/SOURCE_MANIFEST.json --candidate-manifest-sha256 69286dd2ddcb6931521878da213058a222d2c778d7b162cdea4bd83053952917 --original-review S/tree/a/b/c/d/review_m03_win_inference/test_delete_boundaries.py --independent-tests S/test_independent_boundaries.py --public-worker S/public_worker.py --applied-spec S/applied_spec.v19.json --identity-tests S/identity_tests.py --identity-independent S/identity_independent.py --speaker-fixtures S/speaker_fixtures.py --face-fixtures S/face_fixtures.py --identity-adapter S/identity_stdlib_cases.py --root-coordinated-slot ROOT_SLOT --output OUT
+
+Python>=3.10及现有系统时区库，不需要pytest/numpy/ONNX。
+先做boot/startup/actual-spec/完整379当前组件/five-source before-after/原测试/适配器SHA
+检查，之后才导入应用。失败不能靠--local-replay或改校验常量在ARM上绕过。
+可先--check-only另用新输出；CHECKED_ONLY不代表67例通过。
+
+所有SQLite均由独立进程在自建0700 /dev/shm临时目录内创建，data_origin=synthetic；
+假encoder/client/native-ready/PCM/画面/播放fixture不加载实际模型或打开物理设备。
+生产根仅只读源码/config hash及公开人设资源，不打开生产私库/模板或writer lease。
+
+root wrapper必须等待worker真正退出，分别保留exitcode、stdout、stderr及最终JSON。
+RUNNING中间回执不能算通过。新entry异常会写ERROR_BEFORE_TEST_COMPLETION；通过要求
+status=PASS/tests=67/failures=0/errors=0、temporary_stores_removed=true、new_threads_remaining=0，
+并确认全部379实际源校验、五份候选模块SHA及pytest/numpy/onnxruntime未导入。
+
+适配说明：M03原4按unittest原样；M03独立3原函数体AST用标准assertRaises/patch；
+身份47及root独立12保留原测试函数体和断言AST，parametrize做笛卡尔展开、tmp_path用
+TemporaryDirectory、raises用标准unittest。仅Harness的一个公开资源路径改指已经校验的R。
+这些是标准库适配后的67例，不能写成ARM直接跑了pytest59或完整pytest回归。
+WORKER_REVIEW.diff和identity_stdlib_cases.py供root审查；原worker及原测试文件均未改。
+
+本地LOCAL_REPLAY_01.json：67/67 PASS，343公开源/配置hash校验，临时库已清除、线程0、
+pytest/numpy/onnxruntime导入空。它不证明当前实际379、ARM性能、真人识别率或物理听音。

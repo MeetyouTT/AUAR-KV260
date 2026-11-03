@@ -1,0 +1,109 @@
+{
+  "camera_unit": "# /etc/systemd/system/aura-camera-ui.service\n[Unit]\nDescription=AURA shared USB camera preview and YOLOX person adapter\nAfter=local-fs.target\nStartLimitIntervalSec=0\n\n[Service]\nType=simple\nExecStart=/usr/bin/python3 -B /home/root/aura-enrollment-photos-20261019/candidate-6f1aa1842d53/runtime/aura/board/vision/ui_camera_service.py --config /home/root/aura-enrollment-photos-20261019/candidate-6f1aa1842d53/camera_live_config/board_camera_ui.json\nWorkingDirectory=/home/root/aura-enrollment-photos-20261019/candidate-6f1aa1842d53/runtime/aura\nEnvironment=PYTHONUNBUFFERED=1\nRestart=on-failure\nRestartSec=3\nTimeoutStopSec=10\nKillMode=control-group\nUMask=0077\n\n[Install]\nWantedBy=multi-user.target\n",
+  "ui_unit": "# /etc/systemd/system/aura-avatar-ui.service\n[Unit]\nDescription=AURA cached avatar touchscreen interface\nWants=xserver-nodm.service systemd-modules-load.service\nAfter=local-fs.target xserver-nodm.service systemd-modules-load.service\nRequiresMountsFor=/home/root/aura-long-conversation-20261019/candidate-9a5bcf476bf8/runtime\nStartLimitIntervalSec=300\nStartLimitBurst=5\n\n[Service]\nType=notify\nNotifyAccess=main\nUser=root\nEnvironment=DISPLAY=:0 PYTHONUNBUFFERED=1\nWorkingDirectory=/home/root/aura-long-conversation-20261019/candidate-9a5bcf476bf8/runtime/aura\nExecStart=/usr/bin/python3 -B /home/root/aura-long-conversation-20261019/candidate-9a5bcf476bf8/startup/launcher.py --config /home/root/aura-long-conversation-20261019/candidate-9a5bcf476bf8/startup/config.json\nRestart=on-failure\nRestartSec=5\nTimeoutStartSec=240\nTimeoutStopSec=25\nKillMode=mixed\nStandardOutput=journal\nStandardError=journal\nSyslogIdentifier=aura-avatar-ui\n\n[Install]\nWantedBy=graphical.target\n",
+  "camera_config": {
+    "device": "/dev/v4l/by-id/usb-HD_720P_Webcam_HD_720P_Webcam_20130901-video-index0",
+    "port": 8790,
+    "capture_fps": 30,
+    "inference_fps": 10,
+    "detector_backend": "dpu_yolox",
+    "yolo": {
+      "model": "/home/root/aura-bytetrack-20261011/models/yolox_nano_person.xmodel",
+      "model_sha256": "def64abdeeccbd020cb651913ba907464c1a1786e30ba7d4aa077b601388950a",
+      "model_config_sha256": "e3359212356578053b71a844ab10d82617d80c33274bb926875c3f422b6de611",
+      "native_library": "/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/board/vision/native/libaura_yolox.so",
+      "native_sha256": "14524ca6364f7ecab3464999a1f20271d9f3b13e80684859f6da1573caf6efa8",
+      "arch_fingerprint": "0x101000056010407",
+      "classes": [
+        "person"
+      ],
+      "score_threshold": 0.1,
+      "person_nms_iou": 0.45,
+      "reference_image": "/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/tests/fixtures/vision/person_bus.jpg",
+      "reference_sha256": "975917d943c3dd367a27c37c4a9b0cdaf28c73ce671c881f6489a18bda20b46f"
+    },
+    "backend_dir": "/home/root/aura-realtime-vision-20261007/releases/mirror-0c1d48dd418e922d",
+    "backend_sha256": {
+      "face_compat_fast.py": "ee34109e23423d99a4ea3ff75c2bf9d113329b1c8162cd02f30e7dfcfb6bfeaf",
+      "vision_core.py": "9629102ced2856bbd0c120b9c5e3df36c224424165bb980b90be42350ae8a700"
+    },
+    "model_root": "/home/root/aura-adaptation-20261006/identity",
+    "tracking": {
+      "backend": "bytetrack_numpy",
+      "track_threshold": 0.5,
+      "new_track_threshold": 0.6,
+      "match_threshold": 0.8,
+      "nominal_hz": 10,
+      "lost_ms": 500,
+      "confirm_observations": 2,
+      "source_sha256": {
+        "LICENSE": "e9d83751678cbaba6dfba902ea39215c423d93425e58f8450d6001f7261696f9",
+        "__init__.py": "8ca3af0743671af49094a5e770931311769e0a6dc3df9817170bbe128db0336b",
+        "basetrack.py": "c938afcf7c516bba4a77155c2499fcae6f926df7a2faa6f73a4be1b073f9bb2d",
+        "byte_tracker.py": "42a9ada9df21356da16b58096ad20aa42bf2820a1e6b64ba6372169bb04ca75a",
+        "kalman_filter.py": "877fbfd27fd8d76b68be280cc7483f984faa269165f987815b2b7d10b577bf9d",
+        "matching.py": "cce9866fabf71c4fc5d2350fabc050bde12de21dd5eafa2e0e76eb0299ce80c3",
+        "upstream_manifest.json": "86d5788b064af8b2370800a21db21af265ee0cfc3967aef8c89f3fe08aedd17c"
+      }
+    },
+    "identity": {
+      "enabled": true,
+      "config": "/home/root/aura-enrollment-photos-20261019/candidate-6f1aa1842d53/camera_live_config/board_identity.json"
+    }
+  },
+  "camera_config_path": "/home/root/aura-enrollment-photos-20261019/candidate-6f1aa1842d53/camera_live_config/board_camera_ui.json",
+  "identity_config": {
+    "schema_version": "aura-camera-identity-1",
+    "face_model": "/home/root/aura-adaptation-20261006/identity/models/yunet_2022mar.onnx",
+    "embedding_model": "/home/root/aura-adaptation-20261006/identity/models/sface_2021dec_retry.onnx",
+    "model_id": "sface-2021dec-0ba9fbfa01b5",
+    "database": "~/.local/share/aura/identities.sqlite3",
+    "input_size": 320,
+    "minimum_face_score": 0.9,
+    "minimum_face_pixels": 48,
+    "minimum_blur_variance": 40,
+    "threshold": 0.5,
+    "ambiguity_margin": 0.1,
+    "threshold_origin": "user_authorized_experimental_cosine_0.50_not_field_calibrated",
+    "interval_ms": 500,
+    "result_ttl_ms": 3000,
+    "feature_backend": {
+      "kind": "windows_sface",
+      "host": "192.168.50.1",
+      "port": 8792,
+      "timeout_ms": 650
+    },
+    "enrollment_photos": {
+      "enabled": true,
+      "directory": "~/.local/share/aura/enrollment_photos",
+      "max_images_per_session": 192
+    }
+  },
+  "identity_config_path": "/home/root/aura-enrollment-photos-20261019/candidate-6f1aa1842d53/camera_live_config/board_identity.json",
+  "identity_db_sha256": "e0d2113eb51171079978b1e63eb4263d5fb13235fec1839f7be778dab1520aa1",
+  "camera_pid": 93153,
+  "ui_phase": "IDLE",
+  "automatic": {
+    "enabled": false,
+    "state": "STOPPED",
+    "error": "",
+    "completed_turns": 0,
+    "speech_active": false,
+    "can_start": true,
+    "can_stop": false
+  },
+  "pending": false,
+  "ui_audio": "IDLE",
+  "photos": {
+    "enabled": true,
+    "ready": true,
+    "directory": "/home/root/.local/share/aura/enrollment_photos",
+    "active_session": null,
+    "latest_session": "c6c3fa6ebd4449ae93bd9ec316344d51",
+    "image_count": 25,
+    "outcome": "committed",
+    "error": "",
+    "error_count": 0,
+    "last_error": ""
+  }
+}

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.569" timestamp="2026-10-31T08:31:37.170175-07:00" hostname="zhenghang"><testcase classname="tests.test_speaker_close_reentrant" name="test_queued_future_cancellation_callback_can_remove_jobs_during_shutdown[close]" time="0.213"><failure message="RuntimeError: dictionary changed size during iteration">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/feature_trigger_collaboration/candidate_speaker_close/baseline_work/test_queued_future_cancellatio0')
+operation = 'close'
+
+    @pytest.mark.parametrize('operation',['close','reset'])
+    def test_queued_future_cancellation_callback_can_remove_jobs_during_shutdown(tmp_path,operation):
+        service=BoardSpeakerBusiness.create(tmp_path/'public-speaker',encoder_factory=Encoder,
+            board_boot_id=BOOT,quality=quality,expected_model_id=MODEL,anonymous_config={'enabled':True},
+            wall_clock=lambda:1793400000.,data_origin='synthetic')
+        entered=threading.Event();release=threading.Event()
+        def block_sole_worker():
+            entered.set();assert release.wait(3)
+        blocker=service.pool.submit(block_sole_worker)
+        try:
+            assert entered.wait(1)
+            meta,pcm=capture(1)
+            service.submit_analysis(meta,pcm,'b'*32)
+            with service.lock:
+                assert len(service.jobs)==1
+                future=next(iter(service.jobs.values()))['future']
+                assert not future.running() and not future.done()
+            # cancel() on this queued future synchronously calls finished(), whose
+            # original locked callback removes that same job. No timing race needed.
+&gt;           if operation=='close':assert service.close(timeout=.01) is False
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_speaker_close_reentrant.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;board.runtime.board_speaker_business.BoardSpeakerBusiness object at 0x00000250C7052210&gt;
+
+    def close(self,*,timeout=2.):
+        if not self.closing.is_set():
+            self.closing.set()
+            with self.lock:
+&gt;               for job in self.jobs.values():
+                           ^^^^^^^^^^^^^^^^^^
+E               RuntimeError: dictionary changed size during iteration
+
+board_integration_v17\local_runtime_v17\board\runtime\board_speaker_business.py:640: RuntimeError</failure></testcase><testcase classname="tests.test_speaker_close_reentrant" name="test_queued_future_cancellation_callback_can_remove_jobs_during_shutdown[reset]" time="0.161"><failure message="assert False&#10; +  where False = cancelled()&#10; +    where cancelled = &lt;Future at 0x250c8387800 state=pending&gt;.cancelled">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/feature_trigger_collaboration/candidate_speaker_close/baseline_work/test_queued_future_cancellatio1')
+operation = 'reset'
+
+    @pytest.mark.parametrize('operation',['close','reset'])
+    def test_queued_future_cancellation_callback_can_remove_jobs_during_shutdown(tmp_path,operation):
+        service=BoardSpeakerBusiness.create(tmp_path/'public-speaker',encoder_factory=Encoder,
+            board_boot_id=BOOT,quality=quality,expected_model_id=MODEL,anonymous_config={'enabled':True},
+            wall_clock=lambda:1793400000.,data_origin='synthetic')
+        entered=threading.Event();release=threading.Event()
+        def block_sole_worker():
+            entered.set();assert release.wait(3)
+        blocker=service.pool.submit(block_sole_worker)
+        try:
+            assert entered.wait(1)
+            meta,pcm=capture(1)
+            service.submit_analysis(meta,pcm,'b'*32)
+            with service.lock:
+                assert len(service.jobs)==1
+                future=next(iter(service.jobs.values()))['future']
+                assert not future.running() and not future.done()
+            # cancel() on this queued future synchronously calls finished(), whose
+            # original locked callback removes that same job. No timing race needed.
+            if operation=='close':assert service.close(timeout=.01) is False
+            else:service.reset()
+&gt;           assert future.cancelled()
+E           assert False
+E            +  where False = cancelled()
+E            +    where cancelled = &lt;Future at 0x250c8387800 state=pending&gt;.cancelled
+
+tests\test_speaker_close_reentrant.py:28: AssertionError</failure></testcase></testsuite></testsuites>

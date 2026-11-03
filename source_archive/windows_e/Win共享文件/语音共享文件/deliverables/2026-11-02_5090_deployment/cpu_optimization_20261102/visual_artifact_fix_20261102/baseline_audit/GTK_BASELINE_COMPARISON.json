@@ -1,0 +1,118 @@
+{
+  "schema": "aura-GTK-historical-baseline-comparison-short-1",
+  "status": "LOCAL_AUDIT_COMPLETE_NO_GOOD_MORNING_SOURCE_FINGERPRINT_IN_REVIEWED_RECEIPTS",
+  "root_references": [
+    {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\visual_artifact_fix_20261102\\baseline_audit\\MANIFEST_TIMELINE_AND_DELTA.json",
+      "sha256": "abd775ae67f016c71169a2d14ef9de5a432649375c1b585f86231eb44898223f"
+    },
+    {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\visual_artifact_fix_20261102\\baseline_audit\\COMPOSED_RENDER_PATH_CORRECTION.json",
+      "sha256": "892e790916a39383d07e92117fda3de5e896aded5e26fc24145a8b3a4bb59e89"
+    }
+  ],
+  "confirmed_current_startup": "c3861fa3d2cbb10fee424804f7b3932eadd576819a2a6290c7ca406d900b9602",
+  "deltas": [
+    {
+      "component": "tools/board_avatar_gtk.py",
+      "before": "5e5c492832fc1273d45fa25d0ec692b47c9ffa4b6c6d46e42f176e842b50d70c",
+      "after": "d3c3d18aad2afdd02e25c5619befc67cfdd3fd8a7ef9f8713b5403a88c9a7bc5",
+      "change": "Exactly four setters: vision/large each app_paintableTrue,double_bufferedFalse at construction. Remaining entire AST unchanged. This advances setting time; mapped FaceStage already used the same values.",
+      "source_before": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\visual_artifact_fix_20261102\\actual_source_capture\\board_avatar_gtk.py",
+      "source_after": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\visual_artifact_fix_20261102\\gtk\\tools\\board_avatar_gtk.py"
+    },
+    {
+      "component": "tools/board_camera_preview.py",
+      "before": "6e697c16f7ae264dff56b6b35f38da4b531ea13026b69a7c8bdbfb1960a6afcd",
+      "after": "67d6c0f2b24ea97e20fdcc7b3383b6444269a6e26f5deb566f2b88746b7daf9b",
+      "change": "Only work() source read at old158/new158-159: prefer callable read_preview, otherwise existing services.read. All other methods unchanged.",
+      "source_before": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\v2\\original\\tools\\board_camera_preview.py",
+      "source_after": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\v2\\candidate\\tools\\board_camera_preview.py"
+    },
+    {
+      "component": "board/interaction/ui_services.py",
+      "before": "b55ee295e2cb5494f387fbaa4aa081fd1d6bffd57588c018c5f31daae56bd711",
+      "after": "e4dedf9b3d56d22d9eb93de1e96ad1a69870d553ea50f7dd5082b21e19f381c9",
+      "change": "Only adds read_preview at156-179: locked narrow deepcopy of required snapshot/preview/raw-owner fields with original expiry. All existing methods, including full read, unchanged.",
+      "source_before": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\v2\\original\\board\\interaction\\ui_services.py",
+      "source_after": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\gtk\\v2\\candidate\\board\\interaction\\ui_services.py"
+    }
+  ],
+  "composition_correction": {
+    "source": {
+      "path": "E:\\Win\u5171\u4eab\u6587\u4ef6\\\u8bed\u97f3\u5171\u4eab\u6587\u4ef6\\deliverables\\2026-11-02_5090_deployment\\boot_recovery_parallel_20261102\\face_box_sync_review_20261102\\exact_c115\\tools\\face_pan_controls.py",
+      "sha256": "3ebb1b32368c8f12864e0f13da68853e4d9653e4279eada124eb337c5ca9d7ee",
+      "bytes": 15966
+    },
+    "matched_current_380": true,
+    "lines": [
+      188,
+      191,
+      194,
+      195,
+      196,
+      199,
+      200,
+      201,
+      210,
+      212,
+      213
+    ],
+    "finding": "Actual FaceStage already sets double_bufferedFalse/app_paintableTrue before super.attach_preview, handles draw with returnTrue and coalesces a guarded native expose. Early GTK_FINDINGS inspected only the base class and missed this composition. Its missing-native-ownership hypothesis is superseded; d3c3 does not newly introduce those post-attach values. Physical causal benefit is unproven.",
+    "historical_evidence_and_candidate_bytes_unchanged": true,
+    "other_confounders": [
+      "Earlier property-setting time",
+      "GUI/editor restart",
+      "Page/listening workload mode change"
+    ]
+  },
+  "per_frame_invariants": "6e69->67d6 leaves pipeline conversion order/resolution,10ms loop,framerate0/1 caps,queue1/appsrc bound,250ms source+sink freshness,full-black clear,four metadata refs,raw inode/sequence dedup and all read() metrics unchanged. No published scale-first swap or new image cache. Metrics remain native sink-entry reporting, not physical scanout or motion-face input age.",
+  "history_and_acceptance": [
+    {
+      "time": "2026-11-02T09:45:08Z",
+      "receipt": "cpu_optimization_20261102/BASELINE_PREPARED.json",
+      "receipt_sha256": "e9113223acd82085e4643d12e053a904225fb946782f6b02a2b39e47fbdc4374",
+      "startup": "1177df3831407bc819c1f1e3b89090f8c6b97661c8e74c2866b281be93b0a9c8",
+      "scope": "Actual preCPU full3805e5c/6e69/b55; corroborated09:37 source capture. Actual historical source baseline, not contemporaneous human moving-video acceptance."
+    },
+    {
+      "time": "2026-11-02T12:42:51Z",
+      "receipt": "cpu_optimization_20261102/window_benchmark_1231/GTK_APPLIED.json",
+      "scope": "Actual projection commit f507->e494. No human visual pass or measured whole-GUI benefit follows just from this receipt."
+    },
+    {
+      "time": "2026-11-02T14:54:29Z",
+      "receipt": "maintenance_original_axis_20261101/user_acceptance_20261102/USER_ACCEPTANCE.json",
+      "scope": "Explicit human follow/no-stutter acceptance; boot/source fingerprint fields null. Cannot bind a particular morning GTK/preview SHA. Older109s follow technical report also lacks that contemporaneous GUI source join."
+    },
+    {
+      "time": "2026-11-02T19:38:00Z",
+      "receipt": "visual_artifact_fix_20261102/release/APPLY_VISUAL_1_RESULT.json",
+      "scope": "c115->c386 only GTK component changed; other379 unchanged. Editor6a->6d0 is outside380."
+    },
+    {
+      "time": "2026-11-02T19:43:17Z",
+      "receipt": "visual_artifact_fix_20261102/VISUAL_LIVE_USER_ACCEPTANCE.json",
+      "scope": "Human10s video/face-box improvement on c386, not stability acceptance."
+    },
+    {
+      "time": "2026-11-02T19:48:14Z",
+      "receipt": "joint_acceptance_180s_20261102/VISUAL_AXIS_RECURRENCE_USER_REPORT.json",
+      "scope": "Visual recurrence/rightward jerk reported about5min later; short pass cannot be treated as stable baseline."
+    }
+  ],
+  "runtime_mode_confounder": {
+    "supported": "19:39:37 GUI_READY has HFdisabled,micfalse,PAUSED.19:40:51 OPEN_VISION has vision/raw-local activeOutputs[vision]. Root confirms the10s human pass stayed vision+PAUSED.19:44:28 and19:46:11 FINAL_JOINT_READY have main/HFenabled,mictrue/WAITING_SPEECH.",
+    "gaps": "OPEN_VISION does not log HF; later main/HF receipts do not log preview activeOutputs or motion-face source/detection ages. Human pass/recurrence have no simultaneous source-age packet. Page and listening both changed, so this is not same-mode source A/B.",
+    "age_warning": "GUI-projected preview reference280-531ms is not proven actual motion-face input age; do not extend250ms face TTL or attribute the failure from that projection alone."
+  },
+  "comparison_scope": "Root already selected samec386/samevision original listening pause/on comparison after axis handback. CPU ran none. Any later source comparison should isolate either construction setter timing OR worker full-read/narrow-read selection, keep current FaceStage/editor6d0/other379, and never replay an entire historic startup or pan/identity/camera binding set. No automatic additional changes are recommended.",
+  "hint_and_freeze": "Root reports original hint relocation geometry passed; preserve it. Editor V2 and new candidate work remain stopped.",
+  "authority": {
+    "board_calls": 0,
+    "new_candidates_or_source_edits": 0,
+    "new_tests_or_experiments": 0,
+    "root_only_GUI_camera_and_rollback": true,
+    "no_deployment_or_rollback_authorized_here": true
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "boot_id": "975f931a-927b-4a06-b784-ebda8463177f",
+  "driver_writes": 0,
+  "devices": {
+    "fd4a0000.display": {
+      "exists": true,
+      "driver": "/sys/bus/platform/drivers/zynqmp-display",
+      "driver_controls": {
+        "bind": true,
+        "unbind": true
+      },
+      "children": [
+        "fd4a0000.display:zynqmp_dp_snd_codec0",
+        "supplier:phy:phy-fd400000.phy.1",
+        "supplier:platform:firmware:zynqmp-firmware:reset-controller",
+        "supplier:platform:fd400000.phy",
+        "xlnx-drm.0",
+        "zynqmp_dp_snd_pcm0",
+        "of_node",
+        "power",
+        "driver",
+        "i2c-2",
+        "supplier:phy:phy-fd400000.phy.0",
+        "supplier:platform:firmware:zynqmp-firmware:clock-controller",
+        "zynqmp_dp_snd_pcm1",
+        "subsystem",
+        "supplier:platform:firmware:zynqmp-firmware",
+        "fd4a0000.display:zynqmp_dp_snd_card",
+        "drm"
+      ]
+    },
+    "xlnx-drm.0": {
+      "exists": true,
+      "driver": "/sys/bus/platform/drivers/xlnx-drm",
+      "driver_controls": {
+        "bind": true,
+        "unbind": true
+      },
+      "children": [
+        "power",
+        "driver",
+        "subsystem"
+      ]
+    },
+    "fd4c0000.dma-controller": {
+      "exists": true,
+      "driver": "/sys/bus/platform/drivers/xilinx-zynqmp-dpdma",
+      "driver_controls": {
+        "bind": true,
+        "unbind": true
+      },
+      "children": [
+        "of_node",
+        "dma",
+        "power",
+        "driver",
+        "supplier:platform:firmware:zynqmp-firmware:clock-controller",
+        "subsystem",
+        "supplier:platform:firmware:zynqmp-firmware"
+      ]
+    }
+  },
+  "drm_devices": {
+    "card1": {
+      "device": "/sys/devices/platform/axi/axi:zyxclmm_drm",
+      "driver": "/sys/bus/platform/drivers/zocl-drm"
+    },
+    "card0": {
+      "device": "/sys/devices/platform/axi/fd4a0000.display",
+      "driver": "/sys/bus/platform/drivers/zynqmp-display"
+    }
+  },
+  "owners": [
+    {
+      "pid": 1014,
+      "name": "python3",
+      "devices": [
+        "/dev/dri/renderD128"
+      ]
+    },
+    {
+      "pid": 1158,
+      "name": "Xorg",
+      "devices": [
+        "/dev/dri/card0"
+      ]
+    }
+  ],
+  "units": "MainPID=1075\nNRestarts=0\nExecStart={ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B /home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/startup/launcher.py --config /home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/startup/config.json ; ignore_errors=no ; start_time=[Fri 2021-11-19 09:19:33 PST] ; stop_time=[n/a] ; pid=1075 ; code=(null) ; status=0/0 }\nId=aura-avatar-ui.service\nActiveState=active\n\nMainPID=1014\nNRestarts=0\nExecStart={ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B /home/root/aura-handsfree-dialogue-20261020/candidate-0c0a8ab46ec2/runtime/aura/tools/board_camera_motion.py --config /home/root/aura-handsfree-dialogue-20261020/candidate-0c0a8ab46ec2/camera_live_config/board_camera_ui.json ; ignore_errors=no ; start_time=[Fri 2021-11-19 09:19:33 PST] ; stop_time=[n/a] ; pid=1014 ; code=(null) ; status=0/0 }\nId=aura-camera-ui.service\nActiveState=active\n\nMainPID=1074\nNRestarts=0\nExecStart={ path=/etc/xserver-nodm/Xserver ; argv[]=/etc/xserver-nodm/Xserver ; ignore_errors=no ; start_time=[Fri 2021-11-19 09:19:33 PST] ; stop_time=[n/a] ; pid=1074 ; code=(null) ; status=0/0 }\nId=xserver-nodm.service\nActiveState=active\n",
+  "gui": {
+    "phase": "IDLE",
+    "playing": false,
+    "error": "",
+    "ui_page": "main"
+  },
+  "edid_bytes": 0,
+  "touch_present": true
+}

@@ -1,0 +1,59 @@
+{
+  "status": "CANDIDATE_GENERATOR_PREPARED_FIXTURE_VERIFIED_NOT_EXECUTED_ON_BOARD",
+  "saved_utc": "2026-10-30T23:01:51.333615+00:00",
+  "files": [
+    {
+      "path": "rebuild_face_readback_pin.py",
+      "bytes": 15656,
+      "sha256": "0cbcae4980fdce536ab4eccc39c507c659b36c3cf26f60370637f6845417de17"
+    },
+    {
+      "path": "test_rebuild_face_readback_pin.py",
+      "bytes": 7414,
+      "sha256": "8982fee72daa444b3bcab67d1fe19a1987725a55accf9de4e2cb4885170eee6a"
+    }
+  ],
+  "validation": {
+    "passed": 8,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 0.077,
+    "evidence": "regression.xml",
+    "sha256": "ddffe20dec42d70db891075fbdc0a2a724638956b4b18e61784422a9635acf90",
+    "fixture_only": true
+  },
+  "pinned_selected_entry": {
+    "path": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/face-source-v17/entry.py",
+    "sha256": "f26be22cb640bf44a1bd81b66bb3fa014f5b847b13320781836bf3f173387623"
+  },
+  "dry_run_arguments": [
+    "--old-config <existing pinned readback config>",
+    "--expected-boot-id 8100a7fd-0c6a-46c4-82b8-f874988a1521",
+    "--expected-pid 1334"
+  ],
+  "write_arguments": [
+    "All dry-run arguments, rebuilt/verified again at time of write",
+    "--write --private-root <existing POSIX-owned mode0700 directory>",
+    "--output <new absolute .json path under that private root; parent must exist and be mode0700>",
+    "--expected-observation-sha256 <reviewed dry-run report token>"
+  ],
+  "gates": [
+    "Every original source pin still matches, including original r17 entry",
+    "Systemd current MainPID, active/running state, selected ExecStart and cgroup match actual proc argv/executable",
+    "Fresh boot and two matching process start_ticks/cmdline hashes; old same-boot PID reuse fails",
+    "Pinned native launch metadata selects the pinned camera UI/candidate config",
+    "Actual generated camera config must match the original runtime config byte SHA exactly before a boot/PID path relocation",
+    "Actual camera identity config selects the exact unchanged DPU SFace model ID/SHA/dimension/TTL/database path",
+    "Hash actual DPU model and model manifest files without loading runner; recheck all sources/process/model proofs before candidate creation",
+    "No source pin removal: add only the new identical runtime config path/digest",
+    "Explicit reviewed observation token, private POSIX output, exclusive create and fsync; never overwrite original or existing files"
+  ],
+  "public_report": "Pin/hash/count/owner/ready status only. On runtime byte mismatch, report existing schema field names and mask arbitrary added keys; no source values or gallery data.",
+  "limits": [
+    "Ready means current metadata pins were verified at that snapshot, not that a face identity or database row was read. FaceGalleryReadback must still reverify the candidate on each use.",
+    "Pinned native_entry replaces its seed from the checkpoint, so a new runtime may differ in native_execution.seed.sha256. This generator intentionally returns ready=false; it does not accept semantic-only equivalence or relax thresholds.",
+    "No actual board/proc/systemd read, private database access, model runner, network/Windows face payload, deploy, service reload, boot/FDT/firmware or mechanical operation was executed by this subtask."
+  ],
+  "modified_frozen_memory_or_speaker_code": false
+}

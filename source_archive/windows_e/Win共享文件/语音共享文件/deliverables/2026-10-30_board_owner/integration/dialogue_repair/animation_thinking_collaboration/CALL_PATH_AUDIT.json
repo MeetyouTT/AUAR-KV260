@@ -1,0 +1,237 @@
+{
+  "schema": "aura.animation-thinking-call-path.v1",
+  "source_trace": {
+    "tools/board_avatar_gtk.py": {
+      "sha256": "7d95b5f682f7abf4a69509d5843c3345dcc31f8dbefeb0e9f3af27b19aa3542d",
+      "production_pin": "7d95b5f682f7abf4a69509d5843c3345dcc31f8dbefeb0e9f3af27b19aa3542d",
+      "matches": [
+        {
+          "line": 263,
+          "text": "self.output = GStreamerAudioOutput(self.evidence_root/'audio_worker.log', config['audio_device'],persistent=persistent,"
+        },
+        {
+          "line": 291,
+          "text": "from tools.formal_yuki import native_controller_type"
+        },
+        {
+          "line": 292,
+          "text": "controller_type=native_controller_type()"
+        },
+        {
+          "line": 314,
+          "text": "from tools.formal_native_yuki import prepare_portrait"
+        },
+        {
+          "line": 316,
+          "text": "visual_controller.portrait_offload=self.native_yuki"
+        },
+        {
+          "line": 329,
+          "text": "from tools.formal_yuki import paired_recording_type"
+        },
+        {
+          "line": 669,
+          "text": "from tools.formal_native_yuki import create_gl_area"
+        }
+      ]
+    },
+    "tools/formal_yuki.py": {
+      "sha256": "610696bfb89c77a295962e9186f6f5c069ed317234e6ad766d082203e523285d",
+      "production_pin": "610696bfb89c77a295962e9186f6f5c069ed317234e6ad766d082203e523285d",
+      "matches": [
+        {
+          "line": 243,
+          "text": "def native_controller_type():"
+        },
+        {
+          "line": 246,
+          "text": "init = scoped_function(RealtimeController.__init__, dict(RealtimeFacials=NumericFacials))"
+        },
+        {
+          "line": 311,
+          "text": "def paired_recording_type(original, pair):"
+        }
+      ]
+    },
+    "tools/formal_native_yuki.py": {
+      "sha256": "25e648a9630c78843ea188269e2655eac2a412e19c0ed854042d3bcbe87e0453",
+      "production_pin": "25e648a9630c78843ea188269e2655eac2a412e19c0ed854042d3bcbe87e0453",
+      "matches": [
+        {
+          "line": 11,
+          "text": "class StrictLocalPortrait(original.LocalPortrait):"
+        },
+        {
+          "line": 69,
+          "text": "prepare = scoped_function(original.prepare_portrait, dict(LocalPortrait=StrictLocalPortrait))"
+        },
+        {
+          "line": 81,
+          "text": "area = original.create_gl_area(config, mailbox, on_error=failed)"
+        }
+      ]
+    },
+    "tools/native_yuki.py": {
+      "sha256": "b5193b8766bb3bfe58f748affefbb0cebda9da6e33703dbef41833dfd789e8a4",
+      "production_pin": "b5193b8766bb3bfe58f748affefbb0cebda9da6e33703dbef41833dfd789e8a4",
+      "matches": [
+        {
+          "line": 15,
+          "text": "class Control(C.Structure):"
+        },
+        {
+          "line": 51,
+          "text": "class LocalPortrait:"
+        },
+        {
+          "line": 95,
+          "text": "playing=bool(self.output.active and getattr(self.output,'ready',True) and not paused and track!='none')"
+        },
+        {
+          "line": 209,
+          "text": "def tick_native(self):"
+        },
+        {
+          "line": 224,
+          "text": "value=mailbox.consume()"
+        },
+        {
+          "line": 230,
+          "text": "native_started=time.perf_counter();stats=self.native.render(now,width,height)"
+        }
+      ]
+    },
+    "tools/streaming_controller.py": {
+      "sha256": "4b76e137d49994f01ae43a7a608e0b9feb13b9eff66cc981346823bace576899",
+      "production_pin": "4b76e137d49994f01ae43a7a608e0b9feb13b9eff66cc981346823bace576899",
+      "matches": [
+        {
+          "line": 84,
+          "text": "if snapshot.get('audible'):"
+        },
+        {
+          "line": 124,
+          "text": "if self.output.finished():stream['audio_done']=True"
+        },
+        {
+          "line": 141,
+          "text": "meta,remote,finished=self.portrait_frame(self.now(),gain,level)"
+        }
+      ]
+    },
+    "tools/gstreamer_persistent_engine.py": {
+      "sha256": "0e73a064f2014e12f4e90323618c9d04de6a23b0220c138d9d9ff1f8240cc95b",
+      "production_pin": "0e73a064f2014e12f4e90323618c9d04de6a23b0220c138d9d9ff1f8240cc95b",
+      "matches": [
+        {
+          "line": 175,
+          "text": "if token==self.token and start<=now_ns<end:"
+        },
+        {
+          "line": 224,
+          "text": "ok,position=self.sink.query_position(gst.Format.TIME)"
+        },
+        {
+          "line": 226,
+          "text": "self._observe(position)"
+        },
+        {
+          "line": 235,
+          "text": "'clock_source':'GStreamer ALSA sink position query','output_caps':OUTPUT_CAPS,'device':self.device,"
+        }
+      ]
+    },
+    "board/runtime/audio/board_dialogue_jobs.py": {
+      "sha256": "71fd1ac8e2ddb2e20eeb572063cc69e370e18f40af4a97fb65e2d8258bae45a0",
+      "production_pin": "71fd1ac8e2ddb2e20eeb572063cc69e370e18f40af4a97fb65e2d8258bae45a0",
+      "matches": [
+        {
+          "line": 567,
+          "text": "raw = self.asr.transcribe(job.pcm, sample_rate=16000, deadline=job.deadline,"
+        },
+        {
+          "line": 594,
+          "text": "emit('start', context=dict(job.meta), sample_rate=24000, channels=1, sample_width=2,"
+        }
+      ]
+    },
+    "tools/board_recording.py": {
+      "sha256": "f5be518103182bc49eb6af85a82e2b185c43045538875cebad4e03ffee33df00",
+      "production_pin": "f5be518103182bc49eb6af85a82e2b185c43045538875cebad4e03ffee33df00",
+      "matches": [
+        {
+          "line": 109,
+          "text": "def _queue_transcription(self):"
+        },
+        {
+          "line": 118,
+          "text": "self.transcription.update(state='TRANSCRIBING',request_id=request['request_id'])"
+        },
+        {
+          "line": 216,
+          "text": "if poll:self._poll_transcription()"
+        },
+        {
+          "line": 228,
+          "text": "if poll:self._poll_transcription()"
+        },
+        {
+          "line": 301,
+          "text": "result=self.controller.tick()"
+        }
+      ]
+    },
+    "tools/production_listening.py": {
+      "sha256": "a9ccbc44cefef8d2f3a6dd9695355cbd2156f4e5288237a51c394608bf6d5d09",
+      "production_pin": "a9ccbc44cefef8d2f3a6dd9695355cbd2156f4e5288237a51c394608bf6d5d09",
+      "matches": [
+        {
+          "line": 90,
+          "text": "original_tick = recording._monitor_tick"
+        },
+        {
+          "line": 132,
+          "text": "recording._monitor_tick = monitor_tick"
+        },
+        {
+          "line": 137,
+          "text": "recording.monitor_enabled = settings.read()"
+        }
+      ]
+    }
+  },
+  "true_path": [
+    "board_avatar_gtk",
+    "formal_yuki.native_controller_type / paired_recording_type",
+    "formal_native_yuki.StrictLocalPortrait",
+    "native_yuki.LocalPortrait.offer",
+    "native GTK DrawingArea / EGL frame loop",
+    "libaura_yuki / YukiControl"
+  ],
+  "audio_clock": "GStreamer ALSA sink query_position; answer track and audible interval, never model strings",
+  "pre_stream_asr_wait": "PairedRecording wraps existing TRANSCRIBING state without changing FSM/generation or jobs",
+  "direct_stream_events": "text/audio/end readiness cannot override audible gate",
+  "native_override": "Existing PlaybackInstance variable difference source after author ticks, before prepare_frame; 3 fixed face parameters",
+  "controls_layout_unchanged": true,
+  "stats_layout_unchanged": true,
+  "protocol_delta": "Original expression low byte preserved; eye-policy bits 0x100/0x200; new yuki_control_features export required",
+  "character_eye_contract": {
+    "model_sha256": "e45346699c26e01add1e73c145ed6e8fb48ddf2e890e47ddccc8c6381f61a7a7",
+    "parameter": "face_eye_open",
+    "open": 0,
+    "closed": 10,
+    "authored_blink_enabled": true
+  },
+  "controls_ttl_ms": 150,
+  "steady_timers_added": 0,
+  "steady_processes_added": 0,
+  "frame_target": 16,
+  "physical_fps_measured": false,
+  "waist_projection_unchanged": true,
+  "resource_or_texture_modified": false,
+  "palette_modified": false,
+  "body_timeline_modified": false,
+  "private_data_read": false,
+  "device_access": false,
+  "model_inference": false
+}

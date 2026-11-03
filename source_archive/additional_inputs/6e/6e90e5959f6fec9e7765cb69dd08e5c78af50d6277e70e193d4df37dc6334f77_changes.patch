@@ -1,0 +1,296 @@
+--- a/config/yuki_pair.formal.json
++++ b/config/yuki_pair.formal.json
+@@ -12,7 +12,7 @@
+   },
+   "native_config": {
+     "enabled": true,
+-    "fps": 16,
++    "fps": 24,
+     "library": "tools/libaura_yuki.so",
+     "model": "assets/yuki/model.runtime.json",
+     "resource_root": "assets/yuki",
+@@ -45,7 +45,7 @@
+     "tools/board_persona_candidate.py": "c02890cbcbe60419d9834909789f3b6bc0f3ced0e48dfd187f28190de048416b",
+     "tools/egl_window.py": "6b95345e7017f681d063ba7766ee238f62e5d618422a02e47ce34f75f9aa970b",
+     "tools/libaura_yuki.so": "b2432e75a75e4dbdebee8e89a141a68ba00671c33b2b258b81ce16794b2c73d2",
+-    "tools/native_yuki.py": "306dd3efe445111a57930217709c4a70bf3caf885a7d745fd28c4a6a97442c8e"
++    "tools/native_yuki.py": "6da020f794e9664ee3a6f57b3b3f0f547316cb4b0c305916005cc2ff6af0f2bc"
+   },
+   "schema": "aura.yuki.formal_legacy_pair.v1"
+ }
+--- a/tools/board_avatar_gtk.py
++++ b/tools/board_avatar_gtk.py
+@@ -86,7 +86,7 @@
+     """Use native handoff measurements, never the GTK label refresh interval."""
+     import math
+     display=state.get('avatar_display',{})
+-    if display.get('kind')!='native_sink_handoff':return '画面速率待确认'
++    if display.get('kind') not in ('native_sink_handoff','native_yuki_egl'):return '画面速率待确认'
+     fps,age=display.get('fps'),display.get('age_ms')
+     if (isinstance(fps,bool) or not isinstance(fps,(int,float)) or not math.isfinite(fps)
+             or not 0<=fps<=240 or isinstance(age,bool) or not isinstance(age,(int,float))
+@@ -338,7 +338,7 @@
+                 bind_presentation(self,recording)
+             self.controller = AvatarRenderWorker(recording,
+                 self.tokens['colors']['panel_bg'],(self.rect['w'],self.rect['h']),
+-                (1/24 if self.character_pair is not None else .25 if self.preferences['economy'] else (1/24 if config.get('native_avatar') else config['tick_ms']/1000)),native_video=self.native_video,visual_fps=16 if self.character_pair is not None else config.get('stable_avatar_fps',8) if config.get('native_avatar') else None,performance_path=self.evidence_root/'render_performance.jsonl')
++                (1/24 if self.character_pair is not None else .25 if self.preferences['economy'] else (1/24 if config.get('native_avatar') else config['tick_ms']/1000)),native_video=self.native_video,visual_fps=self.native_yuki.target_fps if self.character_pair is not None else config.get('stable_avatar_fps',8) if config.get('native_avatar') else None,performance_path=self.evidence_root/'render_performance.jsonl')
+             self.mixer = MixerService(self.settings_store)
+             defaults = json.loads((AURA/'config/board_ui_services.json').read_text(encoding='utf-8'))
+             self.connection_store = ConnectionStore(Path(config['formal_settings_paths']['service']), defaults['connection'])
+@@ -1409,7 +1409,7 @@
+                                    ('触摸已连接' if self.touch_inputs else '未检测到触摸设备'))
+         portrait=state.get('portrait_offload',{})
+         mode=portrait.get('mode','disabled')
+-        self.controls['portrait_toggle'].set_label('雪妃 · 本地16fps' if self.native_yuki.ready else '雪妃 · 渲染未就绪')
++        self.controls['portrait_toggle'].set_label('雪妃 · 目标'+str(self.native_yuki.target_fps)+'fps' if self.native_yuki.ready else '雪妃 · 渲染未就绪')
+         self.pause_button.set_label('继续' if state['paused'] else '暂停')
+         self.pause_button.set_sensitive(state['playing'] or state['paused'])
+         self.cancel_button.set_sensitive(state['phase'] != 'IDLE' or state['playing'])
+@@ -1446,7 +1446,7 @@
+             command = self.controller.configure_transcription(values)
+             return {'ok':True,'queued':True,'command_id':command,'message':'转写服务设置已保存'}
+         if self.character_pair is not None and kind in ('portrait_fps','portrait_toggle'):
+-            raise ValueError('雪妃候选固定16fps；切换须空闲退出并恢复完整配对')
++            raise ValueError('雪妃帧率由启动配对固定；切换须空闲退出并恢复完整配对')
+         if kind == 'portrait_fps':
+             return {'ok':True,'queued':True,'command_id':self.controller.portrait_fps(data['fps']),'message':'正在调整画面流畅度'}
+         if kind == 'portrait_toggle':
+@@ -1590,6 +1590,10 @@
+         started = time.perf_counter()
+         interval = None if self.last_tick is None else (started-self.last_tick)*1000
+         self.last_tick = started
++        ui_timings={};checkpoint=started
++        def mark_ui(name):
++            nonlocal checkpoint
++            stamp=time.perf_counter();ui_timings[name]=round((stamp-checkpoint)*1000,3);checkpoint=stamp
+         try:
+             if self.diagnostic_result:
+                 completed,self.diagnostic_result = self.diagnostic_result,None
+@@ -1608,7 +1612,9 @@
+                     except Exception as exc:
+                         request['error'] = str(exc)
+                 request['done'].set()
++            mark_ui('commands')
+             packet = self.controller.read()
++            mark_ui('controller_read')
+             if self.native_video:
+                 self.last_image=packet['image']
+                 self.last_avatar_sequence=packet['sequence']
+@@ -1632,6 +1638,7 @@
+                 state['character_pair']=self.character_pair.status()
+             elif self.native_video:state['avatar_display']=dict(self.native_video.read(),kind='native_sink_handoff')
+             settings_text = self.refresh_settings(state)
++            mark_ui('settings')
+             state.update(character=self.character, dialogue_enabled=bool(state.get('local_transcription',{}).get('service',{}).get('conversation')), backend='gtk3-gstreamer', cached_only=True)
+             status = '已暂停' if state['paused'] else {'IDLE':'等你开口','VOICE_PREPARING':'正在准备声音…',
+                 'VOICE_STARTING':'正在准备播放…','SPEAKING':'正在说话','ACTION':'正在回应'}.get(state['phase'],state['phase'])
+@@ -1639,21 +1646,26 @@
+             if getattr(self, 'production_presentation', None) is None:
+                 self.reply.set_text(state['reply'])
+             self.refresh_runtime(state,settings_text)
++            mark_ui('runtime_widgets')
+             from tools.production_business_ui import project_business_ui
+             project_business_ui(self,state)
++            mark_ui('business_widgets')
+             from tools.production_memory_presentation import project_presentation
+             state=project_presentation(self,state)
+-            self.samples.append({'t':state['visual_time'],'interval_ms':interval,
+-                'render_ms':(time.perf_counter()-started)*1000,**{key:state[key] for key in
+-                ('phase','state','asset','index','speech_gain','mouth_level','blink_active','playing','paused','audio_time')}})
+-            state['ui_tick_ms']=round((time.perf_counter()-started)*1000,2)
++            mark_ui('presentation')
+             state['diagnostic_job']=dict(self.diagnostic_job) if self.diagnostic_job else None
+             if self.board_business is not None:
+                 state['board_business']=self.board_business.runtime.public()
++            mark_ui('business_public')
+             fault = getattr(self, 'runtime_faults', None)
+             state['runtime_faults'] = (dict(fault, last=dict(fault['last'],
+                 frames=[dict(frame) for frame in fault['last']['frames']])) if fault is not None else
+                 dict(metadata_only=True, count=0, last=None))
++            state['ui_tick_ms']=round((time.perf_counter()-started)*1000,2)
++            state['ui_stage_timings_ms']=dict(ui_timings)
++            self.samples.append({'t':state['visual_time'],'interval_ms':interval,
++                'render_ms':state['ui_tick_ms'],**{key:state[key] for key in
++                ('phase','state','asset','index','speech_gain','mouth_level','blink_active','playing','paused','audio_time')}})
+             self.bridge.publish(state,packet['jpeg'])
+         except Exception as exc:
+             previous = getattr(self, 'runtime_faults', None)
+--- a/tools/board_avatar_worker.py
++++ b/tools/board_avatar_worker.py
+@@ -31,6 +31,15 @@
+     if value is None or kind in (str,int,float,bool,bytes):return value
+     return copy.deepcopy(value)
+ 
++def portrait_control_fps(offload):
++    """Use the startup-pinned native rate for control offers as well as GLES."""
++    if getattr(offload,'candidate_fixed_native',False):
++        value=offload.target_fps
++        if type(value) is not int or value not in (16,24):
++            raise ValueError('Unsupported native startup rate')
++        return value
++    return offload.target_fps if offload.status()['mode']=='remote' else 8
++
+ class AvatarRenderWorker:
+ 
+     def __init__(self, controller, background, size, interval=.033, native_video=None, visual_fps=None, performance_path=None):
+@@ -246,7 +255,7 @@
+ 
+                     offload=getattr(self.visual_owner,'portrait_offload',None)
+                     if offload:
+-                        fps=16 if getattr(offload,'candidate_fixed_native',False) else offload.target_fps if offload.status()['mode']=='remote' else 8
++                        fps=portrait_control_fps(offload)
+                         period=1/fps
+                         if period!=self.visual_period:
+                             self.visual_period=period;self.next_visual=started
+--- a/tools/formal_native_yuki.py
++++ b/tools/formal_native_yuki.py
+@@ -1,4 +1,4 @@
+-"""Strict16fps candidate wrapper over the pinned, unchanged Yuki host ABI.
++"""Startup-fixed 16/24fps wrapper over the pinned Yuki host ABI.
+ 
+ One GTK/EGL widget owns GLES. The existing audio/render owner offers only
+ bounded numeric controls. No audio device, network, PCM or identity access.
+@@ -12,10 +12,12 @@
+     candidate_fixed_native = True
+ 
+     def __init__(self, output, *, clock=time.monotonic, fps=16):
++        if type(fps) is not int or fps not in (16,24):
++            raise PairRejected('Native portrait supports reviewed16/24fps startup rates')
+         self._prepared = self._drawn = False
+         self._minimum_generation = 0
+         self.visible = False
+-        super().__init__(output, clock=clock, fps=16)
++        super().__init__(output, clock=clock, fps=fps)
+ 
+     @property
+     def ready(self):
+@@ -28,9 +30,13 @@
+             self._drawn = False
+ 
+     def set_fps(self, value):
+-        if type(value) is not int or value != 16:
+-            raise PairRejected('Selected candidate requires16fps; no8fps fallback')
+-        return dict(fps=16)
++        if type(value) is not int or value not in (16,24):
++            raise PairRejected('Native portrait supports reviewed16/24fps; no8fps fallback')
++        with self.lock:
++            if self._prepared and value != self.target_fps:
++                raise PairRejected('Change native frame rate only in a complete idle startup pair')
++            self.target_fps=value
++        return dict(fps=value)
+ 
+     def set_enabled(self, value):
+         if value is not True:
+@@ -60,7 +66,7 @@
+     def status(self):
+         value = super().status()
+         value.update(mode='native' if self.ready else 'blocked', selected=True,
+-                     target_fps=16, fallback_fps=None, fallback_allowed=False,
++                     target_fps=self.target_fps, fallback_fps=None, fallback_allowed=False,
+                      backend='KV260 GLES2', candidate_pair=False, formal_pair=True)
+         value.update(visible=self.visible, presentation_state='visible' if self.visible else 'hidden')
+         return value
+@@ -101,7 +107,8 @@
+         stats = dict(mailbox.latest_stats)
+         visible = mailbox.visible
+     paint = stats.get('paint_at')
+-    return dict(stats, kind='native_yuki_egl', target_fps=16,
++    return dict(stats, kind='native_yuki_egl', target_fps=mailbox.target_fps,
++                fps=stats.get('callback_fps'),frame_measurement='native swap callbacks, not physical scanout',
+                 age_ms=max(0., (now-paint)*1000) if isinstance(paint, (int, float)) else None,
+                 visible=visible, presentation_state='visible' if visible else 'hidden',
+                 frame_scheduling_active=visible and mailbox.ready, fallback_allowed=False)
+--- a/tools/formal_yuki.py
++++ b/tools/formal_yuki.py
+@@ -11,7 +11,7 @@
+ import types
+ 
+ PAIR_VERSION='xuefei-yuki-board-v1-candidate'
+-PAIR_CONFIG_SHA256='998710fc12bf442d6baea501bab0234665b666caa29f4be8f685741d50d82099'
++PAIR_CONFIG_SHA256='fa6351dde41e950012e992edb1fc5113cf87e57fcb81870104a5c9d4b2be0995'
+ PROFILE_ID='fuyukiss-yuki-freemote39-frame-mesh'
+ PROFILE_SHA256='b7b71396c267db80a44c2b32df4ba53ded7920ac952b2fbbfebafba349f85f55'
+ NATIVE_PACKAGE_SHA256='c0107904f8cd0b3e351666ade5fc7234e4278a82d165925dbbdc1459783baebb'
+@@ -93,6 +93,9 @@
+ class CandidatePair:
+     def __init__(self, root, metadata, persona):
+         self.root, self.metadata, self.persona = root, metadata, persona
++        self.target_fps=metadata['native_config']['fps']
++        if type(self.target_fps) is not int or self.target_fps not in (16,24):
++            raise PairRejected('Unsupported native startup rate')
+         self.identity = PairIdentity(**metadata['identity'])
+         self.speech = CharacterSpeechPolicy()
+         self.lock = threading.RLock()
+@@ -184,7 +187,7 @@
+         with self.lock:
+             return dict(profile_version=self.identity.profile_version,
+                         display_name=self.identity.display_name, state=self.state,
+-                        selected=True, production_selected=True, fallback_allowed=False, target_fps=16,
++                        selected=True, production_selected=True, fallback_allowed=False, target_fps=self.target_fps,
+                         render_profile_id=self.identity.render_profile_id,
+                         render_source_profile_sha256=self.identity.render_source_profile_sha256,
+                         prompt_sha256=self.identity.prompt_sha256, error=self.failure)
+@@ -279,10 +282,12 @@
+     business = config.get('board_business', {})
+     if business.get('enabled') is not True or business.get('data_origin') != 'board':
+         raise PairRejected('Formal board business requires explicit migrated board storage')
+-    if (config.get('portrait_offload', {}).get('enabled') or
+-            config.get('native_avatar') is not True or config.get('stable_avatar_fps') != 16 or
++    target_fps=config.get('native_yuki',{}).get('fps')
++    if (type(target_fps) is not int or target_fps not in (16,24) or
++            config.get('portrait_offload', {}).get('enabled') or
++            config.get('native_avatar') is not True or config.get('stable_avatar_fps') != target_fps or
+             not config.get('streaming_conversation') or not config.get('persistent_audio')):
+-        raise PairRejected('Formal image requires one native16 sink and unchanged streaming PCM controller')
++        raise PairRejected('Formal image requires one paired native16/24 sink and unchanged streaming PCM controller')
+     root = Path(aura).resolve(strict=True)
+     from common.character_profile import selected_profile
+     selected = selected_profile()
+--- a/tools/native_yuki.py
++++ b/tools/native_yuki.py
+@@ -17,6 +17,18 @@
+ EYES_THINKING_CLOSED = 0x100
+ EYES_ANSWER_OPEN = 0x200
+ FACIAL_CONTROL_FEATURE = 1
++
++def native_callback_metrics(timestamps):
++    """Bounded numeric swap timing; callers cache this for a full second."""
++    if len(timestamps)<2:return dict(callback_fps=None,callback_samples=len(timestamps),callback_interval_ms={})
++    intervals=[(right-left)*1000. for left,right in zip(timestamps,timestamps[1:])]
++    if any(not math.isfinite(value) or value<=0 for value in intervals):
++        raise ValueError('Invalid native swap timestamps')
++    ordered=sorted(intervals)
++    def q(value):return ordered[min(len(ordered)-1,int((len(ordered)-1)*value))]
++    span=timestamps[-1]-timestamps[0]
++    return dict(callback_fps=(len(timestamps)-1)/span,callback_samples=len(timestamps),callback_window_seconds=span,
++                callback_interval_ms=dict(p50=q(.5),p95=q(.95),p99=q(.99),maximum=q(1.)))
+ 
+ class Control(C.Structure):
+     _fields_=[('owner',C.c_uint64),('sequence',C.c_uint64),('audio_sample',C.c_uint64),
+@@ -191,7 +203,7 @@
+     class YukiArea(Gtk.DrawingArea):
+         def __init__(self):
+             super().__init__();self.native=None;self.egl=None;self.next_frame=0.;self.frame_times=deque(maxlen=3600)
+-            self.frame_observer=None;self.frame_source=None
++            self.frame_observer=None;self.frame_source=None;self.rate_stats={};self.next_rate_report=0.
+             self.set_has_window(True);self.set_app_paintable(True)
+             visual=self.get_screen().get_rgba_visual() if config.get('rgba_window',False) else None
+             self.set_visual(visual or self.get_screen().get_system_visual())
+@@ -262,7 +274,15 @@
+                 stats['gtk_callback_ms']=(time.perf_counter()-callback_started)*1000
+                 stats['paint_at']=time.monotonic()
+                 stats['window_visual']=self.egl.visual;stats['window_rgba_bits']=self.egl.config_bits
+-                self.frame_times.append(now)
++                paint=stats['paint_at'];self.frame_times.append(paint)
++                if paint>=self.next_rate_report:
++                    recent=[]
++                    for stamp in reversed(self.frame_times):
++                        if paint-stamp>4.:break
++                        recent.append(stamp)
++                    self.rate_stats=native_callback_metrics(list(reversed(recent)))
++                    self.next_rate_report=paint+1.
++                stats.update(self.rate_stats)
+                 with mailbox.lock:mailbox.latest_stats=stats
+                 if self.frame_observer:self.frame_observer(dict(stats))
+             except Exception as error:self.failed(error)

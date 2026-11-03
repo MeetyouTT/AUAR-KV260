@@ -1,0 +1,15 @@
+{
+  "status": "CORE_REQUEST_CANDIDATE_READY_42_OFFLINE_PASS_ABBA_RUNNER_PREPARING",
+  "root_reported_current_board_revision": "v13 ae473116 (memory generation fix); do not overwrite root memory work",
+  "current_host_source_sha256": "1bdb20045ac07950840dafc478679efbdce3c295765189280ac5c95c9d6f9bd1",
+  "exact_before_sources": "reference/; SOURCE_PINS.json",
+  "review_patch": "output_contract_review.patch",
+  "optional_prefix_experiment_separate": "prefix_order_separate.patch",
+  "changes": ["Opt-in output_format=json/dialogue_schema_v1/dialogue_abc_v1", "Board-only compact static contract rewrite and complete canonical response restoration", "Full response still validated before any speech", "Opt-in first packet/content/JSON closure/done/cache metadata", "Explicit backend_output_truncated failure, no shortened budget", "Default requests/summary/thinking/TTS/GPU/owner/deadline paths preserved"],
+  "tests_current": {"unique_tests":42,"failed":0,"model_requests":0,"device_operations":0,"production_database_accesses":0},
+  "important_findings": ["think=False and stream=True already enabled", "host buffers to done", "one execution lane serializes TTS behind LLM", "persona already normally 1-2 sentences, max48 Chinese characters", "owner IDs/generation not passed to Ollama messages", "ordinary dynamic facts/summary notes precede recent turns and may reduce prefix reuse; system prompt itself is static", "restoring schema/compact output changes format tokens, not answer limits"],
+  "do_not": ["Do not auto-enable adapter before capability negotiation", "Do not apply optional prefix patch over concurrent board_memory_policy changes", "Do not interpret cached tokens as authority or reuse forgotten source text", "Do not lower num_predict to produce shorter/invalid answers", "Do not claim actual speedup without root model ABBA and directed listening", "Do not change GPU layers/fit4096/residency here"],
+  "root_only_model_benchmark": true,
+  "production_changed": false,
+  "performance_gain_measured": false
+}

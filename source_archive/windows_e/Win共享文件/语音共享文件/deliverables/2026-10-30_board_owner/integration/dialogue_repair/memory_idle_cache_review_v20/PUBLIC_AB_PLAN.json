@@ -1,0 +1,46 @@
+{
+  "schema": "aura.memory-cache-public-ab-plan.v1",
+  "status": "PLAN_ONLY_NOT_EXECUTED",
+  "hypothesis": "A completed non-camera LLM summary between dialogue requests may increase next dialogue prefill or RAM-cache restoration cost",
+  "hardware_owner": "original chat 01a18bcd-1167-71a0-ba0b-d809148d39d9",
+  "preserve": ["PAUSED", "microphone_closed", "no_audio_playback", "existing_model", "single_slot", "ctx2048", "existing_output_validation", "no_production_memory_writes"],
+  "inputs": {
+    "W": "Fixed authored-public dialogue primer that leaves the same stable prefix as D. Re-prime before every block.",
+    "S": "Authored-public ordinary-text summary sent to existing inference lane. Confirm a real model call; do not use structured camera-count fast path.",
+    "D": "Exactly the same target dialogue request bytes and options in both arms, inside existing context budget. Never use real history or profiles."
+  },
+  "arms": {
+    "A": ["Verify paused and lane idle", "W completes", "Wait matched interval with no summary", "D completes; retain numeric response metrics only"],
+    "B": ["Verify paused and lane idle", "W completes", "S completes inside matched interval", "D completes; retain numeric response metrics only"]
+  },
+  "order": ["A", "B", "B", "A"],
+  "recommended_repetitions": 2,
+  "controls": [
+    "No overlap of S and D in cache-only experiment. Overlap belongs to a separate queue/preemption experiment.",
+    "Same model/build, context, backend settings, request bytes and output bounds; no new model, runner or cache-parameter changes.",
+    "W executes before every block, including each consecutive B, to limit carryover effects.",
+    "Record quiet interval and any background task. A failed, canceled or still-running S makes this block incomplete.",
+    "Do not call a resident-weight warmup request proof that the desired prompt prefix is cached.",
+    "Existing host cached-token observation is conditional on output_format; saved normal board dialogue does not explicitly select it. Missing metrics remain unknown. Any supported public-only output_format must be identical in both arms and pass existing request validation.",
+    "Paused listening does not stop compaction. Original owner checks existing broker accepted_llm counter before/after each block: expected delta2 for A and3 for B. Extra accepted jobs, failures, cancellations, model restart or incomplete S invalidate the cache-only block. External clients bypassing broker must also be excluded.",
+    "Structured local memory completions do not themselves invalidate a cache-only block; record their load changes separately. Broker accepted count is not an exact count of backend jobs that reached GPU execution."
+  ],
+  "measure": [
+    "model/backend/build binding hashes",
+    "W/S/D request-byte hashes, task kind and numeric completion status",
+    "backend load_duration_ms",
+    "backend prompt_eval_duration_ms",
+    "prompt_eval_count with version-specific meaning documented",
+    "prompt_eval_cached_count when actually returned; missing means unknown",
+    "first content / first effective reply-text time from existing stream observation where available",
+    "eval_count, eval_duration_ms and total_duration_ms",
+    "queue wait, S complete-before-D check and RAM-cache restoration metadata if already available; restoration need not be included in prompt_eval_duration",
+    "host CPU/GPU pressure and memory-worker model-call count, distinct from completed counter"
+  ],
+  "inference_limits": [
+    "One active slot is not proof of irreversible KV loss when RAM prompt cache is enabled.",
+    "A memory commit is not proof of an LLM request.",
+    "Identical public prompt-cache experiment bounds a cache mechanism; it is not a real-dialogue speed guarantee.",
+    "Do not attribute other dialogue latency stages or all production overflows to this test."
+  ]
+}

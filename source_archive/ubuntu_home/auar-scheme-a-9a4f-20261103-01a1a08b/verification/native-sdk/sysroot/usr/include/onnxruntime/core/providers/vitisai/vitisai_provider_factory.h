@@ -1,0 +1,22 @@
+// Copyright (c) Xilinx Inc.
+// Licensed under the MIT License.
+
+#include "core/session/onnxruntime_c_api.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * \param use_arena zero: false. non-zero: true.
+ */
+ORT_API_STATUS(OrtSessionOptionsAppendExecutionProvider_VITISAI, _In_ OrtSessionOptions* options, _In_ const char* opt_str);
+
+/**
+ *  initialize the vitis ai execution providers.
+ */
+ORT_API_STATUS(OrtExecutionProviderInitialize_VITISAI);
+
+#ifdef __cplusplus
+}
+#endif

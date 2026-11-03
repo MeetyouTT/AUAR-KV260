@@ -1,0 +1,37 @@
+{
+  "status": "SOFTWARE_CANDIDATE_NOT_BOARD_DEPLOYED",
+  "default_enabled": false,
+  "enable_environment": "AURA_PIPELINE_METRICS=1",
+  "files": {
+    "board/vision/dpu_vision_runtime.py": {
+      "sha256": "9fe458cc257e16f4db822d325eedc7937dd9806ce2cc2aee1c1c794e518e775f",
+      "bytes": 8085
+    },
+    "board/vision/pipeline_metrics.py": {
+      "sha256": "35ffa9500e9b25796e15360820a25b72a7b8b8cc9c0771900380c6868b236858",
+      "bytes": 3336
+    },
+    "board/vision/ui_camera_service.py": {
+      "sha256": "9d834efba4059f9ac4efd5441c73a2646e73e693ebb7dbd5d504128775638b62",
+      "bytes": 35167
+    }
+  },
+  "baseline": {
+    "board/vision/ui_camera_service.py": "890fea726de2c6d29581ab2ee4c36db5e36df52f3e84ee20cd634fc8961ec2ce",
+    "board/vision/dpu_vision_runtime.py": "f5fe60a61eb9c3944d1d64097ce4cc838132a65243f28f011758da9d654dd2e6"
+  },
+  "yolo_pre_dpu_post_inside_native_are_individually_measured": false,
+  "sensor_exposure_display_consumption_or_identity_publication_measured": false,
+  "quantiles": "latest256 samples per stage; cumulative count/min/max/mean separately reported",
+  "standard_library_unit_tests": 5,
+  "measured_runner_and_camera_tests": 5,
+  "original_runtime_regression_tests": 5,
+  "tests_passed": 15,
+  "board_deployed": false,
+  "known_gaps": [
+    "YOLO native input conversion, DPU and native decode remain one native interval",
+    "CPU quantization wrapper and identity final consumption not yet individually instrumented",
+    "Source timestamp remains appsink dequeue rather than hardware exposure",
+    "XRT busy collector remains separate bounded sampler"
+  ]
+}

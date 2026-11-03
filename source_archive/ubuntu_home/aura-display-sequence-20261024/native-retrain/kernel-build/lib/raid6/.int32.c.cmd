@@ -1,0 +1,1 @@
+cmd_lib/raid6/int32.c := awk -v N=32 -f /home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux/lib/raid6/unroll.awk < /home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux/lib/raid6/int.uc > lib/raid6/int32.c

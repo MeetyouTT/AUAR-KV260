@@ -1,0 +1,29 @@
+--- shared/aura/tools/demo_script.py
++++ board/aura/tools/demo_script.py
+@@ -651,7 +651,7 @@
+     return "" if value is None else str(value)
+ 
+ 
+-def create_demo_core(assets: str = "reuse", *, idle_body: bool = True) -> StageCore:
++def create_demo_core(assets: str = "reuse") -> StageCore:
+     """Select preview assets for this temporary script, without changing production pools."""
+     if assets == "original":
+         return StageCore()
+@@ -663,7 +663,7 @@
+     if str(delivery) not in sys.path:
+         sys.path.insert(0, str(delivery))
+     from preview_script import ReusePreviewPlayer
+-    return ReusePreviewPlayer(idle_body=idle_body)
++    return ReusePreviewPlayer()
+ 
+ 
+ def main(argv: typing.Optional[typing.Sequence[str]] = None) -> int:
+@@ -702,7 +702,7 @@
+         if args.window or args.qt_window:
+             trace=run_qt_window(effects=args.effects=="blink")
+         else:
+-            runner=SelectedVoiceRunner(create_demo_core("reuse",idle_body=args.effects=="blink"),effects=args.effects=="blink");runner.reset()
++            runner=SelectedVoiceRunner(create_demo_core("reuse"),effects=args.effects=="blink");runner.reset()
+             for i in range(int(runner.plan.end/args.dt)+2):
+                 runner.advance(min(runner.plan.end,i*args.dt))
+             trace=runner.trace

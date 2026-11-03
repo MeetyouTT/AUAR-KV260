@@ -1,0 +1,102 @@
+--- original/board_avatar_gtk.py
++++ source/board_avatar_gtk.py
+@@ -606,6 +606,8 @@
+     def show_page(self, page):
+         if page not in self.page_names:
+             raise ValueError('未知页面')
++        from tools.boundary_visibility import before_page_change, after_page_change
++        before_page_change(page)
+         self.page = page
+         if page in self.touch_layout['layers']['presentation']:
+             self.ui_layer = 'presentation'
+@@ -624,6 +626,7 @@
+         for name in self.page_names:
+             style = self.controls['page_'+name].get_style_context()
+             (style.add_class if page == name else style.remove_class)('selected')
++        after_page_change(page)
+ 
+     def show_layer(self, layer):
+         if layer not in self.touch_layout['layers']:
+--- original/face_zone_editor.py
++++ source/face_zone_editor.py
+@@ -1,6 +1,7 @@
+ """Current-display face-only boundary editor. Does not open any motor device."""
+ import argparse,collections,ctypes,ctypes.util,json,math,os,threading,time,urllib.request
+ from pathlib import Path
++from boundary_visibility import VisibilityServer
+ os.environ['DISPLAY']=':0'
+ import gi
+ gi.require_version('Gtk','3.0');gi.require_version('Gdk','3.0')
+@@ -67,6 +68,7 @@
+         self.hint_label=Gtk.Label(label='人脸位置：未确认');self.hint_window.add(self.hint_label)
+         self.hint_window.connect('realize',lambda widget:widget.get_window().set_pass_through(True))
+         self.boot=Path('/proc/sys/kernel/random/boot_id').read_text().strip()
++        self.visibility_channel=None;self.poll_wakeup=threading.Event()
+         self.position_counts=collections.Counter();self.position_events=collections.deque(maxlen=64)
+         self.last_position_source=None;self.last_position=None;self.next_position_write=0.
+         self.line.add_events(Gdk.EventMask.BUTTON_PRESS_MASK|Gdk.EventMask.BUTTON_RELEASE_MASK|Gdk.EventMask.POINTER_MOTION_MASK)
+@@ -167,6 +169,8 @@
+         threading.Thread(target=send,daemon=True).start()
+ 
+     def update(self,active,face,hint='人脸位置：未确认'):
++        if self.visibility_channel is not None:
++            active=bool(active and self.visibility_channel.gate.allows_overlay())
+         if active:
+             if not self.active:self.line.show_all();self.left_line.show_all()
+             if self.recenter_enabled:self.center_line.show_all()
+@@ -184,9 +188,26 @@
+         for window,(left,top,width,height) in zip(self.faces,rectangles):window.move(left,top);window.resize(width,height);window.show_all()
+         return False
+ 
++    def install_page_visibility(self):
++        self.visibility_channel=VisibilityServer(
++            lambda fn,*args:GLib.idle_add(fn,*args,priority=GLib.PRIORITY_HIGH),self.page_visibility_applied)
++
++    def page_visibility_applied(self,page):
++        if page!='vision':
++            self.drag=False
++            self.update(False,None)
++            display=Gdk.Display.get_default()
++            if display is not None:display.sync()
++        self.poll_wakeup.set()
++
+     def poll(self):
+-        opener=urllib.request.build_opener(urllib.request.ProxyHandler({}));active=False;next_ui=0;following={}
+-        while not self.closed.wait(.1):
++        opener=urllib.request.build_opener(urllib.request.ProxyHandler({}));active=False;next_ui=0;following={};page_revision=-1
++        while not self.closed.is_set():
++            self.poll_wakeup.wait(.1);self.poll_wakeup.clear()
++            if self.closed.is_set():break
++            if self.visibility_channel is not None:
++                revision=self.visibility_channel.gate.snapshot()['revision']
++                if revision!=page_revision:next_ui=0;page_revision=revision
+             face=None;hint='人脸位置：未确认';position='UNCONFIRMED';packet={}
+             try:
+                 if time.monotonic()>=next_ui:
+@@ -201,7 +222,8 @@
+                         if following.get('phase')=='HOLD_AT_LIMIT':hint='已到行程限位，回中尚未完成'
+                         elif control.get('recenter_active'):hint='回中中：蓝点向中央白虚线靠近'
+                         elif control.get('recenter_state')=='AT_CENTER':hint='已回到中央，转轴保持'
+-            except Exception:pass
++            except Exception:
++                if self.visibility_channel is not None and not self.visibility_channel.gate.allows_overlay():active=False
+             now=time.monotonic();source=(packet.get('source_frame_id'),packet.get('source_mono_ms'))
+             if active and (source!=self.last_position_source or position!=self.last_position):
+                 self.position_counts[position]+=1
+@@ -213,7 +235,7 @@
+                     value=dict(boot_id=self.boot,active=bool(active),position=position,hint=hint,box=face,
+                         source_frame_id=packet.get('source_frame_id'),source_mono_ms=packet.get('source_mono_ms'),
+                         updated_mono_ms=int(now*1000),counts=dict(self.position_counts),events=list(self.position_events),
+-                        controller_commands_sent=0,recenter_mode=self.recenter_enabled,target_center_ratio=self.target_center_ratio)
++                        controller_commands_sent=0,page_visibility=self.visibility_channel.gate.snapshot() if self.visibility_channel else None,page_visibility_delivery=self.visibility_channel.last_delivery if self.visibility_channel else None,recenter_mode=self.recenter_enabled,target_center_ratio=self.target_center_ratio)
+                     path=self.path.parent/'face-zone-display-status.json';tmp=path.with_name(path.name+'.'+str(os.getpid()))
+                     tmp.write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n');os.replace(tmp,path)
+                 except OSError:pass
+@@ -222,6 +244,6 @@
+ 
+ def main():
+     p=argparse.ArgumentParser();p.add_argument('--settings',type=Path,required=True);args=p.parse_args()
+-    setup_font();Editor(args.settings);Gtk.main()
++    setup_font();editor=Editor(args.settings);editor.install_page_visibility();Gtk.main()
+ 
+ if __name__=='__main__':main()

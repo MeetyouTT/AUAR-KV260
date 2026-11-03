@@ -1,0 +1,349 @@
+{
+  "reviewed_utc": "2026-10-03T06:08:00.444565+00:00",
+  "result": "Candidate passed finite host and board validation; original baseline restored",
+  "host_tests_passed": true,
+  "board_verified": true,
+  "permanent_installation": false,
+  "original_baseline_restored": true,
+  "successful_board_commands": 24,
+  "failed_board_commands": 1,
+  "known_failed_probe": {
+    "phase": "06-start-candidate",
+    "reason": "Test readiness probe incorrectly used SOCK_STREAM for the vendor SOCK_SEQPACKET service",
+    "fixed_probe": "20-ready-check; continued from the observed active candidate without retrying startup",
+    "production_candidate_binary_changed_for_probe_fix": false
+  },
+  "source_review": {
+    "fixed_commit": "bc06691eb35d7f0acb7c2508b6d050d77b0264a0",
+    "baseline_git_blobs_verified": 139,
+    "changed_files": [
+      "src/daemon_helper.c"
+    ],
+    "patch_matches_actual_source_diff": true,
+    "patch_sha256": "62fd3dc5ddfc6fe789aac5dff38d03f82cf0d3240883d3e0da493546888e99d0",
+    "baseline_helper_sha256": "4a14fe3c1037daeffd72ed62c4f8570787258aa35bdbfd81eef256186cb602dc",
+    "patched_helper_sha256": "83689d55aea68c941737419c2c2fa96fad967e4163258c3ab631256cf6c7682f"
+  },
+  "host_results": [
+    {
+      "test": "baseline-legacy",
+      "exit_code": 0,
+      "results": [
+        "RESULT rescan rounds=130 entries=500 kernel_watches=5 legacy_defect_reproduced=1"
+      ],
+      "log": "evidence/20261003T035825.969132Z-host-tests/baseline-legacy.log"
+    },
+    {
+      "test": "patched-rescan",
+      "exit_code": 0,
+      "results": [
+        "RESULT rescan rounds=10000 entries=5 kernel_watches=5 legacy_defect_reproduced=0"
+      ],
+      "log": "evidence/20261003T035825.969132Z-host-tests/patched-rescan.log"
+    },
+    {
+      "test": "patched-lifecycle",
+      "exit_code": 0,
+      "results": [
+        "RESULT lifecycle cycles=1000 entries=5 kernel_watches=5"
+      ],
+      "log": "evidence/20261003T035825.969132Z-host-tests/patched-lifecycle.log"
+    },
+    {
+      "test": "patched-boundaries",
+      "exit_code": 0,
+      "results": [
+        "RESULT boundaries passed=1 capacity=500"
+      ],
+      "log": "evidence/20261003T035825.969132Z-host-tests/patched-boundaries.log"
+    },
+    {
+      "test": "patched-concurrent",
+      "exit_code": 0,
+      "results": [
+        "RESULT concurrent threads=8 calls=80000 entries=1"
+      ],
+      "log": "evidence/20261003T035825.969132Z-host-tests/patched-concurrent.log"
+    }
+  ],
+  "sanitizers": "Not enabled: this existing GCC 11 SDK does not ship libasan.",
+  "runtime_review": "evidence/20261003T040248.123957Z-runtime-review/status.json",
+  "candidate": {
+    "phase": "patched",
+    "path": "artifacts/runtime/20261003T040248.123957Z-runtime-review/patched/dfx-mgrd",
+    "bytes": 117488,
+    "sha256": "db9c25f09f1178177884b1114c57f32c076f1e7f9cdd0d12b7a896039038a46c",
+    "needed": [
+      "libdfx.so.1.0",
+      "libpthread.so.0",
+      "libc.so.6",
+      "ld-linux-aarch64.so.1"
+    ],
+    "strong_imports": [
+      "__assert_fail@GLIBC_2.17",
+      "__errno_location@GLIBC_2.17",
+      "__fdelt_chk@GLIBC_2.17",
+      "__fprintf_chk@GLIBC_2.17",
+      "__isoc99_fscanf@GLIBC_2.17",
+      "__libc_start_main@GLIBC_2.34",
+      "__memcpy_chk@GLIBC_2.17",
+      "__printf_chk@GLIBC_2.17",
+      "__snprintf_chk@GLIBC_2.17",
+      "__sprintf_chk@GLIBC_2.17",
+      "__stack_chk_fail@GLIBC_2.17",
+      "__stack_chk_guard@GLIBC_2.17",
+      "__stpcpy_chk@GLIBC_2.17",
+      "__strcat_chk@GLIBC_2.17",
+      "__strcpy_chk@GLIBC_2.17",
+      "__strncpy_chk@GLIBC_2.17",
+      "__vfprintf_chk@GLIBC_2.17",
+      "abort@GLIBC_2.17",
+      "accept@GLIBC_2.17",
+      "access@GLIBC_2.17",
+      "bind@GLIBC_2.17",
+      "calloc@GLIBC_2.17",
+      "close@GLIBC_2.17",
+      "closedir@GLIBC_2.17",
+      "dfx_cfg_destroy",
+      "dfx_cfg_init",
+      "dfx_cfg_load",
+      "dfx_cfg_remove",
+      "exit@GLIBC_2.17",
+      "fclose@GLIBC_2.17",
+      "fopen@GLIBC_2.17",
+      "fputc@GLIBC_2.17",
+      "fread@GLIBC_2.17",
+      "free@GLIBC_2.17",
+      "fseek@GLIBC_2.17",
+      "ftell@GLIBC_2.17",
+      "fwrite@GLIBC_2.17",
+      "getenv@GLIBC_2.17",
+      "inotify_add_watch@GLIBC_2.17",
+      "inotify_init@GLIBC_2.17",
+      "inotify_rm_watch@GLIBC_2.17",
+      "ioctl@GLIBC_2.17",
+      "listen@GLIBC_2.17",
+      "malloc@GLIBC_2.17",
+      "memcpy@GLIBC_2.17",
+      "memset@GLIBC_2.17",
+      "mkdtemp@GLIBC_2.17",
+      "mmap@GLIBC_2.17",
+      "munmap@GLIBC_2.17",
+      "open@GLIBC_2.17",
+      "opendir@GLIBC_2.17",
+      "pthread_create@GLIBC_2.34",
+      "pthread_mutex_lock@GLIBC_2.17",
+      "pthread_mutex_unlock@GLIBC_2.17",
+      "read@GLIBC_2.17",
+      "readdir@GLIBC_2.17",
+      "rmdir@GLIBC_2.17",
+      "select@GLIBC_2.17",
+      "sem_init@GLIBC_2.34",
+      "sem_post@GLIBC_2.34",
+      "sem_wait@GLIBC_2.34",
+      "sendmsg@GLIBC_2.17",
+      "signal@GLIBC_2.17",
+      "sleep@GLIBC_2.17",
+      "socket@GLIBC_2.17",
+      "stat@GLIBC_2.33",
+      "stderr@GLIBC_2.17",
+      "stdout@GLIBC_2.17",
+      "strcasecmp@GLIBC_2.17",
+      "strcmp@GLIBC_2.17",
+      "strdup@GLIBC_2.17",
+      "strerror@GLIBC_2.17",
+      "strlen@GLIBC_2.17",
+      "strncmp@GLIBC_2.17",
+      "strncpy@GLIBC_2.17",
+      "strndup@GLIBC_2.17",
+      "strnlen@GLIBC_2.17",
+      "strstr@GLIBC_2.17",
+      "strtol@GLIBC_2.17",
+      "strtoll@GLIBC_2.17",
+      "strtoull@GLIBC_2.17",
+      "system@GLIBC_2.17",
+      "unlink@GLIBC_2.17",
+      "write@GLIBC_2.17"
+    ],
+    "unresolved_strong_imports": [],
+    "build_rpath_removed": true,
+    "original_image_loader_list_passed": true
+  },
+  "query_stress": {
+    "queries": 1000,
+    "samples": [
+      {
+        "queries": 1,
+        "watches": 5
+      },
+      {
+        "queries": 125,
+        "watches": 5
+      },
+      {
+        "queries": 250,
+        "watches": 5
+      },
+      {
+        "queries": 500,
+        "watches": 5
+      },
+      {
+        "queries": 750,
+        "watches": 5
+      },
+      {
+        "queries": 1000,
+        "watches": 5
+      }
+    ],
+    "manager_errors": [],
+    "log_bytes": 1359872
+  },
+  "directory_stress": {
+    "cycles": 50,
+    "probe": "/lib/firmware/xilinx/watch-probe-20261003T042453Z",
+    "probe_absent": true,
+    "kernel_watches": 5,
+    "manager_errors": []
+  },
+  "official_cycles": [
+    {
+      "cycle": 1,
+      "active": [
+        [
+          "kv260-benchmark-b4096",
+          0
+        ]
+      ],
+      "watches": 5
+    },
+    {
+      "cycle": 2,
+      "active": [
+        [
+          "kv260-benchmark-b4096",
+          0
+        ]
+      ],
+      "watches": 5
+    },
+    {
+      "cycle": 3,
+      "active": [
+        [
+          "kv260-benchmark-b4096",
+          0
+        ]
+      ],
+      "watches": 5
+    }
+  ],
+  "functional": [
+    {
+      "phase": "07-official-functional",
+      "top5_match": true,
+      "dpu_match": true
+    },
+    {
+      "phase": "11-official-after-cycles",
+      "top5_match": true,
+      "dpu_match": true
+    },
+    {
+      "phase": "13-m3-functional",
+      "top5_match": true,
+      "dpu_match": true
+    },
+    {
+      "phase": "16-restored-functional",
+      "top5_match": true,
+      "dpu_match": true
+    }
+  ],
+  "candidate_log": {
+    "path": "evidence/20261003T043753Z-board-continuation/18-candidate-log.log.output",
+    "bytes": 1673512,
+    "sha256": "e33f7362ea28b9cfc4d8243b30f7ab204dfaf7bd266c0eb162683ff9919151d3",
+    "diagnostic_counts": {
+      "ERROR:": 0,
+      "no room to add more watch": 0,
+      "no room to add more watch to the base": 0
+    },
+    "collection_after_graceful_SIGINT_flush": true
+  },
+  "known_original_driver_exit_refcount_errors": [
+    "[13104.964094] OF: ERROR: memory leak, expected refcount 1 instead of 2, of_node_get()/of_node_put() unbalanced - destroy cset entry: attach overlay node /axi/zyxclmm_drm"
+  ],
+  "new_target_refcount_errors_with_repaired_driver": 0,
+  "overlay_property_warning_count": 112,
+  "fstab_review": "evidence/20261003T060312Z-fstab-audit/review.json",
+  "final": {
+    "boot_id": "64083069-98b7-409b-a455-b7b3b7158745",
+    "active": [
+      [
+        "kv260-benchmark-b4096",
+        0
+      ]
+    ],
+    "driver": "0991D1B457855C8987936E6",
+    "parameters": {
+      "enable_xgq_ert": "1"
+    },
+    "manager_pid": 19535,
+    "manager_exe": "/usr/bin/dfx-mgrd",
+    "kernel_watches": 5,
+    "original_files": {
+      "/usr/bin/dfx-mgrd": "bdbd8ee09b3f767a53bd5111240c9ade3bb19b1da83d73bd06785ae86260e9a2",
+      "/usr/bin/dfx-mgr-client": "a37d8449c3362a509d459f9e57aa3711314602369354f7d98ca60c3e51607ad7",
+      "/usr/lib/libdfx.so.1.0": "1acb6c9ac1f27e0ea769dc231f32db5565f6ca02a53be00e969fc48c038d290f",
+      "/lib/libc.so.6": "2d68f8d6162252fb0efc481b59a508c16c1c6c3be3d683f8fce269a4af0cc34a",
+      "/lib/libpthread.so.0": "87b3d947da289b44c1925511e2666ffdd9860cb9cd1730a0f0d928a196a52af4",
+      "/lib/ld-linux-aarch64.so.1": "af37b88e079a49854baef51db64bd478936ebdf6bb51e85cb759358ae4ccf0c2",
+      "/lib/modules/5.15.36-xilinx-v2022.2/extra/zocl.ko": "215fe760dafb6766545e308d8bc207c31712154fe5a8ed08342a101a5482a98d",
+      "/etc/vart.conf": "d669edeae713e9e0b5ffdf9d050b11c11f1fc2add68fa1dc8b25483e8d7c59ba",
+      "/etc/dfx-mgrd/daemon.conf": "a517938929fe978aa2975de76cf360a426d2fc5444fbd6d728a96dfa93603a08",
+      "/lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.bit.bin": "7d12c877e0fde40a243d2350b1a2227f565788bf9e2dcae4439d07f213d40a3f",
+      "/lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.dtbo": "36338937904e5ec988566d7341f6504edba34c01bd7e2e3f2025ab0069337e35",
+      "/lib/firmware/xilinx/kv260-benchmark-b4096/shell.json": "2967ccbc1f75c8d4accd1b6fecc11b16a32a5d7992e56c6eebceb99a3410f777",
+      "/lib/firmware/xilinx/kv260-benchmark-b4096/kv260-benchmark-b4096.xclbin": "fc3abb934eec544e49a17c484336cf177258f475522cefc994ec458b726f69ac",
+      "/usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel": "4d4d669c84b6d5aa6f731b389ebcf0f51fb1449752cf5fa4a4beddd496c3c0ef",
+      "/usr/share/vitis_ai_library/models/resnet18/resnet18.prototxt": "691c393b15ae87976060a125067534334bd034c3a5193a96f6f5db3f4da3729c",
+      "/home/root/kv260-test-20261001/pytorch-resnet-dog.jpg": "f3f87bb8ab3c26c7ecfd3ac60421d7f32b0503d1d6c5baf8bac42ed93d86351a",
+      "/home/root/kv260-test-20261001/samoyed.list": "bf02d74370fbfdd8d008c7916109a14be3a5b33bd6057522fbb14e95ac2e9caa",
+      "/home/root/kv260-test-20261001/baseline-backup/baseline-files.tar.gz": "964c04afac0d7de7e36b78d6bdd87f5f4a656bb47b3b7e1a7169510f5dfaa371",
+      "/home/root/Vitis-AI/examples/vai_library/samples/classification/test_jpeg_classification": "322dd07736f409cba02416782475c0dc2b5951435ddbb6d0671d3cda8fac0c0e",
+      "/home/root/Vitis-AI/examples/vai_library/samples/classification/test_performance_classification": "b9f52e4fd21d6526a8ac1e73b6e839b28308368451c4bb30e845a9f96343f1b4",
+      "/lib/firmware/xilinx/kv260-benchmark-b4096-m3/kv260-benchmark-b4096-m3.bit.bin": "a48a25265d280f268300f627e6408ec56707a70d4deebe46e358500cf17b2650",
+      "/lib/firmware/xilinx/kv260-benchmark-b4096-m3/kv260-benchmark-b4096-m3.dtbo": "51ce617967e0c0657bcc2629f1a0a8efa1e4bad3f3bc8f0b1931aacb5bf91937",
+      "/lib/firmware/xilinx/kv260-benchmark-b4096-m3/kv260-benchmark-b4096-m3.xclbin": "875ca912d87b2c993716f4c353265a9cf403b0c9890442610e64291787caafc3",
+      "/lib/firmware/xilinx/kv260-benchmark-b4096-m3/shell.json": "802dbc8b3f118313a5a74df46f56dc550a61b687dfd484fc6a8fd5ac7895c344",
+      "/etc/dfx-mgrd/default_firmware": "7e78c8b095e77ec1fdfa5cdd8b26192d8feb849405b55a50e8fe6562a35f18b2",
+      "/lib/systemd/system/dfx-mgr.service": "a5ba3c45b4bddf9a818d7aa7b34507cc0321296d90e51288f5d930e2293866b6"
+    },
+    "candidate_log_bytes": 1673512,
+    "candidate_log_sha256": "e33f7362ea28b9cfc4d8243b30f7ab204dfaf7bd266c0eb162683ff9919151d3"
+  },
+  "final_readonly_confirmation": {
+    "boot_id": "64083069-98b7-409b-a455-b7b3b7158745",
+    "uptime": "18778.29 74446.53",
+    "active": [
+      [
+        "kv260-benchmark-b4096",
+        0
+      ]
+    ],
+    "driver": "0991D1B457855C8987936E6",
+    "manager_exe": "/usr/bin/dfx-mgrd",
+    "temporary_override_absent": true,
+    "test_directory_absent": true
+  },
+  "limitations": [
+    "No permanent candidate installation or automatic startup of repaired binaries",
+    "Original manager and original ZOCL defects remain in the restored originals",
+    "No new FPS benchmark, M3 register access, PWM, actuator or sustained memory-leak measurement",
+    "Watch writer mutex validation is not a proof of all daemon shared-state thread safety",
+    "Existing overlay property warnings, DRC and timing limitations remain",
+    "Duplicate baseline /boot fstab entries recorded and not changed"
+  ]
+}

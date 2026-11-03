@@ -1,0 +1,100 @@
+{
+  "schema": "aura.stability-local-handoff.v1",
+  "status": "LOCAL_SYNTHETIC_TESTS_PASS_ROOT_REVIEW",
+  "manifest": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\performance_review_newboot\\stability_candidate\\SOURCE_MANIFEST.json",
+  "manifest_sha256": "5e3dd42ad0ee6832f84dd675110b5b3e76db9d3882b9039738c39663e9331256",
+  "diff": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\performance_review_newboot\\stability_candidate\\CHANGES.diff",
+  "test_result": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\performance_review_newboot\\stability_candidate\\TEST_RESULT.json",
+  "test_runner": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\performance_review_newboot\\stability_candidate\\run_local_tests.py",
+  "changes": [
+    "GTK board_business data_origin board sets visual_social False in the existing constructor options",
+    "RecordingController drains with a 12ms between-events deadline and maximum eight results",
+    "ERROR returns immediately and ERROR/CANCELLED/closed stops later event polling"
+  ],
+  "evidence": {
+    "old_social_failure": {
+      "error_class": "ValueError",
+      "capture_state_after_error": "CANCELLED",
+      "actual_import_generated": true
+    },
+    "new_social_quiet_ticks": {
+      "ticks": 41,
+      "seconds": 40,
+      "capture_starts": 1,
+      "spontaneous_cancels": 0,
+      "direct_listener": true
+    },
+    "deterministic_packet_capacity": [
+      {
+        "event_cost_ms": 4.5,
+        "tick_hz": 25,
+        "before": 50,
+        "after": 75
+      },
+      {
+        "event_cost_ms": 6.5,
+        "tick_hz": 25,
+        "before": 25,
+        "after": 50
+      },
+      {
+        "event_cost_ms": 8.0,
+        "tick_hz": 25,
+        "before": 25,
+        "after": 50
+      }
+    ],
+    "budget_boundary": "12ms checked before the next event; current event may finish after deadline",
+    "real_board_jobs_and_receipts": [
+      {
+        "route": "ordinary",
+        "audio_packets": 5,
+        "source_guard_calls": 9,
+        "full_ack": true,
+        "partial_ack_rejected": true,
+        "inference_calls": [
+          "llm",
+          "tts"
+        ]
+      },
+      {
+        "route": "local_memory",
+        "audio_packets": 5,
+        "source_guard_calls": 9,
+        "full_ack": true,
+        "partial_ack_rejected": true,
+        "inference_calls": [
+          "tts"
+        ]
+      },
+      {
+        "route": "identity_enrollment",
+        "audio_packets": 10,
+        "source_guard_calls": 0,
+        "full_ack": true,
+        "partial_ack_rejected": true,
+        "inference_calls": [
+          "tts",
+          "tts"
+        ]
+      }
+    ]
+  },
+  "baseline_protections": [
+    "Full 379-component source mapping anchors the candidate",
+    "Actual producer source pins retain bounded 128-result progress queue, owner/deadline and prepared-turn admission guards",
+    "Actual recording ACK and actual board job acknowledgement reject a partial receipt and commit only the full receipt",
+    "Original 8-frame capture input configuration is outside the two-source patch",
+    "Production automatic listening binding uses the existing no-wake policy",
+    "The existing device_observer option and visual query dispatch remain enabled by their existing configuration"
+  ],
+  "measurement_boundaries": [
+    "25Hz and 4.5/6.5/8ms per-event service times are deterministic simulated capacity",
+    "12ms is checked between event callbacks; one callback can finish after the deadline",
+    "At 24Hz, a two-packet batch has 48 packets/s capacity; real scheduling and per-event duration need device observation",
+    "No current-device acoustic improvement has been measured for this candidate",
+    "GTK option expressions were evaluated from actual source AST; no native GTK window was constructed",
+    "Original archived route tests receive missing constructor-default attributes through test-only class patches",
+    "Actual ASR/model/audio output are public synthetic fixtures; board jobs and synthetic SQLite receipts execute locally"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "step": "camera_entry_source",
+  "utc": "2026-11-01T09:03:28Z",
+  "source_sha256": "54218bd28ad416efb42993713cc0984e89e7fb2f6772c5e05d9a339e87134bbb",
+  "result": {
+    "files": [
+      {
+        "path": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/face-source-v17/entry.py",
+        "sha256": "f26be22cb640bf44a1bd81b66bb3fa014f5b847b13320781836bf3f173387623",
+        "content": "\"\"\"Pinned v14 lazy fixed-anchor current-pixel ingress over the protected native entry.\"\"\"\nimport hashlib\nimport importlib.util\nimport json\nimport runpy\nimport sys\nfrom pathlib import Path\n\nOPS = Path('/home/root/aura-native-live-20261024/ops/be72669aa53de735')\nF = OPS/'pan-face-edge-v5'\nROOT = F/'face-source-v17'\nmanifest = json.loads((ROOT/'deployment-manifest.json').read_text())\nassert all(hashlib.sha256(Path(p).read_bytes()).hexdigest() == h for p, h in manifest['pins'].items())\nmeta = json.loads((OPS/'meta.json').read_text())\nsys.path.insert(0, str(Path(meta['candidate_root'])/'aura'))\n\n\ndef load(name, path):\n    spec = importlib.util.spec_from_file_location(name, path)\n    module = importlib.util.module_from_spec(spec)\n    sys.modules[name] = module\n    spec.loader.exec_module(module)\n    return module\n\n\nload('face_lock_v14', ROOT/'face_lock.py').install()\nload('face_timing_v14', ROOT/'face_timing.py').install()\nstages=load('stage_timing_v17', ROOT/'stage_timing.py');stages.install()\nfrom board.vision.dpu_yunet import DpuYuNet\nfrom board.vision.dpu_vision_runtime import yunet_outputs\nload('fast_yunet_input', ROOT/'fast_yunet_input.py')\nfrom board.vision.reference_faces import YuNetCompat,bgr_image\nload('direct_yunet_input', ROOT/'direct_yunet_input.py').install(\n    DpuYuNet,yunet_outputs,stages.measured,YuNetCompat,bgr_image)\nload('face_flow', ROOT/'face_flow.py')\nsource = load('face_source', F/'face_source.py')\nsource.observation = load('face_observation_v14', ROOT/'face_observation.py').observation\nload('raw_capture_v14', ROOT/'raw_capture.py').install(source)\nentry = F/'native-operator-v1/native_entry_operator.py'\nsys.argv = [str(entry)]\nrunpy.run_path(str(entry), run_name='__main__')\n"
+      },
+      {
+        "path": "/etc/systemd/system/aura-camera-ui.service",
+        "sha256": "29786434df9bb9b94a8e640a7a48db47019c224d3876037ce27d3467bb2f5512",
+        "content": "[Unit]\nDescription=AURA shared USB camera preview and YOLOX person adapter\nAfter=local-fs.target\nStartLimitIntervalSec=0\n\n[Service]\nEnvironment=\"AURA_EXPERIMENT_GIL_MS=1\"\nEnvironment=\"AURA_PIPELINE_METRICS=1\"\nEnvironment=\"AURA_DPU_DIAGNOSTICS=1\"\nEnvironment=\"AURA_THREAD_SCHED_DIAGNOSTICS=switches\"\nType=simple\nExecStart=/usr/bin/python3 -B /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/runtime_entry.py /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/aura/tools/board_camera_motion.py --config /home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/board_camera_ui.json\nWorkingDirectory=/home/root/aura-dpu-vision-20261021/postpower-retry-live/release-reliability-f7624754038f-450136/aura\nEnvironment=PYTHONUNBUFFERED=1\nRestart=on-failure\nRestartSec=3\nTimeoutStopSec=10\nKillMode=control-group\nUMask=0077\n\n[Install]\nWantedBy=multi-user.target\n"
+      },
+      {
+        "path": "/etc/systemd/system/aura-camera-ui.service.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-aura-face-measure-v17.conf",
+        "sha256": "d798cf07ff3f9420672ea0fe6ec5f1e3cf5bbd6bcc6e92ba1305e6d8f61ff3ef",
+        "content": "[Service]\nExecStart=\nExecStartPre=/usr/bin/python3 -B -c \"import hashlib,json;from pathlib import Path;p=Path('/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/face-source-v17/deployment-manifest.json');assert hashlib.sha256(p.read_bytes()).hexdigest()=='84d7359f18a5a98aa5dabba967c4ededf5e35d0c43153166fc6998729a30219c';assert all(hashlib.sha256(Path(n).read_bytes()).hexdigest()==h for n,h in json.loads(p.read_text())['pins'].items())\"\nExecStart=/usr/bin/python3 -B /home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/face-source-v17/entry.py\nRestart=no\nSendSIGKILL=no\nKillMode=process\nTimeoutStopSec=infinity\n"
+      },
+      {
+        "path": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/native_entry.py",
+        "sha256": "839df536696d16c3f538bb158edee80614fb0cef55def64d7e7849d412fa30d4",
+        "content": "\"\"\"Pinned native camera launch; never automatically replace uncertain owners.\"\"\"\nimport ctypes as C\nimport hashlib\nimport json\nimport os\nfrom pathlib import Path\nimport runpy\nimport signal\nimport sys\nimport time\n\nroot=Path(__file__).resolve().parent\nmeta=json.loads((root/'meta.json').read_text())\nboot=Path('/proc/sys/kernel/random/boot_id').read_text().strip()\nassert boot != meta['source_boot'],'The old protection domain cannot be unlocked in place'\nconfig=json.loads(Path(meta['candidate_config']).read_text())\ncheckpoint=Path(config['native_execution']['checkpoint_output'])\nif checkpoint.exists():\n    assert not checkpoint.is_symlink() and checkpoint.stat().st_uid==os.geteuid()\n    raw=checkpoint.read_bytes();assert len(raw)<=262144\n    previous=json.loads(raw);assert previous['schema']=='aura-native-protection-checkpoint-2'\n    config['native_execution']['seed']={'path':str(checkpoint),'sha256':hashlib.sha256(raw).hexdigest()}\nentry=Path(meta['candidate_root'])/'aura/board/vision/ui_camera_service.py'\nassert hashlib.sha256(entry.read_bytes()).hexdigest()==meta['candidate_ui_sha256']\nrun=root/('native-run-'+boot+'-'+str(os.getpid()))\nrun.mkdir(mode=0o700)\nconfig_path=run/'config.json';config_path.write_text(json.dumps(config,indent=2)+'\\n')\nsys.path.insert(0,str(Path(meta['candidate_root'])/'aura'))\nsys.setswitchinterval(.001)\nsys.argv=[str(entry),'--config',str(config_path)]\ntry:\n    runpy.run_path(str(entry),run_name='__main__')\nfinally:\n    binding=sys.modules.get('board.vision.native_binding')\n    retained=getattr(binding,'_RETAINED',{}) if binding else {}\n    if retained:\n        # Keep the process, lock and all native references alive. Neither\n        # systemd Restart nor an outer timeout may create a replacement owner.\n        (run/'UNSAFE_OWNER_RETAINED.json').write_text(json.dumps({'boot':boot,'pid':os.getpid(),\n            'scope':'unconfirmed native completion or lifecycle; automatic replacement forbidden'})+'\\n')\n        def hold(*_):pass\n        signal.signal(signal.SIGTERM,hold);signal.signal(signal.SIGINT,hold)\n        while True:signal.pause()\n"
+      },
+      {
+        "path": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/native_startup.py",
+        "unavailable": true
+      }
+    ],
+    "services_changed": false
+  }
+}

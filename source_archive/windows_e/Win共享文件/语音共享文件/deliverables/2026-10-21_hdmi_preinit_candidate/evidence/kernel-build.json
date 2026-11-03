@@ -1,0 +1,74 @@
+{
+  "source_sha256": "d977bdda5e7c987724e338a1f9b0dea2a609cd4ed30b2ed1ed061c6f53819325",
+  "workdir": "/home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877",
+  "steps": [
+    {
+      "name": "copy-source",
+      "argv": [
+        "cp",
+        "-a",
+        "--reflink=auto",
+        "--",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/linux",
+        "/home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux"
+      ],
+      "exit_code": 0,
+      "seconds": 6.674,
+      "log": "/home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/copy-source.log"
+    },
+    {
+      "name": "copy-build",
+      "argv": [
+        "cp",
+        "-a",
+        "--reflink=auto",
+        "--",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/build/kernel",
+        "/home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/build"
+      ],
+      "exit_code": 0,
+      "seconds": 4.573,
+      "log": "/home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/copy-build.log"
+    },
+    {
+      "name": "olddefconfig",
+      "argv": [
+        "make",
+        "-C",
+        "/home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux",
+        "O=/home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/build",
+        "ARCH=arm64",
+        "CROSS_COMPILE=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-",
+        "olddefconfig"
+      ],
+      "exit_code": 0,
+      "seconds": 4.151,
+      "log": "/home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/olddefconfig.log"
+    },
+    {
+      "name": "kernel-image",
+      "argv": [
+        "make",
+        "-C",
+        "/home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux",
+        "O=/home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/build",
+        "ARCH=arm64",
+        "CROSS_COMPILE=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-",
+        "-j8",
+        "Image"
+      ],
+      "exit_code": 0,
+      "seconds": 417.362,
+      "log": "/home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/kernel-image.log"
+    }
+  ],
+  "board_deployed": false,
+  "active_image_replaced": false,
+  "image": "/home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/build/arch/arm64/boot/Image",
+  "image_sha256": "8bfafe019e09143795092e9452dbe1ca1850a865a57306d3e8ac5ed12a212a34",
+  "image_bytes": 27089408,
+  "kernel_release": "5.15.36-xilinx-v2022.2",
+  "config_sha256": "3e4da163cd12d3be4c76ac458b55aad47f3c5c47269b53aac4305d9b3a643d2b",
+  "completed": true,
+  "physical_fix_verified": false
+}

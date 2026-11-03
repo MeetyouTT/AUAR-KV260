@@ -1,0 +1,158 @@
+def prepare_pair(config, aura, source_hashes=None):
+    """Read only pinned public resources, retaining original legacy business."""
+    value = config.get('character_pair')
+    expected = dict(enabled=True, profile_version=PAIR_VERSION,
+        selection='config/yuki_pair.formal.json', selection_sha256=PAIR_CONFIG_SHA256)
+    if value != expected:
+        raise PairRejected('Select the exact formal image/persona pair')
+    if config.get('board_business', {}).get('enabled'):
+        raise PairRejected('Formal image-only overlay must retain the original legacy business')
+    if (config.get('portrait_offload', {}).get('enabled') or
+            config.get('native_avatar') is not True or config.get('stable_avatar_fps') != 16 or
+            not config.get('streaming_conversation') or not config.get('persistent_audio')):
+        raise PairRejected('Formal image requires one native16 sink and unchanged streaming PCM controller')
+    root = Path(aura).resolve(strict=True)
+    from common.character_profile import selected_profile
+    selected = selected_profile()
+    if (selected.profile_version != PAIR_VERSION or selected.render_profile_id != PROFILE_ID or
+            selected.render_source_profile_sha256 != PROFILE_SHA256 or
+            selected.persona_prompt_sha256 != '11b1b4d04c55ac110969fd5dd7ffb37f29b29bbc26d9c7906e454d4f69af654e' or
+            selected.selection_sha256 != '5dcac93339a56c549ef176e260b4ed7f01fdc3307059c53aa3784b7a382f09c3'):
+        raise PairRejected('Shared selected profile is not this formal image/persona pair')
+    old_runtime = '/home/root/aura-board-vision-20261030/06391079cfddb734-r3-ubuntu/runtime'
+    paths = {key:old_runtime+'/avatar_'+key+'_settings.json' for key in ('user','transcription','conversation','service')}
+    if config.get('formal_settings_paths') != paths or not all(Path(p).is_file() for p in paths.values()):
+        raise PairRejected('Formal overlay must preserve four existing original settings files')
+    if config.get('formal_stage_root') != old_runtime+'/deliverables/2026-10-06_xilan_live':
+        raise PairRejected('Formal overlay must preserve the original public stage/cache root')
+    raw = _read_pinned(root, value['selection'], PAIR_CONFIG_SHA256, 65536)
+    meta = json.loads(raw)
+    if (meta['schema'] != 'aura.yuki.formal_legacy_pair.v1' or
+            meta['identity']['profile_version'] != PAIR_VERSION or
+            meta['identity']['formal_name'] != '御笠雪妃' or
+            meta['identity']['romanized_name'] != 'YUKI MIKASA' or
+            meta['native_package_sha256'] != NATIVE_PACKAGE_SHA256 or
+            meta['identity']['render_profile_id'] != PROFILE_ID or
+            meta['identity']['render_source_profile_sha256'] != PROFILE_SHA256 or
+            config.get('native_yuki') != meta['native_config']):
+        raise PairRejected('Formal renderer/persona configuration mismatch')
+    for relative, expected_hash in meta['runtime_pins'].items():
+        _read_pinned(root, relative, expected_hash)
+    baseline = _read_pinned(root, 'config/yuki_accepted_prompt.baseline.txt',
+        meta['accepted_prompt_sha256'], 4096).decode('utf8')
+    from tools.board_persona_candidate import load_candidate
+    persona = load_candidate(root/'config/persona.xuefei.candidate.json',
+        expected_config_sha256=meta['identity']['persona_config_sha256'],
+        expected_profile_version=PAIR_VERSION, accepted_system_prompt=baseline)
+    if hashlib.sha256(persona.system_prompt.encode()).hexdigest() != meta['identity']['prompt_sha256']:
+        raise PairRejected('Formal persona fingerprint mismatch')
+    if source_hashes is not None:
+        source_hashes.update(meta['runtime_pins'])
+        source_hashes[value['selection']] = PAIR_CONFIG_SHA256
+    return CandidatePair(root, meta, persona)
+
+
+def paired_recording_type(original, pair):
+    """Private startup class; preserve old capture/permissions/ACK/PCM owners.
+
+    The same controller keeps all audio and full-playback acknowledgements.
+    Renderer failure cancels it through the existing worker; readiness also
+    gates admission and local starts. Normal unmap is not a readiness failure.
+    """
+    class PairedRecording(original):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            # A formal image switch is not consent to open the microphone.
+            # Do this before the AvatarRenderWorker is constructed, leaving
+            # the existing settings file intact. Only a later explicit UI
+            # toggle may resume the existing listening path.
+            if hasattr(self, 'monitor_enabled'):
+                self.monitor_enabled=False
+                self.monitor_state='PAUSED'
+                self.monitor_reason='EXPLICIT_START_REQUIRED'
+        def _listen(self):
+            pair.require_ready()
+            return super()._listen()
+        def record_start(self):
+            pair.require_ready()
+            return super().record_start()
+        def conversation_start(self):
+            pair.require_ready()
+            return super().conversation_start()
+        def handsfree_toggle(self):
+            if not getattr(self, 'monitor_enabled', False):pair.require_ready()
+            return super().handsfree_toggle()
+        def _queue_transcription(self):
+            pair.require_ready()
+            return super()._queue_transcription()
+        def submit(self, text, *args, **kwargs):
+            pair.require_ready()
+            # Old cached introductions must never be relabelled as Yuki. New
+            # cue text has a new content key; old named cue audio is not reused.
+            if not isinstance(text, str) or '汐蓝' in text:
+                raise PairRejected('Selected cue belongs to another character')
+            return super().submit(text, *args, **kwargs)
+    return PairedRecording
+
+
+def local_channel_jobs_type(spec, pair):
+    """Only static cues differ; original network/identity/store/ACK work stays.
+
+    The explicit pre-generated public cue files are never user dialogue data.
+    No stale Windows self-introduction or renamed cached waveform is accepted.
+    """
+    from board.runtime.audio.channel_jobs import ChannelConversationJobs
+    from common.voice_wire import wav_payload, MAX_WAV
+    expected = dict(path='/home/root/aura-board-owner-candidate-20261030/xuefei-static-cues-8222c2a0ff30471a/feedback.json',
+        sha256='143f6b2ea0de6afcfc1fc76178faa3de22d8fdd2bbbabc7965ddc7488ea786de')
+    if spec != expected:raise PairRejected('Explicit selected public cue manifest required')
+    path = Path(spec['path'])
+    raw = path.read_bytes()
+    if path.resolve() != path or len(raw)>65536 or hashlib.sha256(raw).hexdigest()!=spec['sha256']:
+        raise PairRejected('Selected public cue manifest changed')
+    values = json.loads(raw)
+    if set(values)!= {'version','assets'} or values['version'] != 1 or set(values['assets']) != {'thinking','arrival','invitation'}:
+        raise PairRejected('Selected public cue schema changed')
+    assets = {}
+    for name,row in values['assets'].items():
+        target = Path(row['path'])
+        if target.parent != path.parent or target.name != name+'.wav' or target.resolve()!=target:
+            raise PairRejected('Selected public cue redirected')
+        if target.stat().st_size>MAX_WAV:raise PairRejected('Selected public cue too large')
+        meta=wav_payload(row['metadata'],target.read_bytes())
+        if '汐蓝' in meta['reply_text'] or meta['duration_seconds']>5:
+            raise PairRejected('Selected cue belongs to another character')
+        assets[name]=dict(meta,path=str(target))
+    class LocalCueChannelJobs(ChannelConversationJobs):
+        def prepare_feedback(self, config):
+            # Preserve the original SpeechJobs.import_generated path contract.
+            # Only reviewed public static waveforms enter this public cache;
+            # an old file is never renamed or overwritten with new cue text.
+            import os
+            import uuid
+            selected={}
+            for name, value in assets.items():
+                target=self.feedback_root/(value['sha256']+'.wav')
+                if not target.exists():
+                    raw=Path(value['path']).read_bytes()
+                    wav_payload(value,raw)
+                    temporary=target.with_name(target.name+'.part-'+uuid.uuid4().hex)
+                    try:
+                        fd=os.open(str(temporary),os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
+                        with os.fdopen(fd,'wb') as out:out.write(raw)
+                        # Link publishes a complete file without replacing any
+                        # existing key. A concurrent same-key publication is OK
+                        # only after the full WAV hash check below.
+                        try:os.link(str(temporary),str(target))
+                        except FileExistsError:pass
+                    finally:temporary.unlink(missing_ok=True)
+                wav_payload(value,target.read_bytes())
+                selected[name]=dict(value,path=str(target))
+            self.feedback_assets={'thinking':selected['thinking']}
+            self.social_assets={name:selected[name] for name in ('arrival','invitation')}
+            self.feedback_address=(config['host'],config['port'])
+            self.feedback_error=''
+        def submit(self, clip):
+            pair.require_ready()
+            return super().submit(clip)
+    return LocalCueChannelJobs

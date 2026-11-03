@@ -1,0 +1,50 @@
+test_bounded_samples_sessions_people_and_unique_capture (test_calibration.CalibrationTests) ... ok
+test_calibration_statistics_suggestion_and_freeze_are_scalar_only (test_calibration.CalibrationTests) ... ok
+test_configuration_default_off_and_explicit_independent_shadow (test_calibration.CalibrationTests) ... ok
+test_end_reset_generation_and_target_change_invalidate_inflight (test_calibration.CalibrationTests) ... ok
+test_explicit_session_source_time_dedup_and_ticket_replay (test_calibration.CalibrationTests) ... ok
+test_group_centroid_and_threshold_margin_semantics_match_real_store (test_calibration.CalibrationTests) ... ok
+test_independent_validation_never_changes_frozen_candidate (test_calibration.CalibrationTests) ... ok
+test_insufficient_coverage_cannot_freeze_or_claim_accuracy (test_calibration.CalibrationTests) ... ok
+test_invalid_feature_and_sampling_rate_do_not_poison_session (test_calibration.CalibrationTests) ... ok
+test_no_file_io_and_close_erases_features (test_calibration.CalibrationTests) ... ok
+test_strict_anonymous_labels_target_and_split_controls (test_calibration.CalibrationTests) ... ok
+test_timeout_bad_end_token_and_explicit_discard (test_calibration.CalibrationTests) ... ok
+test_token_collision_and_control_replay_are_refused (test_calibration.CalibrationTests) ... ok
+test_only_new_route_loopback_and_capability_are_accepted (test_calibration.HttpTests) ... ok
+test_oversized_duplicate_nonfinite_json_and_not_ready_are_refused (test_calibration.HttpTests) ... ok
+test_start_is_explicit_atomic_and_http_never_accepts_features (test_calibration.HttpTests) ... FAIL
+test_end_while_inflight_invalidates_observer_without_stopping_shadow (test_calibration.ObserverTests) ... ok
+test_feature_is_collected_only_after_explicit_label_and_valid_completion (test_calibration.ObserverTests) ... ok
+test_generation_change_discards_output_and_invalidates_session (test_calibration.ObserverTests) ... ok
+test_observer_failure_does_not_turn_shadow_result_into_identity (test_calibration.ObserverTests) ... ok
+test_shadow_can_run_without_any_calibration_collection_and_close_clears (test_calibration.ObserverTests) ... ok
+test_blocked_shadow_cannot_delay_primary_or_change_old_database (test_shadow.PrimaryIsolationTests) ... ok
+test_cosine_shadow_does_not_offer_when_remote_raises (test_shadow.PrimaryIsolationTests) ... ok
+test_disabled_shadow_creates_no_thread_or_adapter (test_shadow.PrimaryIsolationTests) ... ok
+test_no_cosine_shadow_runs_when_remote_raises_and_preserves_original_exception (test_shadow.PrimaryIsolationTests) ... ok
+test_shadow_failure_and_busy_never_replace_primary_vector (test_shadow.PrimaryIsolationTests) ... ok
+test_shadow_offer_health_and_close_exceptions_do_not_escape_primary (test_shadow.PrimaryIsolationTests) ... ok
+test_successful_primary_offers_exactly_once_in_either_mode (test_shadow.PrimaryIsolationTests) ... ok
+test_busy_failure_and_initialization_failure_stay_auxiliary (test_shadow.ShadowTests) ... ok
+test_close_discards_pending_closes_own_runner_and_preserves_owner (test_shadow.ShadowTests) ... ok
+test_default_disabled_and_windows_only_contract (test_shadow.ShadowTests) ... ok
+test_latest_pending_is_bounded_and_copy_is_immutable (test_shadow.ShadowTests) ... ok
+test_one_inflight_plus_one_pending_and_rate_limit (test_shadow.ShadowTests) ... ok
+test_parent_close_reports_incomplete_shutdown_until_worker_has_stopped (test_shadow.ShadowTests) ... ok
+test_producer_never_waits_for_shadow_lock (test_shadow.ShadowTests) ... ok
+test_stale_or_changed_target_after_execution_publishes_no_metrics (test_shadow.ShadowTests) ... ok
+test_stale_or_changed_target_before_execution_is_not_computed (test_shadow.ShadowTests) ... ok
+
+======================================================================
+FAIL: test_start_is_explicit_atomic_and_http_never_accepts_features (test_calibration.HttpTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/candidate-root/tests/test_calibration.py", line 384, in test_start_is_explicit_atomic_and_http_never_accepts_features
+    self.assertNotIn(forbidden, json.dumps(result))
+AssertionError: 'embedding' unexpectedly found in '{"enabled": true, "mode": "CALIBRATION_ONLY", "model_id": "sface-int8-12b2ff5c7de15713", "closed": false, "active_session": true, "sessions": 1, "samples_in_ram": 0, "max_sessions": 32, "max_samples_per_session": 12, "max_embedding_scalar_values": 49152, "accepted": 0, "rejected": 0, "candidate_frozen": false, "last_session_end_reason": null, "mutation_slots_remaining": 127, "identity_decisions_published": 0, "templates_written": 0, "images_saved": 0, "features_saved": 0}'
+
+----------------------------------------------------------------------
+Ran 37 tests in 0.865s
+
+FAILED (failures=1)

@@ -1,0 +1,27 @@
+=== P0-1 验收：动作与说话同步（ack_nod + 长回复）===
+回复文本：你好呀，我是你的桌面玩偶，可以陪你聊天、玩游戏，…（32 字）
+修复后时间线（语音仍在播）：
+    t=0.0   ACK_NOD          frame=1    
+    t=0.3   ACK_NOD          frame=8    
+    t=0.6   ACK_NOD          frame=15   
+    t=0.9   ACK_NOD          frame=22   
+    t=0.95  ACK_NOD          frame=22   动作段播完
+    t=0.96  SPEAKING_NEUTRAL frame=1    接进播报段
+    t=1.2   SPEAKING_NEUTRAL frame=4    
+    t=2.0   SPEAKING_NEUTRAL frame=14   
+    t=3.0   SPEAKING_NEUTRAL frame=19   
+    t=4.0   SPEAKING_NEUTRAL frame=15   
+    t=5.0   SPEAKING_NEUTRAL frame=16   
+    t=5.1   IDLE             frame=1    语音播完
+  [OK ] S1 动作段内状态 = ACK_NOD
+  [OK ] S2a 动作段播完 → 接进播报档：['SPEAKING_NEUTRAL']
+  [OK ] S2b 播报段帧号在变化（不再静止）：[4, 14, 19, 15, 16]
+  [OK ] S4 语音播完 → IDLE
+  [OK ] S3 语音已停 → 不续播，保持 ['ACK_NOD']（纯应答语义）
+对照：旧行为（不接续播）动作段结束后静止 ≈4.05s；修复后静止 0.00s
+  [OK ] S5 修复后'语音仍在播但玩偶静止'的时长 = 0.00s（旧行为 ≈4.05s）
+  [OK ] S5b 旧行为确实停在 ACK_NOD 末帧（问题复现）
+deny_shake 时间线：动作段 ['DENY_SHAKE'] → 播报段 ['SPEAKING_NEUTRAL']
+  [OK ] S6a 动作段内状态 = DENY_SHAKE（新素材与点头同规格）
+  [OK ] S6b deny_shake 动作段播完 → 同样接进播报档：['SPEAKING_NEUTRAL']
+=== RESULT: OK (0 项失败) ===

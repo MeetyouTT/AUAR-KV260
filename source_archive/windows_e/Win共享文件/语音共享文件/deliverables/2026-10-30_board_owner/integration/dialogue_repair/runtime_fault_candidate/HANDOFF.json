@@ -1,0 +1,64 @@
+{
+  "schema": "aura.runtime-fault-location.v1",
+  "status": "FROZEN_SOURCE_ONLY",
+  "source": {
+    "path": "after/tools/board_avatar_gtk.py",
+    "before_sha256": "30b563bd46a4c5bba9c84a3bd52bb3cdd28126dfe04504568935dea1599dd701",
+    "sha256": "4fa8b74b71c89f08fdf9b5d376fd065b02e02baea01603ed03299a9971552e61",
+    "bytes": 118042,
+    "line_endings": "LF"
+  },
+  "public_shape": {
+    "runtime_faults": {
+      "metadata_only": true,
+      "count": "nonnegative cumulative integer, saturates at 2^53-1",
+      "last": {
+        "error_class": "fixed allowlist or other",
+        "frames": [
+          {
+            "file": "static basename only <=96 chars",
+            "function": "static name only <=80 chars",
+            "line": "0..1000000"
+          }
+        ],
+        "frames_truncated": "boolean"
+      }
+    }
+  },
+  "no_fault_shape": {
+    "metadata_only": true,
+    "count": 0,
+    "last": null
+  },
+  "bounds": {
+    "frames_retained": 6,
+    "trace_frames_visited": 32,
+    "records_retained": 1
+  },
+  "logging": "STAGE RUNTIME_FAULT plus compact metadata JSON. Consecutive identical class/location signatures suppress duplicate logs; cumulative count still increments. No global signature history.",
+  "changes": [
+    "Add static fault metadata in outer GTK.tick exception handler and publish a detached copy on next normal state publication.",
+    "Preserve original controller.cancel/status recovery, never retain exception or traceback objects.",
+    "Explicit authorized keep-awake wiring uses handsfree.enabled OR automatic.enabled OR playing; visual_bound no longer blocks voice-first idle listening.",
+    "Paused listener with no automatic conversation/playback continues to obey original desktop idle policy."
+  ],
+  "privacy": [
+    "No str(exc), exception arguments, locals, source line text or traceback formatting in new diagnostics.",
+    "No prefix paths, body, PCM, request/session/profile IDs in the new runtime_faults record.",
+    "Only last fault metadata record retained; no frame/history list grows."
+  ],
+  "tests": {
+    "passed": 6,
+    "subtests_passed": 5,
+    "seconds": 0.1,
+    "xml_sha256": "e5e3946e724927797b90a30e5cd23f867c98aab4c89e5c171fb215a2c2ffa265",
+    "source_sha256": "04002db0e6563353c36ef726d7574f8e19419453d563b9142fe1a34034fed9d8",
+    "command": "\"C:\\Users\\35870\\.codex\\visualizations\\2026\\10\\09\\01a12110-3ba4-7651-b3d7-2e6560916eb6\\omnivoice-runtime-py310\\Scripts\\python.exe\" -B -m pytest -q -p no:cacheprovider \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\runtime_fault_candidate\\tests\\test_runtime_faults.py\"",
+    "scope": "AST-extracted actual helper/tick/keep-awake call; synthetic widgets/sinks. Covers secret exception+locals+path-prefix filtering, unknown class, bounds, repeat counts/log suppression, original cancel, detached next-state metadata and active/paused display behavior."
+  },
+  "boundaries": [
+    "No board/model/device/GTK/service execution.",
+    "No native renderer, queue, ASR, identity, memory or DisplayActivity/X11 implementation changes.",
+    "Prepared root-owned prepare_revision.py untouched. Actual TypeError location remains to be observed by root after normal publication."
+  ]
+}

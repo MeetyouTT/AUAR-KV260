@@ -1,0 +1,41 @@
+M03新boot合并候选；只准备，没有部署或访问板端。
+
+基线：boot bebd3e7d-e984-4517-8cbb-211df7f1c6dc，startup70a2f7fa...，
+manifest e105159f...，379组件，配置5518b670...。
+若根窗口为显示/自动取消稳定性发布了新源码，入口会拒绝，必须先核对新映射重绑。
+不能删除或跳过boot/startup/379源指纹校验。
+
+合并证明：THREE_WAY_MERGE_PROOF.json。
+board_business.py从冷启动482e250...仅加import和history_delete_preview注册，
+移除这两条新增字节即恢复原482e文件；全AST和create_board_business_runtime工厂AST保留。
+history_delete.py/production_memory_presentation.py与独审38/38的r2逐字节一致。
+r2原目录、冷启动原目录与两个独立测试文件未改。
+
+只需stage九份文件（路径见ARM_STAGE_MANIFEST.json）：
+arm_public_worker.py，SOURCE_MANIFEST.json，source_mapping.newboot.json，after/三份源码，
+原四例test_delete_boundaries.py、独立三例test_independent_boundaries.py、冻结worker.py。
+不要上传public_runtime_newboot源码快照；ARM直接只读核验现役runtime/aura。
+不要上传模型、环境、录音、真实声纹或生产数据库。
+
+依赖：Python>=3.9、现有系统时区库。入口不需要pytest、numpy、ONNX或新模型。
+本地Windows验证使用项目外已有tzdata；运行证据imported_optional_packages为空。
+
+root先协调一个公开自动测试空档，沿原控制路径处理监听与owner保护。本脚本不会改变
+聆听/控制/服务状态，不启动或停止生产进程，不进行真实播放或任何设备/模型推理。
+
+命令示例（R=生产运行根，S=新独立stage，OUTPUT须新绝对路径）：
+python3 -B S/arm_public_worker.py --runtime-root R/runtime/aura --startup-config R/startup/config.json --candidate-root S/after --mapping S/source_mapping.newboot.json --candidate-manifest S/SOURCE_MANIFEST.json --candidate-manifest-sha256 29107d8ebf03c541cb4ad771eeb26526a96a8c74aad0c09950344a6fd7e97a7a --original-review S/test_delete_boundaries.py --independent-tests S/test_independent_boundaries.py --public-worker S/worker.py --root-coordinated-slot ROOT_SLOT --output S/NEW_RESULT.json
+可先加--check-only并另选新输出。若启动/boot已改，先交root更新基线审查，不在此处运行。
+
+运行顺序：先完整核验当前boot/startup/全部379文件，再仅在该解释器加载候选3源。
+所有数据只放/dev/shm自建700临时目录，完整测试后移除；持久输出仅公开测试结果/hash。
+原四例以原unittest类直接执行；原独立三例的函数体/断言AST原样执行，
+pytest.raises仅用标准unittest.assertRaises等价上下文、setattr用标准mock.patch适配，
+不将其报告为38项pytest复验。第8例用真实paired._route→处理器→Store→全流ACK，
+同时检查预览只读、派生值清除、少1样本ACK拒绝、原production presentation提交通知。
+ASR/PCM/TTS/native-ready/GUI是明确public fixture，不能当物理听音或真人删除验收。
+
+本地结果：216项回归通过，1项原Linux kernel writer lock证明在Windows跳过；
+同一ARM入口本地8/8通过、临时库清除、线程残留0，参见LOCAL_ARM_ENTRY_02.json。
+LOCAL_ARM_ENTRY_01.json失败原样保留：测试起初把每次submit的原generation失效通知
+也算作一次删除通知；现改为直接记录新增commit-hook调用，未改三个生产源或7个独立断言。

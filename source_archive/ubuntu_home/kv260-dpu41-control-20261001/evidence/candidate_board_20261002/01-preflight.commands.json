@@ -1,0 +1,12 @@
+[
+  {
+    "id": "identity_and_runtime",
+    "command": "tr -d '\\0' </proc/device-tree/model; echo; cat /sys/block/mmcblk1/device/cid; df -h / /boot; xmutil listapps; ls -ld /lib/firmware/xilinx/kv260-benchmark-b4096-dpu41 /home/root/kv260-test-20261001/candidate-stage /home/root/kv260-test-20261001/baseline-backup; ps -eo pid,comm | grep -E '[c]lassification|[x]dputil|[d]pu_runner' || true",
+    "timeout": 35
+  },
+  {
+    "id": "load_and_recovery_tools",
+    "command": "command -v xmutil tar sha256sum bootgen fdtget dtc; systemctl is-active dfx-mgr; sed -n '1,180p' /usr/bin/xmutil; ls -l /sys/class/fpga_manager/fpga0; ip -4 addr show eth0; sha256sum /lib/firmware/xilinx/kv260-benchmark-b4096/* /usr/share/vitis_ai_library/models/resnet18/resnet18.* /home/root/kv260-test-20261001/pytorch-resnet-dog.jpg /home/root/kv260-test-20261001/samoyed.list",
+    "timeout": 35
+  }
+]

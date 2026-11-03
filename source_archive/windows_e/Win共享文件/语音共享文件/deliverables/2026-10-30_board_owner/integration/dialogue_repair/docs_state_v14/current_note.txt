@@ -1,0 +1,7 @@
+公开ASR试验简记（候选未上线）
+
+原3/4线程ABBA：同一5.614625秒公开WAV，3线程11.126/9.902秒、4线程12.238/12.138秒；四轮后台memory均变化，回执明确CONTAMINATED_NO_GAIN_CLAIM，不能声称四线程提速。正式保持原3线程。
+
+隔离流式CTC候选：1线程、一个recognizer重用，同一公开WAV按实时节奏输入。计划输入结束到最终结果为435.846/354.027/379.524/377.206ms；这是final_after_scheduled_input_end_ms，额外tail_wait_ms参数为0，并非扬声器首声或正式ASR耗时。四轮输出均27字，与旧输出29字不一致；旧输出也不是gold，无准确率通过结论。未接正式GTCRN/Silero/录音端点管线，未验证真实录音/渲染FPS或端到端提速，后台memory有变化。
+
+实际执行probe SHA941bad1dfeb3c72f1704b9d1a4ddf84c15b92e6153fc55eb99774714a8fa43e2：root将pacing sleep钳制为非负的一行修正后重过2项现有检查；并非原agent冻结3bc版直接执行。详见evidence_final/streaming_root_result.json。正式startup未变，原ASR3线程、27B/2048/120、OmniVoice16均保持；试验后已按post_streaming_trial回执恢复聆听。

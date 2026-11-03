@@ -1,0 +1,181 @@
+[
+  {
+    "argv": [
+      "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/bin/dtc",
+      "-I",
+      "dts",
+      "-O",
+      "dtb",
+      "-o",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.dtbo",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/auar_xuefei/src/fpga/overlay/aura-visual-servo.dtsi"
+    ],
+    "exit_code": 0,
+    "label": "compile_overlay",
+    "log_sha256": "e8981cc82affb8c38ebffa9d8ca7d4f544a68ccb72deb5b0207cdd39f907944f"
+  },
+  {
+    "argv": [
+      "/home/ghmd/kv260-dpu41-control-20261001/dependencies/dtc-1.7.2/fdtoverlay",
+      "-i",
+      "/home/ghmd/aura-system-pan-20261028/fresh-base.dtb",
+      "-o",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/merged.dtb",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.dtbo"
+    ],
+    "exit_code": 0,
+    "label": "merge_target_tree",
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "argv": [
+      "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/bin/xclbinutil",
+      "--target",
+      "hw",
+      "--key-value",
+      "SYS:PlatformVBNV:xilinx_kv260_ispMipiRx_vcu_DP_kv260_ispMipiRx_vcu_DP_1_0",
+      "--add-section",
+      "MEM_TOPOLOGY:JSON:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/auar_xuefei/src/fpga/xrt_metadata/mem_topology.json",
+      "--add-section",
+      "IP_LAYOUT:JSON:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/auar_xuefei/src/fpga/xrt_metadata/ip_layout.json",
+      "--add-section",
+      "CONNECTIVITY:JSON:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/auar_xuefei/src/fpga/xrt_metadata/connectivity.json",
+      "--add-section",
+      "BUILD_METADATA:JSON:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/auar_xuefei/src/fpga/xrt_metadata/build_metadata.json",
+      "--add-section",
+      "EMBEDDED_METADATA:RAW:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/auar_xuefei/src/fpga/xrt_metadata/embedded_metadata.txt",
+      "--add-section",
+      "SYSTEM_METADATA:RAW:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/auar_xuefei/src/fpga/xrt_metadata/system_metadata.json",
+      "--add-section",
+      "GROUP_CONNECTIVITY:JSON:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/auar_xuefei/src/fpga/xrt_metadata/group_connectivity.json",
+      "--add-section",
+      "GROUP_TOPOLOGY:JSON:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/auar_xuefei/src/fpga/xrt_metadata/group_topology.json",
+      "--output",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.xclbin"
+    ],
+    "exit_code": 0,
+    "label": "rebuild_xclbin",
+    "log_sha256": "dd4068ee1b40d965041ca94920ed7e26d6e6c809fd9f88ab6bf08149fc48f5d9"
+  },
+  {
+    "argv": [
+      "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/bin/xclbinutil",
+      "--input",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.xclbin",
+      "--info"
+    ],
+    "exit_code": 0,
+    "label": "inspect_xclbin",
+    "log_sha256": "96ca3b5e70e47111736ce55c9d81d4472e973a5e02fa2d1325c55be5bdb14f78"
+  },
+  {
+    "argv": [
+      "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/bin/xclbinutil",
+      "--input",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.xclbin",
+      "--dump-section",
+      "MEM_TOPOLOGY:JSON:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/xrt_readback/mem_topology.json"
+    ],
+    "exit_code": 0,
+    "label": "read_MEM_TOPOLOGY",
+    "log_sha256": "45c9063b207f09f87f76677ed3912dfe05fbd653cbc46c986a4a4a5ebfafc38c"
+  },
+  {
+    "argv": [
+      "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/bin/xclbinutil",
+      "--input",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.xclbin",
+      "--dump-section",
+      "IP_LAYOUT:JSON:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/xrt_readback/ip_layout.json"
+    ],
+    "exit_code": 0,
+    "label": "read_IP_LAYOUT",
+    "log_sha256": "3dab47787361b500349be0658170ee0c00b9c79047f817b0a334bc8c181d9cdf"
+  },
+  {
+    "argv": [
+      "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/bin/xclbinutil",
+      "--input",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.xclbin",
+      "--dump-section",
+      "CONNECTIVITY:JSON:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/xrt_readback/connectivity.json"
+    ],
+    "exit_code": 0,
+    "label": "read_CONNECTIVITY",
+    "log_sha256": "1e6f9a6179ce69176165cca9ae02f637031ef597f71280fad21626c2f295cdc1"
+  },
+  {
+    "argv": [
+      "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/bin/xclbinutil",
+      "--input",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.xclbin",
+      "--dump-section",
+      "BUILD_METADATA:JSON:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/xrt_readback/build_metadata.json"
+    ],
+    "exit_code": 0,
+    "label": "read_BUILD_METADATA",
+    "log_sha256": "84f9dcee9c0a852c2efd9f312a00f71d7e1984584572de33ba24e817f7fb6f63"
+  },
+  {
+    "argv": [
+      "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/bin/xclbinutil",
+      "--input",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.xclbin",
+      "--dump-section",
+      "EMBEDDED_METADATA:RAW:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/xrt_readback/embedded_metadata.txt"
+    ],
+    "exit_code": 0,
+    "label": "read_EMBEDDED_METADATA",
+    "log_sha256": "d9cb30857b4ef4439e97c38e56fd29da48fd0d3a9876a9a2a45f099b0bccfc98"
+  },
+  {
+    "argv": [
+      "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/bin/xclbinutil",
+      "--input",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.xclbin",
+      "--dump-section",
+      "SYSTEM_METADATA:RAW:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/xrt_readback/system_metadata.json"
+    ],
+    "exit_code": 0,
+    "label": "read_SYSTEM_METADATA",
+    "log_sha256": "c995f524c520d3ae541fbffa35984cff52679b8ed5f782e6fb709c2cf95c1a64"
+  },
+  {
+    "argv": [
+      "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/bin/xclbinutil",
+      "--input",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.xclbin",
+      "--dump-section",
+      "GROUP_CONNECTIVITY:JSON:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/xrt_readback/group_connectivity.json"
+    ],
+    "exit_code": 0,
+    "label": "read_GROUP_CONNECTIVITY",
+    "log_sha256": "430d8c81db290cdb80aeed2bf74383e4b7ebdeb87788e71555b6264e5143b6b2"
+  },
+  {
+    "argv": [
+      "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/bin/xclbinutil",
+      "--input",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.xclbin",
+      "--dump-section",
+      "GROUP_TOPOLOGY:JSON:/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/xrt_readback/group_topology.json"
+    ],
+    "exit_code": 0,
+    "label": "read_GROUP_TOPOLOGY",
+    "log_sha256": "bce2c283a5dfb3f9a5bf89d875dc5327f7654b234fd6939960bc33638201b765"
+  },
+  {
+    "argv": [
+      "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/bin/bootgen",
+      "-arch",
+      "zynqmp",
+      "-image",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/full_pl.bif",
+      "-o",
+      "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/firmware-fresh01/aura-visual-servo-b4096-wide-v1/aura-visual-servo-b4096-wide-v1.bit.bin"
+    ],
+    "exit_code": 0,
+    "label": "bootgen",
+    "log_sha256": "f8cafae599004bb533a28425f33b42c3b3bc3bd1e2d87df36cadac276e4b0387"
+  }
+]

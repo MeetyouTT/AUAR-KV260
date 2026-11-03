@@ -1,0 +1,61 @@
+{
+  "status": "ONE_PUBLIC_V16_INFERENCE_CHAIN_PASSED",
+  "evidence": {
+    "file": "ACTUAL_CHAIN_1793454952793344600.json",
+    "sha256": "be2c8fc0e549aed2b0cee392383f235094a94dba78ebe75208d9656efa54b59f"
+  },
+  "startup_sha256": "bf6cdd70768ea5fac4e5be874a387f444c0834d67db5e7a2a744671d9019d63c",
+  "asr_variant": "paraformer_small",
+  "asr_threads": 3,
+  "measured_seconds": {
+    "asr_decode": 1.5181044729979476,
+    "llm_complete_rpc": 4.3321423289962695,
+    "tts_first_chunk_rpc": 0.6269135900001856,
+    "asr_decode_start_to_first_ram_audio": 6.492791778000537,
+    "asr_decode_start_to_all_ram_audio": 7.104886649001855,
+    "asr_load_and_pin_validation_separate": 12.943708357001015
+  },
+  "llm_metrics": {
+    "prompt_eval_count": 232,
+    "eval_count": 30,
+    "load_duration_ms": 1.02,
+    "prompt_eval_duration_ms": 907.68,
+    "eval_duration_ms": 3212.2,
+    "total_duration_ms": 4198.8,
+    "thinking_characters": 0,
+    "content_characters": 52,
+    "trailing_whitespace_characters": 0,
+    "first_packet_ms": 1031.9999999992433,
+    "first_content_ms": 1031.9999999992433,
+    "first_json_closed_ms": 4125.0,
+    "backend_done_ms": 4250.0,
+    "json_closed_to_done_ms": 125.0,
+    "prompt_eval_cached_count": 0
+  },
+  "reply_characters": 15,
+  "tts_chunks": 2,
+  "input": {
+    "public_synthetic": true,
+    "duration_seconds": 2.61,
+    "raw_reference_equal": false,
+    "public_reference_without_punctuation_hash_equal": true
+  },
+  "preserved": {
+    "manual_pause": true,
+    "microphone_open": false,
+    "production_ui_camera_owners": true,
+    "windows_model_owners": true,
+    "owned_requests_cleaned": true,
+    "remaining_transport_connections": 0
+  },
+  "background_activity_changed": true,
+  "interpretation": "In this public single case, complete LLM generation is now the largest measured per-turn stage.",
+  "limits": [
+    "One cold-child ASR decode; model loading and pin checks are reported separately, not counted as per-turn recognition.",
+    "Public WAV enters ASR directly; physical microphone, frontend/endpoint, production Jobs routing, context/permission/Store work and playback/ACK are outside this probe.",
+    "The existing persona and negotiated reply contract are used; no real conversation history or retrieved memory is supplied.",
+    "First RAM audio is synthesized data availability, not first network packet, audio enqueue or first acoustic sound.",
+    "Background activity changed; this is neither a controlled before/after comparison nor human waiting/accuracy acceptance.",
+    "The allocation micro-optimization was rejected after its separate queue overflow and remains undeployed."
+  ]
+}

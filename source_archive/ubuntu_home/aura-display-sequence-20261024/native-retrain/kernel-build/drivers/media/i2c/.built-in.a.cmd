@@ -1,0 +1,1 @@
+cmd_drivers/media/i2c/built-in.a := echo >/dev/null; rm -f drivers/media/i2c/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/media/i2c/built-in.a drivers/media/i2c/ap1302.o drivers/media/i2c/imx219.o drivers/media/i2c/imx274.o

@@ -1,0 +1,127 @@
+{
+  "schema": "aura-boot-fix-r7-b01-independent-recheck-1",
+  "status": "B01_CLOSED_IN_PINNED_R7_LOCAL_RUNTIME_RECHECK",
+  "reviewed_snapshot": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\boot_review_inputs\\observed_revision7",
+  "source_sha256": {
+    "boot_recovery.py": "41294ef497171b15ae4b11ea9172fe54aba6a5dc7dfc7e97c5b21cfda8c3ebbc",
+    "recovery_rules.py": "55bfc4db498be172beb040605dcae351c6f972e0df1371cecb48b7d1034ed268"
+  },
+  "scope": "Only quiet queued-action classification and its own-helper/unrelated-job/ordered-start effects. Whole candidate, package and same-job/InvocationID review remain root scope.",
+  "source_lines": {
+    "quiet": [
+      257,
+      310
+    ],
+    "prefix_assignment": 292,
+    "platform_guard": 296
+  },
+  "previous_concrete_finding": {
+    "report": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\validation\\BOOT_FIX_R3_RUNTIME_RECHECK.json",
+    "old_source_sha256": "e60d8f4ebf32f7ed738789d8e79a1e25d80881cb03fda90e5217880c3d70b9b7",
+    "case": "queued_original_idstop_without_live_process",
+    "old_accepted": true,
+    "R7_accepted": false
+  },
+  "source_reasoning": [
+    "own_action_job now uses name.startswith(aura-boot-wide-) directly. It has no boot or action filter, so list/remove/load/idstop and other action suffixes, from the current or another boot, all reach the reject condition.",
+    "The exact current aura-original-wide-prepare.service exception remains before classification and requires MainPID equal this process, job type start and state running. Wrong PID/type/state still rejects.",
+    "Camera/GUI rows retain their individual exact ordered-start checks. An unrelated queued Python command remains allowed.",
+    "All rejected prefix cases stop before any proc/resource scan or action dispatch in this isolated probe. No new submit route was introduced by the classifier change."
+  ],
+  "independent_cases": [
+    {
+      "case": "original_python_idstop_no_pid",
+      "accepted": false,
+      "expected_accepted": false,
+      "hold_reason": "OTHER_PLATFORM_OR_DAEMON_JOB_PENDING_NO_DFX",
+      "queue_queries": 1,
+      "all_metadata_in_memory": true
+    },
+    {
+      "case": "other_boot_python_idstop_no_pid",
+      "accepted": false,
+      "expected_accepted": false,
+      "hold_reason": "OTHER_PLATFORM_OR_DAEMON_JOB_PENDING_NO_DFX",
+      "queue_queries": 1,
+      "all_metadata_in_memory": true
+    },
+    {
+      "case": "future_own_action_without_loader_words",
+      "accepted": false,
+      "expected_accepted": false,
+      "hold_reason": "OTHER_PLATFORM_OR_DAEMON_JOB_PENDING_NO_DFX",
+      "queue_queries": 1,
+      "all_metadata_in_memory": true
+    },
+    {
+      "case": "unrelated_python_job",
+      "accepted": true,
+      "expected_accepted": true,
+      "hold_reason": null,
+      "queue_queries": 1,
+      "all_metadata_in_memory": true
+    },
+    {
+      "case": "own_current_helper",
+      "accepted": true,
+      "expected_accepted": true,
+      "hold_reason": null,
+      "queue_queries": 1,
+      "all_metadata_in_memory": true
+    },
+    {
+      "case": "different_pid_helper",
+      "accepted": false,
+      "expected_accepted": false,
+      "hold_reason": "ANOTHER_PLATFORM_PREPARE_JOB_PENDING",
+      "queue_queries": 1,
+      "all_metadata_in_memory": true
+    },
+    {
+      "case": "own_pid_wrong_job_type",
+      "accepted": false,
+      "expected_accepted": false,
+      "hold_reason": "ANOTHER_PLATFORM_PREPARE_JOB_PENDING",
+      "queue_queries": 1,
+      "all_metadata_in_memory": true
+    },
+    {
+      "case": "own_pid_waiting_helper",
+      "accepted": false,
+      "expected_accepted": false,
+      "hold_reason": "ANOTHER_PLATFORM_PREPARE_JOB_PENDING",
+      "queue_queries": 1,
+      "all_metadata_in_memory": true
+    },
+    {
+      "case": "ordered_camera_gui_start_control",
+      "accepted": true,
+      "expected_accepted": true,
+      "hold_reason": null,
+      "queue_queries": 1,
+      "all_metadata_in_memory": true
+    }
+  ],
+  "independent_direct_case_count": 9,
+  "quiet_diff_from_R5": "--- R5_quiet\n+++ R7_quiet\n@@ -31,8 +31,12 @@\n                 continue\n             entries = ' '.join(current.get(key, '') for key in ('ExecStart', 'ExecStartPre', 'ExecStartPost')).lower()\n+            # Own Python ID_STOP_ONLY jobs also touch the platform. Pending\n+            # actions block advancement; observe_job binds an existing action\n+            # to its durable unit/InvocationID without another submission.\n+            own_action_job = name.startswith('aura-boot-wide-')\n             loader_name = bool(re.search(r'dfx|xmutil|fpga|zocl|dpu-auto', name, flags=re.IGNORECASE))\n             loader_entry = ('dfx-mgr-client' in entries or 'dfx-mgrd' in entries\n                             or ('xmutil' in entries and ('loadapp' in entries or 'unloadapp' in entries)))\n-            require(not loader_name and not loader_entry, 'OTHER_PLATFORM_OR_DAEMON_JOB_PENDING_NO_DFX')\n+            require(not own_action_job and not loader_name and not loader_entry, 'OTHER_PLATFORM_OR_DAEMON_JOB_PENDING_NO_DFX')\n         for path in Path('/proc').iterdir():\n             if not path.name.isdigit() or int(path.name) == os.getpid():\n",
+  "remaining_B01_code_fixes": [],
+  "not_claimed": [
+    "No whole-candidate deployment approval, actual Linux/systemd acceptance or cold-boot acceptance.",
+    "Author8-test receipt is not used as independent evidence; neither author8 nor65/50 suites were executed.",
+    "History adapter compatibility, package hashes, same-job continuation and InvocationID are not re-audited here."
+  ],
+  "actions": {
+    "actual_quiet_ast_executed_with_in_memory_callbacks": true,
+    "original_fixture_suite_executed": false,
+    "author_suite_executed": false,
+    "board_ssh_http_systemctl_proc_or_models_accessed": false,
+    "author_production_or_other_branch_writes": false,
+    "cross_dialogue_messages": false,
+    "only_requested_validation_report_written": true
+  },
+  "later_gates": [
+    "Device access remains frozen until the current owner hands back maintenance rights. The revoked resource window is not reused.",
+    "Root should combine this B01 verdict with the separate history/interface/package checks before considering a new runtime window.",
+    "Keep existing user acceptance of smooth axis behavior and cancellation of face-voice association; no new direction/motion tuning is requested."
+  ]
+}

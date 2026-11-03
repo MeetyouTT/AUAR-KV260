@@ -1,0 +1,67 @@
+{
+  "schema": "aura-memory-readonly-aggregate-query-review-1",
+  "queries": {
+    "pending_valid_bodies_by_fixed_source": {
+      "sql": "SELECT COUNT(*) FROM bm_events e JOIN bm_bodies b USING(event_id) WHERE e.state='valid' AND e.compacted_summary_id IS NULL AND e.source=?",
+      "parameters": "One fixed source enum per query; residual other=total minus allowed-source counts",
+      "allowlist": [
+        "user_said",
+        "assistant_reply",
+        "assistant_played",
+        "camera_observed",
+        "device_event",
+        "memory_command"
+      ]
+    },
+    "failed_tasks_with_live_uncompacted_source": {
+      "sql": "SELECT COUNT(*) FROM bm_tasks q WHERE q.status='failed' AND EXISTS (SELECT 1 FROM bm_task_sources ts JOIN bm_events e USING(event_id) JOIN bm_bodies b USING(event_id) WHERE ts.task_id=q.task_id AND e.state='valid' AND e.compacted_summary_id IS NULL AND e.revision=ts.revision AND e.body_hash=ts.body_hash)",
+      "parameters": [],
+      "meaning": "Historical failed task rows with at least one still-live original source, not distinct pending events or currently eligible jobs"
+    },
+    "valid_summaries": {
+      "sql": "SELECT COUNT(*) FROM bm_summaries WHERE state='valid'",
+      "parameters": []
+    },
+    "current_facts": {
+      "sql": "SELECT COUNT(*) FROM bm_facts WHERE state='current'",
+      "parameters": []
+    },
+    "fixed_turn_status_counts_if_needed": {
+      "sql": "SELECT COUNT(*) FROM bm_turns WHERE status=?",
+      "parameters": "Fixed original production enum only; all unfamiliar values stay aggregated as other",
+      "allowlist": [
+        "played",
+        "interrupted",
+        "invalidated",
+        "generating",
+        "awaiting_playback"
+      ],
+      "execution_requested_by_this_review": false
+    },
+    "compaction_eligible_event_count_at_verified_cutoff": {
+      "sql": "SELECT COUNT(*) FROM bm_events e JOIN bm_bodies b USING(event_id) LEFT JOIN bm_turns t ON t.turn_id=e.turn_id WHERE e.state='valid' AND e.compacted_summary_id IS NULL AND e.reserved_task IS NULL AND e.closed_utc<=? AND (e.turn_id IS NULL OR (t.closed_utc IS NOT NULL AND t.closed_utc<=?))",
+      "parameters": "The same verified production UTC cutoff (now minus 300 seconds), twice. Do not silently substitute an unverified wall clock.",
+      "meaning": "Eligible event candidates, not tasks; original worker also requires global no-active-turn/idle/clock/lease guards."
+    },
+    "fixed_scope_counts": {
+      "sql": "SELECT COUNT(*) FROM bm_turns WHERE scope_kind=?",
+      "allowlist": [
+        "conversation",
+        "profile",
+        "device"
+      ],
+      "parameters": "Count only; never SELECT scope_id/person_id/profile name."
+    }
+  },
+  "connection": "Root only: URI mode=ro, query_only=ON, BEGIN consistent snapshot; no Store constructor/import/migration/worker. Do not use immutable=1 to hide concurrent changes.",
+  "read_prohibited_columns": [
+    "bm_bodies.text",
+    "bm_summaries.summary",
+    "bm_summaries.keywords",
+    "bm_summaries.claims",
+    "bm_events.metadata",
+    "bm_profiles.name",
+    "bm_facts.value"
+  ],
+  "sql_executed_by_this_agent": false
+}

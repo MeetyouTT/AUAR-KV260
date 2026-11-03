@@ -1,0 +1,25 @@
+已按用户本次明确授权，正式选择雪妃形象及配套人格，停止追加性能对比测试。
+
+板端当前正式目录：/home/root/aura-character-xuefei-20261030/f94fca2c94288acb
+默认服务仍为aura-avatar-ui.service，已写持久ExecStart覆盖，服务enabled。当前supervisor539628、GTK539632、相机260102；后续必须重新核对PID和boot，不能照抄这些数值。
+
+已完成的必要启动检查：原生EGL成功出帧且窗口可见；character_pair READY、production_selected=true；渲染profile与978B人格SHA同版本对应；新名称及唤醒称呼为雪妃/御笠雪妃，保留欸/哎。内部profile标识沿用已验xuefei-yuki-board-v1-candidate，标识后缀不代表当前未选用，正式状态以production_selected和本记录为准。
+
+新默认入口已持久化，未进行断电重启测试。临时安全交接guard已移除，原停止策略恢复。旧UI经正常WM_DELETE退出，没有强杀。启动时发现漏带纯常量common/device_policy.py，已补齐470B文件并同步更新全部来源闭包和启动绑定，重启无owner的失败服务后正常就绪；没有扩大测试范围。
+
+Windows默认人格配置也已选择同一978B文本；未来旧8792业务启动使用voice-xuefei-profile-20261030-r13，源码指纹83dbfae5359cbcfd27ed7bc895456177760d41310c785010e57bb02e833ca7de。模型only8797仍完整采用调用方messages，不注入人格。本轮没有启动旧8792或声称完整语音链路READY。
+
+这次仅切换形象/人格/名称/唤醒和公开提示音。现役legacy业务及真实HOME/设置/记忆/身份权限路径保持，未迁入synthetic空库，未迁真实库、未启生产正文清理。麦克风、监听、播放、跟随均关闭，机械仍FAULT/null。新帧率与长稳问题留给后续调试，不把已有14.21fps压力样本改写成通过16fps。
+
+正式依赖必须保留：
+1. 原/home/root/aura-board-vision-20261030/06391079cfddb734-r3-ubuntu/runtime/下四个avatar_*_settings.json及原deliverables/2026-10-06_xilan_live公共舞台/缓存仍被使用，不能把旧root当无用目录删除。
+2. /home/root/aura-board-owner-candidate-20261030/xuefei-static-cues-8222c2a0ff30471a/为新角色已验证的公开提示音依赖，虽然位于candidate父目录，也不能整树清掉。
+3. 原r3来源目录及本次控制journal保留，用于受控回退；不回滚或重写真实记忆。
+
+本次实际启动配置SHA：91dbe7229cf0e11afdcfa6ca5aca657dd7f95a2adfa9b3764a0df0d793f050e2，304份组件绑定。
+基础overlay ZIP SHA：f94fca2c94288acb1ffb5306e3d2dcbbb20caa12b8ca31700670bccf0b612cdc。
+追加device_policy.py SHA：10abf6753ffcbfca562600a66fc8b074809d0077461dd225d5ff9b4c7d23e616。
+完整发布manifest SHA：bfdc28c79eff58e4ae6cc35df889f99232b4fdd64263dab5377a1b108c3fe7a0。
+
+实际回执：integration/formal_character_switch/actual_completed.json。
+受控回退工具与操作：integration/formal_character_switch/publish/HANDOFF.json；先核对当前来源，再按rollback-prepare、正常WM_DELETE、rollback-start、rollback-ready处理，不直接stop/restart旧supervisor。

@@ -1,0 +1,11 @@
+--- before/camera/six_file_transaction_template.py
++++ after/camera/six_file_transaction_template.py
+@@ -121,7 +121,7 @@
+             if (row['mode'],row['uid'],row['gid'])!=(stat.S_IMODE(info.st_mode),info.st_uid,info.st_gid):raise RuntimeError('Target ownership/mode changed')
+             for prefix,key in (('before','before_sha256'),('after','after_sha256')):
+                 pinned({'path':str(self.backup/('%s-%02d.bin'%(prefix,index))),'sha256':row[key]})
+-            if Path(row['stage']).exists():pinned({'path':row['stage'],'sha256':row['after_sha256']})
++            if stage.exists() or stage.is_symlink():pinned({'path':row['stage'],'sha256':row['after_sha256']})
+         self.plan=plan
+ 
+     def commit(self,*,recover=False):

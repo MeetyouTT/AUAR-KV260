@@ -1,0 +1,1 @@
+cmd_drivers/perf/built-in.a := echo >/dev/null; rm -f drivers/perf/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/perf/built-in.a drivers/perf/arm-cci.o drivers/perf/arm_pmu.o drivers/perf/arm_pmu_platform.o

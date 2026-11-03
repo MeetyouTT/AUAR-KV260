@@ -1,0 +1,51 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/36-nfs-post-restart-preflight.json",
+  "manifest_sha256": "e7a1f859a5b935123109cdf77e5023663471fe919ea0ec58aac1b6dbc6e26a59",
+  "started_utc": "2026-10-04T10:51:30.940284+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "boot-identity",
+      "started_utc": "2026-10-04T10:51:31.465828+00:00",
+      "entry": {
+        "id": "boot-identity",
+        "command": "python3 -B -c 'import json; from pathlib import Path; r=lambda p:Path(p).read_text().strip(); print(json.dumps({\"boot_id\":r(\"/proc/sys/kernel/random/boot_id\"),\"uptime\":r(\"/proc/uptime\"),\"kernel\":r(\"/proc/sys/kernel/osrelease\"),\"sd_cid\":r(\"/sys/class/block/mmcblk1/device/cid\"),\"cmdline\":r(\"/proc/cmdline\")}))'",
+        "timeout": 30
+      },
+      "exit_code": 0,
+      "output_sha256": "8036753d4b0b0a20004228e1177f9c380b262f91091a2966d1fe7afccac1c0f1",
+      "bytes": 268,
+      "finished_utc": "2026-10-04T10:51:32.699637+00:00"
+    },
+    {
+      "id": "startup-service-states",
+      "started_utc": "2026-10-04T10:51:32.700179+00:00",
+      "entry": {
+        "id": "startup-service-states",
+        "command": "systemctl show dfx-mgr.service kv260-repaired-zocl.service proc-fs-nfsd.mount nfs-server.service nfs-mountd.service -p Id -p UnitFileState -p LoadState -p ActiveState -p SubState -p Result -p MainPID -p ConditionResult -p ConditionTimestampMonotonic -p DropInPaths -p ExecMainStartTimestampMonotonic -p ActiveEnterTimestampMonotonic -p Requires -p After",
+        "timeout": 30
+      },
+      "exit_code": 0,
+      "output_sha256": "db80e4c88e04e9dcad8de30c32eee51f367119247fa123a5ab6c8223812abac8",
+      "bytes": 2245,
+      "finished_utc": "2026-10-04T10:51:33.962563+00:00"
+    },
+    {
+      "id": "live-nfs-configuration",
+      "started_utc": "2026-10-04T10:51:33.962975+00:00",
+      "entry": {
+        "id": "live-nfs-configuration",
+        "command": "python3 -B -c 'import hashlib,json; from pathlib import Path; p=Path(\"/etc/systemd/system/proc-fs-nfsd.mount.d/20-kv260-nfs-capability.conf\"); d=p.read_bytes(); print(json.dumps({\"path\":str(p),\"sha256\":hashlib.sha256(d).hexdigest(),\"content\":d.decode()}))'",
+        "timeout": 30
+      },
+      "exit_code": 0,
+      "output_sha256": "d272b5c5f523525b2dc54d59178dfa141a4cac56346402f8d886233d43123e8c",
+      "bytes": 392,
+      "finished_utc": "2026-10-04T10:51:35.194243+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T10:51:35.242057+00:00"
+}

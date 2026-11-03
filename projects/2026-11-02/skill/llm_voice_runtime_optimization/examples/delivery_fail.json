@@ -1,0 +1,113 @@
+{
+  "schema": "aura.delivery_source_trace.v1",
+  "evidence_kind": "synthetic_public_example_no_private_content",
+  "events": [
+    {
+      "kind": "request",
+      "time_ms": 0,
+      "scope": "public_scope_a",
+      "request_id": "public_r1",
+      "generation": 1,
+      "deadline_ms": 300000,
+      "expected_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "expected_samples": 32,
+      "expected_segments": 2,
+      "source_dependencies": []
+    },
+    {
+      "kind": "memory_commit",
+      "time_ms": 1,
+      "scope": "public_scope_a",
+      "request_id": "public_r1",
+      "generation": 1,
+      "accepted": true,
+      "role": "user",
+      "source_id": "public_user_1",
+      "source_version": 1
+    },
+    {
+      "kind": "chunk_decision",
+      "time_ms": 10,
+      "scope": "public_scope_a",
+      "request_id": "public_r1",
+      "generation": 1,
+      "accepted": true,
+      "segment_index": 0
+    },
+    {
+      "kind": "chunk_decision",
+      "time_ms": 11,
+      "scope": "public_scope_a",
+      "request_id": "public_r1",
+      "generation": 1,
+      "accepted": true,
+      "segment_index": 1
+    },
+    {
+      "kind": "ack_decision",
+      "time_ms": 20,
+      "scope": "public_scope_a",
+      "request_id": "public_r1",
+      "generation": 1,
+      "accepted": true,
+      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "samples": 32
+    },
+    {
+      "kind": "memory_commit",
+      "time_ms": 21,
+      "scope": "public_scope_a",
+      "request_id": "public_r1",
+      "generation": 1,
+      "accepted": true,
+      "role": "assistant",
+      "source_id": "public_assistant_1",
+      "source_version": 1
+    },
+    {
+      "kind": "summary_commit",
+      "time_ms": 333000,
+      "scope": "public_scope_a",
+      "summary_id": "public_summary_1",
+      "validated": true,
+      "accepted": true,
+      "sources": [
+        {
+          "source_id": "public_user_1",
+          "version": 1
+        },
+        {
+          "source_id": "public_assistant_1",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "kind": "raw_delete",
+      "time_ms": 333001,
+      "scope": "public_scope_a",
+      "source_id": "public_user_1",
+      "summary_id": "public_summary_1"
+    },
+    {
+      "kind": "source_invalidate",
+      "time_ms": 334000,
+      "scope": "public_scope_a",
+      "source_id": "public_user_1"
+    },
+    {
+      "kind": "summary_commit",
+      "time_ms": 334001,
+      "scope": "public_scope_a",
+      "summary_id": "stale_summary",
+      "validated": true,
+      "accepted": false,
+      "sources": [
+        {
+          "source_id": "public_user_1",
+          "version": 1
+        }
+      ]
+    }
+  ]
+}

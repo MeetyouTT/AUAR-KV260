@@ -1,0 +1,137 @@
+--- actual_camera_9d714/board/vision/ui_camera_service.py
++++ candidate/board/vision/ui_camera_service.py
+@@ -8,6 +8,7 @@
+ from board.vision.native_errors import PrimaryAdmissionDeferred
+ from collections import OrderedDict
+ import copy
++from dataclasses import dataclass
+ import fcntl
+ import hashlib
+ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+@@ -30,6 +31,25 @@
+ from board.vision.camera_device import CAMERA_IDENTITY, PINNED_CAMERA, CameraUnavailable, resolve_camera_device
+ 
+ 
++@dataclass
++class PreviewFrame:
++    stamp: int
++    revision: int
++    jpeg: bytes = None
++    pixels: bytes = None
++    failed: bool = False
++
++
++def encode_preview(pixels):
++    import cv2
++    import numpy as np
++    image = np.frombuffer(pixels, dtype=np.uint8).reshape(480, 640, 3)
++    ok, encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 72])
++    if not ok or encoded.nbytes > 256 * 1024:
++        raise ValueError('Preview encoding failed or exceeded size limit')
++    return encoded.tobytes()
++
++
+ class CameraState:
+     """A bounded, expiring view of actual capture/inference observations."""
+     def __init__(self,boot,epoch=None,clock=millis,detector_info=None,device=None):
+@@ -38,6 +58,7 @@
+         self.device = copy.deepcopy(device)
+         self.session = uuid.uuid4().hex
+         self.lock = threading.RLock()
++        self.preview_encoding_lock = threading.Lock()
+         self.sequence = self.capture_frames = self.detected_frames = self.preview_frames = 0
+         self.capture_stamp = self.processed_stamp = None
+         self.frames = OrderedDict()
+@@ -70,9 +91,13 @@
+             self.camera_error = ''
+             return self.capture_frames
+ 
+-    def publish_preview(self,fid,stamp,jpeg):
+-        with self.lock:
+-            self.frames[fid] = (stamp,jpeg)
++    def publish_preview(self,fid,stamp,jpeg=None,*,pixels=None):
++        if (jpeg is None) == (pixels is None):
++            raise ValueError('Preview requires one immutable image payload')
++        if pixels is not None and (not isinstance(pixels, bytes) or len(pixels) != 640 * 480 * 3):
++            raise ValueError('Unexpected BGR preview layout')
++        with self.lock:
++            self.frames[fid] = PreviewFrame(stamp, self.preview_frames + 1, jpeg, pixels)
+             while len(self.frames)>8:self.frames.popitem(last=False)
+             self.preview_frames += 1
+             self.preview_error = ''
+@@ -145,17 +170,56 @@
+             elif self.identity_error:
+                 modules['identity'] = {'state': 'ERROR', 'detail': self.identity_error}
+             if fresh and self.frames:
+-                fid = next(reversed(self.frames));stamp,_ = self.frames[fid]
++                fid = next(reversed(self.frames));stamp = self.frames[fid].stamp
+                 if 0<=now-stamp<1000:
+                     result['preview'] = {'camera_epoch':self.camera_epoch,'frame_id':fid,'captured_mono_ms':stamp}
+             return result
+ 
++    def _preview_frame(self,epoch,fid):
++        # Caller holds self.lock. Recheck this after waiting and after encoding.
++        frame = self.frames.get(fid)
++        if (epoch != self.camera_epoch or frame is None or not 0 <= self.clock()-frame.stamp < 1000
++                or self.camera_error):
++            return None
++        return frame
++
+     def preview(self,epoch,fid):
+         with self.lock:
+-            value = self.frames.get(fid)
+-            if (epoch != self.camera_epoch or value is None or not 0<=self.clock()-value[0]<1000
+-                    or self.camera_error):return None
+-            return value[1]
++            frame = self._preview_frame(epoch, fid)
++            if frame is None or frame.failed:
++                return None
++            if frame.jpeg is not None:
++                return frame.jpeg
++            revision = frame.revision
++            remaining = max(0, (1000 - (self.clock() - frame.stamp)) / 1000)
++        # Waiters retain only the revision, so retired BGR buffers can be freed.
++        del frame
++        if not self.preview_encoding_lock.acquire(timeout=remaining):
++            return None
++        try:
++            with self.lock:
++                frame = self._preview_frame(epoch, fid)
++                if frame is None or frame.revision != revision or frame.failed:
++                    return None
++                if frame.jpeg is not None:
++                    return frame.jpeg
++            try:
++                jpeg = encode_preview(frame.pixels)
++            except Exception as exc:
++                with self.lock:
++                    if self._preview_frame(epoch, fid) is frame:
++                        frame.failed = True
++                        if frame.revision == self.preview_frames:
++                            self.preview_error = str(exc)[:150]
++                return None
++            with self.lock:
++                if self._preview_frame(epoch, fid) is not frame:
++                    return None
++                frame.jpeg = jpeg
++                frame.pixels = None
++                return jpeg
++        finally:
++            self.preview_encoding_lock.release()
+ 
+     def command(self,command):
+         with self.lock:
+@@ -530,10 +594,9 @@
+                             label=('person #%s %.2f'%(track['track_id'],track['score'])
+                                 if state.detector_info['count_kind']=='people' else '#'+str(track['track_id']))
+                             cv2.putText(image,label,(x,max(18,y-6)),cv2.FONT_HERSHEY_SIMPLEX,.6,color,2)
+-                    raw.publish(fid,stamp,image.tobytes())
+-                    ok,encoded=cv2.imencode('.jpg',image,[cv2.IMWRITE_JPEG_QUALITY,72])
+-                    if not ok or encoded.nbytes>256*1024:raise ValueError('Preview encoding failed or exceeded size limit')
+-                    state.publish_preview(fid,stamp,encoded.tobytes())
++                    pixels=image.tobytes()
++                    raw.publish(fid,stamp,pixels)
++                    state.publish_preview(fid,stamp,pixels=pixels)
+                     state.pipeline_metrics.elapsed('preview.render_encode_publish',preview_started)
+                     state.pipeline_metrics.value('preview.publish_source_age',max(0,millis()-stamp))
+                 except Exception as exc:

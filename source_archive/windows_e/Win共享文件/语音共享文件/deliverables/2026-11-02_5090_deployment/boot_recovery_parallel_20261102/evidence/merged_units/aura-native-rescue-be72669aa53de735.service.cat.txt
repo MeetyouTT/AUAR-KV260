@@ -1,0 +1,9 @@
+# /etc/systemd/system/aura-native-rescue-be72669aa53de735.service
+[Unit]
+Description=AURA native maintenance no-execution rescue
+After=local-fs.target
+[Service]
+Type=oneshot
+TimeoutStartSec=infinity
+KillMode=process
+ExecStart=/usr/bin/python3 -B /home/root/aura-native-live-20261024/ops/be72669aa53de735/boot_ops.py --root /home/root/aura-native-live-20261024/ops/be72669aa53de735 rescue

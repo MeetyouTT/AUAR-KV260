@@ -1,0 +1,33 @@
+38
+附录 A 寄存器与状态定义
+以下定义对应已核对的 VSRV/2 宽版 RTL，基址为 0x80080000。RW 字段要求 32 bit 全
+字节写入，表中位宽表示有效数据位；非法读取返回 SLVERR，命令业务拒绝由 reason/ack
+表达。复位后影子与绑定为 0，width、target、reference_width 为 1500，输出关闭。[E20]
+表 A-1 VSRV2 完整寄存器表
+偏移 字段 访问及有效位 复位与说明
+0x000 ID R 32 0x56535256
+0x004 ABI R 32 2
+0x008 BUILD_ID R 32 0x10282601
+bit0 active bit1 armed bit2 referenced
+0x00c flags_reason R 8
+bit3 bound bit7:4 reason
+0x010 shadow_session RW 32 0 非零会话
+0x014 shadow_epoch RW 32 0 非零代次
+0x018 shadow_seq RW 32 0 下一连续序号
+0x01c shadow_width RW 32 0 以 µs 为单位 接受时检查范围
+0x020 shadow_lease RW 32 0 以 ms 为单位 接受时检查 4–500
+0x024 command W 32 命令魔数 不提供读回
+0x028 ack_seq R 32 0 接受序号
+0x02c width R 12 1500 当前数字脉宽
+0x030 lease_left R 9 0 剩余许可 ms
+0x034 session R 32 0 当前会话
+0x038 epoch R 32 0 当前代次
+0x03c shadow_reference RW 32 0 控制参考 µs
+0x040 reference_width R 12 1500 已接受参考 µs
+0x044 target R 12 1500 已接受目标 µs
+reason=0 表示接受或正常状态，1 表示命令前提不满足，2 表示 COMMIT 无效，3 表示
+未知命令或地址，4 表示许可到期。具体读取要结合 flags、ack_seq 与当前事务，不能只看
+reason=0 就断言机构达到目标。
+命令魔数为 BIND 0x42494e44，REFERENCE 0x52454621，ARM 0x41524d21，COMMIT
+0x434d5421，STOP 0x53544f50，QUIESCE 0x51554945。STOP 与到期清除 active、armed、
+referenced、bound，恢复需重新绑定与参考。

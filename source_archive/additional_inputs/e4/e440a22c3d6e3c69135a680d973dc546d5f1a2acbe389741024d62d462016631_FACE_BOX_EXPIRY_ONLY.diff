@@ -1,0 +1,58 @@
+--- a/face_zone_editor.py
++++ b/face_zone_editor.py
+@@ -71,6 +71,7 @@
+         self.visibility_channel=None;self.poll_wakeup=threading.Event()
+         self.position_counts=collections.Counter();self.position_events=collections.deque(maxlen=64)
+         self.last_position_source=None;self.last_position=None;self.next_position_write=0.
++        self.face_display_deadline=None;self.face_expiry_timer=None
+         self.line.add_events(Gdk.EventMask.BUTTON_PRESS_MASK|Gdk.EventMask.BUTTON_RELEASE_MASK|Gdk.EventMask.POINTER_MOTION_MASK)
+         self.line.connect('button-press-event',self.press);self.line.connect('motion-notify-event',self.motion);self.line.connect('button-release-event',self.release)
+         # Popup windows bypass the desktop's automatic maximization policy.
+@@ -168,7 +169,24 @@
+             except Exception:pass
+         threading.Thread(target=send,daemon=True).start()
+ 
+-    def update(self,active,face,hint='人脸位置：未确认'):
++    def expire_face_display(self):
++        self.face_expiry_timer=None
++        deadline=self.face_display_deadline
++        if deadline is None:return False
++        remaining=deadline-int(time.monotonic()*1000)
++        if remaining>0:
++            self.face_expiry_timer=GLib.timeout_add(remaining,self.expire_face_display)
++            return False
++        self.face_display_deadline=None
++        for window in self.faces:window.hide()
++        if self.active:self.hint_label.set_text('人脸位置：未确认')
++        return False
++
++    def update(self,active,face,hint='人脸位置：未确认',source_mono_ms=None,anchor_mono_ms=None):
++        now=int(time.monotonic()*1000)
++        if face is not None and (type(source_mono_ms) is not int or type(anchor_mono_ms) is not int
++                or not 0<=now-source_mono_ms<250 or not 0<=now-anchor_mono_ms<500):
++            face=None;hint='人脸位置：未确认'
+         if self.visibility_channel is not None:
+             active=bool(active and self.visibility_channel.gate.allows_overlay())
+         if active:
+@@ -180,8 +198,12 @@
+         else:self.hint_window.hide()
+         self.active=active
+         if not active or face is None:
++            self.face_display_deadline=None
+             for window in self.faces:window.hide()
+             return False
++        self.face_display_deadline=min(source_mono_ms+250,anchor_mono_ms+500)
++        if self.face_expiry_timer is None:
++            self.face_expiry_timer=GLib.timeout_add(max(1,self.face_display_deadline-now),self.expire_face_display)
+         x,y,w,h=face
+         x=round(CONTENT[0]+x/640*CONTENT[2]);y=round(CONTENT[1]+y/480*CONTENT[3]);w=max(2,round(w/640*CONTENT[2]));h=max(2,round(h/480*CONTENT[3]))
+         rectangles=((x,y,w,2),(x,y+h-2,w,2),(x,y,4,h),(x+w-2,y,2,h),(x+w//2-2,y+h//2-2,5,5))
+@@ -239,7 +261,7 @@
+                     path=self.path.parent/'face-zone-display-status.json';tmp=path.with_name(path.name+'.'+str(os.getpid()))
+                     tmp.write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n');os.replace(tmp,path)
+                 except OSError:pass
+-            GLib.idle_add(self.update,active,face,hint)
++            GLib.idle_add(self.update,active,face,hint,packet.get('source_mono_ms'),packet.get('face_detection_mono_ms'))
+ 
+ 
+ def main():

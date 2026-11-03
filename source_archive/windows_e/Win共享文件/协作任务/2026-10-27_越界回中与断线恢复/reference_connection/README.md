@@ -1,0 +1,11 @@
+# 当前参考的只读连接资格候选
+
+仅增加 `CURRENT_REFERENCE_CONNECTION_VSRV2 / face_follow_reference_connection_only`。这让新boot经核验后可读取状态/STOP并交给现有face-follow生命周期独占接管，**不开放手动JOG，不提供新的机械零点、行程或外部PWM波形证明**。
+
+新增 `board/motion/current_reference_release.py`：按固定SHA读取本boot用户1420参考receipt、完整15µs固定往返report及同run背景位移report；核对原有限授权窗口、全命令ACK/完整返回STOP、至少12个运行期间有效背景样本及实际dx>2px。数字观测不冒充20µs真人或波形验收。qualification文件复制保持原字节，control_report.source_path保留原板端report路径以匹配observer。
+
+`manual_vsrv.py`只增加对应load分支和scope门禁：初始完整读回必须匹配固定试验STOP；以后只能通过已有 `verified_stopped_face_command`验证新face STOP。1400..1600只是允许读取域，任意范围内pulse不能READY。before_move、begin、commit均在运动写入前拒绝本scope，finish只STOP。原manual_release、manual_live_config、follow_readback逐字保留，GUI、worker、生命周期不改；真正face ARM仍依赖原r15当前上下文/TTL保护。
+
+14项本地检查通过，涵盖实际资格数据、wrong boot/FDT/hash/symlink、假观测/不同run/弱背景质量、错误STOP、范围内未知状态拒绝、有效face STOP接续、JOG与直接begin/commit均拒绝、legacy行为兼容。NativeRegisters与driver在连接测试中被Fake替代，无板卡、UART、MMIO或部署动作。
+
+`RELEASE_SCOPE_FIELDS.json`提供新字段；仅与旧release的schema_version/app/abi/build_id/payload_files/runtime_files合并，不继承旧20µs人证或旧boot的observed_predecessor。主终端负责clone当前GUI、配置新boot/FDT与startup pins、准备发布manifest及实板状态核验。此处未放宽manual_live_config跨baseboot守卫。

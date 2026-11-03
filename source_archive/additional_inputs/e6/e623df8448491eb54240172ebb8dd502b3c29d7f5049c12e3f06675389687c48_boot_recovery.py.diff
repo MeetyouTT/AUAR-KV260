@@ -1,0 +1,90 @@
+--- R5/boot_recovery.py
++++ R6/boot_recovery.py
+@@ -347,7 +347,8 @@
+             allow_new_kernel_boot=policy['allow_new_kernel_boot'],
+             current_domain_consumed=self.current_domain_consumed())
+ 
+-    def run_history_gate(self, kind, history, *, checkpoint_pin=None, predecessor=None, normal_expected_pin=None):
++    def run_history_gate(self, kind, history, *, checkpoint_pin=None, predecessor=None,
++                         normal_expected_pin=None, normal_result_pin=None):
+         request = dict(schema='aura-original-history-gate-request-1', kind=kind, boot_id=self.boot,
+                        adapter_pin=self.contract['history_adapter_pin'], history_expected=history)
+         if checkpoint_pin is not None:
+@@ -356,6 +357,7 @@
+                            new_boot_marker_directory=self.contract['native_boot_policy']['new_boot_marker_directory'])
+         if normal_expected_pin is not None:
+             request['normal_stop_expected_pin'] = normal_expected_pin
++            request['normal_stop_complete_result_pin'] = normal_result_pin
+         raw = encoded(request)
+         request_sha = digest(raw)
+         request_path = self.tx / ('history-request-' + request_sha + '.json')
+@@ -390,12 +392,15 @@
+         source = snapshot['active']['predecessor']
+         pin = dict(path=str(CHECKPOINT), sha256=digest(checkpoint))
+         if source['boot_id'] != self.boot:
++            require(type(history['archive_count']) is int and history['archive_count'] < 64,
++                    'NEW_BOOT_WOULD_EXCEED_ORIGINAL_COMPLETE_HISTORY_BOUND')
+             return self.run_history_gate('cold_predecessor', history, checkpoint_pin=pin, predecessor=source)
+         # This pin is supplied only by the existing CPU/main normal-stop flow.
+         # No stop intent, fresh final or approval boolean is fabricated here.
+-        expected_pin = json.loads(regular(STATE_ROOT / 'same-boot-history.expected.pin.json'))
++        proof = json.loads(regular(STATE_ROOT / 'same-boot-history.proof.json'))
++        require(proof.get('schema') == 'aura-existing-cpu-same-boot-history-pins-1', 'GENUINE_CPU_SAME_BOOT_PROOF_PINS_REQUIRED')
+         return self.run_history_gate('same_boot_resume', history, checkpoint_pin=pin, predecessor=source,
+-                                     normal_expected_pin=expected_pin)
++                                     normal_expected_pin=proof['expected_pin'], normal_result_pin=proof['complete_result_pin'])
+ 
+     def history_bytes_unchanged(self, proof):
+         self.pin(proof['request_pin'])
+@@ -415,6 +420,8 @@
+                 and request['boot_id'] == result['boot_id'] == self.boot
+                 and request['source_owner'] == gate['predecessor']['camera_owner']
+                 and request['source_boot'] == gate['predecessor']['boot_id']
++                and request['adapter_pin'] == self.contract['history_adapter_pin']
++                and result['adapter_sha256'] == self.contract['history_adapter_pin']['sha256']
+                 and request['history_expected'] == result['history_expected'] == proof['history_expected']
+                 and result['request_sha256'] == proof['request_pin']['sha256'], 'CAMERA_GATE_HISTORY_PROOF_NOT_EXACT_FINAL')
+         self.pin(checkpoint_pin)
+@@ -714,10 +721,17 @@
+         create(selected_path, candidate_raw)
+         prior_active_raw = snapshot['active_source_raw']
+         prior_active_present = snapshot['active_source_present']
++        active = dict(contract_sha256=self.contract_sha, startup_sha256=digest(new_startup), ui_sha256=digest(new_ui),
++                      selected_pin=selected_pin, selected_sources=candidate['source_sha256'],
++                      predecessor=dict(boot_id=self.boot, camera_owner=current_owner), transaction=str(directory),
++                      history_expected=accepted_history, history_provenance=live_history_proof)
++        active_after_raw = encoded(active)
++        create(directory / 'active-source.after.json', active_after_raw)
+         intent = dict(boot_id=self.boot, contract_sha256=self.contract_sha, camera_owner=current_owner,
+                       startup_before_sha256=digest(snapshot['startup_raw']), startup_after_sha256=digest(new_startup),
+                       ui_before_sha256=digest(snapshot['ui_raw']), ui_after_sha256=digest(new_ui),
+                       active_before_sha256=digest(prior_active_raw),
++                      active_after_sha256=digest(active_after_raw),
+                       selected_pin=selected_pin, changed_components=['config/board_avatar_gtk.json'])
+         create(directory / 'intent.json', encoded(intent))
+         require(process(current_owner['pid']) == current_owner and regular(run) == run_raw, 'CAMERA_OWNER_CHANGED_BEFORE_CAS')
+@@ -733,20 +747,16 @@
+         require(process(current_owner['pid']) == current_owner, 'CAMERA_OWNER_CHANGED_AFTER_CAS')
+         self.check_camera_live(current_owner)
+         original_verify(snapshot['aura'], candidate)
+-        active = dict(contract_sha256=self.contract_sha, startup_sha256=digest(new_startup), ui_sha256=digest(new_ui),
+-                      selected_pin=selected_pin, selected_sources=candidate['source_sha256'],
+-                      predecessor=dict(boot_id=self.boot, camera_owner=current_owner), transaction=str(directory))
+-        active.update(history_expected=accepted_history, history_provenance=live_history_proof)
+         active_path = STATE_ROOT / 'active-source.json'
+         if prior_active_present:
+-            replace_known(active_path, prior_active_raw, encoded(active))
++            replace_known(active_path, prior_active_raw, active_after_raw)
+         else:
+             require(not os.path.lexists(active_path), 'ACTIVE_LEDGER_APPEARED_DURING_BINDING')
+-            create(active_path, encoded(active))
++            create(active_path, active_after_raw)
+         final_snapshot = self.source_snapshot()
+-        require(final_snapshot['active_source_present'] and final_snapshot['active_source_raw'] == encoded(active),
++        require(final_snapshot['active_source_present'] and final_snapshot['active_source_raw'] == active_after_raw,
+                 'ACTIVE_LEDGER_CHANGED_AFTER_BINDING_CAS')
+-        create(directory / 'committed.json', encoded(active))
++        create(directory / 'committed.json', active_after_raw)
+         return dict(status='ORIGINAL_VERIFIER_CURRENT_BINDING_COMMITTED', boot_id=self.boot,
+                     camera_owner=current_owner, selected_source_count=len(candidate['source_sha256']),
+                     changed_components=['config/board_avatar_gtk.json'])

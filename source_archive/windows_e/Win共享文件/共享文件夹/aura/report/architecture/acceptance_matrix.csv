@@ -1,0 +1,31 @@
+id,test,internal_target_not_official,required_evidence,modules,status
+T01,平台复建,固定源码/依赖可得到可上板工程,构建日志、commit、哈希和启动,platform hardware_build reproduction,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T02,同片共存,DPU＋motion IP 同时正确运行；不要求 audio IP,同次启动/配置、推理、版本/寄存器/PWM,platform dpu vsrv hardware_build implementation,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T03,数据,校准集建议≥200 图；独立测试≥200 图、≥300 person；短视频≥30 段,列表/标注/工况，片段不泄漏到两组,person calibration model_build datasets skill_b,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T04,检测,IoU=0.5 下 precision/recall 目标均≥90%；INT8 F1 下降≤3 个百分点,TP/FP/FN、浮点/INT8、分工况,dpu cpu_vision person id_dpu model_build datasets,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T05,更新频率,有效检测目标≥10 Hz，至少统计 1000 帧,采集/推理/输出频率和帧龄分列,dpu camera cpu_vision person scheduler experiments,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T06,控制延迟,相机出队→命令接受 P95≤200 ms,同板计时、帧/seq；不称曝光到动作,camera freshness scheduler calibration clock_map experiments g0 g2 g3 g4 g5 skill_b,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T07,随动,左右移动≥20 次；无持续振荡/越界；稳定中心误差 P95≤画面宽 10%,当前视频与命令，不报无编码器轴角,freshness calibration motion servo experiments g5,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T08,人员事件,正常/弱光/远距/遮挡/交叉共 100 段；正确率目标≥95%，重复进入≤2/100,每段结果及失败,cpu_vision tracking,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T09,指代/对象,回放可重复；过期/歧义不生成动作,当前/左右/历史/换轨迹/相机转动,tracking target motion software_verify,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T10,PWM,满足实物标定；空闲/中/高负载各≥1000 周期,周期/脉宽、P95/P99/max、仪器精度,vsrv output_gate servo rtl_verify board_verify,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T11,数字停止,同步停止边沿→数字禁能目标≤5 ms；动力/机械另测,波形、负载视频、各自起止定义,vsrv output_gate servo rtl_verify board_verify,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T12,有效期/协议,无效命令全部拒绝且不续租；冻帧不能用新序号绕过,≥100 条协议故障；冻结/暂停/复位/停止各≥10 次,freshness clock_map motion vsrv guard_model axi_commit source_guard output_gate rtl_verify experiments g1 g5 skill_a,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T13,原双麦采样,**本版不适用：用户取消声源定位**,删除原因及范围变更记录,,NOT_APPLICABLE_REMOVED
+T14,原粗方向,**本版不适用：不提供声学左中右**,不用 ASD 或全向拾音替代,,NOT_APPLICABLE_REMOVED
+T15,视觉说话人选人,≥30 轮两人任务，比较仅视觉和视听；统计错选、拒绝、耗时,音视频、逐人分数、UNKNOWN，不以全拒绝伪造高准确,target snapshot av_sync asd speaker datasets,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T16,中文 ASR,30 句，关键内容目标≥27 句正确,原音、转写、人工判定,mcp_capture asr datasets,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T17,当前图问答,20 题，目标≥16 正确且无关键虚构,本轮图/问题/回答/规则/错误,vlm datasets,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T18,首声体验,≥30 轮，松键→实际首声 P95≤8 s；图像题单列,分段时长与真实声输出,mcp_capture transport asr tts mcp_play,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T19,取消,≥20 次跨 ASR/VLM/TTS/播放；无旧轮复播；停声 P95≤300 ms,generation、取消及声输出,media_session transport tts mcp_play avatar fsm software_verify skill_c,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T20,登记,正常 20 次目标≥18 成功；未同意/多脸/换人不入库,事务/轨迹/库版本与失败,face identity enrollment,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T21,重返,≥3 位自愿用户，离场 5/30/300 s 后各返回 5 次；合格条件总体目标≥90%,正确/拒识/误认/延迟，按人/时间分列,face id_cpu id_dpu identity scheduler datasets experiments g3 g4 g5,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T22,陌生/串人,≥50 段未知/相似场景，目标不出现错名问候；串人注入均通过,保留失败；有限零误认不是真实概率为零,target face id_cpu identity speaker,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T23,删除/偏好,20 次删除/纠错在重启、缓存和在途结果中均生效,不复活姓名/模板/偏好，不读别人记录,identity enrollment ui software_verify,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T24,观察绑定,本轮图/请求/对象/时间匹配；过期图拒绝或注明历史,冻帧、缓存、换人、迟到输出,camera snapshot media_session vlm av_sync software_verify,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T25,UI,本地事件→显示 P95≤200 ms；真实屏幕不裁剪,≥50 次状态变化、错误和播放同步,avatar ui hdmi,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T26,断连,断公网/Windows/板端控制各≥5 次；降级表真实,断前/断中/恢复、租约和请求日志,devices mcp_capture transport fsm board_verify,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T27,长测,最终配置 2 h 无关键崩溃/失控/持续泄漏,温度、内存、负载、帧龄、音频/队列,fsm board_verify,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T28,冷启动,≥3 次按手册恢复；运动重新确认位置,ready、版本、位置确认、耗时,platform devices servo board_verify reproduction,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T29,完整流程,≥20 轮目标≥18 成功；任一失控/停止失效是关键失败,不从分母删除失败,board_verify release,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED
+T30,独立复现,非原作者/干净环境完成启动及至少一组实验,操作记录、缺步和修订,ai_records skill_a skill_b skill_c design_report reproduction release,FINAL_UNIFIED_RELEASE_NOT_ACCEPTED

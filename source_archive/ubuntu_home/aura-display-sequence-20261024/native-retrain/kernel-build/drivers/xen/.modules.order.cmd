@@ -1,0 +1,1 @@
+cmd_drivers/xen/modules.order := {   cat drivers/xen/events/modules.order;   cat drivers/xen/xenbus/modules.order;   cat drivers/xen/xenfs/modules.order;   echo drivers/xen/xen-gntdev.ko;   echo drivers/xen/xen-gntalloc.ko; :; } | awk '!x[$$0]++' - > drivers/xen/modules.order

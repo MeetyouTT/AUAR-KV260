@@ -1,0 +1,1 @@
+cmd_net/bridge/netfilter/modules.order := {   echo net/bridge/netfilter/ebtables.ko;   echo net/bridge/netfilter/ebtable_filter.ko;   echo net/bridge/netfilter/ebtable_nat.ko;   echo net/bridge/netfilter/ebt_mark.ko; :; } | awk '!x[$$0]++' - > net/bridge/netfilter/modules.order

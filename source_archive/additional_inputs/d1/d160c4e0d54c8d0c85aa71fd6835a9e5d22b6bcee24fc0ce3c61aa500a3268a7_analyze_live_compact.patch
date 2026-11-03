@@ -1,0 +1,13 @@
+--- frozen/analyze_live.py
++++ additive/analyze_live_compact.py
+@@ -64,7 +64,9 @@
+             integrity.append({'name':name,'matches':False,'error':str(error)})
+     actual_members={str(p.relative_to(evidence)) for p in evidence.rglob('*') if p.is_file()}
+     require(actual_members==set(members),'Manifest and recovered member set differ','integrity')
+-    archive=root/'board_evidence.tar.gz'
++    archive_format=manifest.get('archive_format','tar.gz')
++    require(archive_format in ['tar.gz','tar.xz'],'Unsupported evidence archive format','integrity')
++    archive=root/('board_evidence.tar.xz' if archive_format=='tar.xz' else 'board_evidence.tar.gz')
+     archive_ok=False
+     try:
+         archive_ok=(archive.stat().st_size==manifest.get('archive_bytes') and

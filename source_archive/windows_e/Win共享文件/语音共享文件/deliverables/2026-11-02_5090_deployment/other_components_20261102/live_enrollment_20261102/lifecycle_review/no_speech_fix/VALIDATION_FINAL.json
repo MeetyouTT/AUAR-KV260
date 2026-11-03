@@ -1,0 +1,107 @@
+{
+  "status": "LOCAL_CANDIDATE_FROZEN_PENDING_ROOT_REVIEW",
+  "public_source_boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e",
+  "public_source_startup_sha256": "9a9a709a7b2e898879bac595758f9b7ece6f2ff2e75a4c9f42ed9c38e043072a",
+  "public_pinned_sources_verified": 18,
+  "files": {
+    "board/runtime/audio/board_asr.py": {
+      "before_sha256": "4edb865881c887d6a290a02e078e14386bd95d017b79820b143b5a1e329997c3",
+      "candidate_sha256": "c51488ac6bd3563bc3dc42934b321e98e26cb2b58d700318765a60ca4908ef60",
+      "before_bytes": 3652,
+      "after_bytes": 3779
+    },
+    "board/runtime/audio/board_dialogue_jobs.py": {
+      "before_sha256": "687b80cde20d70e4de56dd71956683b9cec59f55bd25965491dc08d00c8cb248",
+      "candidate_sha256": "01b27ede0d8889c35fc9ac990e03538a55fecc7c6a604fb6f781bc5d54c09087",
+      "before_bytes": 49337,
+      "after_bytes": 49590
+    }
+  },
+  "diff_sha256": "6183c207ef2fccea2f48a862715c8977ec9358b82f1c76f207c0671a394b1d7b",
+  "validation": {
+    "CANDIDATE_PIPELINE": {
+      "tests": 31,
+      "passed": 31,
+      "failed": 0,
+      "failures": [],
+      "sha256": "49d7bd7a9336ab219363b04819796a3e543968b6957ffc3827f6967146dfabe2"
+    },
+    "BASELINE_PIPELINE": {
+      "tests": 31,
+      "passed": 23,
+      "failed": 8,
+      "failures": [
+        "test_no_speech_pipeline::test_prepare_blank_relisten_independent_confirmation_completes_original_face_flow[-False]",
+        "test_no_speech_pipeline::test_prepare_blank_relisten_independent_confirmation_completes_original_face_flow[   -False]",
+        "test_no_speech_pipeline::test_prepare_blank_relisten_independent_confirmation_completes_original_face_flow[-True]",
+        "test_no_speech_pipeline::test_prepare_blank_relisten_independent_confirmation_completes_original_face_flow[ \\u3000 -True]",
+        "test_no_speech_pipeline::test_repeated_empty_results_do_not_extend_consent_or_consume_voice_samples",
+        "test_no_speech_pipeline::test_changed_target_after_benign_blank_is_still_rejected",
+        "test_no_speech_pipeline::test_original_authorize_expiry_is_not_extended_by_empty_result",
+        "test_no_speech_pipeline::test_missing_new_capture_proof_is_still_rejected_after_no_speech"
+      ],
+      "sha256": "9d947eb8f8b81d6901cb92600245a2380cd3bab49acf0767b656785358d0245f"
+    },
+    "CANDIDATE_ORIGINAL_REGRESSION": {
+      "tests": 70,
+      "passed": 63,
+      "failed": 7,
+      "failures": [
+        "test_board_dialogue_jobs::test_missing_sensitive_board_handlers_never_fall_back_to_model[\\u897f\\u84dd\\uff0c\\u8bb0\\u4f4f\\u6211-identity_enrollment]",
+        "test_board_dialogue_jobs::test_explicit_memory_precedes_reasoning_and_retains_raw_alias",
+        "test_board_dialogue_jobs::test_wake_alias_and_wake_only_follow_existing_audio_gate",
+        "test_board_dialogue_jobs::test_real_board_store_memory_and_history_flow_without_legacy_services",
+        "test_board_recording.RoutingTests::test_active_local_capture_blocks_remote_image_question",
+        "test_board_recording.RoutingTests::test_camera_only_service_uses_local_record_toggle",
+        "test_board_recording.RoutingTests::test_remote_recording_stop_keeps_its_existing_owner"
+      ],
+      "sha256": "bcb24a5dcf37c0eae5cb0c20f42ca3751fddd656035d060b0bb93dba34f5ffe7"
+    },
+    "BASELINE_ORIGINAL_REGRESSION": {
+      "tests": 70,
+      "passed": 63,
+      "failed": 7,
+      "failures": [
+        "test_board_dialogue_jobs::test_missing_sensitive_board_handlers_never_fall_back_to_model[\\u897f\\u84dd\\uff0c\\u8bb0\\u4f4f\\u6211-identity_enrollment]",
+        "test_board_dialogue_jobs::test_explicit_memory_precedes_reasoning_and_retains_raw_alias",
+        "test_board_dialogue_jobs::test_wake_alias_and_wake_only_follow_existing_audio_gate",
+        "test_board_dialogue_jobs::test_real_board_store_memory_and_history_flow_without_legacy_services",
+        "test_board_recording.RoutingTests::test_active_local_capture_blocks_remote_image_question",
+        "test_board_recording.RoutingTests::test_camera_only_service_uses_local_record_toggle",
+        "test_board_recording.RoutingTests::test_remote_recording_stop_keeps_its_existing_owner"
+      ],
+      "sha256": "b108ce554160ae96b0da79f6e9fe417b86ce3af16390d3ee39afe7e6928572de"
+    }
+  },
+  "original_regression_new_failures": [],
+  "code_scope": [
+    "BoardNoSpeech marker class",
+    "BoardParaformer.transcribe empty-text exception type only",
+    "BoardDialogueJobs._admit_text true empty/whitespace handling after original control-char check",
+    "BoardDialogueJobs._execute narrow ASR marker catch plus original current/deadline check"
+  ],
+  "unchanged": [
+    "models, thresholds, PCM, recognizer arguments, sample quality, voice and face consent",
+    "120s consent/90s sampling limits, target/revision binding, gallery and original registry",
+    "generic service failures, ACK failure, explicit pause/cancel, context/generation checks",
+    "original player receipts, memory grant/scope policy, source authority and all other modules"
+  ],
+  "observed_lifecycle": [
+    "Normal committed-ACK rearm does not reset enrollment",
+    "VAD speech-start callback refreshes the initial microphone-open capture snapshot",
+    "Original generic empty-ASR error can reset an authorize stage and route a later bare confirmation to ordinary dialogue",
+    "Original 30-second conversation-silence closure remains in force"
+  ],
+  "limitations": [
+    "Synthetic recognizer/model/player/memory fixtures; no real audio, GPU/ARM model load, device or private store",
+    "Speaker preservation proves zero speaker/identity dispatch and unchanged synthetic collected count; it is not a real voice-model enrollment test",
+    "This mechanism is reproducible and fits observed SERVICE_ERROR cycles, but the historical incident has no retained capture metadata and is not uniquely attributed",
+    "70 original tests are not all passing: four pre-existing alias/intent fixture failures and three pre-existing GUI fixture missing character_pair"
+  ],
+  "board_mutations": false,
+  "service_or_gui_actions": false,
+  "model_requests": false,
+  "private_data_reads": false,
+  "axis_actions": false,
+  "merge_note": "Root only: CAS the two sources against exact before hashes, preserve all latest UI and four diagnostic candidates, update only those two current startup pins. No overall startup/UI replacement. Keep paired files consistent before any root-managed normal GUI start."
+}

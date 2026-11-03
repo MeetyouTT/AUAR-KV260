@@ -1,0 +1,123 @@
+--- running/tools/board_avatar_worker.py
++++ candidate/tools/board_avatar_worker.py
+@@ -246,7 +246,7 @@
+ 
+                     offload=getattr(self.visual_owner,'portrait_offload',None)
+                     if offload:
+-                        fps=offload.target_fps if offload.status()['mode']=='remote' else 8
++                        fps=offload.target_fps if offload.status()['mode'] in ('remote','native') else 8
+                         period=1/fps
+                         if period!=self.visual_period:
+                             self.visual_period=period;self.next_visual=started
+@@ -281,6 +281,9 @@
+                                 stream=io.BytesIO();image.save(stream,format='JPEG',quality=85);jpeg=stream.getvalue()
+                         else:jpeg=self.packet['jpeg']
+                         resized=time.monotonic()
++                    elif meta and meta.get('_native_yuki'):
++                        # GTK owns the GL context; the audio worker only offers numeric controls.
++                        pass
+                     elif meta:
+ 
+                         if meta['image'].mode == 'RGB':
+
+--- running/tools/board_avatar_gtk.py
++++ candidate/tools/board_avatar_gtk.py
+@@ -151,6 +151,7 @@
+             raise RuntimeError('Cannot connect to the current X display')
+         self.jobs = self.output = self.bridge = self.mixer = self.services = self.preview_output = self.transcriber = None
+         self.native_pixels = self.native_video = None
++        self.native_yuki = self.yuki_portrait = self.native_yuki_config = None
+         self.settings_store = SettingsStore(settings_file or AURA.parent/'avatar_user_settings.json')
+         self.preferences = self.settings_store.read()
+         if windowed:
+@@ -184,7 +185,7 @@
+         try:
+             core = create_runtime_core(create_demo_core)
+             from tools.board_avatar_affine import configure_board_rendering
+-            if config.get('native_avatar'):
++            if config.get('native_avatar') and not config.get('native_yuki',{}).get('enabled'):
+                 from tools.native_pixels import NativePixels
+                 from tools.native_video import NativeVideo
+                 library=AURA/'tools/libaura_pixels.so'
+@@ -193,7 +194,7 @@
+                 self.native_video=NativeVideo(library,(self.rect['w'],self.rect['h']))
+             else:configure_board_rendering(core,self.tokens['colors']['panel_bg'])
+             core.MAX_CACHED_SEQUENCES = int(config['cache_sequences'])
+-            if config.get('native_avatar'):
++            if config.get('native_avatar') and not config.get('native_yuki',{}).get('enabled'):
+                 for name in ('IDLE','PRESENT','LISTENING','THINKING','ACK_NOD','DENY_SHAKE','AWAKE','PUZZLED'):
+                     core.sequence(name);core.sop(name)
+             self.jobs = SpeechJobs(self.root, VoiceWorker(self.root, cached_only=True))
+@@ -236,7 +237,11 @@
+                                    'attention_provider':lambda:self.transcriber.identity_snapshot()
+                                    if self.transcriber.identity_snapshot else None}
+             visual_controller=controller_type(core,self.jobs,self.output)
+-            if config.get('portrait_offload',{}).get('enabled'):
++            if config.get('native_yuki',{}).get('enabled'):
++                from tools.native_yuki import prepare_portrait
++                self.native_yuki,self.native_yuki_config=prepare_portrait(AURA,config['native_yuki'],self.output,self.source_hashes)
++                visual_controller.portrait_offload=self.native_yuki
++            elif config.get('portrait_offload',{}).get('enabled'):
+                 from board.runtime.portrait_offload import PortraitOffload
+                 visual_controller.portrait_offload=PortraitOffload(config['portrait_offload'],(self.rect['w'],self.rect['h']))
+             self.controller = AvatarRenderWorker(recording_type(visual_controller,transcriber=self.transcriber,**recording_options),
+@@ -566,6 +571,11 @@
+             self.portrait.set_size_request(self.rect['w'],self.rect['h'])
+             self.portrait.connect('map',self.attach_native_portrait)
+         self.fixed.put(self.portrait, self.geometry['x']+self.rect['x'], self.geometry['y']+self.rect['y'])
++        if self.native_yuki_config:
++            from tools.native_yuki import create_gl_area
++            self.yuki_portrait=create_gl_area(self.native_yuki_config,self.native_yuki)
++            self.yuki_portrait.set_size_request(self.rect['w'],self.rect['h'])
++            self.fixed.put(self.yuki_portrait,self.geometry['x']+self.rect['x'],self.geometry['y']+self.rect['y'])
+         self.vision_insights = gtk.Fixed()
+         self.vision_insights.set_size_request(self.geometry['w'],self.geometry['h'])
+         self.fixed.put(self.vision_insights,self.geometry['x'],self.geometry['y'])
+@@ -618,7 +628,9 @@
+         for layer,panel in self.navigation_panels.items():
+             panel.set_visible(layer == self.ui_layer)
+         is_vision = page == 'vision'
+-        self.portrait.set_visible(not is_vision)
++        native_yuki=bool(self.native_yuki and self.native_yuki.ready and self.native_yuki.enabled)
++        self.portrait.set_visible(not is_vision and not native_yuki)
++        if self.yuki_portrait:self.yuki_portrait.set_visible(not is_vision and native_yuki)
+         self.vision_insights.set_visible(is_vision)
+         self.avatar_title.set_text('视觉解读' if is_vision else self.character)
+         self.layer_button.set_label('返回' if self.ui_layer == 'debug' else '···')
+@@ -1290,8 +1302,11 @@
+                                    ('触摸已连接' if self.touch_inputs else '未检测到触摸设备'))
+         portrait=state.get('portrait_offload',{})
+         mode=portrait.get('mode','disabled')
+-        self.controls['portrait_toggle'].set_label('画面：电脑' if mode=='remote' else
+-            '画面：电脑连接中，板卡显示' if portrait.get('selected') else '画面：板卡')
++        if self.native_yuki:
++            self.controls['portrait_toggle'].set_label('形象：雪妃' if mode=='native' else '形象：默认')
++        else:
++            self.controls['portrait_toggle'].set_label('画面：电脑' if mode=='remote' else
++                '画面：电脑连接中，板卡显示' if portrait.get('selected') else '画面：板卡')
+         self.pause_button.set_label('继续' if state['paused'] else '暂停')
+         self.pause_button.set_sensitive(state['playing'] or state['paused'])
+         self.cancel_button.set_sensitive(state['phase'] != 'IDLE' or state['playing'])
+@@ -1488,6 +1503,11 @@
+             if self.native_video:
+                 self.last_image=packet['image']
+                 self.last_avatar_sequence=packet['sequence']
++            if self.yuki_portrait:
++                selected=bool(self.native_yuki.ready and self.native_yuki.enabled)
++                self.yuki_portrait.set_visible(self.page!='vision' and selected)
++                self.portrait.set_visible(self.page!='vision' and not selected)
++                if selected:self.displayed_frames=int(self.native_yuki.latest_stats.get('frames',0))
+             if not self.native_video and packet['rgb'] and packet['sequence'] != self.last_avatar_sequence:
+                 self.last_image = packet['image']
+                 self.current_pixbuf = self.Pixbuf.Pixbuf.new_from_bytes(self.GLib.Bytes.new(packet['rgb']),
+@@ -1502,7 +1522,9 @@
+             self.last_runtime_refresh = time.monotonic()
+             state = packet['state']
+             state['avatar_display']={'frames':self.displayed_frames,'sequence':self.last_avatar_sequence,'at':time.monotonic()}
+-            if self.native_video:state['avatar_display']=dict(self.native_video.read(),kind='native_sink_handoff')
++            if self.native_yuki and self.native_yuki.ready and self.native_yuki.enabled:
++                state['avatar_display']=dict(self.native_yuki.latest_stats,kind='native_yuki_egl')
++            elif self.native_video:state['avatar_display']=dict(self.native_video.read(),kind='native_sink_handoff')
+             settings_text = self.refresh_settings(state)
+             state.update(character=self.character, dialogue_enabled=bool(state.get('local_transcription',{}).get('service',{}).get('conversation')), backend='gtk3-gstreamer', cached_only=True)
+             status = '已暂停' if state['paused'] else {'IDLE':'等你开口','VOICE_PREPARING':'正在准备声音…',

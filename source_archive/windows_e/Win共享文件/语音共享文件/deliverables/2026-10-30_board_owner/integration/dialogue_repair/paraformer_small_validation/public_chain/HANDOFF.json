@@ -1,0 +1,54 @@
+{
+  "status": "FROZEN_SOURCE_ONLY_NOT_DEVICE_TESTED",
+  "worker": "public_small_model_chain.py",
+  "worker_sha256": "1b8fdf59d08c83dcb672e6015e3e7e37d2b401a1aac41e96280fd72533b3cdf5",
+  "test": "test_public_small_chain.py",
+  "test_sha256": "fe3f1013f47b19dc6f5a9e873ffd58bab5d8dd183c01cd8852b4e7f5c81d171f",
+  "offline_tests": {"count": 6, "result": "PASS", "native_asr_loaded": false, "network_called": false},
+  "stage_directory": "/home/root/aura-public-small-chain-20261031/1b8fdf59d08c83dc",
+  "stage_files": ["public_small_model_chain.py"],
+  "cli": "python3 -B /home/root/aura-public-small-chain-20261031/1b8fdf59d08c83dc/public_small_model_chain.py --external-deadline-managed",
+  "root_environment": {"PYTHONNOUSERSITE": "1", "PYTHONDONTWRITEBYTECODE": "1", "OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"},
+  "asr_threads": 3,
+  "root_guard_contract": [
+    "Verify current v16 startup/source pins and Windows model owner binding before inference.",
+    "Allow an existing DISABLED speech job only with explicit PAUSED, mic=false, no pending turn. Do not alter user pause.",
+    "Keep existing production UI and camera running with unchanged owners; do not restart services or open microphone/speaker.",
+    "Require Windows model idle before starting; record aggregate counts and background changes afterward without assuming accepted counts increase exactly once.",
+    "Use an owned child process with external timeout 80 seconds plus at most 5 seconds kill grace, bounded below 90 seconds; save both success and failure metadata.",
+    "After worker exits, recheck UI/camera/Windows owners and PAUSED/mic=false; verify no owned model work remains, especially if hard timeout prevents Python finally. Do not cancel unrelated summary jobs."
+  ],
+  "worker_deadlines": {"original_operation_seconds": 65, "python_alarm_seconds": 70, "per_owner_cancel_seconds_via_formal_client": 1, "native_preemption_guaranteed_by_python": false},
+  "input": {
+    "case_id": "S01",
+    "fixture_manifest_sha256": "7109ee213126f098a3a3da08bbc521beb0db54a21e0911be02e04f2010b9a869",
+    "fixture_wav_sha256": "73a3f368db296aa1f11d0f586e6161829945d5df73f5680f06dc9a05395b3655",
+    "samples": 41760,
+    "sample_rate": 16000,
+    "duration_seconds": 2.61,
+    "public_synthetic": true,
+    "intended_not_human_verified": true,
+    "full_manifest_validation_reads_all_eight_public_wavs": true,
+    "inference_runs_only_s01_once": true,
+    "exact_asr_reference_equality_is_diagnostic_not_pass_condition": true
+  },
+  "measurements": [
+    "One ASR constructor including hash verification/native import/model load is timed separately; this is not warmed steady state.",
+    "One ASR decode is followed by the actual recognized public text through formal NegotiatedDialogueClient ABC and complete canonical reply validation.",
+    "Formal split_sentences preserves the full validated reply; complete sentence TTS requests run in order. No old 48-character/name assertion or arbitrary two-request count is used.",
+    "Record ASR completion to complete validated text, first complete sentence RAM audio, and complete reply RAM audio. Record ASR decode start equivalents.",
+    "RAM PCM format/length/hash and all owned response identities are formally validated. Only counts/hashes/timing/numeric model metrics are output.",
+    "First RAM audio means first sentence fully synthesized, received and validated; it is not a streaming packet or speaker onset. No capture/VAD/playback/ACK/Store/permission action is exercised."
+  ],
+  "cancellation": "Register each exact owner before request; outer try/finally cancels every owned LLM/TTS request, including transport/contract failures. Unconfirmed cleanup cannot report PASS. Root handles owned child hard timeout separately.",
+  "upstream_sources": [
+    "../v16_evidence/source_mapping.json",
+    "../../first_wait_integration/verify_public_compact_chain.py",
+    "../../../production_model_host/public_board_name_chain.py",
+    "../../first_wait_streaming_validation/quality/public_quality_worker.py"
+  ],
+  "source_refs": "SOURCE_REFS.json",
+  "prohibited_actions_performed": false,
+  "production_changed": false,
+  "hardware_or_model_run_by_subagent": false
+}

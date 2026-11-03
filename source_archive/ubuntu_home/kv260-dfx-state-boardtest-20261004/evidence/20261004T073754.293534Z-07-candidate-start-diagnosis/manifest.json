@@ -1,0 +1,8 @@
+[
+  {"id":"startup-logs","command":"python3 -B -c 'import pathlib,json; P=pathlib.Path; r=P(\"/home/root/kv260-dfx-state-boardtest-20261004\"); d=P(\"/home/root/kv260-dfx-state-boardtest-20261004/evidence/start-64434545472776\"); print(json.dumps({\"command_outputs\":{p.name:p.read_text() for p in d.iterdir() if p.suffix in (\".stdout\",\".stderr\")},\"manager_stdout\":(r/\"manager.stdout\").read_text(),\"manager_stderr\":(r/\"manager.stderr\").read_text(),\"socket_exists\":P(\"/tmp/dfx-mgrd.socket\").exists(),\"overlays\":[p.name for p in P(\"/sys/kernel/config/device-tree/overlays\").iterdir()],\"render\":[p.name for p in P(\"/dev/dri\").glob(\"renderD*\")]},indent=2))'"},
+  {"id":"manager-status","command":"systemctl show dfx-mgr.service -p MainPID -p ActiveState -p SubState -p Result -p ExecMainStatus -p ExecStart -p DropInPaths"},
+  {"id":"packages-now","command":"dfx-mgr-client -listPackage","timeout":20},
+  {"id":"service-journal","command":"journalctl -b -u dfx-mgr.service --no-pager -o short-monotonic"},
+  {"id":"query-now","command":"xdputil query","timeout":90},
+  {"id":"classification-now","command":"/home/root/Vitis-AI/examples/vai_library/samples/classification/test_jpeg_classification /usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel /home/root/kv260-test-20261001/pytorch-resnet-dog.jpg","timeout":90}
+]

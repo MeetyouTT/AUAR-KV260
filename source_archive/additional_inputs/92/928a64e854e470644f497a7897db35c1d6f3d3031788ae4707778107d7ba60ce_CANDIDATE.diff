@@ -1,0 +1,321 @@
+--- a/board/runtime/board_speaker_business.py
++++ b/board/runtime/board_speaker_business.py
+@@ -259,6 +259,11 @@
+         self.jobs = {}; self.latest = OrderedDict(); self.results = OrderedDict()
+         self.last_evidence_error = None
+         self.capacity = threading.BoundedSemaphore(2); self.counts = dict(submitted=0,complete=0,cancelled=0,unavailable=0,evidence_errors=0)
++        self._probe_cache = OrderedDict(); self._probe_versions = OrderedDict()
++        self._probe_captures = OrderedDict()
++        self._probe_completed = 0
++        self._probe_owner = None; self._probe_until = 0.; self._probe_wall_bounds = None
++        self._probe_view = self._probe_metadata('IDLE',0)
+         self.public_state = dict(active=False,speaker_calibrated=False,automatic_profile_access=False,ready=False)
+         self.lease = _WriterLease(self.root,data_origin=data_origin)
+         self.pool = ThreadPoolExecutor(max_workers=1,thread_name_prefix='board-speaker-cpu')
+@@ -352,13 +357,30 @@
+         binding = hub.binding if hub is not None else None
+         value = dict(ready=hub is not None,active=bool(hub and (hub.speaker.sessions or binding and
+                     (binding.router.active or binding.router.name_waiting))),speaker_calibrated=False,
+-                    automatic_profile_access=False,pcm_persisted=False,single_cpu_worker=True)
++                    automatic_profile_access=False,pcm_persisted=False,single_cpu_worker=True,
++                    self_match_probe=copy.deepcopy(self._probe_view))
+         with self.lock:
+             self.public_state = value
+ 
+     def public(self):
+         with self.lock:
+-            return copy.deepcopy(self.public_state)
++            value = copy.deepcopy(self.public_state)
++            limits = self._probe_until,self._probe_wall_bounds,self._probe_completed
++        return self._probe_project(value,limits)
++
++    def _probe_project(self,value,limits):
++        probe = value.get('self_match_probe')
++        if probe is None or probe['phase'] not in ('CANDIDATE','COLLECTING'):return value
++        until,bounds,completed = limits
++        try:
++            expired = self.clock() >= until
++            if bounds is not None:expired = expired or not bounds[0] <= self.wall_clock() < bounds[1]
++        except Exception:
++            # UI observation fails closed without hiding the worker's own clock
++            # faults. Never call timeline time while holding the service lock.
++            expired = True
++        if expired:value['self_match_probe'] = self._probe_metadata('EXPIRED',0,completed=completed)
++        return value
+ 
+     def _submit(self, operation, meta, pcm, *, deadline=None, is_current=lambda:True, cancel_event=None, cid=None, control=True):
+         meta = context(meta,pcm)
+@@ -431,6 +453,9 @@
+                     value=future.result(timeout=min(.025,max(.001,job['deadline']-self.clock())))
+                     if not self._job_current(job):
+                         raise InterruptedError('Speaker result cancelled before adoption')
++                    value=self._adopt_self_match(job,value)
++                    if not self._job_current(job):
++                        raise InterruptedError('Speaker result cancelled during adoption')
+                     return value
+                 except FutureTimeout:
+                     if future.done():
+@@ -443,6 +468,8 @@
+                 # its sole worker; never undo an already committed identity.
+                 try:self.pool.submit(self._clear_status_receipt,job['meta'])
+                 except RuntimeError:pass  # Closing service cannot admit a later query.
++                try:self.pool.submit(self._clear_self_match,job['meta'])
++                except RuntimeError:pass
+             raise
+ 
+     def route(self,meta,text,pcm,*,visual=None,gallery_packet=None,**kwargs):
+@@ -464,8 +491,219 @@
+             value = self.hub.speaker.turn(meta,text,raw)
+             if self.hub.binding is not None:
+                 self.hub.binding.after_original_voice_turn(meta,text)
++            if self._explicit_self_match(text):
++                device = self.hub.speaker
++                actor = meta['board_boot_id'],meta['session_id']
++                if value is None:
++                    self._probe_publish(meta,'UNAVAILABLE',0)
++                elif not device.calibrated and actor not in device.sessions:
++                    return self._self_match_query(meta,raw,value)
+             return value
+         return self._call(work,meta,pcm,**kwargs)
++
++    @staticmethod
++    def _explicit_self_match(text):
++        from common.character_profile import strip_character_address
++        from common.feature_intents import speaker_text
++        from common.spoken_input import prepare_spoken_input
++        if speaker_text(text) != '查询我的声纹':return False
++        value = strip_character_address(prepare_spoken_input(text)['text']).strip(' ，,。！!？?')
++        patterns = (
++            r'(?:请)?(?:识别|辨认)(?:一下)?(?:我的)?(?:声纹|声音)[吗呢么啊呀]?',
++            r'(?:你)?(?:现在)?(?:能|可以|会)?(?:识别|辨认|认出|认识)(?:我的)?(?:声纹|声音)[吗呢么啊呀]?',
++            r'(?:你)?(?:听|听听|根据|通过)(?:我的)?声音(?:你)?(?:能|可以)?(?:知道|判断|识别|认出)?(?:我是谁|谁在说话)[吗呢么啊呀]?',
++            r'(?:你)?(?:能|可以)?(?:根据|通过)(?:我的)?声音(?:识别|认出|辨认)(?:我|我是谁)[吗呢么啊呀]?',
++        )
++        return any(re.fullmatch(pattern,value) for pattern in patterns)
++
++    @staticmethod
++    def _probe_metadata(phase,count,*,completed=0):
++        return dict(version=1,phase=phase,distinct_captures=max(0,min(3,count)),required_captures=3,
++                    candidate_completed=max(0,min(65535,completed)),completed_is_historical=True,
++                    field_calibrated=False,identity_verified=False,personal_memory_allowed=False)
++
++    def _probe_publish(self,meta,phase,count,*,until=0.,wall_bounds=None):
++        with self.lock:
++            old = self._probe_owner
++            if (old is not None and (old['board_boot_id'],old['session_id']) == (meta['board_boot_id'],meta['session_id'])
++                    and old['generation'] > meta['generation']):return
++            self._probe_owner = dict(meta); self._probe_until = until; self._probe_wall_bounds = wall_bounds
++            self._probe_view = self._probe_metadata(phase,count,completed=self._probe_completed)
++            self.public_state['self_match_probe'] = copy.deepcopy(self._probe_view)
++
++    def _probe_gallery(self):
++        device = self.hub.speaker
++        rows = device.store.db.execute(
++            'SELECT i.id,i.name,t.model_id,t.dimension,t.embedding FROM identities i JOIN templates t ON i.id=t.identity_id '
++            'WHERE t.model_id=? AND t.dimension=? ORDER BY i.id',
++            (device.encoder.model_id,device.encoder.dimension)).fetchall()
++        # Private local provenance only. No template, digest, name or ID is public.
++        digest = hashlib.sha256(json.dumps(rows,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
++        return (device.encoder.model_id,device.store.revision,digest,device.threshold,device.margin)
++
++    def _probe_matcher(self):
++        analyzer = self.hub.progressive_speaker if self.hub is not None else None
++        return getattr(analyzer,'provisional',None)
++
++    def _adopt_self_match(self,job,value):
++        meta = job['meta'];actor=meta['board_boot_id'],meta['session_id']
++        key=(*actor,meta['request_id']);pair=meta['capture_id'],meta['pcm_sha256']
++        with self.lock:
++            if not self._owns(job) or job['cancelled'].is_set() or self.closing.is_set():return value
++            row=self._probe_cache.get(key)
++            if (row is None or row['meta']!=meta or type(value) is not str
++                    or value != row['reply']):return value
++            phase,until,bounds=row['phase'],row['until'],row.get('wall_bounds')
++        if phase=='CANCELLED':return '这次声音比对已取消，没有确认身份。'
++        # Adoption must enforce the same absolute proof expiry on the returned
++        # text, not just on metadata. Clock faults here remain real failures.
++        expired=self.clock()>=until
++        if bounds is not None:expired=expired or not bounds[0]<=self.wall_clock()<bounds[1]
++        if expired:
++            self._probe_publish(meta,'EXPIRED',0)
++            return '这次声音比对结果已过期，请重新自然说五到八秒。'
++        with self.lock:
++            if not self._owns(job) or job['cancelled'].is_set() or self.closing.is_set():return value
++            ledger=self._probe_captures.get(actor,{})
++            contribution=ledger.get(pair)
++            if contribution is not None and contribution['meta']==meta:
++                contribution['adopted']=True
++            row=self._probe_cache.get(key)
++            if row is None or row['meta']!=meta or row['phase']=='CANCELLED':return value
++            # No job/closure is retained: either could keep captured PCM alive.
++            if row['phase']=='CANDIDATE' and not row.get('counted',False):
++                self._probe_completed=min(65535,self._probe_completed+1);row['counted']=True
++            self._probe_publish(meta,row['phase'],row['count'],until=row['public_until'],wall_bounds=row.get('wall_bounds'))
++        return value
++
++    def _clear_self_match(self,meta):
++        actor = meta['board_boot_id'],meta['session_id']; generation = meta['generation']
++        matcher = self._probe_matcher()
++        if matcher is not None:
++            row = matcher.streaks.get(actor)
++            if row is not None and row['generation'] <= generation:matcher.streaks.pop(actor,None)
++            for key,row in tuple(matcher.results.items()):
++                owner = row['context']
++                if (owner['board_boot_id'],owner['session_id']) == actor and owner['generation'] <= generation:
++                    matcher.results.pop(key,None)
++        ledger=self._probe_captures.get(actor,{})
++        for pair,row in tuple(ledger.items()):
++            if row['meta']['generation']<=generation:ledger.pop(pair,None)
++        key = meta['board_boot_id'],meta['session_id'],meta['request_id']
++        owned = self._probe_owner
++        relevant = key in self._probe_cache or (owned is not None and
++            (owned['board_boot_id'],owned['session_id']) == actor and owned['generation'] <= generation)
++        for row in self._probe_cache.values():
++            owner = row['meta']
++            if (owner['board_boot_id'],owner['session_id']) == actor and owner['generation'] <= generation:
++                row.update(phase='CANCELLED',count=0,until=0.,reply=None,voice=None)
++        if relevant:
++            self._probe_cache[key] = dict(meta=dict(meta),token=None,phase='CANCELLED',count=0,until=0.,reply=None,voice=None)
++            while len(self._probe_cache)>64:self._probe_cache.popitem(last=False)
++            if owned is not None and (owned['board_boot_id'],owned['session_id']) == actor and owned['generation'] <= generation:
++                self._probe_publish(meta,'CANCELLED',0)
++
++    def _self_match_query(self,meta,raw,original_reply):
++        binding = self.hub.binding; analyzer = self.hub.progressive_speaker; device = self.hub.speaker
++        actor = meta['board_boot_id'],meta['session_id']; key = (*actor,meta['request_id'])
++        if (binding is None or analyzer is None or self._probe_matcher() is None
++                or device.threshold < .8 or device.margin < .1
++                or device.store.threshold != device.threshold or device.store.ambiguity_margin != device.margin):
++            self._probe_publish(meta,'UNAVAILABLE',0);return original_reply
++        if (device.store.model_id != device.encoder.model_id or device.store.dimension != device.encoder.dimension):
++            self._clear_self_match(meta);self._probe_publish(meta,'SOURCE_CHANGED',0)
++            return '声音模型与登记记录不一致，这次比对未采用。'
++        if not device.store.people():
++            self._probe_publish(meta,'NO_ENROLLMENT',0);return original_reply
++        token = self._probe_gallery(); now = self.clock()
++        old = self._probe_cache.get(key)
++        if old is not None:
++            if old['meta'] != meta:raise ValueError('Foreign self match retry')
++            if old['phase'] == 'CANCELLED':
++                self._probe_publish(meta,'CANCELLED',0);return '这次声音比对已取消，没有确认身份。'
++            bounds = old.get('wall_bounds')
++            if (old['token'] != token or now >= old['until']
++                    or bounds is not None and not bounds[0] <= self.wall_clock() < bounds[1]):
++                phase = 'SOURCE_CHANGED' if old['token'] != token else 'EXPIRED'
++                if phase=='SOURCE_CHANGED':self._clear_self_match(meta)
++                self._probe_publish(meta,phase,0)
++                return '这次声音比对结果已过期或登记记录已变化，请重新自然说五到八秒。'
++            binding._control_evidence(meta,voice=old['voice'])
++            self._probe_publish(meta,old['phase'],old['count'],until=old['public_until'],wall_bounds=bounds)
++            return old['reply']
++        self._probe_publish(meta,'PROCESSING',0)
++        matcher = self._probe_matcher()
++        previous = self._probe_versions.get(actor)
++        ledger=self._probe_captures.setdefault(actor,{})
++        self._probe_captures.move_to_end(actor)
++        while len(self._probe_captures)>32:self._probe_captures.popitem(last=False)
++        streak=matcher.streaks.get(actor)
++        invalid_streak=bool(streak and any(
++            pair not in ledger or not ledger[pair]['adopted'] or ledger[pair]['cancelled'].is_set()
++            for pair in zip(streak['captures'],streak['digests'])))
++        if previous is not None and previous != token or invalid_streak:
++            matcher.streaks.pop(actor,None)
++            ledger.clear()
++            for cached_key,row in tuple(matcher.results.items()):
++                if (row['context']['board_boot_id'],row['context']['session_id']) == actor:
++                    matcher.results.pop(cached_key,None)
++        self._probe_versions[actor] = token; self._probe_versions.move_to_end(actor)
++        while len(self._probe_versions)>32:self._probe_versions.popitem(last=False)
++        try:
++            analyzed = analyzer.analyze(meta,raw,is_current=self._current)
++            if not self._current():raise InterruptedError('Self match capture cancelled')
++            if self._probe_gallery() != token:
++                self._clear_self_match(meta);self._probe_publish(meta,'SOURCE_CHANGED',0)
++                return '登记记录发生变化，这次声音比对未采用，请重新说话。'
++            voice = analyzed[0] if isinstance(analyzed,tuple) and len(analyzed)==2 else None
++            count = 0; phase = 'UNAVAILABLE'; reply = original_reply; wall_bounds=None
++            if isinstance(voice,dict) and voice.get('state') == 'INSUFFICIENT_SPEECH':
++                phase = 'INSUFFICIENT_SPEECH'
++                reply = '这段声音尚未通过原语音质量检查，有效发声需要至少两点五秒。请自然连续说五到八秒，例如：你可以根据我的声音辨认我是谁吗。'
++            elif isinstance(voice,dict) and voice.get('state') == 'NOT_CALIBRATED':
++                row = matcher.streaks.get(actor)
++                if (row is not None and row['generation']==meta['generation'] and row['signature'][:2]==token[:2]
++                        and meta['capture_id'] in row['captures'] and meta['pcm_sha256'] in row['digests']
++                        and 0 <= self.wall_clock()-row['at'] <= 30):
++                    count = min(3,len(row['captures']))
++                    pair=meta['capture_id'],meta['pcm_sha256']
++                    if pair not in ledger:
++                        ledger[pair]=dict(meta=dict(meta),cancelled=self.local.job['cancelled'],adopted=False)
++                    for old_pair in tuple(ledger):
++                        if old_pair not in set(zip(row['captures'],row['digests'])):ledger.pop(old_pair,None)
++                elif row is None:ledger.clear()
++                phase = 'COLLECTING' if count else 'NO_CANDIDATE'
++                reply = ('已完成第'+str(count)+'次声音比对，还需要'+str(3-count)+'次不同录音的稳定匹配。请自然连续说五到八秒。' if count else
++                         '这段声音还未形成稳定的登记声纹候选。完整现场校准尚未完成，我先不确定称呼。')
++                if count == 3:
++                    proof = matcher.proof(meta,store_id=self.hub.voice_reference(None)['store_id'])
++                    if (proof is not None and proof.get('context')==meta and proof.get('model_id')==token[0]
++                            and proof.get('gallery_revision')==token[1] and proof.get('consecutive_distinct')==3
++                            and proof.get('field_calibrated') is False and self._current()
++                            and proof['observed_at'] <= self.wall_clock() < proof['expires_at'] <= proof['observed_at']+2):
++                        person = next((p for p in device.store.people() if p['person_id']==proof['identity_id']),None)
++                        if person is not None:
++                            phase = 'CANDIDATE'
++                            wall_bounds=(proof['observed_at'],proof['expires_at'])
++                            reply = '声音候选称呼是'+person['display_name']+'。完整现场校准尚未完成。'
++                    if phase != 'CANDIDATE':
++                        phase = 'EXPIRED';count=0
++                        reply = '这次声音候选已过期，尚不能确认称呼，请重新自然说五到八秒。'
++            if not self._current():raise InterruptedError('Self match result cancelled')
++            # The 600s original descriptor cache contains only its strict
++            # NOT_CALIBRATED/insufficient evidence, never the candidate name.
++            binding._control_evidence(meta,voice=voice if isinstance(voice,dict) else None)
++            now = self.clock(); ttl=2. if wall_bounds is None else max(0.,min(2.,wall_bounds[1]-self.wall_clock()))
++            public_until=now+(ttl if phase=='CANDIDATE' else 30.)
++            self._probe_cache[key]=dict(meta=dict(meta),token=token,phase=phase,count=count,until=now+ttl,
++                public_until=public_until,wall_bounds=wall_bounds,reply=reply,voice=copy.deepcopy(voice))
++            while len(self._probe_cache)>64:self._probe_cache.popitem(last=False)
++            # The original _call marks this result adopted before publishing
++            # its phase. A later queued capture cannot reuse pending evidence.
++            return reply
++        except BaseException:
++            self._clear_self_match(meta)
++            raise
+ 
+     def submit_analysis(self,meta,pcm,conversation_id,*,visual=None,gallery_provider=None,on_evidence=None,**kwargs):
+         cid = validate_conversation_id(conversation_id); meta = context(meta,pcm)
+@@ -619,6 +857,7 @@
+                     pass
+             binding.router.name_waiting.pop(actor,None)
+             binding.speaker.sessions.pop(actor,None); binding.speaker.aliases.pop(actor,None)
++        self._clear_self_match(meta)
+ 
+     def cancel_analysis(self,meta,conversation_id):
+         meta = context(meta); cid = validate_conversation_id(conversation_id)
+@@ -656,6 +895,12 @@
+                 binding.speaker.sessions.clear(); binding.speaker.aliases.clear()
+             hub.speaker.sessions.clear()
+             getattr(hub.speaker,'save_receipts',{}).clear()
++            matcher = self._probe_matcher()
++            if matcher is not None:matcher.streaks.clear();matcher.results.clear()
++            for row in self._probe_cache.values():row.update(phase='CANCELLED',count=0,until=0.,reply=None,voice=None)
++            self._probe_versions.clear();self._probe_owner=None;self._probe_until=0.;self._probe_wall_bounds=None
++            self._probe_captures.clear()
++            self._probe_view=self._probe_metadata('CANCELLED',0,completed=self._probe_completed)
+             self._refresh_public()
+         if not self.closing.is_set():
+             self.pool.submit(clear)
+@@ -664,10 +909,12 @@
+         with self.lock:
+             state = copy.deepcopy(self.public_state)
+             state['ready'] = state['ready'] and not self.closing.is_set()
+-            return dict(version=1,**state,**self.counts,
++            value = dict(version=1,**state,**self.counts,
+                         data_origin=self.data_origin,queued_or_active=len(self.jobs),maximum_job_slots=2,
+                         last_evidence_error=copy.deepcopy(self.last_evidence_error),
+                         identity_templates_exported=False,profile_grants_issued=False)
++            limits=self._probe_until,self._probe_wall_bounds,self._probe_completed
++        return self._probe_project(value,limits)
+ 
+     def close(self,*,timeout=2.):
+         if not self.closing.is_set():

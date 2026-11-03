@@ -1,0 +1,11 @@
+--- before/board/runtime/board_business.py
++++ after/board/runtime/board_business.py
+@@ -415,6 +415,8 @@
+             system_prompt=system_prompt, asr=asr, clock=clock,
+             context_builder=builder, command_handler=BoardMemoryCommands(self.store))
+         handlers = dict(extra_handlers or {})
++        from board.runtime.history_delete import LocalHistoryDelete
++        handlers.setdefault('history_delete_preview', LocalHistoryDelete(self.store, self.timeline, clock=clock, zone=config.timezone))
+         self.identity_handler = None
+         if identity_snapshot is not None and identity_command is not None:
+             identity = LocalIdentityReplies(boot_id, identity_snapshot, identity_command, clock=clock,

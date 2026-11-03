@@ -1,0 +1,1331 @@
+{
+  "schema": "aura-project-progress-1",
+  "updated_utc": "2026-11-03T06:18:06.110271+00:00",
+  "client_date": "2026-11-02",
+  "timezone": "America/Los_Angeles",
+  "live_board_observed_utc": "2026-11-03T06:09:49.300110+00:00",
+  "live_models_observed_utc": "2026-11-02T09:27:24.4993218-08:00",
+  "overall": "工程包已封存，DPU 与语音性能测量已收尾。逐轮声纹识别与人脸结果已接入大模型的对话前置上下文并部署。角色主界面就绪，聆听暂停。正式两人切换测试仍按用户选择待测。",
+  "full_five_component_human_acceptance_complete": false,
+  "axis_thread": {
+    "thread_id": "01a19b64-8194-70e3-806b-03fa9a283918",
+    "host_id": "local",
+    "title": "转轴跟随｜左侧停点优化",
+    "status": "functional_behavior_user_accepted_tuning_closed_maintenance_freeze_preserved",
+    "responsibility": "Retain accepted original following and tuning; sole axis/platform operational support only after explicit maintained handback",
+    "handoff": "AXIS_CHAT_HANDOFF_20261102.txt",
+    "result_authority": "AXIS_CURRENT_HANDOFF.json",
+    "board_actions_allowed_now": false
+  },
+  "modules": [
+    {
+      "module": "本机模型与LAN",
+      "status": "原模型和LAN部署已通过，09:27主机健康正常",
+      "facts": "27B GPU驻留、TTS就绪、voice存活无错误、无活动或待发请求。本轮只读主机健康，未重跑板卡推理。",
+      "evidence": [
+        "LIVE_MODELS_READONLY_20261102T173043466520Z.json",
+        "../parallel_lan/LAN_PUBLIC_BOARD_READY.json"
+      ]
+    },
+    {
+      "module": "板端业务/角色UI",
+      "status": "原角色主界面就绪，故障数为零，聆听暂停。",
+      "facts": "当前选用d667b871发布的380组件一致，角色可见、运行故障0；采样时点与聆听偏好见原回执，现役仍由身份窗口维护。",
+      "evidence": [
+        "../other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\release\\POST_LIVE_READINESS_RESULT.json",
+        "../other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\LIVE_DAILY_ADDRESS_RESULT.json"
+      ],
+      "latest_animation_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\DEVICE_RETURN_R4.json",
+      "latest_animation_state": "R4 对话状态动画工程验证通过，实屏观感待确认。",
+      "latest_animation_startup_sha256": "d6c3db9a5024386857c09394003268a9777eeb34596b6520fa38263dbc18d1a9",
+      "latest_runtime_startup_sha256": "f8271cc9f9a5ed19e66ec28a53ae0f894a00a6b18d61e771620abaf2fb3bf2c9",
+      "latest_saved_UI_state": {
+        "ui_page": "main",
+        "pair_ready": true,
+        "avatar_visible": true,
+        "runtime_fault_count": 0,
+        "listening_enabled": false,
+        "microphone_open": false,
+        "handsfree_state": "PAUSED",
+        "playing": false,
+        "pending_job": false,
+        "follow": false,
+        "axis_readback": {
+          "flags": 0,
+          "lease_left_ms": 0,
+          "width_us": 1508,
+          "active": false,
+          "armed": false
+        }
+      },
+      "multimodal_context_release": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_multimodal_dialogue_context\\RELEASE_RESULT.json"
+    },
+    {
+      "module": "视觉感知",
+      "status": "相机/DPU工作；人脸登记及KNOWN已有现场确认",
+      "facts": "正式人脸登记及KNOWN已有现场确认；保留现有视觉功能。人脸和声纹独立工作，跨模态关联不在当前范围。相机/平台元数据以该模块所引原时点回执理解。",
+      "evidence": [
+        "../other_components_20261102\\live_enrollment_20261102\\split_commands_20261102\\actual_release\\VOICE_BEFORE_INVENTORY.json",
+        "../other_components_20261102/live_enrollment_20261102/CURRENT_ENROLLMENT_STATUS.json"
+      ]
+    },
+    {
+      "module": "基础语音对话",
+      "status": "现有对话链保留；本轮新增延迟专项按用户要求收口",
+      "facts": "用户认为5秒以内已可接受并要求保持现状；没有新增实测或保证所有轮次低于5秒。原两轮5.04/5.29秒是之前的录音完成至软件SPEAKING记录；本轮未启动板端观察或更改配置。",
+      "evidence": [
+        "../dialogue_latency_20261101/TWO_TURN_LATENCY.json",
+        "CHAT_LATENCY_SCOPE_CLOSED_20261102T173434758075Z.json"
+      ]
+    },
+    {
+      "module": "转轴跟随",
+      "status": "用户最新实物验收通过：转轴正常、无一顿一顿；调参排查收口",
+      "facts": "保留现有原跟随实现和参数；不再继续消抖优化或要求重复实体测试。此次是直接人类验收，未采集新boot/平台/MMIO证据；历史benchmark读数仅适用于其原时点。持久开机恢复另行推进。",
+      "evidence": [
+        "../AXIS_CURRENT_HANDOFF.json",
+        "../maintenance_original_axis_20261101/new_boot_a6d4_readonly_20261102/NEW_BOOT_TECHNICAL_HANDOFF.json",
+        "USER_SCOPE_UPDATE_20261102T145352372336Z.json"
+      ],
+      "user_acceptance_complete": true,
+      "further_stutter_tuning_pending": false,
+      "latest_saved_readback": {
+        "source_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_multimodal_dialogue_context\\final_read_1_RESULT.json",
+        "source_receipt_sha256": "3f0664cb9459800895c642982011f534a0f6483f57fdd442f6d187c6d6286522",
+        "observed_utc": "2026-11-03T06:09:49.300110+00:00",
+        "automatic_following": false,
+        "readback": {
+          "flags": 0,
+          "lease_left_ms": 0,
+          "width_us": 1508,
+          "active": false,
+          "armed": false
+        },
+        "axis_commands_by_this_context_task": 0,
+        "scope": "Dialogue maintenance final public readback"
+      }
+    },
+    {
+      "module": "身份与语言协同",
+      "status": "逐轮声纹与人脸结果已加入大模型对话上下文，正式两人切换测试待测。",
+      "facts": "正式库1声纹模板；一句普通聊天即匹配，用户已确认自然正确称呼，不需重复三遍口令。声纹明确保留现有ECAPA CPU实现，DPU迁移不在当前范围；一般现场标定不冒作已完成。关联取消，未新增个人记忆授权。",
+      "evidence": [
+        "../other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\LIVE_DAILY_ADDRESS_RESULT.json",
+        "PROGRESS_SNAPSHOT_20261102T173043466520Z.json"
+      ],
+      "current_per_utterance_work": {
+        "phase": "SOURCE_DEPLOYED_SCOPE_CLOSED_LIVE_TEST_DEFERRED_BY_USER",
+        "release_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\RELEASE_RESULT.json",
+        "release_receipt_sha256": "2b7ab9cce7e2bdd93ec5a83aec4b401b8e195d5081c68321997d493a1b00014a",
+        "device_publication_verified_by_this_sync": true,
+        "formal_live_test_started": false,
+        "formal_rounds": 0,
+        "human_switching_acceptance": null
+      },
+      "multimodal_context_release": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_multimodal_dialogue_context\\RELEASE_RESULT.json"
+    },
+    {
+      "module": "记忆",
+      "status": "用户反馈基本可用、当前无明显问题；移出当前阻塞",
+      "facts": "保留现有持久存储、摘要、检索和数据；本轮不再安排独立记忆修复或重复专项验收。历史原版本20项离线回归、实库完整性及原计数按其时点保留；本次人类使用反馈不冒作新完成的长期语义/冷启动自动化测试。后续仅在出现具体问题时重新定位。",
+      "evidence": [
+        "../other_components_20261102\\memory_function_review\\FINAL_VERDICT.json",
+        "../memory_status_20261102/MEMORY_CURRENT_082236.json",
+        "PROGRESS_SNAPSHOT_20261102T173043466520Z.json",
+        "USER_MEMORY_FEEDBACK_20261102T173436916745Z.json"
+      ],
+      "current_blocker": false,
+      "standalone_followup_required_now": false
+    },
+    {
+      "module": "板端CPU优化",
+      "status": "GTK已发布；聊天空档离线分析进行中；资源后测仍待明确空闲交接",
+      "facts": "相机候选未上板，无新增整板CPU/对话延迟后测。CPU窗口最新在梳理声纹、ASR、生成、播放完成到重新聆听之间的等待；主窗口已请求一次明确空闲的40秒只读窗口，但不假定已授权或已执行。",
+      "evidence": [
+        "../cpu_optimization_20261102\\CPU_OPT_STATUS.json",
+        "PROGRESS_SNAPSHOT_20261102T173043466520Z.json"
+      ]
+    },
+    {
+      "module": "开机恢复与全流程演示",
+      "status": "R7离线独立复核通过、未关闭代码问题0；待实际部署和冷启动",
+      "facts": "最后的排队原IDSTOP漏检已修复。作者8项定向、审查9个队列场景及2个续观用例分别有对应证据，历史65/50计数不套用R7。上板仍需明确维护交接、实际启动脚本/服务顺序、原相机Native完整历史、目标机校验和真实冷启动回执。",
+      "evidence": [
+        "../cpu_optimization_20261102\\BOOT_CANDIDATE_INDEPENDENT_REVIEW.json",
+        "PROGRESS_SNAPSHOT_20261102T173043466520Z.json"
+      ]
+    }
+  ],
+  "measured_latency_ms": {
+    "asr_ms": 1243.7924844998633,
+    "context_ms": 77.33676399948308,
+    "llm_rpc_ms": 1886.5928990016982,
+    "tts_rpc_ms": 802.1756435009593,
+    "first_audio_queued_from_worker_ms": 4459.744669498832,
+    "capture_complete_to_observed_speaking_ms": 5164.906586499885
+  },
+  "next_sequence": [
+    "继续定位聊天空档并形成有依据的最小优化与分段计时；声纹保留CPU",
+    "在明确空闲交接和新鲜来源核验后补只读资源采样及GTK/相机性能后测",
+    "按既有维护顺序核验实际启动配置/原Native保护证据，上板已离线复核通过的R7并验收冷启动",
+    "完成两轮完整播放、三分钟整机联合演示及持续运行观察，沿用已基本可用的记忆和已验收转轴",
+    "范围保持：记忆不列当前阻塞、声纹CPU、人脸声纹关联取消、转轴参数保留"
+  ],
+  "audit_actions": {
+    "board_queries_sent": 0,
+    "board_commands_sent": false,
+    "database_opened": false,
+    "production_source_changed": false,
+    "local_progress_documents_updated": true,
+    "host_health_get_only": true
+  },
+  "axis_latest_publication_utc": null,
+  "latest_axis_user_feedback": "转轴测试是没问题的没有一顿一顿，人脸与声纹关联不用做",
+  "axis_right_jitter_analysis": "right_jitter_readonly_20261102/EPISODE_ANALYSIS.json",
+  "live_board_observation_source": "主窗口本次有记录的只读部署后检查，实际识别数据未导出。",
+  "current_boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e",
+  "startup_sha256_at_latest_saved_board_receipt": "f8271cc9f9a5ed19e66ec28a53ae0f894a00a6b18d61e771620abaf2fb3bf2c9",
+  "latest_saved_board_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_multimodal_dialogue_context\\final_read_1_RESULT.json",
+  "full_three_minute_integrated_demo_ready": false,
+  "previous_progress_backup": "project_progress_20261102\\before_progress_refresh_20261102T140103Z",
+  "evidence_file_sha256": {
+    "project_progress_20261102\\PROJECT_PROGRESS.json": "686948b28a6d7d05b88cc63c671906cc54ae81c49a0fc88641d58a3815e278d0",
+    "AXIS_CURRENT_HANDOFF.json": "94ee5eb94c2916aa47ec13fad4083f204cb7ef6269cd32655019db67aabd5374",
+    "cpu_optimization_20261102\\CPU_OPT_STATUS.json": "97644143b540cab880ad26f2fe0a6e892bcc662e98aad8b5b5595be5c42a59bb",
+    "other_components_20261102\\live_enrollment_20261102\\CURRENT_ENROLLMENT_STATUS.json": "65144abcb5bed80d164be1cf871f9f8ff6f108bf43f6fdd27074a783b88decf2",
+    "other_components_20261102\\live_enrollment_20261102\\voice_entry_trace_20261102\\PRE_DEPLOYMENT_READINESS.json": "bf363627904ec4f64d46a71e0520dda25dbd106d3add1b70d47d0ad9245abc80",
+    "other_components_20261102\\live_enrollment_20261102\\split_commands_20261102\\actual_release\\VOICE_BEFORE_INVENTORY.json": "cd3f44291a54ef1e8f1fa2aa23e6a9c5578d808a2bd6eacb8ebf6640239ec06b",
+    "other_components_20261102\\live_enrollment_20261102\\split_commands_20261102\\actual_release\\APPLY_RESULT.json": "478a1e4590d8be94de0227f1ff18fd8636560fe91f0ce0c8a077491e5bfd5bc2"
+  },
+  "field_scope": "本轮部署后源码与运行状态已核对，板端合成数据检查确认两路结果在用户话语前进入消息。真人对话和正式两人切换验收等待用户开始。",
+  "axis_publication_scope": "Stable150 release retained, publication was previous boot; current boot platform incompatible",
+  "parallel_workstream_update_utc": "2026-11-03T06:18:06.110271+00:00",
+  "parallel_workstreams": {
+    "identity": {
+      "thread_id": "01a19ad7-5865-7c60-82fa-605d17aea70f",
+      "host_id": "local",
+      "responsibility": "逐轮声纹识别的本地实现与测试，R4 返还后以现场源码为基线合并。",
+      "status": "SOURCE_DEPLOYED_SCOPE_CLOSED_LIVE_TEST_DEFERRED_BY_USER",
+      "exclusive_gui_maintenance_holder": false,
+      "reported_in_flight_at_handoff": {
+        "root_pending_SSH_HTTP_control_or_helpers": 0,
+        "root_active_observers": 0,
+        "root_fresh_check_control_writes": 0
+      },
+      "release_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\DEVICE_HANDOFF_R4.json",
+      "maintenance_holder_active_work": false,
+      "latest_return_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\DEVICE_RETURN_R4.json",
+      "latest_return_utc": "2026-11-03T04:59:47.499464+00:00",
+      "latest_return_ack": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\DEVICE_RETURN_ACK_R4.json",
+      "latest_return_ack_sha256": "9076c8317298961332177c141ef046c8173d0991ee60c69fc7ed98a30941c288",
+      "accepted_utc": "2026-11-03T05:01:48.898101+00:00",
+      "board_actions_allowed_now": false,
+      "reported_at_handoff_utc": "2026-11-03T04:40:57.909362+00:00",
+      "release_receipt_sha256": "9699767732229aae314f360be5c9f444a61cb2e7d6406df7151755bc85f80703",
+      "handoff_id": "animation-R4-a4b34e5af9214593a6cc3a72962a0813",
+      "latest_return_receipt_sha256": "791524c9c6d2f2447f944f0d26d9e9cd28edd10311199f8fea959a493c08d260",
+      "work_directory": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition",
+      "voice_work_phase": "SOURCE_DEPLOYED_SCOPE_CLOSED_LIVE_TEST_DEFERRED_BY_USER",
+      "phase_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\VOICE_PUBLICATION_PHASE_HANDOFF.json",
+      "phase_receipt_sha256": "b584e775a6810b11f83fab5c0ecf220678826fcce96e515ae48d88823275ff5e",
+      "closure_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\USER_TEST_DEFERRED.json",
+      "closure_receipt_sha256": "d51583327fc19a26aeef3e543d8dd080bda228c13f350b638121576d9798a096",
+      "closed_utc": "2026-11-03T05:24:14.936086+00:00",
+      "reported_current_pending_calls_and_observers": 0,
+      "next_device_action_requires_human_start": true
+    },
+    "boot_recovery": {
+      "thread_id": "01a19ca4-6c68-70f2-a9a0-af51dfda6bc6",
+      "host_id": "local",
+      "title": "开机恢复｜wide与界面自动启动",
+      "status": "offline_R7_review_passed_retained_not_deployed_no_device_grant",
+      "responsibility": "Original cold-boot platform/camera/GUI startup recovery candidates, rollback and local tests",
+      "output_directory": "boot_recovery_parallel_20261102",
+      "result_authority": "boot_recovery_parallel_20261102/BOOT_RECOVERY_STATUS.json",
+      "board_queries_or_actions_allowed_now": false,
+      "production_writes_allowed_now": false,
+      "motion_initialization_or_follow_allowed_now": false,
+      "scope": "Real local implementation now; later deployment requires explicit maintained handback and existing sole axis/platform operator"
+    },
+    "cpu": {
+      "thread_id": "01a19b1a-6a07-7781-8af9-aacacb1c8ca4",
+      "host_id": "local",
+      "status": "new_latency_work_closed_at_user_request_keep_offline_candidates_no_board_access",
+      "responsibility": "Existing GTK/camera performance; reusable protected camera lifecycle interface for boot recovery",
+      "result_authority": "cpu_optimization_20261102/CPU_OPT_STATUS.json",
+      "new_interface": "cpu_optimization_20261102/BOOT_RECOVERY_INTERFACE.json",
+      "next_review": "cpu_optimization_20261102/BOOT_CANDIDATE_INDEPENDENT_REVIEW.json"
+    },
+    "axis": {
+      "thread_id": "01a19b64-8194-70e3-806b-03fa9a283918",
+      "host_id": "local",
+      "title": "转轴跟随｜左侧停点优化",
+      "status": "functional_behavior_user_accepted_tuning_closed_maintenance_freeze_preserved",
+      "responsibility": "Retain accepted original following and tuning; sole axis/platform operational support only after explicit maintained handback",
+      "handoff": "AXIS_CHAT_HANDOFF_20261102.txt",
+      "result_authority": "AXIS_CURRENT_HANDOFF.json",
+      "board_actions_allowed_now": false
+    },
+    "animation": {
+      "thread_id": "01a19efd-bb40-7f32-a6e4-a5f0cb59ffe8",
+      "host_id": "local",
+      "title": "玩偶动画效果优化",
+      "responsibility": "本次 GUI 动画维护及本窗口实际操作的归还回执",
+      "handoff": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\DEVICE_HANDOFF_R4.json",
+      "status": "R4_LOADED_GUI_MAINTENANCE_RETURNED_AND_ACCEPTED",
+      "work_directory": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion",
+      "exclusive_gui_maintenance_holder": false,
+      "board_actions_allowed_now": false,
+      "handoff_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\DEVICE_HANDOFF_R4.json",
+      "handoff_sha256": "9699767732229aae314f360be5c9f444a61cb2e7d6406df7151755bc85f80703",
+      "handoff_id": "animation-R4-a4b34e5af9214593a6cc3a72962a0813",
+      "return_status": "RETURN_CONFIRMED_ZERO_IN_FLIGHT",
+      "shared_voice_files": [
+        "board/runtime/board_speaker_business.py",
+        "board/runtime/board_business.py",
+        "board/runtime/board_dialogue.py"
+      ],
+      "overlap_rule": "If R4 animation needs an overlapping file, retain voice semantics and report the exact delta. Voice publication waits for explicit R4 return and rebases onto the real R4 source. No parallel GUI or model control.",
+      "return_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\DEVICE_RETURN_R4.json",
+      "return_receipt_sha256": "791524c9c6d2f2447f944f0d26d9e9cd28edd10311199f8fea959a493c08d260",
+      "return_ack": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\DEVICE_RETURN_ACK_R4.json",
+      "return_ack_sha256": "9076c8317298961332177c141ef046c8173d0991ee60c69fc7ed98a30941c288",
+      "returned_to": "01a19ad7-5865-7c60-82fa-605d17aea70f",
+      "returned_utc": "2026-11-03T04:59:47.499464+00:00",
+      "accepted_utc": "2026-11-03T05:01:48.898101+00:00"
+    }
+  },
+  "parallel_workstream_update_scope": "主窗口直接用户任务已完成，当前维护阶段关闭。",
+  "user_axis_functional_acceptance": {
+    "schema": "aura-human-axis-acceptance-and-scope-update-1",
+    "recorded_host_utc": "2026-11-02T06:53:52.372336-08:00",
+    "client_timezone": "America/Los_Angeles",
+    "source": "Latest direct human message in original project chat 01a1994e-f547-74e1-903d-3591021d67c8",
+    "verbatim_user_message": "转轴测试是没问题的没有一顿一顿，人脸与声纹关联不用做",
+    "axis_follow_behavior_user_accepted": true,
+    "axis_stuttering_user_reports_absent": true,
+    "axis_stuttering_or_additional_tuning_pending": false,
+    "keep_current_axis_implementation_and_parameters": true,
+    "face_voice_association_required": false,
+    "face_voice_association_status": "CANCELLED_BY_USER_NOT_DEFERRED",
+    "association_required_for_demo": false,
+    "independent_face_and_voice_work_retained": true,
+    "existing_stores_templates_links_and_permissions_unchanged": true,
+    "fresh_board_telemetry_collected": false,
+    "physical_test_boot_id_not_supplied": true,
+    "board_queries_and_actions": 0,
+    "scope": "Human functional acceptance and project scope only; not a new MMIO/owner/platform receipt or a maintenance handback"
+  },
+  "face_voice_association_required": false,
+  "face_voice_association_status": "CANCELLED_BY_USER_NOT_DEFERRED",
+  "face_voice_association_required_for_demo": false,
+  "latest_user_scope_receipt": "USER_SCOPE_UPDATE_20261102T145352372336Z.json",
+  "scope_update_actions": {
+    "coordination_messages_sent_to_existing_work_chats": 4,
+    "board_queries": 0,
+    "board_actions": 0,
+    "production_source_or_private_store_mutations": 0,
+    "local_scope_documents_updated": true
+  },
+  "voice_enrollment_complete": true,
+  "voice_recognition_accuracy_acceptance_complete": false,
+  "latest_status_snapshot": "PROGRESS_SNAPSHOT_20261102T173043466520Z.json",
+  "next_milestones": [
+    "Independent voice recognition cumulative-state repair and live acceptance",
+    "Offline independent boot review and interface closure in parallel; after explicit handback, fresh startup-order/source checks and actual boot deployment",
+    "Matched CPU/latency after measurement and original camera candidate lifecycle; then two-turn and three-minute joint demo"
+  ],
+  "latest_coordination_only_update_utc": "2026-11-03T06:18:06.110271+00:00",
+  "voice_owner_match_human_accepted": true,
+  "voice_field_calibration_complete": false,
+  "voice_first_utterance_integration": {
+    "status": "HUMAN_ACCEPTED_FIRST_ORDINARY_UTTERANCE",
+    "human_confirmed": true,
+    "required_captures": 1,
+    "evidence": "other_components_20261102\\live_enrollment_20261102\\voice_conversation_address_20261102\\LIVE_DAILY_ADDRESS_RESULT.json"
+  },
+  "voice_CPU_retention": {
+    "recorded_host_utc": "2026-11-02T09:30:43.46652-08:00",
+    "direct_user_instruction": "算了，先保留在cpu吧，看看目前的进度",
+    "model": "Existing ECAPA ONNX FP32",
+    "execution_backend": "KV260 ARM CPU / ONNX Runtime CPUExecutionProvider",
+    "speaker_DPU_migration_in_current_scope": false,
+    "preserve_registered_voice_and_current_passed_behavior": true,
+    "production_modified_by_this_update": false
+  },
+  "latest_cpu_offline_work": {
+    "recorded_host_utc": "2026-11-02T09:31:56.262346-08:00",
+    "source": "CPU thread compact snapshot revision18",
+    "status": "Active offline analysis of long chat gaps: voice matching, ASR, generation, playback completion and resuming listening",
+    "board_query_or_resource_sample_claimed": false,
+    "independent_boot_review_closed": true
+  },
+  "chat_latency_work": {
+    "schema": "aura-user-chat-latency-scope-close-1",
+    "recorded_host_utc": "2026-11-02T09:34:34.758075-08:00",
+    "direct_user_message": "行吧，5s以内已经够好了，就这样吧",
+    "status": "CLOSED_AT_USER_REQUEST_KEEP_CURRENT_CONFIGURATION",
+    "user_acceptable_latency_target_seconds": 5,
+    "target_or_acceptance_is_not_a_new_measurement": true,
+    "new_end_to_end_latency_measured": false,
+    "new_guarantee_all_turns_under_5s": false,
+    "board_queries_or_actions": 0,
+    "observer_started": false,
+    "model_load_created": false,
+    "source_or_service_changes": false,
+    "readonly_window": "other_components_20261102/live_enrollment_20261102/MAIN_NUMERIC_READONLY_HANDOFF.json",
+    "readonly_window_used": false,
+    "window_return_notified_to_owner": true,
+    "keep_current_models_voice_parameters_auto_address_and_accepted_axis": true,
+    "face_voice_association_cancelled": true,
+    "existing_offline_candidates_retained_not_deployed": true,
+    "scope": "Stop this newly initiated latency-specific work. No automatic DFX/camera/GUI/model restart or deployment follows."
+  },
+  "chat_latency_scope_receipt": "CHAT_LATENCY_SCOPE_CLOSED_20261102T173434758075Z.json",
+  "latency_optimization_required_now": false,
+  "keep_current_chat_configuration": true,
+  "scope_close_actions": {
+    "board_requests": 0,
+    "production_mutations": 0,
+    "peer_notifications": 3,
+    "new_latency_work_stopped": true,
+    "existing_candidates_retained": true
+  },
+  "memory_user_feedback": {
+    "schema": "aura-user-memory-usage-feedback-1",
+    "recorded_host_utc": "2026-11-02T09:34:36.916745-08:00",
+    "client_timezone": "America/Los_Angeles",
+    "source": "Direct human message in original project chat",
+    "verbatim_user_message": "记忆库现在基本上没什么问题了，我觉得",
+    "user_reported_status": "BASICALLY_WORKING_NO_OBVIOUS_CURRENT_PROBLEM",
+    "current_project_blocker": false,
+    "standalone_memory_repair_or_repeated_acceptance_required_now": false,
+    "preserve_existing_implementation_and_data": true,
+    "new_automated_long_term_or_cold_boot_semantic_acceptance_claimed": false,
+    "fresh_database_or_hardware_evidence_collected": false,
+    "board_actions": 0
+  },
+  "memory_current_project_blocker": false,
+  "latest_memory_feedback_receipt": "USER_MEMORY_FEEDBACK_20261102T173436916745Z.json",
+  "current_joint_180s_acceptance": {
+    "updated_host_utc": "2026-11-02T20:57:57.205171+00:00",
+    "phase": "OTHER_FUNCTIONS_CHECK_OPTIMIZATION_DEFERRED_BY_USER",
+    "acceptance_timer_started": false,
+    "resource_sampler_active": false,
+    "functional_observer_active": false,
+    "actual_preflight": "Current benchmark platform, panFAULT/readbacknull and non-current original bindings",
+    "preflight_receipt": "joint_acceptance_180s_20261102/AXIS_ACCEPTANCE_READY.json",
+    "power_off_confirmed_by_current_human": false,
+    "power_receipt": "joint_acceptance_180s_20261102/POWER_DISCONNECTED_USER.json",
+    "maintenance_stage": "Check dialogue, voice-based natural address, short recall and avatar voice/lips; stop axis and defer visual/axis/audio scheduling optimization",
+    "phase_handoff": "joint_acceptance_180s_20261102/CPU_RESTORE_PHASE_HANDOFF.json",
+    "report_thread": "01a19c53-3a84-7c30-8e70-9368a35318d8",
+    "new_source_model_or_R7_deployment_in_acceptance": false,
+    "scope": "Earlier axis human acceptance retained; this current platform prerequisite is separate. No actual 180-second result yet.",
+    "camera_stop_receipt": "cpu_optimization_20261102/wide_restore_20261102/CAMERA_STOP_RESULT.json",
+    "camera_normally_stopped": true,
+    "new_final_sha256": "0f785e65fc26ceaa50fc70a8d4db4437e5c7853e0384ca41cbba2b8de9c5301b",
+    "stop_seal_result": "joint_acceptance_180s_20261102/CPU_PROTECTED_STOP_SEAL_RESULT.json",
+    "cpu_device_return_receipt": "joint_acceptance_180s_20261102/CPU_DEVICE_RETURNED_AFTER_STOP_SEAL.json",
+    "wide_restored": true,
+    "wide_stop_flags": 0,
+    "wide_stop_lease": 0,
+    "camera_restored": true,
+    "camera_owner_at_restore_receipt": {
+      "pid": 362659,
+      "birth_ticks": "2850120",
+      "command_sha256": "acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd"
+    },
+    "camera_restore_receipt": "joint_acceptance_180s_20261102/CPU_CAMERA_RESTORE_RESULT.json",
+    "camera_return_receipt": "joint_acceptance_180s_20261102/CPU_DEVICE_RETURNED_AFTER_CAMERA_RESTORE.json",
+    "axis_binding_phase": "joint_acceptance_180s_20261102/AXIS_BINDING_REFRESH_PHASE_HANDOFF.json",
+    "hold_reason": "Current human reports recurring board video defect and rightward follow jerk; brief prior normal feedback is not stability proof",
+    "current_visual_issue_receipt": "joint_acceptance_180s_20261102/VISUAL_ISSUE_USER_REPORT.json",
+    "independent_initialization_allowed": false,
+    "independent_initialization_executed": false,
+    "motor_power_is_currently_connected": true,
+    "current_motor_power_receipt": "joint_acceptance_180s_20261102/MOTOR_POWER_RECONNECTED_USER.json",
+    "power_isolation_previously_confirmed": true,
+    "current_recurrence_receipt": "joint_acceptance_180s_20261102/VISUAL_AXIS_RECURRENCE_USER_REPORT.json",
+    "new_patch_publication_held": true,
+    "findings_receipt": "joint_acceptance_180s_20261102/REGRESSION_FINDINGS_CURRENT.json",
+    "optimization_deferred_by_user": true,
+    "current_scope_receipt": "joint_acceptance_180s_20261102/USER_DEFER_OPTIMIZATION_CHECK_OTHER_FUNCTIONS.json",
+    "formal_all_function_180s_started": false,
+    "visual_and_axis_acceptance_required_now": false
+  },
+  "current_user_reported_visual_and_right_axis_regression": {
+    "schema": "aura-visual-axis-regression-current-human-report-1",
+    "recorded_host_utc": "2026-11-02T19:48:14.238012+00:00",
+    "human_source_thread": "01a1994e-f547-74e1-903d-3591021d67c8",
+    "reported_issues": [
+      "Board vision problem recurred after short normal observation",
+      "Rightward axis movement is intermittent/jerky"
+    ],
+    "human_requested_reference": "Original camera image and face-follow behavior that were good in this morning actual testing",
+    "c386_short_observation_is_stability_acceptance": false,
+    "three_minute_acceptance_started": false,
+    "all_new_patch_deployments_held": true,
+    "independent_initialization_still_cancelled": true,
+    "diagnosis_approach": "Compare actual accepted morning source/config/owners and present runtime; trace existing original rightward follow state before selecting a minimal attributable fix."
+  },
+  "user_current_optimization_deferral": {
+    "schema": "aura-user-functional-priority-deferral-1",
+    "host_utc": "2026-11-02T20:57:57.205171+00:00",
+    "direct_user_instruction": "要不先不着急优化，就是转轴转动的时候没有语音参与，时间比较紧，这样吧，看看其他功能呢",
+    "scope": "Check dialogue, voice-based natural address, short recall and avatar voice/lips; stop axis and defer visual/axis/audio scheduling optimization",
+    "visual_and_right_axis_status": "OPEN_DEFERRED_NOT_FIXED",
+    "audio_contention_as_cause_of_reported_right_jerk": "NOT_PROVEN; user says no voice participated during turning",
+    "new_affinity_nice_experiments_cancelled": true,
+    "independent_initialization_cancelled": true,
+    "original_full_180s_joint_acceptance_started": false,
+    "functional_check_target": "Three new ordinary dialogue turns, at most120seconds, without waiting for axis or resource-monitor readiness"
+  },
+  "current_performance_measurement": {
+    "schema": "aura-project-performance-closeout-1",
+    "updated_utc": "2026-11-02T21:20:50.326392+00:00",
+    "phase": "MEASUREMENT_AND_CORE_FIGURES_COMPLETE",
+    "human_request": "现在整个项目可以收尾了，赶紧把梳理技术设计报告工作里面需要测试的dpu和语音大模型性能测量",
+    "report_thread": "01a19c53-3a84-7c30-8e70-9368a35318d8",
+    "main_measurement_directory": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\performance_measurement_20261102",
+    "resource_measurement_directory": "E:/Win共享文件/协作任务/2026-11-02_收尾性能实测_01a19c53",
+    "axis_stopped": true,
+    "visual_axis_optimization_deferred": true,
+    "formal_all_function_acceptance_passed": false,
+    "source_model_configuration_changed": false,
+    "llm_success": 5,
+    "tts_success": 5,
+    "planned_pair_skipped_due_busy": 1,
+    "resource_samples": 90,
+    "resource_seconds": 180.15117043299688,
+    "all_device_calls_returned": true,
+    "actual_listening_condition": "PAUSED/microphone closed in all 180 main GUI samples",
+    "main_results_file": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\performance_measurement_20261102\\RESULTS.json",
+    "dpu_crosscheck_file": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\performance_measurement_20261102\\DPU_LOCAL_CROSSCHECK.json",
+    "summary_file": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\performance_measurement_20261102\\PERFORMANCE_CLOSEOUT.txt",
+    "measurement_complete": true,
+    "core_figure_visual_qa": "PASS",
+    "archive_file": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\performance_measurement_20261102\\DPU与语音模型性能实测_20261102.zip",
+    "archive_sha256": "a8772efffc73c967c834788348527cfdf66e876ca1f1fb7fdc06ca81f825536e",
+    "report_integration": "Actual results and reviewed figures sent to report thread; local report assembly continues independently",
+    "performance_window_closed": true,
+    "performance_close_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\joint_acceptance_180s_20261102\\PERFORMANCE_MEASUREMENT_CLOSED.json"
+  },
+  "latest_project_scope_updated_utc": "2026-11-02T21:13:05.379950+00:00",
+  "engineering_delivery_readiness": {
+    "recorded_local_time": "2026-11-02T13:24:00.910279-08:00",
+    "ready_to_prepare": true,
+    "all_functions_finally_accepted": false,
+    "readiness_file": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\engineering_delivery_20261102\\ENGINEERING_DELIVERY_READINESS.json",
+    "scope": "Local package preparation only; documented open visual/axis items and unverified cold boot remain"
+  },
+  "current_gui_maintenance": {
+    "thread_id": "01a1994e-f547-74e1-903d-3591021d67c8",
+    "host_id": "local",
+    "title": "主窗口／对话上下文维护",
+    "status": "DEPLOYED_SCOPE_CLOSED_LISTENING_PAUSED",
+    "permission_active": false,
+    "maintenance_holder_active_work": false,
+    "phase_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_multimodal_dialogue_context\\DEVICE_MAINTENANCE.json",
+    "phase_receipt_sha256": "9f60365d9cbf86992b717211a1f1d3c61357fb81b2b82b99739db553e3cd7f28",
+    "previous_holder_thread_id": "01a19ad7-5865-7c60-82fa-605d17aea70f",
+    "granted_scope": [
+      "Fresh public source, owner, configuration and idle-state reconciliation",
+      "Normal guarded original GUI stop/start while preserving paused listening",
+      "Reversible CAS of board_business.py, board_dialogue.py, board_memory_policy.py and existing startup pins",
+      "Public-only readiness checks and synthetic request assembly validation"
+    ],
+    "source_owner_reconciliation_required_before_publication": true,
+    "user_request": "把人脸识别结果和声纹识别结果在加在对话内容之前一起发送给大模型",
+    "board_actions_allowed_now": false,
+    "closed_utc": "2026-11-03T06:18:06.110271+00:00",
+    "release_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_multimodal_dialogue_context\\RELEASE_RESULT.json",
+    "release_receipt_sha256": "1c49b24837d5c437d817f23948271e2a7e2d40f44df4fd53fffff49f19a41d08",
+    "pending_calls_and_observers": 0,
+    "unknown_operations_remaining": 0,
+    "new_device_actions_requested": false,
+    "source": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_multimodal_dialogue_context\\RELEASE_RESULT.json",
+    "sha256": "1c49b24837d5c437d817f23948271e2a7e2d40f44df4fd53fffff49f19a41d08",
+    "global_owner_registry": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\CHAT_COORDINATION.json"
+  },
+  "engineering_delivery": {
+    "status": "VERIFIED_ENGINEERING_HANDOFF_WITH_BOARD_PUBLIC_FILES",
+    "verified_utc": "2026-11-02T22:32:03.083388+00:00",
+    "evidence": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\engineering_delivery_20261102\\ENGINEERING_PACKAGE_DELIVERED.json",
+    "archive": "E:\\AUAR_工程交付_20261102\\auar_kv260_engineering.rar",
+    "sha256": "185cea28db2db1a95d15ac2cc8abd9c47a39e41e033ad3fa506053d9c2a63d00",
+    "animation_work_directory": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization"
+  },
+  "latest_animation_release": {
+    "handoff_id": "animation-R4-a4b34e5af9214593a6cc3a72962a0813",
+    "handoff_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\DEVICE_HANDOFF_R4.json",
+    "handoff_sha256": "9699767732229aae314f360be5c9f444a61cb2e7d6406df7151755bc85f80703",
+    "return_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\DEVICE_RETURN_R4.json",
+    "return_receipt_sha256": "791524c9c6d2f2447f944f0d26d9e9cd28edd10311199f8fea959a493c08d260",
+    "return_ack": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\DEVICE_RETURN_ACK_R4.json",
+    "return_ack_sha256": "9076c8317298961332177c141ef046c8173d0991ee60c69fc7ed98a30941c288",
+    "release": "R4_dialogue_state_motion",
+    "from_thread_id": "01a19efd-bb40-7f32-a6e4-a5f0cb59ffe8",
+    "to_thread_id": "01a19ad7-5865-7c60-82fa-605d17aea70f",
+    "returned_utc": "2026-11-03T04:59:47.499464+00:00",
+    "accepted_utc": "2026-11-03T05:01:48.898101+00:00",
+    "loaded_into_original_GUI": true,
+    "gui_after_restoration": "READY",
+    "in_flight_on_return": {
+      "root_pending_SSH": 0,
+      "root_pending_HTTP": 0,
+      "root_active_observers": 0,
+      "root_pending_control_transactions": 0,
+      "root_unsettled_device_operations": 0,
+      "root_animation_helper_processes": 0
+    },
+    "unknown_operations_remaining": 0,
+    "permission_active_for_animation": false,
+    "device_actions_by_coordinator": 0,
+    "receiving_thread_next_task_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\VOICE_PUBLICATION_PHASE_HANDOFF.json",
+    "status_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\STATUS_R4.json",
+    "status_receipt_sha256": "4e91034a24a3e08d587690f9dc43b61b276237c7eee0e9dbb30444d5d22d5c35",
+    "fresh_state_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\validation\\FINAL_DEVICE_READY_R4.json",
+    "fresh_state_sha256": "ad78bca654189779ed91b8e123331a1d1f603b5a14bbcf8d128cc36d23a205d8",
+    "software_state_at_return": {
+      "status": "FRESH_READY_NO_ANIMATION_HELPERS_OR_PENDING_COMMANDS",
+      "boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e",
+      "startup_sha256": "d6c3db9a5024386857c09394003268a9777eeb34596b6520fa38263dbc18d1a9",
+      "native_library_sha256": "cae02d5b8b1d5c6744c34b0f9d021046b7901f6a5d824d6cfd9b6e055c94cde0",
+      "all_380_pins_match": true,
+      "gui_owner": {
+        "pid": 927532,
+        "birth_ticks": "6451192",
+        "command_sha256": "48a28efa32b2050901e73e85a80a30a90dcfbce0b7249bde5d6d90902740631d"
+      },
+      "gtk_owner": {
+        "pid": 927542,
+        "birth_ticks": "6451313",
+        "command_sha256": "6cea7651bf5b5c1f428bdcf593988a2cea2c50416e60b3ace948b841954bb373"
+      },
+      "camera_owner": {
+        "pid": 362659,
+        "birth_ticks": "2850120",
+        "command_sha256": "acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd"
+      },
+      "GUI_properties": {
+        "KillMode": "mixed",
+        "Restart": "no",
+        "SendSIGKILL": "yes",
+        "TimeoutStopUSec": "25s"
+      },
+      "main_page": true,
+      "avatar_visible": true,
+      "phase": "IDLE",
+      "pair_ready": true,
+      "runtime_fault_count": 0,
+      "native_frames": 2333,
+      "motion_control_live": true,
+      "motion": {
+        "motion_generation": 0,
+        "motion_action_token": 0,
+        "motion_completed_token": 0,
+        "motion_gestures_started": 0,
+        "motion_gestures_completed": 0,
+        "motion_state": "IDLE",
+        "motion_action": 0,
+        "motion_values": {
+          "head_LR": -1.1019787788391113,
+          "head_slant": 0.5726715922355652,
+          "body_LR": -0.47586721181869507,
+          "body_slant": -0.5063354969024658,
+          "aura_arm_left": 1.7567342519760132,
+          "aura_arm_right": -2.7298152446746826,
+          "head_UD": 0.0,
+          "body_UD": -0.07786918431520462
+        }
+      },
+      "listening_preference": {
+        "version": 1,
+        "enabled": false
+      },
+      "microphone_open": false,
+      "playing": false,
+      "automatic_following": false,
+      "animation_helpers_remaining": [],
+      "temporary_animation_guards": [],
+      "probe_read_only": true
+    },
+    "source_map": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\release\\startup.after.json",
+    "source_map_sha256": "d6c3db9a5024386857c09394003268a9777eeb34596b6520fa38263dbc18d1a9",
+    "startup_before": "31d379389c2f2ac6d2e3ec33e49bd81f6f4076e4371a78f4ae7813a62193fbdf",
+    "startup_sha256": "d6c3db9a5024386857c09394003268a9777eeb34596b6520fa38263dbc18d1a9",
+    "native_library_sha256": "cae02d5b8b1d5c6744c34b0f9d021046b7901f6a5d824d6cfd9b6e055c94cde0",
+    "components_changed": [
+      "config/board_avatar_gtk.json",
+      "config/yuki_pair.formal.json",
+      "tools/formal_yuki.py",
+      "tools/libaura_yuki.so",
+      "tools/native_yuki.py"
+    ],
+    "component_count": 380,
+    "unchanged_component_count": 375,
+    "voice_overlap_files_changed": [],
+    "quality_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\validation\\QUALITY_GATE.json",
+    "quality_receipt_sha256": "94bce0165e058e57e6d4edebbd0c83a661a4868d52a56d4a7264246e7e2e94e7",
+    "adapter_tests_passed": 7,
+    "native_state_pose_cases": 28,
+    "native_dialogue_frames": 7603,
+    "reactions": 4,
+    "lower_arm_absmax_deg": 2.467776298522949,
+    "lower_arm_peak_speed_deg_s": 2.239338755607605,
+    "controlled_offscreen_render": {
+      "R3_fps": 15.997490353086512,
+      "R4_fps": 15.999357515929656,
+      "R3_p95_complete_ms": 18.86283900239505,
+      "R4_p95_complete_ms": 18.956849999085534,
+      "seconds_each": 10.0,
+      "readback_in_timed_loop": false,
+      "speedup_claimed": false
+    },
+    "loaded_GUI_swap_fps": 15.355041355772952,
+    "loaded_GUI_sample_seconds": 20.00285295899812,
+    "sample_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\validation\\LIVE_AFTER_R4.json",
+    "sample_receipt_sha256": "98f7826727818c322221e48ade1c9846a20b5731af1d50c975c852264f5b3690",
+    "physical_screen_human_confirmed_at_return": false,
+    "live_human_dialogue_test_performed": false,
+    "bundle": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\release\\avatar_animation_R4_delivery.zip",
+    "bundle_bytes": 60672412,
+    "bundle_sha256": "73aac1e7d80c1db6122438625f4417d00f6c77ebe99e89df123d70428900b86d",
+    "preview_video": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\previews\\dialogue_motion_16fps.mp4",
+    "source_of_device_state": "动画窗口保存的返还回执。签收后声纹窗口继续设备工作，当前状态以其后续回执为准。"
+  },
+  "latest_saved_board_receipt_sha256": "3f0664cb9459800895c642982011f534a0f6483f57fdd442f6d187c6d6286522",
+  "latest_saved_board_receipt_issued_utc": "2026-11-03T06:09:49.300110+00:00",
+  "animation_release_history": {
+    "R2_shoulder_pivot": {
+      "from_thread_id": "01a19efd-bb40-7f32-a6e4-a5f0cb59ffe8",
+      "to_thread_id": "01a19ad7-5865-7c60-82fa-605d17aea70f",
+      "returned_utc": "2026-11-03T02:37:40.127666+00:00",
+      "accepted_utc": "2026-11-03T02:39:42.807262+00:00",
+      "handoff_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\DEVICE_HANDOFF.json",
+      "handoff_sha256": "b5c330323f023968249bd41f5946aa498210201f06d567bcc2c8a7bb824640ce",
+      "return_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\DEVICE_RETURN.json",
+      "return_receipt_sha256": "e9b61d8dfd2fce15f52a6c55e22ed325291bedff92b1871a2f642c0c1601a879",
+      "return_ack": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\DEVICE_RETURN_ACK.json",
+      "return_ack_sha256": "d6bbe5eafa53e052f54637b5552c446a7cb4c2a8f1c851d3df239715bedd386f",
+      "loaded_into_original_GUI": true,
+      "release": "R2_shoulder_pivot",
+      "gui_after_restoration": "READY",
+      "in_flight_on_return": {
+        "SSH_in_flight": 0,
+        "HTTP_in_flight": 0,
+        "observers_remaining": 0,
+        "unsettled_control_transactions": 0,
+        "background_animation_helpers": 0
+      },
+      "unknown_operations_remaining": 0,
+      "maintenance_holder_active_work": false,
+      "device_actions_by_coordinator": 0,
+      "startup_sha256": "3faab0eb9616a7509ec8f2d72d2b95a7709a830bce1e143cbe8d2d73d385f222",
+      "native_library_sha256": "0c73b9389c11def8e93aab540f73f2c011abdf93f47d2a16f9a0bbadabf9f199",
+      "software_state_at_return": {
+        "status": "FRESH_READY_NO_ANIMATION_HELPERS_OR_PENDING_COMMANDS",
+        "boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e",
+        "startup_sha256": "3faab0eb9616a7509ec8f2d72d2b95a7709a830bce1e143cbe8d2d73d385f222",
+        "native_library_sha256": "0c73b9389c11def8e93aab540f73f2c011abdf93f47d2a16f9a0bbadabf9f199",
+        "all_380_pins_match": true,
+        "gui_owner": {
+          "pid": 803839,
+          "birth_ticks": "5568913",
+          "command_sha256": "48a28efa32b2050901e73e85a80a30a90dcfbce0b7249bde5d6d90902740631d"
+        },
+        "gtk_owner": {
+          "pid": 803849,
+          "birth_ticks": "5569026",
+          "command_sha256": "8d97e865244f65e25c77ff48d896663837f82db392622a2e7445942e8e04d760"
+        },
+        "camera_owner": {
+          "pid": 362659,
+          "birth_ticks": "2850120",
+          "command_sha256": "acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd"
+        },
+        "GUI_properties": {
+          "KillMode": "mixed",
+          "Restart": "no",
+          "SendSIGKILL": "yes",
+          "TimeoutStopUSec": "25s"
+        },
+        "main_page": true,
+        "avatar_visible": true,
+        "phase": "IDLE",
+        "pair_ready": true,
+        "runtime_fault_count": 0,
+        "native_frames": 5880,
+        "listening_preference": {
+          "version": 1,
+          "enabled": false
+        },
+        "microphone_open": false,
+        "playing": false,
+        "automatic_following": false,
+        "animation_helpers_remaining": [],
+        "temporary_animation_guards": [],
+        "probe_read_only": true
+      },
+      "first_GUI_start": "Original model endpoint missing; no rendering initialized",
+      "GUI_start_submissions": 2,
+      "original_model_manager_start_submissions": 1,
+      "model_configuration_changed": false,
+      "physical_screen_human_confirmed_at_return": false,
+      "bundle": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\release\\avatar_animation_R2_delivery.zip",
+      "bundle_sha256": "c7c3d15b1401dda01fb709129c4c68d32437938da985933b8ea96c508000d368",
+      "source_of_device_state": "动画窗口的返还回执，原 GUI 维护窗口已据同一份回执签收。"
+    },
+    "R3_natural_lower_arm": {
+      "handoff_id": "animation-R3-84ab69fa45af4a299794f16ca20bd152",
+      "handoff_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision3_natural_lower_arm\\DEVICE_HANDOFF_R3.json",
+      "handoff_sha256": "6815b70f53668269c7f9782f85874f1418f6ed428d979a4b4177959a9365a0aa",
+      "return_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision3_natural_lower_arm\\DEVICE_RETURN_R3.json",
+      "return_receipt_sha256": "9fb2ca9487a45c0e5ab178c53f023f0c9a3d899000314ba02957405e2aac5cd3",
+      "return_ack": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision3_natural_lower_arm\\DEVICE_RETURN_ACK_R3.json",
+      "return_ack_sha256": "717c4969b1bafd385c09d7ae6d222e3b7ce49f192b76635bf7f65260f7be0210",
+      "release": "R3_natural_lower_arm",
+      "from_thread_id": "01a19efd-bb40-7f32-a6e4-a5f0cb59ffe8",
+      "to_thread_id": "01a19ad7-5865-7c60-82fa-605d17aea70f",
+      "returned_utc": "2026-11-03T03:53:50.696432+00:00",
+      "accepted_utc": "2026-11-03T03:55:40.742987+00:00",
+      "loaded_into_original_GUI": true,
+      "gui_after_restoration": "READY",
+      "in_flight_on_return": {
+        "SSH_in_flight": 0,
+        "HTTP_in_flight": 0,
+        "observers_remaining": 0,
+        "unsettled_control_transactions": 0,
+        "animation_helpers_remaining": 0
+      },
+      "unknown_operations_remaining": 0,
+      "maintenance_holder_active_work": false,
+      "permission_active_for_animation": false,
+      "device_actions_by_coordinator": 0,
+      "status_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision3_natural_lower_arm\\STATUS_R3.json",
+      "status_receipt_sha256": "f17be379bdcc8ec759391a58a40ae86626a1d698aaf875d4b7a6db8d6e290620",
+      "fresh_state_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision3_natural_lower_arm\\validation\\FINAL_DEVICE_READY_R3.json",
+      "fresh_state_sha256": "48e3245a55293eb907700a9dba1d613017a3a8591a1493470d24015fc6ca19a9",
+      "software_state_at_return": {
+        "status": "FRESH_READY_NO_ANIMATION_HELPERS_OR_PENDING_COMMANDS",
+        "boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e",
+        "startup_sha256": "31d379389c2f2ac6d2e3ec33e49bd81f6f4076e4371a78f4ae7813a62193fbdf",
+        "native_library_sha256": "e8b5df8d24dee572152e8909a98721cafb94528f4e6da51da02a540c3f5a7b7b",
+        "all_380_pins_match": true,
+        "gui_owner": {
+          "pid": 864526,
+          "birth_ticks": "6036004",
+          "command_sha256": "48a28efa32b2050901e73e85a80a30a90dcfbce0b7249bde5d6d90902740631d"
+        },
+        "gtk_owner": {
+          "pid": 864532,
+          "birth_ticks": "6036118",
+          "command_sha256": "db4a698acc249e1f85699e19fcfa3c0c430400cfc9cd99ee56bb814774350d37"
+        },
+        "camera_owner": {
+          "pid": 362659,
+          "birth_ticks": "2850120",
+          "command_sha256": "acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd"
+        },
+        "GUI_properties": {
+          "KillMode": "mixed",
+          "Restart": "no",
+          "SendSIGKILL": "yes",
+          "TimeoutStopUSec": "25s"
+        },
+        "main_page": true,
+        "avatar_visible": true,
+        "phase": "IDLE",
+        "pair_ready": true,
+        "runtime_fault_count": 0,
+        "native_frames": 4750,
+        "listening_preference": {
+          "version": 1,
+          "enabled": false
+        },
+        "microphone_open": false,
+        "playing": false,
+        "automatic_following": false,
+        "animation_helpers_remaining": [],
+        "temporary_animation_guards": [],
+        "probe_read_only": true
+      },
+      "startup_before": "3faab0eb9616a7509ec8f2d72d2b95a7709a830bce1e143cbe8d2d73d385f222",
+      "startup_sha256": "31d379389c2f2ac6d2e3ec33e49bd81f6f4076e4371a78f4ae7813a62193fbdf",
+      "native_library_sha256": "e8b5df8d24dee572152e8909a98721cafb94528f4e6da51da02a540c3f5a7b7b",
+      "components_changed": [
+        "config/board_avatar_gtk.json",
+        "config/yuki_pair.formal.json",
+        "tools/formal_yuki.py",
+        "tools/libaura_yuki.so"
+      ],
+      "component_count": 380,
+      "unchanged_component_count": 376,
+      "publication_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision3_natural_lower_arm\\validation\\PUBLICATION_R3.json",
+      "publication_receipt_sha256": "a2fb03a4068bdcc1dba851ab7d43ff8d65f250db80fe12e9bb96b46f01d2f56b",
+      "motion_comparison_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision3_natural_lower_arm\\validation\\NUMERIC_COMPARISON_WITH_CONTEXT.json",
+      "motion_comparison_sha256": "ab1f80e3f5c04158504be482e28d42ac62f5e298db5a2ce813e2f582f7b1343f",
+      "numerical_comparison": {
+        "status": "PASS",
+        "author_ticks": 60000,
+        "unchanged_other_channel_values": 300000,
+        "old_lower_min": -9.23858,
+        "old_lower_max": 9.27713,
+        "new_lower_min": -3.52188,
+        "new_lower_max": 3.5289,
+        "range_ratio": 0.3808,
+        "old_peak_speed_deg_s": 11.1866,
+        "new_peak_speed_deg_s": 3.08717,
+        "execution_host": "KV260 ARM CPU",
+        "specialized_device_display_GPU_or_audio_API_opened": false,
+        "logical_ticks_not_wall_clock_duration": true,
+        "raw_report": "board_results/build/MOTION_COMPARE.json",
+        "raw_flag_interpretation": "device_or_GPU_used=false is a program diagnostic for no device/GPU API access, not a claim that it ran off-board"
+      },
+      "lower_arm_angular_range_reduction_pct": 61.92,
+      "lower_arm_peak_angular_speed_reduction_pct": 72.4,
+      "controlled_offscreen_render": {
+        "R2_fps": 15.999939206502209,
+        "R3_fps": 15.998810017900224,
+        "R2_P95_complete_ms": 19.525335002981592,
+        "R3_P95_complete_ms": 18.9589799992973,
+        "seconds_per_variant": 10,
+        "pixel_readback_in_timed_loop": false,
+        "GUI_stopped_camera_original_owner_retained": true,
+        "speedup_claimed": false
+      },
+      "loaded_GUI_swap_fps": 15.39836791318563,
+      "loaded_GUI_sample_seconds": 19.990081342002668,
+      "sample_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision3_natural_lower_arm\\validation\\LIVE_AFTER_R3.json",
+      "sample_receipt_sha256": "ebc3a022461186cfe80246c1e297d21f60f231442e267ed2daa8a39b22f0c03e",
+      "physical_screen_human_confirmed_at_return": false,
+      "restored_GUI_properties": true,
+      "restored_listening_preference": true,
+      "GUI_normal_stops": 1,
+      "GUI_normal_starts": 1,
+      "bundle": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision3_natural_lower_arm\\release\\avatar_animation_R3_delivery.zip",
+      "bundle_bytes": 17628046,
+      "bundle_sha256": "082c57ad022a732476d8e6d960e94d07abff49fe1a64e64419c526afa2801fd0",
+      "preview_video": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision3_natural_lower_arm\\previews\\before_after_16fps.mp4",
+      "source_of_device_state": "动画窗口保存的板端回执，原 GUI 维护窗口根据同一回执签收。"
+    }
+  },
+  "current_voice_speaker_recognition": {
+    "thread_id": "01a19ad7-5865-7c60-82fa-605d17aea70f",
+    "task": "逐轮声纹识别说话人",
+    "phase": "SOURCE_DEPLOYED_SCOPE_CLOSED_LIVE_TEST_DEFERRED_BY_USER",
+    "requested_work": "这里继续完善声纹识别功能，实现听出说话者",
+    "device_access_allowed_now": false,
+    "voice_publication_started": true,
+    "scope": "已发布并确认逐轮识别模式。用户选择暂停，正式两人切换验收未开始。",
+    "execution_backend": "KV260 ARM CPU / ONNX Runtime CPUExecutionProvider",
+    "handoff_id": "animation-R4-a4b34e5af9214593a6cc3a72962a0813",
+    "handoff": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\DEVICE_HANDOFF_R4.json",
+    "handoff_sha256": "9699767732229aae314f360be5c9f444a61cb2e7d6406df7151755bc85f80703",
+    "source_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\BASELINE_READ_1_RESULT.json",
+    "source_receipt_sha256": "018f23d3391f6a13eeaf6c6641318af34b19c065215fa8e40b830fc843495245",
+    "voice_status_file": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\STATUS.json",
+    "expected_overlap_files": [
+      "board/runtime/board_speaker_business.py",
+      "board/runtime/board_business.py",
+      "board/runtime/board_dialogue.py"
+    ],
+    "merge_rule": "If R4 animation needs an overlapping file, retain voice semantics and report the exact delta. Voice publication waits for explicit R4 return and rebases onto the real R4 source. No parallel GUI or model control.",
+    "requires_explicit_R4_return_and_rebase": true,
+    "preserve_registered_voice_thresholds_and_semantics": true,
+    "publication_result_verified_by_coordinator": true,
+    "phase_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\VOICE_PUBLICATION_PHASE_HANDOFF.json",
+    "phase_receipt_sha256": "b584e775a6810b11f83fab5c0ecf220678826fcce96e515ae48d88823275ff5e",
+    "phase_issued_utc": "2026-11-03T05:01:48.898101+00:00",
+    "R4_explicit_return_received": true,
+    "R4_return_acknowledged": true,
+    "R4_return_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\DEVICE_RETURN_R4.json",
+    "R4_return_receipt_sha256": "791524c9c6d2f2447f944f0d26d9e9cd28edd10311199f8fea959a493c08d260",
+    "rebase_source_map": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_avatar_animation_optimization\\revision4_dialogue_motion\\release\\startup.after.json",
+    "rebase_source_map_sha256": "d6c3db9a5024386857c09394003268a9777eeb34596b6520fa38263dbc18d1a9",
+    "candidate_manifest": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\SOURCE_MANIFEST.json",
+    "candidate_manifest_sha256": "e640d599fc4436bba2d8912d518cca920e3976884b86922466e126060c9f9542",
+    "candidate_files": [
+      {
+        "path": "board/runtime/board_speaker_business.py",
+        "before_sha256": "9a82616aebbc79f0235d7ee1bef0a77effaeb891546587f0f1e7982e8ea7ceb1",
+        "after_sha256": "8b709ecbff3143d1f8ba9da8680aa2135dbd3af2c0236523b75715d0c3c1c0a0",
+        "bytes": 72832
+      },
+      {
+        "path": "board/runtime/board_dialogue.py",
+        "before_sha256": "f5998983494b028850688eb06528d4088c86b41b29742bbea9aed390b4e9ee7c",
+        "after_sha256": "5346ec415b4dedc1ae327beeaf02bb149ddbff3d24470a3515a5149e3708eed6",
+        "bytes": 33508
+      }
+    ],
+    "candidate_before_hashes_match_R4_map": true,
+    "R4_animation_files_to_preserve": [
+      "config/board_avatar_gtk.json",
+      "config/yuki_pair.formal.json",
+      "tools/formal_yuki.py",
+      "tools/libaura_yuki.so",
+      "tools/native_yuki.py"
+    ],
+    "offline_new_semantic_tests_passed": 21,
+    "offline_original_regression_passed": 93,
+    "offline_existing_baseline_failures": 6,
+    "offline_new_regressions": 0,
+    "per_utterance_human_acceptance_confirmed_by_this_sync": false,
+    "status": "DEPLOYED_FORMAL_SWITCH_TEST_NOT_STARTED_USER_REQUESTED_PAUSED",
+    "voice_publication_complete": true,
+    "closed_utc": "2026-11-03T05:24:14.936086+00:00",
+    "last_device_holder_thread_id": "01a19ad7-5865-7c60-82fa-605d17aea70f",
+    "maintenance_holder_active_work": false,
+    "release_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\RELEASE_RESULT.json",
+    "release_receipt_sha256": "2b7ab9cce7e2bdd93ec5a83aec4b401b8e195d5081c68321997d493a1b00014a",
+    "defer_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\USER_TEST_DEFERRED.json",
+    "defer_receipt_sha256": "d51583327fc19a26aeef3e543d8dd080bda228c13f350b638121576d9798a096",
+    "actual_startup_sha256": "f8271cc9f9a5ed19e66ec28a53ae0f894a00a6b18d61e771620abaf2fb3bf2c9",
+    "actual_source_map": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_multimodal_dialogue_context\\startup.after.json",
+    "actual_source_map_sha256": "f8271cc9f9a5ed19e66ec28a53ae0f894a00a6b18d61e771620abaf2fb3bf2c9",
+    "other_runtime_components_preserved": 378,
+    "R4_animation_preserved": true,
+    "running_mode": "PER_UTTERANCE",
+    "running_mode_version": 2,
+    "single_CPU_worker": true,
+    "current_listening_enabled": false,
+    "current_microphone_open": false,
+    "saved_listening_enabled": false,
+    "formal_live_test_started": false,
+    "human_formal_test_started": false,
+    "formal_test_rounds": 0,
+    "human_switching_acceptance": null,
+    "formal_different_person_accuracy_measured": false,
+    "human_requested_test_deferred": true,
+    "field_calibrated": false,
+    "informal_playback_ACKs": 3,
+    "informal_playback_ACKs_counted_as_formal_rounds": false,
+    "informal_observation_classification_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\LIVE_TRIAL_1_ANALYSIS.json",
+    "informal_observation_classification_sha256": "5cb2ff5eac1c630d2a4775e52d67e1784e4a3ca0541adc0b269e51188184f3fb",
+    "monitor_finished": true,
+    "monitor_exit_code": 0,
+    "pending_calls_or_observers": 0,
+    "next_action": "Wait for the human to say start. Freshly reconcile source/owner/UI and record a clear human-start marker before opening microphone and observing A-B-A ordinary utterances. Do not count unrelated room utterances as trial rounds.",
+    "continuation_and_rollback": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\CONTINUE_AND_ROLLBACK.txt",
+    "latest_dialogue_context_release": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_multimodal_dialogue_context\\RELEASE_RESULT.json",
+    "latest_dialogue_context_release_sha256": "1c49b24837d5c437d817f23948271e2a7e2d40f44df4fd53fffff49f19a41d08",
+    "current_component_sha256": {
+      "board/runtime/board_speaker_business.py": "8b709ecbff3143d1f8ba9da8680aa2135dbd3af2c0236523b75715d0c3c1c0a0",
+      "board/runtime/board_dialogue.py": "9ed1549cb87acdec8943f0a62ac4d4ac7f5f1ef98b06bb7df790702cafa4a566"
+    }
+  },
+  "latest_voice_release": {
+    "operator_thread_id": "01a19ad7-5865-7c60-82fa-605d17aea70f",
+    "closed_utc": "2026-11-03T05:24:14.936086+00:00",
+    "phase_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\VOICE_PUBLICATION_PHASE_HANDOFF.json",
+    "phase_receipt_sha256": "b584e775a6810b11f83fab5c0ecf220678826fcce96e515ae48d88823275ff5e",
+    "active_phase_snapshot": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\VOICE_PUBLICATION_PHASE_HANDOFF.active.before.json",
+    "active_phase_snapshot_sha256": "8a0755b8351bdd9fa4e2733f15af22a7447e5f8f469ffa256d80cba3caf84630",
+    "release_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\RELEASE_RESULT.json",
+    "release_receipt_sha256": "2b7ab9cce7e2bdd93ec5a83aec4b401b8e195d5081c68321997d493a1b00014a",
+    "defer_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\USER_TEST_DEFERRED.json",
+    "defer_sha256": "d51583327fc19a26aeef3e543d8dd080bda228c13f350b638121576d9798a096",
+    "observed_utc": "2026-11-03T05:21:46.181486+00:00",
+    "pause_state_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\release\\DEFERRED_RECONCILED_1_RESULT.json",
+    "pause_state_receipt_sha256": "8abfac57ff39a856753301e53b1b25ca07f1abff232ceb6a5debe1bd96498d79",
+    "formal_human_test_started": false,
+    "formal_test_rounds": 0,
+    "formal_human_switching_acceptance": null,
+    "maintenance_holder_active_work": false,
+    "pending_device_calls_observers_and_control_transactions": 0,
+    "coordinator_device_actions": 0,
+    "startup_before": "d6c3db9a5024386857c09394003268a9777eeb34596b6520fa38263dbc18d1a9",
+    "startup_sha256": "7d60ab0f83fc2484f59e065b720cec73cdb2dbe051cb34e366c08ebcbc8e785e",
+    "changed_runtime_files": [
+      {
+        "path": "board/runtime/board_speaker_business.py",
+        "before_sha256": "9a82616aebbc79f0235d7ee1bef0a77effaeb891546587f0f1e7982e8ea7ceb1",
+        "after_sha256": "8b709ecbff3143d1f8ba9da8680aa2135dbd3af2c0236523b75715d0c3c1c0a0",
+        "bytes": 72832
+      },
+      {
+        "path": "board/runtime/board_dialogue.py",
+        "before_sha256": "f5998983494b028850688eb06528d4088c86b41b29742bbea9aed390b4e9ee7c",
+        "after_sha256": "5346ec415b4dedc1ae327beeaf02bb149ddbff3d24470a3515a5149e3708eed6",
+        "bytes": 33508
+      }
+    ],
+    "component_count": 380,
+    "other_runtime_components_preserved": 378,
+    "R4_animation_preserved": true,
+    "source_map": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\release\\startup.after.predicted.json",
+    "source_map_sha256": "7d60ab0f83fc2484f59e065b720cec73cdb2dbe051cb34e366c08ebcbc8e785e",
+    "running_api_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_voice_speaker_recognition\\release\\READY_1_RESULT.json",
+    "running_api_receipt_sha256": "6e1761c5c21f80005d580f7432bd0c0608c596de373c2dee4d24d5a7fd83e073",
+    "running_mode": "PER_UTTERANCE",
+    "mode_version": 2,
+    "single_CPU_worker": true,
+    "threshold": 0.35,
+    "ambiguity_margin": 0.1,
+    "field_calibrated": false,
+    "last_saved_public_state": {
+      "schema": "aura-deferred-voice-pause-readonly-reconciliation-1",
+      "control_writes": 0,
+      "startup_sha256": "7d60ab0f83fc2484f59e065b720cec73cdb2dbe051cb34e366c08ebcbc8e785e",
+      "boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e",
+      "pause_intent_exists": false,
+      "chosen_source_matches": {
+        "board/runtime/board_speaker_business.py": {
+          "declared": true,
+          "exists": true,
+          "matches": true
+        },
+        "board/runtime/board_dialogue.py": {
+          "declared": true,
+          "exists": true,
+          "matches": true
+        },
+        "tools/native_yuki.py": {
+          "declared": true,
+          "exists": true,
+          "matches": true
+        },
+        "tools/libaura_yuki.so": {
+          "declared": true,
+          "exists": true,
+          "matches": true
+        }
+      },
+      "GUI_unit": {
+        "Restart": "no",
+        "TimeoutStopUSec": "25s",
+        "MainPID": "937589",
+        "KillMode": "mixed",
+        "SendSIGKILL": "yes",
+        "ActiveState": "active",
+        "SubState": "running",
+        "Job": ""
+      },
+      "owners": [
+        {
+          "pid": 937589,
+          "exists": true,
+          "birth_ticks": "6513277",
+          "command_sha256": "48a28efa32b2050901e73e85a80a30a90dcfbce0b7249bde5d6d90902740631d"
+        },
+        {
+          "pid": 937618,
+          "exists": true,
+          "birth_ticks": "6516477",
+          "command_sha256": "88e117d64f58aef6801cd827e74766426360a769074e418a9da34a58d71674d4"
+        },
+        {
+          "pid": 362659,
+          "exists": true,
+          "birth_ticks": "2850120",
+          "command_sha256": "acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd"
+        }
+      ],
+      "state": {
+        "ui_page": "vision",
+        "avatar_visible": false,
+        "pair_ready": true,
+        "listening_enabled": false,
+        "microphone_open": false,
+        "handsfree_state": "PAUSED",
+        "playing": false,
+        "pending_job": false,
+        "runtime_fault_count": 0,
+        "speaker_mode": "PER_UTTERANCE",
+        "speaker_threshold": 0.35,
+        "automatic_following": false,
+        "axis_readback": {
+          "flags": 15,
+          "lease_left_ms": 97,
+          "width_us": 2360,
+          "active": true,
+          "armed": true
+        }
+      },
+      "saved_listening_preference": {
+        "version": 1,
+        "enabled": false
+      }
+    },
+    "source_of_runtime_state": "原维护窗口保存的只读回执，主窗口在本地核对。",
+    "human_switching_acceptance": null,
+    "formal_human_trial_status": "NOT_STARTED_USER_DEFERRED",
+    "formal_trial_rounds": 0
+  },
+  "latest_saved_axis_readback": {
+    "source_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_multimodal_dialogue_context\\final_read_1_RESULT.json",
+    "source_receipt_sha256": "3f0664cb9459800895c642982011f534a0f6483f57fdd442f6d187c6d6286522",
+    "observed_utc": "2026-11-03T06:09:49.300110+00:00",
+    "automatic_following": false,
+    "readback": {
+      "flags": 0,
+      "lease_left_ms": 0,
+      "width_us": 1508,
+      "active": false,
+      "armed": false
+    },
+    "axis_commands_by_this_context_task": 0,
+    "scope": "Dialogue maintenance final public readback"
+  },
+  "current_multimodal_context_work": {
+    "status": "DEPLOYED_READY_LISTENING_PAUSED",
+    "maintenance_scope_closed": true,
+    "operator_thread_id": "01a1994e-f547-74e1-903d-3591021d67c8",
+    "work_directory": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_multimodal_dialogue_context",
+    "release_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_multimodal_dialogue_context\\RELEASE_RESULT.json",
+    "release_receipt_sha256": "1c49b24837d5c437d817f23948271e2a7e2d40f44df4fd53fffff49f19a41d08",
+    "startup_sha256": "f8271cc9f9a5ed19e66ec28a53ae0f894a00a6b18d61e771620abaf2fb3bf2c9",
+    "new_tests_passed": 18,
+    "voice_regression_passed": 21,
+    "context_regression_passed": 43,
+    "context_preexisting_failures": 3,
+    "new_context_regressions": 0,
+    "ARM_synthetic_request_verified": true,
+    "formal_human_test_started": false,
+    "listening_enabled": false
+  },
+  "latest_multimodal_context_release": {
+    "schema": "aura-multimodal-dialogue-context-release-1",
+    "status": "DEPLOYED_READY_LISTENING_PAUSED",
+    "completed_utc": "2026-11-03T06:18:06.110271+00:00",
+    "direct_human_request": "把人脸识别结果和声纹识别结果在加在对话内容之前一起发送给大模型",
+    "operator_thread_id": "01a1994e-f547-74e1-903d-3591021d67c8",
+    "startup_before_sha256": "7d60ab0f83fc2484f59e065b720cec73cdb2dbe051cb34e366c08ebcbc8e785e",
+    "startup_sha256": "f8271cc9f9a5ed19e66ec28a53ae0f894a00a6b18d61e771620abaf2fb3bf2c9",
+    "changed_runtime_files": [
+      {
+        "path": "board/runtime/board_business.py",
+        "before_sha256": "9c6da51f569d19d71dd2b25f8e2c4549bfa5c5059f1e7bc45d1124807400b5b2",
+        "after_sha256": "f4e90e6b86d6ff5d1df4fe92523806a364ad864c3dbaa0081780ec567dbaf5e3"
+      },
+      {
+        "path": "board/runtime/board_dialogue.py",
+        "before_sha256": "5346ec415b4dedc1ae327beeaf02bb149ddbff3d24470a3515a5149e3708eed6",
+        "after_sha256": "9ed1549cb87acdec8943f0a62ac4d4ac7f5f1ef98b06bb7df790702cafa4a566"
+      },
+      {
+        "path": "board/runtime/board_memory_policy.py",
+        "before_sha256": "87964292e231c0b1c5989542b2dcc6e3bf34f97d76c8455b517a80c3a4f4dcfe",
+        "after_sha256": "648dcb439c04079fd79c4dab5ff7fc152e2b483e220c08d6ccf5db49f2a7cfe8"
+      }
+    ],
+    "other377_actual_components_preserved": true,
+    "request_order": [
+      "original_persona",
+      "current_face_and_voice_results",
+      "memory_and_recent_dialogue",
+      "current_user_utterance"
+    ],
+    "face_source": "fresh existing public identity snapshot",
+    "voice_source": "existing current-utterance voice result",
+    "face_and_voice_reported_independently": true,
+    "addressing_policy": "Use the current utterance voice name when matched, otherwise use neutral address.",
+    "automatic_profile_or_personal_memory_authority_added": false,
+    "new_encoder_or_inference_calls_added": false,
+    "new_context_checks_passed": 18,
+    "existing_voice_checks_passed": 21,
+    "existing_context_checks_passed": 43,
+    "existing_context_baseline_failures": 3,
+    "new_context_regressions": 0,
+    "baseline_context_failure_reason": "The older tests expect prior-character XiLan wake/address aliases; the deployed character policy uses XueFei. Baseline and candidate fail the same three tests.",
+    "actual_ARM_synthetic_request_verified": true,
+    "actual_private_recognition_values_or_live_voice_test_collected": false,
+    "formal_two_speaker_acceptance_started": false,
+    "formal_two_speaker_acceptance": "DEFERRED_BY_USER",
+    "normal_GUI_stops": 1,
+    "normal_GUI_starts": 1,
+    "last_readonly_state_receipt": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_multimodal_dialogue_context\\final_read_1_RESULT.json",
+    "last_readonly_state_sha256": "3f0664cb9459800895c642982011f534a0f6483f57fdd442f6d187c6d6286522",
+    "last_readonly_state": {
+      "schema": "aura-multimodal-context-final-readonly-verification-1",
+      "control_writes": 0,
+      "model_calls": 0,
+      "microphone_operations": 0,
+      "private_store_reads": 0,
+      "errors": [],
+      "status": "DEPLOYED_READY_SYNTHETIC_LLM_CONTEXT_VERIFIED",
+      "startup_sha256": "f8271cc9f9a5ed19e66ec28a53ae0f894a00a6b18d61e771620abaf2fb3bf2c9",
+      "boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e",
+      "gui_owner": {
+        "pid": 1001788,
+        "birth_ticks": "6877581",
+        "command_sha256": "48a28efa32b2050901e73e85a80a30a90dcfbce0b7249bde5d6d90902740631d"
+      },
+      "gtk_owner": {
+        "pid": 1001824,
+        "birth_ticks": "6881423",
+        "command_sha256": "b721b462bcb2fa1010b46769e6ee03976dde25092aa78412f8b10c5ce1f2dced"
+      },
+      "camera_owner": {
+        "pid": 362659,
+        "birth_ticks": "2850120",
+        "command_sha256": "acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd"
+      },
+      "all380_actual_bytes_match": true,
+      "both_recognition_results_before_dialogue": true,
+      "synthetic_inputs_only": true,
+      "real_user_voice_test_performed": false,
+      "saved_listening_preference": {
+        "version": 1,
+        "enabled": false
+      },
+      "GUI_properties_restored": true,
+      "GUI_unit": {
+        "Restart": "no",
+        "TimeoutStopUSec": "25s",
+        "MainPID": "1001788",
+        "KillMode": "mixed",
+        "SendSIGKILL": "yes",
+        "ActiveState": "active",
+        "SubState": "running",
+        "Job": ""
+      },
+      "current_state": {
+        "ui_page": "main",
+        "pair_ready": true,
+        "avatar_visible": true,
+        "runtime_fault_count": 0,
+        "listening_enabled": false,
+        "microphone_open": false,
+        "handsfree_state": "PAUSED",
+        "playing": false,
+        "pending_job": false,
+        "follow": false,
+        "axis_readback": {
+          "flags": 0,
+          "lease_left_ms": 0,
+          "width_us": 1508,
+          "active": false,
+          "armed": false
+        }
+      },
+      "synthetic_request_metrics": {
+        "context_limit": 2048,
+        "budget_upper_bound": 1059,
+        "conversational_address": true,
+        "face_and_voice_context": true,
+        "budget_unit": "utf8_bytes_plus_reserve",
+        "continuity_summary": false,
+        "history_requested": false,
+        "history_items": 0,
+        "recent_messages": 0,
+        "facts": 0,
+        "history_boundary_incomplete": false,
+        "history_result_limited": false,
+        "history_items_omitted": 0
+      },
+      "board_mono_ms": 68938717
+    },
+    "transaction_backups": {
+      "stop": "/home/root/aura-5090-recovery-20261102-a6d4a069/multimodal-context-20261103T060613Z-be1412dd-stop",
+      "start": "/home/root/aura-5090-recovery-20261102-a6d4a069/multimodal-context-20261103T060613Z-be1412dd-start",
+      "startup_before": "7d60ab0f83fc2484f59e065b720cec73cdb2dbe051cb34e366c08ebcbc8e785e",
+      "startup_after": "f8271cc9f9a5ed19e66ec28a53ae0f894a00a6b18d61e771620abaf2fb3bf2c9"
+    },
+    "pending_SSH_HTTP_observers_or_control_transactions": 0,
+    "unknown_operations_remaining": 0,
+    "maintenance_active": false
+  }
+}

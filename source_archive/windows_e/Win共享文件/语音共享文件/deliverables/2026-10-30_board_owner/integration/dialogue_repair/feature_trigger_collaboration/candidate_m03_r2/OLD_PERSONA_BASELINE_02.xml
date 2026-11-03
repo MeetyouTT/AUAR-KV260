@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.273" timestamp="2026-10-31T18:09:47.430507-07:00" hostname="zhenghang"><testcase classname="aura.tests.framework.test_board_memory_policy" name="test_character_address_understanding_keeps_raw_asr_in_memory" time="0.068"><failure message="AssertionError: assert {'content': '...role': 'user'} == {'content': '...role': 'user'}&#10;  &#10;  Omitting 1 identical items, use -vv to show&#10;  Differing items:&#10;  {'content': '西兰，你好'} != {'content': '汐蓝，你好'}&#10;  Use -v to get more diff">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/feature_trigger_collaboration/candidate_m03_r2/old_persona_baseline_work_02/test_character_address_underst0')
+
+    def test_character_address_understanding_keeps_raw_asr_in_memory(tmp_path):
+        store, client = BoardMemoryStore(tmp_path/'synthetic.sqlite3'), Client()
+        control = controller(store, client)
+        prepare(control, '西兰，你好', 1)
+        request = next(call for call in client.calls if call.get('task') == 'dialogue')
+&gt;       assert request['messages'][-1] == {'role':'user','content':'汐蓝，你好'}
+E       AssertionError: assert {'content': '...role': 'user'} == {'content': '...role': 'user'}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'content': '西兰，你好'} != {'content': '汐蓝，你好'}
+E         Use -v to get more diff
+
+..\..\..\..\..\aura\tests\framework\test_board_memory_policy.py:122: AssertionError</failure></testcase><testcase classname="aura.tests.framework.test_board_memory_policy" name="test_addressed_explicit_commands_still_write_on_board_with_raw_sources[\u897f\u84dd\uff0c\u8bb0\u4f4f\uff1a\u9879\u76ee\u662f\u6d77\u98ce]" time="0.057"><failure message="IndexError: list index out of range">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/feature_trigger_collaboration/candidate_m03_r2/old_persona_baseline_work_02/test_addressed_explicit_comman0')
+text = '西蓝，记住：项目是海风'
+
+    @pytest.mark.parametrize('text', ['西蓝，记住：项目是海风', '西蓝：记住：项目是海风'])
+    def test_addressed_explicit_commands_still_write_on_board_with_raw_sources(tmp_path, text):
+        store, client = BoardMemoryStore(tmp_path/'synthetic.sqlite3'), Client()
+        control = controller(store, client)
+        plan = prepare(control, text, 1)
+&gt;       assert store.context(SCOPE)['facts'][0]['value'] == '海风'
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+..\..\..\..\..\aura\tests\framework\test_board_memory_policy.py:135: IndexError</failure></testcase><testcase classname="aura.tests.framework.test_board_memory_policy" name="test_addressed_explicit_commands_still_write_on_board_with_raw_sources[\u897f\u84dd\uff1a\u8bb0\u4f4f\uff1a\u9879\u76ee\u662f\u6d77\u98ce]" time="0.055"><failure message="IndexError: list index out of range">tmp_path = WindowsPath('E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/integration/dialogue_repair/feature_trigger_collaboration/candidate_m03_r2/old_persona_baseline_work_02/test_addressed_explicit_comman1')
+text = '西蓝：记住：项目是海风'
+
+    @pytest.mark.parametrize('text', ['西蓝，记住：项目是海风', '西蓝：记住：项目是海风'])
+    def test_addressed_explicit_commands_still_write_on_board_with_raw_sources(tmp_path, text):
+        store, client = BoardMemoryStore(tmp_path/'synthetic.sqlite3'), Client()
+        control = controller(store, client)
+        plan = prepare(control, text, 1)
+&gt;       assert store.context(SCOPE)['facts'][0]['value'] == '海风'
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+..\..\..\..\..\aura\tests\framework\test_board_memory_policy.py:135: IndexError</failure></testcase></testsuite></testsuites>

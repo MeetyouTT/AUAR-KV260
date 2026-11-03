@@ -1,0 +1,69 @@
+--- a/board/runtime/board_business.py
++++ b/board/runtime/board_business.py
+@@ -527,7 +527,65 @@
+     def initialize_clock(self, *, timeout=3., cancelled=lambda: False):
+         if type(timeout) not in (int, float) or not 0 < timeout <= 10:
+             raise ValueError('Use a bounded explicit Date sample')
+-        result = self.client.sample_health_date(self.timeline, deadline=self.clock() + timeout, cancelled=cancelled)
++        deadline = self.clock() + timeout
++        def retry_token():
++            timeline, client = self.timeline, self.client
++            if type(timeline) is not StableTimelineClock or type(client) is not InferenceHttpClient:
++                return None
++            # Metadata only. Never retain this clock lock over HTTP or file IO.
++            with timeline.lock:
++                return dict(timeline=timeline, client=client, runtime_boot=self.boot_id,
++                    runtime_clock=self.clock, boot=timeline.boot_id, source=timeline.source_id,
++                    source_sha=timeline.source_sha256, policy_sha=timeline.policy_sha256,
++                    monotonic=timeline.monotonic, verifier=timeline.source_validator,
++                    path=timeline.anchor_path, endpoint=(client.host, client.port),
++                    client_clock=client.clock, configured=(self.config.model_host, self.config.model_port),
++                    policy=copy.deepcopy(timeline.policy), anchor=copy.deepcopy(timeline.anchor),
++                    revision=timeline.file_revision, status=timeline.status, error=timeline.last_error,
++                    fatal=timeline.fatal,
++                    busy=(timeline.active_compactions, timeline.pending_writers, timeline.deferred_rejection))
++        before = retry_token()
++        try:
++            result = self.client.sample_health_date(self.timeline, deadline=deadline, cancelled=cancelled)
++        except ClockUnavailable as exc:
++            if type(exc) is not ClockUnavailable or exc.args != ('sample_rtt_exceeded',):
++                raise
++            after = retry_token()
++            if before is None or after is None or self.started or self.closed:
++                raise
++            objects = ('timeline', 'client', 'runtime_clock', 'monotonic', 'client_clock')
++            unchanged = ('runtime_boot', 'boot', 'source', 'source_sha', 'policy_sha', 'verifier',
++                         'path', 'endpoint', 'configured', 'policy', 'anchor')
++            if (any(after[key] is not before[key] for key in objects)
++                    or any(after[key] != before[key] for key in unchanged)
++                    or before['fatal'] or after['fatal']
++                    or before['busy'] != (0, 0, '') or after['busy'] != (0, 0, '')
++                    or (before['status'], before['error']) not in
++                       (('uninitialized', 'uninitialized'), ('verified', ''), ('rejected', 'sample_rtt_exceeded'))
++                    or (after['status'], after['error']) != ('rejected', 'sample_rtt_exceeded')
++                    or after['boot'] != after['runtime_boot']
++                    or after['monotonic'] is not after['runtime_clock']
++                    or after['client_clock'] is not after['runtime_clock']
++                    or after['endpoint'] != after['configured']
++                    or after['verifier'] != self.client.validate_sample
++                    or after['source'] != self.client.health_date_source_id()
++                    or after['policy'].get('max_rtt') != 1.):
++                raise
++            if before['anchor'] is None:
++                if before['revision'] != 0 or after['revision'] != 0:
++                    raise
++            elif before['path'] is not None:
++                # observe_http_date suppresses a rejection-save error. Only an
++                # exact revision increment proves that original save succeeded.
++                if after['revision'] != before['revision'] + 1:
++                    raise
++            elif after['revision'] != before['revision']:
++                raise
++            if cancelled() or self.clock() >= deadline:
++                raise
++            # New original-client transaction, proof and socket; never replay
++            # a rejected sample, extend its deadline or retry another failure.
++            result = self.client.sample_health_date(self.timeline, deadline=deadline, cancelled=cancelled)
+         self._clock_refresh_next = self.clock() + 600.
+         self._clock_refresh_failures = 0
+         self.clock_refresh_error = ''

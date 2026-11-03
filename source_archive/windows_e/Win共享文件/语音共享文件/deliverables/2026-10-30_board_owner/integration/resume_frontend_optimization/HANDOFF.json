@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "status": "OPT_IN_SAME_WEIGHT_CANDIDATE_LOCAL_NUMERICAL_PASS_ARM_BENEFIT_UNVERIFIED",
+  "production_sources_unchanged": {
+    "aura/board/runtime/audio/board_gtcrn_fft.py": "47cb8a2ec97ad292981bb42b67e217ed0f672a98d561d4ac8dc9c360cf8f6f06",
+    "aura/board/runtime/audio/board_asr_frontend.py": "b3d06b653876469daf5b7bb805458b187662d9862e8ece6da731cbfa3e23a093"
+  },
+  "files": [
+    {
+      "path": "candidate/board_gtcrn_reuse.py",
+      "sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9"
+    },
+    {
+      "path": "run_candidate_probe.py",
+      "sha256": "1e3aaf64a87e76873275c0441203c25adfdc5fbba9362f38bacb7b3575a99b63"
+    },
+    {
+      "path": "benchmark_windows_cpu.py",
+      "sha256": "7f73d0b011632836aa24e5bcf183996dfb950ce8e82996c3ed25793b30d7d797"
+    },
+    {
+      "path": "tests/test_candidate.py",
+      "sha256": "f56d5b8af13f516886cd9d20fa583b17fa0426b0a1f9fec5fc77708f2cbaa920"
+    }
+  ],
+  "candidate": {
+    "class": "ReuseFftSpeechGate",
+    "modes": ["baseline", "reuse", "io", "combined"],
+    "reuse": "Reuse FFT/window/spectrum/complex/synthesis/multiply buffers and Python input dictionary; preserve float32 multiply then add rounding. Preserve exact PCM16 clipping/rounding/grid without constructing an int16 byte array only to decode it again.",
+    "io": "Explicit CPU binding of fixed float32 output buffers; two complete recurrent-state sets alternate. Inputs and outputs of the same invocation never alias. No copy_outputs_to_cpu or shape guessing.",
+    "unchanged": "Original pinned GTCRN/Silero weights, CPU provider, thread bounds, STFT512/hop256/periodic sqrt-Hann, state ordering, output lengths/flush, original endpoint/VAD rules and constructor32 zero-frame warmup.",
+    "unsupported_binding_or_source_change": "Fail explicitly; no silent fallback or production file replacement",
+    "official_binding_api": "https://onnxruntime.ai/docs/api/python/api_summary.html#iobinding"
+  },
+  "synthetic_validation": {
+    "passed": 31,
+    "failed": 0,
+    "seconds": 0.42,
+    "evidence": "synthetic_tests.xml",
+    "sha256": "b2459b86070b7fd55e3ae20754972475c4e52002179a354cd12490fac6f45f99",
+    "coverage": "0/1/255/256/257/319/320/512/1001sample streamed boundaries; exact waveform/length/flush; recurrent sequence and no-alias ping-pong; reset; explicit binding refusal; bit-identical PCM16 quantization including clipping and signed zero; baseline source pin. Synthetic session does not establish real-model performance."
+  },
+  "windows_cpu_public_validation": {
+    "evidence": "windows_cpu_result.json",
+    "sha256": "b84be0185468392d2df97516bfed9e0726293ec68e99f1e8652027206f610328",
+    "onnxruntime": "1.23.2",
+    "numpy": "2.2.6",
+    "provider": "CPUExecutionProvider",
+    "threads": 1,
+    "public_wav_sha256": "1a6bf94091d9c35e11aea5d494d05e3287b8f5c767f6de3bfd796d91b637500c",
+    "runs_per_mode": 3,
+    "all_modes_max_abs_float_error": 0,
+    "all_modes_pcm16_equal_fraction": 1,
+    "same_vad_decisions_and_original_endpoint_pcm": true,
+    "denoiser_frame_mean_ms": {
+      "baseline": [0.9985, 1.0470, 0.9976],
+      "reuse": [0.9888, 0.9953, 0.9936],
+      "io": [0.9619, 0.9792, 0.9887],
+      "combined": [0.9568, 0.9724, 0.9699]
+    },
+    "limit": "Small ordered host-only diagnostic: combined median about2.9percent below baseline median, reuse alone about0.5percent. No causal ARM speed claim, uncertainty bound, realtime or whole-board acceptance. Timing is denoiser-only; full gate has numerical/VAD/endpoint checks."
+  },
+  "parent_execution": {
+    "fresh_process_only": true,
+    "adapter_argv_template": [
+      "/usr/bin/python3", "-B", "<staged>/run_candidate_probe.py",
+      "--candidate-mode", "combined",
+      "--candidate-file", "<staged>/candidate/board_gtcrn_reuse.py",
+      "--probe-file", "<parent latest diagnostic probe with proc-race fixes>",
+      "--code-root", "<pinned board aura stage>",
+      "--resources-root", "/home/root/aura-board-owner-candidate-20261030",
+      "--mode", "frontend-profile", "--runs", "2", "--num-threads", "1",
+      "--process-nice", "<same as paired baseline>"
+    ],
+    "guards": "Adapter delegates the parent's latest probe unchanged, including proc-race fixes, version/resource/idle checks, own-priority restoration and UI/identity telemetry. It patches the chosen class in this process only and tags the result with candidate and probe hashes.",
+    "ort_matrix": "Keep original ORT1.17.3 baseline and candidate separate from the explicit isolated ORT1.19.2 upgrade. The parent's probe version guard remains unchanged; use a separately reviewed version-aware probe for new ORT, never bypass the guard.",
+    "acceptance": "Verify numerical/VAD/endpoint equality on actual ARM runtime, compare matched face-active UI/camera load, then run original8-frame paced pipeline. Small host allocation savings may be insufficient. No production default was changed."
+  },
+  "actions": {
+    "board_accessed": false,
+    "production_files_overwritten": false,
+    "parent_priority_probe_overwritten": false,
+    "gpu_inference": false,
+    "private_audio_or_databases_used": false,
+    "model_weights_copied": false,
+    "services_or_firmware_changed": false
+  }
+}

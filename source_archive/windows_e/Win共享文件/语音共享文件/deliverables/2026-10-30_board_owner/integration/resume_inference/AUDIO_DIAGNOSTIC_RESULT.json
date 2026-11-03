@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "status": "OFFLINE_DIAGNOSTIC_EXTENSION_READY_REAL_RUN_OWNED_BY_PARENT",
+  "source": {
+    "path": "board_audio_pipeline_probe.py",
+    "sha256": "6577dd2b87227a0391386977e8042f0b9f3d90a0728853c80f029a0df00bb4e8"
+  },
+  "tests": {
+    "count": 21,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 1.56,
+    "evidence": "audio_diagnostic_tests.xml",
+    "evidence_sha256": "84ec826ab5a80aa6ac70bbb088db6190b5998bb9458a23f1ff3c505701789ab7",
+    "actual_board_or_models_used": false
+  },
+  "original_failure_preserved": {
+    "parent_evidence": "../resume_actual/20261030T224449-audio.json",
+    "observed_capture_queue_frames": 8,
+    "frames_read": 20,
+    "frames_processed": 11,
+    "frontend_mean_ms": 35.3867,
+    "frontend_p95_ms": 56.4483,
+    "frontend_max_ms": 66.9021,
+    "frames_over_20ms": 9,
+    "producer_read_mean_ms": 19.909,
+    "supply_lateness_max_ms": 6.3332,
+    "asr_executed": false,
+    "production_changed": false
+  },
+  "inference_from_short_window": {
+    "input_frames_per_second": 50,
+    "observed_processor_frames_per_second_approx": 28.3,
+    "net_backlog_frames_per_second_if_mean_persisted_approx": 21.7,
+    "eight_frame_buffer_exhaustion_seconds_approx": 0.37,
+    "sixtyfour_frame_buffer_exhaustion_seconds_approx": 2.9,
+    "limit": "Only a conditional illustration from 11 processed frames, not a measured steady-state forecast. Increasing the queue cannot establish sustainable processing.",
+    "warmup_fact": "The existing gate constructor already processed 32 zero frames before resetting recurrent state. The failed run was not an entirely unwarmed model; short-window startup/scheduler effects still need measurement."
+  },
+  "diagnostic_commands_suffix": [
+    ["--mode", "frontend-profile", "--runs", "2", "--num-threads", "1"],
+    ["--mode", "frontend-profile", "--runs", "2", "--num-threads", "2"]
+  ],
+  "diagnostic_scope": {
+    "status_returned": "DIAGNOSTIC_FRONTEND_PROFILE_ONLY",
+    "source": "Same pinned upstream public WAV, final partial-frame padding and existing 1.4 seconds endpoint silence; 351 frames",
+    "model": "Original pinned GTCRN and Silero on isolated ORT1.17.3/sherpa1.13.8",
+    "reuse": "Same preloaded model/pool, recurrent state reset between explicit repetitions",
+    "measurements": [
+      "First16 frames and all remaining frames separately",
+      "Each complete/partial50-frame timing window",
+      "At least100 remaining frames before sufficient-sample flag",
+      "FFT, ORT and IFFT/overlap-add stage distributions",
+      "Processing real-time factor, process CPU and peak RSS",
+      "Decision digest for matching1/2-thread results"
+    ],
+    "no_asr_or_paced_capture_acceptance": true,
+    "no_system_tuning": true
+  },
+  "pipeline_preserved": {
+    "default_threads": 1,
+    "default_queue_frames": 8,
+    "overflow": "Whole capture fails; ASR is not executed; no frame dropping or concatenation across gaps",
+    "explicit_threads_argument": "Only1 or2; performance/behavior must be verified before choosing2",
+    "queue_limit": "Still1-64, explicit diagnostic capacity is not a production acceptance claim",
+    "device_or_service_actions": false
+  },
+  "next_acceptance": "Parent performs serial matched-load diagnostics and interprets CPU frequency/thermal/UI/camera telemetry. A candidate must then pass the original paced capture and unchanged state checks; component speed alone is insufficient."
+}

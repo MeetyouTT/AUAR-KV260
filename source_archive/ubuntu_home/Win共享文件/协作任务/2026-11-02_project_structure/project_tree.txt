@@ -1,0 +1,530 @@
+﻿AUAR·雪妃：建议项目结构
+本文件是设计清单，不是当前文件存在清单；[条件]项按最终采用情况建立。
+程序和脚本仅建议命名，本次没有生成这些业务内容。
+
+auar_xuefei/
+├── README.md                              # 唯一总入口：简介、硬件、环境、启动、复现、目录对照
+├── license                                # 队伍原创内容的正式开源许可全文
+├── third_party_notices.md                  # 第三方代码、IP、模型、素材的来源与许可边界
+├── release.json                            # 源码、固件、模型、配置与报告的统一发布标识
+├── checksums.sha256                        # 本次交付文件的 SHA-256 校验清单
+├── .gitignore                              # 排除私库、缓存、权重下载、环境和临时构建
+├── .gitattributes                          # 文本换行、二进制文件与跨平台处理约定
+│
+├── src/                                   # 实际参与作品的源码；按运行位置拆分
+│   ├── fpga/
+│   │   ├── readme.md                       # PL 模块、输入、工具、构建入口与接口说明
+│   │   ├── rtl/
+│   │   │   ├── visual_servo.sv              # 自研运动逻辑顶层；也可保留现有整块实现
+│   │   │   ├── axi_lite_regs.sv             # [条件] 若独立拆分：寄存器与读写响应
+│   │   │   ├── command_guard.sv             # [条件] 命令提交、范围、序号和会话监督
+│   │   │   ├── lease_timer.sv               # [条件] 已接受命令的执行期限监督
+│   │   │   ├── pwm_generator.sv             # [条件] PWM 周期、脉宽与输出使能
+│   │   │   └── reset_sync.sv                # [条件] 自研复位同步逻辑
+│   │   ├── bd/
+│   │   │   ├── system.tcl                  # 重建 PS、DPU、互联及自研 IP 的 BD
+│   │   │   └── address_map.json            # AXI 地址、寄存器窗口、中断及版本
+│   │   ├── constraints/
+│   │   │   ├── pins.xdc                    # 真实引脚、电平、驱动能力与边沿速率
+│   │   │   ├── clocks.xdc                  # 时钟、生成时钟、外部时序要求
+│   │   │   └── exceptions.xdc              # [条件] 有依据的时序例外及对应说明
+│   │   ├── ip/
+│   │   │   ├── custom/                     # [条件] 自研封装 IP 的 RTL、component.xml 与脚本
+│   │   │   └── configuration/              # 工程确实依赖的 XCI 和 IP 参数
+│   │   └── hls/                            # [条件] 实际使用 HLS 时放源码、测试与 directives
+│   │
+│   ├── common/
+│   │   ├── pyproject.toml                  # 公共协议包的安装入口和依赖
+│   │   └── aura_contracts/
+│   │       ├── __init__.py
+│   │       ├── version.py                  # 双端协议版本与兼容规则
+│   │       ├── messages.py                 # 请求、响应、状态与错误的数据结构
+│   │       ├── request_identity.py         # request_id、session_id、取消代次等
+│   │       ├── deadlines.py                # 时钟域、单位、期限与过期判断约定
+│   │       ├── audio_format.py             # PCM 参数、分包与序号约定
+│   │       └── schemas/
+│   │           ├── inference_request.schema.json
+│   │           ├── inference_response.schema.json
+│   │           ├── playback_ack.schema.json
+│   │           ├── health.schema.json
+│   │           └── visual_observation.schema.json
+│   │
+│   ├── kv260/
+│   │   ├── readme.md                       # 板端程序入口、依赖及源码职责
+│   │   ├── pyproject.toml                  # ARM Python 业务包安装信息
+│   │   ├── requirements.txt                # 直接 Python 依赖
+│   │   ├── requirements.lock.txt           # 板端实际验证过的固定版本
+│   │   ├── aura_board/
+│   │   │   ├── __init__.py
+│   │   │   ├── main.py                     # 板端业务启动入口
+│   │   │   ├── app/
+│   │   │   │   ├── lifecycle.py            # 初始化、就绪、退出和恢复
+│   │   │   │   ├── state_machine.py        # 聆听、思考、播放、暂停及故障
+│   │   │   │   ├── event_bus.py            # 业务事件传递
+│   │   │   │   └── service_registry.py     # 相机、音频、推理客户端等实例管理
+│   │   │   ├── camera/
+│   │   │   │   ├── capture.py              # 唯一相机采集所有者
+│   │   │   │   ├── frame_buffer.py         # 缓冲、帧号和采集时间
+│   │   │   │   ├── camera_service.py       # 向 UI、检测与跟随提供同一图像源
+│   │   │   │   └── recovery.py             # 断连、重连与旧帧丢弃
+│   │   │   ├── vision/
+│   │   │   │   ├── dpu_runtime.py          # VART/XIR 加载、Tensor、Runner 和生命周期
+│   │   │   │   ├── dpu_scheduler.py        # 单 DPU 多任务准入、预算与调度
+│   │   │   │   ├── yolox_person.py         # 人体检测与实际模型预后处理
+│   │   │   │   ├── yunet_face.py           # 人脸检测与关键点处理
+│   │   │   │   ├── sface_embedding.py      # 对齐、人脸特征与有效性判断
+│   │   │   │   ├── tracker.py              # ByteTrack 或最终实际跟踪实现
+│   │   │   │   ├── observation.py          # 检测结果、轨迹、帧龄与来源
+│   │   │   │   └── metrics.py              # 调用计数、等待、耗时、超限与源龄
+│   │   │   ├── identity/
+│   │   │   │   ├── face_gallery.py         # 人脸登记、查询、删除与 UNKNOWN
+│   │   │   │   ├── enrollment.py           # 登记步骤和质量筛选
+│   │   │   │   ├── matching.py             # 特征距离、阈值与拒识
+│   │   │   │   └── speaker_identity.py     # [条件] 独立声纹身份业务，按实际后端说明
+│   │   │   ├── motion/
+│   │   │   │   ├── service.py              # 唯一正常运动命令写者
+│   │   │   │   ├── follow_controller.py    # 人脸位置到目标脉宽的控制
+│   │   │   │   ├── target_selection.py     # 同一目标锁定、丢失与重新选择
+│   │   │   │   ├── input_freshness.py      # 源帧龄、来源身份和过期拒绝
+│   │   │   │   ├── trajectory.py           # [条件] 实际使用的平滑/轨迹算法
+│   │   │   │   ├── fpga_driver.py          # 寄存器读写、ABI、提交、STOP 和状态
+│   │   │   │   └── shutdown.py             # 进程退出与控制租约收尾
+│   │   │   ├── audio/
+│   │   │   │   ├── alsa_device.py          # MCP01 稳定设备选择和格式检查
+│   │   │   │   ├── capture.py              # USB 采集与队列
+│   │   │   │   ├── frontend.py             # 实际采用的降噪与前端流程
+│   │   │   │   ├── vad.py                  # 实际采用的 VAD 与语音段判定
+│   │   │   │   ├── asr.py                  # Paraformer 或最终 ASR 的 CPU 调用
+│   │   │   │   ├── speaker_embedding.py    # [条件] ECAPA 等 CPU 声纹特征
+│   │   │   │   ├── playback.py             # 实际播放、缓冲与设备状态
+│   │   │   │   └── playback_ack.py         # 完整播放、取消、迟到结果的确认
+│   │   │   ├── dialogue/
+│   │   │   │   ├── controller.py           # 板端语音轮次与半双工业务
+│   │   │   │   ├── inference_client.py     # 调用 Windows 模型服务
+│   │   │   │   ├── context_builder.py      # 经业务筛选的上下文与记忆
+│   │   │   │   ├── reply_validation.py     # 输出格式与可消费内容校验
+│   │   │   │   └── cancellation.py         # 会话撤销、超时与旧结果丢弃
+│   │   │   ├── memory/
+│   │   │   │   ├── store.py                # 板端记忆读写唯一入口
+│   │   │   │   ├── summarizer.py           # 摘要任务、失败重试与提交
+│   │   │   │   ├── retrieval.py            # 同会话与历史记忆查询
+│   │   │   │   ├── retention.py            # 原文保留期和清理策略
+│   │   │   │   ├── provenance.py           # 记忆来源、修正与派生关系
+│   │   │   │   └── forgetting.py           # 撤销/删除后的后续使用约束
+│   │   │   ├── storage/
+│   │   │   │   ├── database.py             # SQLite 连接、事务及错误处理
+│   │   │   │   ├── migrations/             # 版本化建表与升级脚本
+│   │   │   │   └── bootstrap.py            # 空白设备的首次数据初始化
+│   │   │   ├── ui/
+│   │   │   │   ├── main_window.py          # GTK 等实际板端界面入口
+│   │   │   │   ├── avatar_view.py          # 角色画面与渲染器连接
+│   │   │   │   ├── vision_view.py          # 预览、人脸框与边界显示
+│   │   │   │   ├── subtitles.py            # 用户/助手字幕与状态同步
+│   │   │   │   ├── settings.py             # 实际提供的设置和控制
+│   │   │   │   └── presentation.py         # 单一状态投影和刷新节奏
+│   │   │   ├── avatar/
+│   │   │   │   ├── native_bridge.py        # C/C++ 原生角色渲染调用
+│   │   │   │   ├── expression.py           # 表情与动作选择
+│   │   │   │   ├── mouth_sync.py           # 播放驱动口型与时间同步
+│   │   │   │   └── character.py            # 人格、台词与资源绑定
+│   │   │   └── diagnostics/
+│   │   │       ├── health.py               # 业务状态及依赖健康
+│   │   │       ├── metrics.py              # 板端计数、阶段耗时和资源
+│   │   │       └── log_export.py           # 可公开运行证据的导出
+│   │   └── native/
+│   │       ├── makefile                    # 本地库的实际构建入口；可用现有构建系统
+│   │       ├── dpu_bridge/                 # 自研 VART/OpenCV C/C++ 适配层
+│   │       ├── motion_mmio/                # 自研 MMIO/批量提交 C/C++ 实现
+│   │       ├── pixel_bridge/               # 自研像素、画面合成与纹理接口
+│   │       └── avatar_renderer/            # 自研渲染适配；上游完整代码在 third_party/
+│   │
+│   └── windows/
+│       ├── readme.md                       # Windows 环境、模型、端口和启动方法
+│       ├── pyproject.toml                  # Windows 服务包安装信息
+│       ├── requirements.txt                # 推理服务依赖
+│       ├── requirements.lock.txt           # 与最终实际 GPU 环境匹配的版本锁
+│       ├── aura_host/
+│       │   ├── __init__.py
+│       │   ├── main.py                     # 模型服务启动入口
+│       │   ├── server/
+│       │   │   ├── api.py                  # 请求、健康和取消接口
+│       │   │   ├── request_router.py       # LLM / TTS 路由与队列
+│       │   │   ├── ownership.py            # 实例锁、所有者和重复启动检查
+│       │   │   ├── cancellation.py         # 请求取消与过期结果处理
+│       │   │   └── health.py               # 模型、服务和 GPU 就绪状态
+│       │   ├── llm/
+│       │   │   ├── ollama_client.py        # 专用 Ollama 实例调用
+│       │   │   ├── prompt_builder.py       # 板端上下文到模型输入的适配
+│       │   │   ├── output_parser.py        # 实际约定的结构化输出处理
+│       │   │   └── model_profile.py        # 模型标签、量化、上下文和参数
+│       │   ├── tts/
+│       │   │   ├── omnivoice_backend.py    # OmniVoice 推理接口
+│       │   │   ├── reference_voice.py      # 选定参考音色的读取与校验
+│       │   │   ├── pcm_output.py           # PCM 格式、分段与交付
+│       │   │   └── cache.py                # [条件] 实际启用的 TTS 缓存
+│       │   ├── runtime/
+│       │   │   ├── gpu_policy.py           # 真实 GPU 识别、显存和并发策略
+│       │   │   ├── model_manager.py        # 加载、预热与退出
+│       │   │   ├── environment.py          # Python/CUDA/PyTorch/Ollama 核对
+│       │   │   └── process_guard.py        # 子进程管理与退出收尾
+│       │   └── diagnostics/
+│       │       ├── metrics.py              # RPC、首个内容、TTS、RTF 等计时
+│       │       ├── gpu_sampler.py          # 实际 GPU 资源采样
+│       │       └── log_export.py           # 请求与模型指标的公开导出
+│       ├── scripts/
+│       │   ├── setup.ps1                   # 后续实现：检查环境并准备依赖
+│       │   ├── start.ps1                   # 后续实现：启动本项目服务
+│       │   ├── stop.ps1                    # 后续实现：停止本项目拥有的进程
+│       │   ├── status.ps1                  # 后续实现：健康、所有者和模型状态
+│       │   └── collect_environment.ps1     # 后续实现：生成实际主机环境快照
+│       └── ollama/
+│           └── modelfile                   # 模型导入与推理参数；权重路径可配置
+│
+├── config/                                # 可移机的配置模板；不保存个人状态
+│   ├── readme.md                           # 各项参数、单位、默认值和覆盖顺序
+│   ├── common/
+│   │   ├── protocol.json                   # 协议版本、格式和超时约定
+│   │   ├── logging.json                    # 日志级别、字段和保留策略
+│   │   └── network.example.json            # IP、端口与绑定方式的示例
+│   ├── kv260/
+│   │   ├── camera.example.json             # 设备、格式、分辨率和帧率
+│   │   ├── vision.example.json             # 模型路径、任务预算与后处理
+│   │   ├── identity.example.json           # 阈值、登记规则与本地数据位置
+│   │   ├── motion.example.json             # ABI、校准行程、方向、租约和控制参数
+│   │   ├── audio.example.json              # MCP01、采样、前端和播放参数
+│   │   ├── dialogue.example.json           # 模型端点、轮次与输出策略
+│   │   ├── memory.example.json             # 保留期、摘要与查询参数
+│   │   ├── display.example.json            # 屏幕模式、刷新和 UI 参数
+│   │   └── character.example.json          # 角色、动作、音色及提示音绑定
+│   └── windows/
+│       ├── host.example.json               # 推理服务地址、队列与健康接口
+│       ├── models.example.json             # LLM/TTS 标签、外部权重路径
+│       ├── gpu.example.json                # 实测硬件填入方式；不固定旧 GPU UUID
+│       └── ollama.example.json             # 独立服务端口、模型库与参数
+│
+├── models/                                # 模型工件或可核验的取得方法
+│   ├── readme.md                           # 每个模型在哪运行、是否随包、如何取得
+│   ├── manifests/
+│   │   ├── models.csv                      # 名称、任务、后端、来源、版本、许可、SHA、大小
+│   │   ├── yolox.json                      # 实际部署的人体检测模型
+│   │   ├── yunet.json                      # 实际部署的人脸检测模型
+│   │   ├── sface.json                      # 实际部署的人脸特征模型
+│   │   ├── asr.json                        # 实际 Paraformer 等 ASR 模型
+│   │   ├── audio_frontend.json             # GTCRN、VAD 等实际模型
+│   │   ├── speaker.json                    # [条件] ECAPA 声纹模型，声明 CPU 后端
+│   │   ├── llm.json                        # 27B 名称、仓库、revision、量化文件和 SHA
+│   │   └── tts.json                        # OmniVoice、tokenizer 与音色依赖清单
+│   ├── dpu/
+│   │   ├── yolox_person.xmodel             # 在许可和体积允许时提供实际部署字节
+│   │   ├── yunet.xmodel
+│   │   ├── sface.xmodel
+│   │   └── arch.json                       # 与实际 DPU 指纹一致的编译目标
+│   ├── quantization/
+│   │   ├── readme.md                       # 浮点来源、校准、量化、编译与精度口径
+│   │   ├── yunet/
+│   │   │   ├── calibration_manifest.csv    # 公开校准数据来源和划分
+│   │   │   ├── quant_info.json
+│   │   │   ├── compile_config.json
+│   │   │   └── evaluation.json             # 精度结果；明确模拟或板端
+│   │   └── sface/
+│   │       ├── calibration_manifest.csv
+│   │       ├── quant_info.json
+│   │       ├── compile_config.json
+│   │       └── evaluation.json
+│   └── scripts/
+│       ├── fetch_models.py                 # 后续实现：固定版本下载到明确目标位置
+│       ├── verify_models.py                # 后续实现：逐文件 SHA 和完整性检查
+│       ├── quantize.py                     # 后续实现：实际采用模型的量化入口
+│       └── compile.py                      # 后续实现：实际 DPU 目标编译入口
+│
+├── assets/                                # 参与运行的非代码资源
+│   ├── readme.md                           # 文件用途、资源寻址及授权说明
+│   ├── manifest.csv                        # 资源来源、版本、SHA 与再分发条件
+│   ├── character/
+│   │   └── xuefei/                         # 角色模型、纹理、表情和动作；只放有权交付内容
+│   ├── fonts/                             # 实际字体及许可
+│   ├── ui/                                # 图标、背景及显示资源
+│   └── audio/
+│       ├── reference/                     # 有授权的 TTS 参考音色、文本与说明
+│       └── cues/
+│           ├── arrival.wav                # [条件] 最终实际使用的固定问候音
+│           ├── invitation.wav             # [条件] 最终实际使用的邀请音
+│           ├── thinking.wav               # [条件] 最终实际使用的思考提示音
+│           └── manifest.json              # 文本、采样率、声道、时长、SHA 与生成来源
+│
+├── hardware/                              # 作品的电气与机械资料
+│   ├── readme.md                           # 实物版本、供电与接线索引
+│   ├── bom.csv                             # 型号、数量、用途与实际选用项
+│   ├── wiring/
+│   │   ├── system_connections.svg         # 整机相机、屏幕、MCP01、网络与供电
+│   │   ├── servo_connections.svg          # KV260、隔离、独立动力电源及舵机
+│   │   └── pin_map.csv                    # 接头位置、FPGA 引脚、网络、电平与方向
+│   ├── schematics/
+│   │   ├── readme.md                       # 实际电路原件格式与版本
+│   │   ├── control_and_power.pdf          # 公开可阅读的真实电路图
+│   │   └── source/                        # [条件] 实际自制板/电路的 CAD 原件
+│   ├── mechanical/
+│   │   ├── readme.md                       # 安装、零位定义、转轴和干涉说明
+│   │   ├── assembly.pdf                    # 装配图或带尺寸示意图
+│   │   ├── source/                        # [条件] 实际 CAD/STEP/STL 原件
+│   │   └── dimensions.csv                 # 实测尺寸、单位及测量方法
+│   └── calibration/
+│       ├── pulse_angle.csv                 # 实测脉宽、角度、方向和测量条件
+│       ├── travel_limits.json             # 实体允许范围、中点与标定版本
+│       └── measurement_notes.md           # 仪器、误差、波形和未测范围
+│
+├── sim/                                   # FPGA 仿真与执行器软件参考
+│   ├── readme.md                           # 仿真工具、执行顺序和判断依据
+│   ├── rtl/
+│   │   ├── tb_registers.sv                 # 实际采用的 AXI 与寄存器测试台
+│   │   ├── tb_pwm.sv                       # 周期、脉宽与使能
+│   │   ├── tb_command_guard.sv             # 提交、范围、序号、租约与停止
+│   │   ├── vectors/                       # 固定与随机种子测试输入
+│   │   ├── reference/                     # 独立期望输出
+│   │   └── run.tcl                        # xvlog/xelab/xsim 等实际执行入口
+│   ├── software_model/
+│   │   ├── fake_motion_device.py          # 不接执行器的寄存器/时钟模型
+│   │   ├── replay.py                      # 控制输入和时效场景回放
+│   │   └── golden.py                      # 可说明来源的独立参考
+│   └── results/
+│       └── baseline/                      # 一次可追溯的已保存结果；后续大波形写项目外
+│           ├── manifest.json
+│           ├── result.json
+│           ├── run.log
+│           └── waveform.vcd
+│
+├── build/                                 # 工程构建定义与已选定的构建证据
+│   ├── readme.md                           # 干净目录构建、导出和复查的方法
+│   ├── scripts/
+│   │   ├── check_environment.py            # 后续实现：工具、依赖和输入检查
+│   │   ├── create_project.tcl              # 后续实现：按相对路径创建 Vivado 工程
+│   │   ├── build_fpga.tcl                  # 后续实现：综合、实现、时序、位流与导出
+│   │   ├── export_hardware.tcl             # 后续实现：XSA/HWH/位流配套导出
+│   │   ├── build_native.sh                 # 后续实现：ARM 原生库构建
+│   │   ├── package_firmware.py             # 后续实现：生成和核验固件组合
+│   │   └── reproduce.py                    # 后续实现：按模式编排离线/硬件/部署复现
+│   ├── manifests/
+│   │   ├── toolchain.json                  # Vivado/Vitis/PetaLinux/Vitis AI 及补丁
+│   │   ├── platform.json                   # 器件、板卡、DPU、频率、指纹和 ABI
+│   │   ├── dependency_sources.json         # IP/参考工程/镜像/SDK 的固定来源与 SHA
+│   │   └── build_inputs.sha256             # 这次构建的完整输入指纹
+│   └── reports/
+│       └── baseline/                      # 某一实际构建的结果；不同 build_id 分目录
+│           ├── manifest.json
+│           ├── synthesis.rpt
+│           ├── utilization.rpt
+│           ├── utilization_hierarchical.rpt
+│           ├── timing_summary.rpt
+│           ├── clocks.rpt
+│           ├── check_timing.rpt
+│           ├── route_status.rpt
+│           ├── drc.rpt
+│           ├── cdc.rpt                     # [条件] 工具支持且实际执行时保存
+│           ├── build.log
+│           └── metrics.json               # 从原报告提取的数值和口径
+│
+├── board/                                 # KV260 部署材料；与源码和配置分别保存
+│   ├── readme.md                           # 新设备准备、部署顺序和运行说明
+│   ├── firmware/
+│   │   └── release_v1/
+│   │       ├── overlay.bit.bin             # 示例名；最终按加载器需要的名称统一生成
+│   │       ├── overlay.dtbo
+│   │       ├── overlay.xclbin
+│   │       ├── shell.json
+│   │       ├── pairing.json               # 位流/XSA/设备树/XCLBIN/接口配对关系
+│   │       └── checksums.sha256
+│   ├── hardware_handoff/
+│   │   ├── platform.xsa                    # 与本次固件对应的硬件交付
+│   │   └── platform.hwh                    # [条件] 实际需要的硬件元数据
+│   ├── binaries/
+│   │   └── aarch64/                        # 现役原生库；必须能追溯到源码和构建条件
+│   ├── system/
+│   │   ├── image_manifest.json             # 原始镜像、内核、rootfs、XRT/VART 与 SHA
+│   │   ├── boot_manifest.json              # 实际 QSPI/启动方式与所需启动组件
+│   │   ├── packages.txt                    # 系统依赖及实际版本
+│   │   ├── sdk_manifest.json               # ARM SDK/sysroot 的来源与匹配关系
+│   │   └── petalinux/                      # [条件] 自定义系统时附配置、recipes 和 patches
+│   ├── systemd/
+│   │   ├── aura-camera.service             # 相机/视觉服务本体
+│   │   ├── aura-business.service           # 角色、对话与业务服务本体
+│   │   └── dropins/                       # [条件] 最终有效追加配置及加载顺序
+│   ├── udev/
+│   │   └── 99-aura-devices.rules            # [条件] 已采用的稳定设备规则
+│   ├── config/
+│   │   ├── deployment_manifest.json        # 相对源文件到目标路径、权限和 SHA 的映射
+│   │   ├── startup_manifest.json           # 实际服务入口、源码/资源/配置锁
+│   │   └── device_binding.example.json     # boot/PID/源身份字段示例，真实值重新生成
+│   ├── scripts/
+│   │   ├── stage_rootfs.py                 # 后续实现：在普通电脑生成离线暂存树
+│   │   ├── deploy.sh                       # 后续实现：按目标清单安装到确认的设备
+│   │   ├── preflight.py                    # 后续实现：固件、模型、音频、显示与绑定检查
+│   │   ├── start.sh                        # 后续实现：按依赖顺序启动
+│   │   ├── stop.sh                         # 后续实现：停止业务及对应执行者
+│   │   ├── status.sh                       # 后续实现：原样读取实际健康状态
+│   │   └── collect_evidence.py             # 后续实现：收集本轮版本与板测证据
+│   └── evidence/
+│       └── acceptance_001/                 # 每轮独立保存；禁止覆盖历史失败结果
+│           ├── manifest.json               # release/boot/进程身份、时间及条件
+│           ├── firmware_readback.json      # 实际加载项、DPU 指纹与自研 ABI
+│           ├── startup.log
+│           ├── health.jsonl
+│           ├── observation.jsonl           # 实际观测记录与字段单位
+│           └── verdict.md                  # 本轮通过、失败、未测及局限
+│
+├── data/                                  # 可公开的输入、参考与结果
+│   ├── readme.md                           # 数据取得方式、许可、划分和评价方法
+│   ├── manifest.csv                        # 数据文件、来源、用途、SHA 与发布条件
+│   ├── input/
+│   │   ├── vision_public/                  # 固定图像/向量；使用公开或有授权的数据
+│   │   ├── audio_public/                   # 公开测试语音与人工转写
+│   │   ├── dialogue_public.jsonl           # 不含个人历史的对话用例
+│   │   ├── motion_replay.jsonl             # 固定视觉/控制回放输入
+│   │   └── faults.json                     # 断网、过期、取消等可复现场景
+│   ├── reference/
+│   │   ├── vision_expected.json             # 检测/识别参考及容差
+│   │   ├── audio_transcripts.txt            # ASR 人工参考
+│   │   ├── motion_expected.json             # 软件参考和允许误差
+│   │   └── dialogue_expectations.json       # 对话、记忆与撤销的判定规则
+│   └── results/
+│       └── baseline/                      # 每次实验再增加唯一 run_id 子目录
+│           ├── manifest.json
+│           ├── environment.json            # 实际板端/主机/模型/配置/版本
+│           ├── raw/
+│           │   ├── vision.jsonl
+│           │   ├── voice.jsonl
+│           │   ├── resources.csv
+│           │   └── motion.jsonl
+│           ├── comparison.csv              # 同条件基线与优化后结果
+│           ├── summary.json                # 样本数、均值、分位数和失败计数
+│           ├── figures/                    # 由原始数值生成的 PNG/SVG
+│           └── verdict.md
+│
+├── tests/                                 # 软件与系统测试；不与 RTL 仿真混计
+│   ├── readme.md                           # 各级测试的前提和设备需求
+│   ├── protocol/                          # 请求、格式、过期、取消、播放 ACK
+│   ├── kv260/                             # 视觉、跟随、音频、UI、身份和记忆逻辑
+│   ├── windows/                           # 推理 API、实例管理、输出与错误处理
+│   ├── integration/
+│   │   ├── test_inference_roundtrip.py      # 固定输入的双端请求链
+│   │   ├── test_cancel_and_late_reply.py    # 取消、迟到结果及恢复
+│   │   ├── test_disconnect_recovery.py      # 网络断开和恢复
+│   │   ├── test_memory_lifecycle.py         # 原文、摘要、查询、修正和删除
+│   │   └── test_visual_motion_contract.py   # 视觉来源、期限和运动消费
+│   ├── hardware/
+│   │   ├── camera.md                       # 相机/框同步/图像质量实测步骤
+│   │   ├── audio.md                        # MCP01、识别、实际听音与完整播放
+│   │   ├── motion.md                       # 无动力波形、有限运动与停止的步骤
+│   │   ├── cold_boot.md                    # 冷启动、显示/USB/服务与绑定重建
+│   │   └── joint_run.md                    # 同版多功能运行、资源和失败记录
+│   └── fixtures/                          # 测试专用公开小样；不使用真实私库作默认输入
+│
+├── skill/                                 # 官方要求的可复用经验包
+│   ├── README.md                           # 每个 Skill 的范围、入口、效果和限制
+│   ├── command_guard_validation/           # 建议主题 A：FPGA 执行监督与故障验证
+│   │   ├── readme.md
+│   │   ├── workflow.md
+│   │   ├── prompts/                       # 经核验的提示词模板
+│   │   ├── scripts/                       # 可直接复用的校验或报告工具
+│   │   ├── examples/                      # 正例、反例及期望输出
+│   │   ├── case_studies.md                 # 真实失败、判断、修正和复测
+│   │   └── evidence/                      # 输入、原始日志、结果与环境
+│   ├── dpu_workflow_validation/            # 建议主题 B：模型适配、调度和感知时效
+│   │   ├── readme.md
+│   │   ├── workflow.md
+│   │   ├── prompts/
+│   │   ├── scripts/
+│   │   ├── examples/
+│   │   ├── case_studies.md
+│   │   └── evidence/
+│   ├── voice_runtime_optimization/         # 建议主题 C：LLM/TTS、计时和记忆一致性
+│   │   ├── readme.md
+│   │   ├── workflow.md
+│   │   ├── prompts/
+│   │   ├── scripts/
+│   │   ├── examples/
+│   │   ├── case_studies.md
+│   │   └── evidence/
+│   └── pynq_contract_testgen/              # [条件] 通用 PYNQ 补充，实际采用才建立
+│       ├── readme.md
+│       ├── workflow.md
+│       ├── contracts/
+│       ├── templates/
+│       ├── examples/
+│       └── evidence/                      # 模拟、真板、跨板和他人复用分别标记
+│
+├── report/                                # 面向评审的设计和提交素材
+│   ├── readme.md                           # 正式文件、草稿及指标来源的索引
+│   ├── design_report.md                    # 可维护的正文源稿
+│   ├── design_report.docx                  # 按赛事模板填写的可编辑版本
+│   ├── design_report.pdf                   # 最终上传的统一 PDF
+│   ├── amd_supplement.md                   # [条件] AMD 七项要求补充章节
+│   ├── requirements_matrix.csv             # 官方条款 → 文件 → 证据 → 状态
+│   ├── metrics.csv                         # 报告数值、单位、样本、条件与来源
+│   ├── figures/
+│   │   ├── system_architecture.svg         # 整体数据流和部署位置
+│   │   ├── fpga_architecture.svg           # DPU、自研 IP、总线和时钟复位
+│   │   ├── dialogue_flow.svg               # 采集、ASR、LLM、TTS、播放与 ACK
+│   │   ├── memory_flow.svg                 # 存储、摘要、检索和遗忘
+│   │   └── performance/                   # 能追溯到原始数据的图表
+│   ├── photos/
+│   │   ├── overall_front.jpg              # 真实整机照片
+│   │   ├── overall_side.jpg               # 真实侧面/结构照片
+│   │   ├── board_closeup.jpg              # 开发板高清特写
+│   │   ├── wiring_closeup.jpg              # 实际接线和动力/控制连接
+│   │   └── display_running.jpg             # 最终版本运行界面
+│   ├── ai_collaboration/
+│   │   ├── readme.md                       # AI 工具、模型版本、角色和记录边界
+│   │   ├── raw/                           # 可公开的真实历史问答导出；不事后编造
+│   │   ├── prompts.md                      # 关键原始提示词与对应原记录
+│   │   ├── responses.md                    # 关键原回答与来源
+│   │   ├── corrections.md                  # 错误、判断依据、修正和复测
+│   │   ├── case_index.csv                  # 案例 → 源码/工件/验证/Skill
+│   │   └── evidence_index.json             # 来源、SHA、范围和缺失项
+│   ├── demo/
+│   │   ├── storyboard.md                   # 演示顺序与每段要证明的功能
+│   │   ├── demo.mp4                        # 作品介绍视频；上传时独立提供
+│   │   └── recording_conditions.md         # 版本、环境、实物和剪辑说明
+│   ├── poster/                            # [条件] 按企业通知/决赛要求准备
+│   │   ├── poster_en.pptx                 # AMD 模板的一页英文海报
+│   │   └── poster_en.pdf                  # 便于检查与 A4 彩色打印
+│   └── submission/
+│       ├── checklist.csv                   # 后台各字段、格式、大小和最终文件名
+│       ├── repository.txt                  # 正式开源地址、tag、commit 与许可
+│       ├── authorization_template.pdf      # 官方承诺/使用授权书原模板
+│       └── readme.md                       # 签署件、回执的私下保存位置及最终提交说明
+│
+├── docs/                                  # 使另一位开发者看懂并能复现的说明
+│   ├── architecture.md                     # 整体部署、数据流和唯一所有者
+│   ├── feature_scope.md                    # 最终功能、删项、候选与未验证边界
+│   ├── hardware.md                         # 器件型号、外设、供电与接口
+│   ├── platform_lock.md                    # 工具、系统、DPU、ABI 和版本选择理由
+│   ├── protocol.md                         # 双端 API、错误、取消与播放确认
+│   ├── motion_contract.md                  # PS 源时效、PL 租约、范围与停止语义
+│   ├── model_pipeline.md                   # 来源、量化、编译、预后处理和精度验证
+│   ├── runtime_layout.md                   # 仓库文件到 KV260/Windows 运行目录的映射
+│   ├── windows_setup.md                    # 从空白 Windows 准备依赖、模型和服务
+│   ├── kv260_setup.md                      # 从匹配系统准备板端依赖与部署
+│   ├── quickstart.md                       # 已准备环境下的日常启动与演示
+│   ├── reproduction.md                     # 从取得源码到构建、部署、验证的完整步骤
+│   ├── test_plan.md                        # 各级验证、输入、期望与实物前提
+│   ├── measurement_methods.md              # 延迟、资源、频率、精度和统计口径
+│   ├── known_issues.md                     # 真实失败、影响、复现与尚未关闭的问题
+│   └── release_notes.md                    # 每次正式发布的变化与适用证据
+│
+├── tools/                                 # 构建/取数/归档辅助，不能替代真实结果
+│   ├── validate_layout.py                  # 后续实现：文件名、清单及必要路径检查
+│   ├── collect_versions.py                 # 后续实现：实际环境快照
+│   ├── summarize_results.py                # 后续实现：从原始记录重算统计
+│   ├── render_figures.py                   # 后续实现：从统计数据绘图
+│   ├── make_checksums.py                   # 后续实现：生成交付 SHA 清单
+│   └── export_submission.py                # 后续实现：按清单导出并检查提交体积
+│
+└── third_party/                           # 实际使用的第三方输入；固定版本和原许可
+    ├── readme.md                           # 上游地址、revision、补丁与可再分发范围
+    ├── manifest.csv                        # 所有第三方依赖统一登记
+    ├── fpga_ip/                           # [条件] 工程依赖且允许提供的非内置 IP
+    ├── bytetrack/                         # [条件] 实际使用的跟踪源码
+    ├── trajectory/                        # [条件] 实际采用的轨迹库
+    ├── avatar_runtime/                    # [条件] 渲染器依赖与原许可证
+    ├── omnivoice/                         # [条件] 固定 TTS 源码或可核验取得方法
+    └── licenses/                          # 代码、模型、字体、素材等原许可

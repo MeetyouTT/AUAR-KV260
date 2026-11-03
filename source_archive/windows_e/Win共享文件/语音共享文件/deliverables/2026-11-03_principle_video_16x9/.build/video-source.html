@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920, initial-scale=1">
+  <title>AUAR·雪妃｜一轮对话的数据流</title>
+  <style>
+    * { box-sizing:border-box; }
+    html,body { margin:0; width:1920px; height:1080px; overflow:hidden; background:#f7fbff; }
+    body { font-family:"Microsoft YaHei UI","Microsoft YaHei","Segoe UI",sans-serif; font-weight:400; }
+    #aura-dialogue-dataflow { position:relative; width:1920px; height:1080px; --font-size-base:21px; font-size:21px; }
+    #aura-dialogue-dataflow .text-small { font-size:18px; }
+    #aura-dialogue-dataflow .text-muted { color:#647c92; }
+    #aura-dialogue-dataflow h2,#aura-dialogue-dataflow h3 { margin:0; font-weight:500; }
+    #aura-dialogue-dataflow .ad-heading { position:absolute; top:43px; left:64px; right:64px; display:flex; justify-content:space-between; padding:0; }
+    #aura-dialogue-dataflow .ad-heading h2 { font-size:40px; }
+    #aura-dialogue-dataflow .ad-heading>span { font-size:24px; color:#4c6e8e; }
+    #aura-dialogue-dataflow .ad-meta { position:absolute; top:108px; left:66px; width:775px; margin:0; gap:24px; font-size:20px; }
+    #aura-dialogue-dataflow #ad-state { margin-left:0; color:#315e85; }
+    #aura-dialogue-dataflow #ad-range { display:none; }
+    #aura-dialogue-dataflow #ad-title { position:absolute; top:148px; left:64px; font-size:30px; }
+    #aura-dialogue-dataflow #ad-detail,#aura-dialogue-dataflow #ad-current,#aura-dialogue-dataflow .ad-transport { display:none; }
+    #aura-dialogue-dataflow .ad-legend { position:absolute; top:109px; right:64px; margin:0; font-size:20px; gap:24px; }
+    #aura-dialogue-dataflow .ad-key { width:12px; height:12px; }
+    #aura-dialogue-dataflow #ad-diagram { position:absolute; left:64px; top:199px; width:1792px; height:690px; margin:0; }
+    #aura-dialogue-dataflow #ad-svg { height:690px; font-size:21px; }
+    #aura-dialogue-dataflow .ad-node text { font-size:21px; }
+    #aura-dialogue-dataflow .ad-node .ad-sub { font-size:18px; }
+    #aura-dialogue-dataflow .ad-label { font-size:20px; }
+    #aura-dialogue-dataflow .ad-label.text-small { font-size:18px; }
+    #aura-dialogue-dataflow .ad-packet text { font-size:18px; }
+    #aura-dialogue-dataflow .ad-shot-track { position:absolute; top:1000px; left:64px; width:1792px; display:grid; margin:0; gap:18px; font-size:21px; }
+    #aura-dialogue-dataflow .ad-step-bar { height:5px; margin-bottom:12px; }
+    #aura-dialogue-dataflow .ad-shot-track li { color:#69839a; }
+    #aura-dialogue-dataflow .ad-shot-track li[aria-current="step"] { color:#25435f; }
+    #aura-dialogue-dataflow .ad-node.is-context { opacity:.14; }
+    #aura-dialogue-dataflow[data-focused="false"] .ad-node.is-context { opacity:1; }
+    #aura-dialogue-dataflow [data-node="command"] .ad-sub { font-size:16px; }
+    #video-caption { position:absolute; left:100px; top:920px; width:1720px; min-height:52px; text-align:center; color:#25435f; font-size:32px; font-weight:400; line-height:1.45; }
+    #video-footnote { position:absolute; left:65px; top:975px; color:#6a8298; font-size:17px; }
+    #video-footnote-right { position:absolute; right:65px; top:975px; color:#6a8298; font-size:17px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+  </style>
+</head>
+<body>
+  <script>window.__timeline={"duration":157.9,"fps":30,"frames":4737,"width":1920,"height":1080,"voice":"zh-CN-XiaoxiaoNeural","voice_direction":"通用温柔女性播报风格","rate":"-4%","pitch":"-4Hz","ffmpeg":"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-03_principle_video_16x9\\.build\\pydeps\\imageio_ffmpeg\\binaries\\ffmpeg-win-x86_64-v9.0.2.exe","scenes":[{"index":0,"title":"采集：声音与图像各走一条路","short":"采集","text":"雪妃怎样从听见一句话，到做出回答？我们沿着这张数据流图，逐步放大来看。服务就绪并开启聆听后，麦克风采集声音，原始音频留在板端缓冲。相机和跟随控制，则在下方独立并行运行。","start":0,"end":21.098,"duration":21.098,"prefix":0.8,"speech_duration":19.848,"cameraIn":8.664583,"cameraOut":15.026041,"visionAt":15.826041,"captionClose":null,"captions":[{"text":"雪妃怎样从听见一句话，到做出回答？","start":0.8420830000000001,"end":4.552291},{"text":"我们沿着这张数据流图，逐步放大来看。","start":4.672291,"end":8.484583},{"text":"服务就绪并开启聆听后，麦克风采集声音，","start":8.604583,"end":12.953166},{"text":"原始音频留在板端缓冲。","start":13.005625,"end":15.646041},{"text":"相机和跟随控制，则在下方独立并行运行。","start":15.766041,"end":20.218791}],"map":[[0,0],[21.098,2.9999]]},{"index":1,"title":"触发：说话开始入段，句尾才放行","short":"触发","text":"声音先分成两路。一路保留原始音频，另一路经过降噪，交给语音活动检测，判断说话开始和结束。句尾静音达到门限后，本轮录音才会提交。当前对话无需唤醒词，也不以检测到人脸为前提。","start":21.098,"end":41.965999999999994,"duration":20.868,"prefix":0.45,"speech_duration":19.968,"cameraIn":0.45,"cameraOut":19.668,"visionAt":null,"captionClose":null,"captions":[{"text":"声音先分成两路。","start":21.590083,"end":23.724791},{"text":"一路保留原始音频，另一路经过降噪，","start":23.844791,"end":27.425124999999998},{"text":"交给语音活动检测，判断说话开始和结束。","start":27.477583,"end":31.888832999999995},{"text":"句尾静音达到门限后，本轮录音才会提交。","start":32.008832999999996,"end":36.263833},{"text":"当前对话无需唤醒词，","start":36.383832999999996,"end":38.622499999999995},{"text":"也不以检测到人脸为前提。","start":38.662499999999994,"end":41.096999999999994}],"map":[[0,3],[10.970832999999999,6.04],[14.746915999999999,6.48],[20.868,6.9999]]},{"index":2,"title":"转写：原始语音变成用户原话","short":"转写","text":"接下来，板端的语音识别模型，把这段原始音频转成文本。比如，陪我聊两句。文本带着本轮任务信息，交给板端调度，确保采集、识别和后续请求，属于同一轮对话。","start":41.965999999999994,"end":60.26599999999999,"duration":18.3,"prefix":0.45,"speech_duration":17.4,"cameraIn":0.45,"cameraOut":17.1,"visionAt":null,"captionClose":null,"captions":[{"text":"接下来，板端的语音识别模型，","start":42.458082999999995,"end":45.464957999999996},{"text":"把这段原始音频转成文本。","start":45.504957999999995,"end":48.433915999999996},{"text":"比如，陪我聊两句。","start":48.553915999999994,"end":50.790707999999995},{"text":"文本带着本轮任务信息，交给板端调度，","start":50.91070799999999,"end":54.54312399999999},{"text":"确保采集、识别和后续请求，属于同一轮对话。","start":54.60862499999999,"end":59.399874999999994}],"map":[[0,7],[6.046916,8.8],[9.004707999999999,9.05],[12.377123999999998,9.7],[18.3,10.4999]]},{"index":3,"title":"路由：先分流，再组装模型请求","short":"路由","text":"板端先判断意图。记忆查询、登记等本地指令，进入相应流程。普通聊天则组装当前问题、会话上下文和本轮可用称呼。历史内容只在需要追溯时检索，随后形成模型请求。","start":60.26599999999999,"end":79.838,"duration":19.572,"prefix":0.45,"speech_duration":18.672,"cameraIn":7.0552079999999995,"cameraOut":18.372,"visionAt":null,"captionClose":null,"captions":[{"text":"板端先判断意图。","start":60.75808299999999,"end":62.86674999999999},{"text":"记忆查询、登记等本地指令，进入相应流程。","start":62.98674999999999,"end":67.54120799999998},{"text":"普通聊天则组装当前问题、","start":67.66120799999999,"end":70.47279099999999},{"text":"会话上下文和本轮可用称呼。","start":70.51279099999999,"end":73.71308299999998},{"text":"历史内容只在需要追溯时检索，","start":73.83308299999999,"end":76.87954099999999},{"text":"随后形成模型请求。","start":76.95808299999999,"end":78.975916}],"map":[[0,10.5],[7.455208,10.65],[10.306790999999999,11.55],[16.752083,13.15],[19.572,13.9999]]},{"index":4,"title":"LLM：板端请求，再取回并校验","short":"LLM","text":"现在，板端通过局域网，调用主机上的二百七十亿参数语言模型。模型返回回答台词、情绪和动作字段。结果回到板端后，还要经过校验，再继续下一步。对话控制权始终在板端。","start":79.838,"end":99.554,"duration":19.716,"prefix":0.45,"speech_duration":18.816,"cameraIn":0.45,"cameraOut":18.516000000000002,"visionAt":null,"captionClose":null,"captions":[{"text":"现在，板端通过局域网，","start":80.33008299999999,"end":82.82916599999999},{"text":"调用主机上的二百七十亿参数语言模型。","start":82.86916599999999,"end":86.68354099999999},{"text":"模型返回回答台词、情绪和动作字段。","start":86.803541,"end":91.13666599999999},{"text":"结果回到板端后，还要经过校验，","start":91.256666,"end":94.25049999999999},{"text":"再继续下一步。","start":94.2905,"end":95.94133299999999},{"text":"对话控制权始终在板端。","start":96.06133299999999,"end":98.704166}],"map":[[0,14],[3.0911660000000003,14.55],[7.0255410000000005,16.1],[11.478665999999999,17.45],[14.226083,17.62],[19.716,17.9999]]},{"index":5,"title":"TTS：把已校验台词合成为声音","short":"TTS","text":"校验通过后，板端发起第二次独立调用，将台词交给语音合成模型。主机返回合成音频，板端再把它与情绪、动作等控制信息对齐。两次调用，都由板端负责调度。","start":99.554,"end":117.422,"duration":17.868,"prefix":0.45,"speech_duration":16.968,"cameraIn":0.45,"cameraOut":16.668,"visionAt":null,"captionClose":null,"captions":[{"text":"校验通过后，板端发起第二次独立调用，","start":100.046083,"end":103.899333},{"text":"将台词交给语音合成模型。","start":103.939333,"end":106.95941599999999},{"text":"主机返回合成音频，","start":107.079416,"end":109.110249},{"text":"板端再把它与情绪、动作等控制信息对齐。","start":109.175791,"end":113.53495799999999},{"text":"两次调用，都由板端负责调度。","start":113.654958,"end":116.558166}],"map":[[0,18],[2.348958,18.55],[4.445333,19.1],[7.585416,20],[13.561998999999998,21.4],[14.160957999999999,21.96],[17.868,21.9999]]},{"index":6,"title":"输出：声音与画面跟随同一播放时钟","short":"输出","text":"进入输出阶段，板端按统一的播放时钟，向音频设备送出声音。口型、字幕和表情，跟随实际已经播放的位置同步推进。处理和播放期间暂停采集，避免把自己的回答再次录进去。","start":117.422,"end":136.874,"duration":19.452,"prefix":0.45,"speech_duration":18.552,"cameraIn":0.45,"cameraOut":12.623957999999998,"visionAt":null,"captionClose":null,"captions":[{"text":"进入输出阶段，板端按统一的播放时钟，","start":117.91408299999999,"end":121.65012499999999},{"text":"向音频设备送出声音。","start":121.690125,"end":124.176375},{"text":"口型、字幕和表情，","start":124.296375,"end":126.496499},{"text":"跟随实际已经播放的位置同步推进。","start":126.562,"end":130.165958},{"text":"处理和播放期间暂停采集，","start":130.285958,"end":133.124082},{"text":"避免把自己的回答再次录进去。","start":133.176583,"end":136.02774899999997}],"map":[[0,22],[19.452,25.9999]]},{"index":7,"title":"闭环：完整播放确认后再听下一句","short":"闭环","text":"最后，完整播放回执，确认这轮回答已经播完。板端据此提交助手的已播记录，经过尾音保护后，再恢复聆听。至此，采集、触发、处理、调用和输出连成闭环，等待下一句对话。","start":136.874,"end":157.884,"duration":21.01,"prefix":0.45,"speech_duration":18.36,"cameraIn":0.45,"cameraOut":10.695832999999999,"visionAt":null,"captionClose":155.684,"captions":[{"text":"最后，完整播放回执，确认这轮回答已经播完。","start":137.366083,"end":142.14399999999998},{"text":"板端据此提交助手的已播记录，","start":142.26399999999998,"end":145.037041},{"text":"经过尾音保护后，再恢复聆听。","start":145.089541,"end":148.289833},{"text":"至此，采集、触发、处理、调用和输出连成闭环，","start":148.409833,"end":153.656291},{"text":"等待下一句对话。","start":153.696291,"end":155.271416}],"map":[[0,26],[1.372416,26.45],[5.45,27.25],[8.275541,27.3],[9.916165999999999,28.35],[11.595832999999999,28.6],[21.01,29]]}]};window.__videoTime=0;window.__videoLocal=0;</script>
+  <div id="aura-dialogue-dataflow">
+  <div class="ad-heading"><h2>一轮对话的数据流</h2><span class="text-small text-muted">AUAR·雪妃</span></div>
+  <div class="ad-meta text-small"><span id="ad-shot">镜头 01 / 08</span><span id="ad-range">0–3 s</span><span id="ad-camera-mode">全链路总览</span><span id="ad-state" aria-live="polite">聆听</span></div>
+  <h3 id="ad-title">采集：声音与图像各走一条路</h3>
+  <div id="ad-detail" class="ad-detail">麦克风保留原始 PCM，视觉链路在板端并行运行</div>
+  <div class="ad-legend text-small" aria-label="数据颜色图例"><span><b class="ad-key audio"></b>音频</span><span><b class="ad-key text"></b>文本</span><span><b class="ad-key control"></b>触发 / 校验 / ACK</span><span><b class="ad-key frame"></b>视觉</span></div>
+  <div id="ad-diagram"><svg id="ad-svg" role="img" aria-labelledby="ad-svg-title ad-svg-desc"><title id="ad-svg-title">沿同一张数据流图连续推近的原理动画</title><desc id="ad-svg-desc">镜头先展示全链路，再推近采集、VAD、ASR、路由、LLM、TTS、同步输出和完整播放回执。所有模块与路径始终保持同一位置关系。</desc></svg></div>
+  <div id="ad-current" class="ad-current text-small" aria-live="polite">服务就绪并开启聆听后，才开始采集</div>
+  <ol id="ad-shot-track" class="ad-shot-track text-small" aria-label="分镜进度"></ol>
+  <div class="ad-transport"><div class="viz-controls"><button id="ad-play" type="button" class="btn btn-primary">暂停</button><button id="ad-replay" type="button" class="btn">重播</button><span id="ad-time" class="tabular-nums text-small">00.0 / 29.0 s</span><span class="text-small text-muted">逻辑时序示意，非实测耗时</span></div><label class="form-label" for="ad-scrub"><span class="sr-only">动画进度</span></label><input id="ad-scrub" class="form-range" type="range" min="0" max="29" step="0.025" value="0" aria-label="拖动回看连续分镜"></div>
+</div>
+<style>
+  #aura-dialogue-dataflow {
+    /* The user explicitly requested a bright light palette in every host theme. */
+    color-scheme:light;
+    --background:#f7fbff;--foreground:#25435f;--muted:#edf5fc;--muted-foreground:#647c92;
+    --primary:#dceeff;--primary-foreground:#f7fbff;--secondary:#edf5ff;--secondary-foreground:#28496c;
+    --card:#ffffff;--card-foreground:#25435f;--accent:#e5f3ff;--accent-foreground:#285989;
+    --border:#d4e4f2;--input:#d4e4f2;--ring:#76b6f2;
+    --ad-paper:#f7fbff;--ad-node:#edf7ff;--ad-host:#f1f2ff;--ad-ink:#25435f;--ad-muted:#647c92;
+    --ad-audio:#419de8;--ad-text:#7879e8;--ad-control:#eab04f;--ad-visual:#9cbfd7;--ad-wire:#c2d9ec;
+    color:var(--ad-ink);background:var(--ad-paper);
+  }
+  #aura-dialogue-dataflow .ad-heading { display:flex;align-items:baseline;gap:calc(var(--font-size-base)*.75);flex-wrap:wrap;padding-right:90px; }
+  #aura-dialogue-dataflow .ad-meta { display:flex;align-items:center;flex-wrap:wrap;gap:calc(var(--font-size-base)*.8);margin-top:calc(var(--font-size-base)*.85);margin-bottom:calc(var(--font-size-base)*.35); }
+  #aura-dialogue-dataflow #ad-shot,#aura-dialogue-dataflow #ad-state { font-weight:500; }
+  #aura-dialogue-dataflow #ad-state { margin-left:auto; }
+  #aura-dialogue-dataflow #ad-camera-mode { color:var(--ad-muted); }
+  #aura-dialogue-dataflow .ad-detail { min-height:calc(var(--font-size-base)*2);margin-top:calc(var(--font-size-base)*.35); }
+  #aura-dialogue-dataflow .ad-legend { display:flex;align-items:center;flex-wrap:wrap;gap:calc(var(--font-size-base)*.85);margin-top:calc(var(--font-size-base)*.35); }
+  #aura-dialogue-dataflow .ad-legend > span { display:inline-flex;align-items:center;gap:calc(var(--font-size-base)*.35); }
+  #aura-dialogue-dataflow .ad-key { width:10px;height:10px;display:inline-block;font-weight:400; }
+  #aura-dialogue-dataflow .ad-key.audio { background:var(--ad-audio); }
+  #aura-dialogue-dataflow .ad-key.text { background:var(--ad-text);border-radius:50%; }
+  #aura-dialogue-dataflow .ad-key.control { background:var(--ad-control);transform:rotate(45deg); }
+  #aura-dialogue-dataflow .ad-key.frame { background:var(--ad-visual); }
+  #aura-dialogue-dataflow #ad-diagram { width:100%;margin-top:calc(var(--font-size-base)*.4); }
+  #aura-dialogue-dataflow #ad-svg { display:block;width:100%;overflow:hidden;background:var(--ad-paper);font:inherit; }
+  #aura-dialogue-dataflow .ad-edge { fill:none;stroke:var(--ad-wire);stroke-width:1.4;vector-effect:non-scaling-stroke; }
+  #aura-dialogue-dataflow .ad-edge.is-active { stroke:var(--ad-audio);opacity:.8; }
+  #aura-dialogue-dataflow .ad-edge.is-control { stroke:var(--ad-control); }
+  #aura-dialogue-dataflow .ad-conditional { stroke-dasharray:3 4; }
+  #aura-dialogue-dataflow .ad-boundary { fill:none;stroke:var(--ad-wire);stroke-width:1;stroke-dasharray:4 5;vector-effect:non-scaling-stroke; }
+  #aura-dialogue-dataflow .ad-node > rect { fill:var(--ad-node);stroke:var(--ad-wire);stroke-width:1;vector-effect:non-scaling-stroke; }
+  #aura-dialogue-dataflow .ad-node.is-host > rect { fill:var(--ad-host); }
+  #aura-dialogue-dataflow .ad-node.is-active > rect { fill:#dfF0ff;stroke:#83b7e2; }
+  #aura-dialogue-dataflow .ad-node.is-control > rect { fill:#fff0d3;stroke:var(--ad-control); }
+  #aura-dialogue-dataflow .ad-node.is-inactive { opacity:.66; }
+  #aura-dialogue-dataflow[data-focused="true"] .ad-node.is-context { opacity:.14; }
+  #aura-dialogue-dataflow[data-focused="true"] .ad-label:not([data-dynamic]) { opacity:.06; }
+  #aura-dialogue-dataflow .ad-node text { fill:var(--ad-ink);text-anchor:middle;dominant-baseline:middle;font-weight:500; }
+  #aura-dialogue-dataflow .ad-node .ad-sub { font-weight:400;fill:#56738d; }
+  #aura-dialogue-dataflow .ad-label { fill:var(--ad-ink);dominant-baseline:middle; }
+  #aura-dialogue-dataflow .ad-minor { fill:var(--ad-muted); }
+  #aura-dialogue-dataflow .ad-lens { fill:#d9edff;fill-opacity:.15;stroke:#71afe5;stroke-width:1.3;vector-effect:non-scaling-stroke; }
+  #aura-dialogue-dataflow .ad-packet text { fill:var(--ad-ink);text-anchor:middle;dominant-baseline:middle; }
+  #aura-dialogue-dataflow .ad-packet.audio rect { fill:#dcefff;stroke:var(--ad-audio); }
+  #aura-dialogue-dataflow .ad-packet.text rect { fill:#e9e8ff;stroke:var(--ad-text); }
+  #aura-dialogue-dataflow .ad-packet.control rect { fill:#fff0cf;stroke:var(--ad-control); }
+  #aura-dialogue-dataflow .ad-packet.frame rect { fill:#edf6fc;stroke:var(--ad-visual); }
+  #aura-dialogue-dataflow .ad-wave { fill:none;stroke:var(--ad-audio);stroke-width:1.5;vector-effect:non-scaling-stroke; }
+  #aura-dialogue-dataflow .ad-audio-mark { fill:var(--ad-audio); }
+  #aura-dialogue-dataflow .ad-text-mark { fill:var(--ad-text); }
+  #aura-dialogue-dataflow .ad-control-mark { fill:var(--ad-control); }
+  #aura-dialogue-dataflow .ad-track { fill:#dfeaf5; }
+  #aura-dialogue-dataflow .ad-current { min-height:calc(var(--font-size-base)*1.5);margin-top:calc(var(--font-size-base)*.4); }
+  #aura-dialogue-dataflow .ad-shot-track { list-style:none;margin:calc(var(--font-size-base)*.8) 0 0;padding:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:calc(var(--font-size-base)*.5); }
+  #aura-dialogue-dataflow .ad-shot-track li { min-width:0; }
+  #aura-dialogue-dataflow .ad-shot-track li[aria-current="step"] { font-weight:500; }
+  #aura-dialogue-dataflow .ad-step-bar { height:3px;background:#dfeaf5;margin-bottom:calc(var(--font-size-base)*.35); }
+  #aura-dialogue-dataflow .ad-step-bar > span { height:100%;display:block;background:var(--ad-audio);width:0; }
+  #aura-dialogue-dataflow li[data-control="true"] .ad-step-bar > span { background:var(--ad-control); }
+  #aura-dialogue-dataflow .ad-transport { margin-top:calc(var(--font-size-base)*.8); }
+  #aura-dialogue-dataflow .ad-transport .form-label { margin:0; }
+  @media(max-width:599px) { #aura-dialogue-dataflow .ad-shot-track { grid-template-columns:repeat(4,minmax(0,1fr));row-gap:calc(var(--font-size-base)*.6); } #aura-dialogue-dataflow .ad-detail { min-height:calc(var(--font-size-base)*3); } }
+</style>
+<script>
+(() => {
+  const root=document.getElementById('aura-dialogue-dataflow'),svg=root.querySelector('#ad-svg');
+  const title=root.querySelector('#ad-title'),detail=root.querySelector('#ad-detail'),state=root.querySelector('#ad-state'),current=root.querySelector('#ad-current');
+  const shotLabel=root.querySelector('#ad-shot'),rangeLabel=root.querySelector('#ad-range'),modeLabel=root.querySelector('#ad-camera-mode');
+  const play=root.querySelector('#ad-play'),replay=root.querySelector('#ad-replay'),scrub=root.querySelector('#ad-scrub'),timeLabel=root.querySelector('#ad-time'),track=root.querySelector('#ad-shot-track');
+  const NS='http://www.w3.org/2000/svg',duration=29;
+  const shots=[
+    {a:0,b:3,short:'采集',title:'采集：声音与图像各走一条路',detail:'麦克风保留原始 PCM，视觉链路在板端并行运行',state:'聆听',note:'服务就绪并开启聆听后，才开始采集',focus:['mic','buffer'],active:['mic','buffer','camera','dpu','vision-cpu','pl','axis']},
+    {a:3,b:7,short:'触发',title:'触发：说话开始入段，句尾才放行',detail:'去噪信号供 VAD 判断，ASR 仍使用本轮原始 PCM',state:'录音',note:'静音达到句尾门限才提交，不依赖唤醒词或人脸',focus:['buffer','vad','asr'],active:['buffer','vad','asr']},
+    {a:7,b:10.5,short:'转写',title:'转写：原始语音变成用户原话',detail:'Paraformer 在 KV260 上将语音转成文本，再交给路由',state:'识别',note:'同一轮采集、转写与后续请求保持归属一致',focus:['asr'],active:['buffer','asr','router']},
+    {a:10.5,b:14,short:'路由',title:'路由：先分流，再组装模型请求',detail:'本地指令先分流，普通聊天读取会话上下文和本轮称呼',state:'思考',note:'历史检索按意图触发，图中跟随普通聊天这条路径',focus:['context','router'],active:['context','router']},
+    {a:14,b:18,short:'LLM',title:'LLM：板端请求，再取回并校验',detail:'27B 返回台词、情绪和动作字段，板端保留控制权',state:'思考',note:'文本与上下文发往 Windows，回复 JSON 返回 KV260',focus:['router','llm'],active:['router','llm']},
+    {a:18,b:22,short:'TTS',title:'TTS：把已校验台词合成为声音',detail:'板端独立请求 OmniVoice，再收回 24 kHz PCM 音频',state:'思考',note:'TTS 是第二次独立调用，音频与控制在板端对齐',focus:['router','tts','player'],active:['router','tts','player']},
+    {a:22,b:26,short:'输出',title:'输出：声音与画面跟随同一播放时钟',detail:'MCP01 发声，口型、字幕与表情跟随实际已播进度',state:'播放',note:'沿同一播放时间轴，声音与口型同步推进',focus:['player','speaker','screen'],active:['player','speaker','screen']},
+    {a:26,b:29,short:'闭环',title:'闭环：完整播放确认后再听下一句',detail:'完整 ACK 确认助手已播记录，然后恢复聆听',state:'确认',note:'用户原话先记录，助手已播记录以完整回执为准',focus:['context','vad','player'],active:['context','vad','player','mic']}
+  ];
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let t=0,running=false,last=performance.now(),phase=-1,W=0,H=630,VH=540,mobile=false,buildCount=0;
+  let nodes={},paths={},marks={},layers={},globalView,focusViews=[],focusBoxes=[],camera,lastWritten=[];
+  const saved=window.openai?.widgetState?.privateContent;
+  if(saved?.version===4&&Number.isFinite(saved.time)){t=Math.max(0,Math.min(29,saved.time));running=false;}
+  function index(){const i=shots.findIndex(s=>t>=s.a&&t<s.b);return i<0?7:i;}
+  function save(){const f=window.openai?.setWidgetState;if(f){lastWritten.push(t);lastWritten=lastWritten.slice(-12);f({modelContent:{shot:index()+1,focus:shots[index()].title},privateContent:{version:4,time:t}}).catch(()=>{});}}
+  function e(tag,attrs={},text){const n=document.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!==undefined)n.textContent=text;return n;}
+  function label(txt,x,y,{minor=false,anchor='middle'}={}){const n=e('text',{x,y,'text-anchor':anchor,class:`ad-label${minor?' ad-minor text-small':''}`},txt);layers.labels.append(n);return n;}
+  function node(id,x,y,w,main,sub='',{h=64,host=false}={}){const g=e('g',{class:`ad-node${host?' is-host':''}`,'data-node':id});const rect=e('rect',{x:x-w/2,y:y-h/2,width:w,height:h,rx:8});const a=e('text',{x,y:y-(sub?10:0)},main),b=e('text',{x,y:y+14,class:'ad-sub text-small'},sub);g.append(rect,a,b);layers.nodes.append(g);nodes[id]={g,rect,x,y,w,h,main:a,sub:b};return nodes[id];}
+  function edge(id,d,conditional=false){const n=e('path',{d,class:`ad-edge${conditional?' ad-conditional':''}`,'marker-end':'url(#ad-arrow)'});layers.edges.append(n);paths[id]=n;return n;}
+  function bar(x,y,w,type='audio'){layers.marks.append(e('rect',{x,y,width:w,height:4,rx:2,class:'ad-track'}));const n=e('rect',{x,y,width:0,height:4,rx:2,class:`ad-${type}-mark`});layers.marks.append(n);return {n,max:w};}
+  function wave(id,x,y,w,amplitude){const n=e('path',{class:'ad-wave'});layers.marks.append(n);marks[id]={n,x,y,w,a:amplitude};}
+  function drawWave(id,amp,clock=window.__videoTime){const q=marks[id];if(!q)return;let d='';for(let i=0;i<49;i++){const x=q.x+q.w*i/48,y=q.y+Math.sin(i*1.19+clock*13)*Math.sin(i/48*Math.PI)*q.a*amp;d+=`${i?' L':'M'} ${x} ${y}`;}q.n.setAttribute('d',d);}
+  function fit(bounds,pad=32){let x=bounds.x-pad,y=bounds.y-pad,w=bounds.w+2*pad,h=bounds.h+2*pad;const aspect=W/VH;if(w/h<aspect){const nw=h*aspect;x-=(nw-w)/2;w=nw;}else{const nh=w/aspect;y-=(nh-h)/2;h=nh;}return {x,y,w,h};}
+  function effectiveFocus(s,i){return mobile?[['buffer'],['vad'],['asr'],['router'],['llm'],['tts'],['player','screen'],['context','vad']][i]:s.focus;}
+  function focusFor(s,pi){const list=effectiveFocus(s,pi).map(id=>nodes[id]);let minX=Math.min(...list.map(n=>n.x-n.w/2)),maxX=Math.max(...list.map(n=>n.x+n.w/2)),minY=Math.min(...list.map(n=>n.y-n.h/2)),maxY=Math.max(...list.map(n=>n.y+n.h/2));
+    if(pi===0)maxY+=35;if(pi===2)maxY+=62;if(pi===6)maxY+=20;
+    focusBoxes[pi]={x:minX-10,y:minY-10,w:maxX-minX+20,h:maxY-minY+20};
+    const result=fit({x:minX,y:minY,w:maxX-minX,h:maxY-minY},mobile?25:38);
+    const minWidth=globalView.w/2.25;
+    if(result.w<minWidth){const h=minWidth*VH/W;result.x-=(minWidth-result.w)/2;result.y-=(h-result.h)/2;result.w=minWidth;result.h=h;}
+    return result;
+  }
+  function build(){
+    W=1480;mobile=false;H=630;VH=1480*690/1792;buildCount++;
+    nodes={};paths={};marks={};layers={};svg.replaceChildren();svg.style.height="690px";
+    svg.append(e('title',{id:'ad-svg-title'},'同一张全链路图上的连续推近动画'),e('desc',{id:'ad-svg-desc'},'八个镜头保留所有模块和连线的位置，先总览定位、再放大说明，并在镜头之间连续返回总览。'));
+    const defs=e('defs'),marker=e('marker',{id:'ad-arrow',viewBox:'0 0 8 8',refX:7,refY:4,markerWidth:4,markerHeight:4,orient:'auto'});marker.append(e('path',{d:'M 1 1 L 7 4 L 1 7',fill:'none',stroke:'var(--ad-wire)','stroke-width':1.3}));defs.append(marker);svg.append(defs);
+    for(const id of ['edges','lens','nodes','labels','marks','packets','dynamic']){layers[id]=e('g',{'data-layer':id});svg.append(layers[id]);}
+    if(mobile)buildMobile();else buildDesktop();
+    const B=nodes.buffer,S=nodes.speaker,F=nodes.screen,P=nodes.player;
+    marks.buffer=[];for(let i=0;i<7;i++){const b=e('rect',{x:B.x-37+i*11,y:B.y+23,width:7,height:4,rx:1,class:'ad-audio-mark',opacity:.12});layers.marks.append(b);marks.buffer.push(b);}
+    wave('input-wave',nodes.mic.x-30,nodes.mic.y+42,60,8);wave('output-wave',S.x-S.w*.34,S.y+42,S.w*.68,9);
+    marks.mouth=bar(F.x-F.w*.32,F.y+21,F.w*.64,'control');marks.caption=bar(F.x-F.w*.32,F.y+28,F.w*.64,'text');
+    marks.asrText=label('',nodes.asr.x,nodes.asr.y+61);marks.clock=label('',P.x,P.y+57,{minor:true});marks.asrText.setAttribute('data-dynamic','true');marks.clock.setAttribute('data-dynamic','true');
+    marks.lens=e('rect',{class:'ad-lens',rx:10});layers.lens.append(marks.lens);
+    globalView=fit({x:0,y:0,w:W,h:H},12);focusBoxes=[];focusViews=shots.map(focusFor);phase=-1;update();
+  }
+  function buildDesktop(){
+    const s=false, nw=190,rw=200;
+    label('KV260 · 采集、业务与播放',W*.31,20,{minor:true});label('Windows · 本地推理',W*.87,20,{minor:true});
+    layers.edges.append(e('path',{d:`M ${W*.735} 42 V 548`,class:'ad-boundary'}));label('局域网',W*.735,555,{minor:true});
+    node('mic',W*.08,95,145,'麦克风','16 kHz PCM',{h:54});node('buffer',W*.30,95,nw,'原始 PCM','分帧与缓冲');node('asr',W*.56,95,nw,'Paraformer','板端 ASR');
+    node('vad',W*.30,205,rw,'GTCRN + VAD','起音 / 句尾判断',{h:68});node('router',W*.56,280,rw,'板端调度','意图 / 上下文',{h:74});
+    node('command',W*.088,294,160,'本地指令','记忆 / 登记等',{h:54});node('context',W*.29,335,nw,'会话与记录','上下文 / 摘要');
+    node('llm',W*.88,280,nw,'本地 27B','LLM 推理',{h:74,host:true});node('tts',W*.88,425,nw,'OmniVoice','TTS 合成',{h:74,host:true});
+    node('player',W*.56,425,rw,'播放时钟','PCM / 控制对齐',{h:68});node('speaker',W*.29,425,nw,'MCP01 发声','声音输出',{h:58});node('screen',W*.29,510,nw,'口型 / 字幕','跟随已播进度',{h:64});
+    const M=nodes.mic,B=nodes.buffer,A=nodes.asr,V=nodes.vad,R=nodes.router,C=nodes.context,L=nodes.llm,T=nodes.tts,P=nodes.player,S=nodes.speaker,F=nodes.screen,D=nodes.command;
+    edge('input',`M ${M.x+M.w/2} 95 H ${B.x-B.w/2}`);edge('raw',`M ${B.x+B.w/2} 95 H ${A.x-A.w/2}`);edge('vad',`M ${B.x} ${B.y+B.h/2} V ${V.y-V.h/2}`);
+    const gx=(B.x+B.w/2+A.x-A.w/2)/2;marks.gate={x:gx,y:95,vertical:false};
+    edge('trigger',`M ${V.x+V.w/2} 205 H ${gx} V 95`);edge('transcript',`M ${A.x} ${A.y+A.h/2} V ${R.y-R.h/2}`);
+    edge('local',`M ${R.x-R.w/2} 262 H ${D.x} V ${D.y-D.h/2}`,true);
+    edge('read',`M ${R.x-R.w/2} 275 H ${R.x-R.w/2-27} V 323 H ${C.x+C.w/2}`);edge('context',`M ${C.x+C.w/2} 347 H ${R.x-R.w/2-13} V 300 H ${R.x-R.w/2}`);
+    edge('llm-request',`M ${R.x+R.w/2} 263 H ${L.x-L.w/2}`);edge('llm-response',`M ${L.x-L.w/2} 298 H ${R.x+R.w/2}`);
+    const mx=(R.x+R.w/2+T.x-T.w/2)/2;edge('tts-request',`M ${R.x+R.w/2} 308 H ${mx} V 407 H ${T.x-T.w/2}`);edge('audio',`M ${T.x-T.w/2} 442 H ${P.x+P.w/2}`);
+    edge('control',`M ${R.x} ${R.y+R.h/2} V ${P.y-P.h/2}`);edge('speaker',`M ${P.x-P.w/2} 415 H ${S.x+S.w/2}`);edge('screen',`M ${P.x-P.w/2} 440 H ${P.x-P.w/2-29} V ${F.y} H ${F.x+F.w/2}`);
+    edge('ack',`M ${P.x-P.w/2} 400 H ${P.x-P.w/2-43} V 354 H ${C.x+C.w/2}`);edge('rearm',`M ${C.x-C.w/2} 335 H ${D.x+D.w/2+8} V 205 H ${V.x-V.w/2}`);
+    label('板端并行视觉支路',8,561,{minor:true,anchor:'start'});
+    const v=[['camera',.09,'相机 RGB'],['dpu',.29,'DPU 感知'],['vision-cpu',.49,'CPU 跟踪'],['pl',.69,'PL / PWM'],['axis',.9,'单轴跟随']];
+    v.forEach(([id,x,txt])=>node(id,W*x,596,W*.166,txt,'',{h:44}));for(let i=0;i<v.length-1;i++){const a=nodes[v[i][0]],b=nodes[v[i+1][0]];edge('vision'+i,`M ${a.x+a.w/2} 596 H ${b.x-b.w/2}`);}
+  }
+  function buildMobile(){
+    const l=W*.25,r=W*.75,nw=Math.min(128,W*.405);
+    label('KV260 调度 · 主机负责推理',W/2,18,{minor:true});
+    node('mic',l,66,nw,'麦克风','16 kHz PCM',{h:54});node('buffer',r,66,nw,'PCM 缓冲','保留原始语音',{h:58});
+    node('vad',l,177,nw,'GTCRN / VAD','起音与句尾',{h:64});node('asr',r,177,nw,'Paraformer','板端转写',{h:64});
+    node('context',l,287,nw,'会话与记录','上下文 / 摘要',{h:62});node('router',r,287,nw,'板端调度','意图 / 上下文',{h:64});
+    node('command',l,348,nw,'本地指令','',{h:38});node('llm',l,407,nw,'Windows 27B','LLM 推理',{h:60,host:true});
+    node('tts',l,515,nw,'OmniVoice','Windows TTS',{h:64,host:true});node('player',r,515,nw,'播放时钟','PCM / 控制对齐',{h:64});
+    node('speaker',l,627,nw,'MCP01 发声','声音输出',{h:58});node('screen',r,627,nw,'口型 / 字幕','跟随已播进度',{h:64});
+    const M=nodes.mic,B=nodes.buffer,A=nodes.asr,V=nodes.vad,R=nodes.router,C=nodes.context,L=nodes.llm,T=nodes.tts,P=nodes.player,S=nodes.speaker,F=nodes.screen,D=nodes.command;
+    edge('input',`M ${M.x+M.w/2} 66 H ${B.x-B.w/2}`);edge('raw',`M ${B.x} ${B.y+B.h/2} V ${A.y-A.h/2}`);edge('vad',`M ${B.x-B.w/2} 66 H ${W*.46} V 177 H ${V.x+V.w/2}`);
+    marks.gate={x:r,y:119,vertical:true};edge('trigger',`M ${V.x+V.w/2} 177 H ${W*.52} V 119 H ${r}`);edge('transcript',`M ${r} ${A.y+A.h/2} V ${R.y-R.h/2}`);
+    edge('read',`M ${R.x-R.w/2} 273 H ${C.x+C.w/2}`);edge('context',`M ${C.x+C.w/2} 302 H ${R.x-R.w/2}`);edge('local',`M ${R.x} ${R.y+R.h/2} V 348 H ${D.x+D.w/2}`,true);
+    edge('llm-request',`M ${R.x} ${R.y+R.h/2} V 393 H ${L.x+L.w/2}`);edge('llm-response',`M ${L.x+L.w/2} 422 H ${r+20} V 332 H ${r} V ${R.y+R.h/2}`);
+    edge('tts-request',`M ${R.x+R.w/2} 287 H ${W-6} V 497 H ${T.x+T.w/2}`);edge('audio',`M ${T.x+T.w/2} 532 H ${P.x-P.w/2}`);edge('control',`M ${r} ${R.y+R.h/2} V ${P.y-P.h/2}`);
+    edge('speaker',`M ${P.x-P.w/2} 498 H ${W*.5} V 627 H ${S.x+S.w/2}`);edge('screen',`M ${r} ${P.y+P.h/2} V ${F.y-F.h/2}`);
+    edge('ack',`M ${P.x+P.w/2} 515 H ${W-6} V 241 H ${C.x} V ${C.y-C.h/2}`);edge('rearm',`M ${C.x-C.w/2} 287 H 6 V 177 H ${V.x-V.w/2}`);
+    label('并行视觉：图像 / 位置 / PWM',W/2,687,{minor:true});
+    node('camera',W*.17,716,W*.29,'相机 RGB','',{h:38});node('dpu',W*.5,716,W*.29,'DPU / CPU','',{h:38});node('pl',W*.83,716,W*.29,'PL / PWM','',{h:38});
+    edge('vision0',`M ${nodes.camera.x+nodes.camera.w/2} 716 H ${nodes.dpu.x-nodes.dpu.w/2}`);edge('vision1',`M ${nodes.dpu.x+nodes.dpu.w/2} 716 H ${nodes.pl.x-nodes.pl.w/2}`);
+  }
+  function ease(q){q=Math.max(0,Math.min(1,q));return q*q*(3-2*q);}
+  function mix(a,b,q){return {x:a.x+(b.x-a.x)*q,y:a.y+(b.y-a.y)*q,w:a.w+(b.w-a.w)*q,h:a.h+(b.h-a.h)*q};}
+  function cameraAt(){
+    const i=index(),s=window.__timeline.scenes[i],local=window.__videoLocal,focus=focusViews[i];
+    const a=s.cameraIn,b=s.cameraOut,entry=1.05,exit=1.0;
+    if(local<a)return {rect:globalView,mode:i===0?'全链路总览':'全链路定位',lens:.8};
+    if(local<a+entry){const q=ease((local-a)/entry);return {rect:mix(globalView,focus,q),mode:'总览定位 · 连续推近',lens:(1-q)*.75};}
+    if(local>b){const q=ease((local-b)/exit);return {rect:mix(focus,globalView,q),mode:i===7?'回到总览 · 完成闭环':i===0?'并行视觉 · 接续下一步':'拉回总览 · 接续下一步',lens:q*.5};}
+    return {rect:focus,mode:'局部讲解 · 同一条数据流',lens:0};
+  }
+  function packet(id,a,b,txt,type='audio',tiny=false){
+    if(t<a||t>b||!paths[id])return;const q=(t-a)/(b-a),p=paths[id],xy=p.getPointAtLength(p.getTotalLength()*q),alpha=Math.max(0,Math.min(1,q*7,(1-q)*7));
+    const ww=tiny?9:Math.max(48,[...txt].reduce((n,c)=>n+(c.charCodeAt(0)>255?18:9),0)+20);
+    const g=e('g',{class:`ad-packet ${type}`,opacity:alpha,transform:`translate(${xy.x},${xy.y})`});g.append(e('rect',{x:-ww/2,y:tiny?-4.5:-15,width:ww,height:tiny?9:30,rx:type==='text'?9:2,'stroke-width':.9}));if(!tiny)g.append(e('text',{class:'text-small'},txt));layers.packets.append(g);
+  }
+  function point(id,q,type){if(!paths[id])return;const p=paths[id],xy=p.getPointAtLength(p.getTotalLength()*q);const g=e('g',{class:`ad-packet ${type}`,transform:`translate(${xy.x},${xy.y})`,opacity:root.dataset.focused==='true'?.2:1});g.append(e('rect',{x:-3,y:-3,width:6,height:6,rx:1,'stroke-width':.8}));layers.packets.append(g);}
+  function paintGate(){const g=marks.gate,open=t>=6.48;let d;if(g.vertical)d=open?`M ${g.x-11} ${g.y} l 20 -13`:`M ${g.x-11} ${g.y} h 22`;else d=open?`M ${g.x} ${g.y-12} l 18 19`:`M ${g.x} ${g.y-12} v 24`;layers.dynamic.append(e('path',{d,stroke:'var(--ad-control)','stroke-width':2.4,fill:'none','vector-effect':'non-scaling-stroke'}));}
+  function highlight(i){const s=shots[i],focus=effectiveFocus(s,i);for(const [id,n]of Object.entries(nodes)){n.g.classList.toggle('is-active',s.active.includes(id));n.g.classList.toggle('is-inactive',i!==0&&!s.active.includes(id));n.g.classList.toggle('is-context',!focus.includes(id));}
+    for(const [id,p]of Object.entries(paths)){const on=i===0&&['input'].includes(id)||i===1&&['vad','raw','trigger'].includes(id)||i===2&&['raw','transcript'].includes(id)||i===3&&['read','context'].includes(id)||i===4&&id.startsWith('llm')||i===5&&['tts-request','audio','control'].includes(id)||i===6&&['speaker','screen'].includes(id)||i===7&&['ack','rearm'].includes(id);p.classList.toggle('is-active',on);p.classList.toggle('is-control',on&&['trigger','ack','rearm'].includes(id));}
+    title.textContent=s.title;detail.textContent=s.detail;current.textContent=s.note;shotLabel.textContent=`镜头 ${String(i+1).padStart(2,'0')} / 08`;rangeLabel.textContent=`${s.a}–${s.b} s`;phase=i;
+  }
+  function update(){
+    if(!globalView)return;const i=index();if(phase!==i)highlight(i);const s=shots[i];
+    camera=cameraAt();const c=camera.rect;svg.setAttribute('viewBox',`${c.x} ${c.y} ${c.w} ${c.h}`);modeLabel.textContent=camera.mode;
+    const f=focusBoxes[i];for(const [k,v]of Object.entries({x:f.x,y:f.y,width:f.w,height:f.h,opacity:camera.lens}))marks.lens.setAttribute(k,String(v));
+    root.dataset.phase=String(i);root.dataset.shot=String(i+1);root.dataset.cameraMode=camera.mode;root.dataset.zoom=(globalView.w/c.w).toFixed(4);root.dataset.focused=String(globalView.w/c.w>1.12);root.dataset.stage=i===7&&t>=28.4?'聆听':s.state;state.textContent=root.dataset.stage;
+    root.dataset.microphone=t<7||t>=28.4?'open':'closed';root.dataset.llmResult=t>=17.6?'validated':'pending';root.dataset.ttsCalled=t>=18.2?'true':'false';root.dataset.playbackCommitted=t>=27.2?'true':'false';
+    timeLabel.textContent=`${t.toFixed(1).padStart(4,'0')} / 29.0 s`;scrub.value=String(t);scrub.setAttribute('aria-valuetext',`${t.toFixed(1)} 秒，${s.title}`);play.textContent=running?'暂停':t>=29?'播放':'继续';play.setAttribute('aria-label',running?'暂停动画':'播放动画');
+    [...track.children].forEach((li,j)=>{if(j===i)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');li.querySelector('.ad-step-bar > span').style.width=`${Math.max(0,Math.min(1,(t-shots[j].a)/(shots[j].b-shots[j].a)))*100}%`;});
+    layers.packets.replaceChildren();layers.dynamic.replaceChildren();
+    const speech=t>=.45&&t<6.2;drawWave('input-wave',speech?.65+.25*Math.sin(t*9):.06);
+    if(t<7){for(let a=.15;a<6.1;a+=.52){packet('input',a,a+.55,'','audio',true);packet('vad',a+.2,a+.8,'','audio',true);}}
+    marks.buffer.forEach((b,j)=>b.setAttribute('opacity',t<7.7?(t>.25+j*.3?.95:.12):.16));paintGate();
+    packet('trigger',6.04,6.48,'句尾成立','control',mobile);packet('raw',6.51,7.95,'PCM','audio',mobile);
+    packet('transcript',9.05,10.35,'转写文本','text',mobile);packet('read',10.65,11.5,'取上下文','control',mobile);packet('context',11.55,13.15,'上下文','text',mobile);
+    packet('llm-request',14.55,15.8,'问题+上下文','text',mobile);packet('llm-response',16.1,17.6,'回复 JSON','text',mobile);
+    packet('tts-request',18.55,19.7,'已校验台词','text',mobile);for(let a=20;a<21.4;a+=.44)packet('audio',a,a+.65,'PCM','audio',mobile);packet('control',21.15,21.95,'控制','control',mobile);
+    for(let a=22.45;a<25.65;a+=.65){packet('speaker',a,a+.62,'','audio',true);packet('screen',a,a+.62,'','control',true);}
+    packet('ack',26.45,27.25,'完整 ACK','control',mobile);packet('rearm',27.3,28.35,'恢复聆听','control',mobile);
+    const playing=t>=22&&t<26,amp=playing?Math.max(.08,Math.min(1,.5+.32*Math.sin(t*13)+.14*Math.sin(t*27))):0;drawWave('output-wave',amp);marks.mouth.n.setAttribute('width',marks.mouth.max*amp);marks.caption.n.setAttribute('width',marks.caption.max*(playing?(t-22)/4:0));
+    marks.clock.textContent=playing?`同一播放位置 ${((t-22)/4*100).toFixed(0)}%`:'';
+    marks.asrText.textContent=i===2&&t>=8.8?'“陪我聊两句”':'';
+    nodes.mic.sub.textContent=t<7||t>=28.4?'16 kHz PCM':'暂停采集';nodes.vad.sub.textContent=i===1?(t<6.2?'语音段收集中':t<6.48?'静音达到门限':'句尾成立 · 放行'):'起音 / 句尾判断';
+    nodes.router.sub.textContent=t>=17.6&&t<22?'回复 JSON 已校验':i===3?'意图 / 本轮称呼':'意图 / 上下文';nodes.router.g.classList.toggle('is-control',t>=17.6&&t<18.15);nodes.context.sub.textContent=t>=27.25?'助手已播确认':'上下文 / 摘要';nodes.context.g.classList.toggle('is-control',i===7);nodes.vad.g.classList.toggle('is-control',i===1&&t>=6.48||i===7&&t>=28.35);
+    if(t<29){for(let j=0;j<(mobile?2:4);j++)point('vision'+j,((t*.48-j*.17)%1+1)%1,j<2?'frame':'control');}
+  }
+  for(const [i,s]of shots.entries()){const li=document.createElement('li');li.dataset.control=String(i===1||i===7);li.innerHTML='<div class="ad-step-bar"><span></span></div><span></span>';li.lastElementChild.textContent=s.short;track.append(li);}
+  function seek(v){t=Math.max(0,Math.min(29,Number(v)||0));running=false;last=performance.now();update();}
+  play.addEventListener('click',()=>{if(t>=29)t=0;running=!running;last=performance.now();update();save();});replay.addEventListener('click',()=>{t=0;running=true;last=performance.now();update();save();});scrub.addEventListener('input',()=>seek(scrub.value));scrub.addEventListener('change',save);
+  window.addEventListener('openai:set_globals',ev=>{const s=ev.detail?.globals?.widgetState?.privateContent;if(s?.version===4&&Number.isFinite(s.time)&&!lastWritten.includes(s.time))seek(s.time);});
+  /* Fixed 1920x1080 video world: geometry remains stable for the full film. */
+  root.__animation={seek,get:()=>({time:t,running,phase:index(),duration,microphone:root.dataset.microphone,zoom:Number(root.dataset.zoom),camera:{...camera?.rect},globalView:{...globalView},focusView:{...focusViews[index()]},buildCount,focus:effectiveFocus(shots[index()],index())})};
+  build();
+  function tick(now){const dt=Math.max(0,(now-last)/1000);last=now;if(running){t=Math.min(29,t+dt);if(t>=29)running=false;update();}requestAnimationFrame(tick);}requestAnimationFrame(tick);
+})();
+</script>
+<style>
+    * { box-sizing:border-box; }
+    html,body { margin:0; width:1920px; height:1080px; overflow:hidden; background:#f7fbff; }
+    body { font-family:"Microsoft YaHei UI","Microsoft YaHei","Segoe UI",sans-serif; font-weight:400; }
+    #aura-dialogue-dataflow { position:relative; width:1920px; height:1080px; --font-size-base:21px; font-size:21px; }
+    #aura-dialogue-dataflow .text-small { font-size:18px; }
+    #aura-dialogue-dataflow .text-muted { color:#647c92; }
+    #aura-dialogue-dataflow h2,#aura-dialogue-dataflow h3 { margin:0; font-weight:500; }
+    #aura-dialogue-dataflow .ad-heading { position:absolute; top:43px; left:64px; right:64px; display:flex; justify-content:space-between; padding:0; }
+    #aura-dialogue-dataflow .ad-heading h2 { font-size:40px; }
+    #aura-dialogue-dataflow .ad-heading>span { font-size:24px; color:#4c6e8e; }
+    #aura-dialogue-dataflow .ad-meta { position:absolute; top:108px; left:66px; width:775px; margin:0; gap:24px; font-size:20px; }
+    #aura-dialogue-dataflow #ad-state { margin-left:0; color:#315e85; }
+    #aura-dialogue-dataflow #ad-range { display:none; }
+    #aura-dialogue-dataflow #ad-title { position:absolute; top:148px; left:64px; font-size:30px; }
+    #aura-dialogue-dataflow #ad-detail,#aura-dialogue-dataflow #ad-current,#aura-dialogue-dataflow .ad-transport { display:none; }
+    #aura-dialogue-dataflow .ad-legend { position:absolute; top:109px; right:64px; margin:0; font-size:20px; gap:24px; }
+    #aura-dialogue-dataflow .ad-key { width:12px; height:12px; }
+    #aura-dialogue-dataflow #ad-diagram { position:absolute; left:64px; top:199px; width:1792px; height:690px; margin:0; }
+    #aura-dialogue-dataflow #ad-svg { height:690px; font-size:21px; }
+    #aura-dialogue-dataflow .ad-node text { font-size:21px; }
+    #aura-dialogue-dataflow .ad-node .ad-sub { font-size:18px; }
+    #aura-dialogue-dataflow .ad-label { font-size:20px; }
+    #aura-dialogue-dataflow .ad-label.text-small { font-size:18px; }
+    #aura-dialogue-dataflow .ad-packet text { font-size:18px; }
+    #aura-dialogue-dataflow .ad-shot-track { position:absolute; top:1000px; left:64px; width:1792px; display:grid; margin:0; gap:18px; font-size:21px; }
+    #aura-dialogue-dataflow .ad-step-bar { height:5px; margin-bottom:12px; }
+    #aura-dialogue-dataflow .ad-shot-track li { color:#69839a; }
+    #aura-dialogue-dataflow .ad-shot-track li[aria-current="step"] { color:#25435f; }
+    #aura-dialogue-dataflow .ad-node.is-context { opacity:.14; }
+    #aura-dialogue-dataflow[data-focused="false"] .ad-node.is-context { opacity:1; }
+    #aura-dialogue-dataflow [data-node="command"] .ad-sub { font-size:16px; }
+    #video-caption { position:absolute; left:100px; top:920px; width:1720px; min-height:52px; text-align:center; color:#25435f; font-size:32px; font-weight:400; line-height:1.45; }
+    #video-footnote { position:absolute; left:65px; top:975px; color:#6a8298; font-size:17px; }
+    #video-footnote-right { position:absolute; right:65px; top:975px; color:#6a8298; font-size:17px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+  </style>
+  <div id="video-caption" aria-live="off"></div>
+  <div id="video-footnote">原理示意 · 讲解节奏不代表实测耗时</div>
+  <div id="video-footnote-right">KV260 调度 · Windows 推理</div>
+  <script>
+  (()=>{
+    const root=document.getElementById('aura-dialogue-dataflow');
+    const caption=document.getElementById('video-caption');
+    const data=window.__timeline;
+    function interpolate(points,x){
+      if(x<=points[0][0])return points[0][1];
+      for(let i=1;i<points.length;i++)if(x<=points[i][0]){
+        const a=points[i-1],b=points[i],q=(x-a[0])/(b[0]-a[0]);
+        return a[1]+(b[1]-a[1])*q;
+      }
+      return points.at(-1)[1];
+    }
+    window.renderVideoFrame=(seconds)=>{
+      const now=Math.max(0,Math.min(data.duration,seconds));
+      const i=Math.max(0,data.scenes.findIndex((s,j)=>now>=s.start&&(now<s.end||j===7)));
+      const scene=data.scenes[i], local=now-scene.start;
+      window.__videoTime=now;window.__videoLocal=local;
+      root.__animation.seek(interpolate(scene.map,local));
+      const cue=scene.captions.find(c=>now>=c.start&&now<c.end);
+      caption.textContent=cue?.text||'';
+      if(i===7&&now>=data.scenes[7].captionClose)caption.textContent='等待下一句对话。';
+      root.dataset.videoScene=String(i+1);
+      root.dataset.videoTime=now.toFixed(4);
+      root.dataset.caption=caption.textContent;
+      if(i===0&&local>=scene.visionAt){
+        for(const n of root.querySelectorAll('.ad-node'))n.classList.toggle('is-active',['camera','dpu','vision-cpu','pl','axis'].includes(n.dataset.node));
+      }
+      return {time:now,scene:i+1,caption:caption.textContent,animation:root.__animation.get()};
+    };
+    document.fonts.ready.then(()=>{window.renderVideoFrame(0);window.__videoReady=true;});
+  })();
+  </script>
+</body>
+</html>

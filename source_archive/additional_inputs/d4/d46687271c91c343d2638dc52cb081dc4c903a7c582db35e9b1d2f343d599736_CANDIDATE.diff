@@ -1,0 +1,115 @@
+--- before/board/runtime/board_business.py
++++ after/board/runtime/board_business.py
+@@ -494,6 +494,7 @@
+         try:
+             result = self.speaker_business.submit_analysis(job.meta, job.pcm, cid,
+                 visual=self.identity_handler._visual(job), is_current=is_current,
++                gallery_provider=lambda: self.identity_handler._gallery(job),
+                 cancel_event=cancel_event, deadline=job.deadline, on_evidence=evidence)
+             self.speaker_analysis_error = ''
+             return result
+--- before/board/runtime/board_speaker_business.py
++++ after/board/runtime/board_speaker_business.py
+@@ -257,6 +257,7 @@
+         self.config,self.calibration,self.on_evidence = config,c,on_evidence
+         self.lock = threading.RLock(); self.local = threading.local(); self.closing = threading.Event()
+         self.jobs = {}; self.latest = OrderedDict(); self.results = OrderedDict()
++        self.last_evidence_error = None
+         self.capacity = threading.BoundedSemaphore(2); self.counts = dict(submitted=0,complete=0,cancelled=0,unavailable=0,evidence_errors=0)
+         self.public_state = dict(active=False,speaker_calibrated=False,automatic_profile_access=False,ready=False)
+         self.lease = _WriterLease(self.root,data_origin=data_origin)
+@@ -466,9 +467,11 @@
+             return value
+         return self._call(work,meta,pcm,**kwargs)
+ 
+-    def submit_analysis(self,meta,pcm,conversation_id,*,visual=None,on_evidence=None,**kwargs):
++    def submit_analysis(self,meta,pcm,conversation_id,*,visual=None,gallery_provider=None,on_evidence=None,**kwargs):
+         cid = validate_conversation_id(conversation_id); meta = context(meta,pcm)
+         visual = validate_visual(visual,meta) if visual is not None else unavailable(meta)
++        if gallery_provider is not None and not callable(gallery_provider):
++            raise ValueError('Local read-only gallery provider must be callable')
+         key = meta['board_boot_id'],meta['session_id'],meta['request_id']
+         with self.lock:
+             old = self.results.get(key)
+@@ -485,6 +488,30 @@
+             binding = self.hub.binding
+             value = binding.precomputed_analysis(meta,cid,visual) if binding is not None else None
+             if value is None:
++                observed_visual = visual
++                if binding is not None and gallery_provider is not None:
++                    # Read/hash only on the original sole CPU worker, never the
++                    # foreground route or GTK tick. This is observation only:
++                    # no enrollment router, consent, template or grant is made.
++                    try:
++                        packet = gallery_provider()
++                        if not self._current():
++                            raise InterruptedError('Face observation no longer owns the capture')
++                        if observed_visual['state'] == 'FACE_AT_CAPTURE_BOUNDARIES':
++                            age = round(self.clock()*1000)-observed_visual['evidence']['source_end_ms']
++                            if not 0 <= age < 3000:
++                                observed_visual = unavailable(meta,'VISUAL_EXPIRED_BEFORE_ANALYSIS')
++                        reference = None
++                        if packet is not None:
++                            digest = binding.ingest_gallery(packet)['packet_sha256']
++                            reference = binding._gallery_for(meta,digest)
++                        binding._face_reference(meta,observed_visual,reference)
++                    except InterruptedError:
++                        raise
++                    except (OSError,ValueError,KeyError,TypeError,TimeoutError,sqlite3.Error):
++                        # A bad/missing face readback cannot invent a face name
++                        # or suppress an otherwise valid independent voice.
++                        binding._face_reference(meta,observed_visual,None)
+                 analyzer = self.hub.progressive_speaker
+                 if analyzer is None:
+                     voice,alias = self.hub.speaker.analyze(meta,raw),None
+@@ -494,12 +521,12 @@
+                 if binding is not None:
+                     proof = analyzer.provisional.proof(meta,store_id=self.hub.voice_reference(None)['store_id'])
+                     proofs = [proof] if proof is not None else []
+-                    face = binding.face_naming_proof(meta,visual)
++                    face = binding.face_naming_proof(meta,observed_visual)
+                     if face is not None:
+                         proofs.append(face)
+                     identity = binding.registry.resolve(meta,proofs,anonymous=alias)
+                 value = record(meta,cid,status='COMPLETE',reason='DESCRIPTIVE_EVIDENCE_ONLY',
+-                               voice=voice,visual=visual,anonymous=alias,identity=identity)
++                               voice=voice,visual=observed_visual,anonymous=alias,identity=identity)
+             return value
+         try:
+             kwargs['deadline'] = analysis_deadline
+@@ -529,9 +556,14 @@
+             if callback is not None and value['status'] == 'COMPLETE':
+                 try:
+                     callback(copy.deepcopy(value))
+-                except Exception:
++                except Exception as exc:
++                    name = type(exc).__name__
++                    error = (name if name in ('PermissionError','TimeoutError','ValueError','TypeError',
++                        'RuntimeError','OSError','ClockUnavailable') else
++                        'SQLiteError' if isinstance(exc,sqlite3.Error) else 'OtherError')
+                     with self.lock:
+                         self.counts['evidence_errors'] += 1
++                        self.last_evidence_error = dict(stage='evidence_callback',error=error)
+         future.add_done_callback(finished)
+         return self.analysis_result(meta,cid)
+ 
+@@ -631,6 +663,7 @@
+             state['ready'] = state['ready'] and not self.closing.is_set()
+             return dict(version=1,**state,**self.counts,
+                         data_origin=self.data_origin,queued_or_active=len(self.jobs),maximum_job_slots=2,
++                        last_evidence_error=copy.deepcopy(self.last_evidence_error),
+                         identity_templates_exported=False,profile_grants_issued=False)
+ 
+     def close(self,*,timeout=2.):
+--- before/tools/provisional_voice.py
++++ after/tools/provisional_voice.py
+@@ -47,7 +47,8 @@
+ 
+ def query_reply(text,resolution):
+     """Only explicit identity questions produce a naming/confirmation prompt."""
+-    if text.strip(' 。！!？?') not in ('我是谁','你知道我是谁吗','听声音我是谁','你认识我的声音吗'):return None
++    from common.voice_enrollment import identity_query_requested
++    if not identity_query_requested(text) and text.strip(' 。！!？?') not in ('听声音我是谁','你认识我的声音吗'):return None
+     state=resolution['state'];name=resolution.get('name')
+     if state=='CONFLICT':return '当前人脸和声音对应的记录不一致，我先不确定是谁；普通聊天可以继续。'
+     if state=='PROVISIONAL_NAME_CANDIDATE':return '声音可能对应登记的'+name+'，但声纹还未现场标定，不能确认身份。这个称呼对吗？'

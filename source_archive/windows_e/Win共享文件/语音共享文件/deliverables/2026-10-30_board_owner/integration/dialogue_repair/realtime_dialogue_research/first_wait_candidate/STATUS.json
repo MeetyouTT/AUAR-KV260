@@ -1,0 +1,33 @@
+{
+  "status": "FROZEN_CORE_AND_FOUR_CALL_ABBA_READY_ROOT_EXECUTION_ONLY",
+  "scope": "Local public source review, primary-source verification, candidate code and synthetic offline tests only; root owns model measurement and publication",
+  "root_reported_board_revision": "v13 ae473116",
+  "root_reported_startup_sha256": "da47ce3cd7c8f7f10364a8711dcce4cf19295c3bf03e4a2c93cd301c350ad070",
+  "evidence": "../../fixed_copy_human_round.json; repeated snapshots must not be counted as separate rounds or treated as controlled human question tests",
+  "finding": "Current model_inference_host requests Ollama stream=True but buffers all content until done; think defaults false; generic format=json overwrites the schema prepared by chat_body(fast=True)",
+  "focus": [
+    "Keep full JSON and board authorization/source checks",
+    "Reduce actual 27B first reply wait through validated request/protocol changes",
+    "Audit thinking, output constraints, prompt layout and cache reuse",
+    "Preserve answer completeness, voice and startup protection"
+  ],
+  "previous_44_test_chunk_grouping_candidate": "retained separately; not claimed as solution to the 5.7-second LLM wait",
+  "production_changed": false,
+  "models_or_devices_invoked": false,
+  "private_database_accessed": false,
+  "next": "Root executes exactly four public canonical-schema ABBA calls after its fresh exclusive-window readback; subsequent changes use a separate revision",
+  "updated_utc": "2026-10-31T10:25:32.490296+00:00",
+  "core_patch": "output_contract_review.patch",
+  "exact_before": "reference/",
+  "offline_tests": {
+    "passed": 47,
+    "failures": 0,
+    "errors": 0,
+    "evidence": "OFFLINE_TESTS.log",
+    "model_requests": 0,
+    "device_operations": 0,
+    "production_database_accesses": 0
+  },
+  "handoff": "FREEZE_HANDOFF.json",
+  "benchmark": "root_abba_benchmark.py"
+}

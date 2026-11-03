@@ -1,0 +1,24 @@
+现场人脸登记失败只读诊断（2026-11-02，洛杉矶）
+
+已确认终局：原camera sampling的固定原因是SAMPLE_OR_CONFIRM_TIMEOUT，即“采样或确认已超时，请重新采样”。collect10、validate5、total15/15；last_failure mono31894860ms。validation_attempts11/validation_passes11、best_validation_run5、score_rejections0、margin_rejections0、recovery_rejections0。因此这次不能解释为五帧独立验证未通过，也没有降低阈值的依据。原sampling29dc代码在最后5帧通过后先置ready、until=now+60000，超时才fail；这说明最终ready保存/确认时窗耗尽。终局超时不自动等于最早链路故障。
+
+已排除simple=False：现役LocalIdentityReplies构造明确传simple=True，BoardBusinessRuntime未提供替代factory；原simple应先口头确认授权，随后guide轮询到ready自动保存，不需要第二次口头脸确认。
+
+可复现的确认衔接竞态：production factory把snapshot绑定stage.services.identity_snapshot()，UiServices只读gate.value内存缓存（默认后台poll0.6s）；command却用ChannelConversationJobs._identity_command直接POST8790。现役83796d…VoiceEnrollment._start_simple发一次start收到accepted后只读一次缓存。如果缓存还没发布新的sampling session，函数立即reset+sample_failed，此时self.sampling_id仍为空，所以reset不会取消刚启动的相机采样，留下本地脸FSM idle、相机独立collect→validate→ready后超时的形态。
+本地用精确原方法、原snapshot校验和公开合成快照已确定复现：即时发布返回sample_auto/FSM sampling；延迟一拍的合法缓存返回sample_failed/FSM idle，相机仍collect，只发一次start且无cancel。没有网络、模型、设备或真实库访问。可复现源码缺陷与现场形态吻合，但不能在缺少逐次session关联日志时断言它是这轮唯一原因。
+
+已知时间线（UTC，非用户原文）：
+08:59:10 root唯一正常开启聆听请求，随后用户语音操作。
+09:04:10 root PHASE：脸FSM stageidle/activetrue、camera collect9/validate0，统一registry SAMPLING_FACE1。该时刻脸FSM已经不在sampling，早于后续ready确认超时；activetrue可能来自联合business，并不代表自动guide仍在。
+09:07:18–09:07:42 root OBS：camera failed15/15，hf已PAUSED，registry CANCELLED4。
+09:10:27 本代理读到上述明确超时原因和全部验证计数。
+09:18:32 本代理只读公开API people列表长度0，最后操作identity_delete/COMMITTED/db_version2。last_operation原结构没有时间字段，不能判断该删除的时间或操作者，也不能把它称为本次identity_enroll成功；root声明本轮未发删除已保留，未私自恢复旧模板。
+原聚合记录未保存sampling session身份，不能把09:04和后续15/15强行当作已证明的同一个session。也未据现存字段证明GUI/相机重启或换源是唯一原因。
+
+照片与其他原因：当前归档ready=true、error_count0、image_count45（仅计数，未读照片）；没有归档IO失败证据。现公开状态未提供future-gallery事务拒绝码，不能补猜。阈值/歧义/回收拒绝均无本次正证据，后续必须保留0.50/0.10/3000ms、原质量和模型。
+
+实际生产来源再次核验：当前startup1177df3831407bc819c1f1e3b89090f8c6b97661c8e74c2866b281be93b0a9c8在此读取内稳定。production_board_business_gui b01f6edb…、channel_jobs015e13d2…、ui_servicesb55ee295…、voice_enrollment83796dd7…、board_businessb08209ec…的pin/实读字节均匹配已审原来源。并行主页面工作可能改变startup，不能因此整份覆盖或宣称整个最新startup已由当前GUI加载。
+
+原ACK协议：只接受8字段(protocol_version,board_boot_id,service_epoch,command_id,ui_epoch,ui_generation,accepted,detail)，没有result或sampling session_id；原deadline2.5s，六个命令归属字段必须相等。新sync_fix应一次accepted start后有界等原UI发布新session，与start前session不同且同source/target/gallery；取消和超时要重核，不重发start，不认旧failed/ready，不盲cancel未知当前session。enroll原bridge另有ACK和回执验证，不应为start同步顺便改其他提交语义。
+
+用户目前无板卡键鼠，需要纯语音。root决定修后正常恢复GUI再录；本代理仅给候选约束和独审，不操作重试、录音、服务、UI或转轴，不修改生产、不读取姓名/personID/模板/图片/原音频/原文。下一轮只能在原语音确认授权后按新鮮状态重新采样，不对已超时会话补一次“确认”冒充继续保存。当前公开库人数0时原流程应按新登记提示确认登记，不假定仍有同名记录要求确认更新；最终以原真实提交/库存聚合验收。

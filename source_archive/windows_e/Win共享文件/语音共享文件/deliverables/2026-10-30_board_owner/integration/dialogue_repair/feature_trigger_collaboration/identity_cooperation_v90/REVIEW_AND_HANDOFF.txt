@@ -1,0 +1,99 @@
+90f6 声纹/视觉联合记录与自然查询：本地分离候选
+
+状态：LOCAL_VERIFIED_ROOT_REVIEW_PENDING，未部署，未做这三源的ARM采样。
+主窗口负责最终合并、实机采样及发布。本窗口只使用已保存343份公开源码/配置、
+公开合成身份/PCM、假编码器/模型client及新建临时SQLite；没有访问真实模型、
+板端设备或真实私库。现役监听按root最新报告保留false/PAUSED，不改变其状态。
+
+当前正常入口与边界
+
+1. “雪妃，现在镜头前有几个人”“刚才看到了几个人”走LocalVisualQueries，
+   使用现有相机人数结果及device scope统一时间轴。相机故障不是离场证据；
+   不由人数推断人名、画外说话者、物品或颜色。
+2. “雪妃，登记我的声纹，我叫某某”沿用SpeakerDevice原三段不同采样、
+   原质量/一致性/阈值及“确认保存声纹”。保存状态问题只读回原提交回执，
+   不把问句当下一段采样。现役field_calibrated仍false，不降低阈值。
+3. “雪妃，记住我，我叫某某”沿用BindingHubRuntime、FaceGalleryReadback、
+   原人脸确认/采样和签名提交回执，然后三段声纹及“确认保存身份关联”。
+   两部分原提交完成才激活派生关联。裸自报名、同名、模型台词均不是绑定授权。
+4. “雪妃，我是谁”“我叫什么名字”“你还认识我吗”“我是谁呀”等直接问题，
+   候选统一复用现有identity_query_requested语法及原resolver。
+   有ACTIVE关联且同轮新鲜人脸，只能报告当前可见人脸候选；声纹未校准仍是候选。
+   冲突不报人名；无脸/多人/过期不沿用旧人脸。任何结果都不授予个人档案。
+5. “删除声纹，名字是某某”再“确认删除声纹”使用原删除流程，并作废派生关联，
+   保留原人脸模板。原人脸删除后的新鲜完整inventory也会作废派生关联，保留声纹。
+   “取消身份关联”只取消进行中的流程，不能声称可解绑已完成的ACTIVE关联。
+
+两个已证缺口和本次修复
+
+普通轮次原_submit_speaker_analysis只传visual，不传同capture图库读回。
+因此没有该capture的references，face_naming_proof缺失。修复只加一个provider接线；
+图库读/校验/指纹全部在原board-speaker-cpu单线程中进行，前台不新增图库I/O，
+也不重复编码。复用原BindingHub的ingest/reference/resolve，不调用登记路由。
+
+原query_reply仅接受4个精确短句，而正式路由接受更多自然问法。实际paired反例中，
+“我是谁”可以报告联合冲突，三种自然问法却绕过这项结果。候选复用原直接问题语法；
+引用、否定、假设、复合动作仍不进入该查询。
+
+根窗口独审指出：ingest会更新gallery_versions/永久作废派生关联，必须先绑定owner。
+修前版完整保存在owner_check_review_before，SOURCE_MANIFEST SHA19b3bcb2...。
+8个新增反例在该版全部失败：foreign request/capture/boot/generation，配合更高revision
+的空inventory或改fingerprint，会错误改变ACTIVE状态/版本。当前修订在任何ingest前，
+先执行正式route同样的validate_packet(packet,meta)。修后逐项核对people、links、
+invalidations、gallery_versions完全保持。OWNER_CHECK_NEGATIVE_01.xml保留原失败。
+
+新增的last_evidence_error只有stage=evidence_callback和固定白名单异常类别，
+不带异常消息、正文、人名、模板、路径或身份ID。失败仍累计evidence_errors，
+不阻断正常回复，后续成功也不清除历史计数/末次失败。合成计数6→7三例通过；
+这不解释现役历史6次错误。原声纹COMPLETE只证明描述结果形成，不证明timeline已写入。
+
+存储与识别含义
+
+人数记录仍在同一个Store的device scope；声纹描述结果仍在原RAM结果缓存及私有
+speaker/anonymous/link三库。普通轮次写统一时间轴的仍是“身份未确认”小事件，
+不把候选UUID、向量或姓名复制进时间轴，更不把它们自动加入个人记忆。
+同人一致仅表示已有关联候选相符；两端人脸不是active-speaker proof。
+声纹匿名聚类的aN始终是暂时标签，不是身份键。跨boot/TTL使暂时别名、请求证据
+及授权失效；经明确授权保存的模板/派生关联仍保留，新boot必须有新观测。
+
+验证（不同组存在重叠，不能把组数相加当独立用例数）
+
+- 有效冻结9例：未改v90为1PASS/8FAIL；候选9PASS。初期三份fixture调试结果保留，
+  图库同revision内容变化、preview字段及模拟时钟问题不计为产品缺陷。
+- OWNER_CHECK_REGRESSION_01.xml：79PASS，含47联合/边界例、冻结9重复核验、
+  原speaker16、v3原7。覆盖无脸/多人/冲突/离场重返/过期/撤销/跨boot、
+  高revision外国owner、记忆写入失败、原三段授权及实际伪造模型回复不写绑定/授权。
+- VISUAL_REGRESSION_FINAL.xml：103PASS/1 deselected。唯一旧kernel-lock测试在未改
+  v90同样因缺迁移receipt而构造拒绝，见OLD_KERNEL_GATE_BASELINE.xml；原断言未修改。
+- M03_COMPOSITION_02.xml：48PASS，即47联合/边界例加真实paired日期删除闭环。
+  原M03 sources、worker、四项/三项独立测试及ARM回执保持冻结。
+
+最小集成
+
+SOURCE_MANIFEST.json仅3源，CANDIDATE.diff为清晰差异：
+board/runtime/board_business.py：482e...上只加provider一行；冷启动工厂AST完全不变。
+board/runtime/board_speaker_business.py：原56a0...上加异步读回、先owner校验、过期保护和诊断。
+tools/provisional_voice.py：复用原自然问句解析器。
+没有GTK、音频采集/播放源、模型预算、数据库schema、阈值或授权策略更改。
+
+与M03的b336...注册hunk可以独立合并。组合business文件在
+combined_with_frozen_M03/board/runtime/board_business.py，SHA7c5cef7b648af0d8f3aad026c97ee82dace5911a7bdb88d040fc2d0c01038662。
+移除provider一行会按原字节回到冻结b336；原冷启动工厂AST相同。完整组合五源路径和
+SHA见COMBINED_M03_SOURCE_MANIFEST.json；MERGE_PROOF.json提供可逆证明。
+root其它稳定性修复发布后若startup/pins改变，须按实际before SHA重新核对，不覆盖新源。
+
+本地复验入口（从feature_trigger_collaboration，现有Python/pytest依赖在共享目录外）：
+D:/py312/python.exe -B -X utf8 identity_cooperation_v90/run_tests.py identity_cooperation_v90/test_identity_cooperation.py -q -p no:cacheprovider
+加--baseline并指定PUBLIC_COUNTEREXAMPLES_FROZEN.py可重放原8失败。
+加--with-m03并指定test_identity_cooperation.py及test_m03_composition.py可重放组合48例。
+不要再次运行build_candidate.py覆盖封存源；它保留用于可复现审查。
+
+尚未完成的产品范围
+
+已完成关联的独立自然解绑/重新关联尚无正式选择和确认入口。应复用原确认/选择授权，
+不能把模型生成“解绑”或同名记录当作选择和授权。当前仅原模板删除/revoke回调作废派生关系。
+统一查询对没有ACTIVE派生关联的单独登记仍可能按访客答复，不声称任意单独脸/声纹
+都可按名字统一查询。自由聊天模型仍可说未经核实的状态台词；伪造回复测试只证明
+它不能生成真实绑定/档案授权，不证明自由台词事实正确。直接状态问句应走本地确定路径。
+现役6次evidence错误、104次visual错误的根因及全记录成功率均未由本轮确认。
+本地合成结果不代替真实人脸/声纹标定、真人辨认率、物理声音或ARM性能验收。

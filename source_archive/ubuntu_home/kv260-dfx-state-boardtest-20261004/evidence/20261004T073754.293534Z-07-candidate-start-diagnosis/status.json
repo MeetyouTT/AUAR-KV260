@@ -1,0 +1,87 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/07-candidate-start-diagnosis.json",
+  "manifest_sha256": "6682be804584ad960ee03a2395fc1196b69940fb23a9a00831005cbff33983d2",
+  "started_utc": "2026-10-04T07:37:54.293692+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "startup-logs",
+      "started_utc": "2026-10-04T07:37:54.796408+00:00",
+      "entry": {
+        "id": "startup-logs",
+        "command": "python3 -B -c 'import pathlib,json; P=pathlib.Path; r=P(\"/home/root/kv260-dfx-state-boardtest-20261004\"); d=P(\"/home/root/kv260-dfx-state-boardtest-20261004/evidence/start-64434545472776\"); print(json.dumps({\"command_outputs\":{p.name:p.read_text() for p in d.iterdir() if p.suffix in (\".stdout\",\".stderr\")},\"manager_stdout\":(r/\"manager.stdout\").read_text(),\"manager_stderr\":(r/\"manager.stderr\").read_text(),\"socket_exists\":P(\"/tmp/dfx-mgrd.socket\").exists(),\"overlays\":[p.name for p in P(\"/sys/kernel/config/device-tree/overlays\").iterdir()],\"render\":[p.name for p in P(\"/dev/dri\").glob(\"renderD*\")]},indent=2))'"
+      },
+      "exit_code": 0,
+      "output_sha256": "953a437d6c1d5284607b5a0404c61e31e6358043741d30d2157a72a515f29666",
+      "bytes": 5892,
+      "finished_utc": "2026-10-04T07:37:56.478434+00:00"
+    },
+    {
+      "id": "manager-status",
+      "started_utc": "2026-10-04T07:37:56.478894+00:00",
+      "entry": {
+        "id": "manager-status",
+        "command": "systemctl show dfx-mgr.service -p MainPID -p ActiveState -p SubState -p Result -p ExecMainStatus -p ExecStart -p DropInPaths"
+      },
+      "exit_code": 0,
+      "output_sha256": "24b81df615da9cfa3a4c8c16b49609871f3c276fef392fd37cf99635d92df019",
+      "bytes": 487,
+      "finished_utc": "2026-10-04T07:37:57.437254+00:00"
+    },
+    {
+      "id": "packages-now",
+      "started_utc": "2026-10-04T07:37:57.437662+00:00",
+      "entry": {
+        "id": "packages-now",
+        "command": "dfx-mgr-client -listPackage",
+        "timeout": 20
+      },
+      "exit_code": 0,
+      "output_sha256": "d3361c5de7ab7b1949e089fbe4b68f5b745b7139fce21406305e118632c04f4d",
+      "bytes": 726,
+      "finished_utc": "2026-10-04T07:37:58.237072+00:00"
+    },
+    {
+      "id": "service-journal",
+      "started_utc": "2026-10-04T07:37:58.237454+00:00",
+      "entry": {
+        "id": "service-journal",
+        "command": "journalctl -b -u dfx-mgr.service --no-pager -o short-monotonic"
+      },
+      "exit_code": 0,
+      "output_sha256": "d1267beeb4dd83aa68e696746fbe2884bb6ce7922d2904f95bd4de8e0e74ee26",
+      "bytes": 15642,
+      "finished_utc": "2026-10-04T07:37:59.261121+00:00"
+    },
+    {
+      "id": "query-now",
+      "started_utc": "2026-10-04T07:37:59.261449+00:00",
+      "entry": {
+        "id": "query-now",
+        "command": "xdputil query",
+        "timeout": 90
+      },
+      "exit_code": 0,
+      "output_sha256": "65ca88e026b72a5094132679fb73fd1b6d35216b9cb835937acb341f216ced80",
+      "bytes": 1502,
+      "finished_utc": "2026-10-04T07:38:01.292961+00:00"
+    },
+    {
+      "id": "classification-now",
+      "started_utc": "2026-10-04T07:38:01.293303+00:00",
+      "entry": {
+        "id": "classification-now",
+        "command": "/home/root/Vitis-AI/examples/vai_library/samples/classification/test_jpeg_classification /usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel /home/root/kv260-test-20261001/pytorch-resnet-dog.jpg",
+        "timeout": 90
+      },
+      "exit_code": 0,
+      "output_sha256": "07ddebadc085bf48969fe8c988e89949d49603de98490d1a81ad8876938fafbe",
+      "bytes": 730,
+      "finished_utc": "2026-10-04T07:38:02.717098+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T07:38:02.764795+00:00"
+}

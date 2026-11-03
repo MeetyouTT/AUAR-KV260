@@ -1,0 +1,157 @@
+Readonly audit: automatic first-utterance conversational address
+
+Conclusion
+The current production path already analyzes ordinary captured audio on the sole
+speaker worker. A quality-passing uncalibrated capture is encoded once, and the
+existing provisional matcher already performs named-store.match once, even on
+the first capture. The missing behavior is a separately scoped single-capture
+address candidate and its adoption BEFORE the first ordinary LLM context is
+built. Changing only the old three-capture query counter cannot implement this.
+No product files, devices, endpoints, private databases, models or real audio
+were accessed or changed by this audit. This is source analysis, not a new
+runtime test or a claim of real-device acceptance.
+
+Exact production chain
+1. tools/board_avatar_gtk.py:275 selects
+   tools.production_board_business_gui.prepare_board_business when character_pair
+   is present. That factory at line160 creates ProductionGuiBoardBusiness.
+2. tools/production_board_business_gui.py:115 overrides _attach_speaker. Its
+   BoardSpeakerBusiness.create now receives threshold .35 / margin .1 /
+   consistency .6 / field_calibrated false. The generic base GUI and the separate
+   CandidateGuiBoardBusiness override are not the selected creator.
+3. BoardBusinessRuntime.attach_speaker_business (board_business.py:634) attaches
+   the original identity handler and sets jobs.analysis_provider to
+   self._submit_speaker_analysis (line648).
+4. The production pair binds actual jobs._route and _admit_text instance methods
+   from tools/yuki_jobs_candidate.py, and wraps the existing context builder in
+   PairedContextBuilder. Ordinary text returns plan=None; existing special,
+   management, enrollment and memory routes keep their current handlers.
+5. BoardDialogueJobs._execute (audio/board_dialogue_jobs.py:628) calls _route at
+   line719, invokes analysis_provider at line726, then calls prepare_text at
+   line740 when plan is None. It ignores the provider's return value. Analysis is
+   currently enqueued and not awaited before the LLM context begins.
+6. BoardBusinessRuntime._submit_speaker_analysis validates conversation source,
+   then submits job.meta/job.pcm to BoardSpeakerBusiness.submit_analysis with
+   current/cancel/deadline and the same conversation ID. Its existing evidence
+   callback persists only the generic attribution-unconfirmed device event;
+   it does not pass a name to the ordinary LLM.
+7. BoardSpeakerBusiness.submit_analysis (line711) runs the existing progressive
+   analyzer on the sole worker unless a strict control precomputed record
+   exists. ProgressiveSpeakerAnalyzer.analyze (tools/progressive_speaker.py:14)
+   invokes the original voiced_pcm gate, then encoder.encode once, then
+   ProvisionalVoiceMatcher.observe for the uncalibrated branch.
+8. ProvisionalVoiceMatcher.observe (tools/provisional_voice.py:16) calls
+   device.store.match at line20, preserving .35 and .1. A KNOWN result updates
+   the actor's model/revision/identity streak immediately; only the original
+   three-distinct-capture proof remains gated until 3 captures. The first named
+   match itself already contains IdentityMatch.name and is not delayed until 3.
+9. BoardDialogueController.prepare_text -> _prepare -> _messages (line413)
+   obtains store.context scoped by current conversation source, then calls
+   PairedContextBuilder -> BoardContextBuilder. These functions currently receive
+   only stored context/text/history and no volatile voice address packet.
+
+Existing contracts which must remain unchanged
+- common/speaker_turns.py validate_record rejects an uncalibrated legacy voice
+  CANDIDATE and rejects candidate_id for an unknown/not-calibrated voice. Do not
+  mark voice.state CANDIDATE or field_calibrated true to sneak a name through.
+- IdentityLinkRegistry.resolve requires ACTIVE links before giving a linked
+  name. The user excluded association. Do not create links or alter this
+  registry's proof/authority contracts just to address this standalone speaker.
+- The explicit self-match probe's three-capture ledger/proof remains distinct
+  from this newly requested single-capture conversational candidate. Do not set
+  global required_captures=1 or change old proof to represent verified identity.
+- SpeakerDevice enrollment still needs its original three recordings, .6
+  consistency and final confirmation. .35/.1 must remain actual device/store
+  values, with field_calibrated false and no automatic profile grant.
+- named matching quality requires bounded 3-20s PCM with >=2.5s WebRTC VAD speech.
+  A shorter first sentence should still receive normal dialogue, leaving the
+  conversational-address acquisition pending for the next valid sentence.
+
+Smallest reusable design boundaries
+A. Produce a private single-capture packet on the existing speaker worker only,
+   reusing its already computed vector and its already performed named match.
+   Avoid a new encoder, another model process or a foreground Store connection.
+   A clear implementation can add an optional observation callback or an exact-
+   meta private single-result accessor around Provisional.observe's KNOWN branch;
+   the old three-proof return value stays unchanged. Alternatively the worker can
+   conservatively read the immediately produced streak, requiring current
+   generation, exact (capture_id, pcm_sha256) membership as a zipped pair and
+   model/revision equality, and fetch that ID's display_name in the same worker.
+   A stale previous streak or merely matching actor is insufficient.
+B. Keep this packet outside speaker_turns.record and outside binding registry.
+   Include full request meta, conversation source/scope, model/dimension,
+   revision/template-source token, accepted threshold/margin, bounded expiry and
+   cancellation ownership. Its semantic is conversational address candidate;
+   identity_verified/private_memory/profile_access remain false.
+C. A first-turn bridge is necessary. The natural existing owner boundary is a
+   request-level provider in BoardDialogueController._messages(turn,...), before
+   BoardContextBuilder is called, backed by Runtime's pending analysis for this
+   exact request. The current turn already has session/generation/turn_id/
+   context_source_id/scope/cancel/deadline. Wait only within a small explicit
+   remaining budget; unavailable or late analysis must fall back to ordinary
+   chat. Just changing the background callback cannot affect first-turn context.
+   Another valid bridge is bounded Runtime provider adoption before prepare_text,
+   but the resulting context input must remain bound to the original request.
+D. Add the accepted name only as a bounded, clearly data-only context note. The
+   builder must count it in message_cost and omit it if the normal context limit
+   cannot accommodate it. Keep the selected persona unchanged, do not prepend a
+   name to raw ASR or store.begin_turn metadata, and do not create a memory fact.
+   A global builder.name is unsafe because the builder lacks request ownership.
+E. To use the name naturally in subsequent turns, retain a separate volatile
+   current-conversation address lease after successful adoption. This lease is
+   not an extension of the original 2s biometric proof. Explicitly scope it to
+   boot/session/conversation and do not reload it after process restart or across
+   selected conversations/profiles. Clear on reset, new owner/session, source
+   revision/model/template change, expiry, cancellation before adoption, or a new
+   usable capture that contradicts the retained candidate. A short/insufficient
+   capture should not fabricate a new identity. Distinguish pending acquisition
+   from a currently valid adopted address.
+F. Existing ordinary assistant messages can naturally contain the addressed
+   name and follow the already authorized conversation history path. Volatile
+   here means no new name fact/profile grant/link or custom persistent candidate
+   record; it cannot honestly promise the spoken name never appears in the
+   ordinary assistant transcript.
+
+Cancellation, TTL and privacy gates
+- Before and after encoding/match/adoption, enforce the original current meta,
+  cancelled Event, service latest owner, runtime session/generation and deadline.
+  A late worker callback must not establish a name for a superseding request.
+- Keep no PCM, embedding, original job object or is_current closure in the
+  address cache; those can retain audio through referenced jobs. Small owner
+  metadata and the cancellation Event are sufficient.
+- Same exact request retries must use the cached terminal result, without another
+  encode or count. The existing 600s analysis/control cache is not a 600s named
+  proof or a valid conversational-address authorization.
+- Revalidate model/store dimension and source token before accepting a name.
+  Check any gallery change using the sole worker; never move its SQLite handle
+  across threads. Keep namespace/source tokens private.
+- Do not call timeline/event_time while holding service.lock. Existing clock
+  projection fixes already removed this inverse-lock risk. Metadata polling
+  must not raise if proof timing becomes unavailable.
+- Public diagnostics should expose phase/attempt/adoption booleans or bounded
+  counts only, without names, IDs, vectors, scores, raw text or templates.
+- Keep the old local/special registration and query routes from falling through
+  into this ordinary address acquisition. Their precomputed control evidence
+  must still prevent double-encoding a registration capture.
+
+Necessary targeted regression evidence for the implementation
+1. Actual Production factory/override and actual formal pair + Yuki Jobs + LIR
+   + recording/stream/ACK: the FIRST valid ordinary sentence gives LLM input a
+   scoped address note, with exactly one encoder and one named-store.match call.
+2. Follow-up ordinary sentences in the same conversation naturally receive that
+   adopted address; selecting/resuming another conversation, switching profile,
+   30s session reset or process restart cannot inherit it.
+3. First short sentence, poor quality, empty store, unknown .34 and ambiguous
+   .1-gap failures remain normal dialogue without a false name or new prompt
+   requiring three repeats. A later valid .5 sentence can acquire the address.
+4. Cancel before analysis, after match, after worker completion/before adoption,
+   and superseding owner callbacks cannot leave a new lease. Retain the earlier
+   late-adoption race regression as a model for this boundary.
+5. Idempotent retry, expiry, wall clock failure, revision/delete/model changes,
+   and stale 600s control cache cannot reuse an invalid named candidate.
+6. Original explicit 3-query probe, registration 3 samples + final confirmation,
+   field_calibrated=false, margin .1, consistency .6, anonymous policy .9 and
+   no links/profile grants all remain unchanged. Private fields are absent from
+   public metadata; ordinary user raw recording remains untouched.
+
+No implementation or measurements were added in this readonly audit.

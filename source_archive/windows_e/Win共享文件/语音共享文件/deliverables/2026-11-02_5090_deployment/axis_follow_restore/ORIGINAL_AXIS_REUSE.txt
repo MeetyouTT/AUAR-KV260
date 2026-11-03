@@ -1,0 +1,54 @@
+沿用原板端转轴链路的盘点与优化顺序（洛杉矶2026-11-01）
+
+结论：原转轴控制器完整，25项全匹配。当前FAULT来自benchmark平台及旧boot输入绑定，不能用调速度或只换boot字符串解决；不需要重写跟随算法或新增控制器。
+用户最新范围已接收：沿用原板端实现优化。本子代理在范围更新前仅审查，没有写出新事务执行器；之后只读盘点和本地报告。root唯一实际操作者，实物条件以root新建CURRENT_PHYSICAL_CONDITIONS.json为准。
+
+原入口和来源
+原控制器根 /home/root/aura-pan-wide-20261028/control-10282601
+deployment-manifest.json SHA5c8206ee626c91c9f311ee870245813e169ac14e554e2579554c74489066f562，25个实际文件逐项匹配。
+原跟随 /home/root/aura-pan-wide-20261028/control-10282601/run_face_motion.py
+SHA9ebf21a1bcbc37992398e8d59f459141d7cc49163dcf400e768ea129f4e8be94。
+原固件/driver /home/root/aura-pan-wide-20261028/release-6a4b645a5bbfd35c
+candidate-manifest.json SHA6a4b645a5bbfd35c9107976edf27886cf8e0c91e40f48be6f052a95e1172c1cf。
+
+原程序可复用范围
+1. 原run_face_motion.py支持--manifest、--manifest-sha256、--context、--app-root、--output、--direction-evidence、--human-evidence、--zone-settings、--confirmation FACE_ZONE_CONTINUOUS和--duration 0..300。代码不固定本次boot，支持真实新context；现在选择的context/方向/几何文件均为旧bebd3e7d，不能原样当903c输入。
+2. release/bench_identity_stop.py SHA c9e91f74336c1e73d7c60408739abc8537b80066eb666a1a79e32b81d7d267aa，支持新manifest/context/output和--execute --confirmation ID_STOP_ONLY。其原guard会核当前boot/FDT/wide/operating/VART/4固件/3driver；首write为STOP，无BIND/REFERENCE/ARM/COMMIT。benchmark时不能调用设备分支。
+3. 原有限初始化 /home/root/aura-axis-priority-20261101-3c94e7a0/bench_finite_step_deadline_fix.py，SHA f23952abb189e2e826db7f78ff81296a81a4b57c17684258499227d215dc6dc4。虽放旧会话目录，源码CLI支持新context，2秒、1400..1600、最大5µs；需当前现场选initial/target，不能重用旧输出。顶层import bench_identity_stop，运行时需以原release路径作为PYTHONPATH并先核来源，不能凭目录名假定可直接解析。
+4. 原方向小往返 /home/root/aura-axis-priority-20261101-3c94e7a0/bench_observed_80us_6s.py，SHA3538bef649574da5607aa54ffbfdee5e103fc4f1db1ebb468eade239500b876c。CLI支持--context/--expected-state，6秒、origin→origin+80→origin，要求新boot停止寄存器逐值相同且1400..1600内；旧expected-state/方向不能用。本源结果标签写20US但实际请求/事件为80µs，必须按实际事件与user_requested_excursion_us检查，不能据标签误报幅度。
+5. 原相机仍由aura-camera-ui.service经face-source-v17/entry.py启动，原ExecCondition为boot_ops condition camera。已实读Restart=no、KillMode=process、SendSIGKILL=no、TimeoutStop=infinity。正常stop/start使用原systemd命令，不改这些保护；恢复前须原最终checkpoint全链/完整计数验证，恢复后核exact_seed和本次消费。
+6. 原boot_ops.py（SHAa9c00ea799d0731674e5a4c27a3f97802e9dae2d834553fb3e75d82b55ca7872）是原native域维护程序，实际meta.source_boot为008f3e1b、state=ACCEPTED。它的arm/reboot/benchmark/activate/rollback不是本boot通用wide恢复入口，保持原ExecCondition但不重放维护动作。
+7. 已核原板端维护根主要保存旧boot结果/配置及原bench。旧Windows tools/run_step.py固定3c94/PID1352/FDT/阶段，不直接重放。现有systemctl、原client、原checkpoint验证、原bench和原follow可分阶段沿用；操作记录与真实读回由root统筹，不新造转轴框架。
+
+原GUI动作契约
+http://127.0.0.1:8783/api/command，保留原Origin/Host及请求校验。
+{type:pan_face_follow}是toggle，running时stop，否则start；enabled字段不参与。不能未知结果后反复发送来“停止”。
+明确停止为{type:pan_stop}，直接self.pan.stop()，源码tools/pan_controls.py已对现行pin核SHA0a6571320fa7f45b1bc4049d000b85f8ce40434bcb266af4368242543cd99aa1。
+手动pan_jog要求真实GTK输入token，远程/积压jog会拒绝。原界面视觉页有开始/停止人脸跟随及单独停止，不绕过它的输入源保护。
+
+当前实际参数（来自原程序，不是新候选）
+manual配置为runtime/aura/config/pan_manual.local.json，face配置为同根pan_face.local.json；二者仍绑定旧bebd3e7d/FDTaed6…。
+正式follow采用latched_visual_center_hardware_slew：每硬件20ms帧最多4µs，名义200µs/s，PS control tick20ms；不是200度/秒。原行程500..2500µs，当前GUI duration=0持续模式。
+预ARM需2个确认源帧；新实际图像期限250ms与原检测锚500ms取早。目标/相机换代、源乱序、旧图续租和丢脸保护保持。
+原OneEuro位置准入滤波 min_cutoff1Hz、beta6、derivative1Hz、width_beta2；中心大跳>0.08且速度>1.5画幅/秒要下一实际图确认。
+原目标中心0.5、中心容差0.03、预触发margin0.05。中心/容差由原run入口固定；zone JSON的同名center字段并未被传入EdgeConfig，单改JSON不会生效。
+用户原zone：left_camera_ratio=0.1，屏幕right_ratio=0.7158253629442671，viewport[8,112,568,300]。用原纯camera_zone函数计算得到相机区间[0.1,0.8064720153808593]、内容矩形[92,112,400,300]；屏幕边界约x132与x414.589。
+manual按钮sign=-1，原direction evidence的跟随polarity=+1；两者语义/来源不同，且都是旧boot资料，不能据此填本903c方向通过。
+EdgeConfig中的maximum_speed40、acceleration120等兼容字段不是当前hardware_slew的真实速度旋钮；实际脉宽斜率在原PL 4µs/20ms。不要把改兼容字段当作实际提速或抖动优化。
+跟随只要求匿名有效单脸，不要求身份KNOWN；不能把身份UNKNOWN直接当作跟随失效原因。
+
+可立即沿用的原只读输入诊断
+/home/root/aura-pan-wide-20261028/control-10282601/run_input_diagnostics.py
+SHAe273e800d722b09cf034fc53d21be121f5cacf6f5939577366546c8042493f00，原25项manifest内文件，已新鲜核对。
+CLI --settings <本boot合法zone-settings> --output <新独占结果> --duration 1..30，PYTHONPATH指向当前实际GUI aura树解析common包。
+它只读现有/v1/motion/face-stream，输出源图/检测锚年龄、读取队列和拒绝原因，不导入driver/MMIO或发ARM/COMMIT；benchmark下也可先量输入。它会写一个诊断结果文件，应由root调用。本子代理未执行。
+内部1450只是纯软件计算参考，诊断math速度等与正式hardware_slew有差别，不能把结果当机械位置或动作验收。当前旧zone会被原boot guard拒绝；新的几何输入须有本次实际显示/相机来源说明，不能只盲换旧UUID。
+
+优化次序
+先恢复原wide及本boot原context绑定，保持原25文件/driver/斜率/期限不变。原loader精确argv、systemd OS监督和读回契约见OS_CLIENT_SUPERVISION_CONTRACT.txt。
+用原输入诊断区分是源图过期、检测锚过期、队列/HTTP断开还是实际画面越界；不要先扩大250/500ms或lease来掩盖源流问题。
+原参考/方向与STOP通过后，用原--duration 25做一次有限跟随观察，读取原report的input_timing、reader_queue、decisions、visual_center_completions、maximum_control_turn_ms和停止回执；不重写控制器。
+只有实际报告证明误触边界时，再先用已有GUI调一条边界、或经确认改一个既有参数。改边界前用pan_stop并确认停止，原follow检测zone SHA改变会结束当前轮，下一轮重新确认新图。硬件斜率、行程、过期与目标锁先保持。
+未完成实物短窗与数据对照前，不宣称已优化抖动/方向/角度或永久开机恢复。当前没有新的motion回执。
+
+完整机器可读入口/SHA/参数：ORIGINAL_AXIS_REUSE.json；原始实板证据original_axis_inventory_01.json、existing_maintenance_inventory_01.json、os_supervision_capabilities_01.json。root已交接身份单文件补丁后的新startup0f2a319a…；盘点时的3fd记录按历史保留，后续动作须按新实际startup核验。

@@ -1,0 +1,62 @@
+{
+  "runtime": "/home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/runtime",
+  "previous_runtime": "/home/root/aura-render24-rgb565-20261020/887c4b6b2b5d/runtime",
+  "monitor_enabled": true,
+  "preference_path": "/root/.local/share/aura/handsfree_dialogue.json",
+  "backup": "/home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/ui-backup-eeb5e3ad",
+  "override": "/etc/systemd/system/aura-avatar-ui.service.d/zz-aura-listening-timing-20261020.conf",
+  "pc_restarted": false,
+  "camera_modified": false,
+  "human_timing_verified": false,
+  "status": "UI_TIMING_DEPLOYED",
+  "ui_unit": "# /etc/systemd/system/aura-avatar-ui.service\n[Unit]\nDescription=AURA cached avatar touchscreen interface\nWants=xserver-nodm.service systemd-modules-load.service\nAfter=local-fs.target xserver-nodm.service systemd-modules-load.service\nRequiresMountsFor=/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime\nStartLimitIntervalSec=300\nStartLimitBurst=5\n\n[Service]\nType=notify\nNotifyAccess=main\nUser=root\nEnvironment=DISPLAY=:0 PYTHONUNBUFFERED=1\nWorkingDirectory=/home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/runtime/aura\nExecStart=/usr/bin/python3 -B /home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/startup/launcher.py --config /home/root/aura-voice-barge-in-20261020/candidate-667b70d586ca/startup/config.json\nRestart=on-failure\nRestartSec=5\nTimeoutStartSec=240\nTimeoutStopSec=25\nKillMode=mixed\nStandardOutput=journal\nStandardError=journal\nSyslogIdentifier=aura-avatar-ui\n\n[Install]\nWantedBy=graphical.target\n\n# /etc/systemd/system/aura-avatar-ui.service.d/80-aura-pan-manual-20261020.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-pan-manual-ui-20261020/camera-fix-v3/startup/launcher.py --config /home/root/aura-pan-manual-ui-20261020/camera-fix-v3/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/99-aura-rgb565-trial.conf\n[Service]\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-render24-rgb565-20261020/887c4b6b2b5d/startup/launcher.py --config /home/root/aura-render24-rgb565-20261020/887c4b6b2b5d/startup/config.json\n\n# /etc/systemd/system/aura-avatar-ui.service.d/zz-aura-listening-timing-20261020.conf\n[Unit]\nRequiresMountsFor=/home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/runtime\n[Service]\nWorkingDirectory=/home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/runtime/aura\nExecStart=\nExecStart=/usr/bin/python3 -B /home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/startup/launcher.py --config /home/root/aura-listening-timing-20261020/candidate-5a0cab12671b/startup/config.json\n",
+  "camera_pid": 106060,
+  "camera_epoch": "8f3282d3787c4195b278970563559b97",
+  "camera_unchanged": true,
+  "identity_database_unchanged": true,
+  "identity_database_sha256": "e0d2113eb51171079978b1e63eb4263d5fb13235fec1839f7be778dab1520aa1",
+  "handsfree": {
+    "enabled": true,
+    "state": "WAITING_PERSON",
+    "reason": "NOT_FRONTAL",
+    "error": "",
+    "visual_bound": false,
+    "conversation_entered": false,
+    "microphone_open": false,
+    "speech_detection": "energy_vad_then_asr",
+    "diagnostics": {
+      "armed": 0,
+      "speech_starts": 0,
+      "submitted": 0,
+      "entry_rejected": 0,
+      "visual_stops": 0
+    },
+    "speaker_binding_verified": false,
+    "voice_barge_in": true,
+    "listening_timing": {
+      "enabled": true,
+      "entry_confirmed": false,
+      "input_ready": false,
+      "holding_utterance": false,
+      "visual_hold": false,
+      "last_stop_reason": "",
+      "stop_reasons": {}
+    }
+  },
+  "voice_barge_in": {
+    "enabled": true,
+    "listening": false,
+    "echo_reference_ready": false,
+    "echo_reference_gaps": null,
+    "interrupted_turns": 0,
+    "error": "",
+    "last_monitor": {},
+    "last_detection_to_stop_ms": null,
+    "continuation_listening": false,
+    "continuation_handoffs": 0,
+    "next_utterance_pending": false,
+    "echo_cancellation": "SpeexDSP reference from queued playback PCM",
+    "speaker_binding_verified": false
+  },
+  "manual_pan_present": true
+}

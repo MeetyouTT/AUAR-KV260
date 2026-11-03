@@ -1,0 +1,34 @@
+{
+  "experimental": true,
+  "production_accepted": false,
+  "steps": [
+    {
+      "argv": [
+        "nice",
+        "-n",
+        "15",
+        "/home/root/aura-yuki-validation-20261030/build/yuki_frame_export",
+        "/home/root/aura-yuki-validation-20261030/inputs/ems/yuk_0.ems.json",
+        "/home/root/aura-yuki-validation-20261030/inputs/ems/yuk_0.ems.resx.json",
+        "/home/root/aura-yuki-validation-20261030/probe_build/scenario-static-reference.json",
+        "/home/root/aura-yuki-validation-20261030/static-reference-frames.json",
+        "--resource-root",
+        "/home/root/aura-yuki-validation-20261030/inputs/ems"
+      ],
+      "returncode": 0
+    },
+    {
+      "argv": [
+        "nice",
+        "-n",
+        "15",
+        "python3",
+        "/home/root/aura-yuki-validation-20261030/probe_build/gles2_capture.py",
+        "/home/root/aura-yuki-validation-20261030/static-reference-frames.json",
+        "/home/root/aura-yuki-validation-20261030/static-reference-captures"
+      ],
+      "returncode": 0
+    }
+  ],
+  "ui_unchanged": true
+}

@@ -1,0 +1,82 @@
+{
+  "schema": "aura.production-memory-handoff.source.v1",
+  "frozen_utc": "2026-10-31T04:24:04.273319+00:00",
+  "files": [
+    {
+      "path": "aura/common/board_memory_migration.py",
+      "sha256": "add49fbbb131dd5fed7d8cabe63b303788eb7a7119f463d69e4ecf4ccb8357b8",
+      "bytes": 37161
+    },
+    {
+      "path": "aura/common/board_observation_migration.py",
+      "sha256": "a2ab2b2c0178db47c47ab5afcf62cdc7d1da4325175493232ad13ae0dcf2a5c2",
+      "bytes": 13467
+    },
+    {
+      "path": "aura/common/board_production_bootstrap.py",
+      "sha256": "1fad01979f303811d873f47eb05568e613b8c9462142dd1785a1407da6b7790b",
+      "bytes": 19404
+    },
+    {
+      "path": "aura/board/runtime/board_speaker_business.py",
+      "sha256": "43227afc6d86dbf3ae4eed5cf3efcb996ed0267551958773901f49309122a8c7",
+      "bytes": 41224
+    },
+    {
+      "path": "aura/board/runtime/visual_policy.py",
+      "sha256": "efb730d82b812f4323e92c8d6fdf1e69ae9f8dbffab1a5c5db346a18d12b4dc9",
+      "bytes": 16418
+    },
+    {
+      "path": "aura/tools/board_production_import.py",
+      "sha256": "2dea6a9f36ea162f1bc6c9a9480263f7a84894004dbf94a08745e63196ceb20f",
+      "bytes": 9706
+    },
+    {
+      "path": "aura/tests/framework/test_board_production_migration.py",
+      "sha256": "f0a2b1ef75211d234cc69c830b76bfe35f385a1d2494c7532b9867dcacbe1660",
+      "bytes": 19052
+    },
+    {
+      "path": "aura/tests/framework/test_board_memory_migration.py",
+      "sha256": "f22f8c4135fd746e11380aeafdcbb08166438b27a0912f9f407ac458174d2ef0",
+      "bytes": 18028
+    },
+    {
+      "path": "deliverables/2026-10-30_board_owner/integration/production_memory_handoff/snapshot_windows_private.py",
+      "sha256": "243220e6ab2994fd41ec840392f99acb6eda3de83aed87a4426e3d6d4a44e0fe",
+      "bytes": 7421
+    },
+    {
+      "path": "deliverables/2026-10-30_board_owner/integration/production_memory_handoff/inspect_windows_sources.py",
+      "sha256": "225c23ae6cc824e850246e050be336ba7952396604f4bac55444b1620fbb340e",
+      "bytes": 6169
+    }
+  ],
+  "actual_data_migrated": false,
+  "actual_retention_started": false,
+  "hardware_or_models_started": false,
+  "tests": [
+    {
+      "command": "python -B -m pytest -p no:cacheprovider aura/tests/framework/test_board_production_migration.py aura/tests/framework/test_board_memory_migration.py aura/tests/framework/test_visual_policy.py aura/tests/framework/test_board_speaker_business.py --basetemp=deliverables/2026-10-30_board_owner/integration/production_memory_handoff/test-final -q",
+      "passed": 87,
+      "failed": 0,
+      "seconds": 17.9
+    },
+    {
+      "command": "python -B -m pytest -p no:cacheprovider aura/tests/framework/test_board_production_migration.py --basetemp=deliverables/2026-10-30_board_owner/integration/production_memory_handoff/test-final-revision -q",
+      "passed": 8,
+      "failed": 0,
+      "seconds": 3.46,
+      "reason": "source visual effective revision added to private provenance map; all integration fixtures rechecked"
+    }
+  ],
+  "ast_checks": 10,
+  "remaining_live_gates": [
+    "parent-held all-source-writers-stopped barrier",
+    "Windows private ACL snapshot and direct private transfer",
+    "POSIX root0700/files0600/no-symlink and flock validation",
+    "trusted UTC anchor and exact actual source preflight",
+    "parent-only real import and voice-loop/retention activation"
+  ]
+}

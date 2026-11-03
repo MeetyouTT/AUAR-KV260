@@ -1,0 +1,62 @@
+{
+  "schema": "aura-boot-fix-r3-owner-recheck-1",
+  "verdict": "B02_PARTIALLY_FIXED_SAMPLING_GATE_PASS_CAS_LIFECYCLE_RECHECK_STILL_HOLD",
+  "scope": "Only B02 owner/service lifecycle between camera sampling and binding publication. No Native framework expansion or B04/B05 closure claim.",
+  "reviewed": {
+    "snapshot": "boot_review_inputs/observed_revision3/candidate",
+    "boot_recovery.py": "e60d8f4ebf32f7ed738789d8e79a1e25d80881cb03fda90e5217880c3d70b9b7",
+    "recovery_rules.py": "72492c2d50c746b2f26b3292beff189bd76d7d39be04515baab13dbc881c7284"
+  },
+  "sampling_gate": {
+    "verdict": "PASS_STATIC_FIX_OF_REPORTED_DEACTIVATING_AND_QUIESCED_SAMPLE_CASE",
+    "lines": [524, 528, 530, 532, 533, 542, 543, 545, 547],
+    "detail": "R3 now rejects deactivating/pendingJob before sampling and requires active/running/ControlPID0, current full owner, two advancing samples, owner_fenced=false and quiesced=false. The old revision2 acceptance of an already-stopping unit during those samples is fixed."
+  },
+  "publication_boundary": {
+    "verdict": "HOLD_MISSING_POST_SAMPLE_CAMERA_LIFECYCLE_GUARDS",
+    "lines": [560, 603, 604, 608, 610, 611, 612, 613, 617, 623, 626, 627],
+    "detail": "After camera_samples returns, the checks before target replacement only compare process PID/birth/cmd and run bytes. The final source_snapshot does call unit(CAMERA), but only verifies original FragmentPath/DropInPaths/source bytes; it does not require active/running/noJob/ControlPID0 or unquiesced state. After both target replacements, the code again checks only the process fingerprint and original binding metadata before writing the active ledger and committed receipt. A still-alive process can already be deactivating.",
+    "source_snapshot_limited_guard_lines": [244, 245, 246, 248, 250],
+    "scope_of_original_verifier": "The original metadata verifier is retained by the candidate. It is not a substitute for systemd camera lifecycle state; this probe stubs that verifier and does not execute b77 or private/model reads."
+  },
+  "targeted_RAM_probe": {
+    "script": "camera/check_boot_r3_owner_recheck.py",
+    "result": "camera/BOOT_FIX_R3_OWNER_RECHECK_PROBES.json",
+    "methods_executed_from_exact_R3_AST": ["source_snapshot", "camera_samples", "bind_camera"],
+    "healthy_control": {
+      "samples": 2,
+      "result": "ORIGINAL_VERIFIER_CURRENT_BINDING_COMMITTED",
+      "UI_and_startup_replacements_in_RAM": 2,
+      "camera_stopping_at_replace": false
+    },
+    "fault": {
+      "injection": "After two actually healthy RAM samples returned, reading the real-method run config flips the fake unit to deactivating/stop-sigterm with a stop Job. PID/birth/cmd remain identical.",
+      "result": "ORIGINAL_VERIFIER_CURRENT_BINDING_COMMITTED",
+      "UI_and_startup_replacements_in_RAM": 2,
+      "camera_stopping_at_both_replacements": true,
+      "deactivating_unit_metadata_observed_by_source_snapshot_after_sampling": 2,
+      "active_ledger_and_committed_receipt_created_in_RAM": true
+    },
+    "limits": "A small public two-component source closure and in-memory filesystem/unit/process/HTTP stubs exercise the exact three methods. Prepared prerequisites and original b77 verifier are scoped stubs. This is a publication-boundary negative, not actual hardware, a real380 closure, Native startup, or GUI acceptance.",
+    "old65_or_other_full_suites_rerun": false
+  },
+  "minimal_recommendation": [
+    "Retain the fixed camera_samples checks.",
+    "Add/reuse one lightweight current-owner lifecycle assertion: actual camera MainPID matches owner, active/running/noJob/ControlPID0/success, unchanged PID/birth/cmd, with fresh Native owner_fenced=false/quiesced=false when validating health.",
+    "Call it after the final source recapture immediately before binding target CAS, again after target changes before active-ledger/committed publication, and before an already-current success return. Recheck around individual writes as needed to reject a newly observed transition.",
+    "On a detected transition, HOLD and preserve existing transaction evidence for known-byte reconciliation; do not restart, kill or automatically replay the binding. These metadata checks do not make multi-file publication atomic or replace the exclusive writer handoff."
+  ],
+  "unrelated_findings_preserved": {
+    "B04_full_history_receipt_binding": "Previous Native subreview remains open; not retested/modified here.",
+    "B05_boot_mode_counter_domain_binding": "Previous Native subreview remains open; not retested/modified here.",
+    "previous_report": "camera/BOOT_CANDIDATE_NATIVE_SUBREVIEW.json"
+  },
+  "boundaries": {
+    "author_or_production_files_modified": false,
+    "board_SSH_HTTP_proc_services_Native_models_DB_or_media_access": false,
+    "all_target_file_changes_in_RAM_only": true,
+    "local_output_only_in_camera": true,
+    "cross_dialogue_messages_sent": false,
+    "activation_or_cold_boot_accepted": false
+  }
+}

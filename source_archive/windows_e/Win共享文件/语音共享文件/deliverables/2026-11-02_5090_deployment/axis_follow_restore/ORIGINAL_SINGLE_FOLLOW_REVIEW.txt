@@ -1,0 +1,65 @@
+原程序一次有限人脸跟随：只读源码结论
+
+适用范围
+父代理最新转达：动力已接好，安装未动，相机朝前、位置大致居中、空间充足；用户不要往返调试，要求沿原 Ubuntu 程序集中观察一次。本报告取消 80us 方向 bench 和单独初始化方案。CURRENT_PHYSICAL_CONDITIONS.json 中此前“动力断开”是历史条件，不能继续当最新状态。
+本子代理没有启动程序、修改板端文件/服务、访问设备或执行运动。
+
+结论
+原 /home/root/aura-pan-wide-20261028/control-10282601/run_face_motion.py 可从目前已证实的 STOP/1500 命令状态直接开始监测，不需要单独 init bench。1500 仍只表示当前寄存器命令，不是测量的实体中位。
+原 GUI 接入可沿已经使用的 USER_RATED_RANGE_VSRV2 分支恢复。实际当前 release a329dcb4… 本来就是该分支；旧 1400/1420 固定试验约束属于 CURRENT_REFERENCE_CONNECTION_VSRV2 的另一条资格路径，不应为本次继承原 500..2500 软件范围而伪造/重放它。
+保留原 25 个控制器文件、3 个 driver、500..2500us、4us/20ms、250/500ms 与原单目标/owner/lease/STOP 检查，继续用旧真实 polarity=+1，来源应明确记为“原人类方向观察 + 当前安装未变与恢复原方案指令的继承”，不写成新 boot 实体方向已测。
+
+为什么不需要单独初始化
+continuous_session.py SHA 2f805b17d39ede6518f8082f4553b0010cb59a28c395b006d0ec28def2793f03
+构造函数第22行只 status()、require_stopped()、建立 MONITORING；第49行要求 flags=0、lease=0、reason=0，当前 width 在原范围内。它不读取旧1400/1420资格，也不要求实体中位。
+第195行 step() 先验证真实 face 源；第约253–285行在确认至少2个新源帧后，才从当时 current width 生成 PhysicalReference 并 confirm_and_arm。
+必须准确区分“ARM”和“PWM”：原程序允许在边界内侧0.05的近触发区预ARM，即使还没越界；该阶段不 COMMIT/PWM。远离边界的安全区只监测。
+原 hardware_slew_session.py SHA fb1dd76d2454f4c31e426105f93cd09ecc80501683d6c98f975b839f753b41f6
+submit_target() 仍要求 active、admitted new_source、匹配 authority 和 edge，首次 PWM 另有原 initial budget；ARM 前的图片不能给输出权限。端点由原 PL 以4us/20ms逼近，定时 tick 不 COMMIT/续旧图，视觉到中心按原 QUIESCE/STOP 退出。
+
+合法沿用原 GUI 的元数据契约
+原 rated_range_release.py SHA 0124da5d3d82c4185e75db177a0665abc2ca8eb4d229c8c9962ed86677e0bf2b
+保持 schema/status/scope=1 / USER_RATED_RANGE_VSRV2 / explicit_user_rated_pulse_range，ABI2、build0x10282601、app原wide，driver/runtime原SHA。
+新本boot元数据应落新的独立目录，保留旧R2文件原字节；root按现有 load_release 对 root/libvsrv.so、vsrv_driver.py、vsrv_transport.py 的要求放原3份字节，不改源码。
+1. authorization 使用原 aura-explicit-rated-range-1 契约，boot=903cfade-b93c-48fa-804e-379be1967313，bounds=[500,2500]，nominal_center_us=1500，physical_calibration_claimed=false，clearance来自本次用户确认，原角度请求字段只继承已有授权，不解释成实测角度。保留原授权路径/SHA，记录本次真实恢复原程序指令及安装连续性；不编造新的角度/方向测量。
+2. platform_proof 使用本次 root 已完成的真实 ID_STOP 原回执（不是旧boot数据），补充本次实际 boot、FDT d68bc147f22f5ab23bc60f0c2762af4bcd7b64340953e9c948e28ffa6b80f7ca、build。identity_stop_passed=true、ARM_sent=false、COMMIT_sent=false、after_stop 原读回必须由对应证据支持。
+3. release 的 authorization/platform_proof 以本地相对文件与实际新SHA绑定；release/config boot一致，manual bounds仍500..2500，step20、duration2，physical_range_verified/mechanical_reference_calibrated/external_waveform_verified全false。release原 automatic_following_enabled=false 可保持；它表达手动release范围，原GUI face启动是否开放由 pan_manual.local.json 的单独字段控制。
+4. pan_manual.local.json 仅接新release与本次 boot/FDT、原face配置路径。pan_face.local.json 接本次 wide-context、新方向继承证据、真实当前页面/640x480/mirror/viewport的zone设置及人类连续性记录，controller/firmware manifest仍原SHA。不要只把旧UUID替换后称新实测。
+
+连接后不会自动 ARM 的原源码保证与顺序
+manual.py SHA95c9ee09d4ace73112a8b2262dee27029e76d7d223e055d2bbeb57010902a97e：连接阶段只读 status 后 READY，然后等待明确的 pending jog。BIND/REF/ARM只在具体 jog 的 hardware.begin() 里。
+face_pan_controls.py SHA3ebb1b32368c8f12864e0f13da68853e4d9653e4279eada124eb337c5ca9d7ee：构造 running=false，不调用 start()。只有显式“开始人脸跟随”才启动原 run_face_motion。原 work() 先 close 手动 owner，再启动原子进程；GUI停止按钮仍控制这同一个子进程。不要另起一个与GUI stop无关联的并行跟随进程。
+manual_live_config.py SHAe0ed84cb0639a4bcd6c573e27b062f602e711299e4d987b69d31378e28435a83：重连时 boot/FDT/enabled 必须等于GUI构造时base，因此本次第一次换903c/d68配置需正常重建GUI对象，单点 pan_reconnect 不足。原相机79866不需为此重启。
+建议根一次完成所有元数据/原字段验证，在正常GUI维护窗口更新当前实际startup组件pin与实际selected绑定后正常启动GUI，首先仅确认READY/停止读回。automatic_following_enabled=true本身不会自动start；若选择先false再true，需考虑FacePanProcess.config也是构造时读取，不能以仅改磁盘文件当作已刷新运行对象。
+
+最小单次方案
+在原 pan_face.local.json 保留全部原参数，只将 duration_s 从0设为25（原入口支持0..300）。本次只显式启动一次原GUI“开始人脸跟随”，不做往返、不做单独init、不自动重试。25秒是一次程序观察窗口，不是更改原控制tick或lease。
+该GUI按原 arguments() 形成的实际argv应为：
+/usr/bin/python3 -B /home/root/aura-pan-wide-20261028/control-10282601/run_face_motion.py
+  --app-root /home/root/aura-board-business-20261030/production-5259eab11e42af13/runtime/aura
+  --manifest /home/root/aura-pan-wide-20261028/release-6a4b645a5bbfd35c/candidate-manifest.json
+  --manifest-sha256 6a4b645a5bbfd35c9107976edf27886cf8e0c91e40f48be6f052a95e1172c1cf
+  --context /home/root/aura-5090-recovery-20261102-903cfade/original-axis-restore-v1/wide-context.json
+  --direction-evidence <本次当前配置选用的方向继承文件>
+  --human-evidence <本次当前配置选用的人类连续性文件>
+  --zone-settings <本次实际GUI选用的zone文件>
+  --output <由原GUI独占生成的 control-10282601/runs/ui-*/trial.json>
+  --confirmation FACE_ZONE_CONTINUOUS --duration 25
+尖括号为根完成当前配置后原GUI会填入的真实路径，不是可直接粘贴执行的命令；本子代理不生成伪实测输入。
+
+本次观察最低证明
+用户集中观察一次从边界外回中心，原report须至少 commands_accepted>0 且 visual_center_completions>=1，最后 CONTINUOUS_FACE_ZONE_STOPPED/result.stopped.flags=0/lease_left_ms=0。若始终中心区、没新鲜edge或过期，零命令代表按原保护保持，不能报成实体跟随通过。保留原 source/frame/anchor时效与原source owner，不靠增大超时来制造通过。
+方向是本次观察内容；继承+1不是新的实物验收结论。最终实体方向/稳定性取本次用户观察，软件寄存器回执不等于角度或示波器证据。
+
+证据
+current_motion_contracts_readonly_01.json：本次真实startup3f5e81abc20ce5169ac91ae302611cba8958175a6a2bdb615fd9b858353120d5，原CLI、原GUI/配置现行字节。
+original_follow_admission_readonly_01.json：上述原ContinuousSession/HardwareSlewSession/原rated与fixed资格分支/旧授权与平台证明的只读原字节。
+此前 RESTORED_CAMERA_AUDIT.json 21项PASS由root采用，本报告不重复它或宣称新增实物测试。
+
+07:31–07:33UTC 当前几何补充（仅小范围只读，不改参数）
+camera79866 的 health.mirror_horizontal=true。原face-stream一个真实元数据包明确 frame_width=640、frame_height=480、source_kind=actual；此包当时 UNCONFIRMED，不能用来证明当前已具备可执行的face edge，开始后仍须原新鲜源守卫自行准入。
+原GUI board_camera_preview.py caps与原local_preview帧字节约束也都是640x480。Native run config仍原实读SHA c8df0795664d21d52eab3a4f1cf55e0d1a721577d547c512e83ee1931d80871d，UI config仍fc98455a5586cc4f1896f5472ec9b204bd7ff2b0c5be2798ba5cab1788b9b959。
+实际容器不是精确568：现行 ui/ui_layout_spec.json SHA07425e6350b07aa131995e88f09267664b43251e375d4e3d6e2e2414fba14de4，left_panel.x1=585,padding=8，board_avatar_gtk.py L484–485按x1-padding*2得569。页面(8,112)、预览高300，实际容器[8,112,569,300]、400x300内容[92.5,112,400,300]。
+原face_zone.py却硬性接受名义viewport[8,112,568,300]，这是既存原方案的1px名义宽度差。用户要求沿原程序时可继承原zone与validator，报告应明确其为名义坐标，不宣称实测完全相同。以原right_ratio=.7158253629442671计算，名义right_camera=.8064720153808593，若解释为实际569容器为.80701157878822，相差约0.345个640相机像素；内容原点差0.5显示像素。无需为本次观察新写控制器、扩权限或做往返。
+该补充只判断输入/配置几何，不改变现场方向、角度与跟随通过的验收条件。
+证据：current_preview_geometry_readonly_01.json、current_preview_viewport_readonly_01.json、current_face_packet_geometry_readonly_01.json。

@@ -1,0 +1,15 @@
+--- original/host/yuki_host.cpp
++++ candidate/yuki_host.cpp
+@@ -77,9 +77,9 @@
+   checked(instance->advance(elapsed,{},AuthorTickHandler{this,author}));
+   // A zero-step first frame still has a prepared state from construction.
+   checked(instance->prepare_frame());
+-  const auto evaluated=Clock::now();const auto bust_bottom=top+(bottom-top)*.48;
+-  const double scale=std::min(width/(right-left),height/(bust_bottom-top))*.88;
+-  renderer->draw(instance->frame(),width,height,{float(width/2.0-(left+right)/2*scale),float(height/2.0-(top+bust_bottom)/2*scale),float(scale)});
++  const auto evaluated=Clock::now();constexpr double view_top=-3500.0,view_bottom=-2090.0,view_center_x=-50.0;
++  const double scale=height/(view_bottom-view_top)*.96;
++  renderer->draw(instance->frame(),width,height,{float(width*.5-view_center_x*scale),float(height*.5-(view_top+view_bottom)*.5*scale),float(scale)});
+   const auto submitted=Clock::now();++stats.frames;stats.author_ticks=instance->tick_count();
+   stats.owner=control.owner;stats.sequence=control.sequence;stats.audio_sample=control.audio_sample;
+   stats.evaluate_ms=std::chrono::duration<double,std::milli>(evaluated-begin).count();

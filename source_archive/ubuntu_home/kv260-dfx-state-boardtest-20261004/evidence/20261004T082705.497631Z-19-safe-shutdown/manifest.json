@@ -1,0 +1,8 @@
+[
+  {
+    "id":"prepare-coldboot",
+    "command":"python3 -B -c 'import sys; sys.path.insert(0,\"/home/root/kv260-dfx-state-boardtest-20261004/board\"); import validate_v5 as v; e=v.Evidence(\"prepare-coldboot\"); v.guard(e); v.require_phase(e,\"persist\"); v.manager(e,v.NEW); e.check(\"persistent_config_exact\",v.PERSIST.read_text()==v.PERSIST_CONTENT and not v.TEMP.exists()); e.check(\"candidate_hash_exact\",v.sha(v.NEW)==v.NEW_SHA); v.stock(e); v.unload(e,\"unload-before-poweroff\"); v.stop(e); e.run(\"kernel-before-poweroff\",[\"dmesg\"]); e.run(\"flush-before-poweroff\",[\"sync\"]); e.finish()'",
+    "timeout":180
+  },
+  {"id":"clean-poweroff","type":"poweroff"}
+]

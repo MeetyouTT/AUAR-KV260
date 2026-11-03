@@ -1,0 +1,550 @@
+{
+  "schema": "aura-visual-axis-static-readonly-fields-1",
+  "generated_from_local_source_only": true,
+  "device_accessed": false,
+  "sources": {
+    "gui_state": {
+      "endpoint": "127.0.0.1:8783/api/state",
+      "method": "GET"
+    },
+    "camera_health": {
+      "endpoint": "127.0.0.1:8790/health",
+      "method": "GET"
+    },
+    "face_observation": {
+      "endpoint": "127.0.0.1:8790/v1/motion/face/observation",
+      "method": "GET"
+    },
+    "camera_ui": {
+      "endpoint": "127.0.0.1:8790/v1/ui/status",
+      "method": "GET",
+      "raw_payload_has_private_information": true,
+      "raw_payload_export_allowed": false
+    },
+    "controller_report": {
+      "endpoint": null,
+      "path_from": "CURRENT_CHILD_FIXED_REPORT_REFERENCE_ONLY"
+    }
+  },
+  "fields": [
+    {
+      "name": "listening_enabled",
+      "source": "gui_state",
+      "json_pointer": "/handsfree_dialogue/enabled",
+      "type": "boolean",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Cached GUI/business state; not a current camera/actuator owner proof"
+    },
+    {
+      "name": "microphone_open",
+      "source": "gui_state",
+      "json_pointer": "/handsfree_dialogue/microphone_open",
+      "type": "boolean",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Cached GUI/business state; not a current camera/actuator owner proof"
+    },
+    {
+      "name": "listening_state",
+      "source": "gui_state",
+      "json_pointer": "/handsfree_dialogue/state",
+      "type": "enum:PAUSED,OTHER,UNKNOWN",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Cached GUI/business state; not a current camera/actuator owner proof"
+    },
+    {
+      "name": "manual_state",
+      "source": "gui_state",
+      "json_pointer": "/manual_pan/state",
+      "type": "bounded_enum",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Cached GUI/business state; not a current camera/actuator owner proof"
+    },
+    {
+      "name": "follow_enabled",
+      "source": "gui_state",
+      "json_pointer": "/manual_pan/automatic_following",
+      "type": "boolean",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Cached GUI/business state; not a current camera/actuator owner proof"
+    },
+    {
+      "name": "pulse_us",
+      "source": "gui_state",
+      "json_pointer": "/manual_pan/pulse_us",
+      "type": "finite_number",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Cached GUI/business state; not a current camera/actuator owner proof"
+    },
+    {
+      "name": "flags",
+      "source": "gui_state",
+      "json_pointer": "/manual_pan/readback/flags",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Cached GUI/business state; not a current camera/actuator owner proof"
+    },
+    {
+      "name": "lease_left_ms",
+      "source": "gui_state",
+      "json_pointer": "/manual_pan/readback/lease_left_ms",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Cached GUI/business state; not a current camera/actuator owner proof"
+    },
+    {
+      "name": "visual_worker_steps",
+      "source": "gui_state",
+      "json_pointer": "/board_business/visual_timeline/steps",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Cached GUI/business state; not a current camera/actuator owner proof"
+    },
+    {
+      "name": "visual_worker_errors",
+      "source": "gui_state",
+      "json_pointer": "/board_business/visual_timeline/errors",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Cached GUI/business state; not a current camera/actuator owner proof"
+    },
+    {
+      "name": "follow_report_fresh",
+      "source": "gui_state",
+      "json_pointer": "/manual_pan/face_follow/report_fresh",
+      "type": "boolean",
+      "missing": null,
+      "candidate_only": true,
+      "meaning": "Display-only report freshness; never extends motion authority"
+    },
+    {
+      "name": "follow_report_age_ms",
+      "source": "gui_state",
+      "json_pointer": "/manual_pan/face_follow/report_age_ms",
+      "type": "finite_number",
+      "missing": null,
+      "candidate_only": true,
+      "meaning": "Display-only report freshness; never extends motion authority"
+    },
+    {
+      "name": "camera_pid",
+      "source": "camera_health",
+      "json_pointer": "/pid",
+      "type": "positive_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "person_detection_count",
+      "source": "camera_health",
+      "json_pointer": "/detected_frames",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "capture_count",
+      "source": "camera_health",
+      "json_pointer": "/capture_frames",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "capture_age_ms",
+      "source": "camera_health",
+      "json_pointer": "/capture_age_ms",
+      "type": "finite_number",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "person_observation_age_ms",
+      "source": "camera_health",
+      "json_pointer": "/observation_age_ms",
+      "type": "finite_number",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "identity_ready",
+      "source": "camera_health",
+      "json_pointer": "/identity/ready",
+      "type": "boolean",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "identity_backend",
+      "source": "camera_health",
+      "json_pointer": "/identity/backend",
+      "type": "enum:DPU_SFACE_INT8,OTHER,UNKNOWN",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "identity_processed",
+      "source": "camera_health",
+      "json_pointer": "/identity/processed",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "face_detector_processed",
+      "source": "camera_health",
+      "json_pointer": "/identity/face_targets/processed",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "face_detector_source_age_ms",
+      "source": "camera_health",
+      "json_pointer": "/identity/face_targets/source_age_ms",
+      "type": "finite_number",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "face_worker_alive",
+      "source": "camera_health",
+      "json_pointer": "/identity/face_targets/worker_alive",
+      "type": "boolean",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "face_worker_faults",
+      "source": "camera_health",
+      "json_pointer": "/identity/face_targets/worker_faults",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "face_fault_latched",
+      "source": "camera_health",
+      "json_pointer": "/identity/face_targets/fault_latched",
+      "type": "boolean",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "primary_calls",
+      "source": "camera_health",
+      "json_pointer": "/dpu_schedule/primary_calls",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "primary_period_overruns",
+      "source": "camera_health",
+      "json_pointer": "/dpu_schedule/primary_period_overruns",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "native_owner_fenced",
+      "source": "camera_health",
+      "json_pointer": "/dpu_schedule/owner_fenced",
+      "type": "boolean",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "yunet_overruns",
+      "source": "camera_health",
+      "json_pointer": "/dpu_schedule/optional/yunet/overruns",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "yunet_native_failures",
+      "source": "camera_health",
+      "json_pointer": "/dpu_schedule/optional/yunet/native_failures",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "sface_overruns",
+      "source": "camera_health",
+      "json_pointer": "/dpu_schedule/optional/sface/overruns",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "sface_native_failures",
+      "source": "camera_health",
+      "json_pointer": "/dpu_schedule/optional/sface/native_failures",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Separate actual camera/model counters; compare only with unchanged owner"
+    },
+    {
+      "name": "camera_error_present",
+      "source": "camera_health",
+      "json_pointer": "/camera_error",
+      "type": "string_presence_to_nullable_boolean",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Do not return the string"
+    },
+    {
+      "name": "detector_error_present",
+      "source": "camera_health",
+      "json_pointer": "/detector_error",
+      "type": "string_presence_to_nullable_boolean",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Do not return the string"
+    },
+    {
+      "name": "identity_error_present",
+      "source": "camera_health",
+      "json_pointer": "/identity/error",
+      "type": "string_presence_to_nullable_boolean",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Do not return the string"
+    },
+    {
+      "name": "face_source_state",
+      "source": "face_observation",
+      "json_pointer": "/state",
+      "type": "bounded_enum",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Anonymous motion pixels/anchor; not biological identity"
+    },
+    {
+      "name": "source_frame_id",
+      "source": "face_observation",
+      "json_pointer": "/source_frame_id",
+      "type": "positive_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Anonymous motion pixels/anchor; not biological identity"
+    },
+    {
+      "name": "source_mono_ms",
+      "source": "face_observation",
+      "json_pointer": "/source_mono_ms",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Anonymous motion pixels/anchor; not biological identity"
+    },
+    {
+      "name": "source_deadline_ms",
+      "source": "face_observation",
+      "json_pointer": "/deadline_mono_ms",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Anonymous motion pixels/anchor; not biological identity"
+    },
+    {
+      "name": "face_anchor_mono_ms",
+      "source": "face_observation",
+      "json_pointer": "/face_detection_mono_ms",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Anonymous motion pixels/anchor; not biological identity"
+    },
+    {
+      "name": "motion_track_id",
+      "source": "face_observation",
+      "json_pointer": "/target/track_id",
+      "type": "positive_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Anonymous motion pixels/anchor; not biological identity"
+    },
+    {
+      "name": "motion_track_generation",
+      "source": "face_observation",
+      "json_pointer": "/target/track_generation",
+      "type": "positive_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Anonymous motion pixels/anchor; not biological identity"
+    },
+    {
+      "name": "face_measurement_count",
+      "source": "face_observation",
+      "json_pointer": "/face_tracking/valid_measurements",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Anonymous motion pixels/anchor; not biological identity"
+    },
+    {
+      "name": "face_measurement_rounds",
+      "source": "face_observation",
+      "json_pointer": "/face_tracking/processed",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Anonymous motion pixels/anchor; not biological identity"
+    },
+    {
+      "name": "face_anchor_refreshes",
+      "source": "face_observation",
+      "json_pointer": "/face_tracking/anchor_refreshes",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Anonymous motion pixels/anchor; not biological identity"
+    },
+    {
+      "name": "detection_miss",
+      "source": "face_observation",
+      "json_pointer": "/detection_miss",
+      "type": "boolean",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Anonymous motion pixels/anchor; not biological identity"
+    },
+    {
+      "name": "current_identity_state",
+      "source": "camera_ui",
+      "json_pointer": "/modules/identity/state",
+      "type": "bounded_enum",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Project on board; private names and identity IDs must not leave raw response"
+    },
+    {
+      "name": "identity_source_frame_id",
+      "source": "camera_ui",
+      "json_pointer": "/modules/identity/source_frame_id",
+      "type": "positive_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Project on board; private names and identity IDs must not leave raw response"
+    },
+    {
+      "name": "identity_source_mono_ms",
+      "source": "camera_ui",
+      "json_pointer": "/modules/identity/source_mono_ms",
+      "type": "nonnegative_integer",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Project on board; private names and identity IDs must not leave raw response"
+    },
+    {
+      "name": "frontal",
+      "source": "camera_ui",
+      "json_pointer": "/modules/identity/face_attention/frontal",
+      "type": "boolean",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Project on board; private names and identity IDs must not leave raw response"
+    },
+    {
+      "name": "yaw_ratio",
+      "source": "camera_ui",
+      "json_pointer": "/modules/identity/face_attention/yaw_ratio",
+      "type": "finite_number",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Project on board; private names and identity IDs must not leave raw response"
+    },
+    {
+      "name": "roll_degrees",
+      "source": "camera_ui",
+      "json_pointer": "/modules/identity/face_attention/roll_degrees",
+      "type": "finite_number",
+      "missing": null,
+      "candidate_only": false,
+      "meaning": "Project on board; private names and identity IDs must not leave raw response"
+    },
+    {
+      "name": "session_target_locked",
+      "source": "controller_report",
+      "json_pointer": "/result/target_lock/locked",
+      "type": "boolean",
+      "missing": null,
+      "candidate_only": true,
+      "meaning": "Not forwarded into GUI face_follow; requires current report provenance"
+    },
+    {
+      "name": "session_track_id",
+      "source": "controller_report",
+      "json_pointer": "/result/target_lock/track_id",
+      "type": "positive_integer",
+      "missing": null,
+      "candidate_only": true,
+      "meaning": "Not forwarded into GUI face_follow; requires current report provenance"
+    },
+    {
+      "name": "session_track_generation",
+      "source": "controller_report",
+      "json_pointer": "/result/target_lock/track_generation",
+      "type": "positive_integer",
+      "missing": null,
+      "candidate_only": true,
+      "meaning": "Not forwarded into GUI face_follow; requires current report provenance"
+    }
+  ],
+  "unresolved_without_fresh_main_check": {
+    "firmware_kind": "UNKNOWN",
+    "vart_kind": "UNKNOWN",
+    "fdt_context_matches": null,
+    "paired_firmware_and_native_hashes_match": null,
+    "current_reference_us": null,
+    "current_direction_qualified": null,
+    "camera_mounting_confirmed": null,
+    "current_camera_identity_threshold": null,
+    "speaker_field_calibrated": null,
+    "blur_variance_calibrated": null,
+    "mechanical_angle_degrees": null,
+    "generic_native_error_count": null
+  },
+  "prohibited_interpretations": [
+    "visual_worker_steps are not face source FPS",
+    "camera health match_diagnostics may describe an old result; use fresh camera UI identity source",
+    "same motion key is not a biological identity or personal permission",
+    "face_attention.target is the detector key; compare it with current face_target, not motion key",
+    "stream packet count is not distinct-source FPS",
+    "a missing counter is not zero errors"
+  ],
+  "delta_rule": "Same boot/PID/birth/service/camera epoch; both finite integer counters present and nondecreasing; otherwise null",
+  "export_rule": "fixed enums, finite numbers and booleans only; project before crossing board boundary"
+}

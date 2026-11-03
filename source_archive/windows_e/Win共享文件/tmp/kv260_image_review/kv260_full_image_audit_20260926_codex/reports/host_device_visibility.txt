@@ -1,0 +1,34 @@
+COMMAND=lsblk -o NAME,TRAN,TYPE,SIZE,MODEL,MOUNTPOINT
+NAME         TRAN   TYPE   SIZE MODEL            MOUNTPOINT
+loop0               loop     4K                  /snap/bare/5
+loop1               loop  61.9M                  /snap/core20/1328
+loop2               loop  91.7M                  /snap/gtk-common-themes/1535
+loop3               loop  50.3M                  /snap/snapd/27738
+loop4               loop 248.8M                  /snap/gnome-3-38-2004/99
+loop5               loop 349.7M                  /snap/gnome-3-38-2004/143
+loop6               loop    74M                  /snap/core22/2955
+loop7               loop  54.2M                  /snap/snap-store/558
+loop8               loop 531.5M                  /snap/gnome-42-2204/263
+loop9               loop  65.2M                  /snap/gtk-common-themes/1519
+loop10              loop  63.8M                  /snap/core20/2922
+loop11              loop  12.2M                  /snap/snap-store/1216
+nvme0n1      nvme   disk 953.9G YMTC PC300-1TB-B 
+├─nvme0n1p1  nvme   part   200M                  /boot/efi
+├─nvme0n1p2  nvme   part    16M                  
+├─nvme0n1p3  nvme   part   300G                  
+├─nvme0n1p4  nvme   part 275.1G                  
+├─nvme0n1p5  nvme   part     1G                  
+├─nvme0n1p6  nvme   part    25G                  
+├─nvme0n1p7  nvme   part     1G                  
+├─nvme0n1p8  nvme   part   1.9G                  
+├─nvme0n1p9  nvme   part  15.9G                  [SWAP]
+└─nvme0n1p10 nvme   part 333.9G                  /
+EXIT_STATUS=0
+
+COMMAND=findmnt /media/ghmd/boot
+EXIT_STATUS=1
+
+COMMAND=ls /dev/ttyUSB* /dev/ttyACM*
+ls: 无法访问 '/dev/ttyUSB*': 没有那个文件或目录
+ls: 无法访问 '/dev/ttyACM*': 没有那个文件或目录
+EXIT_STATUS=2

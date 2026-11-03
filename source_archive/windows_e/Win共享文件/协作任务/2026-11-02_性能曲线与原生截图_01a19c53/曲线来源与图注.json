@@ -1,0 +1,113 @@
+{
+  "sources": [
+    {
+      "read_path": "/evidence/yunet-live-validation-full.json",
+      "original_path": "E:/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_live_baseline/evidence/yunet-live-validation-full.json",
+      "sha256": "bd62d5dc714e2c90599ab4e731e2784d26b5e7e1f59ff2d8bb6ee01f64f7feae",
+      "bytes": 498542,
+      "scope": "Historical 30-minute KV260 YuNet/YOLO live observation, not current release"
+    },
+    {
+      "read_path": "/public_report/sface-evaluation-report.json",
+      "original_path": "E:/Win共享文件/语音共享文件/deliverables/2026-10-21_dpu_vision_start/evidence/sface-evaluation-report.json",
+      "sha256": "6e75a23ab655ecdae286a19d4b5c86855028d4d5889e12344d414747468f29f6",
+      "bytes": 3791,
+      "scope": "Public held-out SFace quality, host FP32 and INT8 simulation"
+    },
+    {
+      "read_path": "/public/test_pairs.npy",
+      "original_path": "/home/ghmd/aura-dpu-vision-20261021/work/public-faces/test_pairs.npy",
+      "sha256": "a71fda7c49036497db3b252a91c6e8568f050929eb48ea0ec8e094dfc3eb2293",
+      "bytes": 12128,
+      "scope": "Saved public LFW outputs; not private enrollment data"
+    },
+    {
+      "read_path": "/public/test_fp32.npy",
+      "original_path": "/home/ghmd/aura-dpu-vision-20261021/work/public-faces/test_fp32.npy",
+      "sha256": "f140add36808d56589335d56beb569b6605528161535cd3f369b96afffa3a8fc",
+      "bytes": 793216,
+      "scope": "Saved public LFW outputs; not private enrollment data"
+    },
+    {
+      "read_path": "/public/test_int8_simulation.npy",
+      "original_path": "/home/ghmd/aura-dpu-vision-20261021/work/public-faces/test_int8_simulation.npy",
+      "sha256": "bb99ff785288c0f0ecfe1404df196eaa8d84f184f60b3ab444f6948d89700d60",
+      "bytes": 793216,
+      "scope": "Saved public LFW outputs; not private enrollment data"
+    }
+  ],
+  "figures": [
+    {
+      "name": "01_DPU_YuNet_30分钟耗时曲线",
+      "scope": "历史KV260实板：约30分钟，每5秒健康快照；非本轮重跑或逐次完整推理日志",
+      "notes": [
+        "每个点来自约5秒一次健康采样，表示采样时最近一次完整检测路径耗时。",
+        "包含预处理、DPU调用与后处理；360个快照不等于全部4259次YuNet调用的逐次计时。",
+        "历史模型/版本；均值仅针对这些快照，不能作为当前最终版或纯DPU核耗时。"
+      ]
+    },
+    {
+      "name": "02_DPU_联合视觉处理频率曲线",
+      "scope": "历史KV260实板：约30分钟，每5秒健康快照；非本轮重跑或逐次完整推理日志",
+      "notes": [
+        "每窗频率 = 相邻快照中已完成调用计数差 / 实际时间差；首个快照没有窗口频率。",
+        "YOLO与YuNet是不同调度任务；该频率反映所记录业务，不能作为单模型满载最大FPS。",
+        "保留启动阶段波动；本轮仅重算既有实板记录，未访问维护中的KV260。"
+      ]
+    },
+    {
+      "name": "03_视觉_观测年龄与人脸源龄曲线",
+      "scope": "历史KV260实板：约30分钟，每5秒健康快照；非本轮重跑或逐次完整推理日志",
+      "notes": [
+        "主视觉观测年龄与人脸结果源龄来自健康接口的两个独立字段，不能互相替代。",
+        "图中保留全部高值，不把源龄等同模型执行时长，也不把它写成识别准确率。",
+        "历史实板观察；当前发布版的场景、负载与时效需在正式后测中另行记录。"
+      ]
+    },
+    {
+      "name": "04_系统_30分钟CPU曲线",
+      "scope": "历史KV260实板：约30分钟，每5秒健康快照；非本轮重跑或逐次完整推理日志",
+      "notes": [
+        "CPU按/proc/stat区间差分；首个样本没有有效区间，保留缺失，不填0。",
+        "四核总量归一到100%；DPU任务忙时、FPGA静态资源占比与该CPU指标含义不同。",
+        "此图只对应所保存的历史业务版本，不用于宣称当前完整玩偶/LLM联合稳定性。"
+      ]
+    },
+    {
+      "name": "05_SFace_每100对独立准确率曲线",
+      "scope": "公开LFW开发测试集1000对：主机FP32与INT8量化模拟输出；非1000对实板或现场身份验收",
+      "notes": [
+        "前500对为同人正对，后500对为异人负对；分组波动受原始排列和样本构成影响。",
+        "阈值来自独立训练集，重新计算后的误接收/误拒绝和整体准确率与历史报告一致。",
+        "INT8为主机量化模拟；不用于宣称DPU现场准确率随运行时间提升或存在比赛总得分。"
+      ]
+    },
+    {
+      "name": "06_SFace_累计准确率曲线",
+      "scope": "公开LFW开发测试集1000对：主机FP32与INT8量化模拟输出；非1000对实板或现场身份验收",
+      "notes": [
+        "累计准确率 = 截至当前配对的正确判断数 / 已检查配对数；不等同每100对的独立准确率。",
+        "前500正对、后500负对；样本构成改变会影响累计曲线形状，不能解释为模型在线学习。",
+        "固定训练集阈值；主机FP32/INT8模拟公开评测，当前现场验收另测。"
+      ]
+    },
+    {
+      "name": "07_SFace_低误接收区间ROC曲线",
+      "scope": "公开LFW开发测试集1000对：主机FP32与INT8量化模拟输出；非1000对实板或现场身份验收",
+      "notes": [
+        "图示FAR 0%-10%的局部范围；散点为原训练集选定阈值在测试集上的工作点。",
+        "不在测试集重新选择正式阈值；ROC为重算的公开输出统计，不是新增实板推理。",
+        "负对仅500对，最小非零FAR分辨率为1/500=0.2%；不能据此宣称极低现场FAR。"
+      ]
+    },
+    {
+      "name": "08_SFace_阈值与错误率曲线",
+      "scope": "公开LFW开发测试集1000对：主机FP32与INT8量化模拟输出；非1000对实板或现场身份验收",
+      "notes": [
+        "实线为异人误接收率，虚线为同人误拒绝率；仅展示0%-35%错误率区间。",
+        "正式报告使用独立训练集既定阈值：FP32 0.3809，INT8模拟 0.3665。",
+        "该曲线解释已保存公开输出，不改变当前现场配置，也不调整现役身份阈值。"
+      ]
+    }
+  ]
+}

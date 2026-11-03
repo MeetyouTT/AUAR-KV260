@@ -1,0 +1,57 @@
+--- E:\Win共享文件\语音共享文件\deliverables\2026-11-02_5090_deployment\parallel_lan\reviews\firewall-stdout-parse-20261102T044416\original_sources\lan_control.py
++++ E:\Win共享文件\语音共享文件\deliverables\2026-11-02_5090_deployment\parallel_lan\lan_control.py
+@@ -589,7 +589,7 @@
+             'board_probe_current_owner_changed')
+     firewall = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
+                               '-File', str(OUT / 'configure_model_firewall.ps1'), '-Action', 'Check',
+-                              '-ExpectedSession', expected_session], capture_output=True, timeout=120,
++                              '-ExpectedSession', expected_session], capture_output=True, timeout=600,
+                              creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+     require(firewall.returncode == 0, 'exact_firewall_rule_check_required')
+     from board_ssh import ssh
+@@ -669,7 +669,9 @@
+             else:
+                 require(args.transaction, 'explicit_transaction_required')
+                 result = probe_board(live, args.transaction, args.expected_session)
+-    print(json.dumps(result, ensure_ascii=False, indent=2))
++    # ASCII JSON survives native stdout decoding in fresh Windows/UAC code pages.
++    # JSON parsers restore the exact Unicode adapter alias used by strict guards.
++    print(json.dumps(result, ensure_ascii=True, indent=2))
+ 
+ 
+ if __name__ == '__main__':
+--- E:\Win共享文件\语音共享文件\deliverables\2026-11-02_5090_deployment\parallel_lan\reviews\firewall-stdout-parse-20261102T044416\original_sources\test_lan_control.py
++++ E:\Win共享文件\语音共享文件\deliverables\2026-11-02_5090_deployment\parallel_lan\test_lan_control.py
+@@ -443,12 +443,31 @@
+                               board_boot_id=lan.BOARD_BOOT, audio_device_opened=False,
+                               business_database_opened=False, board_file_modified=False))
+         with patch.dict(sys.modules, {'board_ssh': SimpleNamespace(ssh=fake_ssh)}), \
+-                patch.object(lan.subprocess, 'run', return_value=SimpleNamespace(returncode=0)), \
++                patch.object(lan.subprocess, 'run', return_value=SimpleNamespace(returncode=0)) as firewall_check, \
+                 patch.object(lan, 'board_script', return_value='# isolated public script'):
+             result = lan.probe_board(self.live, handoff['transaction_id'], 'b' * 32)
++        self.assertEqual(firewall_check.call_count, 1)
++        self.assertEqual(firewall_check.call_args.kwargs['timeout'], 600)
++        self.assertEqual(firewall_check.call_args.args[0][-4:], ['-Action', 'Check', '-ExpectedSession', 'b' * 32])
+         self.assertEqual(len(ssh_calls), 1)
+         self.assertEqual(ssh_calls[0][0], 'python3 -B -')
+         self.assertFalse(result['audio_played'])
++
++    def test_firewall_check_timeout_does_not_contact_board_or_advance_transaction(self):
++        handoff = self.handoff()
++        receipt = self.work / 'transactions' / handoff['transaction_id'] / 'transaction.json'
++        before = receipt.read_bytes()
++        ssh_calls = []
++        def fake_ssh(*args, **kwargs):
++            ssh_calls.append((args, kwargs))
++            raise AssertionError('Board must not be contacted after firewall Check timeout')
++        with patch.dict(sys.modules, {'board_ssh': SimpleNamespace(ssh=fake_ssh)}), \
++                patch.object(lan.subprocess, 'run', side_effect=lan.subprocess.TimeoutExpired('powershell.exe', 600)) as firewall_check:
++            with self.assertRaises(lan.subprocess.TimeoutExpired):
++                lan.probe_board(self.live, handoff['transaction_id'], 'b' * 32)
++        self.assertEqual(firewall_check.call_args.kwargs['timeout'], 600)
++        self.assertEqual(ssh_calls, [])
++        self.assertEqual(receipt.read_bytes(), before)
+ 
+ 
+ class FakeHttpModels:

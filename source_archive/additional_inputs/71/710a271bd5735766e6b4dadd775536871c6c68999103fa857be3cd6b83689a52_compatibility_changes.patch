@@ -1,0 +1,136 @@
+diff --git a/kv260/overlays/examples/benchmark/Makefile b/kv260/overlays/examples/benchmark/Makefile
+index 1fb0fc2..83092b1 100644
+--- a/kv260/overlays/examples/benchmark/Makefile
++++ b/kv260/overlays/examples/benchmark/Makefile
+@@ -5,6 +5,7 @@ DIR_PRJ = $(shell pwd)
+ RM = rm -rf
+ VIVADO_ROOT := $(XILINX_VIVADO)
+ VIVADO:=${VIVADO_ROOT}/bin/vivado
++TRD_PATH ?= ../..
+ XBU = xclbinutil
+ XBU_FLAGS = --remove-section BITSTREAM --force
+ 
+@@ -34,12 +35,15 @@ XOCC_OPTS = -t ${TARGET} --platform ${PLATFORM} --save-temps --config ${DIR_PRJ}
+ dpu_HDLSRCS=kernel_xml/dpu/kernel.xml\
+ 	     scripts/package_dpu_kernel.tcl\
+ 	     scripts/gen_dpu_xo.tcl\
+-	     ../../dpu_ip/Vitis/dpu/hdl/DPUCZDX8G.v\
+-	     ../../dpu_ip/Vitis/dpu/inc/arch_def.vh\
+-	     ../../dpu_ip/Vitis/dpu/xdc/*.xdc\
+-	     ../../dpu_ip/DPUCZDX8G_*/hdl/DPUCZDX8G_*_dpu.sv\
+-	     ../../dpu_ip/DPUCZDX8G_*/inc/function.vh\
+-             ../../dpu_ip/DPUCZDX8G_*/inc/arch_para.vh
++	     scripts/bip_proc.tcl\
++	     dpu_conf.vh\
++	     $(TRD_PATH)/dpu_ip/Vitis/dpu/hdl/DPUCZDX8G.v\
++	     $(TRD_PATH)/dpu_ip/Vitis/dpu/inc/arch_def.vh\
++	     $(TRD_PATH)/dpu_ip/Vitis/dpu/xdc/*.xdc\
++	     $(TRD_PATH)/dpu_ip/DPUCZDX8G_*/hdl/DPUCZDX8G_*_dpu.sv\
++	     $(TRD_PATH)/dpu_ip/DPUCZDX8G_*/inc/function.vh\
++	     $(TRD_PATH)/dpu_ip/DPUCZDX8G_*/inc/arch_para.vh\
++	     $(TRD_PATH)/dpu_ip/DPUCZDX8G_*/ttcl/fingerprint_json.ttcl
+ 
+ dpu_TCL=scripts/gen_dpu_xo.tcl
+ DPU_KERN_NAME = DPUCZDX8G
+@@ -85,4 +89,3 @@ clean:
+ 	-$(RM) binary_container_1
+ 	-$(RM) DPU_PP packaged* tmp_*
+ 
+-
+diff --git a/kv260/overlays/examples/benchmark/dpu_conf.vh b/kv260/overlays/examples/benchmark/dpu_conf.vh
+index f7a3ae4..5b44f9f 100644
+--- a/kv260/overlays/examples/benchmark/dpu_conf.vh
++++ b/kv260/overlays/examples/benchmark/dpu_conf.vh
+@@ -1,3 +1,19 @@
++/*
++* Copyright 2019 Xilinx Inc.
++*
++* Licensed under the Apache License, Version 2.0 (the "License");
++* you may not use this file except in compliance with the License.
++* You may obtain a copy of the License at
++*
++*    http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*/
++
+ //Setting the arch of DPU, For more details, Please read the PG338 
+ 
+ 
+@@ -91,17 +107,6 @@
+ 
+ `define CHANNEL_AUGMENTATION_ENABLE
+ 
+-// |------------------------------------------------------|
+-// | DepthWiseConv Configuration
+-// | It relates to model. if change, must update model
+-// +------------------------------------------------------+
+-// | Enable  : `define DWCV_ENABLE              
+-// +------------------------------------------------------+
+-// | Disable : `define DWCV_DISABLE               
+-// |------------------------------------------------------|
+-
+-`define DWCV_ENABLE
+-
+ // |------------------------------------------------------|
+ // | ALU parallel Configuration
+ // | It relates to model. if change, must update model
+@@ -141,6 +146,17 @@
+ 
+ `define ALU_RELU_RELU6
+ 
++// |------------------------------------------------------|
++// | argmax or max Configuration
++// | It relates to model. if change, must update model
++// +------------------------------------------------------+
++// | enable  : `define SAVE_ARGMAX_ENABLE                 
++// +------------------------------------------------------+
++// | disable : `define SAVE_ARGMAX_DISABLE                 
++// |------------------------------------------------------|
++
++`define SAVE_ARGMAX_ENABLE                
++ 
+ // |------------------------------------------------------|
+ // | DSP48 Usage Configuration  
+ // | Use dsp replace of lut in conv operate 
+diff --git a/kv260/overlays/examples/benchmark/kernel_xml/dpu/kernel.xml b/kv260/overlays/examples/benchmark/kernel_xml/dpu/kernel.xml
+index 0e7f1c1..ecbc0d6 100644
+--- a/kv260/overlays/examples/benchmark/kernel_xml/dpu/kernel.xml
++++ b/kv260/overlays/examples/benchmark/kernel_xml/dpu/kernel.xml
+@@ -2,7 +2,7 @@
+ <root versionMajor="1" versionMinor="0">
+   <kernel name="DPUCZDX8G" language="ip" vlnv="xilinx.com:RTLKernel:DPUCZDX8G:1.0" attributes="" preferredWorkGroupSizeMultiple="0" workGroupSize="1" debug="true" compileOptions=" -g" profileType="none">
+     <ports>
+-      <port name="S_AXI_CONTROL" mode="slave" range="0x00004000" dataWidth="32" portType="addressable" base="0x0"/>
++      <port name="S_AXI_CONTROL" mode="slave" range="0x00001000" dataWidth="32" portType="addressable" base="0x0"/>
+       <port name="M_AXI_GP0" mode="master" range="0xFFFFFFFF" dataWidth="32" portType="addressable" base="0x0"/>
+       <port name="M_AXI_HP0" mode="master" range="0xFFFFFFFF" dataWidth="128" portType="addressable" base="0x0"/>
+       <port name="M_AXI_HP2" mode="master" range="0xFFFFFFFF" dataWidth="128" portType="addressable" base="0x0"/>    
+diff --git a/kv260/overlays/examples/benchmark/scripts/bip_proc.tcl b/kv260/overlays/examples/benchmark/scripts/bip_proc.tcl
+index 6697f67..1450dae 100755
+--- a/kv260/overlays/examples/benchmark/scripts/bip_proc.tcl
++++ b/kv260/overlays/examples/benchmark/scripts/bip_proc.tcl
+@@ -1,3 +1,19 @@
++# /*
++# * Copyright 2019 Xilinx Inc.
++# *
++# * Licensed under the Apache License, Version 2.0 (the "License");
++# * you may not use this file except in compliance with the License.
++# * You may obtain a copy of the License at
++# *
++# *    http://www.apache.org/licenses/LICENSE-2.0
++# *
++# * Unless required by applicable law or agreed to in writing, software
++# * distributed under the License is distributed on an "AS IS" BASIS,
++# * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# * See the License for the specific language governing permissions and
++# * limitations under the License.
++# */
++
+ #****************************************************************
+ # bip_pagespec
+ #****************************************************************

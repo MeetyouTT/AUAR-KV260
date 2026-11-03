@@ -1,0 +1,55 @@
+5090 部署接续记录（洛杉矶 2026-11-01；目录保留原 2026-11-02 名称）
+
+动态状态：STATUS.json 记录阶段和完成标志；llm_download_progress.json 单独记录下载进度。
+只有 STATUS.json.complete=true、阶段 READY_LOCAL_ONLY_BOARD_INTEGRATION_PENDING，且存在 READY_LOCAL.json，才算本机正式模型验证完成。
+本机完成不等于板端、实体听音/转轴或多小时稳定性验收。
+
+已完成的本机验证：
+- 实读 RTX 5090 Laptop GPU / 24463 MiB；UUID GPU-545096ea-2253-8cb8-e6a6-7dd1969e5853，驱动 621.01。
+- D:/AURARuntimes/voice-py310 的 104 项依赖与接续清单逐项匹配；pip check 通过。
+- PyTorch 2.7.0+cu128、sm_120 支持和真实 CUDA 小算例通过。
+- 原 OmniVoice 三个正式文件再次 SHA256 通过，版本与接受的参考音色保持。
+- 原 OmniVoice16 已实际生成新的 24kHz PCM，并测量新 GPU 显存。仅内存生成，未播放；tts_calibration.json 保存测量。冷启动候选预算 5888 MiB 仍须经过与 27B 共存验收。
+- 完整模型服务回归 101 项及 5 子用例通过；另 4 项部署闸口与真实分段中断续传测试通过。
+- 三个失败断言原先仍要求 30m 驻留，现与迁移清单内现有生产的 keep_alive=-1 对齐；生产模型行为未改。证据 test_contract_alignment.json，原测试与失败日志保留。
+- 自动流程原先受 Windows PowerShell 执行策略阻止，已改为直接调用 validate_environment.py；未修改全局 PowerShell 执行策略。
+
+正在完成：
+- 原 27B 的精确版本下载、SHA256 验证、独立 Ollama 导入与新 GPU 测量。
+- 最终 GGUF 14403496864 字节，SHA256 d83adbbbaace8acdfcfe28004f779326176b9df00b4ec99dc6c24d749723d3b9。
+- 权重、分段和 Ollama 数据始终在 D:/AIModels；不得放入 E:/Win共享文件，也不得创建指向权重的目录联接。
+- 权重通过后按原 2048 上下文和原量化加载；实测 27B 后保存有余量的新 GPU 配置，再启动并验证本机 127.0.0.1:8797 的 LLM 和 TTS HTTP。
+- Windows 仅模型推理，不恢复旧 8792 业务或记忆写者；现有其他 Ollama 11434 不接管。
+
+板卡当前已接入，须以新鲜记录为准：
+- 专用 Intel I226-V 网口 22 已配置 192.168.50.1/24，并确认 Preferred。未添加默认网关，未改 DNS/Wi-Fi。
+- KV260 192.168.50.2:22 可达，RSA 主机指纹 SHA256:+cA3ZLx8WYwZMvqJNEFiPHal6a9Hg+S3/H99r8e7P98 与迁移的可信记录匹配。
+- 用户在可见终端输入 root 密码后，已追加新主机公钥，并用新公钥读取 boot ID 成功；密码未保存。见 interactive_authorization_result.json。
+- 新 boot 903cfade-b93c-48fa-804e-379be1967313；当前 firmware 为 kv260-benchmark-b4096.bit.bin，FPGA operating，VART 指向 benchmark；wide 应用已安装但未激活。
+- 相机服务 active，当前 PID 1333 / birth 2359，命令 SHA acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd；DPU 使用者为该相机。
+- GUI aura-avatar-ui.service 为 failed / MainPID 0，8783 连接拒绝，保存聆听 enabled=false。
+- 首次基线 startup SHA 为迁移末次 ec12fccf…；随后在 14 份相机原源码/模型/私库选择及真实采样推进验证后，已刷新身份读回的 boot/相机出生时间，更新对应组件哈希。当前 startup SHA 07c5aa3b1c8da060e5a7d8520021bce7f167a8cf303b48a0a24f8e2a8b63035d，380 项复核通过，另 379 项保持。原私库未打开，识别参数和源算法未变，备份与回执见 camera_readback_rebind.json。
+- 首次基线时板端时钟在 2021 年，历史采样须以主机观察时间为准。随后在确认 GUI/业务写者停止、保存聆听 false 后，已将本 boot 时钟向前校正到主机 UTC；见 board_clock_alignment.json。持久 NTP 同步仍待恢复。
+- 当前已完成网络、公钥授权、只读基线、停业务时的时钟校正和核验后的相机读回绑定刷新；未加载 wide、未重启相机/GUI、未恢复聆听、未播放或运动。
+
+板端后续：
+先看 reviews/axis_priority_20261101/HANDOFF_5090.txt 的平台/检查点/实体边界。
+旧 boot 的 STOP、宽度、方向、PID、相机检查点及 READY 均只作历史，不能重放旧 repeat 或通过改 boot/PID 绕过检查。
+如切换平台，必须正常释放真实相机并封存最终检查点，确认无 DPU 使用者，再按成套平台恢复；禁止强杀、清锁或伪造 seed。
+新 boot 的位置、方向和短测未验收，勿自动 ARM 或跟随。
+本机服务仍先使用回环地址。板端接入 192.168.50.1:8797 前要核实唯一模型服务 owner、对端限制与最小范围防火墙，并正常切换实例。
+
+校验与环境接续：
+- 原工作区 135927 项中 125174 项通过；10753 项因权限无法核验，没有缺失或已读文件大小/SHA 差异。不能称全盘校验全通过。
+- 迁移包 534 项、外部依赖 111 项、正式 OmniVoice 三个清单大文件 SHA 通过。
+- 原文件和旧配置保存在 before/；所有失败、中间记录与数据库保留。
+- 原环境清单中的未用 Qwen-TTS 候选依赖冲突，接续清单仅排除该候选，正式 OmniVoice 及其参数不变。
+- 新私钥只在新用户 .ssh；迁移包及授权脚本仅含公钥。Ubuntu 的新公钥免密 SSH、Codex登录、应用远程项目和远程聊天访问均已通过新机验收，接续见协作任务/2026-11-01_5090_Ubuntu接入。
+
+一次性后台入口：
+start_deployment.ps1 的 deploy/download/ollama 角色使用独立隐藏 WMI 工作进程和 OS 生命周期锁，避免重复任务；不创建计划任务或开机自启。
+deployment_owner.json、download_owner.json 记录实际 PID 和出生时间；后台日志为 *_wmi_*.log。
+电脑或进程重启后，先读 STATUS、失败日志、实际 owner 和下载文件，再选择接续；旧 PID 与旧 READY 不是当前进程证明。
+续传更新：16 路分段下载；已安全恢复中断尾段。6 项部署闸口/真实续传/尾段恢复测试通过，见 background_tests_tail_recovery.log。原 SHA 验证要求保持。
+
+Windows 在洛杉矶约 17:48 重启，旧下载/部署进程已退出。已保留分段并重新启动 download/ollama/deploy 三个一次性角色，见 windows_reboot_resume.json。不要把旧 PID 当作当前进程。Ubuntu 接入窗口已报告新机 SSH 与应用远程项目/聊天均通过，独立接入记录见协作任务/2026-11-01_5090_Ubuntu接入。

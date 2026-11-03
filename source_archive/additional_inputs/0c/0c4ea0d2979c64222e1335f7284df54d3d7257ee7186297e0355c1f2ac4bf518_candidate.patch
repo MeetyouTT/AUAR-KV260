@@ -1,0 +1,803 @@
+--- a/board/identity/camera_faces.py
++++ b/board/identity/camera_faces.py
+@@ -1,4 +1,4 @@
+-"""YuNet/SFace CPU reference on the detector's SAME immutable source frame."""
++"""Explicit CPU/Windows/DPU identity on the SAME immutable source frame."""
+ import json
+ import math
+ import os
+@@ -11,6 +11,10 @@
+     config = json.loads((path if path.is_absolute() else root/path).read_text(encoding='utf-8'))
+     if config.get('schema_version') != 'aura-camera-identity-1':
+         raise ValueError('Unknown camera identity configuration')
++    if (type(config.get('threshold')) not in (int, float) or not math.isfinite(config['threshold'])
++            or type(config.get('ambiguity_margin')) not in (int, float)
++            or not math.isfinite(config['ambiguity_margin'])):
++        raise ValueError('Explicit model-specific identity threshold and ambiguity margin are required')
+     if (type(config.get('input_size')) is not int or config['input_size'] not in (128, 192, 256, 320)
+             or not 32 <= config['minimum_face_pixels'] <= 256
+             or not 0 <= config['minimum_blur_variance'] <= 10000
+@@ -20,7 +24,10 @@
+     for key in ('face_model', 'embedding_model'):
+         p = Path(config[key])
+         config[key] = str(p if p.is_absolute() else root/p)
+-    if config.get('feature_backend') is not None:
++    feature = config.get('feature_backend')
++    if feature is not None and not isinstance(feature, dict):
++        raise ValueError('Invalid feature backend configuration')
++    if feature is not None and feature.get('kind') != 'dpu_sface':
+         from board.identity.remote_features import RemoteFaceFeatures
+         RemoteFaceFeatures(config['feature_backend'])
+     if config.get('enrollment_photos') is not None:
+@@ -37,6 +44,12 @@
+     config['database'] = str(Path(config['database']).expanduser())
+     if not Path(config['database']).is_absolute():
+         raise ValueError('Identity database must use an absolute device-local path')
++    if feature is not None and feature.get('kind') == 'dpu_sface':
++        from board.identity.model_store import validate_dpu_configuration
++        validate_dpu_configuration(config)
++    if config.get('dpu_sface_shadow') is not None:
++        from board.identity.sface_shadow import shadow_configuration
++        shadow_configuration(config)
+     return config
+ 
+ 
+@@ -68,20 +81,38 @@
+ 
+ 
+ class CameraFaceExtractor:
+-    def __init__(self, config, *, face_targets=False):
++    def __init__(self, config, *, face_targets=False, schedule=None, owner=None, clock=None,
++                 current_target=None, guard_lock=None):
+         import cv2
+         from board.vision.reference_faces import YuNetCompat, SFaceCompat
+         self.cv2, self.config = cv2, config
+         self.detector = None if face_targets else YuNetCompat(config['face_model'],
+             score_threshold=config['minimum_face_score'],input_size=config['input_size'])
+         self.remote = None
+-        if config.get('feature_backend'):
++        self.local_dpu = None
++        feature = config.get('feature_backend')
++        if feature and feature.get('kind') == 'dpu_sface':
++            from board.vision.dpu_sface import DpuSFace
++            self.local_dpu = DpuSFace(config, schedule, owner, clock)
++        elif feature:
+             from board.identity.remote_features import RemoteFaceFeatures
+             self.remote=RemoteFaceFeatures(config['feature_backend'])
+-        self.embedder = None if self.remote else SFaceCompat(config['embedding_model'])
++        self.embedder = None if self.remote or self.local_dpu else SFaceCompat(config['embedding_model'])
+         self.align_crop=SFaceCompat.align_crop
+         self.preview_png = None
+         self.enrollment_quality = None
++        self.shadow = None
++        self.shadow_error = ''
++        self.shadow_shutdown_timeout = False
++        if (config.get('dpu_sface_shadow') or {}).get('enabled'):
++            try:
++                from board.identity.sface_shadow import SFaceShadow
++                self.shadow = SFaceShadow(config, schedule, owner, current_target,
++                    clock=clock, guard_lock=guard_lock)
++                self.shadow.start()
++            except Exception as exc:
++                # Auxiliary startup failures cannot disable Windows identity.
++                self.shadow_error = type(exc).__name__[:64]
+ 
+     def extract(self, image, observation, key):
+         self.preview_png = None
+@@ -103,36 +134,87 @@
+             return None, '人脸较模糊，请保持正对摄像头'
+         from board.identity.sampling import pose_quality
+         self.enrollment_quality = pose_quality(face, variance)
++        shadow_without_reference = (self.shadow is not None and
++            not (self.config.get('dpu_sface_shadow') or {}).get('compare_cosine', True))
++        if shadow_without_reference:
++            # Independent compute evidence does not require Windows online.
++            # The primary request/error still follows the original path below.
++            self._offer_shadow(crop, observation, key, None)
+         ok, encoded = self.cv2.imencode('.png', crop)
+         if ok and encoded.nbytes <= 65536:
+             self.preview_png = encoded.tobytes()
+-        if self.remote:
++        if self.local_dpu:
++            vector = self.local_dpu.feature(crop, source_mono_ms=observation['captured_mono_ms'])
++        elif self.remote:
+             if not self.preview_png:raise ValueError('Could not encode face-only input')
+             vector=self.remote.feature(self.preview_png,key,observation['frame_id'],observation['captured_mono_ms'])
+         else:vector=tuple(float(v) for v in self.embedder.feature(crop))
++        if self.shadow is not None and not shadow_without_reference:
++            self._offer_shadow(crop, observation, key, vector)
+         return vector, ''
++
++    def _offer_shadow(self, crop, observation, key, reference):
++        try:
++            self.shadow.offer(crop, observation['frame_id'], observation['captured_mono_ms'], key, reference)
++        except Exception as exc:
++            self.shadow_error = type(exc).__name__[:64]
++
++    def close(self):
++        if self.shadow is not None:
++            try:
++                self.shadow_shutdown_timeout = not self.shadow.close(timeout=2)
++            except Exception as exc:
++                self.shadow_error = type(exc).__name__[:64]
++                self.shadow_shutdown_timeout = True
++        if self.local_dpu:
++            self.local_dpu.close()
++        return not self.shadow_shutdown_timeout
++
++    def shutdown_ready(self):
++        return self.shadow is None or self.shadow.stopped.is_set()
++
++    def health(self):
++        if self.shadow is not None or self.shadow_error:
++            try:
++                shadow = self.shadow.health() if self.shadow is not None else {'enabled':True,'ready':False}
++                return {'shadow':shadow,'auxiliary_error':self.shadow_error,
++                        'shadow_shutdown_timeout':self.shadow_shutdown_timeout}
++            except Exception as exc:
++                return {'shadow':{'enabled':True,'ready':False},'auxiliary_error':type(exc).__name__[:64],
++                        'shadow_shutdown_timeout':self.shadow_shutdown_timeout}
++        return self.local_dpu.health() if self.local_dpu else None
+ 
+ 
+ def create_service(root, config_path, state, *, schedule=None, owner=None):
+     from board.identity.live import IdentityService
+     from board.identity.store import IdentityStore
+     config = config_for(root, config_path)
+-    path = Path(config['database'])
+-    path.parent.mkdir(parents=True, exist_ok=True)
+-    # New local biometric databases are private and are never part of a bundle.
+-    try:
+-        fd = os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+-    except FileExistsError:
+-        pass
++    dpu = (config.get('feature_backend') or {}).get('kind') == 'dpu_sface'
++    if dpu:
++        if schedule is None or owner is None:
++            raise ValueError('Select a shared DPU scheduler and owner before opening INT8 identity storage')
++        from board.identity.model_store import open_dpu_store
++        store = open_dpu_store(config)
+     else:
+-        os.close(fd)
+-    store = IdentityStore(path, config['model_id'], 128, config['threshold'], config['ambiguity_margin'],
+-                          allow_cross_thread=True)
++        path = Path(config['database'])
++        path.parent.mkdir(parents=True, exist_ok=True)
++        # New local biometric databases are private and are never part of a bundle.
++        try:
++            fd = os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
++        except FileExistsError:
++            pass
++        else:
++            os.close(fd)
++        store = IdentityStore(path, config['model_id'], 128, config['threshold'], config['ambiguity_margin'],
++                              allow_cross_thread=True)
+     from board.identity.photo_archive import EnrollmentPhotoArchive
+     photos=EnrollmentPhotoArchive(config['enrollment_photos']) if config.get('enrollment_photos') else None
+-    service = IdentityService(store, lambda: CameraFaceExtractor(config,face_targets=True), state.identity_target,
++    service = IdentityService(store, lambda: CameraFaceExtractor(config, face_targets=True,
++        schedule=schedule, owner=owner, clock=state.clock,
++        current_target=state.identity_target, guard_lock=state.lock), state.identity_target,
+         lock=state.lock, clock=state.clock, result_ttl_ms=config['result_ttl_ms'], interval_ms=config['interval_ms'],
+-        multi_frame=True,backend='WINDOWS_CPU_SFACE_ORT' if config.get('feature_backend') else 'CPU_SFACE_REFERENCE',
++        multi_frame=True, backend='DPU_SFACE_INT8' if dpu else
++        'WINDOWS_CPU_SFACE_ORT' if config.get('feature_backend') else 'CPU_SFACE_REFERENCE',
+         photo_archive=photos)
+     from board.identity.face_targets import FaceTargetService
+     from board.vision.reference_faces import YuNetCompat
+--- /dev/null
++++ b/board/identity/deferred.py
+@@ -0,0 +1,6 @@
++"""An uncomputed identity packet must not invalidate an existing fresh result."""
++
++
++class DeferredIdentity(RuntimeError):
++    """Busy or expired optional work; discard without a recognition decision."""
++
+--- a/board/identity/live.py
++++ b/board/identity/live.py
+@@ -12,6 +12,7 @@
+ 
+ from board.interaction.ui_contract import millis, target_key, text
+ from board.identity.store import normalize
++from board.identity.deferred import DeferredIdentity
+ 
+ 
+ class IdentityService:
+@@ -31,8 +32,11 @@
+         self.thread = None
+         self.last_operation = None
+         self.processed = self.discarded = 0
++        self.deferred = 0
+         self.last_ms = None
+         self.face_targets = None
++        self.extractor = None
++        self.shutdown_incomplete = False
+         self.backend=backend
+         self.photo_archive=photo_archive
+         from board.identity.sampling import EnrollmentSampling
+@@ -122,7 +126,7 @@
+                 match = result['match']
+                 value.update(state='KNOWN' if match.state == 'KNOWN' else 'UNKNOWN',
+                              person_id=match.identity_id, display_name=match.name,
+-                             detail='CPU 参考识别 · '+match.name if match.state == 'KNOWN' else
++                             detail=('DPU 本地识别 · ' if self.backend == 'DPU_SFACE_INT8' else 'CPU 参考识别 · ')+match.name if match.state == 'KNOWN' else
+                              '匹配存在歧义，请重新面对摄像头' if match.state == 'AMBIGUOUS' else '未登记 / UNKNOWN',
+                              source_frame_id=result['fid'], source_mono_ms=result['stamp'],
+                              target=copy.deepcopy(result['target']))
+@@ -220,6 +224,14 @@
+             embedding, reason = extractor.extract(image, observation, key)
+             vector = None if embedding is None else normalize(embedding, self.store.dimension)
+             reason = str(reason)[:120]
++        except DeferredIdentity:
++            with self.lock:
++                self.last_ms = round((time.monotonic()-started)*1000, 2)
++                self.discarded += 1
++                self.deferred += 1
++            # No recognition decision was computed. Keep the previous result
++            # and sampling state; view()/enroll() still enforce its original TTL.
++            return
+         except Exception as exc:
+             vector, reason = None, '身份识别失败：'+str(exc)[:100]
+         with self.lock:
+@@ -241,9 +253,11 @@
+                         self.store.best_other_score(vector,self.sampling.replace_id))
+ 
+     def work(self):
++        extractor = None
+         try:
+             extractor = self.extractor_factory()
+             with self.lock:
++                self.extractor = extractor
+                 self.ready = True
+             next_at = 0
+             while True:
+@@ -262,6 +276,15 @@
+             with self.lock:
+                 self.error = '身份服务不可用：'+str(exc)[:100]
+                 self.result = self.pending = None
++        finally:
++            if extractor is not None and callable(getattr(extractor, 'close', None)):
++                try:
++                    if extractor.close() is False:
++                        with self.lock:self.shutdown_incomplete = True
++                except Exception as exc:
++                    with self.lock:
++                        self.shutdown_incomplete = True
++                        self.error = '身份模型关闭失败：'+str(exc)[:100]
+ 
+     def health(self):
+         with self.lock:
+@@ -269,12 +292,16 @@
+             return {'ready': self.ready and not self.error and (not face or face['ready']),
+                     'error': self.error or (face['error'] if face else ''), 'face_targets':face,
+                     'backend': self.backend, 'processed': self.processed,
++                    'shutdown_incomplete':self.shutdown_incomplete,
++                    'feature_inference': self.extractor.health() if self.extractor is not None
++                        and callable(getattr(self.extractor, 'health', None)) else None,
+                     'enrollment_photos':self.photo_archive.health() if self.photo_archive else {'enabled':False},
+                     'sampling_diagnostics':None if not self.sampling else {
+                         'stage':self.sampling.stage,'pool_frames':len(self.sampling.training),
+                         'template_policy':self.sampling.policy,
+                         'last_failure':copy.deepcopy(self.sampling.last_failure),'metrics':copy.deepcopy(self.sampling.metrics)},
+-                    'discarded': self.discarded, 'last_inference_ms': self.last_ms,
++                    'discarded': self.discarded, 'deferred': self.deferred,
++                    'model_id': self.store.model_id, 'last_inference_ms': self.last_ms,
+                     'pending_frames': int(self.pending is not None)}
+ 
+     def close(self):
+@@ -289,4 +316,9 @@
+             if self.thread.is_alive():
+                 raise RuntimeError('Identity worker did not stop; database remains open')
+         with self.lock:
++            if self.shutdown_incomplete:
++                ready = getattr(self.extractor, 'shutdown_ready', None)
++                if not callable(ready) or not ready():
++                    raise RuntimeError('Shadow inference has not stopped; keep the shared DPU owner open')
++                self.shutdown_incomplete = False
+             self.store.close()
+--- /dev/null
++++ b/board/identity/model_store.py
+@@ -0,0 +1,146 @@
++"""Explicit, isolated database selection for the INT8 SFace candidate.
++
++Configuration validation is read-only. Opening the selected candidate service
++creates its own 0600 database; the Windows configuration/database is untouched.
++"""
++import json
++import os
++from pathlib import Path
++import sqlite3
++
++MODEL_ID = 'sface-int8-12b2ff5c7de15713'
++MODEL_SHA256 = '12b2ff5c7de157133ebd5aa71665fc5ddcd1f65d9e30e2d6e965e0752e467f25'
++WINDOWS_MODEL_ID = 'sface-2021dec-0ba9fbfa01b5'
++FINGERPRINT = '0x101000056010407'
++
++
++def validate_dpu_configuration(config):
++    backend = config.get('feature_backend')
++    required = {'kind', 'model', 'manifest', 'model_sha256', 'manifest_sha256',
++                'fallback_config', 'max_source_age_ms'}
++    if (not isinstance(backend, dict) or set(backend) != required or backend['kind'] != 'dpu_sface'
++            or config.get('model_id') != MODEL_ID or backend['model_sha256'] != MODEL_SHA256):
++        raise ValueError('DPU SFace requires its exact versioned model configuration')
++    if (type(backend['max_source_age_ms']) is not int
++            or not 100 <= backend['max_source_age_ms'] <= min(1500, config['result_ttl_ms'])):
++        raise ValueError('Invalid DPU SFace source lifetime')
++    digest = backend['manifest_sha256']
++    if not isinstance(digest, str) or len(digest) != 64 or any(c not in '0123456789abcdef' for c in digest):
++        raise ValueError('An explicit SFace compiler manifest SHA256 is required')
++    for key in ('model', 'manifest', 'fallback_config'):
++        if not isinstance(backend[key], str) or not Path(backend[key]).is_absolute():
++            raise ValueError('DPU SFace paths must be explicit absolute paths')
++    database = Path(config['database']).expanduser()
++    if not database.is_absolute() or MODEL_ID not in database.name:
++        raise ValueError('DPU SFace requires a separate version-named database')
++    fallback = json.loads(Path(backend['fallback_config']).read_text(encoding='utf-8'))
++    remote = fallback.get('feature_backend')
++    if (fallback.get('schema_version') != 'aura-camera-identity-1'
++            or fallback.get('model_id') != WINDOWS_MODEL_ID
++            or not isinstance(remote, dict) or remote.get('kind') != 'windows_sface'
++            or remote.get('host') != '192.168.50.1' or remote.get('port') != 8792):
++        raise ValueError('Fallback must preserve the original Windows FP32 configuration')
++    legacy = Path(fallback['database']).expanduser()
++    if not legacy.is_absolute() or database.resolve() == legacy.resolve():
++        raise ValueError('INT8 and Windows identity databases must be separate')
++    if database.exists() and legacy.exists() and os.path.samefile(str(database), str(legacy)):
++        raise ValueError('INT8 database aliases the Windows database')
++    photos = config.get('enrollment_photos')
++    if photos and photos.get('enabled'):
++        archive = Path(photos['directory']).expanduser()
++        old_photos = fallback.get('enrollment_photos')
++        if not archive.is_absolute() or MODEL_ID not in archive.name:
++            raise ValueError('INT8 enrollment photos require a separate version-named archive')
++        if old_photos and archive.resolve() == Path(old_photos['directory']).expanduser().resolve():
++            raise ValueError('INT8 and Windows enrollment archives must be separate')
++    validate_existing_database(database)
++
++
++def check_artifact_configuration(config):
++    """File/configuration check only; no XIR, VART, owner, device, or DB write."""
++    import hashlib
++    validate_dpu_configuration(config)
++    backend = config['feature_backend']
++    for key in ('model', 'manifest'):
++        if hashlib.sha256(Path(backend[key]).read_bytes()).hexdigest() != backend[key+'_sha256']:
++            raise ValueError('Pinned SFace artifact mismatch: '+key)
++    manifest = json.loads(Path(backend['manifest']).read_text(encoding='utf-8'))
++    dpu = [p for p in manifest['partitions'] if p['device'] == 'DPU']
++    if (manifest['sha256'] != MODEL_SHA256 or len(dpu) != 1 or dpu[0]['fingerprint'] != FINGERPRINT
++            or len(dpu[0]['inputs']) != 1 or len(dpu[0]['outputs']) != 1):
++        raise ValueError('Unexpected SFace compiler manifest')
++    source, result = dpu[0]['inputs'][0], dpu[0]['outputs'][0]
++    if (source['dims'] != [1,112,112,3] or source['dtype'] != 'xint8' or source['fix_point'] != 7
++            or result['dims'] != [1,128] or result['dtype'] != 'xint8' or result['fix_point'] != 5):
++        raise ValueError('Unexpected SFace manifest tensor contract')
++    import math
++    threshold = config.get('threshold')
++    margin = config.get('ambiguity_margin')
++    threshold_configured = (type(threshold) in (int, float) and math.isfinite(threshold)
++                            and 0 <= threshold <= 1 and type(margin) in (int, float)
++                            and math.isfinite(margin) and 0 <= margin <= 1)
++    return {'status':'CONFIG_VALIDATED_NOT_RUNTIME_TESTED', 'backend':'DPU_SFACE_INT8',
++            'model_id':MODEL_ID, 'model_sha256':MODEL_SHA256, 'fingerprint':FINGERPRINT,
++            'database_opened':False, 'database_created':False, 'runner_created':False,
++            'threshold_configured':threshold_configured, 'field_threshold_validated':False,
++            'fallback':'EXPLICIT_WHOLE_CONFIG_ROLLBACK'}
++
++
++def validate_existing_database(path):
++    """Reject a renamed, mixed, or unbound existing database before any write."""
++    path = Path(path)
++    # exists() is false for a dangling symlink. Reject it explicitly so SQLite
++    # cannot create a database through an unreviewed filesystem alias.
++    if path.is_symlink():
++        raise ValueError('INT8 identity database must be a real file, not a symlink')
++    if not path.exists():
++        return
++    if not path.is_file() or path.stat().st_size == 0:
++        raise ValueError('Existing INT8 database must have a valid model binding')
++    connection = sqlite3.connect(path.resolve().as_uri() + '?mode=ro', uri=True)
++    try:
++        binding = connection.execute('SELECT model_id, dimension FROM identity_model_binding').fetchall()
++        if binding != [(MODEL_ID, 128)]:
++            raise ValueError('INT8 identity database model binding mismatch')
++        foreign = connection.execute('SELECT DISTINCT model_id, dimension FROM templates').fetchall()
++        if any(row != (MODEL_ID, 128) for row in foreign):
++            raise ValueError('Foreign templates in INT8 identity database')
++    except sqlite3.Error as exc:
++        raise ValueError('Existing database is not a bound INT8 identity database') from exc
++    finally:
++        connection.close()
++
++
++def open_dpu_store(config):
++    """Called only after the user explicitly selects the DPU service config."""
++    from board.identity.store import IdentityStore
++    validate_dpu_configuration(config)
++    path = Path(config['database'])
++    path.parent.mkdir(parents=True, exist_ok=True)
++    created = False
++    try:
++        fd = os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
++    except FileExistsError:
++        # Revalidate after file creation races; never adopt an unbound file.
++        validate_existing_database(path)
++    else:
++        os.close(fd)
++        created = True
++    store = None
++    try:
++        store = IdentityStore(path, MODEL_ID, 128, config['threshold'], config['ambiguity_margin'],
++                              allow_cross_thread=True)
++        with store.db:
++            if created:
++                store.db.execute('CREATE TABLE identity_model_binding '
++                                 '(model_id TEXT PRIMARY KEY, dimension INTEGER NOT NULL)')
++                store.db.execute('INSERT INTO identity_model_binding VALUES (?, ?)', (MODEL_ID, 128))
++        validate_existing_database(path)
++        return store
++    except Exception:
++        if store is not None:
++            store.close()
++        # Retain an incomplete new file for explicit inspection; never delete
++        # or overwrite any database during initialization failure.
++        raise
++
+--- /dev/null
++++ b/board/identity/sface_shadow.py
+@@ -0,0 +1,256 @@
++"""Bounded optional DPU shadow; Windows alone supplies identity decisions.
++
++One immutable crop/reference in flight and one latest pending item, RAM only.
++No database, identity result, enrollment, camera, service, or device ownership.
++"""
++from contextlib import contextmanager
++import math
++from pathlib import Path
++import threading
++import time
++
++from board.identity.deferred import DeferredIdentity
++from board.identity.model_store import MODEL_ID, MODEL_SHA256, WINDOWS_MODEL_ID
++from board.interaction.ui_contract import millis, target_key
++
++
++def shadow_configuration(config):
++    """Pure validation, default off; never opens artifacts, devices or stores."""
++    value = config.get('dpu_sface_shadow')
++    if value is None:
++        return None
++    if not isinstance(value, dict) or type(value.get('enabled')) is not bool:
++        raise ValueError('Invalid DPU SFace shadow configuration')
++    if not value['enabled']:
++        if set(value) != {'enabled'}:
++            raise ValueError('Disabled shadow configuration must contain only enabled=false')
++        return None
++    required = {'enabled','model','manifest','model_sha256','manifest_sha256',
++                'max_source_age_ms','interval_ms','compare_cosine'}
++    primary = config.get('feature_backend') or {}
++    if (set(value) != required or primary.get('kind') != 'windows_sface'
++            or config.get('model_id') != WINDOWS_MODEL_ID):
++        raise ValueError('SFace shadow requires the original Windows FP32 identity backend')
++    if (value['model_sha256'] != MODEL_SHA256 or type(value['interval_ms']) is not int
++            or not 500 <= value['interval_ms'] <= 5000 or type(value['max_source_age_ms']) is not int
++            or not 100 <= value['max_source_age_ms'] <= min(1500,config['result_ttl_ms'])
++            or type(value['compare_cosine']) is not bool):
++        raise ValueError('Invalid SFace shadow model, source lifetime or rate')
++    for key in ('model','manifest'):
++        if not isinstance(value[key], str) or not Path(value[key]).is_absolute():
++            raise ValueError('Shadow model/manifest require explicit absolute paths')
++    digest = value['manifest_sha256']
++    if not isinstance(digest,str) or len(digest) != 64 or any(c not in '0123456789abcdef' for c in digest):
++        raise ValueError('Shadow requires an explicit compiler manifest SHA256')
++    return dict(value)
++
++
++@contextmanager
++def unlocked():
++    yield
++
++
++class SFaceShadow:
++    def __init__(self, config, schedule, owner, current_target, *, clock=millis,
++                 guard_lock=None, embedder_factory=None):
++        self.config = shadow_configuration(config)
++        if self.config is None:
++            raise ValueError('Explicit enabled shadow configuration is required')
++        if schedule is None or owner is None or not callable(current_target) or not callable(clock):
++            raise ValueError('Shadow requires the existing camera owner, scheduler and target check')
++        self.schedule, self.owner, self.current_target = schedule, owner, current_target
++        self.clock, self.guard_lock = clock, guard_lock
++        self.factory = embedder_factory or self._make_embedder
++        self.condition = threading.Condition()
++        self.thread = None
++        self.stopped = threading.Event()
++        self.pending = None
++        self.inflight = 0
++        self.closed = self.ready = False
++        self.embedder = None
++        self.offered = self.enqueued = self.replaced = self.producer_dropped = 0
++        self.processed = self.accepted = self.stale = self.deferred = self.failures = 0
++        self.last_error = ''
++        self.latency_sum = self.latency_min = self.latency_max = 0.
++        self.cosine_count = 0
++        self.cosine_sum = self.cosine_min = self.cosine_max = 0.
++
++    def _make_embedder(self):
++        from board.vision.dpu_sface import DpuSFace
++        value = self.config
++        feature = {k:value[k] for k in ('model','manifest','model_sha256','manifest_sha256','max_source_age_ms')}
++        feature['kind'] = 'dpu_sface'
++        # DpuSFace only needs its pinned tensor contract. No store/config
++        # factory is called and no INT8 database/threshold is required.
++        return DpuSFace({'model_id':MODEL_ID, 'feature_backend':feature},
++                        self.schedule, self.owner, self.clock)
++
++    def _guard(self):
++        return self.guard_lock if self.guard_lock is not None else unlocked()
++
++    def _valid(self, packet):
++        return (not self.closed and packet['target'] == self.current_target()
++                and 0 <= self.clock()-packet['stamp'] < self.config['max_source_age_ms'])
++
++    def start(self):
++        with self.condition:
++            if self.thread is not None or self.closed:
++                raise RuntimeError('Shadow cannot start twice')
++            self.thread = threading.Thread(target=self.work, name='sface-dpu-shadow', daemon=True)
++            self.thread.start()
++
++    def offer(self, crop, fid, stamp, key, reference):
++        """Never waits for shadow state or inference; primary keeps its vector."""
++        self.offered += 1  # The extractor is the sole producer.
++        try:
++            import numpy as np
++            if (self.closed or self.stopped.is_set() or type(fid) is not int or fid < 1
++                    or type(stamp) is not int or not 0 <= self.clock()-stamp < self.config['max_source_age_ms']
++                    or not isinstance(crop,np.ndarray) or crop.dtype != np.uint8 or crop.shape != (112,112,3)):
++                self.producer_dropped += 1
++                return False
++            target = target_key(key)
++            original = None
++            if self.config['compare_cosine']:
++                values = tuple(float(v) for v in reference)
++                norm = math.sqrt(sum(v*v for v in values))
++                if len(values) != 128 or not all(math.isfinite(v) for v in values) or norm <= 1e-12:
++                    self.producer_dropped += 1
++                    return False
++                original = tuple(v/norm for v in values)
++            # One bounded 37,632-byte private copy; producer/camera buffers can
++            # be released or reused immediately after this nonblocking offer.
++            image = np.array(crop, dtype=np.uint8, order='C', copy=True)
++            image.flags.writeable = False
++            packet = {'crop':image,'fid':fid,'stamp':stamp,'target':target,'reference':original}
++            if not self.condition.acquire(blocking=False):
++                self.producer_dropped += 1
++                return False
++            try:
++                if self.closed or self.stopped.is_set():
++                    self.producer_dropped += 1
++                    return False
++                self.replaced += int(self.pending is not None)
++                self.pending = packet
++                self.enqueued += 1
++                self.condition.notify()
++                return True
++            finally:
++                self.condition.release()
++        except Exception:
++            # Shadow input/copy/validation failure cannot escape into primary.
++            self.producer_dropped += 1
++            return False
++
++    @staticmethod
++    def _cosine(feature, reference):
++        values = tuple(float(v) for v in feature)
++        norm = math.sqrt(sum(v*v for v in values))
++        if len(values) != 128 or not all(math.isfinite(v) for v in values) or norm <= 1e-12:
++            raise ValueError('Invalid shadow embedding')
++        return max(-1., min(1., sum(a*b for a,b in zip(values,reference))/norm))
++
++    def _process(self, packet):
++        with self._guard():
++            valid = self._valid(packet)
++        if not valid:
++            with self.condition:self.stale += 1
++            return
++        started = time.monotonic()
++        try:
++            feature = self.embedder.feature(packet['crop'], source_mono_ms=packet['stamp'])
++            cosine = self._cosine(feature,packet['reference']) if self.config['compare_cosine'] else None
++            elapsed = (time.monotonic()-started)*1000
++            # Publication lock order matches the parent health path: camera
++            # state lock then shadow condition. Never hold either during DPU.
++            with self._guard():
++                valid = self._valid(packet)
++                with self.condition:
++                    self.processed += 1
++                    if not valid:
++                        self.stale += 1
++                        return
++                    self.accepted += 1
++                    self.latency_sum += elapsed
++                    self.latency_min = elapsed if self.accepted == 1 else min(self.latency_min,elapsed)
++                    self.latency_max = max(self.latency_max,elapsed)
++                    if cosine is not None:
++                        self.cosine_count += 1
++                        self.cosine_sum += cosine
++                        self.cosine_min = cosine if self.cosine_count == 1 else min(self.cosine_min,cosine)
++                        self.cosine_max = cosine if self.cosine_count == 1 else max(self.cosine_max,cosine)
++        except DeferredIdentity:
++            with self.condition:self.deferred += 1
++        except Exception as exc:
++            with self.condition:
++                self.failures += 1
++                self.last_error = type(exc).__name__[:64]
++
++    def work(self):
++        try:
++            embedder = self.factory()
++            with self.condition:
++                self.embedder, self.ready = embedder, True
++            next_at = 0.
++            while True:
++                with self.condition:
++                    self.condition.wait_for(lambda:self.closed or self.pending is not None)
++                    if self.closed:return
++                    delay = next_at-time.monotonic()
++                    if delay > 0:
++                        self.condition.wait(delay)
++                        continue
++                    packet, self.pending = self.pending, None
++                    self.inflight = 1
++                self._process(packet)
++                # Drop all per-source biometric references before waiting.
++                packet = None
++                with self.condition:self.inflight = 0
++                next_at = time.monotonic()+self.config['interval_ms']/1000.
++        except Exception as exc:
++            with self.condition:
++                self.failures += 1
++                self.last_error = type(exc).__name__[:64]
++        finally:
++            if self.embedder is not None:
++                try:self.embedder.close()
++                except Exception as exc:
++                    with self.condition:
++                        self.failures += 1
++                        self.last_error = type(exc).__name__[:64]
++            with self.condition:
++                self.ready = False
++                self.pending = None
++                self.inflight = 0
++            self.stopped.set()
++
++    def health(self):
++        with self.condition:
++            try:
++                runtime = self.embedder.health() if self.embedder is not None and callable(getattr(self.embedder,'health',None)) else None
++            except Exception as exc:
++                runtime = {'error':type(exc).__name__[:64]}
++            return {'enabled':True,'mode':'SHADOW_ONLY_WINDOWS_IDENTITY','model_id':MODEL_ID,
++                'ready':self.ready,'closed':self.stopped.is_set(),'stop_requested':self.closed,'stopped':self.stopped.is_set(),
++                'pending_frames':int(self.pending is not None),'inflight_frames':self.inflight,
++                'offered':self.offered,'enqueued':self.enqueued,'replaced':self.replaced,
++                'producer_dropped':self.producer_dropped,'processed':self.processed,'accepted':self.accepted,
++                'stale':self.stale,'deferred':self.deferred,'failures':self.failures,'last_error':self.last_error,
++                'accepted_latency_ms':{'count':self.accepted,'mean':self.latency_sum/self.accepted if self.accepted else None,
++                    'min':self.latency_min if self.accepted else None,'max':self.latency_max if self.accepted else None},
++                'same_crop_cosine':{'count':self.cosine_count,'mean':self.cosine_sum/self.cosine_count if self.cosine_count else None,
++                    'min':self.cosine_min if self.cosine_count else None,'max':self.cosine_max if self.cosine_count else None},
++                'execution':runtime,'identity_decisions_from_shadow':0,'templates_written':0}
++
++    def close(self, timeout=5):
++        with self.condition:
++            self.closed = True
++            self.pending = None
++            self.condition.notify_all()
++        if self.thread is None:
++            self.stopped.set()
++            return True
++        self.thread.join(timeout)
++        # The worker owns its runner and closes it after the in-flight job.
++        # Do not close an executing runner or the shared owner from this thread.
++        return self.stopped.is_set()
+--- /dev/null
++++ b/board/vision/dpu_sface.py
+@@ -0,0 +1,94 @@
++"""Optional local SFace inference under the camera's existing DPU owner.
++
++There is deliberately no per-vector FP32 fallback: those vectors belong to a
++different template space. Rollback selects the preserved Windows config/store.
++"""
++from contextlib import contextmanager
++import hashlib
++from pathlib import Path
++
++from board.identity.deferred import DeferredIdentity
++from board.identity.model_store import MODEL_ID, MODEL_SHA256
++from board.vision.dpu_vision_runtime import PinnedRunner, encode, sface_feature
++
++
++class DpuSFace:
++    kind = 'DPU_SFACE_INT8'
++    model_id = MODEL_ID
++
++    def __init__(self, config, schedule, owner, clock):
++        if schedule is None or owner is None or not callable(clock):
++            raise ValueError('DPU SFace requires the camera DPU owner and scheduler')
++        backend = config['feature_backend']
++        if config['model_id'] != MODEL_ID or backend['model_sha256'] != MODEL_SHA256:
++            raise ValueError('DPU SFace model version mismatch')
++        for key in ('model', 'manifest'):
++            if hashlib.sha256(Path(backend[key]).read_bytes()).hexdigest() != backend[key + '_sha256']:
++                raise ValueError('Pinned SFace artifact mismatch: ' + key)
++        self.schedule, self.clock = schedule, clock
++        self.source_ttl = backend['max_source_age_ms']
++        self.requests = self.execution_attempts = self.completed = self.features_returned = 0
++        self.deferred = self.slot_denials = self.expired_after_admission = 0
++        self.runner = PinnedRunner(backend['model'], backend['manifest'], owner)
++        if (self.runner.input_fix != 7 or list(self.runner.inputs[0].dims) != [1, 112, 112, 3]
++                or len(self.runner.outputs) != 1 or list(self.runner.outputs[0].dims) != [1, 128]
++                or self.runner.outputs[0].get_attr('fix_point') != 5):
++            self.runner.close()
++            raise ValueError('Unexpected SFace INT8 tensor contract')
++
++    def _fresh(self, stamp):
++        return type(stamp) is int and 0 <= self.clock() - stamp < self.source_ttl
++
++    @contextmanager
++    def _slot(self, stamp):
++        with self.schedule.optional('sface') as acquired:
++            # Check after admission as well as before preprocessing. No stale
++            # packet may start a non-preemptible VART job.
++            fresh = self._fresh(stamp)
++            if not acquired:
++                self.slot_denials += 1
++            elif not fresh:
++                self.expired_after_admission += 1
++            else:
++                # An attempt is not a completed job: execute_async/wait may
++                # still fail. completed below counts successful actual output.
++                self.execution_attempts += 1
++            yield acquired and fresh
++
++    def _defer(self, message):
++        self.deferred += 1
++        raise DeferredIdentity(message)
++
++    def feature(self, crop, *, source_mono_ms):
++        self.requests += 1
++        if not self._fresh(source_mono_ms) or self.schedule.disabled('sface'):
++            self._defer('SFace source expired or optional task disabled')
++
++        def scheduled(normalized):
++            source = encode(normalized, self.runner.input_fix)
++            if not self._fresh(source_mono_ms):
++                return None
++            # Encoding and runner output allocation/dequantization are outside
++            # the scheduling lock. Only execute_async/wait hold the DPU slot.
++            result = self.runner.execute_encoded(source, slot=self._slot(source_mono_ms))
++            if result is not None:
++                self.completed += 1
++            return result
++
++        result = sface_feature(crop, self.runner, execute=scheduled)
++        if result is None or not self._fresh(source_mono_ms):
++            self._defer('SFace optional slot unavailable or result expired')
++        self.features_returned += 1
++        return result
++
++    def health(self):
++        return {'kind': self.kind, 'model_id': self.model_id,
++                'requests': self.requests, 'execution_attempts': self.execution_attempts,
++                'completed': self.completed, 'features_returned': self.features_returned,
++                'deferred': self.deferred, 'slot_denials': self.slot_denials,
++                'expired_after_admission': self.expired_after_admission,
++                'last_dpu_wait_ms': self.runner.last_ms,
++                'scheduler_calls_mean_admissions': True}
++
++    def close(self):
++        self.runner.close()

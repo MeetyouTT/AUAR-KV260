@@ -1,0 +1,32 @@
+{
+  "script_sha256": "e1b5384bc2abe2aaf957792a316ddca3a1d854aafcc4b06290e75a1b3393e3ed",
+  "prior_script_sha256": "da1f4f6b60f98da11e3c5275028a4c90c596fba33141c4c40bc113a474df6629",
+  "only_replace_target_ast_changed": true,
+  "probe_kind": "exact patched helper with explicit POSIX permission model",
+  "permission_cases": [
+    {
+      "umask": "0o77",
+      "original_mode": "0o644",
+      "resulting_mode": "0o644",
+      "helper_returned_success": true,
+      "context_accepts_new_identity": true,
+      "mode_preserved": true
+    },
+    {
+      "umask": "0o77",
+      "original_mode": "0o755",
+      "resulting_mode": "0o755",
+      "helper_returned_success": true,
+      "context_accepts_new_identity": true,
+      "mode_preserved": true
+    }
+  ],
+  "mode_fix_verified_in_model": true,
+  "prior_partial_closure_not_rerun": true,
+  "previous_probe_evidence": "GTK_TRANSACTION_TARGETED_PROBES.before_mode_fix.json",
+  "existing_tests_rerun": false,
+  "transaction_main_imported_or_run": false,
+  "board_network_or_services_contacted": false,
+  "gtk_files_modified_by_reviewer": false,
+  "native_linux_execution": false
+}

@@ -1,0 +1,1 @@
+cmd_drivers/leds/built-in.a := echo >/dev/null; rm -f drivers/leds/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/leds/built-in.a drivers/leds/led-core.o drivers/leds/led-class.o drivers/leds/led-triggers.o drivers/leds/leds-gpio.o drivers/leds/trigger/built-in.a drivers/leds/blink/built-in.a

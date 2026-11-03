@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "status": "SUBAGENT_SSH_TRANSPORT_BLOCKED_PARENT_AUDIT_REQUIRED",
+  "checked_utc": "2026-10-30T15:31:05Z",
+  "cutoff_requested_by_parent_utc": "2026-10-30T15:45:00Z",
+  "user_power_scope": {
+    "initial_scope_was_unknown": true,
+    "latest_parent_confirmation": "User confirmed Windows, Ubuntu and KV260 will all lose power.",
+    "shutdown_owner": "root parent agent only, after evidence/output persistence confirmation",
+    "subagent_shutdown_authority_used": false
+  },
+  "new_observations_this_audit": {
+    "ssh_attempt": {
+      "alias": "aura-ubuntu",
+      "known_endpoint": "192.168.137.141:22",
+      "mode": "ssh.exe -T -o BatchMode=yes -o ConnectTimeout=8 aura-ubuntu python3 -",
+      "exit_code": 1,
+      "error": "ssh: connect to host 192.168.137.141 port 22: Permission denied",
+      "session_established": false,
+      "sandbox_permissions_parameter_used": false,
+      "retries_or_alternative_network_channels_used": false,
+      "interpretation": "Transport failed before SSH authentication/session. This does not prove Ubuntu or board is off, and does not distinguish local network restriction from remote path state."
+    },
+    "windows_shared_project": {
+      "path": "E:/Win共享文件/语音共享文件",
+      "local_source_and_handoff_readable": true,
+      "ubuntu_copy_availability": "not freshly verified by this subagent because SSH failed"
+    },
+    "ubuntu_current_uart_holders": null,
+    "ubuntu_current_candidate_asr_fft_clock_pytest_processes": null,
+    "ubuntu_systemctl_logind_poweroff_permissions": "parent must verify; subagent SSH could not query",
+    "board_current_live_state": "not queried; this task did not contact the board"
+  },
+  "parent_readonly_probe": {
+    "windows_path": "E:/Win共享文件/语音共享文件/deliverables/2026-10-30_board_owner/ubuntu/shutdown_host_probe.py",
+    "entry": "Get-Content -Raw -LiteralPath <windows_path> | ssh.exe -T -o BatchMode=yes -o ConnectTimeout=8 aura-ubuntu python3 -",
+    "purpose": "Host-only project metadata, relevant process labels, existing UART FD holders, systemd-logind state and read-only CanPowerOff query",
+    "uart_opened": false,
+    "board_commands": false,
+    "raw_argv_or_env_exported": false,
+    "note": "Parent may append its successful probe output and the final shutdown evidence. An empty holder list is bounded by readable /proc FD directories."
+  },
+  "historical_board_evidence_only_not_new_live_checks": [
+    {
+      "evidence": "evidence/20261030T122408840024Z-board_dependency_probe/result.json",
+      "observed_then": "r3-ubuntu actual config/runtime, 286 pins, boot605eaf50-c66a-4559-bfc9-5ae177e0f305, UI supervisor918139, camera1333, IDLE, playing/listening/microphone/following false, mechanical FAULT/null",
+      "current_validity": "historical observation; fresh parent board preflight required"
+    },
+    {
+      "evidence": "evidence/20261030T130034670747Z-board_gtcrn_fft_probe/result.json",
+      "observed_then": "Isolated FFT/ORT1.17.3 candidate finished and UART runner restored echo; original camera PID1333 continued. No production mutation, microphone, playback or motion.",
+      "current_validity": "proves that completed invocation only, not current process absence"
+    },
+    {
+      "evidence": "speaker/arm_equivalence.json and board_memory agent completion message",
+      "observed_then": "ECAPA agent reported its short-lived test process exited, echo restored and temporary Windows asset server exited; original public audio only.",
+      "current_validity": "prior agent report; host process absence still requires parent fresh audit"
+    }
+  ],
+  "production_vs_temporary": {
+    "production_board": "Existing aura-avatar-ui.service / aura-camera-ui.service and r3 startup/runtime are production. Do not kill them as stale tests. Normal final OS shutdown is owned by parent.",
+    "isolated_candidates": "/home/root/aura-board-owner-candidate-20261030/{asr-1.13.8,frontend-b3d06b653876469d,fft-ee19b936d17aa451,control-d14a9312f888b7b8,speaker-c695feae5eaf88eb,semantic-*} are independent candidate directories, not new production entries.",
+    "temporary_host_labels": "run_board_check/run_uart/uart_phase, board_*probe/profile, model_probe_server, serve_candidate_assets, pytest and ECAPA/clock runners are audit/test matches requiring PID+owner review. A filename match alone is not permission to terminate an unrelated process.",
+    "windows_metadata": "windows/shutdown_process_snapshot.json is maintained by parent/Windows owner; this subagent stopped no Windows process."
+  },
+  "clock_validation_status": {
+    "client_mock_report": "windows/date_client_handoff.json: 36 pure-mock tests passed in0.87s at that report; actual sockets/ARM were explicitly deferred.",
+    "new_clock_real_arm_run": false,
+    "basis": "Parent explicitly records clock ARM pending. Current integration/board_clock_probe.py still has BASE='', PIN='', ROOT=UNCONFIGURED, MODEL_PORT=0; no clock result directory was found in this subagent's local ubuntu/evidence inventory.",
+    "synthetic_utc_is_not_clock_validation": "Earlier real ARM->27B semantic-memory probe used synthetic SQLite/time. It is not real board HTTP-Date/UTC anchor validation.",
+    "pending_after_restart": "Run the reviewed Date/clock source/lease/boot test only after a new safe window and trusted endpoint preflight; never silently use board time.time for cleanup/history authority."
+  },
+  "subagent_actions": {
+    "uart_opened": false,
+    "board_script_or_model_triggered": false,
+    "camera_or_mechanical_action": false,
+    "services_stopped": false,
+    "sync_executed": false,
+    "poweroff_executed": false,
+    "new_tests_executed": false
+  },
+  "recovery_notes": "shutdown_resume_notes.md"
+}

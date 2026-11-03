@@ -1,0 +1,52 @@
+Production automatic listening preference
+
+Base: current e345 startup / 368 component pins; exact GTK before SHA
+5ab20a5b86a6982b75447933ce87e9be5b96cb5cc560fa1026c69b574f070fc5.
+Only GTK is overridden; tools/production_listening.py is added. No core,
+frontend, endpoint, queue, models, ACK, persona, appearance or assets change.
+
+Cause of the unwanted manual start:
+CandidateMonitorChoice starts false, and formal_yuki.paired_recording_type
+again forces monitor_enabled false. These were isolation/image-switch rules.
+The formal board-business branch now restores a separate persistent preference
+after that constructor and before the existing AvatarRenderWorker starts.
+Synthetic candidates retain their old RAM-only false choice.
+
+Preference:
+<already verified board private_root>/listening_preference.json
+Common HandsFreeSettings format: {"version":1,"enabled":true|false}.
+Missing means true; read does not create a file. Invalid input stays paused.
+Only explicit handsfree_toggle calls can persist an update. System cancel,
+error handling, native loss and close cannot rewrite the user's preference.
+An explicit pause remains false across restart; resume writes true.
+The common atomic write/file fsync is reused, with private path/file checks.
+If saving a pause fails, recording still stops and reports the existing
+preference-save failure status. An unsuccessful save cannot promise persistence.
+
+Startup:
+The new gate checks runtime.started, !runtime.closed and pair.ready_now().
+The existing runtime start requires its validated startup HTTP Date clock;
+the existing pair first successful native swap activates the runtime.
+Original VoiceFirst enabled/feedback/idle/cooldown gates remain. Nothing here
+performs HTTP, model work, camera readiness checks or capture construction on
+import. Ordinary speech remains independent of visual evidence. Startup/model
+availability after the initial accepted health sample is not newly polled.
+
+UI:
+The existing record action is labeled 暂停聆听 while enabled, 开始聆听
+while paused. Normal operation auto-arms after readiness without a click.
+The tooltip states readiness and persistent pause behavior.
+
+Evidence:
+14 synthetic checks passed: 12 use the REAL formal paired VoiceFirst recording
+class with capture/output/transcriber/pair metadata mocked. They cover both
+startup orderings, feedback/enabled readiness, no visual query, one capture,
+pause/restart/resume, error cooldown/retry, cancel/close preference preservation,
+native readiness loss, corrupt preference, rejected production binding,
+candidate behavior, paused retries and pause-save failure. Two additional checks
+verify GTK binding order, Python 3.9 AST and current fresh dependency pins.
+No board/model/mic/GUI/service
+actions were performed by this agent. Root owns integration and live acceptance.
+
+Final source hashes and package hashes are in HANDOFF.json. Earlier draft
+package/module hashes are superseded by that receipt.

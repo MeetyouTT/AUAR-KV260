@@ -1,0 +1,94 @@
+{
+  "scope": "Offline local fixtures only; no target-board connection or state change",
+  "board_verified_this_run": false,
+  "tests": [
+    {
+      "name": "socket-wrong-type",
+      "argv": [
+        "/home/ghmd/kv260-runtime-submission-20261002/payload/skill/kv260-runtime-review/scripts/socket_probe.py",
+        "--path",
+        "/tmp/kv260-annex-fixture-aogqg2jo/seqpacket.sock",
+        "--type",
+        "stream"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "stdout": "{\"observed_utc\": \"2026-10-03T07:11:18.436418+00:00\", \"path\": \"/tmp/kv260-annex-fixture-aogqg2jo/seqpacket.sock\", \"socket_type\": \"stream\", \"ipc_reachable\": false, \"functional_validation\": false, \"attempts\": 1, \"errno\": 91, \"error\": \"[Errno 91] Protocol wrong type for socket\", \"elapsed_seconds\": 6.8e-05}\n",
+      "stderr": ""
+    },
+    {
+      "name": "socket-correct-type",
+      "argv": [
+        "/home/ghmd/kv260-runtime-submission-20261002/payload/skill/kv260-runtime-review/scripts/socket_probe.py",
+        "--path",
+        "/tmp/kv260-annex-fixture-aogqg2jo/seqpacket.sock"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout": "{\"observed_utc\": \"2026-10-03T07:11:18.462105+00:00\", \"path\": \"/tmp/kv260-annex-fixture-aogqg2jo/seqpacket.sock\", \"socket_type\": \"seqpacket\", \"ipc_reachable\": true, \"functional_validation\": false, \"attempts\": 1, \"elapsed_seconds\": 5.2e-05}\n",
+      "stderr": ""
+    },
+    {
+      "name": "socket-missing",
+      "argv": [
+        "/home/ghmd/kv260-runtime-submission-20261002/payload/skill/kv260-runtime-review/scripts/socket_probe.py",
+        "--path",
+        "/tmp/kv260-annex-fixture-aogqg2jo/missing.sock"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "stdout": "{\"observed_utc\": \"2026-10-03T07:11:18.488753+00:00\", \"path\": \"/tmp/kv260-annex-fixture-aogqg2jo/missing.sock\", \"socket_type\": \"seqpacket\", \"ipc_reachable\": false, \"functional_validation\": false, \"attempts\": 1, \"errno\": 2, \"error\": \"[Errno 2] No such file or directory\", \"elapsed_seconds\": 7e-05}\n",
+      "stderr": ""
+    },
+    {
+      "name": "watches-per-fd",
+      "argv": [
+        "/home/ghmd/kv260-runtime-submission-20261002/payload/skill/kv260-runtime-review/scripts/watch_snapshot.py",
+        "--pid",
+        "123",
+        "--proc-root",
+        "/tmp/kv260-annex-fixture-aogqg2jo/proc",
+        "--sys-root",
+        "/tmp/kv260-annex-fixture-aogqg2jo/sys"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout": "{\"observed_utc\": \"2026-10-03T07:11:18.509944+00:00\", \"pid\": 123, \"proc_root\": \"/tmp/kv260-annex-fixture-aogqg2jo/proc\", \"sys_root\": \"/tmp/kv260-annex-fixture-aogqg2jo/sys\", \"snapshot_complete\": true, \"errors\": [], \"inotify_fds\": {\"3\": {\"watch_lines\": 2, \"unique_watches\": 2, \"wd_hex\": [\"a\", \"b\"]}, \"4\": {\"watch_lines\": 1, \"unique_watches\": 1, \"wd_hex\": [\"a\"]}}, \"process_name\": \"dfx-mgrd\", \"process_start_ticks\": \"8088\", \"vmrss\": \"2048 kB\", \"vmsize\": \"8192 kB\", \"kernel_watch_count\": 3, \"memory\": {\"MemTotal\": \"4096000 kB\", \"MemAvailable\": \"3000000 kB\", \"Slab\": \"4096 kB\", \"SReclaimable\": \"2048 kB\", \"SUnreclaim\": \"2048 kB\"}, \"boot_id\": \"offline-fixture-boot\", \"zocl\": {\"srcversion\": \"FIXTURE_ONLY\", \"refcnt\": \"0\", \"parameters\": {\"enable_xgq_ert\": \"1\"}}}\n",
+      "stderr": ""
+    },
+    {
+      "name": "missing-pid-is-incomplete",
+      "argv": [
+        "/home/ghmd/kv260-runtime-submission-20261002/payload/skill/kv260-runtime-review/scripts/watch_snapshot.py",
+        "--pid",
+        "124",
+        "--proc-root",
+        "/tmp/kv260-annex-fixture-aogqg2jo/proc",
+        "--sys-root",
+        "/tmp/kv260-annex-fixture-aogqg2jo/sys"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "stdout": "{\"observed_utc\": \"2026-10-03T07:11:18.541245+00:00\", \"pid\": 124, \"proc_root\": \"/tmp/kv260-annex-fixture-aogqg2jo/proc\", \"sys_root\": \"/tmp/kv260-annex-fixture-aogqg2jo/sys\", \"snapshot_complete\": false, \"errors\": [{\"error\": \"[Errno 2] No such file or directory: '/tmp/kv260-annex-fixture-aogqg2jo/proc/124/stat'\"}], \"inotify_fds\": {}}\n",
+      "stderr": ""
+    },
+    {
+      "name": "path-traversal",
+      "unsafe_member_rejected": true
+    },
+    {
+      "name": "absolute-path",
+      "unsafe_member_rejected": true
+    },
+    {
+      "name": "safe-relative-kernel-link",
+      "passed": true
+    },
+    {
+      "name": "escaping-kernel-link",
+      "unsafe_member_rejected": true
+    }
+  ],
+  "passed": true,
+  "python_syntax_checked": true
+}

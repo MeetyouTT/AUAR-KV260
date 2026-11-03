@@ -1,0 +1,24 @@
+Restart=no
+TimeoutStartUSec=1min 30s
+TimeoutStopUSec=1min 30s
+MainPID=1121
+Result=success
+ExecStartPre={ path=/usr/bin/xlnx-firmware-detect ; argv[]=/usr/bin/xlnx-firmware-detect ; ignore_errors=yes ; start_time=[Fri 2021-11-19 09:19:33 PST] ; stop_time=[Fri 2021-11-19 09:19:34 PST] ; pid=1019 ; code=exited ; status=0 }
+ExecStart={ path=/usr/local/lib/kv260-dfx-state-repair-20261003/dfx-mgrd ; argv[]=/usr/local/lib/kv260-dfx-state-repair-20261003/dfx-mgrd ; ignore_errors=no ; start_time=[Fri 2021-11-19 09:19:34 PST] ; stop_time=[n/a] ; pid=1121 ; code=(null) ; status=0/0 }
+KillMode=control-group
+SendSIGKILL=yes
+Id=dfx-mgr.service
+Requires=kv260-repaired-zocl.service system.slice sysinit.target
+Requisite=
+Wants=
+BindsTo=
+PartOf=
+Conflicts=shutdown.target
+Before=multi-user.target shutdown.target
+After=sysinit.target systemd-journald.socket kv260-repaired-zocl.service system.slice basic.target
+ActiveState=active
+SubState=running
+FragmentPath=/lib/systemd/system/dfx-mgr.service
+DropInPaths=/etc/systemd/system/dfx-mgr.service.d/10-kv260-repaired.conf /etc/systemd/system/dfx-mgr.service.d/20-kv260-dfx-state-repaired.conf
+UnitFileState=enabled
+Job=

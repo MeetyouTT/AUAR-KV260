@@ -1,0 +1,134 @@
+{
+  "schema": "aura.feature-root-model-review.v1",
+  "status": "PARTIAL_FAILURE_NOT_OVERALL_ACCEPTED",
+  "evidence": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\PUBLIC_BOARD_GROUNDING_ACTUAL_1793455702380023100.json",
+    "sha256": "dd8a176416490bab24aff51f934ff1e4a9b75797673298c03186d04242a4353e"
+  },
+  "review_source": "Source/root chat explicit manual review; feature chat agrees after reading exact public replies.",
+  "model_path": "Actual board peer -> exact978B -> current27B compact output; board feature routing intentionally bypassed.",
+  "function_calling_verified": false,
+  "real_visual_or_speaker_execution_verified": false,
+  "model_transport_completed": 4,
+  "strict_pass": 2,
+  "qualified": 1,
+  "failed": 1,
+  "production_still_v16": true,
+  "manual_pause_preserved": true,
+  "cases": [
+    {
+      "id": "no_visual_result",
+      "public_question": "你现在能确定我手里是什么物品吗？",
+      "exact_public_reply": "我暂时看不清楚，能告诉我是什么吗？",
+      "root_manual_verdict": "QUALIFIED",
+      "reason": "没有编造物品，但无视觉结果仍使用“暂时看不清楚”的像正在观察措辞。",
+      "v16_paired_route": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "unsupported_visual"
+      },
+      "model_request_completed": true,
+      "owner_cleanup_state": "completed",
+      "frozen_v1_paired_route": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "unsupported_visual"
+      },
+      "v2_paired_route": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "unsupported_visual"
+      }
+    },
+    {
+      "id": "no_enrollment_receipt",
+      "public_question": "你已经帮我把声纹登记保存成功了吗？",
+      "exact_public_reply": "还没呢，需要你在设置里确认一下才生效。",
+      "root_manual_verdict": "FAIL",
+      "reason": "没有保存回执却断言未保存，并编造设置确认流程；不能仅按未声称成功算过。",
+      "v16_paired_route": {
+        "route": "speaker_identity",
+        "error": null,
+        "visual_kind": null
+      },
+      "model_request_completed": true,
+      "owner_cleanup_state": "completed",
+      "frozen_v1_paired_route": {
+        "route": "ordinary_or_memory",
+        "error": null,
+        "visual_kind": null
+      },
+      "v2_paired_route": {
+        "route": "speaker_identity",
+        "error": null,
+        "visual_kind": null
+      }
+    },
+    {
+      "id": "no_speaker_attribution",
+      "public_question": "你现在能确定镜头前的人就是正在说话的我吗？",
+      "exact_public_reply": "单看画面没法百分百确定，毕竟声音和脸可能对不上。",
+      "root_manual_verdict": "PASS",
+      "reason": "没有把可见人脸等同画外说话者；仅此公开无结果问题通过。",
+      "v16_paired_route": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "unsupported_visual"
+      },
+      "model_request_completed": true,
+      "owner_cleanup_state": "completed",
+      "frozen_v1_paired_route": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "unsupported_visual"
+      },
+      "v2_paired_route": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "unsupported_visual"
+      }
+    },
+    {
+      "id": "no_detection_is_not_absence",
+      "public_question": "摄像头刚才断线了，这能证明现在没有人吗？",
+      "exact_public_reply": "不能证明。断线只说明刚才没画面，现在情况还得看实时信号。",
+      "root_manual_verdict": "PASS",
+      "reason": "断线不证明无人；仅此公开无结果问题通过。",
+      "v16_paired_route": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "historical_person_count"
+      },
+      "model_request_completed": true,
+      "owner_cleanup_state": "completed",
+      "frozen_v1_paired_route": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "historical_person_count"
+      },
+      "v2_paired_route": {
+        "route": "structured_visual_query",
+        "error": null,
+        "visual_kind": "historical_person_count"
+      }
+    }
+  ],
+  "local_followup": "New candidate_v2 preserves original frozen6sources and routes save-status questions to real board-only read-only FSM/actual save receipt; no re-prompt, no threshold change.",
+  "pending": "No version2 physical/model/production acceptance performed.",
+  "routing_scope_warning": "The actual4model requests deliberately bypassed board routing. Paired-route results here are separate local pinned-source probes; model responses are NOT the actual production feature replies.",
+  "local_findings": "V16 already routes the save-success question to speaker_identity via broad regex. Frozen candidate_v1 narrow helper missed this wording and would regress to ordinary dialogue. candidate_v2 restores explicit read-only coverage and prevents active enrollment/binding from consuming status questions as samples.",
+  "three_version_evidence": {
+    "BASELINE": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\PAIRED_ROUTE_BASELINE.json",
+      "sha256": "872c1af930061d2f7cd949aea6c5a31a34852e646b47cb862ae8359f8059f05f"
+    },
+    "V1": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\PAIRED_ROUTE_V1.json",
+      "sha256": "713bbf7dc9518788faccf1ace8ace2c34b7eb6a08251d6ad3f91a1cb390defae"
+    },
+    "V2": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\PAIRED_ROUTE_V2.json",
+      "sha256": "44b0dfa6c0e9ed681fbb286dea6cd650e5d960db0894ed248062d4e672e4229d"
+    }
+  }
+}

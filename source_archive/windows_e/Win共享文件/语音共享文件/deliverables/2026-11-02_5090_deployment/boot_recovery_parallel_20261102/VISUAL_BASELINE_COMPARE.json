@@ -1,0 +1,251 @@
+{
+  "schema": "aura-visual-historical-current-local-comparison-1",
+  "updated_utc": "2026-11-02T20:53:26.223084+00:00",
+  "status": "LOCAL_SOURCE_RUNTIME_EVIDENCE_COMPARISON_NO_CAUSAL_FIX_CLAIM_ALL_NEW_PATCHES_PAUSED",
+  "latest_user_scope": "Main reports visual problem recurred and rightward axis twitch;180s/new patch publication paused. Axis investigates motion; root sole GUI/camera control. This branch only local comparison.",
+  "historical_baseline": {
+    "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\BASELINE_PREPARED.json",
+    "sha256": "e9113223acd82085e4643d12e053a904225fb946782f6b02a2b39e47fbdc4374",
+    "recorded_utc_field": "2026-11-02T09:45:08.732300+00:00",
+    "boot_id": "903cfade-b93c-48fa-804e-379be1967313",
+    "startup_sha256": "1177df3831407bc819c1f1e3b89090f8c6b97661c8e74c2866b281be93b0a9c8",
+    "components_verified": 380,
+    "scene": {
+      "page": "vision",
+      "following": false,
+      "listening": false
+    },
+    "relation_to_user_morning_good": "Real verified historical380 snapshot available, but this receipt alone does NOT bind the user morning-normal visual observation to this exact startup. It is a comparison reference, not an asserted known-good rollback target."
+  },
+  "c115_to_c386": {
+    "apply_receipt": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\visual_artifact_fix_20261102\\release\\APPLY_VISUAL_1_RESULT.json",
+      "sha256": "390370b493f74e7355a9b116f5a778183e3e5222b0a3bf7af078de794760501d"
+    },
+    "ready_receipt": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\visual_artifact_fix_20261102\\release\\GUI_READY_1_RESULT.json",
+      "sha256": "0a3755904e0ba50a946dc88d7647cc9883e7a63e160fea87e2df6770003f24dd"
+    },
+    "startup_before": "c1154308fcd25a9c8d957f33c5e2a4db0a0ef73e7656eb5aa437e29af9cd123b",
+    "startup_after": "c3861fa3d2cbb10fee424804f7b3932eadd576819a2a6290c7ca406d900b9602",
+    "GUI_components_changed": [
+      "tools/board_avatar_gtk.py"
+    ],
+    "other379_exact": true,
+    "four_setters": [
+      {
+        "method": "build_window",
+        "line": 537,
+        "widget": "preview_image",
+        "setter": "set_app_paintable",
+        "value": true
+      },
+      {
+        "method": "build_window",
+        "line": 538,
+        "widget": "preview_image",
+        "setter": "set_double_buffered",
+        "value": false
+      },
+      {
+        "method": "open_preview",
+        "line": 1054,
+        "widget": "large_preview",
+        "setter": "set_app_paintable",
+        "value": true
+      },
+      {
+        "method": "open_preview",
+        "line": 1055,
+        "widget": "large_preview",
+        "setter": "set_double_buffered",
+        "value": false
+      }
+    ],
+    "all_other_GTK_AST_equal": true,
+    "external_editor": {
+      "before_sha256": "6a8bce7270534bb3b0f71dff657eac5da92b46855fdb7c9748a63b678be8ede4",
+      "after_sha256": "6d0e979034d051bd19addc4876297d80d05ff9cb41febcb5b6824b66b87a663c",
+      "sole_AST_change": "hint_window.move(92,78) -> move(8,420)",
+      "all_geometry_box_mapping_freshness_poll_and_axis_methods_unchanged": true
+    },
+    "camera_restarted": false,
+    "camera_owner": {
+      "pid": 362659,
+      "birth_ticks": "2850120",
+      "command_sha256": "acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd"
+    },
+    "GUI_owner_before": {
+      "pid": 363452,
+      "birth_ticks": "2933733",
+      "command_sha256": "48a28efa32b2050901e73e85a80a30a90dcfbce0b7249bde5d6d90902740631d"
+    },
+    "GUI_owner_after": {
+      "pid": 394712,
+      "birth_ticks": "3106155",
+      "command_sha256": "48a28efa32b2050901e73e85a80a30a90dcfbce0b7249bde5d6d90902740631d"
+    },
+    "GTK_owner_before": {
+      "pid": 363456,
+      "birth_ticks": "2933846",
+      "command_sha256": "b5b35a22c021086df5a2782bbdd4932ba1f18f14c6374717d7ed120a1befda32"
+    },
+    "GTK_owner_after": {
+      "pid": 394720,
+      "birth_ticks": "3106263",
+      "command_sha256": "e81bf963d019b5b23293db8d863359ca706564b4e1fa74a69a212517dc08de48"
+    }
+  },
+  "key_attribution_finding": {
+    "source": "tools/face_pan_controls.py",
+    "sha256": "3ebb1b32368c8f12864e0f13da68853e4d9653e4279eada124eb337c5ca9d7ee",
+    "lines": [
+      188,
+      195
+    ],
+    "fact": "The original FaceStage.attach_preview already sets app_paintable(True) and double_buffered(False) on both canvases before super.attach_preview. Constructor setters in c386 advance the timing; they do not introduce previously absent steady-state property values.",
+    "limit": "Earlier application can affect native-window/backing allocation lifecycle, but the source principle alone is not proof of physical flicker/ghosting resolution. The simultaneous GUI/editor restart is a separate confounder."
+  },
+  "historical_source_differences": {
+    "rows": [
+      {
+        "file": "tools/board_avatar_gtk.py",
+        "historical1177": "5e5c492832fc1273d45fa25d0ec692b47c9ffa4b6c6d46e42f176e842b50d70c",
+        "before_c115": "5e5c492832fc1273d45fa25d0ec692b47c9ffa4b6c6d46e42f176e842b50d70c",
+        "after_c386": "d3c3d18aad2afdd02e25c5619befc67cfdd3fd8a7ef9f8713b5403a88c9a7bc5"
+      },
+      {
+        "file": "tools/board_camera_preview.py",
+        "historical1177": "6e697c16f7ae264dff56b6b35f38da4b531ea13026b69a7c8bdbfb1960a6afcd",
+        "before_c115": "67d6c0f2b24ea97e20fdcc7b3383b6444269a6e26f5deb566f2b88746b7daf9b",
+        "after_c386": "67d6c0f2b24ea97e20fdcc7b3383b6444269a6e26f5deb566f2b88746b7daf9b"
+      },
+      {
+        "file": "tools/face_pan_controls.py",
+        "historical1177": "3ebb1b32368c8f12864e0f13da68853e4d9653e4279eada124eb337c5ca9d7ee",
+        "before_c115": "3ebb1b32368c8f12864e0f13da68853e4d9653e4279eada124eb337c5ca9d7ee",
+        "after_c386": "3ebb1b32368c8f12864e0f13da68853e4d9653e4279eada124eb337c5ca9d7ee"
+      },
+      {
+        "file": "tools/boundary_visibility.py",
+        "historical1177": "a3e4bd5e4ce6253577a304fc6de4284b8ce3add851d8decaba05ee2fa9cd8b62",
+        "before_c115": "a3e4bd5e4ce6253577a304fc6de4284b8ce3add851d8decaba05ee2fa9cd8b62",
+        "after_c386": "a3e4bd5e4ce6253577a304fc6de4284b8ce3add851d8decaba05ee2fa9cd8b62"
+      },
+      {
+        "file": "board/interaction/ui_services.py",
+        "historical1177": "b55ee295e2cb5494f387fbaa4aa081fd1d6bffd57588c018c5f31daae56bd711",
+        "before_c115": "e4dedf9b3d56d22d9eb93de1e96ad1a69870d553ea50f7dd5082b21e19f381c9",
+        "after_c386": "e4dedf9b3d56d22d9eb93de1e96ad1a69870d553ea50f7dd5082b21e19f381c9"
+      },
+      {
+        "file": "board/vision/local_preview.py",
+        "historical1177": "f40212f3ebe7645cb7b55ecc9846882ec7d02c38a6a2703b98f934d7703d8f11",
+        "before_c115": "f40212f3ebe7645cb7b55ecc9846882ec7d02c38a6a2703b98f934d7703d8f11",
+        "after_c386": "f40212f3ebe7645cb7b55ecc9846882ec7d02c38a6a2703b98f934d7703d8f11"
+      },
+      {
+        "file": "ui/board_touch_layout.json",
+        "historical1177": "9c3aa3372d038f024caf60985f61553e6a6eb60c8b5aaebb0881af6eae04e92e",
+        "before_c115": "9c3aa3372d038f024caf60985f61553e6a6eb60c8b5aaebb0881af6eae04e92e",
+        "after_c386": "9c3aa3372d038f024caf60985f61553e6a6eb60c8b5aaebb0881af6eae04e92e"
+      },
+      {
+        "file": "ui/ui_layout_spec.json",
+        "historical1177": "07425e6350b07aa131995e88f09267664b43251e375d4e3d6e2e2414fba14de4",
+        "before_c115": "07425e6350b07aa131995e88f09267664b43251e375d4e3d6e2e2414fba14de4",
+        "after_c386": "07425e6350b07aa131995e88f09267664b43251e375d4e3d6e2e2414fba14de4"
+      },
+      {
+        "file": "config/board_avatar_gtk.json",
+        "historical1177": "fc98455a5586cc4f1896f5472ec9b204bd7ff2b0c5be2798ba5cab1788b9b959",
+        "before_c115": "3898575acb418dff84ace73b23c7980b9b2c871bee9427c2cba1e1a6d9299f89",
+        "after_c386": "3898575acb418dff84ace73b23c7980b9b2c871bee9427c2cba1e1a6d9299f89"
+      },
+      {
+        "file": "config/pan_manual.local.json",
+        "historical1177": "5a9597c42b18425466d7f9991af3a5cef1769bdc68be92ccdd529f022e02b97a",
+        "before_c115": "11b808232632ce95fb82c16d4165eb64329dea10cff37096765bb644f4a299b9",
+        "after_c386": "11b808232632ce95fb82c16d4165eb64329dea10cff37096765bb644f4a299b9"
+      },
+      {
+        "file": "config/pan_face.local.json",
+        "historical1177": "5af0f923b5df3d14047b720cb46513e33f9be3be0452dffec9b74235db067acf",
+        "before_c115": "48b17798c0291291703ae7dd38de11a4f6ede6129ba93b450ba636a599a94bfb",
+        "after_c386": "48b17798c0291291703ae7dd38de11a4f6ede6129ba93b450ba636a599a94bfb"
+      }
+    ],
+    "preview_changed_method_only": "CameraPreviewWorker.work now chooses read_preview() projection instead of full services.read(); attach/push/clear/read/Gst pipeline ASTs unchanged",
+    "ui_services_class_method_deltas": [
+      {
+        "klass": "ConnectionStore",
+        "changed": [],
+        "added": [],
+        "removed": []
+      },
+      {
+        "klass": "NoRedirect",
+        "changed": [],
+        "added": [],
+        "removed": []
+      },
+      {
+        "klass": "HttpTransport",
+        "changed": [],
+        "added": [],
+        "removed": []
+      },
+      {
+        "klass": "UiServiceClient",
+        "changed": [],
+        "added": [
+          "read_preview"
+        ],
+        "removed": []
+      }
+    ],
+    "GTK_geometry_and_native_worker_and_faceStage_and_page_visibility_source_relation": "Historical1177 and c115 have identical GTK5e5c, faceStage3ebb, boundary_visibilitya3e, local_previewf402, UI layout/touch layout pins; c386 changes GTK timing only.",
+    "GTK_config_changed_field_paths": [
+      "/board_business/face_readback/path",
+      "/board_business/face_readback/sha256"
+    ],
+    "config_scope_limit": "Do not roll back full startup/config or pan configuration from historical1177: legitimate identity/binding/accepted axis updates exist and the boot/source owner changed."
+  },
+  "runtime_evidence": {
+    "c386_ready_verified380": true,
+    "short_user_acceptance": {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\visual_artifact_fix_20261102\\VISUAL_LIVE_USER_ACCEPTANCE.json",
+      "sha256": "320e0a6cffee5d70bb9ccca27586c5758d75321d09ea481f0b510579655dcad7",
+      "recorded_utc": "2026-11-02T19:43:17.383856+00:00",
+      "feedback": "人物视频和脸框都已明显正常",
+      "scope": "Human observed video/face-box improvement in this short现场test; not180s acceptance or a hardware timing measurement."
+    },
+    "latest_recurrence": "Main latest direct-user report says visual issue returned. Preserve the earlier short positive receipt as history; it does not establish a durable fix.",
+    "physical_video_root_cause_established": false,
+    "exact_morning_visual_good_startup_binding_established": false,
+    "controlled_baseline_current_physical_comparison_available": false
+  },
+  "editor_expiry_work": "Paused, source findings retained only as code issues; no new TTL patch deployment/review/implementation advanced",
+  "only_writes": "Own baseline_compare subdirectory and local comparison/handoff JSON",
+  "device_calls": 0,
+  "models_or_tests_run": 0,
+  "production_or_peer_files_modified": false,
+  "R7_changed": false,
+  "new_parameters_or_initialization": false,
+  "branch_work_freeze": {
+    "state": "FROZEN_BY_USER_TIME_PRIORITY_OTHER_FUNCTIONS_FIRST",
+    "recorded_utc": "2026-11-02T20:53:26.223084+00:00",
+    "new_candidates_frozen": true,
+    "extra_analysis_frozen": true,
+    "visual_axis_audio_scheduling_work": "Paused; no new optimization or trials",
+    "main_current_scope": "Dialogue / ECAPA CPU voice identity / existing memory / character functions",
+    "R7_deployment": false,
+    "face_expiry_patch_deployment": false,
+    "blocks_main_validation": false,
+    "device_access": false,
+    "board_calls": 0,
+    "models_or_tests_run": 0,
+    "requires_explicit_new_task_to_resume": true,
+    "evidence_boundary": "Retain R7 offline independent pass as offline only; preserve visual timing source findings without calling them physical ghosting cause; preserve historical/current comparison without asserting exact morning-good binding or durable c386 fix"
+  }
+}

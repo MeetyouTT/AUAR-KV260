@@ -1,0 +1,8 @@
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR aarch64)
+set(CMAKE_SYSROOT "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/native-sdk-packaged/sysroot")
+set(CMAKE_C_COMPILER "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/native-sdk-packaged/tools/cc")
+set(CMAKE_CXX_COMPILER "/home/ghmd/auar-scheme-a-9a4f-20261103-01a1a08b/verification/native-sdk-packaged/tools/cxx")
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)

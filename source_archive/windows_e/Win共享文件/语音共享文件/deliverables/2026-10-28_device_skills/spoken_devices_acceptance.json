@@ -1,0 +1,135 @@
+{
+  "status": "PARTIAL",
+  "scope": "Microsoft Huihui synthetic PCM, actual deployed ARM client, ASR/VLM/LLM/TTS; no live mic, no playback, no playback ACK",
+  "boot": "c006a771-c3e4-4d4f-97d7-ade3dd774619",
+  "checks": [
+    {
+      "id": "name_only",
+      "text": "汐蓝",
+      "expected": "wake_only",
+      "input_pcm_sha256": "ef53e958ab8b561f304b5c422030353fa1a2558e49a2fdfa94f9c3754e40e2b6",
+      "actual_asr": "西兰",
+      "outcome": "wake_only",
+      "status": "PASS",
+      "events": [],
+      "seconds": 0.05
+    },
+    {
+      "id": "ai_only",
+      "text": "哎",
+      "expected": "wake_only",
+      "input_pcm_sha256": "18b74f3e187e73f3b3383102ec00e90f509fd7fbf018a87fd6bc070ce1eb5f66",
+      "actual_asr": "i",
+      "outcome": "reject",
+      "status": "FAIL",
+      "events": [],
+      "seconds": 0.044
+    },
+    {
+      "id": "ei_only",
+      "text": "欸",
+      "expected": "wake_only",
+      "input_pcm_sha256": "26afeefa1af56138c73faa82e39dd62ea7298524571690f3356e31992e62ed00",
+      "actual_asr": "喂",
+      "outcome": "reject",
+      "status": "FAIL",
+      "events": [],
+      "seconds": 0.048
+    },
+    {
+      "id": "name_question",
+      "text": "汐蓝，你好。",
+      "expected": "answer",
+      "input_pcm_sha256": "cb0000802e89b2fa3059ca702e106104478cc6f286a290ae726fe460c1cff1db",
+      "actual_asr": "西兰你好",
+      "first_audio_ms": 4808.67,
+      "response_backend": "ollama",
+      "outcome": "answer",
+      "samples": 59280,
+      "reply_characters": 14,
+      "status": "PASS",
+      "events": [
+        "audio",
+        "control",
+        "end",
+        "heartbeat",
+        "start",
+        "text",
+        "transcript"
+      ],
+      "seconds": 6.759
+    },
+    {
+      "id": "ordinary_speech",
+      "text": "今天天气真好。",
+      "expected": "reject",
+      "input_pcm_sha256": "5d69ebe9a92272227829f9bbebb4b3b4c950c951ba61ee6008d5809b01693bfb",
+      "actual_asr": "今天天气真好",
+      "outcome": "reject",
+      "status": "PASS",
+      "events": [],
+      "seconds": 0.075
+    },
+    {
+      "id": "vegetable",
+      "text": "西兰花很好吃。",
+      "expected": "reject",
+      "input_pcm_sha256": "3976cbcf604f677dcf41a73accb1a2a9136bf8c9c83b03c42bfde07af1f9259d",
+      "actual_asr": "西兰花很好吃",
+      "outcome": "reject",
+      "status": "PASS",
+      "events": [],
+      "seconds": 0.074
+    },
+    {
+      "id": "visual_question",
+      "text": "你现在看见了什么？",
+      "expected": "visual_answer",
+      "input_pcm_sha256": "08165bf3bc6d288152cb036e5b481fc5c47eec6998e7bb7c8654fb8e59c6bf6f",
+      "actual_asr": "你现在看见了什么",
+      "visual_frame_upload": true,
+      "first_audio_ms": 10822.23,
+      "response_backend": "local_visual_question",
+      "outcome": "answer",
+      "samples": 401280,
+      "reply_characters": 88,
+      "status": "PASS",
+      "events": [
+        "audio",
+        "control",
+        "end",
+        "heartbeat",
+        "start",
+        "text",
+        "transcript"
+      ],
+      "seconds": 11.357
+    },
+    {
+      "id": "speaker_question",
+      "text": "你认识我的声音吗？",
+      "expected": "device_answer",
+      "input_pcm_sha256": "9cca2d357ef6d25a2d6f9388ce07f5a89497d16c18bb606651c385cfcf925529",
+      "actual_asr": "你认识我的声音吗",
+      "first_audio_ms": 814.94,
+      "response_backend": null,
+      "outcome": "answer",
+      "samples": 106560,
+      "reply_characters": 25,
+      "device_reply_expected": true,
+      "status": "PASS",
+      "events": [
+        "audio",
+        "control",
+        "end",
+        "start",
+        "text",
+        "transcript"
+      ],
+      "seconds": 0.921
+    }
+  ],
+  "microphone_opened": false,
+  "motor_command": false,
+  "no_private_memory_grants": true
+}

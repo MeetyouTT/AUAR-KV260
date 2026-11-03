@@ -1,0 +1,483 @@
+--- v90/public_frontend_budget.py
++++ v20/public_frontend_budget.py
+@@ -15,6 +15,8 @@
+ import sys
+ import time
+ 
++import frontend_v20_common as current
++
+ 
+ ALLOCATION_SHA = 'c7988d2439fbb0d7d4c9d9b9783f3d1ce228cb61ccfd01d54a6ce05762ca9a3b'
+ PUMP_SHA = 'ac0af16c9f783b5590ab0e1562ece179b8cc50ade3912c8b08e8b8592778e093'
+@@ -47,21 +49,13 @@
+ 
+ 
+ def validate_sources(args):
+-    mapping = json.loads(args.source_mapping.read_text(encoding='utf-8-sig'))
+-    root = Path(mapping['root'])
+-    if args.code_root != root/'runtime/aura':
+-        raise ValueError('production_code_root_mismatch')
+-    if digest(root/'startup/config.json') != mapping['startup_sha256']:
+-        raise ValueError('startup_changed')
+-    if Path('/proc/sys/kernel/random/boot_id').read_text().strip() != mapping['boot_id']:
+-        raise ValueError('board_boot_changed')
+-    for relative, expected in mapping['component_pins'].items():
+-        if digest(args.code_root/relative) != expected:
+-            raise ValueError('production_component_changed')
++    mapping = current.package(args.package_sha256)
++    current.worker_paths(args)
++    evidence = current.guard(mapping, full=True)
+     for relative, expected in SOURCE_PINS.items():
+         if mapping['component_pins'].get(relative) != expected:
+             raise ValueError('reviewed_frontend_component_changed')
+-    return mapping
++    return mapping, evidence
+ 
+ 
+ @contextmanager
+@@ -200,6 +194,7 @@
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument('--execute-root-only', action='store_true')
++    parser.add_argument('--package-sha256', required=True)
+     parser.add_argument('--mode', choices=('baseline_1','dual_nospin'), required=True)
+     parser.add_argument('--slot', choices=('A1','B1','B2','A2'), required=True)
+     parser.add_argument('--source-mapping', type=Path, required=True)
+@@ -215,7 +210,7 @@
+         parser.error('A slots are baseline_1 and B slots are dual_nospin')
+     if os.name != 'posix' or platform.machine().lower() not in ('aarch64','arm64'):
+         parser.error('This execution entry is ARM Linux only')
+-    mapping = validate_sources(args)
++    mapping, live_before = validate_sources(args)
+     allocation = load('_reviewed_public_allocation_helpers', args.pipeline_helper, ALLOCATION_SHA)
+     parent = load('_reviewed_public_pcm_helpers', args.pump_helper, PUMP_SHA)
+     pcm, framed = allocation.public_pcm(args.wav)
+@@ -269,9 +264,12 @@
+     after = parent.safety_snapshot()
+     if before != after or not priority.record.get('restoration_confirmed'):
+         result.update(status='FAILED', error_code='owner_state_or_priority_not_restored')
+-    validate_sources(args)
++    _, live_after = validate_sources(args)
++    if live_before['capture_stats'] != live_after['capture_stats']:
++        result.update(status='FAILED', error_code='capture_activity_changed')
+     result.update(schema='aura.public-frontend-budget-slot.v1', slot=args.slot, mode=args.mode,
+         startup_sha256=mapping['startup_sha256'], source_components_verified=len(mapping['component_pins']),
++        source_mapping_sha256=current.MAPPING_SHA, live_guard_before=live_before, live_guard_after=live_after,
+         source_wav_sha256=WAV_SHA, total_wall_seconds=time.monotonic()-started,
+         before=before, after=after, priority=dict(priority.record),
+         original_pcm_and_endpoint_used=True, queue_capacity_frames=8,
+--- v90/compare_frontend_abba.py
++++ v20/compare_frontend_abba.py
+@@ -4,6 +4,8 @@
+ import json
+ from pathlib import Path
+ import statistics
++
++import frontend_v20_common as current
+ 
+ 
+ THRESHOLDS = dict(candidate_mean_gate_wall_ms_max=16.,
+@@ -23,6 +25,13 @@
+     if any(row.get('status') != 'PASS_PUBLIC_SLOT' for row in rows):
+         result.update(status='FAILED_SLOT_DO_NOT_DEPLOY')
+         return result
++    if any(row.get('startup_sha256') != current.STARTUP_SHA
++           or row.get('source_mapping_sha256') != current.MAPPING_SHA
++           or row.get('source_components_verified') != 380
++           or not isinstance(row.get('live_guard_before'), dict)
++           or not isinstance(row.get('live_guard_after'), dict) for row in rows):
++        result.update(status='CURRENT_SOURCE_PROOF_REQUIRED')
++        return result
+     if [row.get('mode') for row in rows] != ['baseline_1','dual_nospin','dual_nospin','baseline_1']:
+         raise ValueError('ABBA modes mismatch')
+     direct = [trial for row in rows for trial in row['throughput']]
+@@ -37,6 +46,12 @@
+     identities = len({(row['startup_sha256'], row['source_wav_sha256'],
+         row['before']['boot_id'], row['before']['ui_pid'], row['before']['camera_pid']) for row in rows}) == 1
+     versions = len({json.dumps(row['runtime']['versions'], sort_keys=True) for row in rows}) == 1
++    guards = [row[key] for row in rows for key in ('live_guard_before', 'live_guard_after')]
++    expected_owners = {role: current.baseline()[role] for role in ('supervisor', 'gtk', 'camera')}
++    pinned_owners = all(guard.get('owners') == expected_owners for guard in guards)
++    capture_stable = len({json.dumps(guard.get('capture_stats'), sort_keys=True) for guard in guards}) == 1
++    memory_stable = all(len({guard.get(key) for guard in guards}) == 1
++                        for key in ('memory_completed', 'memory_discarded'))
+     baseline = [trial for row in rows if row['mode']=='baseline_1' for trial in row['throughput']]
+     candidate = [trial for row in rows if row['mode']=='dual_nospin' for trial in row['throughput']]
+     a_wall = statistics.mean(trial['gate_wall_ms']['mean'] for trial in baseline)
+@@ -50,6 +65,8 @@
+     checks = dict(full_direct_numeric_parity=same_direct, paced_endpoint_parity=same_endpoint,
+         paced_denoised_parity=same_paced_float, owners_and_priority=owners, same_source_and_processes=identities,
+         same_runtime_versions=versions,
++        current_v20_owners=pinned_owners, capture_activity_unchanged=capture_stable,
++        background_memory_counters_unchanged=memory_stable,
+         mean_wall_headroom=b_wall <= THRESHOLDS['candidate_mean_gate_wall_ms_max'],
+         relative_wall_gain=improvement >= THRESHOLDS['minimum_mean_wall_improvement_percent'],
+         total_process_cpu_budget=a_cpu > 0 and b_cpu/a_cpu <= THRESHOLDS['candidate_to_baseline_process_cpu_ratio_max'],
+@@ -75,6 +92,9 @@
+     for path in args.evidence:
+         raw = path.read_bytes()
+         item = json.loads(raw)
+-        rows.append(item.get('result', item))
++        if isinstance(item.get('slots'), list):
++            rows.extend(item['slots'])
++        else:
++            rows.append(item.get('result', item))
+         sources.append(dict(path=str(path.resolve()), sha256=hashlib.sha256(raw).hexdigest()))
+     print(json.dumps(dict(compare(rows), sources=sources), indent=2))
+--- v90/test_frontend_budget.py
++++ v20/test_frontend_budget.py
+@@ -94,6 +94,9 @@
+ 
+ def records():
+     rows = []
++    owners = {role: COMPARE.current.baseline()[role] for role in ('supervisor', 'gtk', 'camera')}
++    guard = dict(owners=owners, capture_stats=dict(armed=0, speech_starts=0, submitted=0),
++                 memory_completed=0, memory_discarded=0)
+     for slot, mode in (('A1','baseline_1'),('B1','dual_nospin'),('B2','dual_nospin'),('A2','baseline_1')):
+         trial = dict(frames=351, model_hops=438, output_samples=111872,
+             output_float32_sha256='float', output_pcm16_sha256='pcm', decision_sha256='vad', decision_bytes_hex='00',
+@@ -102,7 +105,9 @@
+             frame_windows=dict(windows_50_frames=[dict(count=50,mean=15.)]))
+         owner = dict(boot_id='boot', ui_pid=1, camera_pid=2)
+         rows.append(dict(status='PASS_PUBLIC_SLOT', slot=slot, mode=mode,
+-            startup_sha256='startup',source_wav_sha256='public-wav',before=owner,after=dict(owner),
++            startup_sha256=COMPARE.current.STARTUP_SHA,source_wav_sha256='public-wav',before=owner,after=dict(owner),
++            source_mapping_sha256=COMPARE.current.MAPPING_SHA,source_components_verified=380,
++            live_guard_before=copy.deepcopy(guard),live_guard_after=copy.deepcopy(guard),
+             priority=dict(restoration_confirmed=True),runtime=dict(versions={'ort':'1.17.3'}),
+             throughput=[copy.deepcopy(trial),copy.deepcopy(trial)],
+             paced=dict(endpoint=dict(start_sample=0,captured_samples=100,original_pcm_sha256='source',
+--- /dev/null
++++ v20/frontend_v20_common.py
+@@ -0,0 +1,182 @@
++"""Fixed v20 metadata and public-probe guards. Imports perform no device I/O."""
++import hashlib
++import http.client
++import json
++import math
++from pathlib import Path, PurePosixPath
++import subprocess
++import time
++
++
++HERE = Path(__file__).resolve().parent
++ROOT = Path('/home/root/aura-board-business-20261030/production-5259eab11e42af13')
++STARTUP_SHA = 'd24b0d0007e2aa2b417f459891c7f39f168502a58374334ceab69e31af5881dd'
++MAPPING_SHA = 'a7141992428e47d49ef80828ce9a0b33df6bffe32b613343ba01f937f68fdafc'
++SPEC_SHA = 'cd67e77691b415d8133015911806c98aaf328feed44945e492c8b0cd421099c7'
++CONFIG_SHA = '5518b6705083eb9e2fae7e19a47c003182995fe8660cbc6031860c9905da9786'
++BOOT = 'bebd3e7d-e984-4517-8cbb-211df7f1c6dc'
++WAV = Path('/home/root/aura-board-owner-candidate-20261030/asr-1.13.8/models/paraformer/test_wavs/0.wav')
++FRONTEND_MODELS = Path('/home/root/aura-board-owner-candidate-20261030/frontend-b3d06b653876469d/models')
++FFT_DEPS = Path('/home/root/aura-board-owner-candidate-20261030/fft-ee19b936d17aa451/deps')
++ASR_DEPS = Path('/home/root/aura-board-owner-candidate-20261030/asr-1.13.8/deps')
++PACKAGE_FILES = {'run_frontend_abba.py', 'frontend_v20_common.py', 'public_frontend_budget.py',
++    'compare_frontend_abba.py', 'allocation_public_probe.py', 'board_audio_runtime_probe.py',
++    'source_mapping.v20.json', 'spec.v20.json'}
++
++
++class Refused(RuntimeError):
++    pass
++
++
++def need(value, code):
++    if not value:
++        raise Refused(code)
++
++
++def sha(raw):
++    return hashlib.sha256(raw).hexdigest()
++
++
++def read_pinned(path, expected=None, maximum=16 * 1024 * 1024):
++    path = Path(path)
++    need(path.is_absolute() and path.resolve(strict=True) == path and not path.is_symlink()
++         and path.is_file() and path.stat().st_size <= maximum, 'REGULAR_FILE_REQUIRED')
++    raw = path.read_bytes()
++    need(len(raw) <= maximum and (expected is None or sha(raw) == expected), 'SOURCE_PIN_CHANGED')
++    return raw
++
++
++def baseline():
++    mapping = json.loads(read_pinned(HERE / 'source_mapping.v20.json', MAPPING_SHA))
++    spec = json.loads(read_pinned(HERE / 'spec.v20.json', SPEC_SHA))
++    need(mapping['startup_sha256'] == spec['startup_sha256'] == STARTUP_SHA
++         and mapping['boot_id'] == spec['boot_id'] == BOOT and mapping['root'] == ROOT.as_posix()
++         and mapping['component_pins'] == spec['component_sha256']
++         and len(mapping['component_pins']) == spec['component_pins'] == 380
++         and mapping['configuration_sha256'] == spec['configuration_sha256'] == CONFIG_SHA
++         and mapping['source_manifest_sha256'] == spec['source_manifest_sha256']
++         and mapping['current_publication_committed'] is True
++         and mapping['saved_listening_preference'] == {'version': 1, 'enabled': False}
++         and spec['expected_final_listening_enabled'] is False, 'FIXED_V20_BASELINE_REQUIRED')
++    return mapping
++
++
++def package(expected):
++    manifest = json.loads(read_pinned(HERE / 'PACKAGE_MANIFEST.json', expected, 262144))
++    need(set(manifest['files']) == PACKAGE_FILES, 'EXACT_PACKAGE_FILES_REQUIRED')
++    for name, row in manifest['files'].items():
++        raw = read_pinned(HERE / name, row['sha256'], 1024 * 1024)
++        need(len(raw) == row['bytes'], 'PACKAGE_SIZE_CHANGED')
++    return baseline()
++
++
++def metadata(port, route):
++    connection = http.client.HTTPConnection('127.0.0.1', port, timeout=3)
++    try:
++        connection.request('GET', route)
++        response = connection.getresponse()
++        raw = response.read(1048577)
++        need(response.status == 200 and len(raw) <= 1048576, 'METADATA_UNAVAILABLE')
++        return json.loads(raw)
++    finally:
++        connection.close()
++
++
++def boot_id():
++    return Path('/proc/sys/kernel/random/boot_id').read_text().strip()
++
++
++def process_identity(pid):
++    need(type(pid) is int and pid > 0, 'PROCESS_IDENTIFIER_REQUIRED')
++    path = Path('/proc') / str(pid)
++    fields = (path / 'stat').read_text().rsplit(')', 1)[1].split()
++    need(fields[0] not in ('Z', 'X'), 'PROCESS_NOT_LIVE')
++    raw = (path / 'cmdline').read_bytes()
++    need(0 < len(raw) <= 1048576, 'PROCESS_METADATA_BOUND')
++    return dict(pid=pid, birth_ticks=int(fields[19]), command_sha256=sha(raw))
++
++
++def process_parent(pid):
++    fields = (Path('/proc') / str(pid) / 'stat').read_text().rsplit(')', 1)[1].split()
++    return int(fields[1])
++
++
++def unit(unit_name):
++    raw = subprocess.check_output(['systemctl', 'show', unit_name, '-p', 'MainPID',
++                                   '-p', 'ActiveState', '-p', 'SubState'], text=True, timeout=3)
++    return dict(line.split('=', 1) for line in raw.splitlines() if '=' in line)
++
++
++def number(value):
++    return value if type(value) in (int, float) and math.isfinite(value) and value >= 0 else None
++
++
++def paused_metadata(state):
++    hands = state.get('handsfree_dialogue', {})
++    native = state.get('avatar_display', {})
++    business = state.get('board_business', {})
++    pan = state.get('manual_pan', {})
++    need(state.get('phase') == 'IDLE' and state.get('playing') is False
++         and hands.get('enabled') is False and hands.get('state') == 'PAUSED'
++         and hands.get('microphone_open') is False and pan.get('automatic_following') is False,
++         'SAVED_PAUSE_REQUIRED')
++    need(native.get('visible') is True and number(native.get('frames')) is not None
++         and native['frames'] > 0, 'VISIBLE_NATIVE_UI_REQUIRED')
++    need(business.get('dialogue', {}).get('pending') is False
++         and business.get('speaker', {}).get('queued_or_active') == 0, 'BUSINESS_JOB_ACTIVE')
++    memory = business.get('memory', {})
++    stats = hands.get('diagnostics', {})
++    need(all(type(stats.get(name)) is int and stats[name] >= 0 for name in
++             ('armed', 'speech_starts', 'submitted')), 'CAPTURE_COUNTERS_REQUIRED')
++    need(all(type(memory.get(name)) is int and memory[name] >= 0 for name in
++             ('completed', 'discarded')), 'MEMORY_COUNTERS_REQUIRED')
++    return dict(native_frames=number(native.get('frames')), native_age_ms=number(native.get('age_ms')),
++        memory_completed=number(memory.get('completed')), memory_discarded=number(memory.get('discarded')),
++        capture_stats={name: number(stats.get(name)) for name in ('armed', 'speech_starts', 'submitted')},
++        listening_paused=True, microphone_open=False, following=False)
++
++
++def guard(mapping, *, full=True):
++    need(boot_id() == BOOT, 'BOARD_BOOT_CHANGED')
++    startup = json.loads(read_pinned(ROOT / 'startup/config.json', STARTUP_SHA))
++    need(startup['component_sha256'] == mapping['component_pins'], 'COMPONENT_MAP_CHANGED')
++    if full:
++        for relative, fingerprint in mapping['component_pins'].items():
++            path = PurePosixPath(relative)
++            need(not path.is_absolute() and '..' not in path.parts and str(path) == relative,
++                 'COMPONENT_PATH_REJECTED')
++            read_pinned(ROOT / 'runtime/aura' / relative, fingerprint)
++        manifest = json.loads(read_pinned(ROOT / 'production_source_manifest.json', mapping['source_manifest_sha256']))
++        need(manifest['component_pins'] == mapping['component_pins'], 'SOURCE_MANIFEST_CHANGED')
++    config = json.loads(read_pinned(ROOT / 'runtime/aura/config/board_avatar_gtk.json', CONFIG_SHA))
++    options = config['board_business']
++    need(options['asr_variant'] == 'paraformer_small' and options['asr_threads'] == 3
++         and options['asr_directory'] == '/home/root/aura-board-asr-models/paraformer-small-63ddc3cd0f2810b6',
++         'ASR_CONFIGURATION_CHANGED')
++    owners = {}
++    for role in ('supervisor', 'gtk', 'camera'):
++        owners[role] = process_identity(mapping[role]['pid'])
++        need(owners[role] == mapping[role], 'PRODUCTION_OWNER_CHANGED')
++    need(process_parent(mapping['gtk']['pid']) == mapping['supervisor']['pid'], 'GTK_PARENT_CHANGED')
++    for unit_name, role in (('aura-avatar-ui.service', 'supervisor'), ('aura-camera-ui.service', 'camera')):
++        value = unit(unit_name)
++        need(value == dict(MainPID=str(mapping[role]['pid']), ActiveState='active', SubState='running'),
++             'PRODUCTION_SERVICE_CHANGED')
++    preference = json.loads(read_pinned(Path('/home/root/.local/share/aura-board-business/listening_preference.json'), maximum=4096))
++    need(preference == {'version': 1, 'enabled': False} and preference['enabled'] is False
++         and type(preference['version']) is int, 'SAVED_PAUSE_CHANGED')
++    result = paused_metadata(metadata(8783, '/api/state'))
++    camera = metadata(8790, '/health')
++    need(camera.get('pid') == mapping['camera']['pid'], 'CAMERA_HEALTH_OWNER_CHANGED')
++    result.update(observed_mono=time.monotonic(), owners=owners,
++        camera={name: number(camera.get(name)) for name in ('capture_frames', 'detected_frames',
++            'preview_frames', 'capture_age_ms', 'observation_age_ms', 'last_inference_ms')})
++    return result
++
++
++def worker_paths(args):
++    expected = dict(source_mapping=HERE / 'source_mapping.v20.json', code_root=ROOT / 'runtime/aura',
++        pipeline_helper=HERE / 'allocation_public_probe.py', pump_helper=HERE / 'board_audio_runtime_probe.py',
++        wav=WAV, frontend_models=FRONTEND_MODELS, fft_deps=FFT_DEPS, asr_deps=ASR_DEPS)
++    need(all(getattr(args, key) == value for key, value in expected.items()), 'EXACT_PUBLIC_INPUT_PATHS_REQUIRED')
++    return expected
+--- /dev/null
++++ v20/run_frontend_abba.py
+@@ -0,0 +1,146 @@
++"""Root-only sequential public frontend screen, dry by default."""
++import argparse
++import json
++import os
++from pathlib import Path
++import platform
++import signal
++import subprocess
++import sys
++import time
++
++import frontend_v20_common as current
++from compare_frontend_abba import compare
++
++
++ORDER = (('A1', 'baseline_1'), ('B1', 'dual_nospin'),
++         ('B2', 'dual_nospin'), ('A2', 'baseline_1'))
++STAGE_PARENT = Path('/home/root/aura-public-frontend-v20-20261031')
++
++
++def worker_command(slot, mode, package_sha):
++    command = [sys.executable, '-B', str(current.HERE / 'public_frontend_budget.py'),
++               '--execute-root-only', '--package-sha256', package_sha, '--slot', slot, '--mode', mode]
++    values = dict(source_mapping=current.HERE / 'source_mapping.v20.json', code_root=current.ROOT / 'runtime/aura',
++        pipeline_helper=current.HERE / 'allocation_public_probe.py', pump_helper=current.HERE / 'board_audio_runtime_probe.py',
++        wav=current.WAV, frontend_models=current.FRONTEND_MODELS, fft_deps=current.FFT_DEPS, asr_deps=current.ASR_DEPS)
++    for name, path in values.items():
++        command += ['--' + name.replace('_', '-'), str(path)]
++    return command
++
++
++def own_child(process, identity):
++    current.need(current.process_identity(process.pid) == identity
++                 and current.process_parent(process.pid) == os.getpid()
++                 and os.getpgid(process.pid) == process.pid and process.pid != os.getpgrp(),
++                 'OWNED_PROCESS_PROOF_LOST')
++
++
++def run_child(slot, mode, package_sha, batch_deadline):
++    command = worker_command(slot, mode, package_sha)
++    started = time.monotonic()
++    deadline = min(batch_deadline, started + 90.)
++    current.need(deadline - started > 10., 'BATCH_DEADLINE')
++    process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
++        stderr=subprocess.PIPE, text=True, encoding='utf-8', start_new_session=True,
++        env=dict(os.environ, OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1', MKL_NUM_THREADS='1',
++                 PYTHONNOUSERSITE='1', PYTHONDONTWRITEBYTECODE='1'))
++    identity = None
++    value = None
++    try:
++        identity = current.process_identity(process.pid)
++        expected_command = current.sha(b'\0'.join(part.encode() for part in command) + b'\0')
++        current.need(identity['command_sha256'] == expected_command, 'OWNED_CHILD_COMMAND_CHANGED')
++        own_child(process, identity)
++        # Reserve eight seconds inside the 90-second bound for owned cleanup.
++        stdout, stderr = process.communicate(timeout=max(.1, deadline - time.monotonic() - 8.))
++        current.need(len(stdout) <= 1048576, 'PUBLIC_RESULT_TOO_LARGE')
++        value = json.loads(stdout)
++        current.need(value.get('slot') == slot and value.get('mode') == mode
++                     and value.get('startup_sha256') == current.STARTUP_SHA
++                     and value.get('source_mapping_sha256') == current.MAPPING_SHA
++                     and value.get('source_components_verified') == 380, 'PUBLIC_RESULT_OWNER_CHANGED')
++        current.need(value.get('microphone_opened') is False and value.get('audio_played') is False
++                     and value.get('asr_executed') is False and value.get('production_database_opened') is False
++                     and value.get('production_source_modified') is False, 'PUBLIC_RESULT_SCOPE_CHANGED')
++        value.update(owned_child=identity, child_wall_seconds=time.monotonic() - started,
++                     external_deadline_seconds=90., native_stderr_characters=len(stderr))
++        if process.returncode != 0 or value.get('status') != 'PASS_PUBLIC_SLOT':
++            value['status'] = 'FAILED'
++        return value
++    finally:
++        if process.poll() is None:
++            if identity is None:
++                identity = current.process_identity(process.pid)
++            own_child(process, identity)
++            os.killpg(process.pid, signal.SIGTERM)
++            try:
++                process.communicate(timeout=min(3., max(.1, deadline - time.monotonic())))
++            except subprocess.TimeoutExpired:
++                own_child(process, identity)
++                os.killpg(process.pid, signal.SIGKILL)
++                process.communicate(timeout=min(5., max(.1, deadline - time.monotonic())))
++        try:
++            os.killpg(process.pid, 0)
++        except ProcessLookupError:
++            pass
++        else:
++            raise current.Refused('OWNED_PROCESS_GROUP_REMAINS')
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--package-sha256', required=True)
++    parser.add_argument('--execute-root-only', action='store_true')
++    args = parser.parse_args()
++    mapping = current.package(args.package_sha256)
++    if not args.execute_root_only:
++        return dict(status='DRY_V20_PUBLIC_PACKAGE_VALIDATED', order=[slot for slot, _ in ORDER],
++                    components=380, startup_sha256=current.STARTUP_SHA, models_loaded=False, device_access=False)
++    current.need(platform.system() == 'Linux' and platform.machine().lower() in ('aarch64', 'arm64'),
++                 'ARM_LINUX_REQUIRED')
++    current.need(current.HERE.parent == STAGE_PARENT and current.HERE.name == args.package_sha256[:16],
++                 'OWNED_PROBE_STAGE_REQUIRED')
++    current.need(os.getpriority(os.PRIO_PROCESS, 0) == 0 and len(os.sched_getaffinity(0)) == 4,
++                 'ORIGINAL_RUNNER_PRIORITY_AND_AFFINITY_REQUIRED')
++    import fcntl
++    lock_fd = os.open(str(current.HERE / 'owned-probe.lock'), os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
++    with os.fdopen(lock_fd, 'a+b') as lock:
++        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
++        initial = current.guard(mapping, full=True)
++        deadline = time.monotonic() + 420.
++        rows = []
++        try:
++            for slot, mode in ORDER:
++                before = current.guard(mapping, full=False)
++                value = run_child(slot, mode, args.package_sha256, deadline)
++                after = current.guard(mapping, full=False)
++                value['parent_before'], value['parent_after'] = before, after
++                if (before['capture_stats'] != after['capture_stats']
++                        or before['capture_stats'] != initial['capture_stats']):
++                    value.update(status='FAILED', error_code='capture_activity_changed')
++                rows.append(value)
++                if value['status'] != 'PASS_PUBLIC_SLOT':
++                    break
++            final = current.guard(mapping, full=True)
++            return dict(status='PUBLIC_FRONTEND_ABBA_COMPLETE' if len(rows) == 4
++                and all(row['status'] == 'PASS_PUBLIC_SLOT' for row in rows) else 'PUBLIC_FRONTEND_ABBA_STOPPED',
++                schema='aura.public-frontend-abba-v20.v1', slots=rows, comparison=compare(rows),
++                before=initial, after=final, package_sha256=args.package_sha256,
++                source_mapping_sha256=current.MAPPING_SHA, startup_sha256=current.STARTUP_SHA,
++                batch_deadline_seconds=420, production_modified=False, microphone_opened=False, audio_played=False)
++        except Exception as exc:
++            return dict(status='PUBLIC_FRONTEND_ABBA_STOPPED', slots=rows,
++                error_code=str(exc) if isinstance(exc, current.Refused) else type(exc).__name__
++                if type(exc).__name__ in ('TimeoutExpired', 'TimeoutError', 'ValueError', 'OSError', 'RuntimeError') else 'OtherError',
++                package_sha256=args.package_sha256, production_modified=False)
++
++
++if __name__ == '__main__':
++    try:
++        result = main()
++    except Exception as exc:
++        result = dict(status='REFUSED', error_code=str(exc) if isinstance(exc, current.Refused)
++                      else type(exc).__name__ if type(exc).__name__ in ('ValueError', 'OSError', 'RuntimeError') else 'OtherError')
++    print(json.dumps(result, allow_nan=False))
++    raise SystemExit(0 if result['status'] in ('DRY_V20_PUBLIC_PACKAGE_VALIDATED', 'PUBLIC_FRONTEND_ABBA_COMPLETE') else 2)

@@ -1,0 +1,53 @@
+Independent offline review: HOLD_CURRENT_FINAL_SOURCE_ALIAS
+
+Candidate: camera/validate_fresh_final_history_readonly.py
+SHA256: e92d8b0c461ff060d2e6d5e0aceef81c13ad1580cc3f66ad118b27c805b9f102
+
+The original reader/ABI, current owner/normal-stop/counter checks, exact complete
+ordered archive traversal, terminal legacy semantics and read-only failure path
+are preserved in the reviewed source. Archived counters stay in their own domain;
+the current manifest is matched to the stopped owner's actual run config rather
+than imposed on the history. Existing 16-test public synthetic evidence was read,
+not rerun. Neither this review nor the isolated probes ran the board CLI, loader,
+guard, NativeContext, services, models or hardware.
+
+One source-independence blocker remains. referenced_value() at line 196 excludes
+only path strings (line 198; forbidden set at 262). A separate source pin can name
+the pending final's bytes or its same-owner semantic document at another path.
+The provenance history head can consequently attest to itself. Snapshot does not
+reject same-content aliases across paths.
+
+Four directed public in-memory probes were run:
+  baseline original receipt: accepted, expected
+  same SHA separately pinned sealed-final copy: accepted, unexpected
+  different JSON formatting of the same current final: accepted, unexpected
+  envelope with checkpoint member containing the same current final: accepted,
+    unexpected
+Only source_bindings.head and its enclosing provenance pin were changed; the
+current checkpoint, expected head and archive list were not changed. This proves
+acceptance at validate_inputs, not an actual real-board complete CLI success.
+No OS hardlink was created. The same-byte different-path copy is concrete.
+Reproducer: validation/check_fresh_history_source_aliases.py
+Evidence: validation/FRESH_HISTORY_ALIAS_NEGATIVES.json
+
+Minimal recommendation, not applied here:
+  1. Also reject source-pin SHA aliases of the pending final and stop-result
+     (plus other existing forbidden pins where available), regardless of path.
+  2. Before applying a source JSON pointer, reject an aura-native-protection-
+     checkpoint-2 source identifying the current stopped boot/PID/birth, including
+     the supported checkpoint envelope shape. Keep older boot/owner legitimate
+     archive provenance usable. Add the three demonstrated cases as boundaries.
+  3. Root must still capture and pin original public metadata before normal stop,
+     joining it to previously accepted ordered history receipts. A thin receipt
+     copied from the pending final is not independent provenance.
+
+This addresses accidental self-attestation, not a hostile root who controls all
+metadata and pins. No signature framework or general root-forgery defense is
+implied. A real receipt's producer is part of the trusted operating procedure.
+
+Nonblocking observation: adapter accepts stop_intent <= capture, whereas the old
+reference used strict <. No real-clock false pass from equality was demonstrated;
+the source-alias defect alone causes HOLD.
+
+Candidate unchanged; all work local. Device ownership remains with the identity
+chat. Do not use this report as a current-board readiness or stop/restore permit.

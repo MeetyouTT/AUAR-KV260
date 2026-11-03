@@ -1,0 +1,1 @@
+cmd_/home/ghmd/aura-waveshare-touch-20261009/module-build/driver/hid-multitouch.mod := { echo  /home/ghmd/aura-waveshare-touch-20261009/module-build/driver/hid-multitouch.o;  echo; } > /home/ghmd/aura-waveshare-touch-20261009/module-build/driver/hid-multitouch.mod

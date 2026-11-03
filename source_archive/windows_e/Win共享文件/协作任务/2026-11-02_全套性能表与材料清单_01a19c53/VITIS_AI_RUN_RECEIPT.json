@@ -1,0 +1,58 @@
+{
+  "started_utc": "2026-11-02T16:01:03.791697+00:00",
+  "finished_utc": "2026-11-02T16:01:04.299256+00:00",
+  "exit_code": 0,
+  "image": "xilinx/vitis-ai-pytorch-cpu:ubuntu2004-3.0.0.106",
+  "command": [
+    "docker",
+    "run",
+    "--rm",
+    "--network",
+    "none",
+    "--read-only",
+    "--tmpfs",
+    "/tmp:rw,nosuid,size=128m",
+    "--cpus",
+    "2",
+    "--memory",
+    "4g",
+    "-e",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "-v",
+    "/home/ghmd/Win共享文件/协作任务/2026-11-02_全套性能表与材料清单_01a19c53/inspect_xmodel.py:/inspect_xmodel.py:ro",
+    "-v",
+    "/home/ghmd/aura-dpu-vision-20261021/work/yunet-compiled/yunet_public_int8.xmodel:/model0.xmodel:ro",
+    "-v",
+    "/home/ghmd/aura-dpu-vision-20261021/work/sface-compiled/sface_public_int8.xmodel:/model1.xmodel:ro",
+    "-v",
+    "/home/ghmd/aura-board-yolo-20261011/official-model/yolox_nano_pt/yolox_nano_pt.xmodel:/model2.xmodel:ro",
+    "--entrypoint",
+    "/opt/vitis_ai/conda/envs/vitis-ai-pytorch/bin/python",
+    "xilinx/vitis-ai-pytorch-cpu:ubuntu2004-3.0.0.106",
+    "/inspect_xmodel.py",
+    "/model0.xmodel",
+    "/model1.xmodel",
+    "/model2.xmodel"
+  ],
+  "input_models": [
+    {
+      "source_path": "/home/ghmd/aura-dpu-vision-20261021/work/yunet-compiled/yunet_public_int8.xmodel",
+      "bytes": 576254,
+      "sha256": "54d348bfeee01756a98bda4103c056a2d5e469a26ea887822da6edc28bdbbbee"
+    },
+    {
+      "source_path": "/home/ghmd/aura-dpu-vision-20261021/work/sface-compiled/sface_public_int8.xmodel",
+      "bytes": 10796375,
+      "sha256": "12b2ff5c7de157133ebd5aa71665fc5ddcd1f65d9e30e2d6e965e0752e467f25"
+    },
+    {
+      "source_path": "/home/ghmd/aura-board-yolo-20261011/official-model/yolox_nano_pt/yolox_nano_pt.xmodel",
+      "bytes": 2127303,
+      "sha256": "8493a85c05caba4457eb646b030abc511a7cf6eab2695eb309b62b4864d80c44"
+    }
+  ],
+  "board_accessed": false,
+  "inference_executed": false,
+  "model_files_modified": false,
+  "scope": "Read-only XIR inspection of compiled models. Third model is an official reference, not the deployed YOLO SHA."
+}

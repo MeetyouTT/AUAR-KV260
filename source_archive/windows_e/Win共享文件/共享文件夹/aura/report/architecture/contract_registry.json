@@ -1,0 +1,146 @@
+{
+  "schema_version": "aura-contract-registry-1",
+  "basis": "2026-10-02 manager section 6.1",
+  "entries": [
+    {
+      "id": "I01",
+      "name": "平台清单",
+      "owner": "A；B/C 补实际值",
+      "original_name": "contracts/platform_manifest.json",
+      "area": "src/shared/contracts/platform",
+      "module_ids": [
+        "platform",
+        "dpu",
+        "devices"
+      ],
+      "existing": [
+        "hardware/platform/platform_manifest.json",
+        "config/toolchain_lock.json"
+      ],
+      "status": "已存在参考清单；最终统一平台实例/模型/系统/器件待冻结",
+      "frozen_final_contract": false
+    },
+    {
+      "id": "I02",
+      "name": "运动寄存器与行为",
+      "owner": "A 主写，B 评审",
+      "original_name": "contracts/motion_regs.yaml",
+      "area": "src/shared/contracts/motion",
+      "module_ids": [
+        "motion",
+        "vsrv",
+        "axi_commit",
+        "source_guard",
+        "output_gate",
+        "clock_map"
+      ],
+      "existing": [
+        "board/motion/vsrv_driver.py",
+        "common/contracts.py",
+        "hardware/rtl/visual_servo.sv"
+      ],
+      "status": "旧相对租约 ABI 与软件模型已有；新绝对源期限 ABI/位宽/时钟映射待冻结",
+      "frozen_final_contract": false
+    },
+    {
+      "id": "I03",
+      "name": "相机与轨迹",
+      "owner": "B 主写，C 评审",
+      "original_name": "contracts/camera_track.schema.json",
+      "area": "src/shared/contracts",
+      "module_ids": [
+        "camera",
+        "tracking",
+        "target",
+        "snapshot"
+      ],
+      "existing": [
+        "common/contracts.py",
+        "board/vision/frames.py"
+      ],
+      "status": "软件类型已有；真实采集时义、池生命周期和对外序列化待冻结",
+      "frozen_final_contract": false
+    },
+    {
+      "id": "I04",
+      "name": "身份与授权",
+      "owner": "B 主写，C 评审",
+      "original_name": "contracts/identity.schema.json",
+      "area": "src/shared/contracts",
+      "module_ids": [
+        "face",
+        "identity",
+        "enrollment"
+      ],
+      "existing": [
+        "board/identity/store.py"
+      ],
+      "status": "匹配/删除软件逻辑已有；登记操作、质量和阈值实测待接",
+      "frozen_final_contract": false
+    },
+    {
+      "id": "I05",
+      "name": "交互与媒体",
+      "owner": "C 主写，B 评审",
+      "original_name": "contracts/interaction.schema.json",
+      "area": "src/shared/contracts/interaction",
+      "module_ids": [
+        "mcp_capture",
+        "media_session",
+        "transport",
+        "asr",
+        "vlm",
+        "tts",
+        "mcp_play"
+      ],
+      "existing": [
+        "common/schemas",
+        "host/model_service/protocol.py",
+        "board/runtime/media_session.py"
+      ],
+      "status": "文字 1.0 与媒体 aura-runtime-1 分开；真实跨机媒体编码与设备交付待验",
+      "frozen_final_contract": false
+    },
+    {
+      "id": "I06",
+      "name": "说话人建议",
+      "owner": "C 主写，B 评审",
+      "original_name": "contracts/asd_focus.schema.json",
+      "area": "src/shared/contracts",
+      "module_ids": [
+        "av_sync",
+        "asd",
+        "speaker",
+        "target"
+      ],
+      "existing": [
+        "board/fusion/speaker.py",
+        "board/runtime/application.py"
+      ],
+      "status": "窗口结果门已有；真实同步/Light-ASD、竞争保持和完整 schema 待完成",
+      "frozen_final_contract": false
+    },
+    {
+      "id": "I07",
+      "name": "运行状态",
+      "owner": "C 汇总，A/B 定义状态",
+      "original_name": "contracts/runtime_status.schema.json",
+      "area": "src/shared/contracts",
+      "module_ids": [
+        "fsm",
+        "ui",
+        "avatar",
+        "devices",
+        "board_verify"
+      ],
+      "existing": [
+        "board/runtime/events.py",
+        "board/runtime/event_bus.py",
+        "board/interaction/ui_state.py"
+      ],
+      "status": "事件/UI 状态已有；统一平台/进程/设备状态合同与实屏待验",
+      "frozen_final_contract": false
+    }
+  ],
+  "description_is_not_frozen_abi_or_wire_schema": true
+}

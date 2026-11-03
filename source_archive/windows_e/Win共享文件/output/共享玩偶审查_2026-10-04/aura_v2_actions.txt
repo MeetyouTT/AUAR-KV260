@@ -1,0 +1,29 @@
+=== P0-4 avatar_action 一致性收口验收 ===
+单一来源：board/runtime/avatar_actions.py
+白名单  ：['ack_nod', 'deny_shake', 'emo_surprised', 'emo_puzzled']
+C1 单点自洽
+  [OK ] C1a 白名单与 ACTION_TO_STATE 键集合一致
+  [OK ] C1b 别名取值均在白名单内：{'surprised': 'emo_surprised', 'puzzled': 'emo_puzzled'}
+  [OK ] C1c DEFAULT_MOCK_ACTION='ack_nod' 在白名单内
+  [OK ] C1d 旧值 wave 已不在白名单（原本被静默忽略）
+C2 fsm 路由（名单内动作 → 目标状态）
+  [OK ] C2[ack_nod] ack_nod → ACK_NOD（期望 ACK_NOD）
+  [OK ] C2[deny_shake] deny_shake → DENY_SHAKE（期望 DENY_SHAKE）
+  [OK ] C2[emo_surprised] emo_surprised → AWAKE（期望 AWAKE）
+  [OK ] C2[emo_puzzled] emo_puzzled → PUZZLED（期望 PUZZLED）
+  [OK ] C2[alias] 别名 ' Surprised ' 归一化后与 emo_surprised 同效
+  [OK ] C2[unknown] 未知动作 wave → 情绪分档兜底（行为与 v2 等价）
+C3 mock 适配器产出
+  mock avatar_action = 'ack_nod'
+  [OK ] C3a mock 默认动作在白名单内（修复 §3.3 的静默忽略）
+C4 素材映射（STATE_ASSET）
+  [OK ] C4[ack_nod] ACK_NOD → 素材 ack_nod
+  [OK ] C4[deny_shake] DENY_SHAKE → 素材 deny_shake
+  [OK ] C4[emo_surprised] AWAKE → 素材 emo_surprised
+  [OK ] C4[emo_puzzled] PUZZLED → 素材 emo_puzzled
+C5 burst 语义（单点仍是 avatar_assets.BURST_STATES，仅报告）
+  ack_nod        → ACK_NOD        burst=True
+  deny_shake     → DENY_SHAKE     burst=True
+  emo_surprised  → AWAKE          burst=True
+  emo_puzzled    → PUZZLED        burst=False
+=== RESULT: OK (0 项失败) ===

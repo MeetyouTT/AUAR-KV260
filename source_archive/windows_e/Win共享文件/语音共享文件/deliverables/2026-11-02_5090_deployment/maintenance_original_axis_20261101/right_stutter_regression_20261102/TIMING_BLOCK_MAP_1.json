@@ -1,0 +1,97 @@
+{
+  "schema": "aura-original-follow-control-timing-block-map-1",
+  "recorded_host_utc": "2026-11-02T20:19:54.039165+00:00",
+  "controller_manifest_sha256": "9cd35b967bf9c859ed3f1f4de4dc5dad199e81ddfed845435fc8745a41be0ba9",
+  "same_trial_pin": "b18dc1424c97084eed792e871314e8892bdf38f7042dfbcfee36092fa6c21377",
+  "original_telemetry": {
+    "publish_count": 15,
+    "last_publish_ms": 3.799,
+    "maximum_publish_ms": 21.584,
+    "maximum_control_turn_ms": 165.528,
+    "control_turns_over_100ms": 1,
+    "maximum_packet_step_ms": 125.915,
+    "maximum_tick_ms": 21.78
+  },
+  "source_blocks": [
+    {
+      "source": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\maintenance_original_axis_20261101\\left_stop40_20261102\\recovery_stability_20261102_v3\\candidate\\run_face_motion.py",
+      "line": 168,
+      "metric": "maximum_packet_step_ms",
+      "measured_ms": 125.915,
+      "includes": "HardwareSlewSession.step(payload) including parent source validation/perception, status/ARM or submit/STOP native I/O as applicable, followed by session.status(). Wall time includes preemption and GIL waits.",
+      "excludes": "HTTP response readline and json.loads in the separate FaceStream reader; InputTiming.observe and observation trace construction after step; later tick and publish.",
+      "limitation": "The largest sample can be an ARM/rejection/STOP cleanup path after expiry; no per-sample timestamp identifies which packet."
+    },
+    {
+      "source": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\maintenance_original_axis_20261101\\left_stop40_20261102\\recovery_stability_20261102_v3\\candidate\\run_face_motion.py",
+      "line": 160,
+      "metric": "maximum_control_turn_ms",
+      "measured_ms": 165.528,
+      "includes": "Nonblocking queue drain, all queued packet processing/status/trace bookkeeping, tick, and synchronous publish preparation/enqueue.",
+      "excludes": "time.sleep(remaining) after the metric is recorded.",
+      "limitation": "Only global maximum/count>100ms is retained. It does not identify the iteration or coincide automatically with the maxima of step/tick/publish."
+    },
+    {
+      "source": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\maintenance_original_axis_20261101\\left_stop40_20261102\\recovery_stability_20261102_v3\\candidate\\run_face_motion.py",
+      "line": 188,
+      "metric": "maximum_tick_ms",
+      "measured_ms": 21.78,
+      "includes": "HardwareSlewSession.tick including safety checks and native fenced status when active.",
+      "excludes": "New source lease submission: hardware-slew ticks never renew an old image."
+    },
+    {
+      "source": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\maintenance_original_axis_20261101\\left_stop40_20261102\\recovery_stability_20261102_v3\\candidate\\run_face_motion.py",
+      "line": 111,
+      "metric": "maximum_publish_ms",
+      "measured_ms": 21.584,
+      "includes": "session status snapshot, bounded source timing distributions, immutable JSON serialization and LatestReportWriter submit on the control thread, every0.5s.",
+      "excludes": "Background filesystem write/fsync performed by existing writer thread."
+    }
+  ],
+  "case3": {
+    "last_accepted_command_mono_ms_before_submit": 31398026,
+    "returned_lease_ms": 59,
+    "last_accepted_source_deadline_ms": 31398111,
+    "hardware_positive_lease_reads": [
+      {
+        "mono_ms": 31398035,
+        "lease_left_ms": 57
+      },
+      {
+        "mono_ms": 31398043,
+        "lease_left_ms": 49
+      },
+      {
+        "mono_ms": 31398063,
+        "lease_left_ms": 29
+      },
+      {
+        "mono_ms": 31398083,
+        "lease_left_ms": 9
+      }
+    ],
+    "first_observed_expired_ms": 31398122,
+    "new_distinct_source_frame": 59290,
+    "new_frame_source_ms": 31397946,
+    "new_frame_processing_record_ms": 31398130,
+    "new_frame_source_age_at_record_ms": 184,
+    "conclusion": "Control kept polling during this lease. New-frame processing record is later than old lease expiration; the trace does not retain this packet HTTP-arrival/enqueue timestamp, so waiting for new data and waiting to process already queued data cannot be separated for this specific packet."
+  },
+  "internal_queue_evidence": {
+    "maximum_reader_to_control_queue_wait_ms": 99.914,
+    "maximum_depth": 2,
+    "scope": "At least one already HTTP-decoded packet waited inside the follower process during this same trial; the maximum is not linked to a particular lease event."
+  },
+  "transport_scope": {
+    "HTTP": "Only FaceStream worker consumes existing localhost NDJSON; main drain uses get_nowait.",
+    "hardware_IO": "Pinned BatchRegisters/NativeRegisters use ctypes C functions against existing exclusive device handle, not an interprocess hardware command service. Public inspected native C includes platform property-file checks as well as fenced MMIO; wall-time cost per operation is not logged."
+  },
+  "audio_ABA_evidence_limit": "Same-page ON/OFF/ON correlates with slower preview and HTTP and reduced face-ready observations under recording, without LLM/speaker jobs. The follower was stopped during this ABA, so GUI/camera main-thread rq-wait values do not directly profile the running follower thread.",
+  "minimal_evidenced_focus": [
+    "Input delivery/processing budget must fit the actual returned59..128ms leases, not merely a raw camera header<250ms.",
+    "Remove identified unnecessary continuous-audio/shared scheduling work before changing the accepted motion path; CPU thread profile is needed to name the exact hotspot.",
+    "Synchronous report preparation is a measured21.584ms control-thread cost and a candidate for budget-aware scheduling, but no event timestamp proves it caused case3; do not claim this as an already verified fix."
+  ],
+  "no_axis_or_TTL_or_speed_or_lease_change": true,
+  "new_board_calls": 0
+}

@@ -1,0 +1,37 @@
+相机六文件事务独立复核
+
+最终裁定
+root最小修复后的模板32329668ea3dfb63744e58a7866025cb7ba1f0986f72d30948b8c93ceb401a6a静态通过，无剩余代码阻塞。目标Linux dry-run、实际原reader/完整history、真实恢复和CPU收益均尚未由本审查执行。
+离线payload builder为c8092a3777b583082beda9bfd5abae1f8e635d1f81983687b0407cd8a6976ff1。旧模板070f7135…保留在transaction_root_hardening/six_file_transaction_template.py.before.bin；独立确认新旧仅恢复stage存在性这一行不同。
+
+已发现并解决的恢复边界
+旧recover_plan只看stage.exists()，dangling symlink会被当作缺失而跳过pin。apply的O_EXCL仍拒绝占用名字、不会覆盖未知stage，但可能先完成较前的已知目标，造成“dry-run已验证”不准确。
+root改为stage.exists() or stage.is_symlink()后，实际新AST在恢复预检即走pinned regular检查并拒绝。
+TRANSACTION_DANGLING_STAGE_FIXED.json：recover_plan和commit(recover=True)均在替换前拒绝，六目标原字节全保持，未知stage名字/字节保留。Windows缺symlink创建权限，因此这是pathlib dangling观察+真实占用文件名/O_EXCL的隔离模型，不冒充实Linux测试；目录fsync只在Windowsfixture中替换为无操作。没有重跑原10项整套。
+
+事务边界
+固定写集六路径：UI服务、222源码manifest、proposed config、OPS meta、APP入口、operator runtime-manifest。UI只能原9d714或审过v3 7d477；其他221 Python成员实际字节和成员集合保持；APP只替换一处UI常量；op7仅APP pin变更，原C-unit六成员7cf7…与库704f…重新按字节验证，不加载Native。
+proposed config仅改manifest SHA与fresh seed；保留原checkpoint_output和297…前驱unit/library合同，effective operator仍由原loader处理。meta只改UI pin及三项相关protected pin；外层entry/service argv、GUI和selected binding不在该写集。
+prepare在任何目标替换前完整保存并fsync六before+六after及durable PLAN；stage同目录且不以.py结尾，避免变成第223个源码成员。每项替换前后校验SHA向量、目标inode/metadata，使用单文件atomic rename并同步目录。它不是六文件内核原子事务，服务/其他writer冻结是必要条件。
+
+reader归一化receipt
+这是root对已经完成的原reader与完整history语义验证的可信薄封装，模板只核其pin、计划身份和当前生命周期，不替代原语义reader。必须将本次exact fresh final的真实通过结果、owner与freeze证据映射进去，不能把例子中的true/status填进去或引用旧pin的成功收据。
+contract_plan_identity排除root receipt自身以免自哈希循环，其余全部合同字段均覆盖。observed_mono_ns必须来自板端，最多60秒；中断超期可重新完成前置核验并写fresh receipt，不能放宽年龄/Native规则。刷新receipt不改变原已知six计划；不控writer不能仅凭flock取得就推定冻结。
+
+新a6d boot与原archive-only协议
+root已确认此模板只用于“正常停止实际当前相机后导出的同boot fresh final”。seed当前boot/PID/birth的门槛在这个发布范围内成立。
+原native_boot.load_new_boot_checkpoint/commit_new_boot负责首次跨kernel的archive-only引导：旧计数与旧单调时间留在旧域归档，新kernel通过原一次性marker进入新域。此模板不代替该协议，也不适用于拿旧archive直接当当前owner final。
+当前live_guard没有要求previous_kernel_history.source_boot等于当前boot，也没有要求把历史计数合入当前seed。原reader/historical验证应沿实际archive-only规则完成；不能为了模板改归档、造sameboot seed或给旧域重新发恢复预算。此处模板不适用时应先走原loader流程，而非将合法archive-only误报为业务失败。
+
+恢复与回滚
+--recover仍默认dry-run，只有显式apply才完成同一after。原durable PLAN与每份before/after都钉SHA，目标只能已知before/after；未知target/stage拒绝且保留。PLAN未durable时目标未替换，不做自动清理/重试。
+safe_rollback_payload保留原代码/manifest，并以最新fresh seed重算config和meta，不能原样恢复含已消费旧seed的config。rollback-before还须属于原forward durable PLAN的before/after，不能把新发现的未知hash当作before覆盖。
+如果发布前final已被新owner消费，回滚先正常停止该新owner，取得其最新final并重跑原验证。模板不写checkpoint/marker，不杀owner、不删除锁、不启动服务或运动。
+builder的固定历史原SHA是安全拒绝条件，不是证明当前新boot仍匹配；实际原六文件若不同，应重新取源/审查并rebasing，不能为运行模板放宽pin。
+
+适用前提及未覆盖项
+身份/轴等其他writer实际冻结并交权；当前boot/owner/closure新鲜；原正常停止与完整历史验证真实通过；root Linux默认dry-run成功后才apply。只有六after与闭包均通过才启动原相机，随后核原恢复audit/消费marker/计数、实际新owner/run-config和届时selected来源闭包，再恢复GUI并测试功能。
+原payload4项和核心事务10项测试证据复用，没有再次运行。此审查没有SSH、板端查询/写入、负载、Native上下文、模型或真实媒体访问，没有修改候选/模板。
+
+协议维护
+VALIDATION_PROTOCOL.txt末尾已明确当前GTK为e4ded/67d6窄投影，旧022算法失败归档；身份阈值/margin/TTL全部以fresh实际配置记录并保持，不能把历史0.5/0.85填为当前固定合同。采样顺序和原保护保持，换boot后必须重采本次before/after。

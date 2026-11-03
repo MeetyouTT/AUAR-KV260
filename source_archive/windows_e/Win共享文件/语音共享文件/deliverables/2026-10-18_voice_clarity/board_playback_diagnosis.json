@@ -1,0 +1,113 @@
+{
+  "ui": {
+    "phase": "IDLE",
+    "playing": false,
+    "error": "",
+    "ui_settings": {
+      "available": true,
+      "volume": 87,
+      "muted": false,
+      "pending": false,
+      "error": "",
+      "revision": 1515,
+      "requested_version": 7,
+      "applied_version": 7,
+      "fullscreen": true,
+      "economy": false
+    },
+    "local_recording": {
+      "state": "READY",
+      "sample_count": 88000,
+      "duration_seconds": 5.5,
+      "error": "",
+      "result": {
+        "capture_id": "de355faf45c24c1c82c019e4ffbf9bda",
+        "audio_epoch": 1090275565,
+        "first_sample_index": 0,
+        "sample_count": 88000,
+        "format": {
+          "rate_hz": 16000,
+          "channels": 1,
+          "sample_format": "S16_LE"
+        },
+        "duration_seconds": 5.5,
+        "pcm_bytes": 176000,
+        "pcm_sha256": "b60405da197fb8081921c41e000708c9f3d46bb03691007c0cb862a2c63de99b",
+        "started_mono_ms": 5810471,
+        "ended_mono_ms": 5816137
+      },
+      "can_start": true,
+      "can_stop": false,
+      "max_seconds": 20
+    },
+    "local_transcription": {
+      "state": "READY",
+      "capture_id": "de355faf45c24c1c82c019e4ffbf9bda",
+      "request_id": "ca668c12b18848b29592ee6b63f5bd92",
+      "text": "今天天气怎么样今天天天气怎么样",
+      "error": "",
+      "recognition_ms": 156.0,
+      "model_id": "paraformer-f36a0433bcf096bd6d6f11b8",
+      "voice_reply": {
+        "protocol": "aura-voice-1",
+        "source_kind": "actual",
+        "engine": "omnivoice",
+        "revision": "c5fdb5ccb189668d56333f77ba2629f4cd7535f4",
+        "num_step": 16,
+        "reply_text": "今天天气真好，阳光暖暖的～",
+        "emotion": "friendly",
+        "sha256": "56db1d9eab155c01596bb2fee2501cd37093f7052bb0f52150e4c426a887363c",
+        "bytes": 119084,
+        "duration_seconds": 2.48,
+        "llm_ms": 547.0,
+        "tts_ms": 594.0,
+        "llm_model": "qwen3:4b-instruct-2507-q4_K_M"
+      },
+      "service": {
+        "enabled": true,
+        "pending": false,
+        "conversation": true,
+        "host": "192.168.50.1",
+        "port": 8792
+      }
+    }
+  },
+  "sources": {
+    "aura/tools/gstreamer_audio_engine.py": {
+      "sha256": "1b157da907111daf64991fcc7f37586bd42aa7deeff857c1bf1e43c6105eb8bd"
+    },
+    "aura/tools/gstreamer_audio_worker.py": {
+      "sha256": "e7d9544f3236728b20421f4bf58121aa4e2fe0236bac40344471547255671086"
+    },
+    "aura/tools/realtime_audio.py": {
+      "sha256": "60cd206da06639dad286692736f3fb89b2c98da75b9d674eaf07ed1fcee3237f"
+    }
+  },
+  "hardware": {
+    "/proc/asound/cards": " 0 [monitor        ]: DisplayPort_mon - DisplayPort monitor\n                      DisplayPort monitor\n 1 [MCP01          ]: USB-Audio - MCP01\n                      Lenovo MCP01 at usb-xhci-hcd.1.auto-1.2, full speed\n 2 [Webcam         ]: USB-Audio - HD 720P Webcam\n                      HD 720P Webcam HD 720P Webcam at usb-xhci-hcd.1.auto-1.3, high speed\n",
+    "/proc/asound/pcm": "00-00: xilinx-dp0 xilinx-dp-snd-codec-dai-0 : xilinx-dp0 xilinx-dp-snd-codec-dai-0 : playback 1\n00-01: xilinx-dp1 xilinx-dp-snd-codec-dai-1 : xilinx-dp1 xilinx-dp-snd-codec-dai-1 : playback 1\n01-00: USB Audio : USB Audio : playback 1 : capture 1\n02-00: USB Audio : USB Audio : capture 1\n",
+    "/proc/asound/MCP01/stream0": "Lenovo MCP01 at usb-xhci-hcd.1.auto-1.2, full speed : USB Audio\n\nPlayback:\n  Status: Stop\n  Interface 2\n    Altset 1\n    Format: S16_LE\n    Channels: 2\n    Endpoint: 0x02 (2 OUT) (ADAPTIVE)\n    Rates: 48000\n    Bits: 16\n    Channel map: FL FR\n\nCapture:\n  Status: Stop\n  Interface 3\n    Altset 1\n    Format: S16_LE\n    Channels: 1\n    Endpoint: 0x81 (1 IN) (ASYNC)\n    Rates: 16000\n    Bits: 16\n    Channel map: MONO\n",
+    "/proc/asound/MCP01/pcm0p/sub0/hw_params": "closed\n",
+    "/proc/asound/MCP01/pcm0p/sub0/status": "closed\n",
+    "amixer -c MCP01 sget PCM": "Simple mixer control 'PCM',0\n  Capabilities: pvolume pvolume-joined pswitch pswitch-joined\n  Playback channels: Mono\n  Limits: Playback 0 - 151\n  Mono: Playback 131 [87%] [-3.81dB] [on]\n",
+    "sh -c command -v arecord; command -v aplay; command -v gst-launch-1.0": "/usr/bin/arecord\n/usr/bin/aplay\n/usr/bin/gst-launch-1.0\n",
+    "journalctl -u aura-avatar-ui.service -n 55 --no-pager": "ted, status=1/FAILURE\nNov 19 10:04:19 xilinx-kv260-starterkit-20222 systemd[1]: aura-avatar-ui.service: Failed with result 'exit-code'.\nNov 19 10:04:19 xilinx-kv260-starterkit-20222 systemd[1]: Failed to start AURA cached avatar touchscreen interface.\nNov 19 10:04:24 xilinx-kv260-starterkit-20222 systemd[1]: aura-avatar-ui.service: Scheduled restart job, restart counter is at 1.\nNov 19 10:04:24 xilinx-kv260-starterkit-20222 systemd[1]: Stopped AURA cached avatar touchscreen interface.\nNov 19 10:04:24 xilinx-kv260-starterkit-20222 systemd[1]: Starting AURA cached avatar touchscreen interface...\nNov 19 10:04:28 xilinx-kv260-starterkit-20222 aura-avatar-ui[27394]: {\"event\": \"CHILD_STARTING\", \"pid\": 27413, \"args\": [\"/usr/bin/python3\", \"-B\", \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/tools/board_avatar_gtk.py\", \"--evidence-root\", \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2709661818768/evidence\"], \"evidence\": \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2709661818768/evidence\", \"log\": \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2709661818768/stage.log\", \"boot_id\": \"015dcbd2-4fd3-4ed4-8988-b929b0532ff7\", \"supervisor_pid\": 27394, \"service\": \"aura-avatar-ui.service\", \"session\": \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2709661818768\"}\nNov 19 10:04:51 xilinx-kv260-starterkit-20222 aura-avatar-ui[27394]: {\"event\": \"CHILD_EXITED\", \"returncode\": 1, \"was_ready\": false}\nNov 19 10:04:51 xilinx-kv260-starterkit-20222 systemd[1]: aura-avatar-ui.service: Main process exited, code=exited, status=1/FAILURE\nNov 19 10:04:51 xilinx-kv260-starterkit-20222 systemd[1]: aura-avatar-ui.service: Failed with result 'exit-code'.\nNov 19 10:04:51 xilinx-kv260-starterkit-20222 systemd[1]: Failed to start AURA cached avatar touchscreen interface.\nNov 19 10:04:56 xilinx-kv260-starterkit-20222 systemd[1]: aura-avatar-ui.service: Scheduled restart job, restart counter is at 2.\nNov 19 10:04:56 xilinx-kv260-starterkit-20222 systemd[1]: Stopped AURA cached avatar touchscreen interface.\nNov 19 10:04:56 xilinx-kv260-starterkit-20222 systemd[1]: Starting AURA cached avatar touchscreen interface...\nNov 19 10:05:00 xilinx-kv260-starterkit-20222 aura-avatar-ui[27456]: {\"event\": \"CHILD_STARTING\", \"pid\": 27471, \"args\": [\"/usr/bin/python3\", \"-B\", \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/tools/board_avatar_gtk.py\", \"--evidence-root\", \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2741503009820/evidence\"], \"evidence\": \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2741503009820/evidence\", \"log\": \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2741503009820/stage.log\", \"boot_id\": \"015dcbd2-4fd3-4ed4-8988-b929b0532ff7\", \"supervisor_pid\": 27456, \"service\": \"aura-avatar-ui.service\", \"session\": \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2741503009820\"}\nNov 19 10:05:04 xilinx-kv260-starterkit-20222 aura-avatar-ui[27456]: {\"event\": \"STOP_API_UNAVAILABLE\", \"error\": \"<urlopen error [Errno 111] Connection refused>\"}\nNov 19 10:05:04 xilinx-kv260-starterkit-20222 aura-avatar-ui[27456]: {\"event\": \"STOP_API_UNAVAILABLE\", \"error\": \"<urlopen error [Errno 111] Connection refused>\"}\nNov 19 10:05:04 xilinx-kv260-starterkit-20222 systemd[1]: aura-avatar-ui.service: Deactivated successfully.\nNov 19 10:05:04 xilinx-kv260-starterkit-20222 systemd[1]: Stopped AURA cached avatar touchscreen interface.\nNov 19 10:05:04 xilinx-kv260-starterkit-20222 systemd[1]: Starting AURA cached avatar touchscreen interface...\nNov 19 10:05:09 xilinx-kv260-starterkit-20222 aura-avatar-ui[27482]: {\"event\": \"CHILD_STARTING\", \"pid\": 27501, \"args\": [\"/usr/bin/python3\", \"-B\", \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/tools/board_avatar_gtk.py\", \"--evidence-root\", \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2750327873992/evidence\"], \"evidence\": \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2750327873992/evidence\", \"log\": \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2750327873992/stage.log\", \"boot_id\": \"015dcbd2-4fd3-4ed4-8988-b929b0532ff7\", \"supervisor_pid\": 27482, \"service\": \"aura-avatar-ui.service\", \"session\": \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2750327873992\"}\nNov 19 10:05:33 xilinx-kv260-starterkit-20222 aura-avatar-ui[27482]: {\"event\": \"READY\", \"pid\": 27501, \"volume\": 58}\nNov 19 10:05:33 xilinx-kv260-starterkit-20222 systemd[1]: Started AURA cached avatar touchscreen interface.\nNov 19 10:06:11 xilinx-kv260-starterkit-20222 systemd[1]: Stopping AURA cached avatar touchscreen interface...\nNov 19 10:06:13 xilinx-kv260-starterkit-20222 systemd[1]: aura-avatar-ui.service: Killing process 27540 (python3) with signal SIGKILL.\nNov 19 10:06:13 xilinx-kv260-starterkit-20222 systemd[1]: aura-avatar-ui.service: Deactivated successfully.\nNov 19 10:06:13 xilinx-kv260-starterkit-20222 systemd[1]: aura-avatar-ui.service: Unit process 27540 (python3) remains running after unit stopped.\nNov 19 10:06:13 xilinx-kv260-starterkit-20222 systemd[1]: Stopped AURA cached avatar touchscreen interface.\nNov 19 10:06:13 xilinx-kv260-starterkit-20222 systemd[1]: Starting AURA cached avatar touchscreen interface...\nNov 19 10:07:17 xilinx-kv260-starterkit-20222 aura-avatar-ui[28014]: {\"event\": \"CHILD_STARTING\", \"pid\": 28082, \"args\": [\"/usr/bin/python3\", \"-B\", \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura/tools/board_avatar_gtk.py\", \"--evidence-root\", \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2878440984673/evidence\"], \"evidence\": \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2878440984673/evidence\", \"log\": \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2878440984673/stage.log\", \"boot_id\": \"015dcbd2-4fd3-4ed4-8988-b929b0532ff7\", \"supervisor_pid\": 28014, \"service\": \"aura-avatar-ui.service\", \"session\": \"/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/015dcbd2-4fd3-4ed4-8988-b929b0532ff7-2878440984673\"}\nNov 19 10:07:41 xilinx-kv260-starterkit-20222 aura-avatar-ui[28014]: {\"event\": \"READY\", \"pid\": 28082, \"volume\": 58}\nNov 19 10:07:41 xilinx-kv260-starterkit-20222 systemd[1]: Started AURA cached avatar touchscreen interface.\n"
+  },
+  "recent_audio_logs": [
+    {
+      "path": "/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/9223af18-5113-4486-822f-29ec94d03d3e-58310062965541/evidence/audio_worker.log",
+      "tail": ""
+    },
+    {
+      "path": "/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/managed-runs/0ecc7063-1b99-4bca-9e9c-d9f8026732f5-54308021995440/evidence/audio_worker.log",
+      "tail": ""
+    }
+  ],
+  "downloaded_wav": [
+    {
+      "path": "/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/deliverables/2026-10-06_xilan_live/cache/56db1d9eab155c01596bb2fee2501cd37093f7052bb0f52150e4c426a887363c.wav",
+      "sha256": "56db1d9eab155c01596bb2fee2501cd37093f7052bb0f52150e4c426a887363c",
+      "bytes": 119084
+    }
+  ]
+}

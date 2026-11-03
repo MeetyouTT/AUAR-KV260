@@ -1,0 +1,68 @@
+Current-owner camera stop helper: local candidate, not yet executed on the board
+
+File: normal_stop_current_owner.py
+Reviewed SHA256: 4a5e374eacc825e16a22664dc6ef1137f5e0950be3dc8b3e477f791faf5e2e91
+Independent review: ../validation/CAMERA_NORMAL_STOP_INDEPENDENT_REVIEW.json
+
+This adapts the original stop_original_camera.py procedure. It is not a service,
+platform loader, Native restore tool, or substitute for the original full reader.
+The CPU thread currently has no board authority. Obtain a new explicit idle
+handoff, freeze all other writers, and collect the actual inputs before any use.
+
+Default --expected <fresh JSON> performs file/proc/systemd and public camera GET
+checks only. It returns before any mkdir, intent file, or service command.
+Only an explicit --stop permits one original systemctl stop --no-block call.
+The 25-second observation bound never changes the original infinite no-kill
+camera protection. Pending or ambiguous outcomes must be inspected read-only;
+do not reissue stop just because the SSH caller or observation timed out.
+
+Required expected contract
+schema: aura-camera-normal-stop-expected-1
+boot_id: actual current /proc boot UUID
+all_other_writers_frozen: true only after the actual coordinated handoff
+startup: exact {path, sha256} of the current GUI startup; all 380 members checked
+camera_owner: exact {pid, birth_ticks string, command_sha256}
+stopped_gui_owners: actual supervisor/GTK and any additional known GUI owners
+transaction_directory: new unique directory, existing resolved parent, outside
+both GUI and Native AURA source roots; use the project's root-only recovery area
+source_closure: the following fresh, complete fields:
+  selected_readback: {path, sha256} matching the current UI config specification
+  owner_run_config: {path, sha256} pinned by that selected binding
+  native_python_manifest: {path, sha256} matching that run config; exact 222 files
+  native_operator_manifest: {path, sha256}; exact original seven runtime members
+  native_c_unit_manifest: {path, sha256}; original six C/C++/object members, 7cf7...
+  native_library: {path, sha256}; original operator library 704f...
+  camera_systemd:
+    properties: exact systemctl show values for ExecStart, ExecStop, FragmentPath,
+                DropInPaths after the original no-kill stop protection is in place
+    source_sha256: exact FragmentPath plus every DropInPaths file path and digest
+
+The run-config disk library/unit may legally retain predecessor c675.../297....
+The original reviewed operator migration performs 704f.../7cf7... in memory.
+Do not rewrite those original disk fields merely to match the loaded operator.
+The helper pins the reviewed operator closure and connects the selected actual
+run config to its Python manifest; it does not create a NativeContext.
+
+Required live preflight state
+GUI normally inactive/dead/success/exit0/no-job and no service cgroup processes;
+old PID+birth lifetimes dead even if an exec changed the command line. Camera
+active/running, exact full owner, Restart=no, SendSIGKILL=no, KillMode=process,
+TimeoutStopUSec=infinity. Listening false and enrollment sampler explicitly idle.
+Public health must expose all seven SFace counters and both optional tasks with
+calls, native_completed, native_failures, not_submitted, overruns, and recovery
+faults, attempts, recoveries, probe_successes, history_opaque. Availability of
+calls/native_completed in actual health still needs fresh Linux/source proof.
+Missing fields must HOLD before stopping; do not fill zero or substitute a last
+single-operation report for a cumulative counter.
+
+Actual --stop writes an exclusive durable camera-stop-intent.json with the
+current owner, monotonic stop boundary and observed current-kernel lower bounds.
+After confirmed normal stop it checks the unconsumed, new same-owner final and
+emits camera-stop-result.json. A missing result after a durable intent is an
+ambiguous interrupted operation, not permission to repeat it.
+
+NEW_FINAL_PRESENT proves only preliminary freshness and counter bounds. The
+original load_business_checkpoint, current and archived sealed-source rules,
+complete ordered history/legacy anchor checks, sealing and original restore
+protocol remain required before a six-file camera publication or any restart.
+Old archived kernel counters and timestamps stay in their own domain.

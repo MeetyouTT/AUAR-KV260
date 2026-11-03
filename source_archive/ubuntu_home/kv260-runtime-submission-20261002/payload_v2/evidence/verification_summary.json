@@ -1,0 +1,542 @@
+{
+  "created_utc": "2026-10-03T07:35:43.391973+00:00",
+  "passed": true,
+  "board_access_this_turn": false,
+  "permanent_installation": false,
+  "new_zocl_full_build_executed": true,
+  "new_kernel_full_build_executed": true,
+  "sustained_board_test_executed": false,
+  "new_fpga_build_executed": false,
+  "checks": [],
+  "limitations": [
+    "No fresh board state; UART currently absent",
+    "New DFX ELF is host/ABI checked, not board verified",
+    "No clean-machine tool installation or full AURA submission reproduction",
+    "No permanent enablement, PWM, or sustained board validation",
+    "Full visible chat export and latest contest scoring details remain pending"
+  ],
+  "dfx_reproductions": [
+    {
+      "workspace_suffix": "a",
+      "passed": true,
+      "source_state": {
+        "started_utc": "2026-10-03T07:00:16.222979+00:00",
+        "scope": "Offline patch reconstruction in an independent workspace",
+        "commands": [
+          {
+            "name": "check-dfx_mgr",
+            "argv": [
+              "patch",
+              "--batch",
+              "--forward",
+              "--fuzz=0",
+              "-p1",
+              "-i",
+              "/home/ghmd/kv260-runtime-submission-20261002/payload/patches/dfx_watch_dedup.patch",
+              "--dry-run"
+            ],
+            "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a/sources/dfx_mgr",
+            "exit_code": 0,
+            "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/prepare_sources/check-dfx_mgr.log",
+            "sha256": "3181d8159a42c82ac4cb7a5655c67010fd39be7f593a5a3aaa9f6d52cf7c4745",
+            "elapsed_seconds": 0.006
+          },
+          {
+            "name": "apply-dfx_mgr",
+            "argv": [
+              "patch",
+              "--batch",
+              "--forward",
+              "--fuzz=0",
+              "-p1",
+              "-i",
+              "/home/ghmd/kv260-runtime-submission-20261002/payload/patches/dfx_watch_dedup.patch"
+            ],
+            "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a/sources/dfx_mgr",
+            "exit_code": 0,
+            "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/prepare_sources/apply-dfx_mgr.log",
+            "sha256": "fd974cb0fa50cf5e63335d8e5d4359fec173701acee7dafda5cfe7748d2cafed",
+            "elapsed_seconds": 0.002
+          },
+          {
+            "name": "check-xrt",
+            "argv": [
+              "patch",
+              "--batch",
+              "--forward",
+              "--fuzz=0",
+              "-p1",
+              "-i",
+              "/home/ghmd/kv260-runtime-submission-20261002/payload/patches/zocl_ref_balance.patch",
+              "--dry-run"
+            ],
+            "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a/sources/xrt",
+            "exit_code": 0,
+            "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/prepare_sources/check-xrt.log",
+            "sha256": "0e515dd7f46396fd1d8aa81924393440edc07af7bbc74d1f1ec76df715cea3f4",
+            "elapsed_seconds": 0.002
+          },
+          {
+            "name": "apply-xrt",
+            "argv": [
+              "patch",
+              "--batch",
+              "--forward",
+              "--fuzz=0",
+              "-p1",
+              "-i",
+              "/home/ghmd/kv260-runtime-submission-20261002/payload/patches/zocl_ref_balance.patch"
+            ],
+            "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003a/sources/xrt",
+            "exit_code": 0,
+            "log": "/home/ghmd/kv260-runtime-reproduce-20261003a/logs/prepare_sources/apply-xrt.log",
+            "sha256": "e2cb4ca26fa88a494ed551a64d55c4cabbe0c39b9c6b67942b3c9d687597e889",
+            "elapsed_seconds": 0.002
+          }
+        ],
+        "passed": true,
+        "board_verified_this_run": false,
+        "dfx_files_verified": 139,
+        "xrt_files_verified": 2278,
+        "source_lock_sha256": "59c59dad901e0ab9ca9bc9ec61c031fa1fe724e10a9271216232b6b2ed3e39b3",
+        "finished_utc": "2026-10-03T07:00:17.123201+00:00"
+      },
+      "artifacts": [
+        {
+          "path": "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgrd",
+          "bytes": 117488,
+          "sha256": "f8fa21f304c6df316758735d56ddcaa6124292e3c21bb57afb7d703d38f7aa3d",
+          "board_verified_this_run": false,
+          "dynamic_dependencies": [
+            "libdfx.so.1.0",
+            "libpthread.so.0",
+            "libc.so.6",
+            "ld-linux-aarch64.so.1"
+          ],
+          "strong_imports": 84,
+          "unresolved_strong_imports": [],
+          "original_image_loader_list_passed": true
+        },
+        {
+          "path": "/home/ghmd/kv260-runtime-reproduce-20261003a/artifacts/dfx/dfx-mgr-client",
+          "bytes": 23200,
+          "sha256": "9bc8a01d4b28256731999d53a943ac21ecf064825c2573e9a5c3ca7cb662e23f",
+          "board_verified_this_run": false,
+          "dynamic_dependencies": [
+            "libdfx.so.1.0",
+            "libpthread.so.0",
+            "libc.so.6",
+            "ld-linux-aarch64.so.1"
+          ],
+          "strong_imports": 30,
+          "unresolved_strong_imports": [],
+          "original_image_loader_list_passed": true
+        }
+      ]
+    },
+    {
+      "workspace_suffix": "b",
+      "passed": true,
+      "source_state": {
+        "started_utc": "2026-10-03T07:13:36.292306+00:00",
+        "scope": "Offline patch reconstruction in an independent workspace",
+        "commands": [
+          {
+            "name": "check-dfx_mgr",
+            "argv": [
+              "patch",
+              "--batch",
+              "--forward",
+              "--fuzz=0",
+              "-p1",
+              "-i",
+              "/home/ghmd/kv260-runtime-submission-20261002/payload/patches/dfx_watch_dedup.patch",
+              "--dry-run"
+            ],
+            "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003b/sources/dfx_mgr",
+            "exit_code": 0,
+            "log": "/home/ghmd/kv260-runtime-reproduce-20261003b/logs/prepare_sources/check-dfx_mgr.log",
+            "sha256": "3181d8159a42c82ac4cb7a5655c67010fd39be7f593a5a3aaa9f6d52cf7c4745",
+            "elapsed_seconds": 0.004
+          },
+          {
+            "name": "apply-dfx_mgr",
+            "argv": [
+              "patch",
+              "--batch",
+              "--forward",
+              "--fuzz=0",
+              "-p1",
+              "-i",
+              "/home/ghmd/kv260-runtime-submission-20261002/payload/patches/dfx_watch_dedup.patch"
+            ],
+            "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003b/sources/dfx_mgr",
+            "exit_code": 0,
+            "log": "/home/ghmd/kv260-runtime-reproduce-20261003b/logs/prepare_sources/apply-dfx_mgr.log",
+            "sha256": "fd974cb0fa50cf5e63335d8e5d4359fec173701acee7dafda5cfe7748d2cafed",
+            "elapsed_seconds": 0.004
+          },
+          {
+            "name": "check-xrt",
+            "argv": [
+              "patch",
+              "--batch",
+              "--forward",
+              "--fuzz=0",
+              "-p1",
+              "-i",
+              "/home/ghmd/kv260-runtime-submission-20261002/payload/patches/zocl_ref_balance.patch",
+              "--dry-run"
+            ],
+            "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003b/sources/xrt",
+            "exit_code": 0,
+            "log": "/home/ghmd/kv260-runtime-reproduce-20261003b/logs/prepare_sources/check-xrt.log",
+            "sha256": "0e515dd7f46396fd1d8aa81924393440edc07af7bbc74d1f1ec76df715cea3f4",
+            "elapsed_seconds": 0.003
+          },
+          {
+            "name": "apply-xrt",
+            "argv": [
+              "patch",
+              "--batch",
+              "--forward",
+              "--fuzz=0",
+              "-p1",
+              "-i",
+              "/home/ghmd/kv260-runtime-submission-20261002/payload/patches/zocl_ref_balance.patch"
+            ],
+            "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003b/sources/xrt",
+            "exit_code": 0,
+            "log": "/home/ghmd/kv260-runtime-reproduce-20261003b/logs/prepare_sources/apply-xrt.log",
+            "sha256": "e2cb4ca26fa88a494ed551a64d55c4cabbe0c39b9c6b67942b3c9d687597e889",
+            "elapsed_seconds": 0.004
+          }
+        ],
+        "passed": true,
+        "board_verified_this_run": false,
+        "runner_sources": {
+          "board_preflight.py": "05254991e395bdd32d386e74b965685394e121bc1155a541ad20b8127f8f92b2",
+          "build_dfx.py": "0a98347c271834842f9696ecf3ac2ebebb61384587c538c49169a959322eb8e6",
+          "build_zocl.py": "7188d0018e29bbe0b49d66ef0ce575254caa01626e1672be46e747845c3fd9b6",
+          "common.py": "c321a0e824353053fb1edb4a57d4022f615f1a5acb67d2001cdacf751235ea4e",
+          "prepare_sources.py": "7871e054a337a3b9f7dba052705a6a2bcea73513475811f95c56fb13e78dee3b"
+        },
+        "dfx_files_verified": 139,
+        "xrt_files_verified": 2278,
+        "source_lock_sha256": "59c59dad901e0ab9ca9bc9ec61c031fa1fe724e10a9271216232b6b2ed3e39b3",
+        "finished_utc": "2026-10-03T07:13:38.341566+00:00"
+      },
+      "artifacts": [
+        {
+          "path": "/home/ghmd/kv260-runtime-reproduce-20261003b/artifacts/dfx/dfx-mgrd",
+          "bytes": 117488,
+          "sha256": "8724319f72b7a71a3a52ee6e8c59fbe45a40415df86f1ed9bbdec5b096057b48",
+          "board_verified_this_run": false,
+          "dynamic_dependencies": [
+            "libdfx.so.1.0",
+            "libpthread.so.0",
+            "libc.so.6",
+            "ld-linux-aarch64.so.1"
+          ],
+          "strong_imports": 84,
+          "unresolved_strong_imports": [],
+          "original_image_loader_list_passed": true
+        },
+        {
+          "path": "/home/ghmd/kv260-runtime-reproduce-20261003b/artifacts/dfx/dfx-mgr-client",
+          "bytes": 23200,
+          "sha256": "751ae320cf2b9bbaf8b0d55037ce1d2e2256c10bdbec42e90e10d1f54165b8aa",
+          "board_verified_this_run": false,
+          "dynamic_dependencies": [
+            "libdfx.so.1.0",
+            "libpthread.so.0",
+            "libc.so.6",
+            "ld-linux-aarch64.so.1"
+          ],
+          "strong_imports": 30,
+          "unresolved_strong_imports": [],
+          "original_image_loader_list_passed": true
+        }
+      ]
+    },
+    {
+      "workspace_suffix": "c",
+      "passed": true,
+      "source_state": {
+        "started_utc": "2026-10-03T07:33:48.330197+00:00",
+        "scope": "Offline patch reconstruction in an independent workspace",
+        "commands": [
+          {
+            "name": "check-dfx_mgr",
+            "argv": [
+              "patch",
+              "--batch",
+              "--forward",
+              "--fuzz=0",
+              "-p1",
+              "-i",
+              "/home/ghmd/kv260-runtime-submission-20261002/payload/patches/dfx_watch_dedup.patch",
+              "--dry-run"
+            ],
+            "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/dfx_mgr",
+            "exit_code": 0,
+            "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/prepare_sources/check-dfx_mgr.log",
+            "sha256": "3181d8159a42c82ac4cb7a5655c67010fd39be7f593a5a3aaa9f6d52cf7c4745",
+            "elapsed_seconds": 0.002
+          },
+          {
+            "name": "apply-dfx_mgr",
+            "argv": [
+              "patch",
+              "--batch",
+              "--forward",
+              "--fuzz=0",
+              "-p1",
+              "-i",
+              "/home/ghmd/kv260-runtime-submission-20261002/payload/patches/dfx_watch_dedup.patch"
+            ],
+            "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/dfx_mgr",
+            "exit_code": 0,
+            "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/prepare_sources/apply-dfx_mgr.log",
+            "sha256": "fd974cb0fa50cf5e63335d8e5d4359fec173701acee7dafda5cfe7748d2cafed",
+            "elapsed_seconds": 0.002
+          },
+          {
+            "name": "check-xrt",
+            "argv": [
+              "patch",
+              "--batch",
+              "--forward",
+              "--fuzz=0",
+              "-p1",
+              "-i",
+              "/home/ghmd/kv260-runtime-submission-20261002/payload/patches/zocl_ref_balance.patch",
+              "--dry-run"
+            ],
+            "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/xrt",
+            "exit_code": 0,
+            "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/prepare_sources/check-xrt.log",
+            "sha256": "0e515dd7f46396fd1d8aa81924393440edc07af7bbc74d1f1ec76df715cea3f4",
+            "elapsed_seconds": 0.002
+          },
+          {
+            "name": "apply-xrt",
+            "argv": [
+              "patch",
+              "--batch",
+              "--forward",
+              "--fuzz=0",
+              "-p1",
+              "-i",
+              "/home/ghmd/kv260-runtime-submission-20261002/payload/patches/zocl_ref_balance.patch"
+            ],
+            "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/xrt",
+            "exit_code": 0,
+            "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/prepare_sources/apply-xrt.log",
+            "sha256": "e2cb4ca26fa88a494ed551a64d55c4cabbe0c39b9c6b67942b3c9d687597e889",
+            "elapsed_seconds": 0.002
+          }
+        ],
+        "passed": true,
+        "board_verified_this_run": false,
+        "runner_sources": {
+          "board_preflight.py": "05254991e395bdd32d386e74b965685394e121bc1155a541ad20b8127f8f92b2",
+          "build_dfx.py": "0a98347c271834842f9696ecf3ac2ebebb61384587c538c49169a959322eb8e6",
+          "build_zocl.py": "7188d0018e29bbe0b49d66ef0ce575254caa01626e1672be46e747845c3fd9b6",
+          "common.py": "c321a0e824353053fb1edb4a57d4022f615f1a5acb67d2001cdacf751235ea4e",
+          "prepare_sources.py": "7871e054a337a3b9f7dba052705a6a2bcea73513475811f95c56fb13e78dee3b"
+        },
+        "dfx_files_verified": 139,
+        "xrt_files_verified": 840,
+        "source_lock_sha256": "8c892c4d2575f67b521ecbf55eb07fca5507a2ff0d4ddb163cb050ac556e4151",
+        "finished_utc": "2026-10-03T07:33:48.622261+00:00"
+      },
+      "artifacts": [
+        {
+          "path": "/home/ghmd/kv260-runtime-reproduce-20261003c/artifacts/dfx/dfx-mgrd",
+          "bytes": 117488,
+          "sha256": "fe77ab54036e7ee5bdbee7d0321b4b24533825f162eb1e47687cdb28473725f5",
+          "board_verified_this_run": false,
+          "dynamic_dependencies": [
+            "libdfx.so.1.0",
+            "libpthread.so.0",
+            "libc.so.6",
+            "ld-linux-aarch64.so.1"
+          ],
+          "strong_imports": 84,
+          "unresolved_strong_imports": [],
+          "original_image_loader_list_passed": true
+        },
+        {
+          "path": "/home/ghmd/kv260-runtime-reproduce-20261003c/artifacts/dfx/dfx-mgr-client",
+          "bytes": 23200,
+          "sha256": "e4f9e446da19703e2f0c61224de9ea09df3fe69ea34237229d2803b3360aea20",
+          "board_verified_this_run": false,
+          "dynamic_dependencies": [
+            "libdfx.so.1.0",
+            "libpthread.so.0",
+            "libc.so.6",
+            "ld-linux-aarch64.so.1"
+          ],
+          "strong_imports": 30,
+          "unresolved_strong_imports": [],
+          "original_image_loader_list_passed": true
+        }
+      ]
+    }
+  ],
+  "offline_fixture_tests_passed": 9,
+  "sandbox_fixture_failure_preserved": true,
+  "source_export": {
+    "passed": true,
+    "fixed_commit": "43926231f7183688add2dccfd391b36a1f000bea",
+    "full_snapshot_preserved": "/home/ghmd/kv260-runtime-submission-20261002/evidence/full_xrt_fixed_snapshot.tar.gz",
+    "full_snapshot_sha256": "f3e7172e3722bab08074bd7f5cb56a89faa1ff190c79ee39425840dc6f881bbd",
+    "full_snapshot_files": 2278,
+    "exported_snapshot_files": 840,
+    "exported_snapshot_sha256": "3f942664ca80c826e23165d75cbedadf595b88dffd3d5b685b7d4f8629a844f1",
+    "source_file_content_changed": false,
+    "previous_dependency_command_files": 37,
+    "previous_xrt_source_dependencies": 69,
+    "missing_dependencies": [],
+    "generated_module_sources_not_upstream_inputs": [
+      "src/runtime_src/core/edge/drm/zocl/zocl.mod.c"
+    ],
+    "scope": "Runtime core export, not full XRT project; board and original repositories unchanged"
+  },
+  "skill_structure_passed": true,
+  "target_preflight_development_host_refusal_passed": true,
+  "preserved_index_checks": [
+    {
+      "index": "/home/ghmd/kv260-dfx-manager-repair-20261002/EVIDENCE.sha256",
+      "sha256": "d6295a95664fe14ba648621ee9fad28aaab2009ab900875556195c04b9d1e26b",
+      "entries": 1395,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "index": "/home/ghmd/kv260-overlay-repair-20261002/EVIDENCE.sha256",
+      "sha256": "0a39b281832ba69326a2fd26ea812b132effc3eaa1cc01f6f83e02436b80dd47",
+      "entries": 177,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "index": "/home/ghmd/kv260-overlay-repair-20261002/BOARD_EVIDENCE.sha256",
+      "sha256": "cb9d7076bc53921abadeecf6a12d0cb332a66b89e2f60dc09682ff53a5788cfd",
+      "entries": 174,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "index": "/home/ghmd/kv260-runtime-enable-20261002/PREPARATION.sha256",
+      "sha256": "a9c5e7d4a1c161c8259a907d4a0b8de6753e14cd47d52ec4e6b24253a8223ade",
+      "entries": 13,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "index": "/home/ghmd/kv260-contest-review-20261002/REVIEW.sha256",
+      "sha256": "f75000280d20eff99cca671aab1e6a1e1e060b6d6fc4a2467bad69931a6c3b22",
+      "entries": 20,
+      "exit_code": 0,
+      "stderr": ""
+    }
+  ],
+  "preserved_index_records": 1779,
+  "uart_by_id_directory_exists": false,
+  "new_host_artifacts": {
+    "host_rebuild/dfx/dfx-mgr-client": {
+      "bytes": 23200,
+      "sha256": "e4f9e446da19703e2f0c61224de9ea09df3fe69ea34237229d2803b3360aea20",
+      "board_verified_this_run": false
+    },
+    "host_rebuild/dfx/dfx-mgr-client.debug": {
+      "bytes": 58776,
+      "sha256": "a90361ac8545d11860c3a74a72d91c664a20641da48e6bc6812f47171ab0abf9",
+      "board_verified_this_run": false
+    },
+    "host_rebuild/dfx/dfx-mgrd": {
+      "bytes": 117488,
+      "sha256": "fe77ab54036e7ee5bdbee7d0321b4b24533825f162eb1e47687cdb28473725f5",
+      "board_verified_this_run": false
+    },
+    "host_rebuild/dfx/dfx-mgrd.debug": {
+      "bytes": 373048,
+      "sha256": "6fdcd857cf291600a112b2b74f9f2a86cab1f088242726fb7e664b5092c286d2",
+      "board_verified_this_run": false
+    },
+    "host_rebuild/initial_b/dfx-mgr-client": {
+      "bytes": 23200,
+      "sha256": "751ae320cf2b9bbaf8b0d55037ce1d2e2256c10bdbec42e90e10d1f54165b8aa",
+      "board_verified_this_run": false
+    },
+    "host_rebuild/initial_b/dfx-mgr-client.debug": {
+      "bytes": 58776,
+      "sha256": "63d6519ca70c0b8fb1fd52a0586f9ef214a36e33d6741b70fb5049a9aff6aa06",
+      "board_verified_this_run": false
+    },
+    "host_rebuild/initial_b/dfx-mgrd": {
+      "bytes": 117488,
+      "sha256": "8724319f72b7a71a3a52ee6e8c59fbe45a40415df86f1ed9bbdec5b096057b48",
+      "board_verified_this_run": false
+    },
+    "host_rebuild/initial_b/dfx-mgrd.debug": {
+      "bytes": 373048,
+      "sha256": "e8eab783e652b4d453d3d0a4cf96cadda309c1f39c96b3f1ff6bad579d3538a5",
+      "board_verified_this_run": false
+    }
+  },
+  "tested_inputs_reused": {
+    "dfx-mgrd": {
+      "bytes": 117488,
+      "sha256": "db9c25f09f1178177884b1114c57f32c076f1e7f9cdd0d12b7a896039038a46c",
+      "new_build_this_turn": false
+    },
+    "zocl.ko": {
+      "bytes": 339600,
+      "sha256": "5cef5e0eba083419b3ece6fd4829a9f3112e3f0daaee513e1617d60ed1f7f412",
+      "new_build_this_turn": false
+    }
+  },
+  "updated_utc": "2026-10-03T07:57:28.358067+00:00",
+  "kernel_jobs": 8,
+  "zocl_prepare_and_module_jobs": 4,
+  "new_kernel_symvers_sha256": "6e582b60f2a379055924117f930e5ca0fac44c98d56f3b374dc3ce278da7b8ed",
+  "kernel_symvers_matches_prior": true,
+  "new_zocl_metadata": {
+    "vermagic": "5.15.36-xilinx-v2022.2 SMP mod_unload aarch64",
+    "srcversion": "9BDC942A6014BCCBD1DCB78",
+    "license": "GPL"
+  },
+  "new_zocl_artifacts": {
+    "host_rebuild/zocl/zocl.debug.ko": {
+      "bytes": 7434592,
+      "sha256": "0362c437fb6002883e10250482a3b721b1f5bbd9196df29c6ff55aa07291f58c",
+      "board_verified_this_run": false
+    },
+    "host_rebuild/zocl/zocl.ko": {
+      "bytes": 339408,
+      "sha256": "9c1e7c008b07442e8b7beb8d2938fccf5d5ea950b13fc2a6172d330304715b78",
+      "board_verified_this_run": false
+    }
+  },
+  "new_zocl_matches_tested_input": false,
+  "new_zocl_board_verified_this_run": false,
+  "new_build_diagnostics": {
+    "prepare": {
+      "warning_lines": []
+    },
+    "kernel": {
+      "warning_lines": []
+    },
+    "module": {
+      "warning_lines": [
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/xrt/src/runtime_src/core/edge/drm/zocl/cu.c:328:23: warning: unused variable 'flags' [-Wunused-variable]",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/xrt/src/runtime_src/core/edge/drm/zocl/zocl_xclbin.c:1191:13: warning: unused variable 'slot_id' [-Wunused-variable]",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/xrt/src/runtime_src/core/edge/drm/zocl/zocl_xclbin.c:1190:34: warning: unused variable 'ret' [-Wunused-variable]",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/xrt/src/runtime_src/core/edge/drm/zocl/zocl_xclbin.c:1760:17: warning: ignoring return value of 'copy_from_user' declared with attribute 'warn_unused_result' [-Wunused-result]"
+      ]
+    }
+  }
+}

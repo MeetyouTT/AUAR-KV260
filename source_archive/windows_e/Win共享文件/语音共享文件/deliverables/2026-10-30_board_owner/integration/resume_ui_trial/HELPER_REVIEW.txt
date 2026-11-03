@@ -1,0 +1,20 @@
+Source-only X11 normal-close helper. Default inspection has no window mutation.
+
+Files: x11_normal_close.py, original_gui.plan.json, launcher_review.json, test_x11_normal_close.py.
+All local tests use mock X11/proc/systemd providers. No board/display/model/service/device call was made by this subtask. LinuxLP64 ctypes layout is tested without loading libX11 on Windows.
+
+Root-only future execution, from a reviewed copy on the board:
+  /usr/bin/python3 -B x11_normal_close.py --plan original_gui.plan.json --plan-sha256 eab89f18a59e8f3bf63996ef3d213523d49544a54540c8e5789955108b190fa1
+This default only inspects. It reads local :0 windows, /proc owner/birth/cmdline hash, pinned sources and effective systemctl show properties. Output contains window ID, title hash, owner metadata and a source/guard-bound review token; no title text, environment, raw argv or screenshots.
+
+Before root explicitly requests normal close, effective aura-avatar-ui.service properties must be Restart=no, SendSIGKILL=no, TimeoutStopUSec=infinity, no pending Job, and MainPID1296 (the pinned original supervisor) or0. Root must apply/recheck its guards first and then rerun inspect to obtain a token bound to the effective guard state.
+  /usr/bin/python3 -B x11_normal_close.py --plan original_gui.plan.json --plan-sha256 <sameSHA> --request-close --review-token <inspect token> --window-id <inspect window ID, decimal or0xhex>
+The helper repeats source/process/window checks immediately before one WM_PROTOCOLS/WM_DELETE_WINDOW ClientMessage to that same normal GTK top-level window. Dialog, transient, multiple, unknown-type, unmapped/override-redirect, missing protocol, changed owner/source/title or unsafe guards refuse. Only existing atoms are queried (only_if_exists); default inspect does not create atoms.
+It observes the original owner for at most20seconds after sending. Exit0 means the old owner exited; exit3 reports still present/changed without sending another close or taking forced action; exit2 is refusal/uncertain error. Synchronous Xlib/systemctl metadata operations are separate from that20second observation budget; no stronger whole-command realtime guarantee is claimed.
+
+Do not stop/TERM the supervisor before WM_DELETE. Its pinned5b15... source has one Popen before its poll loop, no internal child respawn, and returns when the child exits. finally.stop_child first returns immediately if child.poll()!=None. Therefore a normal already-completed GTK exit avoids its terminate/kill code. Effective Restart=no prevents systemd restarting the naturally exited supervisor. However stop_child explicitly calls child.terminate and then child.kill on timeout if invoked while child is alive. SendSIGKILL=no does not disable that Python path.
+The original GTK source connects delete-event to stage.close, which closes its existing controller/cleanup/output owners, destroys its own widget and quits Gtk.main. It has no SIGTERM handler. The helper never calls XDestroyWindow or any process signal; normal GTK close retains its existing cleanup behavior.
+
+The plan's original source proof is pinned to actual_ui_baseline.json plus the independently acquired fresh r3 manifest. Original owner1366/birth2302/argvSHAa924c66d... is only a reviewed expectation, not a live fact. Any owner/birth/boot/source change refuses; do not edit the plan without a new review/hash.
+For later candidate close, root must build a fresh plan from the actual launch.json/proc argv/birth with exact reviewed cmdline SHA and entry under /home/root/aura-board-owner-candidate-20261030/.../aura/tools/board_avatar_gtk.py or board_avatar_pan.py, preserving original supervisor proof and current effective guards. Arbitrary script prefixes, remote DISPLAY/DNS and unrelated services are not accepted. No candidate PID is inferred or automatically discovered.
+X11 PID properties and review tokens are local ownership safeguards, not cryptographic authentication against a malicious X client. The service/proc/source checks and explicit root review still govern operation.

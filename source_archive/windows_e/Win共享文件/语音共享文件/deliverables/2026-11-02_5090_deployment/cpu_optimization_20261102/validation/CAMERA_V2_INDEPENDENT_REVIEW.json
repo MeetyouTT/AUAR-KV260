@@ -1,0 +1,60 @@
+{
+  "status": "V2_BLOCKER_REPRODUCED_LOCAL_GUARD_PROTOTYPE_PASSES",
+  "reviewed_candidate_sha256": "0bf23f511f6f85512603277b1496c704fcd792a4f1a0fc97854ead03441920bf",
+  "original_suite_v2": {
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "passed": true
+  },
+  "v2_race_results": [
+    {
+      "old_mode": "ok",
+      "new_mode": "raise",
+      "new_jpeg_available": false,
+      "error_after_latest_request": true,
+      "error_after_stale_request": false,
+      "stale_request_changed_latest_error": true,
+      "old_request_returned_jpeg": true
+    },
+    {
+      "old_mode": "raise",
+      "new_mode": "ok",
+      "new_jpeg_available": true,
+      "error_after_latest_request": false,
+      "error_after_stale_request": true,
+      "stale_request_changed_latest_error": true,
+      "old_request_returned_jpeg": false
+    }
+  ],
+  "local_guard_prototype_existing_suite": {
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "passed": true
+  },
+  "local_guard_prototype_races": [
+    {
+      "old_mode": "ok",
+      "new_mode": "raise",
+      "new_jpeg_available": false,
+      "error_after_latest_request": true,
+      "error_after_stale_request": true,
+      "stale_request_changed_latest_error": false,
+      "old_request_returned_jpeg": true
+    },
+    {
+      "old_mode": "raise",
+      "new_mode": "ok",
+      "new_jpeg_available": true,
+      "error_after_latest_request": false,
+      "error_after_stale_request": false,
+      "stale_request_changed_latest_error": false,
+      "old_request_returned_jpeg": false
+    }
+  ],
+  "production_candidate_modified": false,
+  "board_or_network_used": false,
+  "raw_media_private_content_used": false,
+  "required_fix": "Only the latest retained frame may update the global preview_error; older requests retain their own return and counters."
+}

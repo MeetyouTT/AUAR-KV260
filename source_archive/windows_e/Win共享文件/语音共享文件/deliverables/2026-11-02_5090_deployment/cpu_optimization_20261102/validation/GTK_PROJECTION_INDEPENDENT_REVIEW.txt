@@ -1,0 +1,25 @@
+GTK v2窄投影独立裁定：静态通过，无代码发布阻塞；ARM/真实GUI及全流程A/B待执行。
+
+已核组件
+ui_services.py 原b55ee295… → 新e4dedf9b3d56d22d9eb93de1e96ad1a69870d553ea50f7dd5082b21e19f381c9。
+board_camera_preview.py 原6e697c16… → 新67d6c0f2b24ea97e20fdcc7b3383b6444269a6e26f5deb566f2b88746b7daf9b。
+SnapshotGate合同7f67e4bdfe4a95396fbe6445759c80f8ea79cf51d2d991269213409a83daec86。
+旧022换序候选已经真实像素失败，仍为REJECTED；本候选完全保留原Gst，不包含条件换序。
+
+独立结构复核
+1. UiServiceClient原有全部方法AST逐一相同，仅新增read_preview。原read和身份/命令/取消接口完整保留。
+2. SnapshotGate.read与read_preview的source expiry AST完全一致，均在clock>=observed+ttl时失效。new method使用原condition，gate/connection/JPEG键及复制均在同一个锁域内，无新增锁、IO或后台线程。
+3. SnapshotGate取消mask只修改interaction字幕和interaction_suppressed，原CameraPreviewWorker不消费这些字段。新投影直接取已ingest验证的camera元数据不改变其取消/失源判断。
+4. 实际worker访问view的键恰为snapshot、preview、raw_preview。投影保留boot/service/camera epoch、frame-id与captured时间、camera state及transport；source_kind供原use_raw消费。
+5. 新函数deepcopy最小snapshot和JPEG值，不返回可变gate/preview/camera内部结构。原JPEG同key与>1500ms失效条件保留，原use_raw要求local_raw/loopback/actual/raw传输同时满足的逻辑直接复用。
+6. CameraPreviewWorker除work外所有方法AST一致；将work仅新增的read selector归一化后，其余整个方法AST与原版一致。旧对象无可调用read_preview时走原read。
+7. read_preview异常仍由原work异常路径清空；缺少/过期/丢失camera仍走原clear。配置变更在原condition内重建gate/清缓存，不会返回混合owner或取消代数。
+
+复用已交付测试结果，不重复跑未变的大套件：11项PASS，包括350次configure/cancel/loss并发、字段独立引用、精确TTL/JPEG边界、原/新worker决策和旧接口fallback。独立本次仅运行本地哈希/AST裁定程序，没有负载测试或板端访问。
+
+收益边界与部署前提
+公开Windows 75%/94.7%是read方法局部拷贝成本下降，不能称整板或GTK进程节省同样比例。真实ARM及相同页面/场景的CPU、预览更新率、源龄和GUI主页面功能仍需复测。
+最新会话已换boot；旧903c/79866/25pin与82.5%窗口只能历史参考。必须先取得新boot/相机/GUI owner和最新26pin/voice/axis闭包，核本次两组件原SHA仍匹配后发布。不能用旧1177或680整份startup覆盖身份对话的后续修复。
+身份对话持有恢复/登记权时保持冻结；本审查不授权并发部署或运动。
+
+证据：GTK_PROJECTION_INDEPENDENT_REVIEW.json、review_gtk_projection_static.py。

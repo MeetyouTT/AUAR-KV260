@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-26",
+  "scope": "Windows offline functional simulation; not ARM emulation or new board acceptance",
+  "distinct_regression_passed": 155,
+  "additional_subtests_passed": 26,
+  "integration_scenarios_passed": 7,
+  "asr_public_inferences": 6,
+  "vad_cases_passed": 5,
+  "speaker_public_held_out_queries": 2,
+  "core_sources_unchanged": 18,
+  "matrix": [
+    {
+      "component": "conversation_memory_context_rules",
+      "result": "OFFLINE_LOGIC_PASS",
+      "target_gate": "PS integration and single database ownership"
+    },
+    {
+      "component": "speaker_gallery",
+      "result": "OFFLINE_LOGIC_PASS",
+      "target_gate": "PS integration; no field accuracy claim"
+    },
+    {
+      "component": "silero_vad_alone",
+      "result": "WINDOWS_PASS_AND_HISTORICAL_BOARD_HEADROOM",
+      "target_gate": "current full-load board tail-latency and acoustic tests"
+    },
+    {
+      "component": "paraformer_int8",
+      "result": "WINDOWS_CPU_PASS",
+      "target_gate": "ARM load, memory and actual latency"
+    },
+    {
+      "component": "ecapa_encoder",
+      "result": "WINDOWS_CPU_PUBLIC_SMOKE_PASS",
+      "target_gate": "ARM runtime adaptation and calibration"
+    },
+    {
+      "component": "vits_tts",
+      "result": "WAVEFORM_PASS_CONTENT_UNRESOLVED",
+      "target_gate": "intelligibility, voice acceptance and ARM timing"
+    },
+    {
+      "component": "kokoro_int8_tts",
+      "result": "WAVEFORM_PASS_SINGLE_THREAD_SLOW",
+      "target_gate": "performance, voice acceptance and ARM timing"
+    },
+    {
+      "component": "gtcrn_vad_combined",
+      "result": "HISTORICAL_BOARD_NOT_REALTIME",
+      "target_gate": "optimization or lighter alternative"
+    },
+    {
+      "component": "current_omnivoice",
+      "result": "CURRENT_LOADER_REQUIRES_CUDA",
+      "target_gate": "not an unchanged PS migration"
+    },
+    {
+      "component": "current_27b",
+      "result": "CURRENT_RESIDENT_MODEL_TOO_LARGE",
+      "target_gate": "different small-model architecture if fully standalone"
+    }
+  ],
+  "prior_environment_failures_retained": true,
+  "production_changed": false,
+  "llm_weights_copied": false,
+  "target_arm_executed": false
+}

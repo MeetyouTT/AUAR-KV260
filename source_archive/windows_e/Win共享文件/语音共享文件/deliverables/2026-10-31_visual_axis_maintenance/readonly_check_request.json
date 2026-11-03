@@ -1,0 +1,53 @@
+{
+  "schema": "aura-visual-axis-fixed-metadata-request-1",
+  "execute_by": "MAIN_WINDOW_ONLY",
+  "this_is_not_an_executor_or_motion_permit": true,
+  "use_existing_main_window_readonly_projector": true,
+  "source_context": "FRESH_CURRENT_OWNERS_REQUIRED",
+  "format": {
+    "owners_freshly_verified": "boolean",
+    "canonical_components_verified": "boolean",
+    "gui_source_matches_candidate_before_sha": "boolean",
+    "wide_controller_matches_archive_before_sha": "boolean",
+    "camera_current_source_pins_verified": "boolean",
+    "motion_config_current_boot_matches": "boolean",
+    "fdt_context_matches": "boolean",
+    "fpga_operating": "boolean",
+    "firmware_kind": ["BENCHMARK_B4096", "WIDE_V1", "OTHER", "UNKNOWN"],
+    "vart_kind": ["BENCHMARK_B4096", "WIDE_V1", "OTHER", "UNKNOWN"],
+    "paired_firmware_and_native_hashes_match": "boolean",
+    "camera_pid": "nonnegative integer or null",
+    "camera_birth_ticks": "nonnegative integer or null",
+    "supervisor_pid": "nonnegative integer or null",
+    "gtk_pid": "nonnegative integer or null",
+    "listening_enabled": "boolean or null",
+    "listening_state": ["PAUSED", "OTHER", "UNKNOWN"],
+    "microphone_open": "boolean or null",
+    "follow_enabled": "boolean or null",
+    "manual_state": ["FAULT", "READY", "CONNECTING", "MOVING", "STOPPING", "UNAVAILABLE", "OTHER", "UNKNOWN"],
+    "pulse_us": "bounded numeric or null from existing status only, never inferred angle",
+    "identity_backend": ["DPU_SFACE_INT8", "OTHER", "UNKNOWN"],
+    "face_identity_threshold": "numeric or null, expected 0.85",
+    "camera_error_present": "boolean or null",
+    "detector_error_present": "boolean or null",
+    "identity_error_present": "boolean or null",
+    "person_detection_count_delta": "nonnegative integer or null",
+    "face_measurement_count_delta": "nonnegative integer or null",
+    "native_error_count_delta": "nonnegative integer or null",
+    "current_stopped_reference_qualified": "boolean",
+    "current_direction_evidence_qualified": "boolean",
+    "camera_moves_with_axis_currently_confirmed": "boolean",
+    "speaker_field_calibrated": "boolean or null"
+  },
+  "exclude": [
+    "RAW_HTTP_RESPONSES", "ARBITRARY_ERROR_TEXT", "CAMERA_FRAMES", "FACE_CROPS",
+    "BIOMETRIC_TEMPLATES", "NAMES_OR_PERSON_IDS", "CONVERSATIONS", "PCM", "DATABASE_DUMPS"
+  ],
+  "constraints": [
+    "Do not load MMIO/native motion drivers just to obtain this diagnostic.",
+    "Do not update boot/FDT bindings, source pins, checkpoint markers, listening preference or service owners.",
+    "Use UNKNOWN/null for unavailable fields; do not default missing diagnostics to zero or healthy.",
+    "Treat all saved owner/PID/READY observations as historical.",
+    "Keep current main-window serial ownership and existing projection privacy boundaries."
+  ]
+}

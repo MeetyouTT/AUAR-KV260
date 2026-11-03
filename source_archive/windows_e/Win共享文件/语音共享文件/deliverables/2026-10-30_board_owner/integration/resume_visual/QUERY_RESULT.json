@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "status": "DEVICE_ONLY_VISUAL_QUERY_CLOSED_LOOP_SYNTHETIC_PASS_NOT_DEPLOYED",
+  "validation": {
+    "tests": 99,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 5.50,
+    "evidence": "query_final_v2_tests.xml",
+    "evidence_sha256": "bcb9d80a34d782089d2c4df22843556a8ff231be160166db435a250795a720fb",
+    "real_board_models_or_camera_used": false,
+    "production_data_used": false,
+    "earlier_test_expectation_errors": "policy_tests.xml retains 66 passed and 3 failed: tests expected a committed key on Store ACK; corrected to the actual authoritative played/interrupted status and retained heard-event checks. No production behavior was changed to hide these test errors."
+  },
+  "sources": [
+    {
+      "path": "aura/board/runtime/visual_memory.py",
+      "sha256": "ddfff3ed68ecc1e7586f9c7d3a10e489a981301970220f1fbdfcde96b39ae090"
+    },
+    {
+      "path": "aura/board/runtime/visual_policy.py",
+      "sha256": "ed8fb2ad306e9fb4c443105bae1441608db73d8ef89089f1623c9b17a6a96a9f"
+    },
+    {
+      "path": "aura/tests/framework/test_visual_policy.py",
+      "sha256": "4a0e4a4031664992d9ba3e6d87c1575f510878d2cce356f28cfb9cd83c2bb7c0"
+    }
+  ],
+  "routing": {
+    "class": "board.runtime.visual_policy.LocalVisualQueries",
+    "enable": "Explicit BoardBusinessConfig.visual_device_id; None keeps this disabled",
+    "matching": "Explicit visual/person-count requests including past questions precede generic conversation history, while original management/enrollment/identity/speaker priorities remain",
+    "current": "Only fresh accepted stable board-local health proof; explicitly persist a frozen camera_query source for the current query. No old timeline count used as current. Failure/unstable/expired proof produces an unknown answer, never assumed zero.",
+    "history": "Only configured device scope and observation topic visual; uses history_with_status and protected person-count claims, never infers counts/identity from free summary narrative",
+    "time": "Board-parsed explicit date or bounded recent-minute/hour range; ambiguous/unsupported time is rejected instead of silently widened or treated as current",
+    "reply": "Local Chinese template, at most 48 characters, original TTS and complete player ACK, no added LLM/vision model"
+  },
+  "memory": {
+    "query_input_source": "device_event",
+    "canonical_prefix": "设备查询意图（规范化）：",
+    "required_claim": {"field": "input_representation", "value": "normalized_visual_query"},
+    "answer_topic": "视觉查询答复",
+    "observation_topic": "视觉",
+    "raw_private_asr_or_conversation_id_copied_to_device": false,
+    "conversation_or_profile_context_copy": false,
+    "source_dependencies": "SourcedBoardReply binds original same-device event/summary references through the unchanged same-scope Store assertions",
+    "invalidation": "Source forgetting/correction removes dependent played answers and summaries; invalidation before playback rejects a later full ACK",
+    "original_scope": "check_scope validates the live original job scope before device routing and in the local reply callback; no personal facts or grants become public",
+    "recursive_recall_prevented": "Observation history topic excludes normalized query/answer topic"
+  },
+  "verified": [
+    "Actual jobs routes past person-count questions through local device policy with only TTS",
+    "Canonical query is a device event and never impersonates verbatim user speech",
+    "No private name, raw question, CID, identity or image enters device storage",
+    "Current stable, unstable, stale, zero and unavailable cases remain distinct",
+    "Same-frame current-source retry is idempotent; forgotten tombstone cannot restore itself",
+    "Event/summary forgetting and fact correction invalidate dependent played answers",
+    "Partial playback never enters heard recall; forgotten source rejects pending ACK",
+    "History reports no-match, limit, omitted boundary summaries and irreversible summary details within 48 characters",
+    "Compacted protected person-count claims are used without copying free narrative or identity",
+    "Original expired profile authorization cannot be skipped by selecting device scope"
+  ],
+  "actions": {
+    "board_accessed": false,
+    "real_model_loaded": false,
+    "microphone_or_playback_started": false,
+    "production_database_used": false,
+    "production_cutover": false
+  },
+  "remaining": "Parent-managed actual board query/current-health/physical receipt and full runtime acceptance. Previous RESULT.json documents the earlier collector-only snapshot; this file is the later query completion snapshot."
+}

@@ -1,0 +1,29 @@
+你现在接手AURA/KV260项目。旧Windows主机以后可能不再启用，所有后续工作和Windows大语言模型/TTS运行转移到本5090 Laptop主机。请实际配置并接续工作，不要只给计划。资料已保存在本工作区，先阅读5090主机迁移包_20261101/00_先读.md及清单。
+
+一、第一步确认完整载荷
+1. 当前应打开整个Win共享文件目录，包含语音共享文件、语言模型分析、协作任务、FPGA/Verilog/项目/报告等原目录，以及5090主机迁移包_20261101；不能只拿迁移子目录当完整项目。
+2. 读取工作区AGENTS.md、语音共享文件/AGENTS.md，并将本提示词与迁移包最新事实放在旧版本READY段落之前理解。旧PID/boot/方向/显存校准不能直接当现在状态。
+3. 运行迁移包/tools/Prepare-5090.ps1默认只读检查；读取verification/WORKSPACE_INVENTORY.json及外部依赖和Codex导出manifest。清楚报告缺失内容，不造通过。
+
+二、配置本地5090主机
+1. 按environment的实际版本清单重建Python环境，不复制旧venv，合并external_dependencies中的普通源码/资源。实际校验GPU型号/驱动、torch CUDA、所用架构和显存；旧GPU UUID/5060Ti calibration_id均失效。
+2. 保留27B模型身份、量化、原人格、OmniVoice16和现有音色，不擅自换模型来冒充性能优化。Windows只运行模型服务；板端继续拥有采集/处理/业务/存储/显示/播放。
+3. 用户禁止将语言模型权重、下载分段、Ollama数据及其目录联接放在E共享目录。按environment外部模型清单，在新机项目外模型目录恢复，更新语音共享文件/aura/config/model_storage.local.json。若无D盘可选其他项目外本地路径；模型缺失就按精确来源下载，不依赖旧机重新开机。
+4. 依据新环境更新aura/config/model_inference.local.json的voice_python，旧C:/Users/35870/.codex/visualizations/.../omnivoice-runtime-py310不再是可用路径。原Windows入口start_inference.ps1（start_voice为模型入口包装），原服务192.168.50.1:8797/allowed_peers192.168.50.2；Ollama11435本地。更新GPU调度配置前保留备份，使用原健康检查和有效校准，不把旧准入数值视为5090结果。
+
+三、恢复Codex远程协作
+1. 阅读codex/恢复远程协作.md、configuration/config.sanitized.toml、plugins_and_mcp.json和ssh配置。完整旧配置只是参考，native pipe、App runtime绝对路径、notify及内置MCP要由新Codex安装生成；仅合并适用个人偏好，保留新安装正常运行配置。
+2. 新主机自行登录Codex及需要的插件。auth.json、SSH私钥和浏览器凭证未迁入E；不关闭StrictHostKeyChecking来绕过登录问题。
+3. tools/Prepare-5090.ps1 -ApplySsh可在新用户.ssh生成Ubuntu/板端新密钥并准备别名，只有公钥写回本包codex/new_host_public_keys。从Ubuntu原可信本地控制台给ghmd授权ubuntu.pub；从板端原可信控制台/已授权Ubuntu通路给root授权board.pub；可在Linux目标账号运行tools/install_public_key.py --public-key 文件 --apply，默认不带--apply仅检查。保留原authorized_keys。
+4. Ubuntu旧连接alias aura-ubuntu，用户ghmd，地址192.168.137.141，项目/home/ghmd/Win共享文件/语音共享文件，codex=/home/ghmd/.local/bin/codex。Ubuntu连到新主机热点后重新核对IP/路由/SSH；先验证ssh aura-ubuntu，再在Codex的Connections中接入。不要沿用最初172.23/10.148跨网络失败地址。
+5. 旧board_ssh.py硬编码C盘旧私钥，必须在新机改为新用户私钥或AURA_BOARD_SSH_KEY等本机可配置路径，保留备份及严格主机指纹校验。设备串行操作只能由一个已指定窗口负责，其他代理只做本地工作。
+
+四、最新设备状态和下一步
+1. 阅读语音共享文件/deliverables/2026-10-31_visual_axis_maintenance/reviews/axis_priority_20261101/HANDOFF_5090.txt、CURRENT_MIGRATION_STATE.json、PROMPT_5090.txt；这些覆盖旧boot的人脸跟随通过记录。
+2. 最新已知boot3c94e7a0，曾从benchmark恢复wide并按实际最终Native检查点恢复相机2094。这里只是历史事实，迁移最后SSH banner超时，当前在线/boot/输出未能再次确认。不能沿用PID或盲发旧repeat。最后实际读回flags0/lease0/activefalse/armedfalse/1505us；不是机械中点。
+3. 本boot仅完成一次2秒1500→1505初始化和STOP；用户未观察清楚。重复初始化、6秒方向往返、25秒跟随均未执行。恢复时先核对供电/位置/平台/相机/唯一肖像及运动owner/输出；沿已有原维护流程做有限动作和停止回读。没有现场方向确认就不把旧+1绑定迁过去。禁止强杀相机、清锁或只改boot/PID放宽保护。
+4. 当前用户优先级：转轴接入测试优先；记忆库测试后置。先完成检测人脸→位置误差→正确方向→跟随与停稳→丢脸/停止释放输出的短测，再处理持久启动重启回benchmark缺口。源和证据保留，完成后关闭跟随/机械输出。
+5. startup ec12fccfdd3e8446e9c761e161167e00187e6fcf90372aa7e52c9865cc23c56f已应用，GUI因MCP01声卡缺失而未READY，另需本boot相机绑定恢复。摘要与暂停继续软件交接见summary_retention_acceptance_20261101/SOFTWARE_ONLY_HANDOFF.json。新机不要把旧actual_ready.json当新release已运行。
+6. 上一22317/de04已有人数、字幕双栏、完整声音及三轮短期记忆成功记录；自然333秒原文清除/有效摘要保留的存储半段通过；新同会话精确摘要召回未通过验收。声纹未校准，不能确认身份或扩大个人记忆权限。
+
+边界：不删除原记录/原库/历史归档，不导出板端身份模板或私钥，不擅自恢复聆听或机械动作。必要的正常安装和已授权接续工作应完成，不重复无意义审批；硬件动作按当时用户在场和保护条件执行。持续报告实际进展，分别说明已迁移、已配置、已验证和待验，最终提供新主机配置记录与准确接续状态。

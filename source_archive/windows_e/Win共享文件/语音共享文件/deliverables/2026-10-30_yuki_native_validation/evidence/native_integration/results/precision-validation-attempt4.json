@@ -1,0 +1,77 @@
+{
+  "status": "FAIL",
+  "steps": [
+    {
+      "argv": [
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/yuki_tile_uv_test"
+      ],
+      "returncode": 0,
+      "elapsed": 0.040940589002275374
+    },
+    {
+      "argv": [
+        "python3",
+        "/home/root/aura-yuki-validation-20261030/native_integration/validate_precision_images.py"
+      ],
+      "returncode": 0,
+      "elapsed": 15.94926720699732
+    },
+    {
+      "argv": [
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/yuki_runtime_audit",
+        "/home/root/aura-yuki-validation-20261030/native_integration/runtime_assets/model.runtime.json",
+        "/home/root/aura-yuki-validation-20261030/native_integration/runtime_assets/yuk_0.ems.resx.json",
+        "--resource-root",
+        "/home/root/aura-yuki-validation-20261030/native_integration/runtime_assets",
+        "--output",
+        "/home/root/aura-yuki-validation-20261030/native_integration/results/runtime-audit.json",
+        "--steps",
+        "360"
+      ],
+      "returncode": 0,
+      "elapsed": 6.228147160996741
+    },
+    {
+      "argv": [
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_host/yuki_frame_export",
+        "/home/root/aura-yuki-validation-20261030/native_integration/runtime_assets/model.runtime.json",
+        "/home/root/aura-yuki-validation-20261030/native_integration/runtime_assets/yuk_0.ems.resx.json",
+        "/home/root/aura-yuki-validation-20261030/probe_build/scenario-validation.json",
+        "/home/root/aura-yuki-validation-20261030/native_integration/results/final-profile-frames.json",
+        "--resource-root",
+        "/home/root/aura-yuki-validation-20261030/native_integration/runtime_assets"
+      ],
+      "returncode": 0,
+      "elapsed": 2.139371277000464
+    },
+    {
+      "argv": [
+        "python3",
+        "/home/root/aura-yuki-validation-20261030/native_integration/host/validate_native.py",
+        "continuous",
+        "35"
+      ],
+      "returncode": 0,
+      "elapsed": 37.07014058899949
+    },
+    {
+      "argv": [
+        "python3",
+        "/home/root/aura-yuki-validation-20261030/native_integration/host/validate_gtk_clock.py",
+        "300"
+      ],
+      "returncode": 1,
+      "elapsed": 308.25744425599987
+    }
+  ],
+  "source_profile": "fuyukiss-yuki-freemote39-frame-mesh",
+  "production_deployed": false,
+  "error": "Required validation failed: 300",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/root/aura-yuki-validation-20261030/native_integration/precision_validation_worker.py\", line 30, in <module>\n    run(['python3',str(root/'host/validate_gtk_clock.py'),'300'],340)\n  File \"/home/root/aura-yuki-validation-20261030/native_integration/precision_validation_worker.py\", line 12, in run\n    if p.returncode:raise RuntimeError('Required validation failed: '+str(argv[-1]))\nRuntimeError: Required validation failed: 300\n",
+  "binary_sha256": {
+    "libaura_yuki.so": "9c98e06715db316252cfb7ba1c0eb1a26465a4a33e42107e72df27165cc7b686",
+    "yuki_runtime_audit": "28d21d8c588a689479777663f2b6e49368c9d39845500af215fa95db95d71667",
+    "yuki_frame_export": "2e0483b1e570d422a8a4065c0e77aa53b59a605a8e6b211e49f9b1438b13a3d0",
+    "yuki_tile_uv_test": "056bfcb899c54f508d11fb57095769b44a8dd69117e61fbe5ccc20b1aa7fe398"
+  }
+}

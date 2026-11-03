@@ -1,0 +1,193 @@
+{
+  "status": "INDEPENDENT_PUBLIC_SCREEN_REVIEW_COMPLETE_PROMISING_SPEED_AND_MEMORY_CANDIDATE",
+  "reviewed_utc": "2026-10-31T13:22:25.155Z",
+  "reviewer_thread": "01a191ec-d0c3-77d0-904f-86e6cc9b2cb3",
+  "sole_board_operator_thread": "01a18bcd-1167-71a0-ba0b-d809148d39d9",
+  "recommendation": "Advance Paraformer Small INT8 to guarded dialogue integration and real speech verification; no production acceptance or deployment implied by this offline screen.",
+  "model_repository": "csukuangfj/sherpa-onnx-paraformer-zh-small-2024-03-09",
+  "revision": "63ddc3cd0f2810b68289a7b3876e62ef5d53d6df",
+  "public_documentation": "https://github.com/k2-fsa/sherpa/blob/master/docs/source/onnx/pretrained_models/offline-paraformer/paraformer-models.rst",
+  "scope": "Eight identical public synthetic WAVs, 2.28–3.72 seconds each; two rounds per model, three CPU threads, nice 0, one additional isolated model process at a time; camera/GUI/memory workers retained, microphone already paused at entry.",
+  "evidence": [
+    {
+      "path": "actual_public_paraformer_1793452789418734300.json",
+      "sha256": "50314e1aa54b0a127e94432aa59540347dbe10c5508ffcde5c860fa57e756709"
+    },
+    {
+      "path": "actual_public_paraformer_small_1793452839898432400.json",
+      "sha256": "34bb777265fbbb64967e34bd07eb55b8c486f04c717585299875d409b3f2913b"
+    }
+  ],
+  "pair_evidence": [
+    {
+      "path": "PAIR_1793452601667143500.json",
+      "sha256": "a8899aa564f3c3a09d9030b74089d176cef85f71e0964e3523653aaa95e091ab",
+      "status": "PAIR_STOPPED"
+    },
+    {
+      "path": "PAIR_1793452676433867000.json",
+      "sha256": "5f410d86f45772765f0fe030fe56e3bd1f4a0e1b52f7f8d3e48248015446079c",
+      "status": "PUBLIC_PAIR_FINISHED_NOT_PRODUCTION_ACCEPTANCE"
+    }
+  ],
+  "first_attempt_note": "Stopped before any model slot or listening mutation because entry state was already paused. Parent then preserved entry preference and completed the public comparison. No model load failure is implied.",
+  "validated": {
+    "worker_sha256": "94f7ac8598628f6137ca3e3d122904d9eb4bd8627df8077de80bea423177536e",
+    "native_sherpa_version": "1.13.8",
+    "pair_wav_hashes_match": true,
+    "original_adapter_and_model_pins_retained": true,
+    "small_model_and_tokens_pins_matched": true,
+    "original_startup_unchanged": true,
+    "exit_codes_both_zero": true
+  },
+  "metrics": [
+    {
+      "engine": "paraformer",
+      "utterances": 16,
+      "unique_audio_files": 8,
+      "rounds": 2,
+      "threads": 3,
+      "mean_decode_wall_ms": 5788.5254375,
+      "first_decode_wall_ms": 5144.116,
+      "second_round_mean_wall_ms": 5902.183875000001,
+      "min_decode_wall_ms": 4566.631,
+      "max_decode_wall_ms": 7725.742,
+      "total_decode_cpu_ms": 151184.784,
+      "mean_decode_cpu_ms": 9449.049,
+      "recognizer_factory_wall_ms": 13526.527,
+      "isolated_process_peak_rss_mib": 411.53125,
+      "literal_intent_edits": 6,
+      "literal_intent_characters": 214,
+      "repeat_hypotheses_stable": true,
+      "background_activity_changed": true,
+      "worker_exit_code": 0,
+      "owners_unchanged": true
+    },
+    {
+      "engine": "paraformer_small",
+      "utterances": 16,
+      "unique_audio_files": 8,
+      "rounds": 2,
+      "threads": 3,
+      "mean_decode_wall_ms": 2056.501,
+      "first_decode_wall_ms": 1613.946,
+      "second_round_mean_wall_ms": 2125.53375,
+      "min_decode_wall_ms": 1493.914,
+      "max_decode_wall_ms": 3053.515,
+      "total_decode_cpu_ms": 51562.003,
+      "mean_decode_cpu_ms": 3222.6251875,
+      "recognizer_factory_wall_ms": 12979.654,
+      "isolated_process_peak_rss_mib": 194.34765625,
+      "literal_intent_edits": 4,
+      "literal_intent_characters": 214,
+      "repeat_hypotheses_stable": true,
+      "background_activity_changed": true,
+      "worker_exit_code": 0,
+      "owners_unchanged": true
+    }
+  ],
+  "observed_comparison": {
+    "mean_decode_wall_reduction_percent": 64.4728001594793,
+    "total_decode_cpu_reduction_percent": 65.89471398126945,
+    "process_peak_rss_reduction_percent": 52.77450831498216,
+    "paired_cases_faster": 16,
+    "paired_cases_total": 16,
+    "interpretation": "Small had lower wall time in all 16 paired decodes and substantially lower process CPU and peak RSS. This supports a promising candidate on KV260. Fixed order, small synthetic set and changing background activity prevent treating exact percentages as controlled causal or guaranteed production gains.",
+    "factory_load_excluded_from_decode": true,
+    "real_speech_end_to_end_latency_not_measured": true,
+    "system_wide_peak_memory_not_measured": true
+  },
+  "paired_quality": [
+    {
+      "case": "S01",
+      "reference": "你好，请用两句话介绍你自己。",
+      "baseline": "你好请用两句话介绍你自己",
+      "candidate": "你好请用两句话介绍你自己",
+      "finding": "Key meaning and wording retained in these public fixtures."
+    },
+    {
+      "case": "S02",
+      "reference": "我叫林悦，树林的林，喜悦的悦。",
+      "baseline": "我叫林月树林的林喜喜悦的悦",
+      "candidate": "我叫林月树林的林喜悦的月",
+      "finding": "Both output 林月 instead of intended 林悦. Small additionally outputs 喜悦的月 instead of 喜悦的悦, losing the explicit character explanation; original retains it with an extra 喜. Name accuracy is not accepted."
+    },
+    {
+      "case": "S03",
+      "reference": "桌上有三本书，杯子里有二百五十毫升水。",
+      "baseline": "唉桌上有三本书杯子里有二百五十毫升水",
+      "candidate": "桌上有三本书杯子里有二百五十毫升水",
+      "finding": "Both retain 三本书 and 二百五十毫升; Small omits the baseline extra 唉."
+    },
+    {
+      "case": "S04",
+      "reference": "我没有关灯，也没有锁门。",
+      "baseline": "我没有关灯也没有锁门",
+      "candidate": "我没有关灯也没有锁门",
+      "finding": "Key meaning and wording retained in these public fixtures."
+    },
+    {
+      "case": "S05",
+      "reference": "更正一下，会议改到下午四点，不是三点。",
+      "baseline": "更正一下会议改到下午四点不是三点",
+      "candidate": "更正一下会议改到下午四点不是三点",
+      "finding": "Key meaning and wording retained in these public fixtures."
+    },
+    {
+      "case": "S06",
+      "reference": "请记住，我把蓝色钥匙放在书架第二层。",
+      "baseline": "请记住我把蓝色钥匙放在书架第二层",
+      "candidate": "请记住我把蓝色钥匙放在书架第二层",
+      "finding": "Key meaning and wording retained in these public fixtures."
+    },
+    {
+      "case": "S07",
+      "reference": "我刚才把蓝色钥匙放在哪里？",
+      "baseline": "我刚才把蓝色钥匙放在哪里",
+      "candidate": "我刚才把蓝色钥匙放在哪里",
+      "finding": "Key meaning and wording retained in these public fixtures."
+    },
+    {
+      "case": "S08",
+      "reference": "请忘记我刚才说的钥匙位置。",
+      "baseline": "请忘记我刚才说的钥匙位置",
+      "candidate": "请忘记我刚才说的钥匙位置",
+      "finding": "Key meaning and wording retained in these public fixtures."
+    }
+  ],
+  "quality_limit": "Authored synthetic intents are not human-gold transcripts. 107 normalized characters repeated twice are not 214 independent samples. Literal edit distance 4/214 versus 6/214 does not establish general accuracy superiority. No real voice, dialect, noise or false-trigger acceptance.",
+  "final_state": {
+    "evidence": "../paraformer_small_paused_final_1793452676433867000.json",
+    "sha256": "eb2dcd69befa1342c01a41872cfcb08a9faf4355c6d43c5a8bd353e6c2b79b3a",
+    "observed_mono": 55106.621774004,
+    "phase": "IDLE",
+    "listening": {
+      "enabled": false,
+      "state": "PAUSED",
+      "conversation_entered": false,
+      "entry_mode": "direct_speech",
+      "wake_word_required": false,
+      "microphone_open": false,
+      "conversation_mode": "half_duplex",
+      "voice_barge_in": false
+    },
+    "runtime_faults": {
+      "count": 0,
+      "last": null
+    },
+    "capture_failures": 3,
+    "entry_enabled": false,
+    "entry_preference_preserved": true,
+    "interpretation": "Public test left pre-existing paused state unchanged. The operating window subsequently reported the user explicitly confirmed manual pause. Preserve that preference; no automatic-listening restoration is claimed for this pair.",
+    "manual_pause_confirmed_by_owner_message": true,
+    "confirmation_thread": "01a18bcd-1167-71a0-ba0b-d809148d39d9"
+  },
+  "production_model_changed": false,
+  "board_access_by_reviewer": false,
+  "privacy": {
+    "real_microphone_recorded": false,
+    "store_mutated": false,
+    "private_conversation_exported": false
+  },
+  "followup": "Original optimization owner receives this evidence to plan minimal reversible integration while preserving identity, permissions, memory semantics and normal audio ACK/rearm. Any faster complete-dialogue claim needs a real end-to-end test."
+}

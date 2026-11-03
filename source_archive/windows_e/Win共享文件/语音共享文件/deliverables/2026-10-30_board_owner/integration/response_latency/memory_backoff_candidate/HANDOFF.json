@@ -1,0 +1,45 @@
+{
+  "schema": "aura.memory-backoff-candidate.v1",
+  "status": "SOURCE_ONLY_SYNTHETIC_TESTS_PASS",
+  "files": {
+    "common/board_memory_backoff.py": {
+      "path": "after/common/board_memory_backoff.py",
+      "sha256": "e0abd91758c9e55d6f60bb7bf0f00a9ceed1fa0c194962b87a1d2412705d1d57",
+      "bytes": 4288,
+      "new": true
+    },
+    "board/runtime/board_business.py": {
+      "path": "after/board/runtime/board_business.py",
+      "before_sha256": "1aa9727ef1ff6f7981f5a53459548c19e5cd168233dce31372ebc914d2ca062d",
+      "sha256": "b0d19864ac305e52d5d9f4f86823ae97b4d8d134c56c0ec78c0ae316bd8efc18",
+      "bytes": 34680,
+      "change": "Only add wrapper import and replace injectable default worker_factory; exact other AST preserved"
+    }
+  },
+  "base_store_candidate_sha256_unchanged": "943bf88c05400c49c76a1aee68a0bb242cb929cee3e213bc21f465ac3ef77d46",
+  "behavior": {
+    "original_worker_loop_interval_seconds": 3,
+    "failure_delays_seconds": [3, 6, 12, 24, 48, 60],
+    "maximum_retry_delay_seconds": 60,
+    "timer": "process-local monotonic RAM; no schema or DB schedule",
+    "backed_off_reasons": ["candidate_rejected", "model_failed", "deadline_exceeded", "database_busy", "compaction_failed"],
+    "success": "Clear retry streak and pending cooldown",
+    "idle_no_work_cancelled_stale_commit_clock_unverified": "Do not add failure or extend cooldown",
+    "exception_classification": "InterruptedError or original cancellation predicate true becomes cancelled; TimeoutError becomes deadline_exceeded. No exception message parsing.",
+    "health": "Original health plus retry_backoff metadata: failure_streak/retry_in_seconds/last_delay_seconds/last_failure_code/skipped_for_cooldown/maximum_seconds"
+  },
+  "tests": {
+    "source": "tests/test_backoff.py",
+    "sha256": "6b93a7b4c384e67b8562cf31b7318494b7c8e22caef40a19a53be8a0f702e4dc",
+    "targeted_passed": 11,
+    "targeted_seconds": 0.72,
+    "combined_prepared_stream_backoff_passed": 68,
+    "combined_failed": 0,
+    "combined_seconds": 4.16,
+    "covers": ["Exact capped schedule and cooldown without model calls", "Original bodies retained through repeated failures", "Success resets and empty work does not count failure", "Interrupted/timeout/model error classification", "Invalidated source plus socket failure treated as cancellation", "Foreground idle false", "Stale commit", "Pre-lease database busy preserves original exception", "Stop and programming errors", "Factory only import/default AST change"]
+  },
+  "unchanged": ["Original worker step/lease/commit implementation", "Foreground preemption and cancellation predicate", "Five-minute policy", "Atomic summary-before-body-delete", "Profile grants and scope permissions", "Store schema and transactions", "Model/weights/context/summary validation"],
+  "limitations": ["A new worker process starts without the previous RAM cooldown", "Cooldown is worker-wide and can postpone unrelated idle summaries up to 60 seconds", "No malformed summary is adopted and no source body is removed by retry scheduling", "No actual model or production acceptance claimed"],
+  "actual_devices_models_services_private_databases_accessed": false,
+  "production_modified": false
+}

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xd:component xmlns:xd="http://www.xilinx.com/xd" xd:vendor="xilinx.com" xd:library="xd" xd:name="dr" xd:version="1.00" xd:type="design">
+    <xd:repository>
+    <xd:file xd:name="xd_ip_db.xml"/>
+  </xd:repository>
+    <xd:instance xd:name="kv260_ispMipiRx_vcu_DP" xd:componentRef="kv260_ispMipiRx_vcu_DP">
+    <xd:clock xd:name="PS_0_saxihpc1_fpd_aclk" xd:frequency="300000000" xd:tolerance="15000000"/>
+    <xd:clock xd:name="PS_0_saxihp1_fpd_aclk" xd:frequency="300000000" xd:tolerance="15000000"/>
+    <xd:clock xd:name="PS_0_saxihp3_fpd_aclk" xd:frequency="300000000" xd:tolerance="15000000"/>
+  </xd:instance>
+    <xd:instance xd:name="DPUCZDX8G_1" xd:componentRef="DPUCZDX8G">
+    <xd:clock xd:name="aclk" xd:frequency="300000000" xd:tolerance="15000000"/>
+    <xd:clock xd:name="ap_clk_2" xd:frequency="600000000" xd:tolerance="30000000"/>
+  </xd:instance>
+    <xd:instance xd:name="axi_ic_PS_0_S_AXI_HPC1_FPD" xd:componentRef="axi_interconnect">
+    <xd:parameter xd:name="NUM_MI" xd:value="1"/>
+    <xd:parameter xd:name="NUM_SI" xd:value="1"/>
+    <xd:parameter xd:name="M00_HAS_REGSLICE" xd:value="0"/>
+    <xd:parameter xd:name="S00_HAS_REGSLICE" xd:value="0"/>
+  </xd:instance>
+    <xd:instance xd:name="axi_ic_PS_0_S_AXI_HP1_FPD" xd:componentRef="axi_interconnect">
+    <xd:parameter xd:name="NUM_MI" xd:value="1"/>
+    <xd:parameter xd:name="NUM_SI" xd:value="1"/>
+    <xd:parameter xd:name="M00_HAS_REGSLICE" xd:value="0"/>
+    <xd:parameter xd:name="S00_HAS_REGSLICE" xd:value="0"/>
+  </xd:instance>
+    <xd:instance xd:name="axi_ic_PS_0_S_AXI_HP3_FPD" xd:componentRef="axi_interconnect">
+    <xd:parameter xd:name="NUM_MI" xd:value="1"/>
+    <xd:parameter xd:name="NUM_SI" xd:value="1"/>
+    <xd:parameter xd:name="M00_HAS_REGSLICE" xd:value="0"/>
+    <xd:parameter xd:name="S00_HAS_REGSLICE" xd:value="0"/>
+  </xd:instance>
+    <xd:instance xd:name="PS_0_pl_ps_irq0_1_interrupt_concat" xd:componentRef="xlconcat">
+    <xd:parameter xd:name="NUM_PORTS" xd:value="7"/>
+  </xd:instance>
+    <xd:instance xd:name="irq_const_tieoff" xd:componentRef="xlconstant">
+    <xd:parameter xd:name="CONST_WIDTH" xd:value="1"/>
+    <xd:parameter xd:name="CONST_VAL" xd:value="0"/>
+  </xd:instance>
+    <xd:connection>
+    <xd:busInterface xd:name="M00_AXI" xd:instanceRef="axi_ic_PS_0_S_AXI_HPC1_FPD"/>
+    <xd:busInterface xd:name="PS_0_S_AXI_HPC1_FPD" xd:instanceRef="kv260_ispMipiRx_vcu_DP"/>
+  </xd:connection>
+    <xd:connection>
+    <xd:busInterface xd:name="M00_AXI" xd:instanceRef="axi_ic_PS_0_S_AXI_HP1_FPD"/>
+    <xd:busInterface xd:name="PS_0_S_AXI_HP1_FPD" xd:instanceRef="kv260_ispMipiRx_vcu_DP"/>
+  </xd:connection>
+    <xd:connection>
+    <xd:busInterface xd:name="M00_AXI" xd:instanceRef="axi_ic_PS_0_S_AXI_HP3_FPD"/>
+    <xd:busInterface xd:name="PS_0_S_AXI_HP3_FPD" xd:instanceRef="kv260_ispMipiRx_vcu_DP"/>
+  </xd:connection>
+    <xd:connection>
+    <xd:busInterface xd:name="axi_ic_accel_ctrl_M01_AXI" xd:instanceRef="kv260_ispMipiRx_vcu_DP"/>
+    <xd:busInterface xd:name="S_AXI_CONTROL" xd:instanceRef="DPUCZDX8G_1"/>
+  </xd:connection>
+    <xd:connection>
+    <xd:busInterface xd:name="M_AXI_GP0" xd:instanceRef="DPUCZDX8G_1"/>
+    <xd:busInterface xd:name="S00_AXI" xd:instanceRef="axi_ic_PS_0_S_AXI_HPC1_FPD"/>
+  </xd:connection>
+    <xd:connection>
+    <xd:busInterface xd:name="M_AXI_HP0" xd:instanceRef="DPUCZDX8G_1"/>
+    <xd:busInterface xd:name="S00_AXI" xd:instanceRef="axi_ic_PS_0_S_AXI_HP1_FPD"/>
+  </xd:connection>
+    <xd:connection>
+    <xd:busInterface xd:name="M_AXI_HP2" xd:instanceRef="DPUCZDX8G_1"/>
+    <xd:busInterface xd:name="S00_AXI" xd:instanceRef="axi_ic_PS_0_S_AXI_HP3_FPD"/>
+  </xd:connection>
+    <xd:connection>
+    <xd:port xd:name="dout" xd:instanceRef="PS_0_pl_ps_irq0_1_interrupt_concat"/>
+    <xd:port xd:name="PS_0_pl_ps_irq0_1" xd:instanceRef="kv260_ispMipiRx_vcu_DP"/>
+  </xd:connection>
+    <xd:connection>
+    <xd:port xd:name="interrupt" xd:instanceRef="DPUCZDX8G_1"/>
+    <xd:port xd:name="In1" xd:instanceRef="PS_0_pl_ps_irq0_1_interrupt_concat"/>
+  </xd:connection>
+    <xd:connection>
+    <xd:port xd:name="dout" xd:instanceRef="irq_const_tieoff"/>
+    <xd:port xd:name="In0" xd:instanceRef="PS_0_pl_ps_irq0_1_interrupt_concat"/>
+    <xd:port xd:name="In2" xd:instanceRef="PS_0_pl_ps_irq0_1_interrupt_concat"/>
+    <xd:port xd:name="In3" xd:instanceRef="PS_0_pl_ps_irq0_1_interrupt_concat"/>
+    <xd:port xd:name="In4" xd:instanceRef="PS_0_pl_ps_irq0_1_interrupt_concat"/>
+    <xd:port xd:name="In5" xd:instanceRef="PS_0_pl_ps_irq0_1_interrupt_concat"/>
+    <xd:port xd:name="In6" xd:instanceRef="PS_0_pl_ps_irq0_1_interrupt_concat"/>
+  </xd:connection>
+</xd:component>

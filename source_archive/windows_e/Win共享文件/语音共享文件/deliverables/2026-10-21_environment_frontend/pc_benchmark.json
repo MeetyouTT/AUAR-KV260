@@ -1,0 +1,4783 @@
+{
+  "date": "2026-10-21",
+  "production_changed": false,
+  "network_blocked": true,
+  "microphone_opened": false,
+  "samples": [
+    {
+      "id": "public_0",
+      "path": "D:\\AIModels\\speaker-identity\\public-samples\\spk1_snt1.wav",
+      "sha256": "2f7315ccf543b6368528b098cd895098c154f222cd55ff7b5f66b50feb383c56",
+      "seconds_used": 2.87,
+      "scope": "Upstream public test sample; not user enrollment."
+    },
+    {
+      "id": "public_1",
+      "path": "D:\\AIModels\\speaker-identity\\public-samples\\spk1_snt2.wav",
+      "sha256": "e1f125a318f4026991bf78f5c41481be0fbcf9b3b2fd72284f9824cb851c3034",
+      "seconds_used": 3.15,
+      "scope": "Upstream public test sample; not user enrollment."
+    },
+    {
+      "id": "public_2",
+      "path": "D:\\AIModels\\speaker-identity\\public-samples\\spk2_snt1.wav",
+      "sha256": "5f3f534ba99f159358c6ee2e4fb5e42b3b9399f37f4e290651405c76095f26f0",
+      "seconds_used": 2.01,
+      "scope": "Upstream public test sample; not user enrollment."
+    },
+    {
+      "id": "public_3",
+      "path": "D:\\AIModels\\speaker-identity\\public-samples\\spk2_snt2.wav",
+      "sha256": "589bcda06796c124544138d7ff40562c146be5e06c1765f2fb4d27c22d19ea8a",
+      "seconds_used": 1.76,
+      "scope": "Upstream public test sample; not user enrollment."
+    },
+    {
+      "id": "public_4",
+      "path": "E:\\Win共享文件\\语音共享文件\\aura\\models\\asr\\sherpa-onnx-paraformer-zh-2023-09-14\\test_wavs\\0.wav",
+      "sha256": "1a6bf94091d9c35e11aea5d494d05e3287b8f5c767f6de3bfd796d91b637500c",
+      "seconds_used": 5.614625,
+      "scope": "Upstream public test sample; not user enrollment."
+    },
+    {
+      "id": "public_5",
+      "path": "E:\\Win共享文件\\语音共享文件\\aura\\models\\asr\\sherpa-onnx-paraformer-zh-2023-09-14\\test_wavs\\1.wav",
+      "sha256": "d1a6d1f1a9eff2d8afea3f043bfe0a317a0ce4c4e36df1795781c83c95911bbe",
+      "seconds_used": 5.1561875,
+      "scope": "Upstream public test sample; not user enrollment."
+    },
+    {
+      "id": "public_6",
+      "path": "E:\\Win共享文件\\语音共享文件\\aura\\models\\asr\\sherpa-onnx-paraformer-zh-2023-09-14\\test_wavs\\2.wav",
+      "sha256": "064140723b8580b54d765149c7b11c3b98f352eae441a51b00176e76b7ddab16",
+      "seconds_used": 4.5274375,
+      "scope": "Upstream public test sample; not user enrollment."
+    }
+  ],
+  "cases": [
+    {
+      "name": "digital_silence",
+      "expected": "non_speech",
+      "source": "Deterministic generated stress signal, not a room recording.",
+      "seconds": 12.0,
+      "results": {
+        "energy": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.010399999155197293,
+          "feed_ms_p95": 0.012500000593718141,
+          "feed_ms_max": 0.06500000017695129,
+          "feed_real_time_factor": 0.0005405249946003702,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.258400003076531,
+          "feed_ms_p95": 0.28559999918797985,
+          "feed_ms_max": 0.7557999997516163,
+          "feed_real_time_factor": 0.008803925005243704,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.1293499990424607,
+          "feed_ms_p95": 0.15189999976428226,
+          "feed_ms_max": 0.3096000000368804,
+          "feed_real_time_factor": 0.00465381666557126,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.12730000162264332,
+          "feed_ms_p95": 0.15269999857991934,
+          "feed_ms_max": 0.32590000046184286,
+          "feed_real_time_factor": 0.004605458332055908,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "generated_white",
+      "expected": "non_speech",
+      "source": "Deterministic generated stress signal, not a room recording.",
+      "seconds": 12.0,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.18
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 600,
+          "feed_ms_median": 0.010099996870849282,
+          "feed_ms_p95": 0.015099998563528061,
+          "feed_ms_max": 0.05390000296756625,
+          "feed_real_time_factor": 0.0005480749987327727,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.2583999994385522,
+          "feed_ms_p95": 0.2936999953817576,
+          "feed_ms_max": 0.4409000030136667,
+          "feed_real_time_factor": 0.008757024999795249,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.1286999977310188,
+          "feed_ms_p95": 0.14709999959450215,
+          "feed_ms_max": 0.2983999947900884,
+          "feed_real_time_factor": 0.00458931665646863,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.12754999988828786,
+          "feed_ms_p95": 0.1674999948590994,
+          "feed_ms_max": 0.7029999978840351,
+          "feed_real_time_factor": 0.004674516675246802,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "generated_lowpass",
+      "expected": "non_speech",
+      "source": "Deterministic generated stress signal, not a room recording.",
+      "seconds": 12.0,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.18
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 600,
+          "feed_ms_median": 0.010099996870849282,
+          "feed_ms_p95": 0.013299999409355223,
+          "feed_ms_max": 0.07080000068526715,
+          "feed_real_time_factor": 0.0005356999972718768,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.25940000341506675,
+          "feed_ms_p95": 0.3355000008014031,
+          "feed_ms_max": 0.5803000021842308,
+          "feed_real_time_factor": 0.00902435834420127,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.12850000348407775,
+          "feed_ms_p95": 0.15210000128718093,
+          "feed_ms_max": 0.35940000088885427,
+          "feed_real_time_factor": 0.004640908346118522,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.12770000103046186,
+          "feed_ms_p95": 0.14859999646432698,
+          "feed_ms_max": 0.3360999980941415,
+          "feed_real_time_factor": 0.004612275001515324,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "generated_harmonic_fan_like",
+      "expected": "non_speech",
+      "source": "Deterministic generated stress signal, not a room recording.",
+      "seconds": 12.0,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.18
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 600,
+          "feed_ms_median": 0.010000003385357559,
+          "feed_ms_p95": 0.014700002793688327,
+          "feed_ms_max": 0.0427999984822236,
+          "feed_real_time_factor": 0.0005411416708132796,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.25779999850783497,
+          "feed_ms_p95": 0.33059999987017363,
+          "feed_ms_max": 0.6365999943227507,
+          "feed_real_time_factor": 0.00894854166896645,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.12989999959245324,
+          "feed_ms_p95": 0.16869999672053382,
+          "feed_ms_max": 0.47869999980321154,
+          "feed_real_time_factor": 0.004759666670603717,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.12720000086119398,
+          "feed_ms_p95": 0.1692000005277805,
+          "feed_ms_max": 0.35490000300342217,
+          "feed_real_time_factor": 0.004775191665127447,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "generated_am_rustle_like",
+      "expected": "non_speech",
+      "source": "Deterministic generated stress signal, not a room recording.",
+      "seconds": 12.0,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.32
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 600,
+          "feed_ms_median": 0.010000003385357559,
+          "feed_ms_p95": 0.023100001271814108,
+          "feed_ms_max": 0.10569999722065404,
+          "feed_real_time_factor": 0.0006045333296545626,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.25889999960782006,
+          "feed_ms_p95": 0.3369999976712279,
+          "feed_ms_max": 0.556200000573881,
+          "feed_real_time_factor": 0.009037641670147423,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.1291999979002867,
+          "feed_ms_p95": 0.1807000007829629,
+          "feed_ms_max": 0.3221000006305985,
+          "feed_real_time_factor": 0.0047808333377664285,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 600,
+          "feed_ms_median": 0.12889999925391749,
+          "feed_ms_p95": 0.156299996888265,
+          "feed_ms_max": 0.2949999980046414,
+          "feed_real_time_factor": 0.004635024997090416,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 375,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_0_clean",
+      "expected": "speech",
+      "source": "public_0",
+      "speech_interval_samples": [
+        8000,
+        53920
+      ],
+      "seconds": 4.47,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.86
+          ],
+          "segments": [
+            [
+              0.48,
+              4.04
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.018499995348975062,
+          "feed_ms_p95": 0.02909999602707103,
+          "feed_ms_max": 0.24880000273697078,
+          "feed_real_time_factor": 0.0010281165703116277,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.08
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.26059999800054356,
+          "feed_ms_p95": 0.3405999959795736,
+          "feed_ms_max": 0.5512999996426515,
+          "feed_real_time_factor": 0.009190358749510942,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 139,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.08
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.13179999950807542,
+          "feed_ms_p95": 0.17630000365898013,
+          "feed_ms_max": 0.27269999554846436,
+          "feed_real_time_factor": 0.004978520173363851,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 139,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.14
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.1314999972237274,
+          "feed_ms_p95": 0.15700000221841037,
+          "feed_ms_max": 0.3121999980066903,
+          "feed_real_time_factor": 0.004834932737253949,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 139,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_0_quiet",
+      "expected": "speech",
+      "source": "public_0",
+      "speech_interval_samples": [
+        8000,
+        53920
+      ],
+      "seconds": 4.47,
+      "results": {
+        "energy": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.009399998816661537,
+          "feed_ms_p95": 0.009999996109399945,
+          "feed_ms_max": 0.03930000093532726,
+          "feed_real_time_factor": 0.0004848206243890175,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 223,
+          "feed_ms_median": 0.2593000026536174,
+          "feed_ms_p95": 0.28899999597342685,
+          "feed_ms_max": 0.44839999463874847,
+          "feed_real_time_factor": 0.00885773540906203,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 139,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.44
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.13000000035390258,
+          "feed_ms_p95": 0.16820000018924475,
+          "feed_ms_max": 0.25379999715369195,
+          "feed_real_time_factor": 0.004754103140395464,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 139,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.24
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.12959999730810523,
+          "feed_ms_p95": 0.1480999999330379,
+          "feed_ms_max": 0.27740000223275274,
+          "feed_real_time_factor": 0.004653856513571232,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 139,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_0_fan_like_snr5",
+      "expected": "speech",
+      "source": "public_0",
+      "speech_interval_samples": [
+        8000,
+        53920
+      ],
+      "seconds": 4.47,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              4.08
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.009999996109399945,
+          "feed_ms_p95": 0.013299999409355223,
+          "feed_ms_max": 0.16239999968092889,
+          "feed_real_time_factor": 0.0005581838537802118,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.08
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.2609000002848916,
+          "feed_ms_p95": 0.28620000375667587,
+          "feed_ms_max": 0.4724000027636066,
+          "feed_real_time_factor": 0.008943116598665472,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 139,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.08
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.12989999959245324,
+          "feed_ms_p95": 0.15690000145696104,
+          "feed_ms_max": 0.3090999962296337,
+          "feed_real_time_factor": 0.004712533607524026,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 139,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.12
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.12799999967683107,
+          "feed_ms_p95": 0.14240000018617138,
+          "feed_ms_max": 0.26530000468483195,
+          "feed_real_time_factor": 0.004560582957339093,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 139,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_0_fan_like_snr0",
+      "expected": "speech",
+      "source": "public_0",
+      "speech_interval_samples": [
+        8000,
+        53920
+      ],
+      "seconds": 4.47,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              4.08
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.010000003385357559,
+          "feed_ms_p95": 0.013700002455152571,
+          "feed_ms_max": 0.2282999994349666,
+          "feed_real_time_factor": 0.0005769058389222717,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.08
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.2584999965620227,
+          "feed_ms_p95": 0.33310000435449183,
+          "feed_ms_max": 0.4966000051354058,
+          "feed_real_time_factor": 0.009031883418594483,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 139,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.08
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.13179999950807542,
+          "feed_ms_p95": 0.17210000078193843,
+          "feed_ms_max": 0.28790000214939937,
+          "feed_real_time_factor": 0.004896569524363369,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 139,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.12
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 223,
+          "feed_ms_median": 0.12820000119972974,
+          "feed_ms_p95": 0.14910000027157366,
+          "feed_ms_max": 0.2796000044327229,
+          "feed_real_time_factor": 0.004568026914530655,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 139,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_1_clean",
+      "expected": "speech",
+      "source": "public_1",
+      "speech_interval_samples": [
+        8000,
+        58400
+      ],
+      "seconds": 4.75,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              4.26
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.010399999155197293,
+          "feed_ms_p95": 0.018500002624932677,
+          "feed_ms_max": 0.28160000510979444,
+          "feed_real_time_factor": 0.0006507172963713622,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.34
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.2592000018921681,
+          "feed_ms_p95": 0.3285000057076104,
+          "feed_ms_max": 0.5960999988019466,
+          "feed_real_time_factor": 0.009036835439366639,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 148,
+            "pending_samples": 64,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.34
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.1295000038226135,
+          "feed_ms_p95": 0.1812999980757013,
+          "feed_ms_max": 0.32749999809311703,
+          "feed_real_time_factor": 0.004849071760700214,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 148,
+            "pending_samples": 64,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.78
+          ],
+          "segments": [
+            [
+              0.4,
+              4.36
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.12790000619133934,
+          "feed_ms_p95": 0.16360000154236332,
+          "feed_ms_max": 0.28220000240253285,
+          "feed_real_time_factor": 0.004712510549459402,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 148,
+            "pending_samples": 64,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_1_quiet",
+      "expected": "speech",
+      "source": "public_1",
+      "speech_interval_samples": [
+        8000,
+        58400
+      ],
+      "seconds": 4.75,
+      "results": {
+        "energy": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.00960000033956021,
+          "feed_ms_p95": 0.01069999416358769,
+          "feed_ms_max": 0.04189999890513718,
+          "feed_real_time_factor": 0.0004916877560965906,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.8
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 237,
+          "feed_ms_median": 0.2598000064608641,
+          "feed_ms_p95": 0.4279000058886595,
+          "feed_ms_max": 0.6643999950028956,
+          "feed_real_time_factor": 0.009452869194262083,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 148,
+            "pending_samples": 64,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.8
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 237,
+          "feed_ms_median": 0.12889999925391749,
+          "feed_ms_p95": 0.14519999967887998,
+          "feed_ms_max": 0.30300000071292743,
+          "feed_real_time_factor": 0.004583438799138385,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 148,
+            "pending_samples": 64,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.78
+          ],
+          "segments": [
+            [
+              0.4,
+              4.36
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.12939999578520656,
+          "feed_ms_p95": 0.1688999982434325,
+          "feed_ms_max": 0.2787000048556365,
+          "feed_real_time_factor": 0.004784556958954074,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 148,
+            "pending_samples": 64,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_1_fan_like_snr5",
+      "expected": "speech",
+      "source": "public_1",
+      "speech_interval_samples": [
+        8000,
+        58400
+      ],
+      "seconds": 4.75,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              4.36
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.009999996109399945,
+          "feed_ms_p95": 0.012399999832268804,
+          "feed_ms_max": 0.19810000230791047,
+          "feed_real_time_factor": 0.0005597046389537254,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.52
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.26330000400776044,
+          "feed_ms_p95": 0.3388999975868501,
+          "feed_ms_max": 0.5710999976145104,
+          "feed_real_time_factor": 0.009197573847272964,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 148,
+            "pending_samples": 64,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.52
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.12989999959245324,
+          "feed_ms_p95": 0.1646999953663908,
+          "feed_ms_max": 0.30929999775253236,
+          "feed_real_time_factor": 0.004806856544101847,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 148,
+            "pending_samples": 64,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.78
+          ],
+          "segments": [
+            [
+              0.4,
+              4.36
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.13210000179242343,
+          "feed_ms_p95": 0.16500000492669642,
+          "feed_ms_max": 0.3074999985983595,
+          "feed_real_time_factor": 0.004830421940182858,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 148,
+            "pending_samples": 64,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_1_fan_like_snr0",
+      "expected": "speech",
+      "source": "public_1",
+      "speech_interval_samples": [
+        8000,
+        58400
+      ],
+      "seconds": 4.75,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              4.36
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.010399999155197293,
+          "feed_ms_p95": 0.020699997548945248,
+          "feed_ms_max": 0.33910000638570637,
+          "feed_real_time_factor": 0.0006940928255875874,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.36
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.2583999958005734,
+          "feed_ms_p95": 0.37600000359816477,
+          "feed_ms_max": 0.5527999965124764,
+          "feed_real_time_factor": 0.009221856540718847,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 148,
+            "pending_samples": 64,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              4.36
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.12989999959245324,
+          "feed_ms_p95": 0.16089999553514645,
+          "feed_ms_max": 0.33039999834727496,
+          "feed_real_time_factor": 0.004776561175810001,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 148,
+            "pending_samples": 64,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.8
+          ],
+          "segments": [
+            [
+              0.42,
+              4.36
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 237,
+          "feed_ms_median": 0.12939999578520656,
+          "feed_ms_p95": 0.15010000061010942,
+          "feed_ms_max": 0.2764999953797087,
+          "feed_real_time_factor": 0.004698502108354498,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 148,
+            "pending_samples": 64,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_2_clean",
+      "expected": "speech",
+      "source": "public_2",
+      "speech_interval_samples": [
+        8000,
+        40160
+      ],
+      "seconds": 3.61,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              2.9
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.009900002623908222,
+          "feed_ms_p95": 0.013199998647905886,
+          "feed_ms_max": 0.1832999987527728,
+          "feed_real_time_factor": 0.0005685833315914755,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              3.06
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.25970000206143595,
+          "feed_ms_p95": 0.2893999990192242,
+          "feed_ms_max": 0.5261999976937659,
+          "feed_real_time_factor": 0.009061027792793337,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 112,
+            "pending_samples": 256,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              3.08
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.12909999713883735,
+          "feed_ms_p95": 0.14650000230176374,
+          "feed_ms_max": 0.2778000052785501,
+          "feed_real_time_factor": 0.004612611096995857,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 112,
+            "pending_samples": 256,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              3.12
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.12915000115754083,
+          "feed_ms_p95": 0.19630000315373763,
+          "feed_ms_max": 0.32759999885456637,
+          "feed_real_time_factor": 0.005036305544005397,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 112,
+            "pending_samples": 256,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_2_quiet",
+      "expected": "speech",
+      "source": "public_2",
+      "speech_interval_samples": [
+        8000,
+        40160
+      ],
+      "seconds": 3.61,
+      "results": {
+        "energy": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.009499999578110874,
+          "feed_ms_p95": 0.010100004146806896,
+          "feed_ms_max": 0.03730000025825575,
+          "feed_real_time_factor": 0.0004901944339508191,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.88
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 180,
+          "feed_ms_median": 0.2588499955891166,
+          "feed_ms_p95": 0.28989999555051327,
+          "feed_ms_max": 0.4335999983595684,
+          "feed_real_time_factor": 0.00878547221671195,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 112,
+            "pending_samples": 256,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 180,
+          "feed_ms_median": 0.12955000056535937,
+          "feed_ms_p95": 0.14620000001741573,
+          "feed_ms_max": 0.22950000129640102,
+          "feed_real_time_factor": 0.004581027761661163,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 112,
+            "pending_samples": 256,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              3.12
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.13250000483822078,
+          "feed_ms_p95": 0.17809999553719535,
+          "feed_ms_max": 0.3141000051982701,
+          "feed_real_time_factor": 0.005242833313887887,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 112,
+            "pending_samples": 256,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_2_fan_like_snr5",
+      "expected": "speech",
+      "source": "public_2",
+      "speech_interval_samples": [
+        8000,
+        40160
+      ],
+      "seconds": 3.61,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              3.22
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.009899995347950608,
+          "feed_ms_p95": 0.015300000086426735,
+          "feed_ms_max": 0.13329999637790024,
+          "feed_real_time_factor": 0.0005573888908353789,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              3.22
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.2629000009619631,
+          "feed_ms_p95": 0.3305000063846819,
+          "feed_ms_max": 0.5143000016687438,
+          "feed_real_time_factor": 0.009166805543322375,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 112,
+            "pending_samples": 256,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              3.22
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.13005000073462725,
+          "feed_ms_p95": 0.1725999973132275,
+          "feed_ms_max": 0.31200000375974923,
+          "feed_real_time_factor": 0.004852416659559822,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 112,
+            "pending_samples": 256,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.78
+          ],
+          "segments": [
+            [
+              0.4,
+              3.08
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.12844999582739547,
+          "feed_ms_p95": 0.1497999983257614,
+          "feed_ms_max": 0.2705000006244518,
+          "feed_real_time_factor": 0.004618388864198803,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 112,
+            "pending_samples": 256,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_2_fan_like_snr0",
+      "expected": "speech",
+      "source": "public_2",
+      "speech_interval_samples": [
+        8000,
+        40160
+      ],
+      "seconds": 3.61,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              3.22
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.009900002623908222,
+          "feed_ms_p95": 0.012699994840659201,
+          "feed_ms_max": 0.1505999971413985,
+          "feed_real_time_factor": 0.0005578888986848243,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              3.16
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.25924999863491394,
+          "feed_ms_p95": 0.30870000045979396,
+          "feed_ms_max": 0.9894000031636097,
+          "feed_real_time_factor": 0.009064250007213559,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 112,
+            "pending_samples": 256,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              3.16
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.1296500013268087,
+          "feed_ms_p95": 0.16540000069653615,
+          "feed_ms_max": 0.25779999850783497,
+          "feed_real_time_factor": 0.00476169444785531,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 112,
+            "pending_samples": 256,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.8
+          ],
+          "segments": [
+            [
+              0.42,
+              3.08
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 180,
+          "feed_ms_median": 0.13039999976172112,
+          "feed_ms_p95": 0.16789999790489674,
+          "feed_ms_max": 0.2779000060399994,
+          "feed_real_time_factor": 0.004809361099533917,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 112,
+            "pending_samples": 256,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_3_clean",
+      "expected": "speech",
+      "source": "public_3",
+      "speech_interval_samples": [
+        8000,
+        36160
+      ],
+      "seconds": 3.36,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.94
+          ],
+          "segments": [
+            [
+              0.56,
+              2.76
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.009800001862458885,
+          "feed_ms_p95": 0.011100004485342652,
+          "feed_ms_max": 0.13919999764766544,
+          "feed_real_time_factor": 0.0005475595311768952,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              2.84
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.2596499980427325,
+          "feed_ms_p95": 0.341799997841008,
+          "feed_ms_max": 0.48489999608136714,
+          "feed_real_time_factor": 0.009303065477676379,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 105,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              2.84
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.12940000306116417,
+          "feed_ms_p95": 0.16289999621221796,
+          "feed_ms_max": 0.44889999844599515,
+          "feed_real_time_factor": 0.004762648809663092,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 105,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              2.9
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.12845000310335308,
+          "feed_ms_p95": 0.16429999959655106,
+          "feed_ms_max": 0.26369999977760017,
+          "feed_real_time_factor": 0.004772797607680938,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 105,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_3_quiet",
+      "expected": "speech",
+      "source": "public_3",
+      "speech_interval_samples": [
+        8000,
+        36160
+      ],
+      "seconds": 3.36,
+      "results": {
+        "energy": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.009499999578110874,
+          "feed_ms_p95": 0.010099996870849282,
+          "feed_ms_max": 0.039399994420818985,
+          "feed_real_time_factor": 0.0004886309441298224,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              3.24
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.26315000286558643,
+          "feed_ms_p95": 0.30300000071292743,
+          "feed_ms_max": 0.49160000344272703,
+          "feed_real_time_factor": 0.00908017858645984,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 105,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              3.24
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.12975000208825804,
+          "feed_ms_p95": 0.20519999816315249,
+          "feed_ms_max": 0.2596000049379654,
+          "feed_real_time_factor": 0.0049795535601116995,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 105,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              2.9
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.12969999806955457,
+          "feed_ms_p95": 0.16850000247359276,
+          "feed_ms_max": 0.3205999964848161,
+          "feed_real_time_factor": 0.004851696409483945,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 105,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_3_fan_like_snr5",
+      "expected": "speech",
+      "source": "public_3",
+      "speech_interval_samples": [
+        8000,
+        36160
+      ],
+      "seconds": 3.36,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              2.96
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.01069999416358769,
+          "feed_ms_p95": 0.013900003978051245,
+          "feed_ms_max": 0.1759999940986745,
+          "feed_real_time_factor": 0.0006292559581717276,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              2.96
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.26479999723960645,
+          "feed_ms_p95": 0.30330000299727544,
+          "feed_ms_max": 0.46999999904073775,
+          "feed_real_time_factor": 0.009084553563471195,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 105,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              2.96
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.1282499979424756,
+          "feed_ms_p95": 0.1632999992580153,
+          "feed_ms_max": 0.24869999469956383,
+          "feed_real_time_factor": 0.004672470216367704,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 105,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              2.9
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.13314999887370504,
+          "feed_ms_p95": 0.15219999477267265,
+          "feed_ms_max": 0.33660000190138817,
+          "feed_real_time_factor": 0.0048688392932187225,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 105,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_3_fan_like_snr0",
+      "expected": "speech",
+      "source": "public_3",
+      "speech_interval_samples": [
+        8000,
+        36160
+      ],
+      "seconds": 3.36,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              2.96
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.010299998393747956,
+          "feed_ms_p95": 0.013800003216601908,
+          "feed_ms_max": 0.094600000011269,
+          "feed_real_time_factor": 0.000563005988581045,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              2.92
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.2599500003270805,
+          "feed_ms_p95": 0.4358000005595386,
+          "feed_ms_max": 0.60710000252584,
+          "feed_real_time_factor": 0.00998866073911943,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 105,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.72
+          ],
+          "segments": [
+            [
+              0.34,
+              2.96
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.12929999866173603,
+          "feed_ms_p95": 0.1647000026423484,
+          "feed_ms_max": 0.30949999927543104,
+          "feed_real_time_factor": 0.004779553563864846,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 105,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.78
+          ],
+          "segments": [
+            [
+              0.4,
+              2.9
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 168,
+          "feed_ms_median": 0.12870000136899762,
+          "feed_ms_p95": 0.1453000004403293,
+          "feed_ms_max": 0.2775999964796938,
+          "feed_real_time_factor": 0.004606607145823156,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 105,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_4_clean",
+      "expected": "speech",
+      "source": "public_4",
+      "speech_interval_samples": [
+        8000,
+        97834
+      ],
+      "seconds": 7.214625,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            1.02
+          ],
+          "segments": [
+            [
+              0.64,
+              6.82
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.009899995347950608,
+          "feed_ms_p95": 0.014699995517730713,
+          "feed_ms_max": 0.3084999989368953,
+          "feed_real_time_factor": 0.0005645000096087137,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            1.04
+          ],
+          "segments": [
+            [
+              0.66,
+              6.16
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.25860000096145086,
+          "feed_ms_p95": 0.3088000012212433,
+          "feed_ms_max": 0.5247000008239411,
+          "feed_real_time_factor": 0.008955930556516655,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 225,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            1.04
+          ],
+          "segments": [
+            [
+              0.66,
+              6.2
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.12955000056535937,
+          "feed_ms_p95": 0.16709999908925965,
+          "feed_ms_max": 0.3177999969921075,
+          "feed_real_time_factor": 0.0047711111215499435,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 225,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            1.04
+          ],
+          "segments": [
+            [
+              0.66,
+              6.22
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.12790000255336054,
+          "feed_ms_p95": 0.15870000061113387,
+          "feed_ms_max": 0.4050999996252358,
+          "feed_real_time_factor": 0.004685291662301299,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 225,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_4_quiet",
+      "expected": "speech",
+      "source": "public_4",
+      "speech_interval_samples": [
+        8000,
+        97834
+      ],
+      "seconds": 7.214625,
+      "results": {
+        "energy": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.009400006092619151,
+          "feed_ms_p95": 0.01219999830937013,
+          "feed_ms_max": 0.05129999772179872,
+          "feed_real_time_factor": 0.0005096111049675124,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            1.36
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 360,
+          "feed_ms_median": 0.2597499988041818,
+          "feed_ms_p95": 0.34360000427113846,
+          "feed_ms_max": 0.5224000051384792,
+          "feed_real_time_factor": 0.00901101389798795,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 225,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            1.04
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 360,
+          "feed_ms_median": 0.1283999990846496,
+          "feed_ms_p95": 0.15139999595703557,
+          "feed_ms_max": 0.28360000578686595,
+          "feed_real_time_factor": 0.004615666674807371,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 225,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            1.06
+          ],
+          "segments": [
+            [
+              0.68,
+              6.32
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.13194999701227061,
+          "feed_ms_p95": 0.1612999985809438,
+          "feed_ms_max": 0.5182000022614375,
+          "feed_real_time_factor": 0.004823319446182318,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 225,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_4_fan_like_snr5",
+      "expected": "speech",
+      "source": "public_4",
+      "speech_interval_samples": [
+        8000,
+        97834
+      ],
+      "seconds": 7.214625,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              6.82
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.009800001862458885,
+          "feed_ms_p95": 0.012700002116616815,
+          "feed_ms_max": 0.2592000018921681,
+          "feed_real_time_factor": 0.0005501111182739907,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              6.84
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.2612999996927101,
+          "feed_ms_p95": 0.2884999994421378,
+          "feed_ms_max": 0.46209999709390104,
+          "feed_real_time_factor": 0.008912638887623971,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 225,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              6.9
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.12954999692738056,
+          "feed_ms_p95": 0.1475000026402995,
+          "feed_ms_max": 0.31429999944521114,
+          "feed_real_time_factor": 0.004616319449471323,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 225,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            1.32
+          ],
+          "segments": [
+            [
+              0.94,
+              6.22
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.1286999977310188,
+          "feed_ms_p95": 0.170599996636156,
+          "feed_ms_max": 0.3802999999606982,
+          "feed_real_time_factor": 0.004773388888376455,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 225,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_4_fan_like_snr0",
+      "expected": "speech",
+      "source": "public_4",
+      "speech_interval_samples": [
+        8000,
+        97834
+      ],
+      "seconds": 7.214625,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              6.82
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.009900002623908222,
+          "feed_ms_p95": 0.012200005585327744,
+          "feed_ms_max": 0.24330000451300293,
+          "feed_real_time_factor": 0.0005486388989892374,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            1.28
+          ],
+          "segments": [
+            [
+              0.9,
+              6.26
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.2609000002848916,
+          "feed_ms_p95": 0.33059999987017363,
+          "feed_ms_max": 0.5986000032862648,
+          "feed_real_time_factor": 0.009116569451887498,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 225,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            1.28
+          ],
+          "segments": [
+            [
+              0.9,
+              6.26
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.12884999887319282,
+          "feed_ms_p95": 0.1686000032350421,
+          "feed_ms_max": 0.33350000012433156,
+          "feed_real_time_factor": 0.004728763895198224,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 225,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            1.38
+          ],
+          "segments": [
+            [
+              1.0,
+              5.88
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 360,
+          "feed_ms_median": 0.12740000238409266,
+          "feed_ms_p95": 0.14989999908721074,
+          "feed_ms_max": 0.262100002146326,
+          "feed_real_time_factor": 0.004589847228797023,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 225,
+            "pending_samples": 0,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_5_clean",
+      "expected": "speech",
+      "source": "public_5",
+      "speech_interval_samples": [
+        8000,
+        90499
+      ],
+      "seconds": 6.7561875,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.86
+          ],
+          "segments": [
+            [
+              0.48,
+              6.36
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.010000003385357559,
+          "feed_ms_p95": 0.014999997802078724,
+          "feed_ms_max": 0.30639999749837443,
+          "feed_real_time_factor": 0.0005984273084107018,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.88
+          ],
+          "segments": [
+            [
+              0.5,
+              6.52
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.2583999958005734,
+          "feed_ms_p95": 0.338099998771213,
+          "feed_ms_max": 0.6445999970310368,
+          "feed_real_time_factor": 0.009068130558351116,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 210,
+            "pending_samples": 320,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.88
+          ],
+          "segments": [
+            [
+              0.5,
+              6.1
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.1292000015382655,
+          "feed_ms_p95": 0.17050000315066427,
+          "feed_ms_max": 0.25720000121509656,
+          "feed_real_time_factor": 0.00475651334182018,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 210,
+            "pending_samples": 320,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.88
+          ],
+          "segments": [
+            [
+              0.5,
+              6.12
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.12859999696956947,
+          "feed_ms_p95": 0.1866999955382198,
+          "feed_ms_max": 0.3524999992805533,
+          "feed_real_time_factor": 0.004761364973027215,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 210,
+            "pending_samples": 320,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_5_quiet",
+      "expected": "speech",
+      "source": "public_5",
+      "speech_interval_samples": [
+        8000,
+        90499
+      ],
+      "seconds": 6.7561875,
+      "results": {
+        "energy": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.009499999578110874,
+          "feed_ms_p95": 0.011999996786471456,
+          "feed_ms_max": 0.09750000026542693,
+          "feed_real_time_factor": 0.0005208011734740151,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.88
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 337,
+          "feed_ms_median": 0.26219999563181773,
+          "feed_ms_p95": 0.2964999948744662,
+          "feed_ms_max": 0.5161000008229166,
+          "feed_real_time_factor": 0.00894587536618626,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 210,
+            "pending_samples": 320,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.88
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 337,
+          "feed_ms_median": 0.1292000015382655,
+          "feed_ms_p95": 0.14560000272467732,
+          "feed_ms_max": 0.2853999976650812,
+          "feed_real_time_factor": 0.004597062304643956,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 210,
+            "pending_samples": 320,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.88
+          ],
+          "segments": [
+            [
+              0.5,
+              6.16
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.12969999806955457,
+          "feed_ms_p95": 0.16820000018924475,
+          "feed_ms_max": 0.5138999986229464,
+          "feed_real_time_factor": 0.004892002974079994,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 210,
+            "pending_samples": 320,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_5_fan_like_snr5",
+      "expected": "speech",
+      "source": "public_5",
+      "speech_interval_samples": [
+        8000,
+        90499
+      ],
+      "seconds": 6.7561875,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              6.36
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.01049999991664663,
+          "feed_ms_p95": 0.01769999653333798,
+          "feed_ms_max": 0.2874000056181103,
+          "feed_real_time_factor": 0.0006476706203480198,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              6.48
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.25860000459942967,
+          "feed_ms_p95": 0.3328000020701438,
+          "feed_ms_max": 0.5291000052238815,
+          "feed_real_time_factor": 0.008959910986371247,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 210,
+            "pending_samples": 320,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              6.54
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.12939999578520656,
+          "feed_ms_p95": 0.15349999739555642,
+          "feed_ms_max": 0.3324999997857958,
+          "feed_real_time_factor": 0.0047033827912334614,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 210,
+            "pending_samples": 320,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.9
+          ],
+          "segments": [
+            [
+              0.52,
+              6.22
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.12900000001536682,
+          "feed_ms_p95": 0.15300000086426735,
+          "feed_ms_max": 0.3910000014002435,
+          "feed_real_time_factor": 0.004679985145648917,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 210,
+            "pending_samples": 320,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_5_fan_like_snr0",
+      "expected": "speech",
+      "source": "public_5",
+      "speech_interval_samples": [
+        8000,
+        90499
+      ],
+      "seconds": 6.7561875,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              6.36
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.009900002623908222,
+          "feed_ms_p95": 0.011099997209385037,
+          "feed_ms_max": 0.23540000256616622,
+          "feed_real_time_factor": 0.0005486350081990907,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.74,
+            5.38
+          ],
+          "segments": [
+            [
+              0.36,
+              5.14
+            ],
+            [
+              5.14,
+              6.26
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.2623999971547164,
+          "feed_ms_p95": 0.3055000051972456,
+          "feed_ms_max": 0.5221000028541312,
+          "feed_real_time_factor": 0.009086142427839674,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 210,
+            "pending_samples": 320,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.74,
+            5.38
+          ],
+          "segments": [
+            [
+              0.36,
+              5.16
+            ],
+            [
+              5.16,
+              6.26
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.12969999806955457,
+          "feed_ms_p95": 0.15049999637994915,
+          "feed_ms_max": 0.4317999992053956,
+          "feed_real_time_factor": 0.004716795249398209,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 210,
+            "pending_samples": 320,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            1.7,
+            2.88
+          ],
+          "segments": [
+            [
+              1.32,
+              2.64
+            ],
+            [
+              2.64,
+              6.16
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 337,
+          "feed_ms_median": 0.12799999967683107,
+          "feed_ms_p95": 0.15970000094966963,
+          "feed_ms_max": 0.2734000008786097,
+          "feed_real_time_factor": 0.004612596454718896,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 210,
+            "pending_samples": 320,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_6_clean",
+      "expected": "speech",
+      "source": "public_6",
+      "speech_interval_samples": [
+        8000,
+        80439
+      ],
+      "seconds": 6.1274375,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            1.02
+          ],
+          "segments": [
+            [
+              0.64,
+              5.74
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.009900002623908222,
+          "feed_ms_p95": 0.013899996702093631,
+          "feed_ms_max": 0.25460000324528664,
+          "feed_real_time_factor": 0.0005646405268968022,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            1.1
+          ],
+          "segments": [
+            [
+              0.72,
+              5.42
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.2582000015536323,
+          "feed_ms_p95": 0.3104999996139668,
+          "feed_ms_max": 0.5657000001519918,
+          "feed_real_time_factor": 0.008879673216998688,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 191,
+            "pending_samples": 128,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            1.1
+          ],
+          "segments": [
+            [
+              0.72,
+              5.42
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.12799999967683107,
+          "feed_ms_p95": 0.16460000188089907,
+          "feed_ms_max": 0.411000000895001,
+          "feed_real_time_factor": 0.004667385613121202,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 191,
+            "pending_samples": 128,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            1.04
+          ],
+          "segments": [
+            [
+              0.66,
+              5.42
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.12695000259554945,
+          "feed_ms_p95": 0.14090000331634656,
+          "feed_ms_max": 0.37209999572951347,
+          "feed_real_time_factor": 0.004531127443543583,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 191,
+            "pending_samples": 128,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_6_quiet",
+      "expected": "speech",
+      "source": "public_6",
+      "speech_interval_samples": [
+        8000,
+        80439
+      ],
+      "seconds": 6.1274375,
+      "results": {
+        "energy": {
+          "speech_starts": [],
+          "segments": [],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.011399999493733048,
+          "feed_ms_p95": 0.01200000406242907,
+          "feed_ms_max": 0.05339999916031957,
+          "feed_real_time_factor": 0.0005366830021623078,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            1.12
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 306,
+          "feed_ms_median": 0.26015000184997916,
+          "feed_ms_p95": 0.2934000003733672,
+          "feed_ms_max": 0.4495000030146912,
+          "feed_real_time_factor": 0.008849248363915298,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 191,
+            "pending_samples": 128,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            1.1
+          ],
+          "segments": [],
+          "still_active_at_end": true,
+          "calls": 306,
+          "feed_ms_median": 0.12955000056535937,
+          "feed_ms_p95": 0.15129999519558623,
+          "feed_ms_max": 0.22929999977350235,
+          "feed_real_time_factor": 0.004590898685159581,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 191,
+            "pending_samples": 128,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            1.1
+          ],
+          "segments": [
+            [
+              0.72,
+              5.46
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.13485000090440735,
+          "feed_ms_p95": 0.20569999469444156,
+          "feed_ms_max": 0.3412999940337613,
+          "feed_real_time_factor": 0.0054011110930088785,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 191,
+            "pending_samples": 128,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_6_fan_like_snr5",
+      "expected": "speech",
+      "source": "public_6",
+      "speech_interval_samples": [
+        8000,
+        80439
+      ],
+      "seconds": 6.1274375,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              5.74
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.01005000012810342,
+          "feed_ms_p95": 0.017400001524947584,
+          "feed_ms_max": 0.37310000334400684,
+          "feed_real_time_factor": 0.0006138071827449702,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              6.04
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.26079999952344224,
+          "feed_ms_p95": 0.3228999994462356,
+          "feed_ms_max": 0.5548999979509972,
+          "feed_real_time_factor": 0.009080310454105144,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 191,
+            "pending_samples": 128,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.74
+          ],
+          "segments": [
+            [
+              0.36,
+              6.04
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.1320000010309741,
+          "feed_ms_p95": 0.17700000171316788,
+          "feed_ms_max": 0.26339999749325216,
+          "feed_real_time_factor": 0.00491598039409724,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 191,
+            "pending_samples": 128,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            1.1
+          ],
+          "segments": [
+            [
+              0.72,
+              5.56
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.1303000026382506,
+          "feed_ms_p95": 0.16700000560376793,
+          "feed_ms_max": 0.29720000020461157,
+          "feed_real_time_factor": 0.0047569607797377815,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 191,
+            "pending_samples": 128,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "public_6_fan_like_snr0",
+      "expected": "speech",
+      "source": "public_6",
+      "speech_interval_samples": [
+        8000,
+        80439
+      ],
+      "seconds": 6.1274375,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.68
+          ],
+          "segments": [
+            [
+              0.3,
+              5.74
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.010100004146806896,
+          "feed_ms_p95": 0.013299999409355223,
+          "feed_ms_max": 0.2607000060379505,
+          "feed_real_time_factor": 0.0006134150335960869,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            1.1
+          ],
+          "segments": [
+            [
+              0.72,
+              5.74
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.2663999985088594,
+          "feed_ms_p95": 0.31630000012228265,
+          "feed_ms_max": 0.5576999974437058,
+          "feed_real_time_factor": 0.00916173200785362,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 191,
+            "pending_samples": 128,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            1.1
+          ],
+          "segments": [
+            [
+              0.72,
+              5.74
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.12930000229971483,
+          "feed_ms_p95": 0.14930000179447234,
+          "feed_ms_max": 0.38689999928465113,
+          "feed_real_time_factor": 0.0046942646994603205,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 191,
+            "pending_samples": 128,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            1.1
+          ],
+          "segments": [
+            [
+              0.72,
+              5.56
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 306,
+          "feed_ms_median": 0.12894999963464215,
+          "feed_ms_p95": 0.17150000348920003,
+          "feed_ms_max": 0.30279999919002876,
+          "feed_real_time_factor": 0.004785833319153003,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 191,
+            "pending_samples": 128,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "upstream_speech_with_noise",
+      "expected": "speech",
+      "source": "D:\\AIModels\\audio-frontend-eval-20261021\\speech_with_noise.wav",
+      "seconds": 3.4976875,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.18
+          ],
+          "segments": [
+            [
+              0.0,
+              3.1
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 174,
+          "feed_ms_median": 0.010299998393747956,
+          "feed_ms_p95": 0.014500001270789653,
+          "feed_ms_max": 0.14099999680183828,
+          "feed_real_time_factor": 0.0005780747069993281,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.58
+          ],
+          "segments": [
+            [
+              0.2,
+              3.32
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 174,
+          "feed_ms_median": 0.26294999770470895,
+          "feed_ms_p95": 0.3463000030023977,
+          "feed_ms_max": 0.5846999993082136,
+          "feed_real_time_factor": 0.00928591953093071,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 108,
+            "pending_samples": 384,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.58
+          ],
+          "segments": [
+            [
+              0.2,
+              2.8
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 174,
+          "feed_ms_median": 0.13114999819663353,
+          "feed_ms_p95": 0.16849999519763514,
+          "feed_ms_max": 0.3388999975868501,
+          "feed_real_time_factor": 0.004843793102809704,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 108,
+            "pending_samples": 384,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.64
+          ],
+          "segments": [
+            [
+              0.26,
+              2.84
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 174,
+          "feed_ms_median": 0.13050000052317046,
+          "feed_ms_p95": 0.15980000171111897,
+          "feed_ms_max": 0.2826999989338219,
+          "feed_real_time_factor": 0.004795689691773391,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 108,
+            "pending_samples": 384,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    },
+    {
+      "name": "upstream_inp_16k",
+      "expected": "speech",
+      "source": "D:\\AIModels\\audio-frontend-eval-20261021\\inp_16k.wav",
+      "seconds": 10.868875,
+      "results": {
+        "energy": {
+          "speech_starts": [
+            0.18
+          ],
+          "segments": [
+            [
+              0.0,
+              10.48
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 543,
+          "feed_ms_median": 0.010199997632298619,
+          "feed_ms_p95": 0.017899998056236655,
+          "feed_ms_max": 0.37000000156695023,
+          "feed_real_time_factor": 0.0006257182216405968,
+          "pcm_slice_exact": true,
+          "gate": null
+        },
+        "silero_vad.int8.onnx": {
+          "speech_starts": [
+            0.78
+          ],
+          "segments": [
+            [
+              0.4,
+              10.16
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 543,
+          "feed_ms_median": 0.2615999983390793,
+          "feed_ms_p95": 0.2989999993587844,
+          "feed_ms_max": 0.6936999998288229,
+          "feed_real_time_factor": 0.009001436462730055,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-int8-k2",
+            "threshold": 0.5,
+            "windows": 339,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad.onnx": {
+          "speech_starts": [
+            0.8
+          ],
+          "segments": [
+            [
+              0.42,
+              10.16
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 543,
+          "feed_ms_median": 0.12870000500697643,
+          "feed_ms_p95": 0.16119999781949446,
+          "feed_ms_max": 0.5058000024291687,
+          "feed_real_time_factor": 0.0047481491700055774,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v4-fp32-k2",
+            "threshold": 0.5,
+            "windows": 339,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        },
+        "silero_vad_v5.onnx": {
+          "speech_starts": [
+            0.78
+          ],
+          "segments": [
+            [
+              0.4,
+              10.38
+            ]
+          ],
+          "still_active_at_end": false,
+          "calls": 543,
+          "feed_ms_median": 0.1281000004382804,
+          "feed_ms_p95": 0.15920000441838056,
+          "feed_ms_max": 0.38889999996172264,
+          "feed_real_time_factor": 0.004679198890653676,
+          "pcm_slice_exact": true,
+          "gate": {
+            "model_id": "silero-v5-k2-release",
+            "threshold": 0.5,
+            "windows": 339,
+            "pending_samples": 192,
+            "failed": false,
+            "backend": "onnxruntime-cpu-1-thread"
+          }
+        }
+      }
+    }
+  ],
+  "versions": {
+    "numpy": "2.2.6",
+    "onnxruntime": "1.23.2",
+    "sherpa-onnx": "1.13.8"
+  },
+  "limits": "Small public/generated evaluation, not room noise, television rejection, or human acceptance.",
+  "gtcrn": [
+    {
+      "name": "digital_silence",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04745516667207994,
+      "process_ms_p95": 0.9475399983784879,
+      "input_samples": 192000,
+      "output_samples": 192000,
+      "original_rms": 0.0,
+      "enhanced_rms": 0.0,
+      "silero_after": {
+        "speech_starts": [],
+        "segments": [],
+        "still_active_at_end": false,
+        "calls": 600,
+        "feed_ms_median": 0.2576500010036398,
+        "feed_ms_p95": 0.2887999944505282,
+        "feed_ms_max": 0.5627999998978339,
+        "feed_real_time_factor": 0.008778100021421173,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 375,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [],
+        "segments": [],
+        "still_active_at_end": false,
+        "calls": 600,
+        "feed_ms_median": 0.12590000551426783,
+        "feed_ms_p95": 0.1469000053475611,
+        "feed_ms_max": 0.3302999975858256,
+        "feed_real_time_factor": 0.00455344166099773,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 375,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_digital_silence.wav"
+    },
+    {
+      "name": "generated_white",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04609704998862677,
+      "process_ms_p95": 0.9068349994777235,
+      "input_samples": 192000,
+      "output_samples": 192000,
+      "original_rms": 0.030000001192092896,
+      "enhanced_rms": 0.000985102029517293,
+      "silero_after": {
+        "speech_starts": [],
+        "segments": [],
+        "still_active_at_end": false,
+        "calls": 600,
+        "feed_ms_median": 0.25579999783076346,
+        "feed_ms_p95": 0.29090000316500664,
+        "feed_ms_max": 0.5879000018467195,
+        "feed_real_time_factor": 0.00881376667287744,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 375,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [],
+        "segments": [],
+        "still_active_at_end": false,
+        "calls": 600,
+        "feed_ms_median": 0.12570000399136916,
+        "feed_ms_p95": 0.14139999984763563,
+        "feed_ms_max": 0.26480000087758526,
+        "feed_real_time_factor": 0.0044315666758241905,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 375,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_generated_white.wav"
+    },
+    {
+      "name": "generated_lowpass",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04712576667225221,
+      "process_ms_p95": 0.9551049992296611,
+      "input_samples": 192000,
+      "output_samples": 192000,
+      "original_rms": 0.030000001192092896,
+      "enhanced_rms": 0.0025225644931197166,
+      "silero_after": {
+        "speech_starts": [],
+        "segments": [],
+        "still_active_at_end": false,
+        "calls": 600,
+        "feed_ms_median": 0.25585000184946693,
+        "feed_ms_p95": 0.320700004522223,
+        "feed_ms_max": 0.5729999975301325,
+        "feed_real_time_factor": 0.008793266676851394,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 375,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [],
+        "segments": [],
+        "still_active_at_end": false,
+        "calls": 600,
+        "feed_ms_median": 0.12789999891538173,
+        "feed_ms_p95": 0.1505999971413985,
+        "feed_ms_max": 0.2879999956348911,
+        "feed_real_time_factor": 0.004604949990607565,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 375,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_generated_lowpass.wav"
+    },
+    {
+      "name": "generated_harmonic_fan_like",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04608104167346028,
+      "process_ms_p95": 0.9016050011268814,
+      "input_samples": 192000,
+      "output_samples": 192000,
+      "original_rms": 0.030000001192092896,
+      "enhanced_rms": 0.0026717940345406532,
+      "silero_after": {
+        "speech_starts": [],
+        "segments": [],
+        "still_active_at_end": false,
+        "calls": 600,
+        "feed_ms_median": 0.25649999952293,
+        "feed_ms_p95": 0.31460000172955915,
+        "feed_ms_max": 0.5155000035301782,
+        "feed_real_time_factor": 0.008862316661179648,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 375,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [],
+        "segments": [],
+        "still_active_at_end": false,
+        "calls": 600,
+        "feed_ms_median": 0.12659999629249796,
+        "feed_ms_p95": 0.17579999985173345,
+        "feed_ms_max": 0.3193000011378899,
+        "feed_real_time_factor": 0.004713591675681528,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 375,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_generated_harmonic_fan_like.wav"
+    },
+    {
+      "name": "generated_am_rustle_like",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04734394999771515,
+      "process_ms_p95": 0.9251349991245659,
+      "input_samples": 192000,
+      "output_samples": 192000,
+      "original_rms": 0.03500000014901161,
+      "enhanced_rms": 0.00031352334190160036,
+      "silero_after": {
+        "speech_starts": [],
+        "segments": [],
+        "still_active_at_end": false,
+        "calls": 600,
+        "feed_ms_median": 0.25454999922658317,
+        "feed_ms_p95": 0.3440000000409782,
+        "feed_ms_max": 0.5649000013363548,
+        "feed_real_time_factor": 0.009080191661875384,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 375,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [],
+        "segments": [],
+        "still_active_at_end": false,
+        "calls": 600,
+        "feed_ms_median": 0.12660000356845558,
+        "feed_ms_p95": 0.1469000053475611,
+        "feed_ms_max": 0.283800000033807,
+        "feed_real_time_factor": 0.004527416667163682,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 375,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_generated_am_rustle_like.wav"
+    },
+    {
+      "name": "public_4_clean",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04672191555630975,
+      "process_ms_p95": 0.9467499985476024,
+      "input_samples": 115434,
+      "output_samples": 115434,
+      "original_rms": 0.03528689965605736,
+      "enhanced_rms": 0.03456655889749527,
+      "silero_after": {
+        "speech_starts": [
+          1.04
+        ],
+        "segments": [
+          [
+            0.66,
+            6.16
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 360,
+        "feed_ms_median": 0.25570000070729293,
+        "feed_ms_p95": 0.31769999623065814,
+        "feed_ms_max": 0.5973999941488728,
+        "feed_real_time_factor": 0.00885726389949721,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 225,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          1.04
+        ],
+        "segments": [
+          [
+            0.66,
+            6.22
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 360,
+        "feed_ms_median": 0.12720000086119398,
+        "feed_ms_p95": 0.14400000509340316,
+        "feed_ms_max": 0.35600000410340726,
+        "feed_real_time_factor": 0.004546250002022134,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 225,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_public_4_clean.wav"
+    },
+    {
+      "name": "public_4_quiet",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04701780064782065,
+      "process_ms_p95": 0.947450000239769,
+      "input_samples": 115434,
+      "output_samples": 115434,
+      "original_rms": 0.0035286899656057358,
+      "enhanced_rms": 0.0033722061198204756,
+      "silero_after": {
+        "speech_starts": [
+          1.54
+        ],
+        "segments": [],
+        "still_active_at_end": true,
+        "calls": 360,
+        "feed_ms_median": 0.25734999871929176,
+        "feed_ms_p95": 0.32810000266181305,
+        "feed_ms_max": 0.4716000039479695,
+        "feed_real_time_factor": 0.008901124992917175,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 225,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          1.06
+        ],
+        "segments": [
+          [
+            0.68,
+            6.28
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 360,
+        "feed_ms_median": 0.12820000119972974,
+        "feed_ms_p95": 0.14899999951012433,
+        "feed_ms_max": 0.32529999589314684,
+        "feed_real_time_factor": 0.004674125001555594,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 225,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_public_4_quiet.wav"
+    },
+    {
+      "name": "public_4_fan_like_snr5",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04642927386702649,
+      "process_ms_p95": 0.9283500003220979,
+      "input_samples": 115434,
+      "output_samples": 115434,
+      "original_rms": 0.04098356142640114,
+      "enhanced_rms": 0.02209930308163166,
+      "silero_after": {
+        "speech_starts": [
+          1.04
+        ],
+        "segments": [
+          [
+            0.66,
+            7.0
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 360,
+        "feed_ms_median": 0.25570000070729293,
+        "feed_ms_p95": 0.3249000001233071,
+        "feed_ms_max": 0.4944000029354356,
+        "feed_real_time_factor": 0.0088977499965242,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 225,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          1.04
+        ],
+        "segments": [
+          [
+            0.66,
+            6.12
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 360,
+        "feed_ms_median": 0.1281000004382804,
+        "feed_ms_p95": 0.15500000154133886,
+        "feed_ms_max": 0.32440000359201804,
+        "feed_real_time_factor": 0.0046499027909400565,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 225,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_public_4_fan_like_snr5.wav"
+    },
+    {
+      "name": "public_4_fan_like_snr0",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.048309274550565676,
+      "process_ms_p95": 0.9925999947881792,
+      "input_samples": 115434,
+      "output_samples": 115434,
+      "original_rms": 0.050623729825019836,
+      "enhanced_rms": 0.01676112227141857,
+      "silero_after": {
+        "speech_starts": [
+          1.04
+        ],
+        "segments": [
+          [
+            0.66,
+            7.06
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 360,
+        "feed_ms_median": 0.25599999935366213,
+        "feed_ms_p95": 0.32839999767020345,
+        "feed_ms_max": 0.5383000025176443,
+        "feed_real_time_factor": 0.008963416667029378,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 225,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          1.04
+        ],
+        "segments": [
+          [
+            0.66,
+            6.06
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 360,
+        "feed_ms_median": 0.1281000004382804,
+        "feed_ms_p95": 0.1669000048423186,
+        "feed_ms_max": 0.40689999877940863,
+        "feed_real_time_factor": 0.0047408750065692905,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 225,
+          "pending_samples": 0,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_public_4_fan_like_snr0.wav"
+    },
+    {
+      "name": "public_5_clean",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.045953105932210005,
+      "process_ms_p95": 0.9034699971380178,
+      "input_samples": 108099,
+      "output_samples": 108099,
+      "original_rms": 0.034944068640470505,
+      "enhanced_rms": 0.033984191715717316,
+      "silero_after": {
+        "speech_starts": [
+          0.88
+        ],
+        "segments": [
+          [
+            0.5,
+            6.06
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 337,
+        "feed_ms_median": 0.2582000015536323,
+        "feed_ms_p95": 0.32250000367639586,
+        "feed_ms_max": 0.5004999984521419,
+        "feed_real_time_factor": 0.008929258174707185,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 210,
+          "pending_samples": 320,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          0.88
+        ],
+        "segments": [
+          [
+            0.5,
+            6.12
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 337,
+        "feed_ms_median": 0.127500003145542,
+        "feed_ms_p95": 0.1483999949414283,
+        "feed_ms_max": 0.32130000181496143,
+        "feed_real_time_factor": 0.0046412611347143,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 210,
+          "pending_samples": 320,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_public_5_clean.wav"
+    },
+    {
+      "name": "public_5_quiet",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04762697897451951,
+      "process_ms_p95": 0.946740002837032,
+      "input_samples": 108099,
+      "output_samples": 108099,
+      "original_rms": 0.0034944070503115654,
+      "enhanced_rms": 0.0032923908438533545,
+      "silero_after": {
+        "speech_starts": [
+          0.88
+        ],
+        "segments": [],
+        "still_active_at_end": true,
+        "calls": 337,
+        "feed_ms_median": 0.2567000046838075,
+        "feed_ms_p95": 0.290599993604701,
+        "feed_ms_max": 0.5237000004854053,
+        "feed_real_time_factor": 0.008808887243978693,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 210,
+          "pending_samples": 320,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          0.88
+        ],
+        "segments": [
+          [
+            0.5,
+            6.16
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 337,
+        "feed_ms_median": 0.12769999739248306,
+        "feed_ms_p95": 0.15449999773409218,
+        "feed_ms_max": 0.2982000005431473,
+        "feed_real_time_factor": 0.004636587538849355,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 210,
+          "pending_samples": 320,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_public_5_quiet.wav"
+    },
+    {
+      "name": "public_5_fan_like_snr5",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04748654473653231,
+      "process_ms_p95": 1.01120000181254,
+      "input_samples": 108099,
+      "output_samples": 108099,
+      "original_rms": 0.04070482403039932,
+      "enhanced_rms": 0.02315589040517807,
+      "silero_after": {
+        "speech_starts": [
+          0.88
+        ],
+        "segments": [
+          [
+            0.5,
+            6.6
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 337,
+        "feed_ms_median": 0.25809999351622537,
+        "feed_ms_p95": 0.32279999868478626,
+        "feed_ms_max": 0.504999996337574,
+        "feed_real_time_factor": 0.00892918396965519,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 210,
+          "pending_samples": 320,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          0.88
+        ],
+        "segments": [
+          [
+            0.5,
+            6.16
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 337,
+        "feed_ms_median": 0.13010000111535192,
+        "feed_ms_p95": 0.14589999773306772,
+        "feed_ms_max": 0.3177999969921075,
+        "feed_real_time_factor": 0.00465778931985728,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 210,
+          "pending_samples": 320,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_public_5_fan_like_snr5.wav"
+    },
+    {
+      "name": "public_5_fan_like_snr0",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04744140092973034,
+      "process_ms_p95": 0.9264000007533467,
+      "input_samples": 108099,
+      "output_samples": 108099,
+      "original_rms": 0.05030379816889763,
+      "enhanced_rms": 0.01590912602841854,
+      "silero_after": {
+        "speech_starts": [
+          0.88
+        ],
+        "segments": [
+          [
+            0.5,
+            6.74
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 337,
+        "feed_ms_median": 0.25740000273799524,
+        "feed_ms_p95": 0.3352999992785044,
+        "feed_ms_max": 0.5808999994769692,
+        "feed_real_time_factor": 0.0089975667669015,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 210,
+          "pending_samples": 320,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          0.9
+        ],
+        "segments": [
+          [
+            0.52,
+            6.16
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 337,
+        "feed_ms_median": 0.12850000348407775,
+        "feed_ms_p95": 0.15970000094966963,
+        "feed_ms_max": 0.4054000019095838,
+        "feed_real_time_factor": 0.004730593479051564,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 210,
+          "pending_samples": 320,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_public_5_fan_like_snr0.wav"
+    },
+    {
+      "name": "public_6_clean",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04607498647007908,
+      "process_ms_p95": 0.9066600010555703,
+      "input_samples": 98039,
+      "output_samples": 98039,
+      "original_rms": 0.03438323736190796,
+      "enhanced_rms": 0.03374839946627617,
+      "silero_after": {
+        "speech_starts": [
+          1.1
+        ],
+        "segments": [
+          [
+            0.72,
+            5.4
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 306,
+        "feed_ms_median": 0.25570000070729293,
+        "feed_ms_p95": 0.27769999724114314,
+        "feed_ms_max": 0.4633999997167848,
+        "feed_real_time_factor": 0.00875227123246303,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 191,
+          "pending_samples": 128,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          1.04
+        ],
+        "segments": [
+          [
+            0.66,
+            5.4
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 306,
+        "feed_ms_median": 0.12770000466844067,
+        "feed_ms_p95": 0.16590000450378284,
+        "feed_ms_max": 0.3763999993680045,
+        "feed_real_time_factor": 0.004740326810005011,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 191,
+          "pending_samples": 128,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_public_6_clean.wav"
+    },
+    {
+      "name": "public_6_quiet",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.0482616917742773,
+      "process_ms_p95": 1.0391399991931394,
+      "input_samples": 98039,
+      "output_samples": 98039,
+      "original_rms": 0.003438323736190796,
+      "enhanced_rms": 0.0033023313153535128,
+      "silero_after": {
+        "speech_starts": [
+          1.12
+        ],
+        "segments": [],
+        "still_active_at_end": true,
+        "calls": 306,
+        "feed_ms_median": 0.25660000392235816,
+        "feed_ms_p95": 0.29999999969732016,
+        "feed_ms_max": 0.46149999980116263,
+        "feed_real_time_factor": 0.0087806372534734,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 191,
+          "pending_samples": 128,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          1.06
+        ],
+        "segments": [
+          [
+            0.68,
+            5.42
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 306,
+        "feed_ms_median": 0.127500003145542,
+        "feed_ms_p95": 0.14989999908721074,
+        "feed_ms_max": 0.35930000012740493,
+        "feed_real_time_factor": 0.004616045759510693,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 191,
+          "pending_samples": 128,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_public_6_quiet.wav"
+    },
+    {
+      "name": "public_6_fan_like_snr5",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04815756995745787,
+      "process_ms_p95": 1.089899997896282,
+      "input_samples": 98039,
+      "output_samples": 98039,
+      "original_rms": 0.03890656307339668,
+      "enhanced_rms": 0.02508803829550743,
+      "silero_after": {
+        "speech_starts": [
+          1.06
+        ],
+        "segments": [
+          [
+            0.68,
+            5.4
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 306,
+        "feed_ms_median": 0.2557500010880176,
+        "feed_ms_p95": 0.3195000026607886,
+        "feed_ms_max": 0.45560000580735505,
+        "feed_real_time_factor": 0.008917352938119115,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 191,
+          "pending_samples": 128,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          1.04
+        ],
+        "segments": [
+          [
+            0.66,
+            5.42
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 306,
+        "feed_ms_median": 0.1286999977310188,
+        "feed_ms_p95": 0.18560000171419233,
+        "feed_ms_max": 0.32639999699313194,
+        "feed_real_time_factor": 0.004847794117547155,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 191,
+          "pending_samples": 128,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_public_6_fan_like_snr5.wav"
+    },
+    {
+      "name": "public_6_fan_like_snr0",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04829452767768346,
+      "process_ms_p95": 0.9934699977748094,
+      "input_samples": 98039,
+      "output_samples": 98039,
+      "original_rms": 0.04784489423036575,
+      "enhanced_rms": 0.01807709038257599,
+      "silero_after": {
+        "speech_starts": [
+          1.06
+        ],
+        "segments": [
+          [
+            0.68,
+            5.94
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 306,
+        "feed_ms_median": 0.25689999893074855,
+        "feed_ms_p95": 0.34530000266386196,
+        "feed_ms_max": 0.6599000043934211,
+        "feed_real_time_factor": 0.009142009804277906,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 191,
+          "pending_samples": 128,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          1.04
+        ],
+        "segments": [
+          [
+            0.66,
+            5.42
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 306,
+        "feed_ms_median": 0.13160000162315555,
+        "feed_ms_p95": 0.15910000365693122,
+        "feed_ms_max": 0.44350000098347664,
+        "feed_real_time_factor": 0.0048133006476431175,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 191,
+          "pending_samples": 128,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_public_6_fan_like_snr0.wav"
+    },
+    {
+      "name": "upstream_speech_with_noise",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04613239460394449,
+      "process_ms_p95": 0.9330100001534447,
+      "input_samples": 55963,
+      "output_samples": 55963,
+      "original_rms": 0.0333903469145298,
+      "enhanced_rms": 0.02116975374519825,
+      "silero_after": {
+        "speech_starts": [
+          0.62
+        ],
+        "segments": [
+          [
+            0.24,
+            2.8
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 174,
+        "feed_ms_median": 0.2590000003692694,
+        "feed_ms_p95": 0.3470999945420772,
+        "feed_ms_max": 0.5904000063310377,
+        "feed_real_time_factor": 0.00934405170378393,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 108,
+          "pending_samples": 384,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          0.58
+        ],
+        "segments": [
+          [
+            0.2,
+            2.84
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 174,
+        "feed_ms_median": 0.1280999968003016,
+        "feed_ms_p95": 0.1453000004403293,
+        "feed_ms_max": 0.2612000025692396,
+        "feed_real_time_factor": 0.004602701146618581,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 108,
+          "pending_samples": 384,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_upstream_speech_with_noise.wav"
+    },
+    {
+      "name": "upstream_inp_16k",
+      "hop_samples": 256,
+      "first_output_after_input_samples": 512,
+      "processing_rtf": 0.04691418385082977,
+      "process_ms_p95": 0.9525699988444102,
+      "input_samples": 173902,
+      "output_samples": 173902,
+      "original_rms": 0.08056223392486572,
+      "enhanced_rms": 0.060038287192583084,
+      "silero_after": {
+        "speech_starts": [
+          0.78
+        ],
+        "segments": [
+          [
+            0.4,
+            10.16
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 543,
+        "feed_ms_median": 0.2567999981692992,
+        "feed_ms_p95": 0.3409000055398792,
+        "feed_ms_max": 0.7248999972944148,
+        "feed_real_time_factor": 0.009116565369791652,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v4-int8-k2",
+          "threshold": 0.5,
+          "windows": 339,
+          "pending_samples": 192,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "silero_v5_after": {
+        "speech_starts": [
+          0.78
+        ],
+        "segments": [
+          [
+            0.4,
+            10.22
+          ]
+        ],
+        "still_active_at_end": false,
+        "calls": 543,
+        "feed_ms_median": 0.12830000196117908,
+        "feed_ms_p95": 0.16180000238819048,
+        "feed_ms_max": 0.531300000147894,
+        "feed_real_time_factor": 0.004750460398041053,
+        "pcm_slice_exact": true,
+        "gate": {
+          "model_id": "silero-v5-k2-release",
+          "threshold": 0.5,
+          "windows": 339,
+          "pending_samples": 192,
+          "failed": false,
+          "backend": "onnxruntime-cpu-1-thread"
+        }
+      },
+      "warning": "RMS reduction is not proof of improved target speech or transcription.",
+      "enhanced_path": "D:\\AIModels\\audio-frontend-eval-20261021\\derived\\gtcrn_upstream_inp_16k.wav"
+    }
+  ]
+}

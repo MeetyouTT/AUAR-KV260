@@ -1,0 +1,27 @@
+[
+  {
+    "id": "board-identity",
+    "command": "python3 -B -c 'import json;from pathlib import Path;P=Path;r=lambda p:P(p).read_text().strip();cid=r(\"/sys/block/mmcblk1/device/cid\");kernel=r(\"/proc/sys/kernel/osrelease\");assert cid==\"0353445345333247805558c00401a100\";assert kernel==\"5.15.36-xilinx-v2022.2\";print(json.dumps({\"sd_cid\":cid,\"kernel\":kernel,\"boot_id\":r(\"/proc/sys/kernel/random/boot_id\"),\"uptime\":r(\"/proc/uptime\"),\"cmdline\":r(\"/proc/cmdline\")}))'",
+    "timeout": 30
+  },
+  {
+    "id": "drm-connectors-and-edid",
+    "command": "python3 -B -c 'import json,base64,hashlib;from pathlib import Path;P=Path;out={\"connectors\":{},\"cards\":{}}\nfor c in sorted(P(\"/sys/class/drm\").glob(\"card*-*\")):\n d={\"path\":str(c.resolve())}\n for n in [\"status\",\"enabled\",\"dpms\",\"modes\",\"connector_id\"]:\n  p=c/n\n  if p.exists():\n   try:d[n]=p.read_text().strip()\n   except OSError as e:d[n]={\"error\":str(e)}\n p=c/\"edid\"\n if p.exists():\n  b=p.read_bytes();d[\"edid\"]={\"bytes\":len(b),\"sha256\":hashlib.sha256(b).hexdigest(),\"base64\":base64.b64encode(b).decode()}\n out[\"connectors\"][c.name]=d\nfor c in sorted(P(\"/sys/class/drm\").glob(\"card[0-9]\")):\n out[\"cards\"][c.name]={\"device\":str((c/\"device\").resolve()),\"driver\":str((c/\"device/driver\").resolve())}\nprint(json.dumps(out,indent=2))'",
+    "timeout": 30
+  },
+  {
+    "id": "display-state-and-framebuffer",
+    "command": "python3 -B -c 'import json;from pathlib import Path;P=Path;out={}\npaths=[P(\"/proc/fb\")]+list(P(\"/sys/kernel/debug/dri\").glob(\"*/state\"))+list(P(\"/sys/kernel/debug/dri\").glob(\"*/name\"))+list(P(\"/sys/kernel/debug/dri\").glob(\"*/clients\"))\nfor f in P(\"/sys/class/graphics\").glob(\"fb*\"):\n paths.extend(f/n for n in [\"name\",\"modes\",\"mode\",\"virtual_size\",\"bits_per_pixel\",\"stride\",\"blank\"])\nfor p in paths:\n if p.exists():\n  try:out[str(p)]=p.read_text()\n  except OSError as e:out[str(p)]={\"error\":str(e)}\np=P(\"/sys/kernel/debug/clk/clk_summary\")\nif p.exists():out[\"display_clock_summary\"]=[l for l in p.read_text().splitlines() if any(s in l.lower() for s in [\"dpll\",\"dpdma\",\"dp_video\",\"dp_audio\",\"dp_ref\"])]\nprint(json.dumps(out,indent=2))'",
+    "timeout": 30
+  },
+  {
+    "id": "display-userspace-and-services",
+    "command": "python3 -B -c 'import json,shutil,subprocess;from pathlib import Path;P=Path;out={\"tools\":{n:shutil.which(n) for n in [\"modetest\",\"kmsprint\",\"fbset\",\"xrandr\",\"xdpyinfo\",\"weston\",\"gst-launch-1.0\",\"gst-inspect-1.0\",\"python3\"]},\"display_processes\":[],\"device_owners\":[],\"commands\":[]}\nfor p in P(\"/proc\").iterdir():\n if not p.name.isdigit():continue\n try:\n  comm=(p/\"comm\").read_text().strip()\n  if any(s in comm.lower() for s in [\"weston\",\"xorg\",\"xwayland\",\"wayland\",\"matchbox\",\"qt\",\"kms\",\"gst\"]):out[\"display_processes\"].append({\"pid\":int(p.name),\"comm\":comm})\n  owned=[str(f.resolve()) for f in (p/\"fd\").iterdir() if str(f.resolve()) in [\"/dev/dri/card0\",\"/dev/fb0\"]]\n  if owned:out[\"device_owners\"].append({\"pid\":int(p.name),\"comm\":comm,\"devices\":owned})\n except OSError:pass\nfor c in [[\"systemctl\",\"show\",\"dfx-mgr.service\",\"weston.service\",\"display-manager.service\",\"-p\",\"Id\",\"-p\",\"LoadState\",\"-p\",\"ActiveState\",\"-p\",\"SubState\",\"-p\",\"MainPID\"],[\"systemctl\",\"--failed\",\"--no-pager\"],[\"xmutil\",\"listapps\"]]:\n r=subprocess.run(c,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,timeout=20);out[\"commands\"].append({\"argv\":c,\"rc\":r.returncode,\"stdout\":r.stdout,\"stderr\":r.stderr})\nprint(json.dumps(out,indent=2))'",
+    "timeout": 90
+  },
+  {
+    "id": "current-kernel-log",
+    "command": "dmesg",
+    "timeout": 60
+  }
+]

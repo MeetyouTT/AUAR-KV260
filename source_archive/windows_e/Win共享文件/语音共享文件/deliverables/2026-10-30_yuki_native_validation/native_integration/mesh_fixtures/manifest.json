@@ -1,0 +1,536 @@
+{
+  "scope": "independent original-engine inputs; expectations are native candidate hypotheses",
+  "browser_executed": false,
+  "board_compiled": false,
+  "models": {
+    "absolute_with_bp": {
+      "directory": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\mesh_fixtures\\absolute_with_bp",
+      "model": "/mesh-fixtures/absolute_with_bp/model.psb",
+      "source_variables": [
+        "p",
+        "q"
+      ],
+      "psb": {
+        "bytes": 21696,
+        "extra_resources": 1,
+        "extra_lengths": [
+          384
+        ],
+        "sha256": "ef3685e875bc714e3e529b9b36bc6b8a615174afbbf95f5ee041fb0bc25fc096"
+      }
+    },
+    "absolute_plus_delta": {
+      "directory": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\mesh_fixtures\\absolute_plus_delta",
+      "model": "/mesh-fixtures/absolute_plus_delta/model.psb",
+      "source_variables": [
+        "p",
+        "q"
+      ],
+      "psb": {
+        "bytes": 22144,
+        "extra_resources": 2,
+        "extra_lengths": [
+          384,
+          384
+        ],
+        "sha256": "d5cf2cf0bd0da3f8779c676b07a919910723dbd8a2ac947c9b08589db5204d5c"
+      }
+    },
+    "bp_only": {
+      "directory": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\mesh_fixtures\\bp_only",
+      "model": "/mesh-fixtures/bp_only/model.psb",
+      "source_variables": [
+        "p",
+        "q"
+      ],
+      "psb": {
+        "bytes": 20960,
+        "extra_resources": 0,
+        "extra_lengths": [],
+        "sha256": "03e8353314ddcab2a44c8cb0f6e11aa567bbd92d849d50a37f17ef10712ff236"
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "bp-control",
+      "mode": "bp_only",
+      "variables": {
+        "p": 0,
+        "q": 0
+      },
+      "rig": "/mesh-fixtures/bp-control-rig.json",
+      "expected_model_bounds": [
+        96,
+        64,
+        160,
+        128
+      ],
+      "expected_model_corners": [
+        [
+          96,
+          64
+        ],
+        [
+          160,
+          64
+        ],
+        [
+          96,
+          128
+        ],
+        [
+          160,
+          128
+        ]
+      ],
+      "expected_scope": "unprojected model XY; screenshot coordinates depend on common view"
+    },
+    {
+      "name": "abs-neutral-bp-priority",
+      "mode": "absolute_with_bp",
+      "variables": {
+        "p": 0,
+        "q": 0
+      },
+      "rig": "/mesh-fixtures/abs-neutral-bp-priority-rig.json",
+      "expected_model_bounds": [
+        64,
+        64,
+        128,
+        128
+      ],
+      "expected_model_corners": [
+        [
+          64,
+          64
+        ],
+        [
+          128,
+          64
+        ],
+        [
+          64,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "expected_scope": "unprojected model XY; screenshot coordinates depend on common view"
+    },
+    {
+      "name": "abs-fraction",
+      "mode": "absolute_with_bp",
+      "variables": {
+        "p": 0.5,
+        "q": 0
+      },
+      "rig": "/mesh-fixtures/abs-fraction-rig.json",
+      "expected_model_bounds": [
+        72.0,
+        64,
+        136.0,
+        128
+      ],
+      "expected_model_corners": [
+        [
+          72.0,
+          64
+        ],
+        [
+          136.0,
+          64
+        ],
+        [
+          72.0,
+          128
+        ],
+        [
+          136.0,
+          128
+        ]
+      ],
+      "expected_scope": "unprojected model XY; screenshot coordinates depend on common view"
+    },
+    {
+      "name": "abs-left-end",
+      "mode": "absolute_with_bp",
+      "variables": {
+        "p": -1,
+        "q": 0
+      },
+      "rig": "/mesh-fixtures/abs-left-end-rig.json",
+      "expected_model_bounds": [
+        48,
+        64,
+        112,
+        128
+      ],
+      "expected_model_corners": [
+        [
+          48,
+          64
+        ],
+        [
+          112,
+          64
+        ],
+        [
+          48,
+          128
+        ],
+        [
+          112,
+          128
+        ]
+      ],
+      "expected_scope": "unprojected model XY; screenshot coordinates depend on common view"
+    },
+    {
+      "name": "abs-right-end",
+      "mode": "absolute_with_bp",
+      "variables": {
+        "p": 1,
+        "q": 0
+      },
+      "rig": "/mesh-fixtures/abs-right-end-rig.json",
+      "expected_model_bounds": [
+        80,
+        64,
+        144,
+        128
+      ],
+      "expected_model_corners": [
+        [
+          80,
+          64
+        ],
+        [
+          144,
+          64
+        ],
+        [
+          80,
+          128
+        ],
+        [
+          144,
+          128
+        ]
+      ],
+      "expected_scope": "unprojected model XY; screenshot coordinates depend on common view"
+    },
+    {
+      "name": "abs-left-clamp",
+      "mode": "absolute_with_bp",
+      "variables": {
+        "p": -2,
+        "q": 0
+      },
+      "rig": "/mesh-fixtures/abs-left-clamp-rig.json",
+      "expected_model_bounds": [
+        48,
+        64,
+        112,
+        128
+      ],
+      "expected_model_corners": [
+        [
+          48,
+          64
+        ],
+        [
+          112,
+          64
+        ],
+        [
+          48,
+          128
+        ],
+        [
+          112,
+          128
+        ]
+      ],
+      "expected_scope": "unprojected model XY; screenshot coordinates depend on common view"
+    },
+    {
+      "name": "abs-right-clamp",
+      "mode": "absolute_with_bp",
+      "variables": {
+        "p": 2,
+        "q": 0
+      },
+      "rig": "/mesh-fixtures/abs-right-clamp-rig.json",
+      "expected_model_bounds": [
+        80,
+        64,
+        144,
+        128
+      ],
+      "expected_model_corners": [
+        [
+          80,
+          64
+        ],
+        [
+          144,
+          64
+        ],
+        [
+          80,
+          128
+        ],
+        [
+          144,
+          128
+        ]
+      ],
+      "expected_scope": "unprojected model XY; screenshot coordinates depend on common view"
+    },
+    {
+      "name": "abs-left-fraction",
+      "mode": "absolute_with_bp",
+      "variables": {
+        "p": -0.5,
+        "q": 0
+      },
+      "rig": "/mesh-fixtures/abs-left-fraction-rig.json",
+      "expected_model_bounds": [
+        56.0,
+        64,
+        120.0,
+        128
+      ],
+      "expected_model_corners": [
+        [
+          56.0,
+          64
+        ],
+        [
+          120.0,
+          64
+        ],
+        [
+          56.0,
+          128
+        ],
+        [
+          120.0,
+          128
+        ]
+      ],
+      "expected_scope": "unprojected model XY; screenshot coordinates depend on common view"
+    },
+    {
+      "name": "sum-neutral",
+      "mode": "absolute_plus_delta",
+      "variables": {
+        "p": 0,
+        "q": 0
+      },
+      "rig": "/mesh-fixtures/sum-neutral-rig.json",
+      "expected_model_bounds": [
+        64,
+        64,
+        128,
+        128
+      ],
+      "expected_model_corners": [
+        [
+          64,
+          64
+        ],
+        [
+          128,
+          64
+        ],
+        [
+          64,
+          128
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "expected_scope": "unprojected model XY; screenshot coordinates depend on common view"
+    },
+    {
+      "name": "sum-delta-only",
+      "mode": "absolute_plus_delta",
+      "variables": {
+        "p": 0,
+        "q": 1
+      },
+      "rig": "/mesh-fixtures/sum-delta-only-rig.json",
+      "expected_model_bounds": [
+        64,
+        80,
+        128,
+        144
+      ],
+      "expected_model_corners": [
+        [
+          64,
+          80
+        ],
+        [
+          128,
+          80
+        ],
+        [
+          64,
+          144
+        ],
+        [
+          128,
+          144
+        ]
+      ],
+      "expected_scope": "unprojected model XY; screenshot coordinates depend on common view"
+    },
+    {
+      "name": "sum-fraction",
+      "mode": "absolute_plus_delta",
+      "variables": {
+        "p": 0.5,
+        "q": 0.5
+      },
+      "rig": "/mesh-fixtures/sum-fraction-rig.json",
+      "expected_model_bounds": [
+        72.0,
+        72.0,
+        136.0,
+        136.0
+      ],
+      "expected_model_corners": [
+        [
+          72.0,
+          72.0
+        ],
+        [
+          136.0,
+          72.0
+        ],
+        [
+          72.0,
+          136.0
+        ],
+        [
+          136.0,
+          136.0
+        ]
+      ],
+      "expected_scope": "unprojected model XY; screenshot coordinates depend on common view"
+    },
+    {
+      "name": "sum-two-endpoints",
+      "mode": "absolute_plus_delta",
+      "variables": {
+        "p": 1,
+        "q": 1
+      },
+      "rig": "/mesh-fixtures/sum-two-endpoints-rig.json",
+      "expected_model_bounds": [
+        80,
+        80,
+        144,
+        144
+      ],
+      "expected_model_corners": [
+        [
+          80,
+          80
+        ],
+        [
+          144,
+          80
+        ],
+        [
+          80,
+          144
+        ],
+        [
+          144,
+          144
+        ]
+      ],
+      "expected_scope": "unprojected model XY; screenshot coordinates depend on common view"
+    },
+    {
+      "name": "sum-negative-clamp",
+      "mode": "absolute_plus_delta",
+      "variables": {
+        "p": -2,
+        "q": -2
+      },
+      "rig": "/mesh-fixtures/sum-negative-clamp-rig.json",
+      "expected_model_bounds": [
+        48,
+        48,
+        112,
+        112
+      ],
+      "expected_model_corners": [
+        [
+          48,
+          48
+        ],
+        [
+          112,
+          48
+        ],
+        [
+          48,
+          112
+        ],
+        [
+          112,
+          112
+        ]
+      ],
+      "expected_scope": "unprojected model XY; screenshot coordinates depend on common view"
+    }
+  ],
+  "recommended_first_cases": [
+    "bp-control",
+    "abs-neutral-bp-priority",
+    "abs-fraction",
+    "sum-delta-only",
+    "sum-fraction",
+    "sum-two-endpoints"
+  ],
+  "hashes": {
+    "abs-fraction-rig.json": "515a76bfb4a50c7357af6da0d30fa7eab31e919f21d3006aa4d9f6dcb7c4ac8c",
+    "abs-left-clamp-rig.json": "7216edd689b8d1cc0953f3f0780d00167b85f541cfa06b347d78758881d5c1fd",
+    "abs-left-end-rig.json": "f3e527f38d5e5add5dde41f529b85344f9bc47b3eb7e2f9f985bc6c5440527f5",
+    "abs-left-fraction-rig.json": "042bfc6ea87e3c695b9aef5cda56f13c2c938b0858b71c0f211a4c1f6209b328",
+    "abs-neutral-bp-priority-rig.json": "ccdcdea5ff0584fb52d1db56c34c9b9b10278c5f0fa512a1ec83adc48a5ade40",
+    "abs-right-clamp-rig.json": "7b4a161692f63ec23724d6d57ae3cb86238e07840df4b8e53d6b2193041a56d3",
+    "abs-right-end-rig.json": "d8247972296ac29ff77959f5a27e919da1e2fdf67eb27d9e16037acbb546bb1b",
+    "bp-control-rig.json": "035f04d6c68508c92fa6aabf1df714026bb51bfd2e8c655203f6004fe439ff61",
+    "sum-delta-only-rig.json": "22169d561415ae84676ee5ebd315334c7548464df1cab16319cad2a818ddf71e",
+    "sum-fraction-rig.json": "fe4a70c3b24f3366a693faa3463b8ad1e391d3bf5faf76a0ea9ebdf7d48edbec",
+    "sum-negative-clamp-rig.json": "7bb8d80341f6e529baa2fb512f2e8ab138e79f9c1671ea44bfcca85846796d92",
+    "sum-neutral-rig.json": "049b0d6fcf4aadf8f703a7b776dc03d830fbf7135048ae97bd2b28437f5015b0",
+    "sum-two-endpoints-rig.json": "963da460453f44221ce3034aabe9c5a8b28dacbaa1b1aa6d71cf8514e189cda5",
+    "absolute_plus_delta/compile.log": "88928dd671ec28d130a06cedb455ac14b72efa39a1bf3a7d771b259de2d5e534",
+    "absolute_plus_delta/model.json": "872cb0813b19480913483ce80c4b421efb3f8c610d9c50c89bba7d42e6335b3c",
+    "absolute_plus_delta/model.psb": "d5cf2cf0bd0da3f8779c676b07a919910723dbd8a2ac947c9b08589db5204d5c",
+    "absolute_plus_delta/model.resx.json": "30c411220cbd4ecdd914e6337de5f367b8e9aeb2009225fb0c02452c191fb6cb",
+    "absolute_plus_delta/texture.png": "76a38ed9dae202a955df8fc29fdadb5bf2dadac3cae284686ef1080e8efa94ea",
+    "absolute_with_bp/compile.log": "ed716e4f44dc07e4f7bdfdf61dc7e5758fbe140822a01927e59efbfecd3bc3ac",
+    "absolute_with_bp/model.json": "30bc73e5ab57a86cf7db624eff6d08ca56a8dd3ffbaa671249c1b6de4939624e",
+    "absolute_with_bp/model.psb": "ef3685e875bc714e3e529b9b36bc6b8a615174afbbf95f5ee041fb0bc25fc096",
+    "absolute_with_bp/model.resx.json": "6347aef34ba734e20d5fa25d6cc00e8c44c4d8354b234245749b83ae6ee5e643",
+    "absolute_with_bp/texture.png": "76a38ed9dae202a955df8fc29fdadb5bf2dadac3cae284686ef1080e8efa94ea",
+    "bp_only/compile.log": "964e3a7181618065296c75c85d10ee73c59977743e905ba0a046b43ce86709bf",
+    "bp_only/model.json": "970053a4c8202e68d2b44e8e56b40cbff755bea213c21e3ebc1962a89577d7c7",
+    "bp_only/model.psb": "03e8353314ddcab2a44c8cb0f6e11aa567bbd92d849d50a37f17ef10712ff236",
+    "bp_only/model.resx.json": "786256b7be4c30b57e76490d3afb8ad0ccd26b993a93ab566cb6658a37e4f200",
+    "bp_only/texture.png": "76a38ed9dae202a955df8fc29fdadb5bf2dadac3cae284686ef1080e8efa94ea"
+  }
+}

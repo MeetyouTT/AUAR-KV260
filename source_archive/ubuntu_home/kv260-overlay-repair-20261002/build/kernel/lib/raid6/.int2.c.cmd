@@ -1,0 +1,1 @@
+cmd_lib/raid6/int2.c := awk -v N=2 -f /home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/lib/raid6/unroll.awk < /home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/lib/raid6/int.uc > lib/raid6/int2.c

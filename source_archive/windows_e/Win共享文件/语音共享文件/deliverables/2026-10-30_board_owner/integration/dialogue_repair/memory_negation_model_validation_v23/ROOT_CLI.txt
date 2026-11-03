@@ -1,0 +1,23 @@
+v23公开摘要模型验证入口
+
+本目录由root串行执行。默认dry仅验证公开payload，实际开关为 --execute-root-only。当前worker冻结于df8535a395df25d1df6c186b413062a9235bf2cf4ba006d665455f46632071d6。
+
+先使用v22原发布器完成guard、window-inspect和normal-close。worker要求NORMAL_CLOSED、guard保留、保存的暂停偏好false和原A相机229296/2474670。它持有publisher、UI、timeline、speaker锁，结束后保留GUI关闭状态，后续由root使用原v22 start/ready恢复。
+
+root把worker.py及所选payload复制到自己的板端阶段目录并核对SHA，然后逐条执行。以before单case为例，<stage>替换为该目录。
+
+/usr/bin/python3 -B <stage>/worker.py --payload <stage>/BEFORE_PILOT_PAYLOAD.json --payload-sha256 1f960e7dc9d2ff8f4ea3c11bf00b308896b9f0d87baaf6f9bf2d620c9eb49690
+
+/usr/bin/python3 -B <stage>/worker.py --payload <stage>/BEFORE_PILOT_PAYLOAD.json --payload-sha256 1f960e7dc9d2ff8f4ea3c11bf00b308896b9f0d87baaf6f9bf2d620c9eb49690 --window-seconds 180 --execute-root-only
+
+candidate单case对应CANDIDATE_PILOT_PAYLOAD.json，SHA8c87c918ec030a4c27bf42ec9d3b89bd5a82326395d2be4338f0cc44b5cb6622。
+
+全组含原6项、补充4项和1个有界重复问句。before使用BEFORE_ALL_PUBLIC_PAYLOAD.json，SHAf57644bf8ea4fa1be99c49747b91856b2900a6f29334502ecda484d4d7617900。candidate使用CANDIDATE_ALL_PUBLIC_PAYLOAD.json，SHAbeb542bcf280d65793c341dc1d6585ec0d59aa9d9de821bfc57e59caf1ba08d3。root按窗口选择30至900秒外层上限，模型每次30秒及SummaryClient其余默认预算保持，最终容量301字节。
+
+每个公开请求保留正常客户端验证后的响应，包括后来被摘要校验拒绝的text，供人工按rubric检查。accepted只代表机械校验通过，人工语义结果仍为PENDING。字段stage区分single、fragment及reduction，实际请求数与覆盖率使用SummaryClient.metrics。长样例实际能否完成多段要以实测回执为准。
+
+全部prepared在RAM构造。静态_required_claims和_candidate仅处理这些公开内存字典，不实例化Store。数据库、设备打开以及摘要阶段的ctypes加载被audit拒绝。metadata guard仅额外允许ctypes为Python自身C API加载None；实际native库仍拒绝。guard会读取继承源码、配置和模型pin字节，不导出生产正文、真实库或模板。
+
+候选两源仅替换本次进程sys.modules，after为common971ab33fdf41cd3226de0be25edd9dc2e0380e39a7aa724965a01a46fc699d07、policy2488436c306fee4261cbbb0371e60617b8d32da3655d5dd7f697cd333ee9fe0f。真实production runtime文件和模型配置保留原样。最终source guard再核380组件、22pin相机闭包和用户暂停选择。
+
+本地准备程序prepare_runner.py支持--mode before/candidate及--case <case_id>/all，--write-payload才写新文件。candidate必须显式提供root选定两源SHA。原输入中的旧messages未进入payload。

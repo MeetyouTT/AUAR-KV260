@@ -1,0 +1,77 @@
+{
+  "schema": "aura.capture-numeric-diagnostics-handoff.v1",
+  "status": "FROZEN_NOT_DEPLOYED",
+  "files": [
+    {
+      "path": "board/runtime/audio/automatic_capture.py",
+      "before_sha256": "751a26e70fe79e9371dc50d63a399386e4b5c637d58ca5b8142617d4de7ef4c0",
+      "sha256": "5e7abc5a15840aff51d0471313498a46efc940f16d4bd7ee95fed65f98fdcc0a",
+      "bytes": 8419
+    },
+    {
+      "path": "board/runtime/audio/board_frontend_auto.py",
+      "before_sha256": "94400137437292cc3d072b0dc1625818a45c5fbe69c1f055f867fe55793d333a",
+      "sha256": "d81275853699597a5dc92c0651f8ffb8e59f63ece760d2d9d514527078cc6573",
+      "bytes": 34133
+    }
+  ],
+  "manifest_sha256": "229720408ccc6b242ee30362158d6b7f557d224257b91ac30d1a715b99a88c9b",
+  "overlay_sha256": "dc2ca14c10305cebffdcd9d94cae245d94247e8eca8c0140aa7609f266c2a622",
+  "passed": 20,
+  "tests": {
+    "new_cases": 8,
+    "original_contract_cases": 12,
+    "xml_sha256": "7b2178a514f47778212d8daffa0dfc69ac85106fa5c5009d191a26538fe02c68",
+    "external_receipt_sha256": "f008eb9aecf8ad347f96b8fc69f8983ded06e048197df6e33d46a956bcf3e09a",
+    "commands": [
+      "\"C:\\Users\\35870\\.codex\\visualizations\\2026\\10\\09\\01a12110-3ba4-7651-b3d7-2e6560916eb6\\omnivoice-runtime-py310\\Scripts\\python.exe\" -B -m pytest -q -p no:cacheprovider \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\capture_diagnostics_candidate\\tests\\test_capture_diagnostics.py\"",
+      "\"C:\\Users\\35870\\.codex\\visualizations\\2026\\10\\09\\01a12110-3ba4-7651-b3d7-2e6560916eb6\\omnivoice-runtime-py310\\Scripts\\python.exe\" -B \"E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\capture_diagnostics_candidate\\tests\\run_external_contract.py\""
+    ]
+  },
+  "api_paths": [
+    "audio_frontend.current.endpoint_feed_calls",
+    "audio_frontend.current.endpoint_feed_wall_last_ms",
+    "audio_frontend.current.endpoint_feed_wall_max_ms",
+    "audio_frontend.current.endpoint_feed_wall_total_ms",
+    "audio_frontend.current.endpoint_feed_cpu_last_ms",
+    "audio_frontend.current.endpoint_feed_cpu_max_ms",
+    "audio_frontend.current.endpoint_feed_cpu_total_ms",
+    "audio_frontend.current.consumer_gap_last_ms",
+    "audio_frontend.current.consumer_gap_max_ms",
+    "audio_frontend.current.consumer_gap_total_ms",
+    "audio_frontend.current.consumer_gap_count",
+    "audio_frontend.current.capture_failures",
+    "audio_frontend.current.last_capture_failure"
+  ],
+  "public_mapping": "Verified through current RecordingController.public then current production presentation._clean; safe_capture_diagnostics retains its existing conservative projection and is not the new path.",
+  "semantics": {
+    "endpoint": "Exact original endpoint.feed; original PCM/decisions returned unchanged. Wall/thread CPU measured in finally including failed attempts.",
+    "consumer_gap": "Start-to-start gap between complete endpoint feeds; excludes the initial microphone warmup before the first frame.",
+    "reset": "Endpoint counters reset for each original capture start; a single safe last failure remains across cancel/rearm on the same proxy.",
+    "failure": "First observed failure per capture generation; fixed error_code plus finite allowlisted queue/frontend numeric/flag fields only. No raw exception message, capture_id or PCM.",
+    "origin": "from_error_status=true means a real child ERROR status; false means the last known safe state when transport/callback/cleanup failed.",
+    "queue": "Overflow clears the original queue; retained queued_frames may therefore be zero. peak_frames/frame counts and error_code distinguish failure.",
+    "cancel": "Successful user cancel/close creates no failure; original cancel/generation barriers remain unchanged."
+  },
+  "unchanged": [
+    "single child/model/lease topology",
+    "original eight-frame queue and overflow rejection",
+    "original GTCRN/Silero/FFT weights and thresholds",
+    "original priority and capture ownership",
+    "wire required status fields and METADATA_MAX=4096",
+    "speech callback/READY/TAKE/cancel/ACK contracts"
+  ],
+  "boundaries": [
+    "No hardware/model/GUI/service action performed.",
+    "No performance claim: added diagnostic overhead remains to be checked on ARM.",
+    "No GC disabling, affinity, nice, model, queue or renderer change.",
+    "One last-failure snapshot is RAM-only; no audio/text is persisted."
+  ],
+  "budget_context": {
+    "source": "board_budget_idle_v6.json supplied by root",
+    "frontend_cpu_single_core_percent": 97.7,
+    "frontend_consumer_cpu_percent": 93.51,
+    "runqueue_wait_ms_per_8_26s": 305.0,
+    "rationale": "Separates complete endpoint thread CPU from scheduling/lock wall delay; existing gate-only16ms did not prove full-frame real time."
+  }
+}

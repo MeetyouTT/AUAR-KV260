@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="1.520" timestamp="2026-10-26T01:13:00.116705-07:00" hostname="zhenghang"><testcase classname="语音共享文件.aura.tests.framework.test_long_conversation" name="test_http_conversation_header_survives_new_transport_session" time="0.586"><failure message="PermissionError: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。">tmp_path = WindowsPath('E:/Win共享文件/语言模型分析/板端迁移模拟_20261026/regression_http_tmp/test_http_conversation_header_0')
+
+    def test_http_conversation_header_survives_new_transport_session(tmp_path):
+        from tools.asr_server import AsrServer
+        from tools.board_model_host import ModelHandler
+        from board.runtime.audio.voice_channel import VoiceChannel
+        model = host(tmp_path)
+        model.lock = threading.Lock()
+        model.voice = voice_fixture.VoiceChannelTests().fixture_models(tmp_path).voice
+        model.latency_options = {}
+        class Engine:
+            model_id = 'TEST_ONLY'
+            def transcribe(self, pcm): return '我喜欢绿色'
+        server = AsrServer(('127.0.0.1', 0), Engine(), handler=ModelHandler)
+        server.models = model
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        original = channel_frames
+        seen = []
+        def source(*args, **kwargs):
+            seen.append(kwargs.get('conversation'))
+            return original(*args, **kwargs, stream_factory=voice_fixture.VoiceChannelTests.fake_stream)
+        channel = VoiceChannel('127.0.0.1', server.server_port)
+        with patch('tools.voice_channel_source.channel_frames', source):
+            thread.start()
+            try:
+                for index in range(2):
+                    meta = dict(owner('http%d' % index, 1), board_boot_id='boot%d' % index,
+                                session_id='session%d' % index)
+&gt;                   result = channel.exchange(meta, voice_fixture.PCM, lambda header, pcm: None, conversation=CID)
+
+语音共享文件\aura\tests\framework\test_long_conversation.py:213: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+语音共享文件\aura\board\runtime\audio\voice_channel.py:56: in exchange
+    self.connection.connect()
+D:\sd-webui-aki-v4.11.1-cu128\_py310\lib\http\client.py:942: in connect
+    self.sock = self._create_connection(
+D:\sd-webui-aki-v4.11.1-cu128\_py310\lib\socket.py:845: in create_connection
+    raise err
+D:\sd-webui-aki-v4.11.1-cu128\_py310\lib\socket.py:833: in create_connection
+    sock.connect(sa)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+sock = &lt;socket.socket [closed] fd=-1, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0&gt;
+address = ('127.0.0.1', 60736)
+
+    def local_connect(sock, address):
+        if not isinstance(address, tuple) or address[0] != '127.0.0.1' or address[1] not in test_ports:
+            raise RuntimeError('Only this process-owned loopback fixture may connect')
+&gt;       return original_connect(sock, address)
+E       PermissionError: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+
+语言模型分析\板端迁移模拟_20261026\run_regression.py:32: PermissionError</failure></testcase><testcase classname="语音共享文件.aura.tests.framework.test_memory_controls" name="test_http_spoken_command_route_keeps_conversation_and_uses_database_result" time="0.566"><failure message="PermissionError: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。">tmp_path = WindowsPath('E:/Win共享文件/语言模型分析/板端迁移模拟_20261026/regression_http_tmp/test_http_spoken_command_route0')
+
+    def test_http_spoken_command_route_keeps_conversation_and_uses_database_result(tmp_path):
+        from tools.asr_server import AsrServer
+        from tools.board_model_host import ModelHandler
+        from board.runtime.audio.voice_channel import VoiceChannel
+        from tests.framework.test_voice_channel import PCM
+        models=host(tmp_path);models.lock=threading.Lock()
+        models.voice=voice_fixture.VoiceChannelTests().fixture_models(tmp_path).voice
+        models.latency_options={'reply_first':True,'coalesce_chat':True}
+        inputs=iter(['记住：项目=海风','你记住了什么','查看第一条记忆',
+                     '把我的项目改成晨光','忘记我的项目','你记住了什么'])
+        class Engine:
+            model_id='FAKE_ASR_TEST_ONLY'
+            def transcribe(self, pcm):return next(inputs)
+        def forbidden(*args,**kwargs):raise AssertionError('Command must not invoke LLM')
+        original=channel_frames
+        def source(*args,**kwargs):return original(*args,**kwargs,stream_factory=forbidden)
+        server=AsrServer(('127.0.0.1',0),Engine(),handler=ModelHandler);server.models=models
+        thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+        channel=VoiceChannel('127.0.0.1',server.server_port,feedback=True)
+        try:
+            with patch('tools.voice_channel_source.channel_frames',source):
+                replies=[]
+                for n in range(1,7):
+                    events=[]
+&gt;                   result=channel.exchange(owner('http-memory%d'%n,n),PCM,lambda h,p:events.append(h),conversation=CID)
+
+语音共享文件\aura\tests\framework\test_memory_controls.py:215: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+语音共享文件\aura\board\runtime\audio\voice_channel.py:56: in exchange
+    self.connection.connect()
+D:\sd-webui-aki-v4.11.1-cu128\_py310\lib\http\client.py:942: in connect
+    self.sock = self._create_connection(
+D:\sd-webui-aki-v4.11.1-cu128\_py310\lib\socket.py:845: in create_connection
+    raise err
+D:\sd-webui-aki-v4.11.1-cu128\_py310\lib\socket.py:833: in create_connection
+    sock.connect(sa)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+sock = &lt;socket.socket [closed] fd=-1, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0&gt;
+address = ('127.0.0.1', 60738)
+
+    def local_connect(sock, address):
+        if not isinstance(address, tuple) or address[0] != '127.0.0.1' or address[1] not in test_ports:
+            raise RuntimeError('Only this process-owned loopback fixture may connect')
+&gt;       return original_connect(sock, address)
+E       PermissionError: [WinError 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+
+语言模型分析\板端迁移模拟_20261026\run_regression.py:32: PermissionError</failure></testcase></testsuite></testsuites>

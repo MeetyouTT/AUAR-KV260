@@ -1,0 +1,53 @@
+GTK主候选v2：只缩窄预览线程的状态读取（root部署）
+
+状态
+候选已完成，11项公开合成/纯逻辑/并发测试通过，Windows公开拷贝CPU基准完成。尚未部署；尚无ARM或真实GTK整机收益结论。原一文件换序候选022已被root的严格像素等价门槛拒绝，保持归档，不作为本主候选的一部分。568特例实验不推进。
+
+瓶颈与实际键
+原CameraPreviewWorker.work每10ms调用UiServiceClient.read。该API需要为完整界面提供完整SnapshotGate深拷贝、回执列表等，但预览线程只消费以下值：
+view.snapshot；view.preview；view.raw_preview。
+snapshot.board_boot_id、service_epoch、preview.camera_epoch/frame_id/captured_mono_ms、modules.camera.state。
+原use_raw额外消费source_kind和modules.camera.preview_transport；connection.host和local_raw来自同一client。
+本次源核验见上级SOURCE_GATE.json，实际ui_contract SHA7f67e4bdfe4a95396fbe6445759c80f8ea79cf51d2d991269213409a83daec86。
+
+两个精确组件
+board/interaction/ui_services.py
+  原 b55ee295e2cb5494f387fbaa4aa081fd1d6bffd57588c018c5f31daae56bd711
+  新 e4dedf9b3d56d22d9eb93de1e96ad1a69870d553ea50f7dd5082b21e19f381c9
+tools/board_camera_preview.py
+  原 6e697c16f7ae264dff56b6b35f38da4b531ea13026b69a7c8bdbfb1960a6afcd
+  新 67d6c0f2b24ea97e20fdcc7b3383b6444269a6e26f5deb566f2b88746b7daf9b
+源码在candidate/，确定性构建build_projection_candidate.py，精确diff分别为ui_services.diff和board_camera_preview.diff。
+
+行为与锁合同
+1. 原UiServiceClient.read、identity_snapshot、use_raw、configure、work等已有方法AST全部相同；仅新增read_preview。
+2. 新方法始终持有原self.condition；读取gate、连接、JPEG缓存、raw设置和复制投影均在该锁内完成。未增加锁或改变锁顺序，未做文件/网络/GUI/模型IO。
+3. link必须原READY，gate.value必须存在，并完全复用当前SnapshotGate.read的observed_mono_ms+ttl_ms到期条件：clock>=截止时返回snapshot=None。无缓存期限扩展。
+4. 只复制上述必要字段为独立字典；preview键及camera字典不引用可变内部结构。JPEG引用只有与当前preview_key相等才返回，保留原age>1500ms清空条件；JPEG数据也deepcopy，真实bytes本身不可变。
+5. raw选择仍调用原use_raw：local_raw开启、127.0.0.1、actual来源、aura-local-bgr-1传输同时成立。原RawFrameReader的owner/epoch/frame序号、250ms截止/原文件权限校验均未改。
+6. SnapshotGate取消mask只改变interaction字幕，不改变camera/preview；新投影只读camera部分，所以摄像头取消/失源决策与原worker使用全快照后的决策相同。完整UI/API仍走原read保留取消字幕语义。
+7. worker优先调用可调用的read_preview；旧服务对象只有read时沿原read路径。方法返回异常仍由原work异常路径清空，并未静默绕过校验。
+8. 整条GStreamer描述、640x480输入、全部输出尺寸/插值/像素格式协商/alpha、16fps头像、250ms丢帧探针、队列、PTS/frame-id、blank、X11 sink、多输出生命周期和JPEG fallback均保持原源码。
+
+已做纯测试
+test_projection.py，UNIT_TEST_RESULTS.json：11项全PASS、0errors/0failures。
+原已有方法与Gst AST不变；raw/JPEG/remote/fixture/local_raw关闭等组合；observedTTL精确到期边界；camera LOST/ERROR/缺失；JPEG缓存键不匹配与1499/1500/1501ms；取消与身份预览开启；返回可变数据独立；configure重建gate失效；实际worker对raw/cancel/expire/loss/no-preview的原新决策相同；旧read-only服务fallback；350次并发configure/cancel/loss期间返回的owner/epoch/帧与JPEG一致。
+初次harness漏导入原DEFAULT_CONNECTION导致2项未通过，初次日志保存在UNIT_TEST_RESULTS.initial_harness_missing_constant.*；harness改为从原AST执行该常量后全通过，产品候选未因此修改。
+
+公开CPU基准
+PUBLIC_CPU_BENCHMARK_WINDOWS.json，AMD64、3000次/4轮交替full/preview：小公开快照方法CPU约降75%，填充公开快照约降94.7%。这是状态read方法成本，Windows时钟有量化误差，不能称为板端或整个GTK节省75%/94.7%。
+原full read与新projection都在相同的candidate client字段上执行；AST已证明full read与原函数完全相同。数据是公开合成问题、回答、对象、回执；固定源时钟用于隔离复制成本，不涉及真实内容或实际源龄。
+root可在ARM stdin执行同一自包含纯脚本：
+  /usr/bin/python3 -B -I -S - --iterations 3000 --rounds 4
+文件 projection_public_benchmark_standalone.py
+原始文件SHA 73981c2c862bdde5ac7feea12285b91bff29edc9abe0a82c05e3bf61318afc23
+读取为文本后LF代码SHA 40be3919478d79afd871065d90bd9ac931d4dec8229b297d75b8adc8a2e95431
+该脚本内嵌已核纯源，通过AST只定义client及纯验证函数；全stdlib，无板端文件写入/网络/服务/摄像头/X11/模型/DB/音频/转轴访问。它只用于read方法成本筛选，真实GUI A/B仍需执行。
+
+发布和回滚（仅root）
+新鲜核实际current startup与两组件原SHA，不能使用旧startup1177或680覆盖现役。root正在协调身份登记，须保留新voice a911及其当前完整pins，并保留stable150原轴25项/四配置和冻结条件。
+两个候选源码需要在原GUI正常停态按原事务方式替换并更新相应component pins；若命中当前selected25或其他源闭包则按原验证器更新其真实依赖，不绕过校验。不得修改相机保护/seed/固件/模型/身份阈值；本GTK候选不需要重启相机。
+启动后核GUI/原完整配对/字幕/口型/身份登记、视觉页/放大预览、切页恢复/失源清空、数据新鲜度和全部组件闭包。用同方法、同场景、同页面对比原/新GTK及整机CPU；实际相机新旧版本必须分阶段标明，不能混算收益。
+若行为或性能退步，恢复两项保存的原字节并更新对应pins，保留其他已完成的身份和转轴变更；正常恢复GUI后复核。后续全流程真人ASR→LLM→TTS→完整播放ACK与原轴跟随由root/专用轴窗口按已授权协作执行。
+
+本代理没有任何板端写入、服务控制、GUI切页/停启、负载执行或转轴动作。所有候选/测试/报告均在gtk独立本地目录；只读源码检查不包含真实对话/记忆/图像/声音或身份模板。

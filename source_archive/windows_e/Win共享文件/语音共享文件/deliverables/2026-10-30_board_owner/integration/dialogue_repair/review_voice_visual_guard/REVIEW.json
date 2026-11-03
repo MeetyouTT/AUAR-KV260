@@ -1,0 +1,65 @@
+{
+  "schema": "aura.voice-visual-store-guard.independent-review.v1",
+  "status": "PASS_LOCAL_REQUESTED_BOUNDARIES_NO_BLOCKER_FOUND",
+  "candidate_source_manifest_sha256": "2ad7b32e6e3afa42548c8cf89e9d41fb49d3274a6f37897837cd77bc269907b2",
+  "combined_six_source_manifest_sha256": "06e5ced57c55b0ef551424c37b08c1a9bd5f43217af98c8a6f9170c1cc597f91",
+  "source_review": {
+    "board/runtime/board_business.py": {
+      "before_sha256": "7c5cef7b648af0d8f3aad026c97ee82dace5911a7bdb88d040fc2d0c01038662",
+      "after_sha256": "b08209eca7979825e26845080bca5e1d64e065d3cabd1178df763a93540573f2",
+      "only_changed_method": "BoardBusinessRuntime._submit_speaker_analysis",
+      "all_other_ast_identical": true
+    },
+    "board/runtime/board_speaker_business.py": {
+      "before_sha256": "134466a85599d73697b11aceaeec97c1e0b5d9db4b125f4accd50bf14f525e25",
+      "after_sha256": "6904267bd016a10a1508b26f372f0db54a71d78eed2eb15b043026218b1b7816",
+      "only_changed_method": "BoardSpeakerBusiness.submit_analysis",
+      "all_other_ast_identical": true
+    },
+    "common/board_memory.py": {
+      "before_sha256": "c27d4d3c39e5de293cbc7fed8899de8b0d39ea6ccc99c0e7f64f22c8a90a2c0b",
+      "after_sha256": "05095d249caf3598802d5951910b412affe167b508933c7e831e3ffacc4fc0d0",
+      "only_changed_method": "BoardMemoryStore.append_event",
+      "all_other_ast_identical": true
+    }
+  },
+  "tests": {
+    "total": 33,
+    "author_suite_replayed_unchanged": 25,
+    "new_independent": 8,
+    "failed": 0,
+    "skipped": 0,
+    "sqlite_version": "3.49.1",
+    "test_result_sha256": "11802d48e8f27279b9be59b93ebad693e12a5a56b1d119d7a8881b10e2c7de6a"
+  },
+  "combined_closure": {
+    "baseline_startup_sha256": "de7772b898378d2263b0809d18c095a60585a672690371d2f072b2e04c2f574f",
+    "baseline_components": 379,
+    "after_components": 380,
+    "source_files": 6,
+    "v19_gtk_and_recording_pins_preserved": true
+  },
+  "verified": [
+    "SQLite BEGIN IMMEDIATE wait cancel/owner/deadline rejection",
+    "Guard failure after insert rolls back event/body/scope revision/fact-key index",
+    "Old omitted guard and explicit None results and open-event closure remain compatible",
+    "Matching repeated event IDs and frozen metadata retain one row after uncertain postcommit MemoryBusy",
+    "Two concurrent same-ID writers serialize and commit one event",
+    "Idempotent existing-row path still checks guard",
+    "Non-callable guard fails before SQL",
+    "Original MemoryBusy exception and bounded three-attempt business retry remain available",
+    "Speaker diagnostics preserve static exception classes without message bodies",
+    "Visual collector transient/duplicate/stale/clock behavior replays unchanged"
+  ],
+  "lock_scope": "Original ProfileAccess->SQLite ordering is retained. New callback reads is_current, cancel event and monotonic deadline without acquiring a new job/controller/presentation lock. Retry waits occur after the transaction context has exited.",
+  "guard_contract": "Optional pure exception-based check; invalidation must raise. Checks occur after BEGIN acquisition and after insert before the original context commits.",
+  "limits": [
+    "Windows local synthetic Stores and public RAM completion fixtures only",
+    "No Linux writer-lease, actual camera, embedding, acoustic or model acceptance performed",
+    "Baseline unsafe assertions are expected-reproduction cases and do not indicate production capability success",
+    "Production historical evidence-error counters do not establish that all historical failures had this cause",
+    "Persistent MemoryBusy is bounded to three attempts and reports an evidence error"
+  ],
+  "author_sources_original_tests_or_production_modified": false,
+  "devices_network_or_private_data_accessed": false
+}

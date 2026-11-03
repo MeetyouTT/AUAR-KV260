@@ -1,0 +1,86 @@
+{
+  "boot_id": "bec99c5a-5292-4a3e-b180-c52187d6c47b",
+  "cmdline": "earlycon console=ttyPS1,115200 clk_ignore_unused root=/dev/ram0 rw init_fatal_sh=1 cma=1536M zynqmp_dpsub.power_on_delay_ms=5000",
+  "files_modified": 0,
+  "framebuffers": {
+    "fb0": {
+      "name": "xlnxdrmfb",
+      "modes": "U:1024x768p-0",
+      "mode": "",
+      "virtual_size": "1024,1536",
+      "bits_per_pixel": "16"
+    },
+    "fbcon": {}
+  },
+  "fbdev_emulation": "Y",
+  "config": [
+    "CONFIG_DRM_KMS_HELPER=y",
+    "CONFIG_DRM_FBDEV_EMULATION=y",
+    "CONFIG_DRM_ZYNQMP_DPSUB=y",
+    "CONFIG_FB=y",
+    "CONFIG_FRAMEBUFFER_CONSOLE=y",
+    "# CONFIG_FRAMEBUFFER_CONSOLE_LEGACY_ACCELERATION is not set",
+    "# CONFIG_FRAMEBUFFER_CONSOLE_ROTATION is not set",
+    "# CONFIG_FRAMEBUFFER_CONSOLE_DEFERRED_TAKEOVER is not set"
+  ],
+  "fb_device_users": [],
+  "units": {
+    "rc": 0,
+    "text": "MainPID=1092\nNRestarts=0\nExecStart={ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B /home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/startup/launcher.py --config /home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/startup/config.json ; ignore_errors=no ; start_time=[Fri 2021-11-19 09:19:33 PST] ; stop_time=[n/a] ; pid=1092 ; code=(null) ; status=0/0 }\nId=aura-avatar-ui.service\nActiveState=active\n\nMainPID=1003\nNRestarts=0\nExecStart={ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B /home/root/aura-handsfree-dialogue-20261020/candidate-0c0a8ab46ec2/runtime/aura/tools/board_camera_motion.py --config /home/root/aura-handsfree-dialogue-20261020/candidate-0c0a8ab46ec2/camera_live_config/board_camera_ui.json ; ignore_errors=no ; start_time=[Fri 2021-11-19 09:19:33 PST] ; stop_time=[n/a] ; pid=1003 ; code=(null) ; status=0/0 }\nId=aura-camera-ui.service\nActiveState=active\n\nMainPID=1079\nNRestarts=0\nExecStart={ path=/etc/xserver-nodm/Xserver ; argv[]=/etc/xserver-nodm/Xserver ; ignore_errors=no ; start_time=[Fri 2021-11-19 09:19:33 PST] ; stop_time=[n/a] ; pid=1079 ; code=(null) ; status=0/0 }\nId=xserver-nodm.service\nActiveState=active\n"
+  },
+  "protected": {
+    "/home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/startup/config.json": "3721a1f6101a4e14f88cab7f66e4430886206a55b21fafa33c56acf56c9395a0",
+    "/home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/startup/launcher.py": "cd1680220b60f6120db1bc847ca59cfd445796ff37e48a3ba93efca65eddfd98",
+    "/boot/uEnv.txt": "05cd73695dc8797899ee32a02ba5081403f02d5b28b8b89b3b71ffe503279ffe",
+    "/etc/X11/xorg.conf": "164afc02188bb108230acd9a6e54b30ff145d131c6c070579fd501751c20e06e"
+  },
+  "xorg_setup": [
+    "[    21.901] (==) Using config file: \"/etc/X11/xorg.conf\"",
+    "[    21.922] (**) |   |-->Monitor \"<default monitor>\"",
+    "[    21.923] (==) No monitor specified for screen \"DefaultScreen\".",
+    "\tUsing a default monitor configuration.",
+    "\t\"DefaultScreen\" for depth/fbbpp 16/16",
+    "[    22.030] (**) ARMSOC(0): Depth 16, (--) framebuffer bpp 16",
+    "[    22.093] (II) ARMSOC(0): Output DP-1 has no monitor section",
+    "[    22.152] (II) ARMSOC(0): Modeline \"1024x768\"x60.0   65.00  1024 1048 1184 1344  768 771 777 806 -hsync -vsync (48.4 kHz e)",
+    "[    22.152] (II) ARMSOC(0): Using exact sizes for initial modes",
+    "[    22.152] (II) ARMSOC(0): Output DP-1 using initial mode 1024x768 +0+0"
+  ],
+  "early_display": [
+    "[    0.008376] Console: colour dummy device 80x25",
+    "[    4.445752] zynqmp-display fd4a0000.display: vtc bridge property not present",
+    "[    4.505701] xlnx-drm xlnx-drm.0: bound fd4a0000.display (ops 0xffff800009023e78)",
+    "[    9.893356] Console: switching to colour frame buffer device 128x48",
+    "[    9.919668] zynqmp-display fd4a0000.display: [drm] fb0: xlnxdrmfb frame buffer device",
+    "[    9.927743] [drm] Initialized xlnx 1.0.0 20130509 for fd4a0000.display on minor 0",
+    "[    9.935255] zynqmp-display fd4a0000.display: ZynqMP DisplayPort Subsystem driver probed",
+    "[   15.960272] systemd[1]: Starting Load Kernel Module drm...",
+    "[   16.306167] systemd[1]: modprobe@drm.service: Deactivated successfully.",
+    "[   16.314104] systemd[1]: Finished Load Kernel Module drm.",
+    "[   21.514234] [drm] Probing for xlnx,zocl",
+    "[   21.514292] zocl-drm axi:zyxclmm_drm: IRQ index 8 not found",
+    "[   21.514655] [drm] FPGA programming device pcap founded.",
+    "[   21.514701] [drm] PR[0] Isolation addr 0x0",
+    "[   21.517741] [drm] Initialized zocl 0.0.0 00000 for axi:zyxclmm_drm on minor 1",
+    "[   22.062820] zocl-drm axi:zyxclmm_drm: zocl_create_client: created KDS client for pid(1146), ret: 0",
+    "[   22.062938] zocl-drm axi:zyxclmm_drm: zocl_destroy_client: client exits pid(1146)",
+    "[   31.153845] zocl-drm axi:zyxclmm_drm: zocl_create_client: created KDS client for pid(1398), ret: 0",
+    "[   31.153926] zocl-drm axi:zyxclmm_drm: zocl_destroy_client: client exits pid(1398)",
+    "[   31.915198] zocl-drm axi:zyxclmm_drm: zocl_create_client: created KDS client for pid(1398), ret: 0",
+    "[   31.915286] zocl-drm axi:zyxclmm_drm: zocl_destroy_client: client exits pid(1398)",
+    "[   31.915415] zocl-drm axi:zyxclmm_drm: zocl_create_client: created KDS client for pid(1398), ret: 0",
+    "[   31.915466] zocl-drm axi:zyxclmm_drm: zocl_destroy_client: client exits pid(1398)",
+    "[   31.915677] zocl-drm axi:zyxclmm_drm: zocl_create_client: created KDS client for pid(1398), ret: 0",
+    "[   31.915889] zocl-drm axi:zyxclmm_drm: zocl_destroy_client: client exits pid(1398)",
+    "[   31.921705] zocl-drm axi:zyxclmm_drm: zocl_create_client: created KDS client for pid(1398), ret: 0",
+    "[   31.921783] zocl-drm axi:zyxclmm_drm: zocl_destroy_client: client exits pid(1398)",
+    "[   31.921926] zocl-drm axi:zyxclmm_drm: zocl_create_client: created KDS client for pid(1398), ret: 0",
+    "[   31.940600] [drm] skip kind 29(AIE_RESOURCES) return code: -22",
+    "[   31.940618] [drm] found kind 8(IP_LAYOUT)",
+    "[   31.940627] [drm] skip kind 9(DEBUG_IP_LAYOUT) return code: -22",
+    "[   31.940632] [drm] skip kind 25(AIE_METADATA) return code: -22",
+    "[   31.940636] [drm] found kind 7(CONNECTIVITY)",
+    "[   31.940643] [drm] found kind 6(MEM_TOPOLOGY)",
+    "[   31.940772] [drm] Memory 0 is not reserved in device tree. Will allocate memory from CMA"
+  ]
+}

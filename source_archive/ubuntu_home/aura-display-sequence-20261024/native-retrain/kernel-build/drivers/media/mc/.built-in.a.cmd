@@ -1,0 +1,1 @@
+cmd_drivers/media/mc/built-in.a := echo >/dev/null; rm -f drivers/media/mc/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/media/mc/built-in.a drivers/media/mc/mc-device.o drivers/media/mc/mc-devnode.o drivers/media/mc/mc-entity.o drivers/media/mc/mc-request.o drivers/media/mc/mc-dev-allocator.o

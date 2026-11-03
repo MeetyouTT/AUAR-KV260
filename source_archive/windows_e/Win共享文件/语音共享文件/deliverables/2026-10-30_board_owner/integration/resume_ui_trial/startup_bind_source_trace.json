@@ -1,0 +1,58 @@
+{
+  "status": "LOCAL_SOURCE_TRACE_ONLY_NO_DEVICE_CALL",
+  "source_zip_sha256": "2c25b6a91a635a9bb70eef00cdc180829c503cdba3382135f8366c72e3242334",
+  "source_sha256": {
+    "tools/board_avatar_pan.py": "9bdc7ed97da9a3f33ba33604e3488d04165f603dd3b43f9f90f7c3032790c1a3",
+    "tools/face_pan_controls.py": "3ebb1b32368c8f12864e0f13da68853e4d9653e4279eada124eb337c5ca9d7ee",
+    "tools/pan_controls.py": "0a6571320fa7f45b1bc4049d000b85f8ce40434bcb266af4368242543cd99aa1",
+    "tools/board_avatar_gtk.py": "2792c2828b8553171c2dac81a55fb7ac19dade5305e8debd81c7cb02671d4f5e",
+    "tools/realtime_bridge.py": "685b55c8c9692aa6768ec9bb637a0b4cfe486481945a4777d7369336e028f825",
+    "tools/yuki_business_gui.py": "f10f3d9e41bf48761428d39f850fd797640348f8723884590596e99475ee5e94"
+  },
+  "failure_input_sha256": "e47f1709b8e766da7d76b3a3c7b095e813546a2b6f8298ddc0fe2b912c4129d9",
+  "candidate_pid": 454787,
+  "initialization": {
+    "chain": [
+      "board_avatar_pan.main stage_type(original)",
+      "FaceStage.__init__ single super",
+      "PanStage.__init__ single super",
+      "BoardAvatarStage.__init__"
+    ],
+    "face_super_init_calls": 1,
+    "pan_super_init_calls": 1,
+    "board_stage_bridge_calls": 1,
+    "bridge_line": 295,
+    "build_window_line": 298,
+    "failure_before_window_and_native_first_swap": true,
+    "business_activate_before_failure": false
+  },
+  "bind": {
+    "module": "tools/realtime_bridge.py",
+    "server": "ExclusiveServer",
+    "allow_reuse_address": false,
+    "address": "127.0.0.1",
+    "port": 8783,
+    "error": "EADDRINUSE"
+  },
+  "original_supervisor": {
+    "sha256": "5b15a8cf1813935679e5f4d30eb788e9c8d6ae18826669009d06c92cba152e03",
+    "port_wait_default_seconds": 70,
+    "port_wait_call_line": 333,
+    "child_spawn_line": 384,
+    "waits_before_spawn": true,
+    "source_note": "Explicit original comment: exclusive HTTP can leave TIME_WAIT; waits without killing another process."
+  },
+  "direct_candidate_launch": {
+    "helper": "launch_v2.py",
+    "source_sha256": "d87375185bfb5c5f2956a0b4400966ec1c2c2717c1c64dc2f83312e7575c3a71",
+    "port_wait_implemented": false
+  },
+  "conclusion": "Pinned source has one GTK initializer path and one StageBridge bind; no source evidence of double initialization.",
+  "inference": "Exclusive rebind during old8783 TIME_WAIT is a strong candidate because direct launch skips the existing supervisor port wait. Live owner/state metadata is required to confirm it.",
+  "parent_readonly_followup": "Classify /proc/net/tcp{,6} local port224F: state0A LISTEN needs exact owner proof; state06 TIME_WAIT without LISTEN supports wait. Preserve exclusive bind semantics and all other owners.",
+  "next_candidate_source_option": "Before future direct launch, under same flock/guard/source checks and original finite startup budget, wait for a bind probe with the same no-reuse semantics. Do not enable reuse, change ports blindly, kill an owner or modify TCP sysctls.",
+  "actual_inference_or_gles_test": false,
+  "device_calls": 0,
+  "service_calls": 0,
+  "source_changed": false
+}

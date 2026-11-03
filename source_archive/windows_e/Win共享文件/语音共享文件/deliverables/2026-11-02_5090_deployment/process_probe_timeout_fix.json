@@ -1,0 +1,127 @@
+{
+  "passed": true,
+  "observed_utc": "2026-11-02T02:34:58.210500+00:00",
+  "change": "Only subprocess timeout upper bound 1.2 -> 2.5 seconds, still capped by remaining original deadline; all ownership logic unchanged",
+  "backup": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\before\\model_inference_host.before_probe_timeout_20261102.py",
+  "source_sha256": "b4ea2359d7bda3eee38736a6fc39b1a0c6c78a955b7a683f4daafd52b7596be5",
+  "probes": [
+    {
+      "kind": "short_original_deadline",
+      "seconds": 0.18699999999989814,
+      "result": {
+        "available": false,
+        "error": "process_probe_unavailable"
+      }
+    },
+    {
+      "kind": "real_fresh_process_probe",
+      "seconds": 1.172,
+      "result": {
+        "available": true,
+        "logical_workers": 0,
+        "external_workers": 0,
+        "owned_workers": 0,
+        "workers": [],
+        "scope": "read-only process metadata; launcher and interpreter children form one family"
+      }
+    },
+    {
+      "kind": "real_fresh_process_probe",
+      "seconds": 1.109,
+      "result": {
+        "available": true,
+        "logical_workers": 0,
+        "external_workers": 0,
+        "owned_workers": 0,
+        "workers": [],
+        "scope": "read-only process metadata; launcher and interpreter children form one family"
+      }
+    }
+  ],
+  "read_only_backend_preflight": {
+    "protocol_version": 1,
+    "ok": true,
+    "observation_only": true,
+    "reservation": false,
+    "gpu_policy": {
+      "mode": "adaptive",
+      "enforcing": true,
+      "calibration_id": "5090laptop24gb-27biq4xs-ctx2048-ov16-20261102-r1"
+    },
+    "memory": {
+      "available": true,
+      "gpu_uuid": "GPU-545096ea-2253-8cb8-e6a6-7dd1969e5853",
+      "total_mib": 24463,
+      "free_mib": 22145,
+      "used_mib": 1993,
+      "age_ms": 0,
+      "scope": "device snapshot; not a reservation or inference peak"
+    },
+    "llm_residency": {
+      "available": true,
+      "llm_resident": false,
+      "llm_gpu_resident": false,
+      "llm_gpu_bytes": 0,
+      "model": "aura-qwen3.8-27b-abliterated:iq4_xs",
+      "scope": "Ollama /api/ps; independent of /api/tags model availability",
+      "fresh": true,
+      "sampled_mono": 2769.796,
+      "age_ms": 0,
+      "ttl_ms": 2000,
+      "probe_calls": 1
+    },
+    "tts_ownership": {
+      "available": true,
+      "logical_workers": 0,
+      "external_workers": 0,
+      "owned_workers": 0,
+      "workers": [],
+      "scope": "read-only process metadata; launcher and interpreter children form one family"
+    },
+    "tts_ready": false,
+    "admission": {
+      "llm": {
+        "extra_mib": 14848,
+        "reserve_mib": 1024,
+        "active_reserved_mib": 0,
+        "required_free_mib": 15872,
+        "observed_free_mib": 22145,
+        "shortfall_mib": 0,
+        "can_admit_now": true,
+        "reason": "snapshot_headroom_available",
+        "phase": "cold_or_unknown"
+      },
+      "tts": {
+        "extra_mib": 5888,
+        "reserve_mib": 1024,
+        "active_reserved_mib": 0,
+        "required_free_mib": 6912,
+        "observed_free_mib": 22145,
+        "shortfall_mib": 0,
+        "can_admit_now": true,
+        "reason": "snapshot_headroom_available",
+        "phase": "cold_or_unknown"
+      }
+    },
+    "startup": {
+      "can_warm_unique_tts_now": true,
+      "blocked_reasons": [],
+      "order": [
+        "externally_release_old_tts_owner",
+        "explicit_ram_tts_warmup",
+        "verify_same_owned_worker_ready",
+        "recheck_original_llm_admission",
+        "load_existing_27b",
+        "recheck_steady_tts_admission"
+      ],
+      "cold_tts_required_free_mib": 6912,
+      "post_warmup_llm_admission_must_be_rechecked": true,
+      "external_business_single_writer_confirmation_required": true,
+      "external_idle_and_process_ownership_confirmation_required": true,
+      "external_rollback_plan_required": true,
+      "automatic_stop_or_unload": false
+    }
+  },
+  "regression": "host_regression_probe_timeout_fix.log: 101 passed, 5 subtests passed",
+  "actual_models_started": false
+}

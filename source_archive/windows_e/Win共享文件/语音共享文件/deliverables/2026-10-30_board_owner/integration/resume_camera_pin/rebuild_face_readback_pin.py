@@ -1,0 +1,510 @@
+"""Read-only fresh camera-owner proof; optionally create one private candidate.
+
+Never opens a gallery database, camera, model runner, GPIO or network connection.
+The old source pins and INT8 identity/model/gallery selection remain mandatory.
+Default requires identical runtime bytes. An explicit reviewed runtime/seed pair
+may accept only the pinned native launcher's sealed predecessor-checkpoint SHA
+refresh, after proving the unchanged source/model chain and consumed boot archive.
+Nothing is installed, reloaded, overwritten or enabled by this script.
+"""
+import argparse
+import copy
+import hashlib
+import json
+import os
+from pathlib import Path, PurePosixPath
+import re
+import stat
+import subprocess
+import time
+
+
+ENTRY = '/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/face-source-v17/entry.py'
+ENTRY_SHA256 = 'f26be22cb640bf44a1bd81b66bb3fa014f5b847b13320781836bf3f173387623'
+UNIT = 'aura-camera-ui.service'
+FIELDS = {'version','enabled','board_boot_id','camera_pid','camera_start_ticks','camera_cmdline_sha256',
+          'camera_config','identity_config','source_sha256','database','model_id','dimension','model_sha256','result_ttl_ms','backend'}
+
+# Reviewed metadata from the existing original operator deployment. These are
+# source/ABI identity anchors, not a new operator request or permission to retry
+# recovery. Its historical request_boot_id and every protection value stay as-is.
+REVIEWED_OPERATOR = {
+    'runtime_manifest':'74e011db30a9d943a9512f7648190ac0c01060af06df1280d1e8ea006dc882ad',
+    'settings':'5d5e3460c4430fe0178e803eaac94ddac48c2eae0f773019b5aca36d8c6f74a7',
+    'identity_recovery':'64831498d8497c2087b3bb1543367e8cc1917ca131694000884f2d58e60990f7',
+    'predecessor_unit':'29786434df9bb9b94a8e640a7a48db47019c224d3876037ce27d3467bb2f5512',
+    'unit':'7cf7eaeecd70e62301d3e12e95d5df6a23bd3e5847ed854200c712598b703c32',
+    'library':'704f561a50b5f0fb8f9b4cf72c024acce0cdafd888cad0784507f484518fc224',
+}
+
+
+class PinRejected(ValueError):
+    def __init__(self,code,fields=()):
+        self.code,self.fields = code,list(fields)
+        super().__init__(code)
+
+
+def digest(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def canonical(value):
+    return json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode('utf-8')
+
+
+def path(value):
+    if (not isinstance(value,str) or not value.startswith('/') or '..' in PurePosixPath(value).parts
+            or any(ord(c)<32 for c in value)):
+        raise PinRejected('INVALID_SOURCE_PATH')
+    return PurePosixPath(value)
+
+
+def differences(old,new,prefix='',maximum=32):
+    """Only old schema field names; never print source values/new arbitrary keys."""
+    if not isinstance(old,dict) or not isinstance(new,dict):
+        return [prefix or '<root>'] if old != new else []
+    result = []
+    for key in sorted(old):
+        label = prefix+'.'+key if prefix else key
+        if key not in new:
+            result.append(label)
+        elif old[key] != new[key]:
+            result.extend(differences(old[key],new[key],label,maximum) if label.count('.') < 5 else [label])
+        if len(result)>=maximum:
+            return result[:maximum]
+    if set(new)-set(old):
+        result.append((prefix+'.' if prefix else '')+'<additional_fields>')
+    return result[:maximum]
+
+
+class LiveReader:
+    def read(self,name,maximum=2*1024*1024):
+        with Path(name).open('rb') as stream:
+            raw = stream.read(maximum+1)
+        if len(raw)>maximum:
+            raise PinRejected('SOURCE_METADATA_TOO_LARGE')
+        return raw
+    def hash(self,name):
+        result = hashlib.sha256()
+        with Path(name).open('rb') as stream:
+            for chunk in iter(lambda:stream.read(1024*1024),b''):
+                result.update(chunk)
+        return result.hexdigest()
+    def boot(self):
+        return self.read('/proc/sys/kernel/random/boot_id',256).decode('ascii').strip()
+    def private_metadata(self,name):
+        p=Path(name); info=p.lstat()
+        return (not p.is_symlink() and p.resolve(strict=True)==p.absolute()
+                and stat.S_ISREG(info.st_mode) and info.st_uid==os.geteuid() and not info.st_mode&0o077)
+    def monotonic_ns(self):
+        return time.monotonic_ns()
+    def clock_ticks(self):
+        return os.sysconf('SC_CLK_TCK')
+    def mapped_file(self,pid,name):
+        # Inspect only whether this approved library is mapped. No runner is
+        # loaded and no other process map names/addresses leave this reader.
+        lines=self.read('/proc/'+str(pid)+'/maps',4*1024*1024).decode('utf-8').splitlines()
+        return any(len(parts)==6 and parts[5]==name for parts in (line.split(None,5) for line in lines))
+    def python_paths(self,root):
+        root=Path(root)
+        return {str(item.relative_to(root)) for item in root.rglob('*.py') if not item.is_symlink()}
+    def unit(self):
+        properties = ('MainPID','ActiveState','SubState','ExecStart','ControlGroup')
+        output = subprocess.check_output(['systemctl','--no-pager','show',UNIT]+[
+            item for key in properties for item in ('-p',key)],text=True,timeout=5)
+        return dict(line.split('=',1) for line in output.splitlines() if '=' in line)
+    def process(self,pid):
+        root = Path('/proc')/str(pid)
+        command = self.read(str(root/'cmdline'),16384)
+        process_stat = self.read(str(root/'stat'),16384).decode('utf-8')
+        fields = process_stat.rsplit(')',1)[1].split()
+        if not process_stat.startswith(str(pid)+' (') or len(fields)<20 or fields[0] in ('Z','X'):
+            raise PinRejected('CAMERA_PROCESS_NOT_LIVE')
+        argv = command.rstrip(b'\x00').decode('utf-8').split('\x00')
+        return dict(pid=pid,start_ticks=fields[19],cmdline_sha256=digest(command),argv=argv,
+                    executable=str((root/'exe').resolve(strict=True)),
+                    argv_executable=str(Path(argv[0]).resolve(strict=True)),
+                    cgroups=[line.split(':',2)[2] for line in self.read(str(root/'cgroup'),16384).decode().splitlines() if line.count(':')>=2])
+
+
+def read_json(reader,name):
+    try:
+        value = json.loads(reader.read(str(name)).decode('utf-8'))
+    except (ValueError,UnicodeError):
+        raise PinRejected('INVALID_SOURCE_JSON') from None
+    if not isinstance(value,dict):
+        raise PinRejected('INVALID_SOURCE_JSON')
+    return value
+
+
+def observed_owner(reader,expected_boot,expected_pid,entry):
+    boot = reader.boot(); unit = reader.unit()
+    if boot != expected_boot:
+        raise PinRejected('FRESH_BOOT_MISMATCH')
+    if (unit.get('MainPID') != str(expected_pid) or unit.get('ActiveState') != 'active'
+            or unit.get('SubState') != 'running' or unit.get('ControlGroup') != '/system.slice/'+UNIT):
+        raise PinRejected('SYSTEMD_CAMERA_OWNER_MISMATCH')
+    process = reader.process(expected_pid)
+    if (process.get('pid') != expected_pid or process.get('argv') != ['/usr/bin/python3','-B',entry]
+            or process.get('executable') != process.get('argv_executable')
+            or unit['ControlGroup'] not in process.get('cgroups',[]) or not re.fullmatch(r'[0-9]+',process.get('start_ticks',''))):
+        raise PinRejected('PROC_CAMERA_OWNER_MISMATCH')
+    # Both selected next start and actually running argv must identify this entry.
+    command = unit.get('ExecStart','')
+    match = re.search(r'argv\[\]=([^;]+)\s*;',command)
+    if match is None or match[1].strip().split() != ['/usr/bin/python3','-B',entry]:
+        raise PinRejected('SYSTEMD_EXECSTART_DIFFERS_FROM_PROC')
+    return dict(board_boot_id=boot,camera_pid=expected_pid,camera_start_ticks=process['start_ticks'],
+                camera_cmdline_sha256=process['cmdline_sha256'])
+
+
+def _sha(value):
+    return isinstance(value,str) and re.fullmatch(r'[0-9a-f]{64}',value) is not None
+
+
+def _metadata_json(reader,name,proofs,*,private=False):
+    name=str(path(name))
+    if private and not reader.private_metadata(name):
+        raise PinRejected('REVIEWED_CHECKPOINT_METADATA_NOT_PRIVATE')
+    raw=reader.read(name,262144)
+    if len(raw)>262144:
+        raise PinRejected('REVIEWED_METADATA_TOO_LARGE')
+    actual=digest(raw)
+    if name in proofs and proofs[name]!=actual:
+        raise PinRejected('REVIEWED_METADATA_CHANGED_DURING_PROBE')
+    proofs[name]=actual
+    def unique(pairs):
+        value={}
+        for key,item in pairs:
+            if key in value:raise PinRejected('DUPLICATE_REVIEWED_METADATA_FIELD')
+            value[key]=item
+        return value
+    def constant(_):
+        raise PinRejected('INVALID_REVIEWED_METADATA_NUMBER')
+    try:
+        value=json.loads(raw.decode('utf-8'),object_pairs_hook=unique,parse_constant=constant)
+    except (ValueError,UnicodeError) as exc:
+        if isinstance(exc,PinRejected):raise
+        raise PinRejected('INVALID_REVIEWED_METADATA_JSON') from None
+    if not isinstance(value,dict):raise PinRejected('INVALID_REVIEWED_METADATA_JSON')
+    return value
+
+
+def reviewed_seed_change(config,old_camera,camera,reader,meta,owner,*,runtime_sha256,seed_sha256):
+    """Read/prove the existing native protection history; never restore it.
+
+    This does not attest BOOT/FDT/FPGA/VART or mechanical readiness. Those are
+    separate protections, unchanged here. The seed schema is a sealed camera
+    predecessor counter/history checkpoint, not a mechanical binding file.
+    """
+    if not _sha(runtime_sha256) or not _sha(seed_sha256):
+        raise PinRejected('EXPLICIT_REVIEWED_RUNTIME_AND_SEED_SHA_REQUIRED')
+    if differences(old_camera,camera)!=['native_execution.seed.sha256']:
+        raise PinRejected('REVIEWED_CHANGE_NOT_EXACT_SEED_SHA',differences(old_camera,camera))
+    native=camera['native_execution']; seed_pin=native['seed']
+    if set(seed_pin)!={'path','sha256'} or seed_pin['sha256']!=seed_sha256:
+        raise PinRejected('REVIEWED_SEED_SHA_MISMATCH')
+    seed_path=str(path(seed_pin['path']))
+    if seed_path!=native.get('checkpoint_output') or native.get('allow_new_kernel_boot') is not True:
+        raise PinRejected('REVIEWED_SEED_NOT_PINNED_LAUNCHER_CHECKPOINT')
+    proofs={}; static={}
+    document=_metadata_json(reader,seed_path,proofs,private=True)
+    if proofs[seed_path]!=seed_sha256:raise PinRejected('REVIEWED_SEED_BYTES_MISMATCH')
+    seed=document.get('seed',{}); auxiliary=document.get('auxiliary',{})
+    if not isinstance(seed,dict) or not isinstance(auxiliary,dict):
+        raise PinRejected('REVIEWED_SEED_NOT_SEALED_QUIESCENT_CAMERA_HISTORY')
+    if (document.get('schema')!='aura-native-protection-checkpoint-2'
+            or document.get('scope')!='final_quiescent_before_native_owner_close'
+            or any(type(seed.get(k)) is not int for k in ('abi_version','struct_size','checkpoint_kind','fenced'))
+            or seed.get('abi_version')!=2 or seed.get('struct_size')!=520 or seed.get('checkpoint_kind')!=1
+            or seed.get('purpose')!='final_quiescent_business_checkpoint' or seed.get('fenced')!=0
+            or any(type(auxiliary.get(k)) is not int or auxiliary[k]!=0 for k in ('active','primary_waiting','fenced'))
+            or auxiliary.get('pending_result_tokens')!=[0,0,0]
+            or any(type(x) is not int for x in auxiliary.get('pending_result_tokens',[]))):
+        raise PinRejected('REVIEWED_SEED_NOT_SEALED_QUIESCENT_CAMERA_HISTORY')
+    # The source is the old *camera* owner, including its birth, not a new
+    # current-boot zero counter seed or a reused PID from unrelated work.
+    if (seed.get('boot_id')!=config['board_boot_id'] or seed['boot_id']==owner['board_boot_id']
+            or type(seed.get('source_pid')) is not int or seed['source_pid']!=config['camera_pid']
+            or type(seed.get('source_birth_ticks')) is not int
+            or str(seed['source_birth_ticks'])!=config['camera_start_ticks']
+            or type(seed.get('captured_mono_ns')) is not int or seed['captured_mono_ns']<=0):
+        raise PinRejected('REVIEWED_SEED_PREDECESSOR_OWNER_MISMATCH')
+    source_manifest=str(path(native.get('source_manifest')))
+    manifest=_metadata_json(reader,source_manifest,proofs)
+    if (proofs[source_manifest]!=native.get('source_manifest_sha256')
+            or seed.get('source_manifest_sha256')!=proofs[source_manifest]
+            or manifest.get('schema')!='aura-native-python-source-2'
+            or not isinstance(manifest.get('files'),dict) or not 1<=len(manifest['files'])<=4096):
+        raise PinRejected('REVIEWED_NATIVE_SOURCE_MANIFEST_MISMATCH')
+    source_root=path(meta['candidate_root'])/'aura'
+    for relative,expected in manifest['files'].items():
+        item=PurePosixPath(relative)
+        if (not isinstance(relative,str) or item.is_absolute() or '..' in item.parts
+                or str(item)!=relative or item.suffix!='.py' or not _sha(expected)):
+            raise PinRejected('UNSAFE_REVIEWED_NATIVE_SOURCE_MANIFEST')
+        name=str(source_root/item)
+        if reader.hash(name)!=expected:raise PinRejected('REVIEWED_NATIVE_SOURCE_FILE_CHANGED')
+        proofs[name]=expected
+    if reader.python_paths(str(source_root))!=set(manifest['files']):
+        raise PinRejected('REVIEWED_NATIVE_SOURCE_CLOSURE_CHANGED')
+    static[source_manifest]=proofs[source_manifest]
+    if manifest['files'].get('board/vision/ui_camera_service.py')!=meta['candidate_ui_sha256']:
+        raise PinRejected('REVIEWED_NATIVE_UI_SOURCE_MISMATCH')
+    # The existing operator has a separately pinned, exact ABI-compatible unit.
+    # Check its manifest/settings/library without installing or importing it.
+    ops=path(meta['root']); operator=ops/'pan-face-edge-v5/native-operator-v1'
+    settings_path=str(operator/'settings.json'); runtime_path=str(operator/'runtime-manifest.json')
+    settings=_metadata_json(reader,settings_path,proofs)
+    runtime=_metadata_json(reader,runtime_path,proofs)
+    if (proofs[settings_path]!=REVIEWED_OPERATOR['settings']
+            or proofs[runtime_path]!=REVIEWED_OPERATOR['runtime_manifest']
+            or runtime.get('schema')!='aura-native-operator-runtime-1'
+            or settings.get('schema')!='aura-explicit-native-operator-request-1'
+            or not isinstance(runtime.get('files'),dict) or not 1<=len(runtime['files'])<=128):
+        raise PinRejected('REVIEWED_OPERATOR_METADATA_SHA_MISMATCH')
+    expected_unit=REVIEWED_OPERATOR['unit']; effective_library=str(operator/'libaura_native_operator.so')
+    if (native.get('source_unit_sha256')!=REVIEWED_OPERATOR['predecessor_unit']
+            or settings.get('predecessor_unit_sha256')!=native['source_unit_sha256']
+            or settings.get('unit_sha256')!=expected_unit or document.get('source_unit_sha256')!=expected_unit
+            or settings.get('old_library')!=native.get('library')
+            or settings.get('old_library_sha256')!=native.get('library_sha256')
+            or settings.get('library')!=effective_library
+            or settings.get('library_sha256')!=REVIEWED_OPERATOR['library']):
+        raise PinRejected('REVIEWED_OPERATOR_UNIT_OR_LIBRARY_IDENTITY_MISMATCH')
+    required={settings_path:REVIEWED_OPERATOR['settings'],str(operator/'identity_recovery.py'):REVIEWED_OPERATOR['identity_recovery'],
+              str(operator/'source-manifest.json'):expected_unit,effective_library:REVIEWED_OPERATOR['library'],
+              str(operator/'native_entry_operator.py'):config['source_sha256'][str(operator/'native_entry_operator.py')],
+              str(ops/'native_entry_pan_face_v5.py'):config['source_sha256'][str(ops/'native_entry_pan_face_v5.py')]}
+    if any(runtime['files'].get(name)!=value for name,value in required.items()):
+        raise PinRejected('REVIEWED_OPERATOR_MANIFEST_BINDING_MISMATCH')
+    for name,expected in runtime['files'].items():
+        target=path(name)
+        if (ops not in target.parents or target.suffix not in ('.py','.json','.so')
+                or not _sha(expected) or reader.hash(name)!=expected):
+            raise PinRejected('REVIEWED_OPERATOR_ARTIFACT_MISMATCH')
+        proofs[name]=expected
+        if target.suffix in ('.py','.json'):static[name]=expected
+    old_library=str(path(native['library']))
+    if reader.hash(old_library)!=native['library_sha256']:
+        raise PinRejected('REVIEWED_PREDECESSOR_LIBRARY_SHA_MISMATCH')
+    proofs[old_library]=native['library_sha256']
+    if not reader.mapped_file(owner['camera_pid'],effective_library):
+        raise PinRejected('REVIEWED_OPERATOR_LIBRARY_NOT_MAPPED_BY_CAMERA')
+    static[runtime_path]=proofs[runtime_path]
+    # Re-read the already consumed current-boot marker and its archived sealed
+    # predecessor. Do not create/consume/remove markers or replay admission.
+    directory=path(native.get('new_boot_marker_directory'))
+    marker_path=str(directory/('kernel-boot-'+owner['board_boot_id']+'.consumed'))
+    marker=_metadata_json(reader,marker_path,proofs,private=True)
+    archive_path=str(directory/'archive'/(owner['board_boot_id']+'-'+seed_sha256+'.json'))
+    if (marker.get('schema')!='aura-native-current-kernel-consumption-1'
+            or marker.get('boot')!=owner['board_boot_id'] or marker.get('source_checkpoint_sha256')!=seed_sha256
+            or marker.get('archive_path')!=archive_path or not _sha(marker.get('archive_sha256'))):
+        raise PinRejected('REVIEWED_BOOT_CONSUMPTION_BINDING_MISMATCH')
+    ticks=reader.clock_ticks(); captured=marker.get('captured_mono_ns')
+    if (type(ticks) is not int or not 1<=ticks<=1000000 or type(captured) is not int
+            or not int(owner['camera_start_ticks'])*1000000000//ticks<=captured<=reader.monotonic_ns()):
+        raise PinRejected('REVIEWED_BOOT_CONSUMPTION_PREDATES_CURRENT_OWNER')
+    archive=_metadata_json(reader,archive_path,proofs,private=True)
+    if (proofs[archive_path]!=marker['archive_sha256']
+            or archive.get('schema')!='aura-native-previous-kernel-archive-1'
+            or archive.get('current_boot')!=owner['board_boot_id'] or archive.get('source_boot')!=seed['boot_id']
+            or archive.get('source_checkpoint_sha256')!=seed_sha256 or archive.get('source_checkpoint_path')!=seed_path
+            or archive.get('source_manifest_sha256')!=seed['source_manifest_sha256']
+            or archive.get('history_is_lower_bound') is not False or archive.get('unknown_tail') is not False
+            or archive.get('checkpoint')!=document):
+        raise PinRejected('REVIEWED_BOOT_ARCHIVE_BINDING_MISMATCH')
+    public=dict(mode='explicit_reviewed_native_camera_checkpoint_sha_only',seed_sha256=seed_sha256,
+        runtime_sha256=runtime_sha256,predecessor_unit_sha256=native['source_unit_sha256'],
+        source_unit_sha256=expected_unit,operator_manifest_sha256=proofs[runtime_path],
+        boot_marker_sha256=proofs[marker_path],archive_sha256=proofs[archive_path],
+        existing_boot_consumption_verified=True,operator_library_mapped=True,
+        operator_request_executed=False,counters_or_recovery_state_modified=False,
+        hardware_or_mechanical_readiness_asserted=False)
+    return dict(public=public,recheck=proofs,additional_static_pins=static,effective_library=effective_library,
+                source_root=str(source_root),source_paths=set(manifest['files']))
+
+
+def build_candidate(config,reader,*,expected_boot,expected_pid,entry=ENTRY,entry_sha256=ENTRY_SHA256,
+                    expected_current_runtime_sha256=None,expected_current_seed_sha256=None):
+    if (expected_current_runtime_sha256 is None)!=(expected_current_seed_sha256 is None):
+        raise PinRejected('REVIEWED_RUNTIME_AND_SEED_PAIR_REQUIRED')
+    if set(config) != FIELDS or config.get('version') != 1 or config.get('enabled') is not True:
+        raise PinRejected('UNSUPPORTED_READBACK_SCHEMA')
+    if not re.fullmatch(r'[0-9a-f-]{36}',expected_boot or '') or type(expected_pid) is not int or expected_pid<1:
+        raise PinRejected('EXPLICIT_FRESH_OWNER_REQUIRED')
+    pins = config.get('source_sha256')
+    if (not isinstance(pins,dict) or not pins or len(pins)>128 or pins.get(entry) != entry_sha256
+            or any(not isinstance(value,str) or not re.fullmatch(r'[0-9a-f]{64}',value) for value in pins.values())):
+        raise PinRejected('ORIGINAL_ENTRY_PIN_REQUIRED')
+    path(entry)
+    for name,expected in pins.items():
+        source = path(name)
+        if source.suffix not in ('.json','.py') or '.local' in source.parts or str(source) == config['database']:
+            raise PinRejected('UNSAFE_ORIGINAL_SOURCE_PIN')
+        if reader.hash(name) != expected:
+            raise PinRejected('ORIGINAL_SOURCE_SHA_MISMATCH')
+    first = observed_owner(reader,expected_boot,expected_pid,entry)
+    if (first['board_boot_id'] == config['board_boot_id'] and first['camera_pid'] == config['camera_pid']
+            and first['camera_start_ticks'] != config['camera_start_ticks']):
+        raise PinRejected('OLD_PID_REUSED')
+    ops = path(entry).parents[2]
+    selected = [ops/'meta.json',ops/'native_entry.py',ops/'native_entry_pan_face_v5.py',
+                ops/'pan-face-edge-v5/native-operator-v1/native_entry_operator.py']
+    if any(str(name) not in pins for name in selected):
+        raise PinRejected('NATIVE_LAUNCH_CHAIN_NOT_PINNED')
+    meta = read_json(reader,selected[0])
+    if meta.get('root') != str(ops):
+        raise PinRejected('NATIVE_LAUNCH_ROOT_CHANGED')
+    candidate_config = str(path(meta.get('candidate_config')))
+    ui_source = str(path(meta.get('candidate_root'))/'aura/board/vision/ui_camera_service.py')
+    if candidate_config not in pins or pins.get(ui_source) != meta.get('candidate_ui_sha256'):
+        raise PinRejected('CAMERA_SELECTION_SOURCE_CHANGED')
+    old_runtime = str(path(config['camera_config']))
+    if old_runtime not in pins or config['identity_config'] not in pins:
+        raise PinRejected('CONFIG_CHAIN_NOT_PINNED')
+    # This exact deterministic path is created by the pinned native_entry.py.
+    current_runtime = str(ops/('native-run-'+expected_boot+'-'+str(expected_pid))/'config.json')
+    old_camera = read_json(reader,old_runtime); camera = read_json(reader,current_runtime)
+    old_hash,new_hash = pins[old_runtime],reader.hash(current_runtime)
+    seed_review=None
+    if new_hash != old_hash:
+        if expected_current_runtime_sha256 is None:
+            raise PinRejected('GENERATED_CAMERA_CONFIG_BYTES_CHANGED',differences(old_camera,camera))
+        if new_hash!=expected_current_runtime_sha256:
+            raise PinRejected('REVIEWED_CURRENT_RUNTIME_SHA_MISMATCH')
+        seed_review=reviewed_seed_change(config,old_camera,camera,reader,meta,first,
+            runtime_sha256=expected_current_runtime_sha256,seed_sha256=expected_current_seed_sha256)
+    elif expected_current_runtime_sha256 is not None:
+        raise PinRejected('REVIEWED_CHANGE_NOT_EXACT_SEED_SHA',differences(old_camera,camera))
+    identity_path = str(path(config['identity_config']))
+    if camera.get('identity') != {'enabled':True,'config':identity_path}:
+        raise PinRejected('ACTUAL_IDENTITY_SELECTION_CHANGED')
+    identity = read_json(reader,identity_path)
+    backend = identity.get('feature_backend',{})
+    if (identity.get('schema_version') != 'aura-camera-identity-1' or identity.get('database') != config['database']
+            or identity.get('model_id') != config['model_id'] or identity.get('result_ttl_ms') != config['result_ttl_ms']
+            or backend.get('kind') != 'dpu_sface' or backend.get('model_sha256') != config['model_sha256']
+            or config['dimension'] != 128 or config['backend'] != 'DPU_SFACE_INT8'
+            or config['model_id'] != 'sface-int8-'+config['model_sha256'][:16]):
+        raise PinRejected('ORIGINAL_INT8_IDENTITY_CHAIN_CHANGED')
+    path(config['database'])  # Compare metadata only. Never stat/open/hash the DB.
+    model_proofs = {}
+    for name,section in (('feature',backend),('face',identity.get('face_backend',{}))):
+        if not section:
+            continue
+        for filename,hash_key in (('model','model_sha256'),('manifest','manifest_sha256')):
+            target = str(path(section.get(filename))); expected = section.get(hash_key)
+            if (target == config['database'] or not isinstance(expected,str) or not re.fullmatch(r'[0-9a-f]{64}',expected)
+                    or PurePosixPath(target).suffix not in ('.json','.xmodel') or reader.hash(target) != expected):
+                raise PinRejected('ACTUAL_DPU_MODEL_SHA_MISMATCH')
+            model_proofs[name+'_'+hash_key] = expected
+    second = observed_owner(reader,expected_boot,expected_pid,entry)
+    if second != first:
+        raise PinRejected('CAMERA_PROCESS_REUSED_DURING_PROBE')
+    if any(reader.hash(name) != value for name,value in pins.items()) or reader.hash(current_runtime) != new_hash:
+        raise PinRejected('SOURCE_CHANGED_DURING_PROBE')
+    if seed_review is not None:
+        if (any(reader.hash(name)!=value for name,value in seed_review['recheck'].items())
+                or not reader.mapped_file(expected_pid,seed_review['effective_library'])
+                or reader.python_paths(seed_review['source_root'])!=seed_review['source_paths']
+                or read_json(reader,current_runtime)!=camera):
+            raise PinRejected('REVIEWED_SEED_PROOF_CHANGED_DURING_PROBE')
+    for name,section in (('feature',backend),('face',identity.get('face_backend',{}))):
+        if section and any(reader.hash(str(path(section[key]))) != section[hash_key] for key,hash_key in
+                           (('model','model_sha256'),('manifest','manifest_sha256'))):
+            raise PinRejected('DPU_MODEL_CHANGED_DURING_PROBE')
+    candidate = copy.deepcopy(config); candidate.update(first)
+    candidate['camera_config'] = current_runtime
+    candidate['source_sha256'][current_runtime] = new_hash  # Preserve every original pin.
+    if seed_review is not None:
+        for name,value in seed_review['additional_static_pins'].items():
+            if name in pins and pins[name]!=value:
+                raise PinRejected('REVIEWED_EXTENSION_WOULD_REPLACE_ORIGINAL_SOURCE_PIN')
+            candidate['source_sha256'][name]=value
+        if len(candidate['source_sha256'])>128:
+            raise PinRejected('REVIEWED_SOURCE_PIN_CAPACITY_EXCEEDED')
+    changes = [key for key in config if candidate[key] != config[key]]
+    observation = dict(owner=first,entry_sha256=entry_sha256,camera_config_sha256=new_hash,
+                       identity_config_sha256=pins[identity_path],model_sha256=model_proofs,
+                       original_source_pins_sha256=digest(canonical(pins)),database_path_sha256=digest(config['database'].encode()))
+    if seed_review is not None:observation['reviewed_seed_change']=seed_review['public']
+    report = dict(ready=True,status='PIN_CANDIDATE_READY_NOT_INSTALLED',owner=first,
+        observation_sha256=digest(canonical(observation)),candidate_sha256=digest(candidate_bytes(candidate)),
+        original_pin_count=len(pins),candidate_pin_count=len(candidate['source_sha256']),changed_fields=changes,
+        camera_config_relocated=current_runtime != old_runtime,camera_config_sha256=new_hash,
+        identity_config_sha256=pins[identity_path],model_proofs=model_proofs,database_opened=False,
+        native_runner_loaded=False,model_or_mechanical_config_changed=False,windows_payload_sent=False,written=False)
+    if seed_review is not None:
+        report['reviewed_seed_change']=seed_review['public']
+        report['added_static_proof_pins']=[dict(path=name,sha256=value) for name,value in
+            sorted(seed_review['additional_static_pins'].items()) if name not in pins]
+    if current_runtime != old_runtime:
+        report['added_source_pin'] = dict(path=current_runtime,sha256=new_hash)
+    return candidate,report
+
+
+def candidate_bytes(candidate):
+    return (json.dumps(candidate,ensure_ascii=False,sort_keys=True,indent=2)+'\n').encode('utf-8')
+
+
+def write_new_candidate(candidate,report,*,private_root,output,expected_observation_sha256):
+    if expected_observation_sha256 != report.get('observation_sha256'):
+        raise PinRejected('REVIEWED_OBSERVATION_TOKEN_MISMATCH')
+    if os.name != 'posix':
+        raise PinRejected('WRITE_REQUIRES_ACTUAL_POSIX_BOARD')
+    if not Path(private_root).is_absolute() or not Path(output).is_absolute():
+        raise PinRejected('WRITE_REQUIRES_ABSOLUTE_PRIVATE_PATHS')
+    root = Path(private_root).absolute(); destination = Path(output).absolute()
+    if (root.resolve() != root or destination.resolve() != destination or root not in destination.parents
+            or destination.suffix != '.json' or any(part.casefold() == 'win共享文件' for part in destination.parts)):
+        raise PinRejected('WRITE_REQUIRES_NEW_PRIVATE_CANDIDATE')
+    info = root.stat()
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+        raise PinRejected('CANDIDATE_ROOT_NOT_PRIVATE')
+    parent = destination.parent
+    parent_info = parent.stat()
+    if parent_info.st_uid != os.getuid() or parent_info.st_mode & 0o077:
+        raise PinRejected('CANDIDATE_PARENT_NOT_PRIVATE')
+    if destination.exists() or destination == Path(candidate['camera_config']) or str(destination) in candidate['source_sha256']:
+        raise PinRejected('CANDIDATE_OVERWRITE_REFUSED')
+    raw = candidate_bytes(candidate)
+    fd = os.open(str(destination),os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,'O_NOFOLLOW',0),0o600)
+    with os.fdopen(fd,'wb') as stream:
+        stream.write(raw); stream.flush(); os.fsync(stream.fileno())
+    return dict(report,written=True,candidate_sha256=digest(raw))
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--old-config',required=True)
+    parser.add_argument('--expected-boot-id',required=True)
+    parser.add_argument('--expected-pid',type=int,required=True)
+    parser.add_argument('--expected-current-runtime-sha256')
+    parser.add_argument('--expected-current-seed-sha256')
+    parser.add_argument('--write',action='store_true')
+    parser.add_argument('--private-root')
+    parser.add_argument('--output')
+    parser.add_argument('--expected-observation-sha256')
+    args = parser.parse_args()
+    try:
+        reader = LiveReader()
+        config = read_json(reader,args.old_config)
+        candidate,report = build_candidate(config,reader,expected_boot=args.expected_boot_id,expected_pid=args.expected_pid,
+            expected_current_runtime_sha256=args.expected_current_runtime_sha256,
+            expected_current_seed_sha256=args.expected_current_seed_sha256)
+        if args.write:
+            if not args.private_root or not args.output or not args.expected_observation_sha256:
+                raise PinRejected('WRITE_REQUIRES_PRIVATE_PATH_AND_REVIEW_TOKEN')
+            report = write_new_candidate(candidate,report,private_root=args.private_root,output=args.output,
+                                         expected_observation_sha256=args.expected_observation_sha256)
+    except PinRejected as exc:
+        report = dict(ready=False,status=exc.code,different_fields=exc.fields,written=False,database_opened=False)
+    except (OSError,ValueError,KeyError,TypeError,subprocess.SubprocessError):
+        report = dict(ready=False,status='SOURCE_OR_OWNER_PROBE_UNAVAILABLE',written=False,database_opened=False)
+    print(json.dumps(report,sort_keys=True))
+
+
+if __name__ == '__main__':
+    main()

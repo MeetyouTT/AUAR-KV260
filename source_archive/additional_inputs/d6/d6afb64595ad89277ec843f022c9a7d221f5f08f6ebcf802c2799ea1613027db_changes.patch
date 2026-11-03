@@ -1,0 +1,396 @@
+--- a/tools/board_avatar_gtk.py
++++ b/tools/board_avatar_gtk.py
+@@ -12,6 +12,8 @@
+ import sys
+ import threading
+ import time
++
++_UI_WIDGET_GETTERS = {'set_text': 'get_text', 'set_label': 'get_label', 'set_sensitive': 'get_sensitive', 'set_visible': 'get_visible', 'set_tooltip_text': 'get_tooltip_text', 'set_value': 'get_value'}
+ 
+ AURA = Path(__file__).resolve().parents[1]
+ if str(AURA) not in sys.path:
+@@ -1103,11 +1105,27 @@
+         if self.preview_output:self.preview_output.detach(name)
+         getattr(self,'preview_bindings',{}).pop(name,None)
+ 
++    def _ui_set(self, widget, method, value):
++        """Avoid a GTK mutation when its current value already matches."""
++        getter = _UI_WIDGET_GETTERS[method]
++        stats = getattr(self, '_ui_widget_writes', None)
++        if stats is None:
++            stats = self._ui_widget_writes = dict(applied=0, skipped=0)
++        if getattr(widget, getter)() == value:
++            stats['skipped'] += 1
++            return False
++        getattr(widget, method)(value)
++        stats['applied'] += 1
++        return True
++
+     def refresh_runtime(self, state, settings_text):
+         from board.interaction.ui_contract import STATE_TEXT, display_state
++        runtime_started=time.perf_counter();runtime_cpu=time.thread_time()
+         view = self.services.read()
++        services_done=time.perf_counter()
+         snapshot = view['snapshot']
+         display=self.preview_output.read('vision') if self.preview_output else {'frame_visible':False,'frame_reference':None}
++        preview_done=time.perf_counter()
+         modules = snapshot['modules'] if snapshot else {}
+         fixture = bool(snapshot and snapshot['source_kind'] == 'fixture')
+         caps = snapshot['capabilities'] if snapshot else {}
+@@ -1118,8 +1136,10 @@
+         handsfree=state.get('handsfree_dialogue',{})
+         self.display_activity.tick(bool(handsfree.get('enabled')
+                                        or automatic.get('enabled') or state.get('playing')))
++        wake_done=time.perf_counter()
+         transcription = state.get('local_transcription',{})
+         self.refresh_voice_face_dialog(transcription)
++        dialog_done=time.perf_counter()
+         local_conversation=bool(transcription.get('service',{}).get('conversation'))
+         local_recording_active = local_recording.get('state') == 'RECORDING'
+         local_busy = state['phase'] != 'IDLE' or state['playing'] or state['paused']
+@@ -1129,7 +1149,7 @@
+                      'OFFLINE':'服务未连接，请检查地址与服务状态','STALE':'服务状态已过期，操作已暂停',
+                      'READY':'服务已连接'}.get(view['link'],'服务待接入')
+         camera_only = bool(modules.get('camera') and not modules.get('interaction'))
+-        self.mode_label.set_text('测试服务 · 数据仅用于联调' if fixture else
++        self._ui_set(self.mode_label, 'set_text', '测试服务 · 数据仅用于联调' if fixture else
+                                 ('相机与身份已接入 · 语音使用独立服务' if modules.get('identity') else
+                                  '相机已接入 · 语音与身份待接入') if camera_only else
+                                 '服务已连接 · 按当前能力开放操作' if snapshot else '本地演示可用 · 语音与视觉待接入')
+@@ -1163,7 +1183,7 @@
+                     '正在认真想，想好就告诉你…' if state.get('phase')=='THINKING' else
+                     '雪妃已回答' if transcription.get('state')=='ANSWERED' else status)
+         if not fixture and self.ui_layer == 'presentation':
+-            self.mode_label.set_text('视觉追踪 · '+('相机已连接' if modules.get('camera',{}).get('state') == 'READY' else '等待相机连接')
++            self._ui_set(self.mode_label, 'set_text', '视觉追踪 · '+('相机已连接' if modules.get('camera',{}).get('state') == 'READY' else '等待相机连接')
+                 if self.page == 'vision' else '玩偶交流 · 连续对话' if self.config.get('automatic_turns') else '玩偶交流 · 录音后自动回答' if local_conversation else
+                 '玩偶交流 · '+('语音主机已连接' if modules.get('host',{}).get('state') == 'READY' else '语音主机待连接'))
+         if automatic.get('enabled'):
+@@ -1191,7 +1211,7 @@
+             status='这句说完了，我在听下一句…'
+         if handsfree.get('enabled') and state.get('playing') and barge.get('listening') and barge.get('echo_reference_ready'):
+             status='正在回答，你可以直接开口打断'
+-        self.status.set_text(status)
++        self._ui_set(self.status, 'set_text', status)
+         target,identity = modules.get('target',{}), modules.get('identity',{})
+         people = modules.get('vision',{}).get('people_count')
+         count_label = '人脸：' if modules.get('vision',{}).get('count_kind') == 'faces' else '人数：'
+@@ -1199,10 +1219,10 @@
+         if camera_only and target.get('state') == 'NONE':target_text = '无目标'
+         if target.get('selected'):target_text += ' #'+str(target['selected']['track_id'])
+         identity_text = identity.get('display_name') or display_state('identity',identity.get('state'))
+-        self.insight_labels['people'].set_text(str(people)+' 人' if people is not None else '等待检测')
+-        self.insight_labels['target'].set_text(target_text)
+-        self.insight_labels['identity'].set_text(identity_text)
+-        self.insight_labels['identity'].set_tooltip_text(identity.get('detail', '身份服务尚未接入'))
++        self._ui_set(self.insight_labels['people'], 'set_text', str(people)+' 人' if people is not None else '等待检测')
++        self._ui_set(self.insight_labels['target'], 'set_text', target_text)
++        self._ui_set(self.insight_labels['identity'], 'set_text', identity_text)
++        self._ui_set(self.insight_labels['identity'], 'set_tooltip_text', identity.get('detail', '身份服务尚未接入'))
+         transcript = transcription.get('text') or interaction.get('transcript') or ('麦克风已关闭，恢复免点击后再说话。' if handsfree and not handsfree.get('enabled') else '等待你的声音…')
+         if local_recording_active:transcript = '正在聆听…'
+         elif transcription.get('state') == 'CANCELLED':transcript = '本轮已取消。'
+@@ -1214,8 +1234,8 @@
+         # The bound production lifecycle is the sole writer of subtitle slots.
+         # Its final projection still runs every refresh, including expiry/clear.
+         if getattr(self, 'production_presentation', None) is None:
+-            self.transcript_label.set_text(transcript)
+-            self.transcript_label.set_tooltip_text(transcription.get('error') or transcript)
++            self._ui_set(self.transcript_label, 'set_text', transcript)
++            self._ui_set(self.transcript_label, 'set_tooltip_text', transcription.get('error') or transcript)
+         reply = interaction.get('reply') or ('本轮已取消。' if interaction.get('state') == 'CANCELLED' else
+                     '我在这里，准备好就开始说话吧。\n语音主机连接后，将在这里显示回答。')
+         if local_busy and state.get('reply'):
+@@ -1245,59 +1265,59 @@
+         for key, label in [('first_audio','首声'),('asr','ASR'),('vlm','VLM'),('tts','TTS')]:
+             value = _finite_display_number(timings.get(key))
+             latency.append(label+' '+(value+'ms' if value is not None else '—'))
+-        self.latency_label.set_text(' · '.join(latency))
++        self._ui_set(self.latency_label, 'set_text', ' · '.join(latency))
+         recording = local_recording_active or audio.get('state') == 'RECORDING'
+-        self.record_button.set_label('停止录音' if recording else '开始录音')
++        self._ui_set(self.record_button, 'set_label', '停止录音' if recording else '开始录音')
+         local_capture = local_recording_active or (audio.get('state') != 'RECORDING' and not caps.get('record_start'))
+         record_available = (local_recording.get('can_stop' if recording else 'can_start') if local_capture
+                             else caps.get('record_stop' if recording else 'record_start'))
+-        self.record_button.set_sensitive(bool(record_available) and not local_busy
++        self._ui_set(self.record_button, 'set_sensitive', bool(record_available) and not local_busy
+             and not state['avatar_command_pending'] and not view['pending_count'] and (recording or not remote_busy))
+-        self.record_button.set_tooltip_text('点击开始，再次点击停止；最长录音20秒' if record_available else '请先结束当前播放或录音')
++        self._ui_set(self.record_button, 'set_tooltip_text', '点击开始，再次点击停止；最长录音20秒' if record_available else '请先结束当前播放或录音')
+         if self.config.get('automatic_turns'):
+-            self.record_button.set_label('结束对话' if automatic.get('enabled') else '开始对话')
+-            self.record_button.set_sensitive(bool(automatic.get('can_stop') or
++            self._ui_set(self.record_button, 'set_label', '结束对话' if automatic.get('enabled') else '开始对话')
++            self._ui_set(self.record_button, 'set_sensitive', bool(automatic.get('can_stop') or
+                 automatic.get('can_start') and not state['avatar_command_pending'] and not view['pending_count'] and not remote_busy))
+-            self.record_button.set_tooltip_text('停止聆听并结束当前回答' if automatic.get('enabled') else
++            self._ui_set(self.record_button, 'set_tooltip_text', '停止聆听并结束当前回答' if automatic.get('enabled') else
+                 '开启后说完自动接话；雪妃回答完会继续听下一句')
+-            self.interaction_cancel.set_tooltip_text('取消当前录音或回答，并结束连续对话')
++            self._ui_set(self.interaction_cancel, 'set_tooltip_text', '取消当前录音或回答，并结束连续对话')
+         if handsfree:
+-            self.record_button.set_label('暂停聆听' if handsfree.get('enabled') else '开始聆听')
+-            self.record_button.set_sensitive(not state['avatar_command_pending'])
+-            self.record_button.set_tooltip_text('服务就绪后自动聆听；暂停会关闭麦克风，并记住暂停选择')
++            self._ui_set(self.record_button, 'set_label', '暂停聆听' if handsfree.get('enabled') else '开始聆听')
++            self._ui_set(self.record_button, 'set_sensitive', not state['avatar_command_pending'])
++            self._ui_set(self.record_button, 'set_tooltip_text', '服务就绪后自动聆听；暂停会关闭麦克风，并记住暂停选择')
+         preview_ref = snapshot.get('preview') if snapshot else None
+         frame_fresh = bool(preview_ref and time.monotonic()*1000-preview_ref['captured_mono_ms'] <= 1500)
+         frame_fresh = frame_fresh and preview_ref==display['frame_reference']
+-        self.ask_button.set_sensitive(bool(caps.get('ask_frame')) and frame_fresh and not local_busy and not local_recording_active
++        self._ui_set(self.ask_button, 'set_sensitive', bool(caps.get('ask_frame')) and frame_fresh and not local_busy and not local_recording_active
+                                       and not remote_busy and not view['pending_count'])
+-        self.ask_button.set_tooltip_text('使用当前画面发起问答' if caps.get('ask_frame') else '当前图问答尚未接入')
++        self._ui_set(self.ask_button, 'set_tooltip_text', '使用当前画面发起问答' if caps.get('ask_frame') else '当前图问答尚未接入')
+         for name in ('target_select','identity_enroll','identity_delete'):
+-            self.controls[name].set_sensitive(bool(caps.get(name)) and not view['pending_count'])
+-            self.controls[name].set_tooltip_text('操作由身份与目标服务确认' if caps.get(name) else '功能尚未接入')
+-        self.controls['identity_enroll'].set_sensitive(bool(identity) and not view['pending_count'])
+-        self.controls['vision_target_select'].set_sensitive(self.controls['target_select'].get_sensitive())
+-        self.controls['vision_target_select'].set_tooltip_text(self.controls['target_select'].get_tooltip_text())
+-        self.controls['vision_identity'].set_sensitive(bool(identity)
++            self._ui_set(self.controls[name], 'set_sensitive', bool(caps.get(name)) and not view['pending_count'])
++            self._ui_set(self.controls[name], 'set_tooltip_text', '操作由身份与目标服务确认' if caps.get(name) else '功能尚未接入')
++        self._ui_set(self.controls['identity_enroll'], 'set_sensitive', bool(identity) and not view['pending_count'])
++        self._ui_set(self.controls['vision_target_select'], 'set_sensitive', self.controls['target_select'].get_sensitive())
++        self._ui_set(self.controls['vision_target_select'], 'set_tooltip_text', self.controls['target_select'].get_tooltip_text())
++        self._ui_set(self.controls['vision_identity'], 'set_sensitive', bool(identity)
+             and not view['pending_count'])
+-        self.controls['vision_identity'].set_tooltip_text(identity.get('detail') or '身份服务尚未接入')
++        self._ui_set(self.controls['vision_identity'], 'set_tooltip_text', identity.get('detail') or '身份服务尚未接入')
+         for index in range(len(self.lines)):
+-            self.controls['demo_'+str(index)].set_sensitive(not remote_busy and not local_recording_active)
++            self._ui_set(self.controls['demo_'+str(index)], 'set_sensitive', not remote_busy and not local_recording_active)
+         image=display['frame_visible']
+         # Freshness controls the placeholder/actions, never the native XID.
+         # Hiding this canvas on a late frame can leave an obsolete drawable
+         # after remapping. The worker already clears expired pixels.
+-        self.preview_image.set_visible(True)
++        self._ui_set(self.preview_image, 'set_visible', True)
+         if self.large_preview:
+-            self.large_preview_note.set_text('实时画面 · '+count_label+str(people) if image and people is not None else
++            self._ui_set(self.large_preview_note, 'set_text', '实时画面 · '+count_label+str(people) if image and people is not None else
+                 '实时画面 · 等待检测结果' if image else '画面已失联或过期，等待重新连接')
+-        self.preview_expand.set_sensitive(bool(image))
+-        self.preview_placeholder.set_visible(self.preview_output.placeholder_visible(display, modules.get('camera',{}).get('state')) if self.preview_output else not bool(image))
+-        self.preview_placeholder.set_text('当前画面已失联或过期' if modules.get('camera',{}).get('state') == 'LOST' else
++        self._ui_set(self.preview_expand, 'set_sensitive', bool(image))
++        self._ui_set(self.preview_placeholder, 'set_visible', self.preview_output.placeholder_visible(display, modules.get('camera',{}).get('state')) if self.preview_output else not bool(image))
++        self._ui_set(self.preview_placeholder, 'set_text', '当前画面已失联或过期' if modules.get('camera',{}).get('state') == 'LOST' else
+             '等待视觉画面\n接入后显示当前画面与目标')
+-        self.vision_note.set_text(('界面预览 · 示例数据，非实时采集。' if fixture else
++        self._ui_set(self.vision_note, 'set_text', ('界面预览 · 示例数据，非实时采集。' if fixture else
+                                   identity.get('detail') or '点击“放大画面”查看细节，或选择要关注的目标。') if image else
+                                  '等待摄像头画面，恢复后继续显示追踪结果。')
+-        self.vision_summary.set_text(('示例解读：' if fixture else '')+
++        self._ui_set(self.vision_summary, 'set_text', ('示例解读：' if fixture else '')+
+             ('画面中检测到 '+str(people)+' 人。\n'+
+              ('当前关注目标 #'+str(target['selected']['track_id'])+'。' if target.get('selected') else '尚未选择跟随目标。')+
+              ('\n目标身份：'+identity['display_name']+'。' if identity.get('display_name') else '')
+@@ -1318,8 +1338,8 @@
+         values['network'] = ('已连接','READY') if lan is True else ('网线未连接','OFFLINE') if lan is False else ('未检测到','UNKNOWN')
+         for key,(value,status_code) in values.items():
+             label = self.device_cards[key]
+-            if label.get_text()!=value:label.set_text(value)
+-            label.set_tooltip_text(modules.get(key,{}).get('detail') or value)
++            if label.get_text()!=value:self._ui_set(label, 'set_text', value)
++            self._ui_set(label, 'set_tooltip_text', modules.get(key,{}).get('detail') or value)
+             style = label.get_style_context()
+             desired=('bad' if status_code in ('ERROR','FAULT','FAILED','LOST') else
+                             'good' if status_code in ('READY','KNOWN','CONFIRMED') else
+@@ -1327,10 +1347,10 @@
+             if not style.has_class(desired):
+                 for name in ('good','warn','bad','unknown'):style.remove_class(name)
+                 style.add_class(desired)
+-        self.device_note.set_text(('测试数据 · ' if fixture else '')+link_text)
+-        self.connection_label.set_text(link_text+(' · 配置文件需要修复' if self.connection_store.error else ''))
+-        self.connection_label.set_tooltip_text(view['error'] or self.connection_store.error or link_text)
+-        self.host_status_label.set_text('语音主机：'+values['host'][0])
++        self._ui_set(self.device_note, 'set_text', ('测试数据 · ' if fixture else '')+link_text)
++        self._ui_set(self.connection_label, 'set_text', link_text+(' · 配置文件需要修复' if self.connection_store.error else ''))
++        self._ui_set(self.connection_label, 'set_tooltip_text', view['error'] or self.connection_store.error or link_text)
++        self._ui_set(self.host_status_label, 'set_text', '语音主机：'+values['host'][0])
+         if view['results']:
+             result = view['results'][-1]
+             from board.interaction.ui_contract import identity_completion
+@@ -1350,13 +1370,19 @@
+         presentation_footer = ('演示层   ·   '+('视觉追踪' if self.page == 'vision' else '设置' if self.page == 'settings' else '玩偶交流')+
+                                '   ·   '+settings_text+'   ·   '+
+                                ('示例数据' if fixture else '语音主机 '+values['host'][0]))
+-        self.footer.set_text(self.toast if time.monotonic() < self.toast_until else
++        self._ui_set(self.footer, 'set_text', self.toast if time.monotonic() < self.toast_until else
+                              footer if self.ui_layer == 'debug' else presentation_footer)
+         self.runtime_view = {k:v for k,v in view.items() if k not in ('preview','identity_face')}
+         self.runtime_view.update(protocol_version='aura-ui-1',frame_visible=bool(image),
+                                  frame_reference=display['frame_reference'])
+         self.runtime_view['preview_metrics']=display
+         state.update(ui_runtime=self.runtime_view,ui_pages=list(self.page_names),ui_layer=self.ui_layer)
++        ended=time.perf_counter()
++        state['ui_runtime_timings_ms']=dict(services_read=(services_done-runtime_started)*1000,
++            preview_read=(preview_done-services_done)*1000,display_activity=(wake_done-preview_done)*1000,
++            voice_dialog=(dialog_done-wake_done)*1000,widgets=(ended-dialog_done)*1000,
++            total=(ended-runtime_started)*1000,thread_cpu=(time.thread_time()-runtime_cpu)*1000)
++        state['ui_widget_writes']=dict(self._ui_widget_writes)
+ 
+     def volume_changed(self, scale):
+         if not self.updating_volume:
+@@ -1381,7 +1407,10 @@
+ 
+     def refresh_settings(self, state):
+         from tools.board_ui_settings import touch_devices
++        settings_started=time.perf_counter();settings_cpu=time.thread_time()
++        self._ui_widget_writes=dict(applied=0,skipped=0)
+         mix = self.mixer.read()
++        mixer_done=time.perf_counter()
+         now = time.monotonic()
+         if now-self.last_touch_scan > 3:
+             self.touch_inputs = touch_devices()
+@@ -1391,30 +1420,35 @@
+             except OSError:
+                 self.device_inventory['lan'] = None
+             self.last_touch_scan = now
++        scan_done=time.perf_counter()
+         if mix['pending']:
+             text = '正在设置音量…'
+         elif mix['available']:
+             text = '音量 '+str(mix['volume'])+'%'+(' · 已静音' if mix['muted'] else '')
+             if not self.volume_dragging:
+                 self.updating_volume = True
+-                self.volume_scale.set_value(mix['volume'])
++                self._ui_set(self.volume_scale, 'set_value', mix['volume'])
+                 self.updating_volume = False
+         else:
+             text = mix['error'] or '读取音量…'
+-        self.volume_label.set_text(text)
+-        self.mute_button.set_label('取消静音' if mix['muted'] else '静音')
+-        self.fullscreen_button.set_label('退出全屏' if self.preferences['fullscreen'] else '进入全屏')
+-        self.economy_button.set_label('省电动画：'+('开' if self.preferences['economy'] else '关'))
+-        self.devices_label.set_text(('音响已连接' if mix['available'] else '音响不可用')+' · '+
++        self._ui_set(self.volume_label, 'set_text', text)
++        self._ui_set(self.mute_button, 'set_label', '取消静音' if mix['muted'] else '静音')
++        self._ui_set(self.fullscreen_button, 'set_label', '退出全屏' if self.preferences['fullscreen'] else '进入全屏')
++        self._ui_set(self.economy_button, 'set_label', '省电动画：'+('开' if self.preferences['economy'] else '关'))
++        self._ui_set(self.devices_label, 'set_text', ('音响已连接' if mix['available'] else '音响不可用')+' · '+
+                                    ('触摸已连接' if self.touch_inputs else '未检测到触摸设备'))
+         portrait=state.get('portrait_offload',{})
+         mode=portrait.get('mode','disabled')
+-        self.controls['portrait_toggle'].set_label('雪妃 · 本地16fps' if self.native_yuki.ready else '雪妃 · 渲染未就绪')
+-        self.pause_button.set_label('继续' if state['paused'] else '暂停')
+-        self.pause_button.set_sensitive(state['playing'] or state['paused'])
+-        self.cancel_button.set_sensitive(state['phase'] != 'IDLE' or state['playing'])
++        self._ui_set(self.controls['portrait_toggle'], 'set_label', '雪妃 · 本地16fps' if self.native_yuki.ready else '雪妃 · 渲染未就绪')
++        self._ui_set(self.pause_button, 'set_label', '继续' if state['paused'] else '暂停')
++        self._ui_set(self.pause_button, 'set_sensitive', state['playing'] or state['paused'])
++        self._ui_set(self.cancel_button, 'set_sensitive', state['phase'] != 'IDLE' or state['playing'])
+         state.update(ui_page=self.page,ui_settings=dict(mix,**{k:self.preferences[k] for k in ('fullscreen','economy')}),
+                      touch_devices=self.touch_inputs)
++        ended=time.perf_counter()
++        state['ui_settings_timings_ms']=dict(mixer_read=(mixer_done-settings_started)*1000,
++            device_scan=(scan_done-mixer_done)*1000,widgets=(ended-scan_done)*1000,
++            total=(ended-settings_started)*1000,thread_cpu=(time.thread_time()-settings_cpu)*1000)
+         return text
+ 
+     def key_pressed(self, widget, event):
+@@ -1588,6 +1622,8 @@
+         if self.closed:
+             return False
+         started = time.perf_counter()
++        callback_cpu=time.thread_time()
++        refreshed=False;publish_started=None;publish_ms=0.;callback_succeeded=False
+         interval = None if self.last_tick is None else (started-self.last_tick)*1000
+         self.last_tick = started
+         ui_timings={};checkpoint=started
+@@ -1630,7 +1666,9 @@
+             if time.monotonic()-self.last_runtime_refresh < .1:
+                 return True
+             self.last_runtime_refresh = time.monotonic()
++            refreshed=True
+             state = packet['state']
++            state['ui_callback_previous']=dict(getattr(self,'ui_callback_previous',{}))
+             state['avatar_display']={'frames':self.displayed_frames,'sequence':self.last_avatar_sequence,'at':time.monotonic()}
+             if self.character_pair is not None:
+                 from tools.formal_native_yuki import display_status
+@@ -1666,7 +1704,10 @@
+             self.samples.append({'t':state['visual_time'],'interval_ms':interval,
+                 'render_ms':state['ui_tick_ms'],**{key:state[key] for key in
+                 ('phase','state','asset','index','speech_gain','mouth_level','blink_active','playing','paused','audio_time')}})
++            publish_started=time.perf_counter()
+             self.bridge.publish(state,packet['jpeg'])
++            publish_ms=(time.perf_counter()-publish_started)*1000
++            callback_succeeded=True
+         except Exception as exc:
+             previous = getattr(self, 'runtime_faults', None)
+             count = previous['count'] + 1 if previous is not None else 1
+@@ -1679,6 +1720,15 @@
+                 print('STAGE RUNTIME_FAULT '+json.dumps(fault, separators=(',', ':')), flush=True)
+             self.controller.cancel()
+             self.status.set_text(message)
++        finally:
++            if refreshed:
++                finished=time.perf_counter()
++                if publish_started is not None and not callback_succeeded:
++                    publish_ms=(finished-publish_started)*1000
++                self.ui_callback_previous=dict(wall_ms=(finished-started)*1000,
++                    thread_cpu_ms=(time.thread_time()-callback_cpu)*1000,publish_ms=publish_ms,
++                    completed_mono=time.monotonic(),succeeded=callback_succeeded,
++                    sequence=getattr(self,'ui_callback_previous',{}).get('sequence',0)+1)
+         return True
+ 
+ 
+--- a/tools/x11_display_activity.py
++++ b/tools/x11_display_activity.py
+@@ -1,24 +1,34 @@
+ """Wake only during conversation activity; leave desktop idle policy unchanged."""
+ import ctypes as C
+ import ctypes.util
++from functools import lru_cache
+ import time
+ 
+ 
+-def wake_display():
++@lru_cache(maxsize=1)
++def _display_libraries():
++    """Resolve libraries once, before GTK starts its interactive event loop."""
+     x=C.CDLL(ctypes.util.find_library('X11') or 'libX11.so.6')
+     pointer=C.c_void_p
+     x.XOpenDisplay.argtypes=[C.c_char_p];x.XOpenDisplay.restype=pointer
+     x.XResetScreenSaver.argtypes=[pointer];x.XSync.argtypes=[pointer,C.c_int]
+     x.XCloseDisplay.argtypes=[pointer]
++    name=ctypes.util.find_library('Xext')
++    ext=C.CDLL(name) if name else None
++    if ext is not None:
++        ext.DPMSCapable.argtypes=[pointer]
++        ext.DPMSInfo.argtypes=[pointer,C.POINTER(C.c_ushort),C.POINTER(C.c_int)]
++        ext.DPMSForceLevel.argtypes=[pointer,C.c_ushort]
++    return x,ext
++
++
++def wake_display():
++    x,ext=_display_libraries()
+     display=x.XOpenDisplay(None)
+     if not display:raise RuntimeError('Cannot connect to X11 display')
+     try:
+         x.XResetScreenSaver(display)
+-        name=ctypes.util.find_library('Xext')
+-        if name:
+-            ext=C.CDLL(name);ext.DPMSCapable.argtypes=[pointer]
+-            ext.DPMSInfo.argtypes=[pointer,C.POINTER(C.c_ushort),C.POINTER(C.c_int)]
+-            ext.DPMSForceLevel.argtypes=[pointer,C.c_ushort]
++        if ext is not None:
+             if ext.DPMSCapable(display):
+                 level=C.c_ushort();enabled=C.c_int()
+                 if ext.DPMSInfo(display,C.byref(level),C.byref(enabled)) and enabled.value and level.value:
+@@ -30,6 +40,11 @@
+ class DisplayActivity:
+     def __init__(self,wake=wake_display,clock=time.monotonic):
+         self.wake=wake;self.clock=clock;self.next_wake=0.;self.error=''
++        if wake is wake_display:
++            # Loading symbols opens no X display and changes no idle policy.
++            # Keep linker/library discovery off the recurring UI refresh.
++            try:_display_libraries()
++            except (OSError,RuntimeError,AttributeError) as exc:self.error=str(exc)
+ 
+     def tick(self,active):
+         if not active:

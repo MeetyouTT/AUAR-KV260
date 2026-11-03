@@ -1,0 +1,88 @@
+--- a/src/daemon_helper.c
++++ b/src/daemon_helper.c
+@@ -29,6 +29,7 @@
+ struct watch *active_watch = NULL;
+ struct basePLDesign *base_designs = NULL;
+ static int inotifyFd;
++static pthread_mutex_t watch_lock = PTHREAD_MUTEX_INITIALIZER;
+ platform_info_t platform;
+ sem_t mutex;
+ void firmware_dir_walk(void);
+@@ -540,17 +541,48 @@
+ 
+ void add_to_watch(int wd, char *name, char *path, char *parent_name, char *parent_path)
+ {
+-    int i;
++    struct watch entry = {0};
++    int i, free_slot = -1, slot = -1;
++
++    /* Repeated inotify_add_watch() calls can return an existing descriptor. */
++    if (wd < 0 || !name || !path || !parent_name || !parent_path) {
++        errno = EINVAL;
++        DFX_ERR("invalid watch");
++        return;
++    }
++    if (strlen(name) >= sizeof(entry.name) ||
++        strlen(path) >= sizeof(entry.path) ||
++        strlen(parent_name) >= sizeof(entry.parent_name) ||
++        strlen(parent_path) >= sizeof(entry.parent_path)) {
++        errno = ENAMETOOLONG;
++        DFX_ERR("watch metadata is too long");
++        return;
++    }
++    entry.wd = wd;
++    strcpy(entry.name, name);
++    strcpy(entry.path, path);
++    strcpy(entry.parent_name, parent_name);
++    strcpy(entry.parent_path, parent_path);
++
++    pthread_mutex_lock(&watch_lock);
+     for (i = 0; i < MAX_WATCH; i++) {
+         if (active_watch[i].wd == -1) {
+-            active_watch[i].wd = wd;
+-            strncpy(active_watch[i].name, name, 64 -1);
+-            strncpy(active_watch[i].path, path, WATCH_PATH_LEN -1);
+-            strncpy(active_watch[i].parent_name, parent_name, 64 -1);
+-            strncpy(active_watch[i].parent_path, parent_path, WATCH_PATH_LEN -1);
+-            return;
+-        }
+-    }
++            if (free_slot == -1)
++                free_slot = i;
++        } else if (active_watch[i].wd == wd ||
++                   !strcmp(active_watch[i].path, path)) {
++            slot = i;
++            break;
++        }
++    }
++    if (slot == -1)
++        slot = free_slot;
++    if (slot != -1)
++        active_watch[slot] = entry;
++    pthread_mutex_unlock(&watch_lock);
++    if (slot != -1)
++        return;
++    errno = ENOSPC;
+     DFX_ERR("no room to add more watch");
+ }
+ 
+@@ -584,13 +616,15 @@
+ void remove_watch(char *path)
+ {
+     int i;
++    pthread_mutex_lock(&watch_lock);
+     for (i = 0; i < MAX_WATCH; i++) {
+-        if (strcmp(active_watch[i].path, path) == 0){
++        if (active_watch[i].wd >= 0 && strcmp(active_watch[i].path, path) == 0){
+ 			inotify_rm_watch(inotifyFd, active_watch[i].wd);
++			memset(&active_watch[i], 0, sizeof(active_watch[i]));
+ 			active_watch[i].wd = -1;
+-			active_watch[i].path[0] = '\0';
+-        }
+-    }
++        }
++    }
++    pthread_mutex_unlock(&watch_lock);
+ }
+ accel_info_t *add_accel_to_base(struct basePLDesign *base, char *name, char *path, char *parent_path)
+ {

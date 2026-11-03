@@ -1,0 +1,116 @@
+{
+  "schema": "aura.public-inference-pilot-decision.v1",
+  "created_utc": "2026-11-01T00:58:04.037561+00:00",
+  "review_mode": "OFFLINE_SAVED_EVIDENCE_ONLY",
+  "evidence": [
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\compact_two_field_candidate\\root_benchmark_runs\\abba_2e27abe72b4b.json",
+      "sha256": "37ae291cf6e60a780e70cca38de3fcc2cbb7bcd0964e6df9ece6a53270b45fb1"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\compact_two_field_candidate\\root_benchmark_runs\\d01_87349a7fef99.json",
+      "sha256": "902e545f7593b072e896c11198e9d9053cfac09d16b6bca2d4093c291c44601b"
+    }
+  ],
+  "verified_parameters": {
+    "seed": 8701,
+    "num_ctx": 2048,
+    "num_predict": 120,
+    "temperature": 0.6
+  },
+  "two_field_decision": {
+    "decision": "DO_NOT_DEPLOY_NO_OBSERVED_SPEED_GAIN",
+    "order": [
+      "dialogue_abc_v1",
+      "dialogue_ab_v1",
+      "dialogue_ab_v1",
+      "dialogue_abc_v1"
+    ],
+    "arms": {
+      "dialogue_abc_v1": {
+        "sample_count": 2,
+        "wall_ms": [
+          2657.0,
+          2640.0
+        ],
+        "mean_wall_ms": 2648.5,
+        "eval_tokens": [
+          15,
+          15
+        ],
+        "decode_ms": [
+          1513.26,
+          1525.79
+        ],
+        "prefill_ms": [
+          862.09,
+          1062.09
+        ],
+        "cached_prompt_tokens": [
+          214,
+          0
+        ]
+      },
+      "dialogue_ab_v1": {
+        "sample_count": 2,
+        "wall_ms": [
+          3390.0,
+          2766.0
+        ],
+        "mean_wall_ms": 3078.0,
+        "eval_tokens": [
+          22,
+          22
+        ],
+        "decode_ms": [
+          2299.22,
+          2326.22
+        ],
+        "prefill_ms": [
+          1037.72,
+          354.25
+        ],
+        "cached_prompt_tokens": [
+          0,
+          234
+        ]
+      }
+    },
+    "candidate_minus_baseline_ms": 429.5,
+    "candidate_slower_percent": 16.217,
+    "all_complete": true,
+    "all_semantic_pass": true,
+    "all_cross_arm_speech_identical": true,
+    "post_guard_passed": true,
+    "inference": "The two-field candidate increased generated tokens from 15 to 22 for the same four-character spoken reply in this pilot.",
+    "limits": [
+      "One fixed public question and seed with two samples per arm.",
+      "No warm-up trials were run. Prompt cache counts differed across trials and between cached and uncached trials.",
+      "Results support withholding this candidate. They do not estimate performance for all prompts or a stable population speed difference.",
+      "Measured complete-response model time only. ASR, endpoint detection, TTS, playback, full board business and acoustic onset were excluded."
+    ]
+  },
+  "reasoning_decision": {
+    "decision": "DO_NOT_DEPLOY_AT_CURRENT_120_TOKEN_CAP",
+    "request_count": 1,
+    "http_status": 200,
+    "think_requested": true,
+    "think_request_accepted": true,
+    "complete_json": false,
+    "semantic_check": "NOT_RUN",
+    "error_code": "OUTPUT_TRUNCATED",
+    "wall_ms": 14578.0,
+    "eval_tokens": 120,
+    "thinking_characters": 242,
+    "content_characters": 0,
+    "no_hidden_retry": true,
+    "post_guard_passed": true,
+    "limits": [
+      "One public case. The backend accepted think=true but used the 120-token cap without producing final content.",
+      "Correctness was not evaluated because complete JSON was absent.",
+      "The observation does not authorize raising the production token budget or presenting thinking tokens as a valid spoken answer."
+    ]
+  },
+  "production_changes_made_by_review": false,
+  "device_model_or_private_store_accessed_by_review": false
+}

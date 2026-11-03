@@ -1,0 +1,47 @@
+<!doctype html><html lang='zh-CN'><head><meta charset='utf-8'>
+<title>P0-2 长句去重复 · 改前/改后对比</title>
+<style>
+body{background:#1b1e24;color:#e6e6e6;font-family:'Microsoft YaHei',sans-serif;margin:24px}
+h1{font-size:20px;margin:0 0 4px} .sub{color:#8b96a3;font-size:12px;margin-bottom:18px}
+h2{font-size:16px;margin:26px 0 10px;border-left:4px solid #4aa08a;padding-left:8px}
+table{border-collapse:collapse;font-size:13px;width:100%}
+th,td{border:1px solid #333a45;padding:4px 8px;text-align:left;vertical-align:top}
+th{background:#252a32;position:sticky;top:0}
+tr:nth-child(even) td{background:#20242b}
+.burst{color:#ffcf5c;font-weight:bold} .loop{color:#7fd18b}
+.fb{color:#ff8a7a} .n{color:#6f7a87}
+.grid{display:flex;flex-wrap:wrap;gap:14px}
+.card{background:#232830;border:1px solid #333a45;border-radius:8px;padding:10px;width:182px}
+.card img{display:block;margin:0 auto 6px;background:#2b2f36;border-radius:6px}
+.card .t{text-align:center;font-weight:bold;font-size:13px;margin-bottom:6px}
+.k{color:#93a0ad;font-size:12px;line-height:1.6}
+.k b{color:#dfe6ee} .warn{color:#ffcf5c}
+</style></head><body>
+<h1>P0-2 长句去重复 · 改前 / 改后对比</h1>
+<div class='sub'>取帧口径与播放层同一份：<b>board/interaction/avatar_timing.py</b>（qt_widgets 播放层调用它）。下方 GIF 由该口径<b>逐帧采样</b>合成，不是逐帧直出。素材 talking_neutral · 39 帧 @24.00fps · 1.625s，每段演示 6s。</div>
+<h2>一、改的是什么</h2>
+<table><tr><th>手段</th><th>改前</th><th>改后</th></tr><tr><td>入场相位</td><td>进入状态必从第 0 帧起（相位恒 0）→ 每次说长句都是同一段入场动作</td><td>进入 loop 状态抽 <b>phase ∈ [0, 1.625s)</b>，每次入场都不同</td></tr><tr><td>播放速度</td><td>恒 1.0 → 循环节恒 = 素材时长 1.625s</td><td>按回复字数估句长 → <b>speed ∈ [0.85, 1.15]</b></td></tr><tr><td>burst 一次性动作</td><td colspan='2'>不受影响：不加相位、不变速，仍从第 0 帧起播（AWAKE / ACK_NOD）</td></tr></table>
+<h2>二、三档句长：改前 / 改后动图</h2>
+<h3>A 短句（10 字）</h3><div class='sub'>好的，我帮你把灯打开。<br>预计口播 2.4s · speed=1.150 · 入场相位 0.770s · 精确周期：改前 1.625s → 改后 无（已打散）</div>
+<div class='grid'>
+<div class='card'><div class='t'>改前（共用：相位 0 / 速度 1.0）</div><img src='before.gif' width='160' height='166'></div>
+<div class='card'><div class='t'>改后（随机相位 / 变速）</div><img src='A_after.gif' width='160' height='166'></div>
+</div>
+<h3>B 中句（30 字）</h3><div class='sub'>我看到画面左侧有一位来访者，他正站在门口，手里拿着一封信。<br>预计口播 6.4s · speed=0.978 · 入场相位 1.417s · 精确周期：改前 1.625s → 改后 无（已打散）</div>
+<div class='grid'>
+<div class='card'><div class='t'>改前（共用：相位 0 / 速度 1.0）</div><img src='before.gif' width='160' height='166'></div>
+<div class='card'><div class='t'>改后（随机相位 / 变速）</div><img src='B_after.gif' width='160' height='166'></div>
+</div>
+<h3>C 长句（80 字）</h3><div class='sub'>我看到画面左侧有一位来访者，他先在门口停了一会儿，然后向房间里走了两步，又把手里那封信举起来晃了晃，像是在确认我有没有注意到他；如果你愿意，我也可以先替你打个招呼，再问问他今天来找谁。<br>预计口播 20.4s · speed=0.850 · 入场相位 0.524s · 精确周期：改前 1.625s → 改后 无（已打散）</div>
+<div class='grid'>
+<div class='card'><div class='t'>改前（共用：相位 0 / 速度 1.0）</div><img src='before.gif' width='160' height='166'></div>
+<div class='card'><div class='t'>改后（随机相位 / 变速）</div><img src='C_after.gif' width='160' height='166'></div>
+</div>
+<h2>三、指标（可复核）</h2><table>
+<tr><th>档位</th><th>字数</th><th>预计句长</th><th>speed</th><th>入场相位</th><th>改前精确周期</th><th>改后精确周期</th></tr>
+<tr><td>A 短句（10 字）</td><td>11</td><td>2.4s</td><td><b>1.150</b></td><td>0.770s</td><td>1.625s（= 素材时长）</td><td><b>无（已打散）</b></td></tr>
+<tr><td>B 中句（30 字）</td><td>29</td><td>6.4s</td><td><b>0.978</b></td><td>1.417s</td><td>1.625s（= 素材时长）</td><td><b>无（已打散）</b></td></tr>
+<tr><td>C 长句（80 字）</td><td>92</td><td>20.4s</td><td><b>0.850</b></td><td>0.524s</td><td>1.625s（= 素材时长）</td><td><b>无（已打散）</b></td></tr>
+</table>
+<h2>四、入场一致性（模拟 16 次重新入场，t=0.3s 取的帧）</h2><table><tr><th></th><th>首帧取值范围</th><th>种数</th></tr><tr><td>改前</td><td>[7]</td><td><b>1</b></td></tr><tr><td>改后</td><td>[5, 7, 8, 11, 12, 13, 15, 16, 19, 20, 21, 28, 29, 30, 31, 35]</td><td><b>16</b></td></tr></table>
+</body></html>

@@ -1,0 +1,63 @@
+{
+  "status": "LOCAL_REVIEWED_SOURCE_SNAPSHOT_NO_CODE_BLOCKER",
+  "reviewed_sources": {
+    "common/binding_intent.py": "8048cd5bd4f3f80cd872f373e1eed149820f37d2ec40042390c17cfb4cd94df1",
+    "board/runtime/board_business.py": "c01bb04c7bfbce8d78b51aefa5faf0426527be13edf6e26d8d28828c488222b3",
+    "board/runtime/audio/board_dialogue_jobs.py": "7c0fc844a6848b43c2fc659522d9be962d0c6130c2f0bcc121ff81142fde5134"
+  },
+  "original_voice_contract": {
+    "tests": 24,
+    "passed": 24,
+    "failed": 0,
+    "failure_names": [],
+    "sha256": "60c5edf68a62efef9a867df9fcd11d9ef2c91a7b6a766018d576552eed9b5725"
+  },
+  "blackbox_v2": {
+    "tests": 30,
+    "passed": 30,
+    "failed": 0,
+    "failure_names": [],
+    "sha256": "de9dc74538c4044b0ddeb4e3e097ca2c81d3725db7c1a06b733d49a07afc0c6c"
+  },
+  "first_draft_counterexamples": {
+    "tests": 15,
+    "passed": 13,
+    "failed": 2,
+    "failure_names": [
+      "test_cancelled_current_request_does_not_leave_pending_voice_entry",
+      "test_cancel_during_exact_original_begin_turn_does_not_resurrect_name_authority"
+    ],
+    "sha256": "02137df9e2f8d0f392b1c480613624cd0e6456bb29661da8e672126fe0479540"
+  },
+  "producer_manifest_matches_reviewed_source": false,
+  "loaded_sources_sha256": "30311f4d959963146c5639687f0387500240bdc28621597fa2f1040c7fd2aa79",
+  "test_sha256": "5779fd53fc02ab06bb3123e9900161251c9a083d1e929e2af56c8a89ebc12bb1",
+  "contract_checks": [
+    "Voice-only: no face source/readback, unified route, face command, or cross-modal link attempt",
+    "Face-only: no voice turn, voice sample or voice save dispatch",
+    "Bare voice -> pending name -> 200 public polls while Device inactive -> same actor name followup opens original Device",
+    "Unarmed/cancelled/reset/expired/different-session name hints cannot start enrollment",
+    "Three actual original SpeakerDevice synthetic samples and final original confirmation save",
+    "Wrong face/joint confirmation cannot save standalone voice",
+    "Active opposite-modality request is busy without consuming or discarding original sample/target",
+    "Exact original controller begin_turn cancellation window cannot resurrect pending voice authority",
+    "Exact original face start+guide registered/reset outside producer.finally -> first voice request opens directly",
+    "Exact original voice save outside producer.finally -> first face request opens directly",
+    "Actual BoardDialogueJobs._route dispatches both explicit entry kinds",
+    "Entire Jobs AST equals 01b27 after removing only the two new kind-tuple members",
+    "Quoted/negative/hypothetical strings do not arm standalone entry; original remember-self joint kind remains"
+  ],
+  "model_accuracy_claim": false,
+  "real_enrollment_claim": false,
+  "production_or_service_or_axis_actions": false,
+  "private_store_or_media_reads": false,
+  "ssh_calls": false,
+  "limitations": [
+    "Runtime dependencies are exact original public methods with RAM fixtures; no physical devices, production stores or model loads",
+    "Review is for the exact three hashes above; later producer source changes require refreshed review",
+    "Producer manifest/diff sealing is separate; this review records actual compiled bytes independently",
+    "Root must rebase against CPU-returned latest production source/startup pins; f507 is only the historical candidate base",
+    "Future association of two separately enrolled modalities is outside this change; old explicit joint compatibility is retained"
+  ],
+  "deployment_authority": "Root only after CPU maintenance handback; no authorization or hardware action was exercised by this review"
+}

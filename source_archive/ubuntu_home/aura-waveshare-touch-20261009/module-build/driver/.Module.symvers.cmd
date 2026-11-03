@@ -1,0 +1,1 @@
+cmd_/home/ghmd/aura-waveshare-touch-20261009/module-build/driver/Module.symvers := sed 's/\.ko$$/\.o/' /home/ghmd/aura-waveshare-touch-20261009/module-build/driver/modules.order | scripts/mod/modpost   -E -o /home/ghmd/aura-waveshare-touch-20261009/module-build/driver/Module.symvers -e -i Module.symvers   -T -

@@ -1,0 +1,53 @@
+{
+  "status": "LOCAL_TEMPLATE_ONLY_NOT_EXECUTED",
+  "script_sha256": "29d733c50092c8aa2db8e8ab1f35317cbb4eb2b4d0b2f8b62e2c29a08fe92192",
+  "script_sha256_lf": "29d733c50092c8aa2db8e8ab1f35317cbb4eb2b4d0b2f8b62e2c29a08fe92192",
+  "payload_sha256": "778028b7d180b258e25b2639f3fe0e3024b3af0d031ac407b9474d533302d5da",
+  "payload_bytes": 40658,
+  "components": {
+    "board/interaction/ui_services.py": {
+      "old_sha256": "b55ee295e2cb5494f387fbaa4aa081fd1d6bffd57588c018c5f31daae56bd711",
+      "new_sha256": "e4dedf9b3d56d22d9eb93de1e96ad1a69870d553ea50f7dd5082b21e19f381c9"
+    },
+    "tools/board_camera_preview.py": {
+      "old_sha256": "6e697c16f7ae264dff56b6b35f38da4b531ea13026b69a7c8bdbfb1960a6afcd",
+      "new_sha256": "67d6c0f2b24ea97e20fdcc7b3383b6444269a6e26f5deb566f2b88746b7daf9b"
+    }
+  },
+  "static_checks": {
+    "default_dry_run": true,
+    "no_ssh_or_network_imports": true,
+    "systemctl_only_show": true,
+    "exclusive_create": true,
+    "fsync_and_atomic_startup_replacement": true,
+    "selected_dependency_hold": true,
+    "no_recursive_delete": true,
+    "original_380_verified": true,
+    "pan25_verified": true,
+    "rollback_rebases_only_target_pins": true
+  },
+  "runtime_mutations": [
+    "<fresh runtime>/aura/board/interaction/ui_services.py",
+    "<fresh runtime>/aura/tools/board_camera_preview.py",
+    "<fresh expected startup path>"
+  ],
+  "supporting_mutations": [
+    "<startup parent>/.gtk-preview-cpu-deploy.lock",
+    "<dedicated transaction>/intent.json",
+    "<dedicated transaction>/plan.json",
+    "<dedicated transaction>/backup/*",
+    "<dedicated transaction>/startup.after.json",
+    "<dedicated transaction>/receipt.json",
+    "one O_EXCL stage file beside each replaced target; consumed by os.replace"
+  ],
+  "never_mutated": [
+    "private databases",
+    "model files",
+    "camera configuration or process",
+    "selected readback source map",
+    "all pan files and controller25",
+    "all unrelated startup fields and component pins"
+  ],
+  "not_an_atomic_multifile_transaction": "Current writer freeze remains mandatory. Cooperative flock and repeated content+inode+mtime CAS reject observed conflicts; POSIX file replacement alone cannot prevent a noncooperating writer in the final check/rename interval.",
+  "on_failure": "HOLD, no automatic retry or rollback; inspect fresh current known bytes and explicitly run rollback."
+}

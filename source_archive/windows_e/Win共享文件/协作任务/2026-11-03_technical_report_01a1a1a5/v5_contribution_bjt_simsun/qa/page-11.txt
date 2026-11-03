@@ -1,0 +1,20 @@
+10
+图 3-1 外设与执行信号关系示意 引脚来自 XDC 隔离及供电关系按最终实物核对
+3.4 PS 与 PL 的寄存器事务
+运动 IP 的 AXI4-Lite 数据宽度为 32 bit，地址窗口为 0x80080000 起的 4 KiB。软件
+先写 session、epoch、seq、width 和 lease 等影子字段，再向 command 写 COMMIT。AXI
+写应答只表示总线事务结束，软件还要读 reason 与 ack_seq 才能判断命令是否接受。
+[E20][E21]
+表 3-2 关键寄存器及业务语义
+关键字段 相对偏移 单位与业务语义
+ID ABI BUILD_ID 0x000 0x004 0x008 只读身份 ABI=2 BUILD=0x10282601
+flags 与 reason 0x00c 状态低 4 bit 原因高 4 bit
+shadow session epoch seq 0x010 0x014 0x018 当前上下文与连续命令序号
+shadow width lease 0x01c 0x020 µs 与 ms 分别计量
+BIND REFERENCE ARM COMMIT STOP
+command 0x024
+QUIESCE
+ack_seq width lease_left 0x028 0x02c 0x030 已接受序号 当前脉宽 剩余许可
+reference 与 target 0x040 0x044 控制参考及目标脉宽 不等于实测角度
+有效 COMMIT 要求已经绑定、参考和 ARM，当前未在 QUIESCE，会话及代次一致，seq 恰
+为 ack_seq+1，目标为 500–2500 µs，租约为 4–500 ms。拒绝不会更新接受序号。接受后

@@ -1,0 +1,74 @@
+相机与GTK CPU优化：独立验收协议
+任务范围：原工程、原模型与现有功能保持，候选通过后实际验证两轮真人对话与原转轴跟随并行。
+本目录只做本地验证设计和纯过滤器检查；未联系板端、启动负载或操作转轴。
+
+职责与现场配合
+root负责经授权的GUI/camera部署及观察；转轴仍由专用对话或现场用户通过原UI操作。以最新AXIS_COORDINATION_HANDOFF.json及AXIS_CURRENT_HANDOFF.json为准，不重放旧运动请求。
+现场最少配合：准备两句公开短话；等上一轮完整说完再说下一句；在原可用范围内缓慢左右小幅移动；确认实际声音、口型、方向、停止/丢脸停止。无需导出对话正文、图像、PCM或身份模板。
+
+基线的边界
+performance_check_20261102/BOARD_PERFORMANCE_091612.json有40.002秒、21个系统样本和5个健康样本。视觉页、IDLE、麦克风关闭、无播放、自动跟随关闭、边界editor运行。
+整板4核CPU加权均值82.524%，2秒区间均值峰84.363%，不是瞬时硬件峰值；相机41.623%、GTK26.980%、Xorg3.700%、音频worker3.212%、editor2.631%，均按整板容量归一化。
+相机18.690采集fps/9.809处理fps，Native主任务新增390、周期超期新增0；原生avatar在视觉页隐藏且停止帧调度，旧绘制时延不能当作本窗实时画面开销。
+observer自身约0.881个百分点CPU。整机数字包含它及GET处理开销；不要简单全额扣除来声称无观察器负载，也不要把十秒线程窗与四十秒主窗相加。
+旧两轮对话为此前startup3fd124及owner16318的历史结果，仅是对话延迟参考，不是本轮全协同A/B。LLM RPC约1.940/1.833秒、ASR约1.093/1.395秒、TTS约.766/.838秒；两轮新完整ACK均committed。
+
+部署之前
+1. 新鲜核boot、实际GTK/相机/监督者PID-birth-cmd、实际startup与组件闭包、当前相机run config、所选readback来源；不要从滞后的DEPLOYMENT_CURRENT抄旧PID。轴版本以专用对话冻结交接为准。
+2. 相机若必须正常重启，沿原检查点精确封存、原reader验证、单次消费恢复、累计计数保留流程；禁止清零、改marker、伪seed或降低原保护。新相机owner与run config必须按真实值重绑readback，旧pin按历史保留。
+3. 两个候选独立审查。先测一个，保持另一个原样；单项通过再组合，便于归因和回退。所有发布版本保留原源、manifest、实际差异及正常回退入口。
+4. Native固件、DPU模型、当次fresh实际身份阈值/margin/TTL、轴速度/源龄/lease/STOP、用户数据和权限语义保持。身份数值须从当次已核配置记录并保持，不能把历史0.5、0.85或旧TTL填成此次固定合同；现役轴配置不能被旧startup备份覆盖。
+
+阶段一：视觉页常驻A/B
+— 采用同一40秒采样程序与相同间隔；同页面、预览分辨率/格式/目标帧率、相机模式、editor状态、光照和近似同场景。不要通过关预览、减分辨率、降帧、停止身份或移除editor制造对照优势。
+— 相机/GTK/原轴release在一组测试内稳定；相机或GUI换PID后应重建expected，不能跨owner相减CPU或帧计数。startup若变化，该窗不作可归因A/B。
+— 同时比较整机CPU均值/P95/2秒区间峰、按整机容量归一化进程CPU、RSS/可用内存、采集与处理fps、采集/观察源龄、Native新增超期和错误、可选身份任务完成/失败计数。
+— 采集fps因消除瓶颈上升时，要同时报告吞吐和CPU/帧。CPU变化不能脱离实际处理量；不能以增加队列或源龄换CPU下降。
+— 摄像头输入有人脸与否影响SFace负载；记录仅计数/布尔的任务完成差异，避免将不同输入内容当同负载。未经现场控制的一组只说明有限证据，不称严格A/B。
+— 主要候选功能检查：Raw与JPEG接口、首帧和多客户端、更新/断连/恢复、画面尺寸/方向/色彩/叠加几何；GTK字幕/交互、切页、主页面原角色16fps调度、口型/声音配合保持。
+
+阶段二：main真人对话与原随动联合窗口
+— 前提是候选单项及组合常驻窗通过，原正式UI恢复READY；当前相机、业务写者、身份服务、语音服务健康；用新fresh expected启动纯GET观察器。
+— 建议120秒，有效窗口至少覆盖两轮完整播放以及原跟随开启/运动/停止。角色主页面可见，固定原16fps；由实际操作者启聆听及原跟随。观察器本身无POST或toggle能力。
+— 两句公开短话用相近长度/音量及同一人，等上轮完整说完；其中一轮配合缓慢左右走动，另安排一次可控短暂丢脸或离开视野，再以原方式停止。真人现场观察优先，技术计数不能代替实物确认。
+— 同窗记录整板CPU/内存、相机fps/源龄/新超期、GTK原生帧推进/可见性/故障、ASR/完整LLM RPC/TTS/首PCM入队/worker耗时、播放器欠载/回压、新完整ACK、原轴commands accepted/visual center completions/STOP/readback。
+— 所有计数仅在同boot、同实际owner、同轴report run中取差值。原报告和当前健康字段可能来自不同快照，不把非原子采样值强行配成单事件因果。
+— 每轮要求新request_hash、完整latency.complete且无错误、新last_playback_ack同本轮request并committed=true。baseline旧ACK排除。身份/记忆本地命令可能不调用27B；若要验证LLM，至少有一轮普通问答且llm_calls>=1。
+— capture结束到观察SPEAKING是软件状态边界。250/500ms轮询分辨率必须注明，均非真人末字到扬声器首声。first_audio_queued从worker起算；guard累计通常与后续音频重叠，不加到首声上。
+— 主页面实际角色帧率与目标16分开报告；语音/轴同时负载下的短时CPU峰不能用视觉页空闲窗替代。没有声学/光学测量时，不报告实体轴响应毫秒或物理首声毫秒。
+
+候选通过与回退依据
+CPU下降须与同条件数据相符，吞吐/源龄/功能均无明显退化；新故障、Native fence/quiesce、检查点/owner绑定失败、播放ACK失败、原轴STOP失败或实体异常均不能宣称通过。
+出现这些问题时由获授权操作者沿原停止/正常回退流程处理；观察器不杀进程、不删除锁、不解除保护、不重发动作。候选不适用时保留失败证据和原版本，不能仅改阈值让报告变绿。
+阶段一已有改善不等同阶段二已完成；真人或轴现场验收未发生时，应明确标记PENDING，不能用合成文本或离线测试补成全流程通过。
+
+纯GET观察器
+observe_joint_readonly.py：可直接经SSH stdin运行，无远端文件写入/应用导入/DB/设备访问。
+run_joint_observer.py：root可用本地--expected JSON和独占--output-dir启动。--duration默认180（1..300秒）；--interval默认.5，可设.25以匹配旧轮询，camera每2秒读取一次。不得盲用旧watch_board_latency.py，它有旧startup/PID及可选conversation_toggle控制。
+expected格式：
+{
+  "boot_id": "<新鲜实际boot>",
+  "startup_sha256": "<新鲜实际startup SHA>",
+  "owners": {
+    "gui": {"pid": <实际GTK PID>, "birth_ticks": "<实际birth>", "command_sha256": "<实际cmd SHA>"},
+    "camera": {"pid": <实际相机PID>, "birth_ticks": "<实际birth>", "command_sha256": "<实际cmd SHA>"}
+  },
+  "axis_release_root": "<专用对话冻结的真实控制器root，可选>",
+  "axis_report_path": "<本次真实runs/.../trial.json，可选>"
+}
+owners可再加入supervisor/本次follow进程。axis路径只有已经实际开启的新run才可引用，不能填旧结果当本次动作。若用户经原UI新开一轮导致run变更，应在新观察窗口使用新的路径。
+启动示例（仅示例，未执行板端）：
+python run_joint_observer.py --expected fresh_expected.json --output-dir run_after_joint --duration 180 --interval 0.25
+退出码非0/guard变更不可算完成；FINISHED元数据本身不等于owner一致或功能通过。host_exit也必须检查。
+此观察器不重复采集全机/proc；可与root现有CPU采样器对齐时间窗，保持前后相同工具组合并报告其开销。
+
+本次离线检查
+OFFLINE_OBSERVER_CHECK.json：8项通过，检查GET-only、无远端写方法/子进程/设备/DB导入、敏感正文和姓名过滤、请求ID哈希、缺失字段为未知、ACK关联和相机计数保留。没有联网或负载执行。
+
+针对两个当前主候选的独立审查重点
+GTK v2窄read_preview投影（ui_services e4dedf9b…、board_camera_preview 67d6c0f2…）：原GStreamer、尺寸、像素与帧率路径全保持。只核投影覆盖实际worker所需键、原SnapshotGate observed+TTL谓词、原condition锁、取消/失源/配置代数、同JPEG key与1500ms界限、use_raw条件、独立返回引用及旧read-only对象fallback。完整UI/API继续走原read。静态通过及原11项/350并发证据见GTK_PROJECTION_INDEPENDENT_REVIEW；公开局部拷贝CPU不能代替ARM或整机收益。
+已拒绝旧GTK换序022记录保留：root实板严格比较在587x440的6个格式/图案组合出现9/11级可见像素差，因此拒绝。568特例实验不推进；不可将旧换序作为当前窄投影候选的一部分，也不可弱化像素门槛。
+相机按需JPEG v3（7d4773b8…）：缓存绑定同一已画帧的不可变所有权以及seq/epoch/原时间；保留8帧缓存和1000ms JPEG TTL、端点质量、Raw/JPEG语义。producer_failed+latestfid/tuple保护全局健康，同fid替换retire旧holder，全局编码锁→帧锁；五个原并发/producer/owned队列边界独立通过。真实CV2及部署恢复仍待root；legacy render_encode_publish计时在lazy版不含按需编码，不能独自作为提速证据。
+
+新boot对照补充
+原903c boot的PID、25pin和82.5%常驻窗只保留历史。新a6d或之后任何boot必须先核fresh实际owner/闭包/身份参数/26pin或届时真实数量，再在同boot、同场景重新采before和after。首次跨kernel的原Native archive-only合法协议由原loader管理；本性能协议不要求历史计数/单调时间进入新域，也不要求将旧archive伪装成当前owner final。

@@ -1,0 +1,85 @@
+{
+  "case_id": "e2_rest_s421001_L124_guide62",
+  "experiment": "E2 中间帧锚定（保持姿势约束）",
+  "basis": "review_20261006/接收端验收结论.md §4：先做一条保持姿势的约束小样，优先验证 E2 中间帧参考约束能否在实际节点版本接入",
+  "source_graph": "e1_rest_s421001_L124_api.json",
+  "source_graph_sha256": "60ffcd4745099efd741e2d67b31d264fa671164455959e36bc8bbc43b866251f",
+  "probe_graph": "e2_rest_s421001_L124_guide62_api.json",
+  "probe_graph_sha256": "e36e65f7f33ee78882715b496699af4f9ea1747775f0aad93acde259e4666343",
+  "single_variable": "相对 E1（length=124）只增加 1 个中间帧锚定 + 1 处重连",
+  "changed": [
+    {
+      "op": "add_node",
+      "node": "15",
+      "class_type": "MiniMaxH3AddGuide",
+      "inputs": {
+        "positive": [
+          "7",
+          0
+        ],
+        "latent": [
+          "7",
+          1
+        ],
+        "frame_idx": 62,
+        "vae": [
+          "3",
+          0
+        ],
+        "image": [
+          "5",
+          0
+        ]
+      }
+    },
+    {
+      "op": "rewire",
+      "node": "10",
+      "input": "conditioning",
+      "from": [
+        "7",
+        0
+      ],
+      "to": [
+        "15",
+        0
+      ]
+    }
+  ],
+  "all_diff_paths": [
+    {
+      "path": "/10/inputs/conditioning/0",
+      "from": "7",
+      "to": "15"
+    },
+    {
+      "path": "/15",
+      "from": "<MISSING>",
+      "to": {
+        "class_type": "MiniMaxH3AddGuide",
+        "inputs": {
+          "positive": [
+            "7",
+            0
+          ],
+          "latent": [
+            "7",
+            1
+          ],
+          "frame_idx": 62,
+          "vae": [
+            "3",
+            0
+          ],
+          "image": [
+            "5",
+            0
+          ]
+        }
+      }
+    }
+  ],
+  "node_availability": "MiniMaxH3AddGuide 由 /object_info 实测存在（comfy_extras.nodes_minimax_h3），无额外权重依赖",
+  "frame_idx": 62,
+  "length": 124
+}

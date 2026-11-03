@@ -1,0 +1,4 @@
+import datetime,hashlib,json
+from pathlib import Path
+root=Path('/home/root/aura-board-business-20261030/production-5259eab11e42af13');raw=(root/'startup/config.json').read_bytes();j=json.loads(raw);aura=Path(j['runtime'])/'aura';p=aura/'config/board_avatar_gtk.json';u= p.read_bytes();v=json.loads(u);speaker=v['board_business']['speaker']
+print(json.dumps({'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'startup_sha256':hashlib.sha256(raw).hexdigest(),'ui_configuration_sha256':hashlib.sha256(u).hexdigest(),'ui_config_matches_current_startup_pin':hashlib.sha256(u).hexdigest()==j['component_sha256']['config/board_avatar_gtk.json'],'binding_config_enabled':speaker.get('anonymous_config',{}).get('enabled') is True,'source_snapshot_stable':(root/'startup/config.json').read_bytes()==raw and p.read_bytes()==u,'config_read_only':True,'motor_or_main_page_content_inspected':False,'identity_or_profile_store_opened':False}))

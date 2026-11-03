@@ -1,0 +1,30 @@
+已冻结本地三文件声纹登记入口/补名候选，未由本代理发布或访问板卡。
+
+针对已证实的失败类别：现场固定metadata显示裸登记已进入voice等待姓名；下一轮LIR解析ordinary，原speaker RAM尚无session，无当轮错误或reset。原始文本已被原API清理，不能确定究竟是哪一个空格、标点、前缀或词形；本次改善登记语法和补名交互，不宣称恢复了现场确切原句或解决了所有InterruptedError/外部reset。
+
+只改candidate_runtime内三文件（完整before/after与字节数见SOURCE_MANIFEST.json）：
+1. common/feature_intents.py：共享speaker_text全句匹配自我声纹登记，支持我要/我想/请/帮我/给我、登记/注册/录入声纹、登记声音，及动词后的固定“一下”。不做子串搜索、错字猜测或姓名拼补。原无分隔“登记声纹我叫…”本来就支持，本次保留。
+   姓名槽使用原valid_name和原SpeakerDevice的20字符上限。仅中文姓名字符之间的ASCII/全角空格可合并；“我叫/我的名字是/名字是/叫我”后的冒号是姓名引导分隔符。名称内部逗号、冒号、中文hyphen或Latin词内/词间空白不拼接。疑问、引述、否定、帮助询问和普通谈论不因关键词启动登记。
+2. board/runtime/board_business.py：LIR仅在同actor、原120秒待姓名入口内调用共享完整姓名槽解析；保留原“叫我…”兼容。未先明确登记、取消/reset/超时/换会话后，都不能靠新姓名格式启动。原声纹turn健康返回、仍在等名且原声纹FSM未active时，短提示为“请告诉我这次声纹登记的称呼。直接说‘我叫’，再加上你的称呼。” 不要求复述长复合口令，不新增确认步骤。
+3. tools/yuki_jobs_candidate.py：仅补原两处kind tuple，避免独立人脸/声纹入口落入memory command，也让face_only进入原identity handler；voice_only仍使用speaker_identity原能力。
+
+不改binding_intent8048；它原本就使用共享speaker_text判断voice_only。原“记住我”联合流程保留，未新增联合别名。同名不自动建立关联，不创建links或私人记忆授权。原SpeakerDevice/三段样本/重复PCM检测/质量与一致性门槛/采样180秒/最终“确认保存声纹”均不变。
+
+关键SHA：
+feature_intents: 2ad13c7a5a175a85dfb412182fca44a79229962ff742b18691a7b72ea75f15f2
+Business: bf185a86dfd1f94924759c194b0246b51e64cb0a09654c935e8e1310f7bbea51
+yuki_jobs: d7bade70cf15cd5c7dd9bb17be702f86c5f2d1a32ad5c5809dddffde7a71d200
+
+验证：
+- CANDIDATE_YUKI_FINAL.xml：66/66通过；BASELINE_YUKI_FINAL.xml同66项为41通过/25失败，失败对应新允许的语法/格式、短提示、原问句与注入尾巴拒绝、Yuki face dispatch，以及因此原始文本用例尚未进入采样。基线结果完整保留，没有改fixture掩盖。
+- 使用实际formal CandidatePair、CharacterSpeechPolicy、BoardPersonaCandidate guard，以及实际bind_runtime_pair绑定到真实Jobs instance的_admit_text/_route。实际LocalRecordController/PairedMemoryCommands/PairedContextBuilder也在链内，验证原始合成ASR文本逐字保留到原Store，姓名格式归一不改原文。
+- 实际BoardSpeakerBusiness.create、sole worker、原SpeakerDevice、BindingHub和progressive analyzer、fresh三库；实际192D接口，但编码器/VAD/ASR/LLM/TTS均是纯合成替身。完整走三段原采样与原保存确认，结果synthetic voice1、links0；起始口令不算样本，状态查询和跨模态请求不消费样本。
+- ORIGINAL_VOICE_CONTRACT_FINAL.xml：原独立声纹24项全部通过，原断言未改，仅把测试加载路径指向本候选。
+- 独立审查由另一个代理执行；其结论及证据在independent_review，不能把本代理用例重复计入独审。
+- 349个公开源/配置逐文件比较只改上述3项。AST确认整个BoardBusinessRuntime（含已发布AAC initialize_clock）完全不变；LIR只有__call__改变，reset/public/entry/epoch/visual/gallery方法保持；Yuki AST精确只有2个既有tuple变化。Jobs580b、Face a911、Speaker690、Hub80b、Device da9、router85和binding8048均保持。
+
+pair指纹：找到精确998710fc12bf442d6baea501bab0234665b666caa29f4be8f685741d50d82099的公开formal JSON，与actual formal_yuki.PAIR_CONFIG_SHA256一致，其runtime_pins仍10项且不含这三文件，无需联动改pair JSON或放松guard。root已独立确认现役相同；发布仍由root依据最新380清单CAS。
+
+保留早期证据：CANDIDATE_YUKI_V1为61通过/2失败；两个失败分别是测试把跨模态busy后的描述性分析编码误当登记样本编码，以及显式装配缺少ConversationSelection。修正的是测试夹具，未放松产品guard或改原流程；V2为旧候选63/63。随后按root静审保留“叫我”和更清晰短提示并新增3项成为最终66。
+
+范围：未执行SSH/GET/服务/GUI/转轴命令，不读真实ASR、姓名、PCM、模板、私库或anchor。完整Runtime.__init__仍未测（公开快照缺无关history_delete）；显式装配真实目标类及Runtime原attach/analysis方法。native frame READY输入为合成测试元数据，未验证GPU或asset读取链；已另做formal JSON精确SHA和pin关系检查。真实声学质量、驱动/播放器、延迟及用户现场登记成功仍须root正常发布后观察固定metadata验收。

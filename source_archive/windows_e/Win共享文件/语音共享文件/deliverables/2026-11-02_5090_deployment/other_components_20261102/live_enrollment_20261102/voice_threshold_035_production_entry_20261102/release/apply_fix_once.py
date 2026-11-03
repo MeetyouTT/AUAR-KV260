@@ -1,0 +1,137 @@
+PAYLOAD = {'base_startup_sha256': '474f6640b4a2df3383b8ccb2814db7fe3448965c078dd87f972ba0997b23f7b2', 'files': {'tools/production_board_business_gui.py': {'before_sha256': 'b01f6edb9efe88cf95da60900e5ccc32eec93a24ef3f515ab08f51ae2ee6ada8', 'candidate_sha256': '279ef8deb388e963e846453de71ddfe865fc05ab49e78c496321537234407168', 'payload_base64': 'IiIiQ2FuZGlkYXRlIGNvbnN0cnVjdG9yOyBvcmlnaW5hbCBmYWN0b3J5L3Byb2ZpbGUvZ3VpZGUgbWV0aG9kcyBhcmUgaW5oZXJpdGVkLgpObyBydW50aW1lIGdsb2JhbHMgb3IgbWFpbiBzb3VyY2UgYXJlIGNoYW5nZWQuCiIiIgpmcm9tIHBhdGhsaWIgaW1wb3J0IFBhdGgKZnJvbSB0b29scy5ib2FyZF9idXNpbmVzc19ndWkgaW1wb3J0IChHdWlCb2FyZEJ1c2luZXNzLCBCb2FyZEJ1c2luZXNzQ29uZmlnLAogICAgY3JlYXRlX2JvYXJkX2J1c2luZXNzX3J1bnRpbWUsIENvbnZlcnNhdGlvblNlbGVjdGlvbiwgbG9jYWxfZmVlZGJhY2tfcHJvdmlkZXIpCmZyb20gdG9vbHMueXVraV9idXNpbmVzc19jYW5kaWRhdGUgaW1wb3J0IChiaW5kX3J1bnRpbWVfcGFpciwgbG9hZF9wcml2YXRlX2ZhY2VfcmVhZGJhY2ssCiAgICBzZWxlY3RlZF9mZWVkYmFja19wcm92aWRlciwgdmFsaWRhdGVfZmVlZGJhY2tfY2hhcmFjdGVyKQoKZGVmIF9yZXZpZXdlZF9hc3JfcGlucyh2YXJpYW50KToKICAgIGlmIHR5cGUodmFyaWFudCkgaXMgbm90IHN0ciBvciB2YXJpYW50IG5vdCBpbiAoJ2Jhc2VsaW5lJywgJ3BhcmFmb3JtZXJfc21hbGwnKToKICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdVbmtub3duIGV4cGxpY2l0IGJvYXJkIEFTUiB2YXJpYW50JykKICAgIGlmIHZhcmlhbnQgPT0gJ3BhcmFmb3JtZXJfc21hbGwnOgogICAgICAgIHJldHVybiAoJzNlZjZjMTkzNjliOTEyZjdjYWYzY2VmOGU1NDVjNWNjZDFhMzNkOWQ3ZWM3OTJhNDY2NjhkYzQxYzRiMjI5ZWMnLAogICAgICAgICAgICAgICAgJzRiMmQ5NjRlMThiOWNmMTM5YjQ3MzAwM2I2Njk4ZmIyZWQ5YTJhNWVjNTViOTNkYWE2NzdiMjhmNTc4ODk3YWEnKQogICAgcmV0dXJuICgnZjM2YTA0MzNiY2YwOTZiZDZkNmYxMWI4MGEzYWM4YmVkMTEwYmRjYTYzMmZlMGQ3MzFkZjhkMWE4NDQ3NTk0NScsCiAgICAgICAgICAgICc1OWFiYTg4NzNhMmVkMWUxMjJjMjVmZWU0MjFlMjVmMjgzYjYzMjkwZWZiZGU4NWMxZjAxYTg1M2Q4M2NiNmU2JykKCgpjbGFzcyBQcm9kdWN0aW9uR3VpQm9hcmRCdXNpbmVzcyhHdWlCb2FyZEJ1c2luZXNzKToKICAgIGRlZiBfX2luaXRfXyhzZWxmLCBzdGFnZSwgdmFsdWUsIGF1cmEpOgogICAgICAgIGlmIG5vdCBpc2luc3RhbmNlKHZhbHVlLCBkaWN0KSBvciB2YWx1ZS5nZXQoJ2VuYWJsZWQnKSBpcyBub3QgVHJ1ZToKICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignQm9hcmQgYnVzaW5lc3MgbXVzdCBiZSBleHBsaWNpdGx5IGVuYWJsZWQnKQogICAgICAgIHJlcXVpcmVkID0geydlbmFibGVkJywgJ3ByaXZhdGVfcm9vdCcsICd1dGNfYm91bmRzJywgJ2RhdGFfb3JpZ2luJywgJ2Fzcl9kaXJlY3RvcnknLAogICAgICAgICAgICAgICAgICAgICdmcm9udGVuZF9kaXJlY3RvcnknLCAnZmVlZGJhY2tfbWFuaWZlc3QnLCAnZmVlZGJhY2tfbWFuaWZlc3Rfc2hhMjU2JywgJ2Jvb3RzdHJhcF9yZWNlaXB0JywgJ2Jvb3RzdHJhcF9yZWNlaXB0X3NoYTI1Nid9CiAgICAgICAgb3B0aW9uYWwgPSB7J21vZGVsX3BvcnQnLCAndGltZW91dF9tcycsICd0aW1lem9uZScsICdlbnRyeV9tb2RlJywgJ2Fzcl90aHJlYWRzJywgJ2Fzcl92YXJpYW50JywgJ2RpYWxvZ3VlX291dHB1dF9mb3JtYXQnLAogICAgICAgICAgICAgICAgICAgICdmcm9udGVuZF90aHJlYWRzJywgJ3Zpc3VhbF9kZXZpY2VfaWQnLCAnc3BlYWtlcicsICdmYWNlX3JlYWRiYWNrJywKICAgICAgICAgICAgICAgICAgICAncmV0ZW50aW9uX2VuYWJsZWQnLCAncmVzdW1lX3NhdmVkX2NvbnZlcnNhdGlvbicsICdmcm9udGVuZF9vcHRpbWl6YXRpb24nLCAnY2FwdHVyZV9wcmlvcml0eV9uaWNlJywgJ2Zyb250ZW5kX3Byb2Nlc3MnLCAnZnJvbnRlbmRfY2FwdHVyZV9wcm9jZXNzJ30KICAgICAgICBpZiBub3QgcmVxdWlyZWQgPD0gc2V0KHZhbHVlKSBvciBzZXQodmFsdWUpIC0gcmVxdWlyZWQgLSBvcHRpb25hbDoKICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignSW52YWxpZCBib2FyZCBidXNpbmVzcyBjb25maWd1cmF0aW9uJykKICAgICAgICBzZWxmLmFzcl92YXJpYW50ID0gdmFsdWUuZ2V0KCdhc3JfdmFyaWFudCcsICdiYXNlbGluZScpCiAgICAgICAgbW9kZWxfcGluLCB0b2tlbnNfcGluID0gX3Jldmlld2VkX2Fzcl9waW5zKHNlbGYuYXNyX3ZhcmlhbnQpCiAgICAgICAgaWYgdmFsdWVbJ2RhdGFfb3JpZ2luJ10gIT0gJ2JvYXJkJyBvciB0eXBlKHZhbHVlLmdldCgncmV0ZW50aW9uX2VuYWJsZWQnLEZhbHNlKSkgaXMgbm90IGJvb2w6CiAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoJ0Zvcm1hbCBwcm9kdWN0aW9uIHJlcXVpcmVzIGV4cGxpY2l0IGJvYXJkIG9yaWdpbiBhbmQgcmV0ZW50aW9uIGJvb2xlYW4nKQogICAgICAgIGlmIHR5cGUodmFsdWUuZ2V0KCdyZXN1bWVfc2F2ZWRfY29udmVyc2F0aW9uJyxUcnVlKSkgaXMgbm90IGJvb2w6CiAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoJ0Nob29zZSBzYXZlZCBhbm9ueW1vdXMgY29udGludWF0aW9uIGV4cGxpY2l0bHknKQogICAgICAgIGZyb20gdG9vbHMucHJvZHVjdGlvbl9vdXRwdXRfZm9ybWF0IGltcG9ydCB2YWxpZGF0ZV9kaWFsb2d1ZV9vdXRwdXRfZm9ybWF0LCBpbnN0YWxsX2RpYWxvZ3VlX291dHB1dAogICAgICAgIHNlbGYuZGlhbG9ndWVfb3V0cHV0X2Zvcm1hdCA9IHZhbGlkYXRlX2RpYWxvZ3VlX291dHB1dF9mb3JtYXQodmFsdWUuZ2V0KCdkaWFsb2d1ZV9vdXRwdXRfZm9ybWF0JywgJ2pzb24nKSkKICAgICAgICBzZWxmLmRpYWxvZ3VlX291dHB1dCA9IE5vbmUKICAgICAgICBmcm9tIHRvb2xzLnByb2R1Y3Rpb25fZnJvbnRlbmRfc2VsZWN0aW9uIGltcG9ydCB2YWxpZGF0ZV9mcm9udGVuZF9vcHRpb25zCiAgICAgICAgc2VsZi5mcm9udGVuZF9vcHRpbWl6YXRpb24sc2VsZi5jYXB0dXJlX3ByaW9yaXR5X25pY2U9dmFsaWRhdGVfZnJvbnRlbmRfb3B0aW9ucyh2YWx1ZSkKICAgICAgICBzZWxmLmZyb250ZW5kX3Byb2Nlc3M9dmFsdWUuZ2V0KCdmcm9udGVuZF9wcm9jZXNzJyxGYWxzZSkKICAgICAgICBzZWxmLmZyb250ZW5kX2NhcHR1cmVfcHJvY2Vzcz12YWx1ZS5nZXQoJ2Zyb250ZW5kX2NhcHR1cmVfcHJvY2VzcycsRmFsc2UpCiAgICAgICAgZnJvbSBjb21tb24uYm9hcmRfcHJvZHVjdGlvbl9ib290c3RyYXAgaW1wb3J0IHZlcmlmeV9wcm9kdWN0aW9uX2Jvb3RzdHJhcF9yZWNlaXB0CiAgICAgICAgdmVyaWZ5X3Byb2R1Y3Rpb25fYm9vdHN0cmFwX3JlY2VpcHQodmFsdWVbJ3ByaXZhdGVfcm9vdCddLCB2YWx1ZVsnYm9vdHN0cmFwX3JlY2VpcHQnXSwgdmFsdWVbJ2Jvb3RzdHJhcF9yZWNlaXB0X3NoYTI1NiddKQogICAgICAgIGltcG9ydCBoYXNobGliCiAgICAgICAgaWYgaGFzaGxpYi5zaGEyNTYoUGF0aCh2YWx1ZVsnZmVlZGJhY2tfbWFuaWZlc3QnXSkucmVhZF9ieXRlcygpKS5oZXhkaWdlc3QoKSAhPSB2YWx1ZVsnZmVlZGJhY2tfbWFuaWZlc3Rfc2hhMjU2J106CiAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoJ1RoZSBzZWxlY3RlZCBwdWJsaWMgY3VlIG1hbmlmZXN0IGNoYW5nZWQnKQogICAgICAgIHJlYWRiYWNrID0gbG9hZF9wcml2YXRlX2ZhY2VfcmVhZGJhY2sodmFsdWUuZ2V0KCdmYWNlX3JlYWRiYWNrJykpCiAgICAgICAgcmVhZGJhY2sudmVyaWZ5KHJlYWRiYWNrLmNvbmZpZykKICAgICAgICBmcm9tIGJvYXJkLnJ1bnRpbWUuYXVkaW8uYm9hcmRfYXNyIGltcG9ydCBCb2FyZFBhcmFmb3JtZXIKICAgICAgICBmcm9tIHRvb2xzLnByb2R1Y3Rpb25fZnJvbnRlbmRfc2VsZWN0aW9uIGltcG9ydCBjcmVhdGVfZnJvbnRlbmRfcG9vbAogICAgICAgIGZyb20gYm9hcmQucnVudGltZS5hdWRpby5jaGFubmVsX2pvYnMgaW1wb3J0IENoYW5uZWxDb252ZXJzYXRpb25Kb2JzCiAgICAgICAgZnJvbSB0b29scy5wcm9maWxlX2NvbnRyb2wgaW1wb3J0IGFjY2Vzc19mcm9tX2NvbmZpZwogICAgICAgIHNlbGYuY2hhcmFjdGVyX3BhaXIgPSBzdGFnZS5jaGFyYWN0ZXJfcGFpcgogICAgICAgIGlmIHNlbGYuY2hhcmFjdGVyX3BhaXIgaXMgTm9uZToKICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcigiRXhwbGljaXQgY2FuZGlkYXRlIHBhaXIgcmVxdWlyZWQiKQogICAgICAgIHNlbGYuZmFjZV9yZWFkYmFja19zcGVjID0gdmFsdWUuZ2V0KCdmYWNlX3JlYWRiYWNrJykKICAgICAgICBzZWxmLnJlY29yZGluZyA9IE5vbmUKICAgICAgICBzZWxmLndvcmtlcl9vd25lZCA9IEZhbHNlCiAgICAgICAgc2VsZi5mcm9udGVuZCA9IE5vbmUKICAgICAgICBzZWxmLnJ1bnRpbWUgPSBOb25lCiAgICAgICAgIyBFeHBsaWNpdCB2YXJpYW50IHNlbGVjdHMgb25lIHJldmlld2VkIHBhaXI7IHRoZSBjYWxsZXIgc3RpbGwgc3VwcGxpZXMgaXRzIGRpcmVjdG9yeS4KICAgICAgICBhc3IgPSBCb2FyZFBhcmFmb3JtZXIodmFsdWVbJ2Fzcl9kaXJlY3RvcnknXSwgbW9kZWxfc2hhMjU2PW1vZGVsX3BpbiwKICAgICAgICAgICAgdG9rZW5zX3NoYTI1Nj10b2tlbnNfcGluLCBudW1fdGhyZWFkcz12YWx1ZS5nZXQoJ2Fzcl90aHJlYWRzJywgMikpCiAgICAgICAgZmVlZGJhY2sgPSBsb2NhbF9mZWVkYmFja19wcm92aWRlcih2YWx1ZVsnZmVlZGJhY2tfbWFuaWZlc3QnXSkKICAgICAgICB0cnk6CiAgICAgICAgICAgIHNlbGYuZnJvbnRlbmQgPSBjcmVhdGVfZnJvbnRlbmRfcG9vbCh2YWx1ZVsnZnJvbnRlbmRfZGlyZWN0b3J5J10sb3B0aW1pemF0aW9uPXNlbGYuZnJvbnRlbmRfb3B0aW1pemF0aW9uLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBudW1fdGhyZWFkcz12YWx1ZS5nZXQoJ2Zyb250ZW5kX3RocmVhZHMnLCAxKSxmcm9udGVuZF9wcm9jZXNzPXNlbGYuZnJvbnRlbmRfcHJvY2VzcykKICAgICAgICAgICAgY29uZmlnID0gQm9hcmRCdXNpbmVzc0NvbmZpZyh2YWx1ZVsncHJpdmF0ZV9yb290J10sIHR1cGxlKHZhbHVlWyd1dGNfYm91bmRzJ10pLAogICAgICAgICAgICAgICAgbW9kZWxfcG9ydD12YWx1ZS5nZXQoJ21vZGVsX3BvcnQnLCA4Nzk3KSwgdGltZW91dF9tcz12YWx1ZS5nZXQoJ3RpbWVvdXRfbXMnLCAxMjAwMDApLAogICAgICAgICAgICAgICAgdGltZXpvbmU9dmFsdWUuZ2V0KCd0aW1lem9uZScsICdBbWVyaWNhL0xvc19BbmdlbGVzJyksIGVudHJ5X21vZGU9dmFsdWUuZ2V0KCdlbnRyeV9tb2RlJywgJ3ZvaWNlX2ZpcnN0JyksCiAgICAgICAgICAgICAgICBkYXRhX29yaWdpbj12YWx1ZVsnZGF0YV9vcmlnaW4nXSwgdmlzdWFsX2RldmljZV9pZD12YWx1ZS5nZXQoJ3Zpc3VhbF9kZXZpY2VfaWQnLCAnYm9hcmQtY2FtZXJhJyksCiAgICAgICAgICAgICAgICBib290c3RyYXBfcmVjZWlwdD12YWx1ZVsnYm9vdHN0cmFwX3JlY2VpcHQnXSwgYm9vdHN0cmFwX3JlY2VpcHRfc2hhMjU2PXZhbHVlWydib290c3RyYXBfcmVjZWlwdF9zaGEyNTYnXSwKICAgICAgICAgICAgICAgIHJldGVudGlvbl9lbmFibGVkPXZhbHVlLmdldCgncmV0ZW50aW9uX2VuYWJsZWQnLEZhbHNlKSkKICAgICAgICAgICAgc2VsZi5ydW50aW1lID0gY3JlYXRlX2JvYXJkX2J1c2luZXNzX3J1bnRpbWUoY29uZmlnLCBzdGFnZS5ib2FyZF9ib290X2lkLAogICAgICAgICAgICAgICAgYXNyPWFzciwgc3lzdGVtX3Byb21wdD1zZWxmLmNoYXJhY3Rlcl9wYWlyLnNlbGVjdGVkX3Byb21wdCwKICAgICAgICAgICAgICAgIGNvbnZlcnNhdGlvbl9zZWxlY3Rpb249Q29udmVyc2F0aW9uU2VsZWN0aW9uKFBhdGgodmFsdWVbJ3ByaXZhdGVfcm9vdCddKS8nY29udmVyc2F0aW9uX3NlbGVjdGlvbi5qc29uJyksCiAgICAgICAgICAgICAgICBpZGVudGl0eV9zbmFwc2hvdD1sYW1iZGE6IHN0YWdlLnNlcnZpY2VzLmlkZW50aXR5X3NuYXBzaG90KCkgaWYgc3RhZ2Uuc2VydmljZXMgaXMgbm90IE5vbmUgZWxzZSBOb25lLAogICAgICAgICAgICAgICAgaWRlbnRpdHlfY29tbWFuZD1DaGFubmVsQ29udmVyc2F0aW9uSm9icy5faWRlbnRpdHlfY29tbWFuZCwKICAgICAgICAgICAgICAgIHByb2ZpbGVfYWNjZXNzPWFjY2Vzc19mcm9tX2NvbmZpZyhhdXJhKSwgZmVlZGJhY2tfcHJvdmlkZXI9ZmVlZGJhY2ssCiAgICAgICAgICAgICAgICBjYXB0dXJlX2lkbGU9c2VsZi5jYXB0dXJlX2lkbGUpCiAgICAgICAgICAgIGZyb20gY29tbW9uLmJvYXJkX3Byb2R1Y3Rpb25fYm9vdHN0cmFwIGltcG9ydCByZWdpc3Rlcl9hbm9ueW1vdXNfY29udmVyc2F0aW9uCiAgICAgICAgICAgIHNlbGYucnVudGltZS5qb2JzLmNvbnZlcnNhdGlvbl9zZWxlY3Rpb24uYmVmb3JlX3B1Ymxpc2ggPSAoCiAgICAgICAgICAgICAgICBsYW1iZGEgY2lkOiByZWdpc3Rlcl9hbm9ueW1vdXNfY29udmVyc2F0aW9uKHNlbGYucnVudGltZS5zdG9yZSwgY2lkKSkKICAgICAgICAgICAgYmluZF9ydW50aW1lX3BhaXIoc2VsZi5ydW50aW1lLCBzZWxmLmNoYXJhY3Rlcl9wYWlyKQogICAgICAgICAgICBzZWxmLnJ1bnRpbWUuaW5pdGlhbGl6ZV9jbG9jayh0aW1lb3V0PTMuKQogICAgICAgICAgICBzZWxmLmRpYWxvZ3VlX291dHB1dCA9IGluc3RhbGxfZGlhbG9ndWVfb3V0cHV0KHNlbGYucnVudGltZSwKICAgICAgICAgICAgICAgIG1vZGU9c2VsZi5kaWFsb2d1ZV9vdXRwdXRfZm9ybWF0LCBzeXN0ZW1fcHJvbXB0PXNlbGYuY2hhcmFjdGVyX3BhaXIuc2VsZWN0ZWRfcHJvbXB0KQogICAgICAgICAgICBzcGVha2VyID0gdmFsdWUuZ2V0KCdzcGVha2VyJykKICAgICAgICAgICAgaWYgc3BlYWtlciBpcyBub3QgTm9uZToKICAgICAgICAgICAgICAgIHNlbGYuX2F0dGFjaF9zcGVha2VyKHNwZWFrZXIsIHN0YWdlLmJvYXJkX2Jvb3RfaWQpCiAgICAgICAgICAgIGVsaWYgdmFsdWVbJ2RhdGFfb3JpZ2luJ10gPT0gJ2JvYXJkJzoKICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoJ1RoZSBib2FyZC1vd25lZCByZXBsYWNlbWVudCByZXF1aXJlcyB0aGUgZXhpc3Rpbmcgc3BlYWtlci9pZGVudGl0eSBidXNpbmVzcycpCiAgICAgICAgICAgIGluaXRpYWxpemVfYW5vbnltb3VzX3NlbGVjdGlvbihzZWxmLnJ1bnRpbWUsIHZhbHVlLmdldCgncmVzdW1lX3NhdmVkX2NvbnZlcnNhdGlvbicsVHJ1ZSkpCiAgICAgICAgICAgIHZhbGlkYXRlX2ZlZWRiYWNrX2NoYXJhY3RlcihmZWVkYmFjaygpKQogICAgICAgICAgICBzZWxmLnJ1bnRpbWUuam9icy5wcmVwYXJlX2ZlZWRiYWNrKCkKICAgICAgICAgICAgc2VsZi5ydW50aW1lLmpvYnMuZmVlZGJhY2tfcHJvdmlkZXIgPSBzZWxlY3RlZF9mZWVkYmFja19wcm92aWRlcihmZWVkYmFjaywgc2VsZi5jaGFyYWN0ZXJfcGFpcikKICAgICAgICBleGNlcHQgQmFzZUV4Y2VwdGlvbjoKICAgICAgICAgICAgc2VsZi5jbG9zZSgpCiAgICAgICAgICAgIHJhaXNlCgoKICAgIGRlZiByZWNvcmRpbmdfb3B0aW9ucyhzZWxmLHZpc3VhbF9jb250cm9sbGVyKToKICAgICAgICBpZiBzZWxmLmNhcHR1cmVfcHJpb3JpdHlfbmljZT09MDoKICAgICAgICAgICAgb3B0aW9ucz1zdXBlcigpLnJlY29yZGluZ19vcHRpb25zKHZpc3VhbF9jb250cm9sbGVyKQogICAgICAgIGVsc2U6CiAgICAgICAgICAgIGZyb20gdG9vbHMucHJvZHVjdGlvbl9mcm9udGVuZF9zZWxlY3Rpb24gaW1wb3J0IHByaW9yaXR5X3JlY29yZGluZ19vcHRpb25zCiAgICAgICAgICAgIG9wdGlvbnM9cHJpb3JpdHlfcmVjb3JkaW5nX29wdGlvbnMoc2VsZix2aXN1YWxfY29udHJvbGxlcikKICAgICAgICBpZiBzZWxmLmZyb250ZW5kX2NhcHR1cmVfcHJvY2VzczoKICAgICAgICAgICAgZnJvbSB0b29scy5wcm9kdWN0aW9uX2Zyb250ZW5kX3NlbGVjdGlvbiBpbXBvcnQgYXV0b21hdGljX2NhcHR1cmVfcmVjb3JkaW5nX29wdGlvbnMKICAgICAgICAgICAgb3B0aW9ucz1hdXRvbWF0aWNfY2FwdHVyZV9yZWNvcmRpbmdfb3B0aW9ucyhzZWxmLG9wdGlvbnMpCiAgICAgICAgcmV0dXJuIG9wdGlvbnMKCiAgICBkZWYgX2F0dGFjaF9zcGVha2VyKHNlbGYsIHZhbHVlLCBib290X2lkKToKICAgICAgICBmcm9tIGJvYXJkLnJ1bnRpbWUuYXVkaW8uYm9hcmRfc3BlYWtlcl9vbm54IGltcG9ydCBCb2FyZEVjYXBhT25ueEVuY29kZXIKICAgICAgICBmcm9tIGJvYXJkLnJ1bnRpbWUuYXVkaW8uZmFjZV9nYWxsZXJ5X3JlYWRiYWNrIGltcG9ydCBGYWNlR2FsbGVyeVJlYWRiYWNrCiAgICAgICAgZnJvbSBib2FyZC5ydW50aW1lLmJvYXJkX3NwZWFrZXJfYnVzaW5lc3MgaW1wb3J0IEJvYXJkU3BlYWtlckJ1c2luZXNzCiAgICAgICAgZnJvbSBjb21tb24uc3BlYWtlcl9pZGVudGl0eSBpbXBvcnQgdm9pY2VkX3BjbQogICAgICAgIHJlcXVpcmVkID0geydlbmFibGVkJywgJ21vZGVsX2RpcmVjdG9yeScsICdtYW5pZmVzdF9zaGEyNTYnLCAnZXhwZWN0ZWRfbW9kZWxfaWQnLCAnYW5vbnltb3VzX2NvbmZpZyd9CiAgICAgICAgaWYgbm90IGlzaW5zdGFuY2UodmFsdWUsIGRpY3QpIG9yIHNldCh2YWx1ZSkgIT0gcmVxdWlyZWQgb3IgdmFsdWVbJ2VuYWJsZWQnXSBpcyBub3QgVHJ1ZToKICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignRXhwbGljaXQgcGlubmVkIGxvY2FsIHNwZWFrZXIgYnVzaW5lc3MgY29uZmlndXJhdGlvbiBpcyByZXF1aXJlZCcpCiAgICAgICAgZmluZ2VycHJpbnQgPSB2YWx1ZVsnbWFuaWZlc3Rfc2hhMjU2J10KICAgICAgICBpZiBub3QgaXNpbnN0YW5jZShmaW5nZXJwcmludCwgc3RyKSBvciBsZW4oZmluZ2VycHJpbnQpICE9IDY0IG9yIGFueShjIG5vdCBpbiAnMDEyMzQ1Njc4OWFiY2RlZicgZm9yIGMgaW4gZmluZ2VycHJpbnQpOgogICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKCdUaGUgb3JpZ2luYWwgRUNBUEEgZXhwb3J0IG1hbmlmZXN0IG11c3QgYmUgcGlubmVkJykKICAgICAgICByZWFkYmFjayA9IGxvYWRfcHJpdmF0ZV9mYWNlX3JlYWRiYWNrKHNlbGYuZmFjZV9yZWFkYmFja19zcGVjKQogICAgICAgIGlmIHJlYWRiYWNrIGlzIE5vbmU6CiAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoJ0ZyZXNoIGxvY2FsIGZhY2UtZ2FsbGVyeSBzb3VyY2UgYmluZGluZyBpcyByZXF1aXJlZCcpCiAgICAgICAgcmVhZGJhY2sudmVyaWZ5KHJlYWRiYWNrLmNvbmZpZykgICMgTWV0YWRhdGEvc291cmNlLW9ubHkgY2hlY2ssIG5vIHRlbXBsYXRlIGV4cG9ydC4KICAgICAgICBzZXJ2aWNlID0gQm9hcmRTcGVha2VyQnVzaW5lc3MuY3JlYXRlKFBhdGgoc2VsZi5ydW50aW1lLmNvbmZpZy5wcml2YXRlX3Jvb3QpLydzcGVha2VyJywKICAgICAgICAgICAgZW5jb2Rlcl9mYWN0b3J5PWxhbWJkYTogQm9hcmRFY2FwYU9ubnhFbmNvZGVyKHZhbHVlWydtb2RlbF9kaXJlY3RvcnknXSwKICAgICAgICAgICAgICAgICAgICAgICAgZXhwZWN0ZWRfbWFuaWZlc3Rfc2hhMjU2PWZpbmdlcnByaW50LCB0aHJlYWRzPTEpLAogICAgICAgICAgICBib2FyZF9ib290X2lkPWJvb3RfaWQsIHF1YWxpdHk9dm9pY2VkX3BjbSwgZXhwZWN0ZWRfbW9kZWxfaWQ9dmFsdWVbJ2V4cGVjdGVkX21vZGVsX2lkJ10sCiAgICAgICAgICAgIGFub255bW91c19jb25maWc9dmFsdWVbJ2Fub255bW91c19jb25maWcnXSwgd2FsbF9jbG9jaz1zZWxmLnJ1bnRpbWUudGltZWxpbmUuZXZlbnRfdGltZSwKICAgICAgICAgICAgY2FsaWJyYXRpb249eyd0aHJlc2hvbGQnOi4zNSwnbWFyZ2luJzouMSwnY29uc2lzdGVuY3knOi42LCdmaWVsZF9jYWxpYnJhdGVkJzpGYWxzZX0sCiAgICAgICAgICAgIGNsb2NrPXNlbGYucnVudGltZS5jbG9jaywgZGF0YV9vcmlnaW49c2VsZi5ydW50aW1lLmNvbmZpZy5kYXRhX29yaWdpbikKICAgICAgICB0cnk6CiAgICAgICAgICAgIHNlbGYucnVudGltZS5hdHRhY2hfc3BlYWtlcl9idXNpbmVzcyhzZXJ2aWNlLCBmYWNlX3JlYWRiYWNrPXJlYWRiYWNrKQogICAgICAgIGV4Y2VwdCBCYXNlRXhjZXB0aW9uOgogICAgICAgICAgICBzZXJ2aWNlLmNsb3NlKCkKICAgICAgICAgICAgcmFpc2UKCgogICAgZGVmIGNsb3NlKHNlbGYpOgogICAgICAgICMgQSBsZWFzZSBjbG9zZSBjYW5jZWxzIG9uZSB0dXJuOyBvbmx5IEdVSSBzaHV0ZG93biByZXRpcmVzIHRoaXMgbW9kZWwgY2hpbGQuCiAgICAgICAgcG9vbD1nZXRhdHRyKHNlbGYsJ2Zyb250ZW5kJyxOb25lKQogICAgICAgIHNodXRkb3duPWdldGF0dHIoZ2V0YXR0cihwb29sLCdnYXRlJyxOb25lKSwnc2h1dGRvd24nLE5vbmUpCiAgICAgICAgaWYgY2FsbGFibGUoc2h1dGRvd24pOgogICAgICAgICAgICByZWNvcmRpbmc9Z2V0YXR0cihzZWxmLCdyZWNvcmRpbmcnLE5vbmUpCiAgICAgICAgICAgIGlmIHJlY29yZGluZyBpcyBub3QgTm9uZSBhbmQgbm90IHNlbGYud29ya2VyX293bmVkIGFuZCBub3QgcmVjb3JkaW5nLmNsb3NlZDoKICAgICAgICAgICAgICAgIHJlY29yZGluZy5jbG9zZSgpCiAgICAgICAgICAgIHBvb2wuY2xvc2UoKQogICAgICAgICAgICBpZiBub3Qgc2h1dGRvd24oKToKICAgICAgICAgICAgICAgIHJhaXNlIFJ1bnRpbWVFcnJvcignZnJvbnRlbmRfd29ya2VyX3NodXRkb3duX2luY29tcGxldGUnKQogICAgICAgIHJldHVybiBzdXBlcigpLmNsb3NlKCkKCiAgICBkZWYgYWN0aXZhdGUoc2VsZik6CiAgICAgICAgc2VsZi5jaGFyYWN0ZXJfcGFpci5yZXF1aXJlX3JlYWR5KCkKICAgICAgICByZXR1cm4gc3VwZXIoKS5hY3RpdmF0ZSgpCgpkZWYgcHJlcGFyZV9ib2FyZF9idXNpbmVzcyhzdGFnZSwgdmFsdWUsIGF1cmEpOgogICAgcmV0dXJuIFByb2R1Y3Rpb25HdWlCb2FyZEJ1c2luZXNzKHN0YWdlLCB2YWx1ZSwgYXVyYSkKCgpkZWYgaW5pdGlhbGl6ZV9hbm9ueW1vdXNfc2VsZWN0aW9uKHJ1bnRpbWUsIHJlc3VtZV9zYXZlZCk6CiAgICAiIiJFeHBsaWNpdCByb290IGNvbnRpbnVhdGlvbiBwb2xpY3k7IG5vIHByb2ZpbGUvZ3JhbnQvdG9rZW4gaXMgaW1wb3J0ZWQuIiIiCiAgICBpbXBvcnQgaGFzaGxpYgogICAgc2VsZWN0aW9uID0gcnVudGltZS5qb2JzLmNvbnZlcnNhdGlvbl9zZWxlY3Rpb24KICAgIHByb29mID0gcnVudGltZS5ib290c3RyYXBfcHJvb2YKICAgIGlmIHJlc3VtZV9zYXZlZCBhbmQgcHJvb2YuZ2V0KCdjb252ZXJzYXRpb25fc2VsZWN0aW9uX3ZlcmlmaWVkJykgaXMgVHJ1ZToKICAgICAgICByYXcgPSBQYXRoKHNlbGVjdGlvbi5wYXRoKS5yZWFkX2J5dGVzKCkKICAgICAgICBpZiBoYXNobGliLnNoYTI1NihyYXcpLmhleGRpZ2VzdCgpICE9IHByb29mLmdldCgnY29udmVyc2F0aW9uX3NlbGVjdGlvbl9zaGEyNTYnKToKICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcignVmVyaWZpZWQgYW5vbnltb3VzIGNvbnZlcnNhdGlvbiByZWZlcmVuY2UgY2hhbmdlZCBiZWZvcmUgYWRtaXNzaW9uJykKICAgICAgICBydW50aW1lLmpvYnMuc2VsZWN0X2NvbnZlcnNhdGlvbihyZXN1bWU9VHJ1ZSkKICAgICAgICBydW50aW1lLmluaXRpYWxfc2VsZWN0aW9uID0gZGljdChtb2RlPSdzYXZlZF9hbm9ueW1vdXMnLCBzZXNzaW9uX2lzX2ZyZXNoPVRydWUsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwcm9maWxlX2dyYW50X2ltcG9ydGVkPUZhbHNlKQogICAgZWxpZiByZXN1bWVfc2F2ZWQgYW5kIG5vdCBwcm9vZi5nZXQoJ2NvbnZlcnNhdGlvbl9zZWxlY3Rpb25fdmVyaWZpZWQnKToKICAgICAgICBydW50aW1lLmpvYnMuc2VsZWN0X2NvbnZlcnNhdGlvbihyZXN1bWU9RmFsc2UpCiAgICAgICAgcnVudGltZS5pbml0aWFsX3NlbGVjdGlvbiA9IGRpY3QobW9kZT0nbmV3X2Fub255bW91c19ub19zYXZlZF9yZWZlcmVuY2UnLCBzZXNzaW9uX2lzX2ZyZXNoPVRydWUsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwcm9maWxlX2dyYW50X2ltcG9ydGVkPUZhbHNlKQogICAgZWxzZToKICAgICAgICBydW50aW1lLmluaXRpYWxfc2VsZWN0aW9uID0gZGljdChtb2RlPSdleHBsaWNpdF9zZWxlY3Rpb25fcmVxdWlyZWQnLCBzZXNzaW9uX2lzX2ZyZXNoPVRydWUsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwcm9maWxlX2dyYW50X2ltcG9ydGVkPUZhbHNlKQo='}}}
+"""PAYLOAD is supplied from the frozen, tested single-file candidate by the host."""
+import base64
+import copy
+import hashlib
+import json
+import os
+from pathlib import Path
+import stat
+import subprocess
+import time
+import uuid
+
+ROOT = Path('/home/root/aura-board-business-20261030/production-5259eab11e42af13')
+STARTUP = ROOT / 'startup/config.json'
+TX = Path('/home/root/aura-5090-recovery-20261102-a6d4a069/voice-threshold-035-production-entry-v1')
+KEYS = {'tools/production_board_business_gui.py'}
+assert set(PAYLOAD['files']) == KEYS
+
+def raw(p):
+    p = Path(p); s = p.lstat()
+    assert stat.S_ISREG(s.st_mode) and s.st_uid == 0 and not p.is_symlink()
+    return p.read_bytes()
+
+def sha(p): return hashlib.sha256(raw(p)).hexdigest()
+
+def unit(name):
+    r = subprocess.run(['systemctl', 'show', name, '--property=MainPID,ActiveState,SubState,Job'], capture_output=True, text=True, timeout=4)
+    assert r.returncode == 0
+    return dict(line.split('=', 1) for line in r.stdout.splitlines() if '=' in line)
+
+def owners():
+    assert Path('/proc/sys/kernel/random/boot_id').read_text().strip() == 'a6d4a069-e9b0-4065-8df7-dc23556b168e'
+    assert unit('aura-avatar-ui.service') == {'MainPID': '0', 'ActiveState': 'inactive', 'SubState': 'dead', 'Job': ''}
+    assert not Path('/proc/266240').exists() and not Path('/proc/266299').exists()
+    assert unit('aura-camera-ui.service') == {'MainPID': '1332', 'ActiveState': 'active', 'SubState': 'running', 'Job': ''}
+    assert Path('/proc/1332/stat').read_text().rsplit(')', 1)[1].split()[19] == '2236'
+    assert sha('/proc/1332/cmdline') == 'acf3ee123d7674fdea6e90e79252909ca396249c870269169910879d940c27dd'
+
+def sync_dir(path):
+    fd = os.open(path, os.O_RDONLY | os.O_DIRECTORY)
+    try: os.fsync(fd)
+    finally: os.close(fd)
+
+def create(path, data):
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(fd, 'wb') as stream:
+        stream.write(data); stream.flush(); os.fsync(stream.fileno())
+    sync_dir(path.parent)
+
+def replace(path, expected, data):
+    info = path.lstat()
+    assert stat.S_ISREG(info.st_mode) and info.st_uid == 0 and info.st_nlink == 1
+    assert raw(path) == expected, 'Concurrent source change'
+    temp = path.with_name('.' + path.name + '.voice-threshold-035-production-entry-' + uuid.uuid4().hex + '.tmp')
+    fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, stat.S_IMODE(info.st_mode))
+    try:
+        with os.fdopen(fd, 'wb') as stream:
+            stream.write(data); stream.flush(); os.fsync(stream.fileno())
+        assert raw(path) == expected, 'Concurrent source change'
+        os.replace(temp, path); sync_dir(path.parent)
+        assert raw(path) == data
+    finally:
+        if temp.exists(): temp.unlink()
+
+owners()
+assert json.loads(raw(TX / 'stop-result.json'))['status'] == 'GUI_NORMAL_STOPPED'
+assert TX.resolve(strict=True) == TX and TX.stat().st_uid == 0
+assert not (TX / 'apply-intent.json').exists() and not (TX / 'applied.json').exists()
+startup_before = raw(STARTUP)
+assert hashlib.sha256(startup_before).hexdigest() == PAYLOAD['base_startup_sha256'] == '474f6640b4a2df3383b8ccb2814db7fe3448965c078dd87f972ba0997b23f7b2'
+startup = json.loads(startup_before); aura = Path(startup['runtime']) / 'aura'
+assert len(startup['component_sha256']) == 380
+assert all(sha(aura / k) == v for k, v in startup['component_sha256'].items())
+assert startup['component_sha256']['board/runtime/board_business.py'] == 'bf185a86dfd1f94924759c194b0246b51e64cb0a09654c935e8e1310f7bbea51'
+assert startup['component_sha256']['common/feature_intents.py'] == '901c74d8de825bf6f22ac7cca608db3840ea7d39cc104ac4b5392dca3f7d8f6c'
+assert startup['component_sha256']['tools/yuki_jobs_candidate.py'] == 'd7bade70cf15cd5c7dd9bb17be702f86c5f2d1a32ad5c5809dddffde7a71d200'
+assert startup['component_sha256']['board/runtime/audio/board_dialogue_jobs.py'] == '580b2cf796275104cf15f2295afa2de29f82f32eabdd783a4b3aff858840a464'
+assert startup['component_sha256']['board/runtime/audio/board_asr.py'] == 'c51488ac6bd3563bc3dc42934b321e98e26cb2b58d700318765a60ca4908ef60'
+assert startup['component_sha256']['common/binding_intent.py'] == '8048cd5bd4f3f80cd872f373e1eed149820f37d2ec40042390c17cfb4cd94df1'
+assert startup['component_sha256']['board/interaction/ui_services.py'] == 'e4dedf9b3d56d22d9eb93de1e96ad1a69870d553ea50f7dd5082b21e19f381c9'
+assert startup['component_sha256']['tools/board_camera_preview.py'] == '67d6c0f2b24ea97e20fdcc7b3383b6444269a6e26f5deb566f2b88746b7daf9b'
+assert sha(aura / 'config/yuki_pair.formal.json') == '998710fc12bf442d6baea501bab0234665b666caa29f4be8f685741d50d82099'
+pair_pins = json.loads(raw(aura / 'config/yuki_pair.formal.json'))['runtime_pins']
+assert len(pair_pins) == 10 and not (set(pair_pins) & KEYS)
+assert all(sha(aura / k) == v for k,v in pair_pins.items())
+assert startup['component_sha256']['board/identity/voice_enrollment.py'] == 'a9113ba40efc49828ee158554b2dae70485858396680918458f6f96bba16bacb'
+assert startup['component_sha256']['tools/unified_identity_binding.py'] == '85e415d00daa770d4d94ae58006a23ed9700067651a0448de80c99eb33ed1809'
+assert startup['component_sha256']['config/board_avatar_gtk.json'] == '8b9556b8c7a12cda0d90de2076a144bef4a106316bc74a4e5639ffa5106f1fb5'
+ui = json.loads(raw(aura / 'config/board_avatar_gtk.json')); selected = ui['board_business']['face_readback']
+assert selected['sha256'] == sha(selected['path']) == '99c53c5992355a2a4dfdedceb3cc90d813981328456b987e503459fe6d0691b5'
+binding = json.loads(raw(selected['path'])); assert len(binding['source_sha256']) == 26
+assert all(sha(p) == v for p, v in binding['source_sha256'].items())
+assert json.loads(raw('/home/root/.local/share/aura-board-business/listening_preference.json')) == {'version': 1, 'enabled': False}
+before = {}; after = {}; new_startup = copy.deepcopy(startup)
+for key in sorted(KEYS):
+    spec = PAYLOAD['files'][key]; path = aura / key
+    before[path] = raw(path)
+    assert hashlib.sha256(before[path]).hexdigest() == spec['before_sha256'] == startup['component_sha256'][key]
+    data = base64.b64decode(spec['payload_base64'], validate=True)
+    assert hashlib.sha256(data).hexdigest() == spec['candidate_sha256']
+    compile(data, str(path), 'exec')
+    after[path] = data; new_startup['component_sha256'][key] = spec['candidate_sha256']
+before[STARTUP] = raw(STARTUP)
+assert before[STARTUP] == startup_before and hashlib.sha256(before[STARTUP]).hexdigest() == PAYLOAD['base_startup_sha256']
+after[STARTUP] = (json.dumps(new_startup, sort_keys=True, indent=2) + '\n').encode()
+assert {k: v for k, v in new_startup.items() if k != 'component_sha256'} == {k: v for k, v in startup.items() if k != 'component_sha256'}
+assert {k for k in startup['component_sha256'] if startup['component_sha256'][k] != new_startup['component_sha256'][k]} == KEYS
+owners(); assert all(raw(p) == b for p, b in before.items())
+create(TX / 'apply-intent.json', (json.dumps({'board_monotonic': time.monotonic(), 'base_startup_sha256': PAYLOAD['base_startup_sha256'],
+       'startup_after_sha256': hashlib.sha256(after[STARTUP]).hexdigest(), 'changed_files': sorted(KEYS)}) + '\n').encode())
+create(TX / 'startup.before.json', before[STARTUP])
+for key in sorted(KEYS): create(TX / (Path(key).stem + '.before.py'), before[aura / key])
+changed = []
+try:
+    for path in [aura / key for key in sorted(KEYS)] + [STARTUP]:
+        owners(); assert raw(path) == before[path]
+        changed.append(path); replace(path, before[path], after[path])
+    assert all(sha(aura / k) == v for k, v in new_startup['component_sha256'].items())
+    assert raw(STARTUP) == after[STARTUP] and sha(selected['path']) == selected['sha256']
+    owners()
+except Exception:
+    for path in reversed(changed):
+        owners()
+        if raw(path) == after[path]: replace(path, after[path], before[path])
+    raise
+receipt = {'schema': 'aura-voice-threshold-035-production-entry-enrollment-fix-applied-1', 'status': 'VOICE_THRESHOLD_035_PRODUCTION_ENTRY_APPLIED_GUI_STOPPED',
+           'board_boot_id': 'a6d4a069-e9b0-4065-8df7-dc23556b168e', 'board_monotonic': time.monotonic(),
+           'startup_before_sha256': PAYLOAD['base_startup_sha256'], 'startup_after_sha256': hashlib.sha256(after[STARTUP]).hexdigest(),
+           'source_pins_after': {k: PAYLOAD['files'][k]['candidate_sha256'] for k in sorted(KEYS)},
+           'components_verified': 380, 'other_component_pins_preserved': 379,
+           'selected_binding_sha256': selected['sha256'], 'selected_binding_source_count': 26,
+           'camera_pid': 1332, 'camera_birth_ticks': '2236', 'voice_a911_and_router85_preserved': True,
+           'identity_match_threshold_changed_to': .35, 'time_policy_or_private_store_changed': False,
+           'services_controlled_or_axis_operations': False, 'diagnostic_four_file_candidate_deployed': False}
+create(TX / 'applied.json', (json.dumps(receipt, sort_keys=True, indent=2) + '\n').encode())
+print(json.dumps(receipt))

@@ -1,0 +1,33 @@
+<!-- controlled-frontal-failure-20261019 -->
+> **最新真人结果：正脸识别未通过。** 用户开始检查后10秒取得6份有效输入，0份达到0.80，最高0.643；人脸目标也不稳定。照片保存/模板一致性已通过，不能当作真人识别完成。[本轮结果](controlled_front_check_review.md)。
+<!-- /controlled-frontal-failure-20261019 -->
+
+<!-- actual-enrollment-photos-20261019 -->
+**本轮真实登记及照片保存已完成。** 用户确认“已经完成登记”，正式COMMITTED，原身份1条/单模板保留，库修订14→15，registered完整播放；真实保存25张112×112采样图（13采集、7质量拒绝、5最终独立验证）及selected.png原样副本。模板帧7828，验证8025/8036/8051/8065/8080，分数0.813952～0.897079且逐帧≥0.80。板卡目录0700/文件0600，电脑原PNG逐张解码、尺寸/SHA核对通过。已目视检查实际正脸模板、转头拒绝图及两张验证图；裁剪中心为人脸，眼镜存在屏幕反光，不据此断言全部识别失败的原因。全部照片及标注：[照片预览](E:/Win共享文件/语音共享文件/身份登记照片/c6c3fa6ebd4449ae93bd9ec316344d51/照片预览.md)、[离线总览](E:/Win共享文件/语音共享文件/身份登记照片/c6c3fa6ebd4449ae93bd9ec316344d51/照片总览.html)。用户第6代身份查询仍identity_unknown并完整播放；未做离场重返或不同人验证，不把登记/保存成功当识别稳定性已通过。以下较早“照片待采集”是加载时记录，最新以本段及photo_review.json为准。
+<!-- /actual-enrollment-photos-20261019 -->
+
+# 语音登记入口：取消字幕标记导致人脸状态被拒
+
+**修复已加载，照片保存服务保持启用；等待新的真实登记照片。** UI运行`/home/root/aura-identity-capture-snapshot-20261019/candidate-28f2ad776b08/runtime`，相机仍`/home/root/aura-enrollment-photos-20261019/candidate-6f1aa1842d53/camera_live_config/board_camera_ui.json`、PID 2004（后续动态读取）。本次仅重载UI，未重载相机或电脑模型，身份库1身份/1模板/修订14及哈希保持。
+
+## 已确认原因
+
+用户反馈登记失败或无法开始。正式语音第18代返回`face_unavailable`，`capture_snapshot_valid=false`，照片0张、采样idle。随后8秒18次相机观测中17次允许开始采样，排除了“当时模型一直未就绪”的解释。界面缓存链接READY、快照约230ms，包含`interaction_suppressed=true`，严格协议校验报“服务状态字段不完整或未知”。
+
+结束/取消交互后，`SnapshotGate.read()`在展示副本上加该标记并隐藏旧字幕；旧GUI把这个展示副本交给`ChannelConversationJobs.capture_started`。相机协议不允许该未知字段，录音起点身份因此变成None。后续即使当前人脸清晰，语音登记仍因缺录音起点来源拒绝进入采样。这轮失败没有进入保存照片的环节。
+
+## 修复及验证
+
+新增`UiServiceClient.identity_snapshot()`，在内存锁内读取原始协议缓存，检查连接READY、原启动ID、原时钟/TTL、原结构后返回独立副本；GUI把这个方法直接交给录音绑定。界面继续使用原展示副本，旧字幕仍隐藏。无新HTTP、文件、图片处理或模型调用进入UI/音频线程，不过滤任意未知字段来强行通过，不延长TTL、不使用旧授权。原同服务/相机/目标/库修订、单人、显式更新确认、0.80/0.1及独立5帧验证保持。
+
+Windows182项和24个子用例通过，4个Linux专属用例在板端运行；Linux222项通过。新增7项复现取消后捕获失败、修复后可准备称呼且不写库，以及断线、过期、错启动、未知字段、换目标、返回副本独立和取消授权不复活。Windows首轮POSIX权限断言失败已保留在`tests_pc_linux_mode_initial.log`，生产权限未放宽。真实相机协议快照预检确认原展示消息仍校验失败、新来源可捕获、字幕仍屏蔽、断线仍拒绝；该预检只读，无登记命令。
+
+活动29份源码、原相机unit/PID和原模型/音频配置已核对。电脑保持Paraformer→原27B IQ4_XS/2048→OmniVoice16及5项延迟选项；原YOLOX-Nano/ByteTrack/DPU/FPGA保持，LLM权重仍D盘。
+
+## 下一轮照片
+
+按原称呼说“帮我登记身份，我叫……”，复述后说“确认更新登记”；确认后才开始采样。脸部照片保存在`/home/root/.local/share/aura/enrollment_photos/<session>/`，实际112×112人脸裁剪；成功、失败或取消均留档。最终模板和最终5张独立验证图有清单标记。
+
+`../2026-10-19_enrollment_photo_archive/export_latest.py`将实际照片校验复制到`E:\Win共享文件\语音共享文件\身份登记照片/<session>/`并生成离线总览。此前未保存的照片无法补回，公开模型预检图片不可当用户登记照片。当前尚未取得这次修复后真人照片，不把入口修复称为真人采样/重返准确度通过。
+
+证据：`entry_diagnosis_before.json`、`tests_pc.log`、`tests_board.log`、`preflight.json`、`deployment.json`、`source_verification.json`、`verification_summary.json`、`verified_source.zip`。源码包不含权重、身份库、现场照片、特征或姓名。回退`rollback.py`仅恢复上一UI，保留存图相机和当前身份库；备份`/home/root/aura-identity-capture-snapshot-20261019/candidate-28f2ad776b08/activation-backup-f0838cbad0`。

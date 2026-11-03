@@ -1,0 +1,1 @@
+cmd_net/ipv4/netfilter/nf_reject_ipv4.ko := /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ld -r  -EL  -maarch64elf  --build-id=sha1  -T scripts/module.lds -o net/ipv4/netfilter/nf_reject_ipv4.ko net/ipv4/netfilter/nf_reject_ipv4.o net/ipv4/netfilter/nf_reject_ipv4.mod.o;  true

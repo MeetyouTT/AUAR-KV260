@@ -1,0 +1,101 @@
+{
+  "status": "FROZEN_PUBLIC_PARAFORMER_SMALL_WORKER_READY_FOR_ROOT_REVIEW_NOT_DEPLOYED",
+  "created_utc": "2026-10-31T13:14:21.436624+00:00",
+  "files": {
+    "public_paraformer_small_worker.py": {
+      "sha256": "94f7ac8598628f6137ca3e3d122904d9eb4bd8627df8077de80bea423177536e",
+      "bytes": 12961
+    },
+    "public_quality_helper.py": {
+      "sha256": "293b23f5dd350e5f4d1cce1489120a44b2c4d743c1534080da496f3f58407176",
+      "bytes": 13458
+    },
+    "test_public_paraformer_small_worker.py": {
+      "sha256": "7364ff1a0e69379618186bf396d84835e5b5fee464d4f4f4c4431c991e1d698b",
+      "bytes": 11938
+    }
+  },
+  "local_checks": "LOCAL_CHECKS.json",
+  "local_checks_sha256": "7c3fa5a5a49f4976a06f7d3309451a7ea96aba189452518679d6e2cd703bc718",
+  "model_repository": "csukuangfj/sherpa-onnx-paraformer-zh-small-2024-03-09",
+  "model_revision": "63ddc3cd0f2810b68289a7b3876e62ef5d53d6df",
+  "baseline_adapter_sha256": "4edb865881c887d6a290a02e078e14386bd95d017b79820b143b5a1e329997c3",
+  "manifest_path": "/home/root/aura-public-streaming-validation-20261031/synthetic-8a9983b6bb9f42c6/manifest.json",
+  "manifest_sha256": "7109ee213126f098a3a3da08bbc521beb0db54a21e0911be02e04f2010b9a869",
+  "default_configuration": {
+    "threads": 3,
+    "rounds": 2,
+    "sample_rate": 16000,
+    "feature_dim": 80,
+    "decoding_method": "greedy_search",
+    "provider": "cpu",
+    "max_seconds": 170,
+    "external_child_timeout_seconds": 180
+  },
+  "execution_owner": "01a18bcd-1167-71a0-ba0b-d809148d39d9 only; this subagent never operates device",
+  "transport_contract": [
+    "Parent validates current boot/startup/config/source pins, same GUI/camera owners, paused microphone/no active dialogue; no concurrent extra ASR test.",
+    "Copy worker plus unchanged helper to isolated public board directory; their SHA must match this handoff.",
+    "Parent externally bounds each owned child lifetime to 180 seconds and passes --max-seconds 170 --external-deadline-managed; native inference cannot be interrupted by internal soft deadline.",
+    "Preserve GUI/camera and current production pipeline, record before/after CPU/background memory/load metadata; run model slots sequentially, never parallel.",
+    "Restore prior automatic listening after bounded test in parent finally; do not manipulate production Store or replay public memory commands."
+  ],
+  "args_common": [
+    "--manifest",
+    "<manifest_path>",
+    "--manifest-sha256",
+    "<manifest_sha256>",
+    "--threads",
+    "3",
+    "--rounds",
+    "2",
+    "--max-seconds",
+    "170",
+    "--external-deadline-managed"
+  ],
+  "args_paraformer": [
+    "--engine",
+    "paraformer",
+    "--model-dir",
+    "<formal existing Paraformer dir>",
+    "--paraformer-source",
+    "<current exact-pinned board_asr.py>"
+  ],
+  "report_semantics": {
+    "validation": "Model hash and overall fixture validation are timed before construction; runtime imports separately timed.",
+    "load": "load_* is only official recognizer factory call; constructor_total includes baseline adapter repeated resource hashes; constructor_nonfactory is the measured remainder, not claimed to be pure hashing.",
+    "decode": "Only PCM conversion + stream creation/accept + decode + result extraction; no model load/hash/warmup; check cancellation/deadline before and after.",
+    "cpu": "time.process_time includes the isolated process native threads; can exceed elapsed wall time.",
+    "rss": "Linux getrusage peak of whole child, not model-only memory.",
+    "quality": "References are eight authored public synthesis intents, not human-gold transcripts. Character error and spans are literal only; numerals/homophone names/punctuation require manual paired review. No automatic quality pass/fail or deployment.",
+    "rounds": "Eight exact public statements repeated twice per process, one recognizer, no hidden warmup; first_model_decode and repeated_input_round distinguish first and repeated data."
+  },
+  "real_board_test_performed": false,
+  "production_changed": false,
+  "small_model_sha256": "3ef6c19369b912f7caf3cef8e545c5ccd1a33d9d7ec792a46668dc41c4b229ec",
+  "small_model_bytes": 81828675,
+  "small_tokens_sha256": "4b2d964e18b9cf139b473003b6698fb2ed9a2a5ec55b93daa677b28f578897aa",
+  "small_tokens_bytes": 75352,
+  "args_paraformer_small": [
+    "--engine",
+    "paraformer_small",
+    "--model-dir",
+    "<isolated staged Paraformer Small dir>"
+  ],
+  "worker_entrypoint": "public_paraformer_small_worker.py",
+  "small_factory_contract": {
+    "name": "sherpa_onnx.OfflineRecognizer.from_paraformer",
+    "params": {
+      "paraformer": "<model-dir>/model.int8.onnx",
+      "tokens": "<model-dir>/tokens.txt",
+      "num_threads": 3,
+      "sample_rate": 16000,
+      "feature_dim": 80,
+      "decoding_method": "greedy_search",
+      "provider": "cpu"
+    },
+    "pcm": "little-endian signed int16 to float32, divided by 32768; stream.accept_waveform(16000, samples); decode_stream; result.text.strip()",
+    "baseline": "Exact-pinned production BoardParaformer class is loaded unchanged, current baseline resources remain pinned; Small never uses or changes that adapter."
+  },
+  "original_sensevoice_worker_unchanged": true
+}

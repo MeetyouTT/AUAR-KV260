@@ -1,0 +1,115 @@
+{
+  "schema": "aura-project-progress-1",
+  "updated_utc": "2026-11-02T08:40:44.179278+00:00",
+  "client_date": "2026-11-02",
+  "timezone": "America/Los_Angeles",
+  "live_board_observed_utc": "2026-11-02T08:36:35.762102+00:00",
+  "live_models_observed_utc": "2026-11-02T08:35:19.4282474Z",
+  "overall": "基础链路已跑通；完整身份个人记忆协同、最终停点、冷启动恢复仍待验收",
+  "full_five_component_human_acceptance_complete": false,
+  "axis_thread": {
+    "thread_id": "01a19b64-8194-70e3-806b-03fa9a283918",
+    "host_id": "local",
+    "title": "转轴跟随｜左侧停点优化",
+    "status": "active",
+    "responsibility": "唯一板卡转轴操作、原跟随停点优化、转轴候选测试与发布、实体反馈",
+    "handoff": "AXIS_CHAT_HANDOFF_20261102.txt",
+    "result_authority": "AXIS_CURRENT_HANDOFF.json"
+  },
+  "modules": [
+    {
+      "module": "本机模型与LAN",
+      "status": "实测通过、当前健康",
+      "evidence": [
+        "LIVE_MODELS_READONLY.json",
+        "../parallel_lan/LAN_PUBLIC_BOARD_READY.json"
+      ],
+      "facts": "原27B IQ4_XS与OmniVoice16；模型驻留，TTS就绪；板卡LAN推理链路已验收"
+    },
+    {
+      "module": "板端业务/角色UI",
+      "status": "当前运行正常",
+      "evidence": [
+        "LIVE_BOARD_READONLY.json"
+      ],
+      "facts": "GUI/相机/边界editor均运行；380组件一致；角色准备完成、业务写者持有、故障0；当前在视觉页，聆听暂停"
+    },
+    {
+      "module": "视觉感知",
+      "status": "运行就绪、有实际人脸输入及跟随证据",
+      "evidence": [
+        "LIVE_BOARD_READONLY.json",
+        "../maintenance_original_axis_20261101/ui_follow_final.json"
+      ],
+      "facts": "相机采集和检测持续，身份服务ready，无采集错误；不等同本人KNOWN已验收"
+    },
+    {
+      "module": "基础语音对话",
+      "status": "两轮真人完整播放通过",
+      "evidence": [
+        "../dialogue_latency_20261101/TWO_TURN_LATENCY.json"
+      ],
+      "facts": "两轮均有匹配完整播放回执；软件观测录音结束至SPEAKING约5.04/5.29秒；非声学首声"
+    },
+    {
+      "module": "转轴跟随",
+      "status": "原跟随已验证；左停点改版后新增右转抖动反馈，专用对话排查",
+      "evidence": [
+        "../AXIS_CHAT_HANDOFF_20261102.txt",
+        "../maintenance_original_axis_20261101/left_stop40_20261102/APPLIED.json",
+        "../right_jitter_readonly_20261102/DIAGNOSIS.txt"
+      ],
+      "facts": "原UI基线109.352秒、386接受命令、17次视觉完成并STOP；新左0.40/右0.45候选31项测试通过，08:39版本化发布，专用对话继续实际运行与新停点反馈；最新只读分析发现24.293秒中5次非完成停启，右转映射与机械侧未确认"
+    },
+    {
+      "module": "身份与语言协同",
+      "status": "修复已部署；真人完整链待验",
+      "evidence": [
+        "../identity_dialogue_review/REVIEW_VERDICT.json",
+        "../identity_dialogue_review/runtime_after25/RUNTIME_MINIMAL_01.json"
+      ],
+      "facts": "修复身份查询被声纹登记误采样；当前身份/声纹服务就绪；本人KNOWN、声纹绑定和个人权限调用未完成本轮实测"
+    },
+    {
+      "module": "记忆",
+      "status": "已落在板端、原摘要链运行；个人记忆/长时召回待验",
+      "evidence": [
+        "../video_demo_readiness_20261101/MEMORY_CURRENT_READONLY.json",
+        "LIVE_BOARD_READONLY.json"
+      ],
+      "facts": "07:20只读快照767轮、3391有效摘要、1项待处理正文、quick_check通过；08:36当前GUI累计完成86项，不能跨进程相减"
+    },
+    {
+      "module": "开机恢复与稳定性",
+      "status": "尚未最终验收",
+      "evidence": [
+        "LIVE_BOARD_READONLY.json",
+        "../identity_dialogue_review/runtime_after25/ORIGINAL_SAMPLER_VS_PLAIN_01.json"
+      ],
+      "facts": "当前业务时钟锚定可用，但系统NTP未同步；有网络健康请求秒级长尾；下一次冷启动能自动恢复wide/相机绑定/GUI/轴尚未验收"
+    }
+  ],
+  "measured_latency_ms": {
+    "asr_ms": 1243.7924844998633,
+    "context_ms": 77.33676399948308,
+    "llm_rpc_ms": 1886.5928990016982,
+    "tts_rpc_ms": 802.1756435009593,
+    "first_audio_queued_from_worker_ms": 4459.744669498832,
+    "capture_complete_to_observed_speaking_ms": 5164.906586499885
+  },
+  "next_sequence": [
+    "独立转轴对话完成新左停点实物确认",
+    "同一轮验证视觉目标、本人KNOWN、声纹/会话关联、个人记忆权限与正常回复完整播放",
+    "根据两轮已测数据先检查完整LLM回复交付和ASR，再定位网络长尾",
+    "保存后做一次有现场观察的冷启动与自动恢复验收"
+  ],
+  "audit_actions": {
+    "board_commands_sent": false,
+    "database_opened": false,
+    "models_restarted": false,
+    "private_content_exported": false
+  },
+  "axis_latest_publication_utc": "2026-11-02T08:39:07.509404+00:00",
+  "latest_axis_user_feedback": "right-turn jitter; left reportedly normal",
+  "axis_right_jitter_analysis": "right_jitter_readonly_20261102/EPISODE_ANALYSIS.json"
+}

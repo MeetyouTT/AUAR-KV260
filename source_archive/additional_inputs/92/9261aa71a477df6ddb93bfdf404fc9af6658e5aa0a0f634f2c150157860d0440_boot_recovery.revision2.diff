@@ -1,0 +1,55 @@
+--- archive65/candidate/boot_recovery.py
++++ observed_revision2/candidate/boot_recovery.py
+@@ -305,6 +305,24 @@
+             require(name in {'libvsrv.so', 'vsrv_driver.py', 'vsrv_transport.py'}
+                     and digest(regular(RELEASE / 'driver' / name)) == pin, 'ORIGINAL_DRIVER_CHANGED')
+         require(digest(regular(RELEASE / 'bench_identity_stop.py')) == IDSTOP_SHA, 'ORIGINAL_IDSTOP_CHANGED')
++
++    def current_domain_consumed(self):
++        policy = self.contract['native_boot_policy']
++        directory = Path(policy['new_boot_marker_directory'])
++        require(directory.is_absolute() and not directory.is_symlink() and directory.resolve() == directory,
++                'ORIGINAL_NEW_BOOT_MARKER_DIRECTORY_REDIRECTED')
++        marker = directory / ('kernel-boot-' + self.boot + '.consumed')
++        # lexists includes an original partial record, symlink or any other
++        # path object. Neither marker family is changed by this wrapper.
++        return os.path.lexists(marker)
++
++    def checkpoint_gate(self, snapshot, checkpoint):
++        policy = self.contract['native_boot_policy']
++        return verify_final_pointer(
++            checkpoint, os.path.lexists(str(CHECKPOINT) + '.native-consumed-' + digest(checkpoint)),
++            snapshot['active']['predecessor'], current_boot=self.boot,
++            allow_new_kernel_boot=policy['allow_new_kernel_boot'],
++            current_domain_consumed=self.current_domain_consumed())
+ 
+     def once(self, action, argv, allow_submit=True):
+         """Durable once-only submission; reentry observes the SAME transient unit."""
+@@ -391,7 +409,7 @@
+         require(self.boot != self.contract['installed_boot_id'], 'INSTALL_BOOT_REQUIRES_MANUAL_MAIN_AXIS_RECOVERY')
+         self.quiet()
+         cp = regular(CHECKPOINT, 262144)
+-        cp_sha = verify_final_pointer(cp, os.path.lexists(str(CHECKPOINT) + '.native-consumed-' + digest(cp)), snapshot['active']['predecessor'])
++        cp_sha = self.checkpoint_gate(snapshot, cp)
+         require(json.loads(cp)['seed']['boot_id'] != self.boot, 'COLD_PREDECESSOR_BOOT_REQUIRED')
+         sealed = self.tx / ('predecessor-final-' + cp_sha + '.json')
+         if sealed.exists():
+@@ -403,7 +421,7 @@
+         def boundary():
+             now = self.source_snapshot()
+             require(now['startup_raw'] == snapshot['startup_raw'] and regular(CHECKPOINT, 262144) == cp, 'SOURCE_OR_FINAL_CHANGED_DURING_PREPARE')
+-            require(not os.path.lexists(str(CHECKPOINT) + '.native-consumed-' + cp_sha), 'FINAL_CONSUMED_DURING_PREPARE')
++            require(self.checkpoint_gate(now, cp) == cp_sha, 'CHECKPOINT_ROUTE_CHANGED_DURING_PREPARE')
+             require(self.daemon_owner() == daemon, 'DAEMON_OWNER_CHANGED')
+             self.quiet()
+ 
+@@ -471,8 +489,7 @@
+         current = unit(CAMERA)
+         require(all(current.get(k) == v for k, v in {'Restart': 'no', 'KillMode': 'process', 'SendSIGKILL': 'no', 'TimeoutStopUSec': 'infinity'}.items()), 'NATIVE_NORMAL_STOP_PROTECTION_CHANGED')
+         checkpoint = regular(CHECKPOINT, 262144)
+-        checkpoint_sha = verify_final_pointer(checkpoint, os.path.lexists(str(CHECKPOINT) + '.native-consumed-' + digest(checkpoint)),
+-                                              snapshot['active']['predecessor'])
++        checkpoint_sha = self.checkpoint_gate(snapshot, checkpoint)
+         gate = dict(boot_id=self.boot, contract_sha256=self.contract_sha, checkpoint_sha256=checkpoint_sha,
+                     startup_sha256=digest(snapshot['startup_raw']), predecessor=snapshot['active']['predecessor'],
+                     checked_mono_ns=time.monotonic_ns())

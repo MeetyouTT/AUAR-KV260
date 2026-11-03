@@ -1,0 +1,30 @@
+相机lazy JPEG最终v3独立裁定
+状态：静态与五个原阻塞定向回归通过；真实OpenCV、部署恢复及整机收益尚待root执行。
+候选SHA 7d4773b8ff527773eefc90aa2443dd4bfae801f07c6fcde672af65dd22ff8f66。
+原源SHA 9d714b9bd00ea1da12088fa1e22100d7bdb689d0cac10332c3933b31e4f4d2df。
+
+范围与保留项
+独立AST确认，原顶层定义除CameraState/run外均一致，仅添加_PreviewJpeg；CameraState原captured、observed、snapshot、identity和command等方法不变，HTTP handler完整不变。
+在run中仅将lazy holder发表与producer错误helper归一化后，整个run AST与原版一致。原采集、推理、DPU、native关闭/检查点、绘制、Raw发布、分辨率、镜像、线程安排均保持。
+绘制仍在source.copy()上进行，然后同一owned连续640x480 uint8 BGR先写Raw，再转交JPEG holder。质量72、256KiB限制、8帧缓存、1000ms JPEG截止和原HTTP 200/404/头部条件保持。真实codec字节等价仍须由probe_real_cv2_v3.py在可用OpenCV环境核实。
+
+原阻塞修复复核
+1. 旧保留帧成功不能清掉新帧JPEG失败；旧帧失败不能污染新帧成功。v3仅当前latest fid、相同缓存tuple且没有producer失败时更新全局preview_error。
+2. 原producer的绘制/Raw发表失败经实际preview except调用preview_failed，失败标志只由之后新publish复位。失败发生在旧HTTP开始之前或之后，旧cached JPEG均不能清掉该producer错误。当前latestfid和tuple身份校验下，这个粘性布尔方案足够，无需再增加revision机制。
+3. samefid覆盖不同holder先retire旧对象；同对象重发不自我退休。原实际loop fid本已单调，故此为方法边界稳健性，不表述为现场已发生的问题。
+4. resolve统一global encode lock→frame lock。等待其他编码的旧对象不持帧锁，producer retire采用非阻塞try-lock；只有实际活跃编码可保留一份额外BGR图。不会以JPEG编码锁阻塞相机/identity共享state锁。
+5. 完成编码后仍在state锁内复核epoch、缓存tuple、原TTL、camera_error，旧代或过期结果不返回。每帧失败缓存保持sticky，实际编码/缓存命中/失败计数保留。
+
+本次执行量
+复用了camera/LOCAL_TESTS_V3.json中27项全PASS证据，不重跑未改整套测试。
+仅从原独立复现脚本提取五个合成回归，在实际v3类上重新执行：旧成功/旧失败、producer前/后、samefid十二队列，全部通过。最后一项缓存只有1帧、排队旧owned图0、旧无意义编码0。
+本次没有板端、网络、真实媒体、模型或业务访问，也没有修改候选。详情在CAMERA_V3_INDEPENDENT_REVIEW.json及review_camera_v3_static.py。
+
+性能语义
+保留的legacy pipeline_metrics名preview.render_encode_publish在lazy版不再包含按需JPEG编码；preview_frames现在计待请求帧的发布，不是已成功JPEG编码数。health用on_request_cache模式和新增JPEG计数标明。
+对照必须保持相同JPEG消费者和Raw消费者条件，使用实际进程/整机CPU、处理量与源龄。不能仅凭legacy timer下降宣称提速，也不能用多客户端JPEG请求数不同的窗归因收益。
+
+当前部署限制
+新boot已出现，旧903c/79866/25pin及82.5%只能历史参考。身份对话独占恢复/登记期间不部署、不加板端负载。
+取得顺序交接后，由root核新boot原源SHA/六文件及source闭包、当前检查点正常封存和原reader/消费恢复、实际新owner/readback绑定。保留最新voice修复、26pin及当前轴版本，不能用旧startup覆盖。
+本轮只审相机代码候选，未额外审查六文件部署payload生成器；该事务的正确性不能由本裁定替代。

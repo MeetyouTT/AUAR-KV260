@@ -1,0 +1,33 @@
+你现在在用户的新5090 Laptop上继续AURA语音/视觉/转轴项目。请承接既有工作，不从头改架构或重新下载所有模型。
+
+请先读这些材料：
+1. E:\Win共享文件\AGENTS.md
+2. E:\Win共享文件\语音共享文件\AGENTS.md（有大量旧快照；下面本轮新证据覆盖旧boot/PID/READY）。
+3. E:\Win共享文件\语音共享文件\deliverables\2026-10-31_visual_axis_maintenance\reviews\axis_priority_20261101 下的HANDOFF_5090.txt、CURRENT_MIGRATION_STATE.json、HANDOFF_5090_MANIFEST.json。
+4. E:\Win共享文件\语音共享文件\deliverables\2026-10-31_visual_axis_maintenance\reviews\platform_receipt_v2\COEXISTENCE_RECOVERY.md
+5. 主窗口提供的E盘完整迁移总交接与Codex/模型服务配置说明，优先按其实际新路径适配。
+
+你的初始任务是恢复可审阅的工作环境和只读现状，保持转轴运动冻结。旧机本窗口没有继续2秒repeat、6秒往返或25秒跟随；不要自动接续这些脚本。
+设备串行owner旧窗口为01a195e4-58a7-72d3-b141-d5d373579f7f；主协调窗口01a18bcd-1167-71a0-ba0b-d809148d39d9不操作设备。切换新主机后避免两个窗口或两台电脑并发写设备。
+
+最后已知板端boot为3c94e7a0-3f4d-4b66-801c-fa0a1b749bfb；相机2094/birth64899；wide固件和VART已临时恢复；FDT e35979051349cffd903e2acf42b6ce10fbc9074d8e807c7e7ba92bf47adf0cc3。
+最后读回为2026-11-01 14:54:33 UTC：flags0、lease0、active=false、armed=false、width1505。此前14:53:32 STOP证据无运动owner。
+迁移冻结时再次尝试STOP-only，SSH192.168.50.2:22 banner超时，未取得新的回执。所以这些都是最后已知事实；不要把它们当作你现在已读到的状态。
+首次2秒初始化1500→1505有43次ACK并STOP，但用户未观察清楚；物理方向、中心、范围未验收。原boot方向+1/“差不多额”仅为历史。
+本次重启曾自动回benchmark，wide只有运行时维护恢复；尚缺持久启动集成。本boot GUI仍startup ec12、MCP01未就绪failed/MainPID0、监听偏好false；没有新boot GUI READY或原UI读回绑定验收。
+
+新电脑的板端SSH请先独立配置：
+E:\Win共享文件\语音共享文件\deliverables\2026-10-18_board_dialogue\board_ssh.py 是既有传输实现，保留host-key校验。
+旧机私钥只被该文件引用，路径为 C:\Users\35870\.codex\visualizations\2026\10\09\01a12110-3ba4-7651-b3d7-2e6560916eb6\board-access-20261018\id_ed25519；此路径不是E盘交付物。
+不要复制/导出旧私钥或凭证到共享盘。新机用自己的密钥和经用户授权的公钥，核实主机指纹，配置本机ssh.exe/known_hosts。不得关StrictHostKeyChecking。
+Python D:\py312\python.exe也是旧机依赖，按新机实际安装配置。不要假定旧虚拟环境可复制使用。
+
+恢复工作从只读清点开始：当前boot、FPGA固件/VART/FDT、服务/相机PID+birth+cmd SHA、源文件闭包、GUI/MCP01状态、运动owner以及本轮输出关闭证据。板卡离线时先报告接线/网络事实，不自动改固件或清锁。
+旧恢复脚本在axis_priority_20261101\remote，入口tools\run_step.py；它们绑定旧boot/阶段，不能直接当通用启动器重跑。
+若以后用户重新开始运动测试，先在新的真实上下文核准唯一owner与物理条件，再承接原控制器和正常检查点恢复流程。继续保留lease、PL slew、QUIESCE/STOP和源帧新鲜性，不用旧readback伪造位置或方向。
+保留原25文件控制器和全部失败记录；R2不是现役。匿名跟随不能给予身份/个人记忆权限。真实私库、身份模板和密钥留在板端私有目录，不导出为普通共享迁移包。
+
+LLM权重/缓存不得在E:\Win共享文件或其子目录，也不得建立指向外部权重的目录联接。旧机权重/下载在D:\AIModels\qwen3.8-27b-abliterated，Ollama在D:\AIModels\Ollama-AURA；新机实际外部路径由aura\config\model_storage.local.json及总迁移单适配。
+保持业务writer在板端；Windows新机负责既有模型推理，不恢复已退役的Windows业务writer。未完成五分钟摘要召回、真人方向/跟随、冷启动和长期稳定验收的项目如实保留待验。
+
+先向用户报告你实际找到的文件与依赖、当前连接事实及可继续的最小步骤，再在用户当前任务范围内推进。不要把“旧记录存在”“文件校验通过”写成硬件或真人测试通过。

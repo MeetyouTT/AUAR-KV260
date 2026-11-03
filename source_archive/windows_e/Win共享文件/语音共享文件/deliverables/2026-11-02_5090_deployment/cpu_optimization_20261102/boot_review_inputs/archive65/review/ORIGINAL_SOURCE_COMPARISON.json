@@ -1,0 +1,110 @@
+{
+  "schema": "aura-boot-recovery-exact-source-comparison-1",
+  "original_files_overwritten": 0,
+  "original_default_firmware_changed": false,
+  "original_cpu_adapters_copied_or_reimplemented": false,
+  "original_boot_pid_hash_and_consumption_flags_reused": false,
+  "algorithm_reuse": [
+    {
+      "original": "launch_original_remove.py",
+      "original_sha256": "4853f34f294724475ea41785fcd5448aa9be357fb1360ad8e2a6a538d7394eae",
+      "original_snapshot": "evidence/original_sources/launch_original_remove.py",
+      "new_wrapper": "candidate/boot_recovery.py",
+      "new_wrapper_sha256": "779010bdea0572dfd9a28e3749457459592f7b95daff80ef48e12bf62ce3abc5",
+      "semantics": "same original client remove argv; durable systemd single job; fresh dynamic context"
+    },
+    {
+      "original": "read_original_remove_result.py",
+      "original_sha256": "7dfd2a92d598bb8d872e3631a9510255ffc54c14925f0f4f5b25624a98414c54",
+      "original_snapshot": "evidence/original_sources/read_original_remove_result.py",
+      "new_wrapper": "candidate/recovery_rules.py",
+      "new_wrapper_sha256": "53ca8785afcc11a04e620243095af1e1dfb4138caf5f0b55281f8a9be4a1862a",
+      "semantics": "exact original reply plus actual overlay/render/ZOCL teardown"
+    },
+    {
+      "original": "launch_original_load.py",
+      "original_sha256": "8a1e224506c4be2885053b1e088808dfe747cadf974eb40b84739fa9f0cb3df8",
+      "original_snapshot": "evidence/original_sources/launch_original_load.py",
+      "new_wrapper": "candidate/boot_recovery.py",
+      "new_wrapper_sha256": "779010bdea0572dfd9a28e3749457459592f7b95daff80ef48e12bf62ce3abc5",
+      "semantics": "same original client load argv and original 4 firmware + 3 driver hashes"
+    },
+    {
+      "original": "read_original_load_result.py",
+      "original_sha256": "e3d09424d4954cf9fd426918b5ec2cc4bb32db5d73adea65cd42a4f9f3f78c2d",
+      "original_snapshot": "evidence/original_sources/read_original_load_result.py",
+      "new_wrapper": "candidate/recovery_rules.py",
+      "new_wrapper_sha256": "53ca8785afcc11a04e620243095af1e1dfb4138caf5f0b55281f8a9be4a1862a",
+      "semantics": "exact original reply; dynamic overlay suffix, exact VART, ZOCL parent/child/render pairing"
+    },
+    {
+      "original": "bench_identity_stop.py",
+      "original_sha256": "c9e91f74336c1e73d7c60408739abc8537b80066eb666a1a79e32b81d7d267aa",
+      "original_snapshot": "evidence/original_sources/bench_identity_stop.py",
+      "new_wrapper": "candidate/boot_recovery.py",
+      "new_wrapper_sha256": "779010bdea0572dfd9a28e3749457459592f7b95daff80ef48e12bf62ce3abc5",
+      "semantics": "unchanged original program called by pinned SHA with ID_STOP_ONLY, never a new controller"
+    }
+  ],
+  "unchanged_original_config_sources": [
+    {
+      "path": "/lib/systemd/system/dfx-mgr.service",
+      "before_sha256": "a5ba3c45b4bddf9a818d7aa7b34507cc0321296d90e51288f5d930e2293866b6",
+      "after_sha256": "a5ba3c45b4bddf9a818d7aa7b34507cc0321296d90e51288f5d930e2293866b6"
+    },
+    {
+      "path": "/etc/dfx-mgrd/daemon.conf",
+      "before_sha256": "a517938929fe978aa2975de76cf360a426d2fc5444fbd6d728a96dfa93603a08",
+      "after_sha256": "a517938929fe978aa2975de76cf360a426d2fc5444fbd6d728a96dfa93603a08"
+    },
+    {
+      "path": "/etc/dfx-mgrd/default_firmware",
+      "before_sha256": "7e78c8b095e77ec1fdfa5cdd8b26192d8feb849405b55a50e8fe6562a35f18b2",
+      "after_sha256": "7e78c8b095e77ec1fdfa5cdd8b26192d8feb849405b55a50e8fe6562a35f18b2"
+    },
+    {
+      "path": "/usr/bin/xlnx-firmware-detect",
+      "before_sha256": "ac9a73c9b18bb3fc85db5515d91298641a9bb71ba2443fd2efa1964ebb92d07c",
+      "after_sha256": "ac9a73c9b18bb3fc85db5515d91298641a9bb71ba2443fd2efa1964ebb92d07c"
+    },
+    {
+      "path": "/etc/dfx-mgrd/kv260-benchmark-b4096",
+      "before_sha256": "7e78c8b095e77ec1fdfa5cdd8b26192d8feb849405b55a50e8fe6562a35f18b2",
+      "after_sha256": "7e78c8b095e77ec1fdfa5cdd8b26192d8feb849405b55a50e8fe6562a35f18b2"
+    },
+    {
+      "path": "/etc/systemd/system/kv260-repaired-zocl.service",
+      "before_sha256": "c2f10513e2e13a65770aa6cc4aff07a99ddba0ac18ddb190d9f95686e01ada4a",
+      "after_sha256": "c2f10513e2e13a65770aa6cc4aff07a99ddba0ac18ddb190d9f95686e01ada4a"
+    },
+    {
+      "path": "/usr/local/lib/kv260-runtime-repair/load-repaired-zocl.sh",
+      "before_sha256": "821461a00209bbc6e2fc01f17c790328eec73e9b619b1fcc6f115338e46995ae",
+      "after_sha256": "821461a00209bbc6e2fc01f17c790328eec73e9b619b1fcc6f115338e46995ae"
+    },
+    {
+      "path": "/etc/systemd/system/dfx-mgr.service.d/10-kv260-repaired.conf",
+      "before_sha256": "32dcc98eaffba6eba4f0ccf9109961a5227cf220e76fa22635659190a1d2dd4d",
+      "after_sha256": "32dcc98eaffba6eba4f0ccf9109961a5227cf220e76fa22635659190a1d2dd4d"
+    },
+    {
+      "path": "/etc/systemd/system/dfx-mgr.service.d/20-kv260-dfx-state-repaired.conf",
+      "before_sha256": "b46fd13058a791972516355663ff64da8c0692628ea2467e5627476aa9a5ce16",
+      "after_sha256": "b46fd13058a791972516355663ff64da8c0692628ea2467e5627476aa9a5ce16"
+    }
+  ],
+  "changed_runtime_fields_only": [
+    "UI board_business.face_readback",
+    "startup component_sha256[config/board_avatar_gtk.json]"
+  ],
+  "retained_sources": [
+    "actual latest identity/GTK sources",
+    "original selected policy/model/gallery metadata",
+    "all previous run-config source pins",
+    "original Native full Python/C/operator closure",
+    "accepted axis controller/parameters and original GUI launcher"
+  ],
+  "fresh_source_changes_require_new_capture": true,
+  "actual_device_comparison_performed": false,
+  "unresolved_auxiliary_loader": "Saved unit inventory lists generated dpu-auto-config; its current generated unit/init source and ordering require fresh review"
+}

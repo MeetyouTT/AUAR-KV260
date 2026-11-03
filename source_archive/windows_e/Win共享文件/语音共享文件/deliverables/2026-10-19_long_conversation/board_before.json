@@ -1,0 +1,17 @@
+{
+  "ui_unit": "# /etc/systemd/system/aura-avatar-ui.service\n[Unit]\nDescription=AURA cached avatar touchscreen interface\nWants=xserver-nodm.service systemd-modules-load.service\nAfter=local-fs.target xserver-nodm.service systemd-modules-load.service\nRequiresMountsFor=/home/root/aura-identity-capture-snapshot-20261019/candidate-28f2ad776b08/runtime\nStartLimitIntervalSec=300\nStartLimitBurst=5\n\n[Service]\nType=notify\nNotifyAccess=main\nUser=root\nEnvironment=DISPLAY=:0 PYTHONUNBUFFERED=1\nWorkingDirectory=/home/root/aura-identity-capture-snapshot-20261019/candidate-28f2ad776b08/runtime/aura\nExecStart=/usr/bin/python3 -B /home/root/aura-identity-capture-snapshot-20261019/candidate-28f2ad776b08/startup/launcher.py --config /home/root/aura-identity-capture-snapshot-20261019/candidate-28f2ad776b08/startup/config.json\nRestart=on-failure\nRestartSec=5\nTimeoutStartSec=240\nTimeoutStopSec=25\nKillMode=mixed\nStandardOutput=journal\nStandardError=journal\nSyslogIdentifier=aura-avatar-ui\n\n[Install]\nWantedBy=graphical.target\n",
+  "camera_unit": "# /etc/systemd/system/aura-camera-ui.service\n[Unit]\nDescription=AURA shared USB camera preview and YOLOX person adapter\nAfter=local-fs.target\nStartLimitIntervalSec=0\n\n[Service]\nType=simple\nExecStart=/usr/bin/python3 -B /home/root/aura-enrollment-photos-20261019/candidate-6f1aa1842d53/runtime/aura/board/vision/ui_camera_service.py --config /home/root/aura-enrollment-photos-20261019/candidate-6f1aa1842d53/camera_live_config/board_camera_ui.json\nWorkingDirectory=/home/root/aura-enrollment-photos-20261019/candidate-6f1aa1842d53/runtime/aura\nEnvironment=PYTHONUNBUFFERED=1\nRestart=on-failure\nRestartSec=3\nTimeoutStopSec=10\nKillMode=control-group\nUMask=0077\n\n[Install]\nWantedBy=multi-user.target\n",
+  "camera_pid": 2004,
+  "phase": "IDLE",
+  "automatic": {
+    "enabled": false,
+    "state": "STOPPED",
+    "error": "",
+    "completed_turns": 2,
+    "speech_active": false,
+    "can_start": true,
+    "can_stop": false
+  },
+  "pending": false,
+  "python_pytest": true
+}

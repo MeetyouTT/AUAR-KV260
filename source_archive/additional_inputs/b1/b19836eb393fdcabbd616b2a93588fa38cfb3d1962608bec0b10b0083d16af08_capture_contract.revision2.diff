@@ -1,0 +1,10 @@
+--- archive65/candidate/capture_contract.py
++++ observed_revision2/candidate/capture_contract.py
+@@ -145,6 +145,7 @@
+     contract = dict(schema='aura-boot-recovery-contract-1', fresh_handoff_approved=True, installed_boot_id=boot,
+                     startup_path=source['path'], runtime_aura=str(aura), component_count=len(startup['component_sha256']),
+                     native_ops_root=str(OPS), native_manifest=native_manifest,
++                    native_boot_policy={key: native[key] for key in ('allow_new_kernel_boot', 'new_boot_marker_directory')},
+                     listening_preference_path='/home/root/.local/share/aura-board-business/listening_preference.json',
+                     immutable_files=files, original_units=units, absent_platform_units=absent_units,
+                     installation_handoff=copy_handoff(expected),

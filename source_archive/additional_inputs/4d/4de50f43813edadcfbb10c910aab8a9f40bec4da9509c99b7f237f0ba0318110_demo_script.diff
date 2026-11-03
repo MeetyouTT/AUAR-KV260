@@ -1,0 +1,278 @@
+--- before/tools/demo_script.py
++++ after/tools/demo_script.py
+@@ -23,14 +23,15 @@
+ 
+ 用法
+ ----
+-    "<PY>" -s tools\\demo_script.py                  # 加速回放（默认 2.0x）+ 打印时间轴
+-    "<PY>" -s tools\\demo_script.py --speed 1.0      # 真实速度（全剧约 66 s）
++    "<PY>" -s tools\\demo_script.py                  # 虚拟时钟全速 + 打印时间轴
++    "<PY>" -s tools\\demo_script.py --window         # 真窗口、真实速度（全剧约 66 s）
+     "<PY>" -s tools\\demo_script.py --png            # 额外导出关键帧拼图
+     "<PY>" -s tools\\demo_script.py --list           # 只列剧本，不播放
+     "<PY>" -s tools\\demo_script.py --quiet          # 只出摘要（不逐行时间轴）
+ 
+ 注：采样步长 `--dt`（默认 0.1 s 虚拟时间）越大跑得越快，但**会漏掉 <dt 的瞬态**；
+ 验收素材轮换用默认值即可（切换间隔 ~6.4 s ≫ 0.1 s）。
++剧本的 dur/stop 模拟音频忙状态，仅验收播放流程；不调用真实 TTS 或 LLM。
+ """
+ from __future__ import annotations
+ 
+@@ -89,22 +90,14 @@
+ 
+ 
+ def _ask(t: float, note: str = "") -> typing.List[Cue]:
+-    """一轮"用户把话说完"（IDLE → PRESENT → AWAKE → THINKING）。
+-
+-    ⚠ FSM 实测约束（2026-10-05，来自本剧本首轮回放）：
+-      · `dialogue.response_received` **只在 THINKING 下合法**；
+-      · `audio.vad_end` 在 **IDLE 下被拒**（`IDLE → THINKING` 非法）——
+-        必须先走到「有人在」的状态；
+-      · 已验证可用的链（首轮即走通）：
+-        `scene.person_enter`(IDLE→PRESENT) → `audio.kws_detected`(PRESENT→AWAKE)
+-        → `audio.vad_end`(AWAKE→THINKING)。
+-    代价：每轮会**重播一次 AWAKE 惊讶 burst**（本剧只给它 0.2 s 就切走，
+-    视觉上"刚要惊讶就开始想"）—— 演示素材轮换够用；真要精细可另配事件。
++    """后续轮通过既有按键入口倾听，再送语音结束事件。
++
++    首轮演完整唤醒；后续轮使用 BOARD_KEY_PRESSED → LISTENING → THINKING，
++    避免为了进入思考而反复插入只有 0.2 秒的惊讶动作。
+     """
+     return [
+-        Cue(t, "event", EventType.SCENE_PERSON_ENTER,
+-            note or "└ 开新一轮：有人在场（→ PRESENT）"),
+-        Cue(round(t + 0.2, 3), "event", EventType.AUDIO_KWS_DETECTED, ""),
++        Cue(t, "event", EventType.BOARD_KEY_PRESSED,
++            note or "└ 开新一轮：按键倾听（→ LISTENING）"),
+         Cue(round(t + 0.4, 3), "event", EventType.AUDIO_VAD_END, ""),
+     ]
+ 
+@@ -128,10 +121,10 @@
+     Cue(5.5, "event", EventType.AUDIO_KWS_DETECTED, "③ 关键词唤醒 → AWAKE（burst 惊讶，单次）"),
+ 
+     # ---- ④ 倾听 → 思考（**刻意停顿**：体现"不急着说"的节奏感）----
+-    Cue(8.5, "event", EventType.AUDIO_VAD_END, "④ 语音结束 → 倾听/思考（停顿 3 s）"),
++    Cue(8.5, "event", EventType.AUDIO_VAD_END, "④ 倾听结束 → 思考（停顿 3 s）"),
+ 
+     # ---- ⑤ 短句 · 中性档（3 素材池，但太短 ⇒ 看不出轮换，作为"短"的一端）----
+-    # 首轮已由 ③④ 走到 THINKING，这里**直接回复**即可（后续轮改用 `_ask` 重开一轮）
++    # 首轮唤醒播完自动进入 LISTENING，④再到 THINKING；后续轮用 _ask 的倾听入口。
+     *_reply(11.5, SHORT_TEXT, "friendly", "", 3.4,
+             "⑤b 短句 11 字 · 中性档（friendly 不在高涨表 ⇒ SPEAKING_NEUTRAL）"),
+ 
+@@ -208,7 +201,7 @@
+ 
+ 
+ class ScriptRunner:
+-    """按剧本推进虚拟时钟 → 逐步调 `core.frame_at(now)` → 记录轨迹。"""
++    """剧本只调度事件；窗口和虚拟回放共用显示收尾及动作完成流程。"""
+ 
+     def __init__(self, core: StageCore, dt: float = 0.1,
+                  sample_every: float = 0.5) -> None:
+@@ -220,6 +213,17 @@
+         self._last_asset: typing.Optional[str] = None
+         self._last_state: typing.Optional[str] = None
+         self._last_meta: typing.Optional[typing.Dict] = None
++        self._speaking = False       # 剧本模拟音频忙状态；不播放真实声音
++
++    def reset(self) -> None:
++        """重播同时清空状态、显示收尾、模拟音频与本轮轨迹。"""
++        self.core.fsm.reset()
++        self.core.reset_playback()
++        self.core.reply_text = ""
++        self._speaking = False
++        self.trace.reset()
++        self._next_sample = 0.0
++        self._last_asset = self._last_state = self._last_meta = None
+ 
+     # ---------------- 单拍执行 ----------------
+     def _fire(self, cue: Cue, t: float) -> None:
+@@ -229,6 +233,7 @@
+         if cue.kind == "mark":
+             return
+         if cue.kind == "reset":
++            self._speaking = False
+             core.fsm.reset()
+             core.reset_playback()
+             core.reply_text = ""
+@@ -246,6 +251,7 @@
+             gen = core.new_turn()
+             data = dict(cue.value or {})
+             ok = core.accept_response(gen, data)
++            self._speaking = ok and cue.dur > 0.0
+             flag = "" if ok else " [代次作废]"
+             self.trace.events.append((
+                 t, "reply(emotion=%s action=%s) → %s%s"
+@@ -253,6 +259,7 @@
+                       core.fsm.state.label, flag)))
+             return
+         if cue.kind == "stop":
++            self._speaking = False
+             before = core.fsm.rejected_count
+             core.send(EventType.AUDIO_PLAYBACK_STOP)
+             if core.fsm.rejected_count > before:
+@@ -262,6 +269,7 @@
+                     (t, "playback_stopped → %s" % core.fsm.state.label))
+             return
+         if cue.kind == "cancel":
++            self._speaking = False
+             core.cancel()
+             core.send(EventType.AUDIO_CANCEL_REQUESTED)
+             self.trace.events.append((t, "cancel → %s" % core.fsm.state.label))
+@@ -269,36 +277,52 @@
+         self.trace.errors.append("未知 cue 种类：%s" % cue.kind)
+ 
+     # ---------------- 采样 ----------------
+-    def _sample(self, t: float) -> None:
+-        """采一帧：记录**素材切换**（★本案主证据）与状态变化。"""
++    def _sample(self, t: float) -> typing.Optional[typing.Dict]:
++        """取实际显示帧，并按正式播放器的策略处理一次性动作完成。"""
+         core = self.core
+         state = core.fsm.state.label
+         if state != self._last_state:
+             self.trace.states.append((t, state))
+             self._last_state = state
+         try:
+-            meta = core.frame_at(state, t)          # 签名：(state, now)
++            meta = core.display_frame(state, t)
+         except Exception as exc:                    # 播放层异常不应中断剧本回放
+-            self.trace.errors.append("frame_at(%.2f) 抛异常：%r" % (t, exc))
++            self.trace.errors.append("display_frame(%.2f) 抛异常：%r" % (t, exc))
++            self._last_meta = None
+             return
++        if core.take_burst_finished():
++            completion = core.burst_completion(state, self._speaking, core.emotion)
++            if completion is not None:
++                before = core.fsm.rejected_count
++                core.send(*completion)
++                if core.fsm.rejected_count > before:
++                    self.trace.rejected.append((t, str(completion[0])))
++                else:
++                    self.trace.events.append((t, "动作段播完 → %s" % core.fsm.state.label))
+         if not isinstance(meta, dict):
+             self.trace.samples.append({"t": t, "state": state, "asset": None})
+             self._last_meta = None
+             return
+         asset = str(meta.get("asset") or "")
++        display_state = str(meta.get("display_state") or state)
+         if self._last_asset is not None and asset != self._last_asset:
++            previous_display = (self._last_meta or {}).get("display_state")
+             self.trace.switches.append({
+-                "t": t, "from": self._last_asset, "to": asset, "state": state,
++                "t": t, "from": self._last_asset, "to": asset, "state": display_state,
++                "from_state": previous_display,
+                 "stage": meta.get("stage"), "index": meta.get("index"),
+                 "frames": meta.get("frames")})
+         self._last_asset = asset
+         row = {"t": t, "state": state, "asset": asset,
++               "display_state": display_state,
++               "transitioning": bool(meta.get("transitioning")),
+                "stage": meta.get("stage"), "index": meta.get("index"),
+                "frames": meta.get("frames"), "phase": meta.get("phase"),
+                "speed": meta.get("speed"), "state_time": meta.get("state_time"),
+                "burst": meta.get("burst")}
+         self._last_meta = row
+         self.trace.samples.append(row)
++        return meta
+ 
+     def _line(self, t: float) -> str:
+         """一行时间轴（列：虚拟时刻 / 状态 / 阶段 / 素材 / 帧 / 状态内 t / 速度）。"""
+@@ -315,6 +339,7 @@
+     # ---------------- 主循环 ----------------
+     def run(self, realtime: bool = False, quiet: bool = False) -> Trace:
+         """跑完全剧；`realtime=True` 按真实时间走（看它演），否则虚拟时钟全速。"""
++        self.reset()
+         end = script_end()
+         cues = sorted(SCRIPT, key=lambda c: c.t)
+         i = 0
+@@ -383,7 +408,7 @@
+     used: typing.Dict[str, typing.Set[str]] = {}
+     for row in trace.samples:
+         if row.get("asset"):
+-            used.setdefault(str(row["state"]), set()).add(str(row["asset"]))
++            used.setdefault(str(row.get("display_state") or row["state"]), set()).add(str(row["asset"]))
+     for state in sorted(used):
+         pool = list(core.pool(state))
+         got = sorted(used[state])
+@@ -397,10 +422,12 @@
+             print("  ! %s" % err)
+ 
+     rotated = [s for s, a in used.items() if len(a) > 1 and len(core.pool(s)) > 1]
+-    # 只统计**池内换素材**（同状态且池 >1）：跨状态切换的 `stage` 值对 burst 无意义
+-    # （实测：AWAKE 是从上一状态遗留的 loop 进来的 → 混进来会把结论误报成"否"）。
++    # 只统计同一显示状态的池内轮换，排除开始说话与收尾后的跨状态切换。
+     pool_sw = [sw for sw in trace.switches
+-               if len(core.pool(str(sw["state"]))) > 1]
++               if sw.get("from_state") == sw["state"]
++               and len(core.pool(str(sw["state"]))) > 1
++               and sw["from"] in core.pool(str(sw["state"]))
++               and sw["to"] in core.pool(str(sw["state"]))]
+     print("\n=== 结论 ===")
+     print("  有池且发生轮换的状态：%s" % (rotated or "（无）"))
+     all_enter = all((sw.get("index") == 0 and sw.get("stage") == "enter")
+@@ -439,11 +466,12 @@
+         asset = row.get("asset")
+         if not asset:
+             continue
+-        key = (str(row["state"]), str(asset))
++        display_state = str(row.get("display_state") or row["state"])
++        key = (display_state, str(asset))
+         if key in seen:
+             continue
+         seen.add(key)
+-        picks.append((float(row["t"]), str(row["state"]), str(asset),
++        picks.append((float(row["t"]), display_state, str(asset),
+                       int(row.get("index") or 0)))
+ 
+     tiles: typing.List[typing.Tuple[typing.Any, str]] = []
+@@ -501,6 +529,7 @@
+     end = script_end()
+     stage_w, stage_h = 320, 360                       # 与 demo_stage.STAGE_W/H 同口径
+     runner = ScriptRunner(core, dt=tick_ms / 1000.0)
++    runner.reset()
+     trace = runner.trace
+ 
+     root = tk.Tk()
+@@ -545,6 +574,7 @@
+         while cursor[0] < len(cues) and cues[cursor[0]].t <= t + 1e-9:
+             runner._fire(cues[cursor[0]], cues[cursor[0]].t)
+             cursor[0] += 1
++        meta = runner._sample(t)                    # 与无窗口回放共用同一条完整播放回路
+         for _t0, text in trace.marks[seen_mk[0]:]:
+             log_add(text)
+         seen_mk[0] = len(trace.marks)
+@@ -553,8 +583,9 @@
+         seen_ev[0] = len(trace.events)
+ 
+         state = core.fsm.state.label
+-        state_lbl.configure(text=state)
+-        meta = core.frame_at(state, t)
++        display_state = str((meta or {}).get("display_state") or state)
++        state_lbl.configure(text=state if display_state == state else
++                            "%s（显示 %s）" % (state, display_state))
+         if meta is None:
+             canvas.delete("all")
+             canvas.create_text(stage_w // 2, stage_h // 2,
+@@ -572,7 +603,7 @@
+                 "phase  : %.3fs   speed: %.3f\n"
+                 "state_t: %.2fs   stage: %s\n"
+                 "虚时   : %.2fs / %.0fs"
+-                % (meta["asset"], len(core.pool(state)),
++                % (meta["asset"], len(core.pool(display_state)),
+                    int(meta.get("index") or 0) + 1, int(meta.get("frames") or 0),
+                    "burst" if meta.get("burst") else "loop",
+                    float(meta.get("phase") or 0.0), float(meta.get("speed") or 1.0),
+@@ -587,12 +618,8 @@
+ 
+     def replay(_event=None) -> None:
+         """F5 重播：FSM 回 IDLE + 播放时间基归零（与剧本 ⑪ 同口径，零残留）。"""
+-        core.fsm.reset()
+-        core.reset_playback()
+-        core.reply_text = ""
++        runner.reset()
+         cursor[0], seen_mk[0], seen_ev[0], done[0] = 0, 0, 0, False
+-        trace.reset()                                 # 清上一轮轨迹（否则旧 marks/events 会被重放一遍）
+-        runner._last_state, runner._last_asset, runner._last_meta = None, None, None
+         wall[0] = time.monotonic()
+         log_add("—— 重播（F5）——")
+         if not scheduled[0]:                          # ★ 演出结束后 tick 链已停 ⇒ 必须重新起链，否则"点了没反应"

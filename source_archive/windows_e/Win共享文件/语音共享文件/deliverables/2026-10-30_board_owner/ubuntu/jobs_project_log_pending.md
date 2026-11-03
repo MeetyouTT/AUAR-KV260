@@ -1,0 +1,11 @@
+# 后续jobs桥候选：供根代理统一追加项目日志
+
+仅Windows源码与纯mock/合成SQLite工作。新增BoardDialogueJobs，不修改现役channel_jobs、GUI、portrait_offload、人物素材、渲染或配置，也未自动开麦/播放。完整能力清单、具体缺口和factory接点见jobs_adapter_handoff.json。
+
+已经运行的最后子集为63 passed / 0.51s，包括真实Controller+合成Store的登记前取消屏障、零模型请求/旧ACK拒绝、阻塞mock外部取消仍请求幂等remote cancel、共享Event后当前错误帧不会消失、24k流和口型时钟/完整receipt。controller只增加可选cancel_event，旧调用兼容；没有5秒轮询或新对话预算。
+
+之后按根代理要求加search=selected.topic或None，以及jobs.idle/ASR前preempt；memory agent同时落地search/clear API。这些最新源码及对应新增测试在角色PAIRED_AB_ARMING_PILOT窗口开始后未执行，根代理将在明确释放后统一回归。手册factory必须wall_clock=timeline.event_time，idle组合jobs.idle and controller.idle and timeline.safe_for_compaction。
+
+原job包含的身份登记/确认/查询、声纹/临时aN/跨模态关联、profile授权与新个人对话recent重置、视觉进入、结构化画面问答、历史删除确认、复杂思考/提示音、barge capture工厂等未完成板端接线的部分均标记缺口并失败关闭，不回退Windows旧业务。24k真实OmniVoice RAM格式由模型代理只读确认，48k stereo仅设备sink边界。完整plan分包兼容旧玩家，不声称保留增量LLM/TTS重叠或首PCM性能。
+
+冻结SHA：jobs35b9b7b944a51c81050eb93078bfe1e24bc5a8e4959d82b34376f729353fede0；controller e98d37825f24f90d674173c64f02c461f5775237232f734708fb6e33d77444f6；jobs测试19db8e837faa3671004407fb4002221c553f7bc8a1e77828dbc549b11c205c7f。本阶段未运行新的网络/ARM/GPU/socket或真实模型测试，项目日志追加由根代理统一执行，避免占用人物性能窗口。

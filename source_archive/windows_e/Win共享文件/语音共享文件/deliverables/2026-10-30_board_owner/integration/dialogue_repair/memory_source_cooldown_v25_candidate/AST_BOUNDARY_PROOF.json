@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "changed_methods": {
+    "common/board_memory.py": [
+      "BoardMemoryStore.prepare_compaction",
+      "BoardMemoryWorker._fail_task",
+      "BoardMemoryWorker._prepare_compaction (new)",
+      "BoardMemoryWorker.step (one call replacement)"
+    ],
+    "common/board_memory_backoff.py": [
+      "BoardMemoryBackoffWorker.__init__",
+      "BoardMemoryBackoffWorker._prepare_compaction (new)",
+      "BoardMemoryBackoffWorker._record_source_failure (new)",
+      "BoardMemoryBackoffWorker._fail_task",
+      "BoardMemoryBackoffWorker.step",
+      "BoardMemoryBackoffWorker.health"
+    ]
+  },
+  "python39_parse": true,
+  "all_unrelated_module_and_method_ast_preserved": true,
+  "worker_step_only_prepare_call_replaced": true,
+  "worker_failure_result_capture_inverse_restores_original_ast": true,
+  "store_preparation_only_default_kwarg_validation_and_filter_added": true,
+  "global_record_failure_ast_identical": true,
+  "validator_schema_commit_cleanup_permissions_and_model_requests_unchanged": true,
+  "only_existing_connection_indexed_source_metadata_queries_added": true,
+  "source_query_columns": [
+    "event_id",
+    "revision",
+    "turn_id"
+  ],
+  "exclusion_udf_is_pure_ram_set_membership": true,
+  "no_per_candidate_related_exclusion_query": true,
+  "default_empty_exclusion_has_original_sql_and_selection": true,
+  "maximum_batches": 64,
+  "maximum_versions_per_batch": 64,
+  "maximum_version_entries": 4096,
+  "source_event_id_maximum_characters": 160
+}

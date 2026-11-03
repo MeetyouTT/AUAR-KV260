@@ -1,0 +1,37 @@
+[
+  {
+    "attempt": 1,
+    "phase": "original",
+    "test_collection_started": false,
+    "product_tests_executed": 0,
+    "failure": "Read-only audit guard also blocked pytest/colorama standard Windows kernel32 console library import.",
+    "classification": "TEST_HARNESS_SETUP_NOT_PRODUCT_FAILURE",
+    "correction": "Allow exact kernel32 name only; all model/device DLLs remain forbidden. Keep tempfile default inside the owned synthetic work directory and disable pytest capture."
+  },
+  {
+    "attempt": 2,
+    "phase": "original",
+    "product_tests_executed": 0,
+    "failure": "Pytest capture-plugin import attempted the installed readline/pyreadline Windows UI DLL even with -s. The audit correctly blocked it.",
+    "classification": "TEST_HARNESS_SETUP_NOT_PRODUCT_FAILURE",
+    "correction": "Disable the capture plugin itself before plugin initialization; do not permit user32/clipboard library loads."
+  },
+  {
+    "attempt": 3,
+    "phase": "original",
+    "product_tests_executed": 0,
+    "failure": "Pytest logging plugin opens the Windows NUL sink outside the allowed artifact directory; audit denied the open.",
+    "classification": "TEST_HARNESS_SETUP_NOT_PRODUCT_FAILURE",
+    "correction": "Disable the logging plugin; retain the write boundary rather than allowing unrelated device/file sinks."
+  },
+  {
+    "attempt": 4,
+    "phase": "original",
+    "failed": 3,
+    "errors": 11,
+    "product_behavior_reached": false,
+    "failure": "Python 3.10 sqlite3 audit arguments are UTF-8 bytes; str(bytes) incorrectly treated their representation as an external path. The guard rejected every synthetic connection before Store initialization.",
+    "classification": "TEST_HARNESS_PATH_DECODING_NOT_PRODUCT_FAILURE",
+    "correction": "Decode audit paths using os.fsdecode, then apply the same resolved-path containment check."
+  }
+]

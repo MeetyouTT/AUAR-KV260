@@ -1,0 +1,1 @@
+cmd_drivers/net/mdio/built-in.a := echo >/dev/null; rm -f drivers/net/mdio/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/net/mdio/built-in.a drivers/net/mdio/fwnode_mdio.o drivers/net/mdio/of_mdio.o

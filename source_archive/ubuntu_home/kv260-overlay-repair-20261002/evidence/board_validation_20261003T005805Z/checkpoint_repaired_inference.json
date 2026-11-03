@@ -1,0 +1,94 @@
+{
+  "state": "repaired_driver_loaded_and_official_inference_matches",
+  "complete_board_validation": false,
+  "before_driver_switch": {
+    "phase": "original_state_saved_and_candidate_transferred",
+    "runtime_unchanged": true,
+    "baseline_performance": {
+      "fps": {
+        "1": [
+          215.13,
+          215.148,
+          215.08
+        ],
+        "2": [
+          238.837,
+          238.632,
+          238.932
+        ]
+      },
+      "median_fps": {
+        "1": 215.13,
+        "2": 238.837
+      }
+    },
+    "transfer": {
+      "started_utc": "2026-10-03T01:21:09.844201+00:00",
+      "source": "/home/ghmd/kv260-overlay-repair-20261002/bundle/kv260-zocl-reference-repair-20261002.tar.gz",
+      "destination": "/home/root/kv260-zocl-repair-20261003T005805Z/candidate.tar.gz",
+      "bytes": 108477,
+      "expected_sha256": "3126707fe3c9165fd743dcbcc1408247337b538524e8b4de6c4edaa4e997cfef",
+      "complete": true,
+      "frames_acknowledged": 36,
+      "finished_utc": "2026-10-03T01:21:48.386147+00:00"
+    }
+  },
+  "old_remove_review": {
+    "phase": "08-remove-old-app",
+    "all_commands_complete_and_successful": true,
+    "commands": [
+      {
+        "id": "remove-old-app",
+        "returncode": 0,
+        "integrity_sha256": "7cec10a1d0e8b2dc7c32931391f21988a434c045f1813d5a3123bc4805b6c448",
+        "uptime_before": 2066.5,
+        "uptime_after": 2066.64,
+        "kernel_interval_isolated": true,
+        "new_kernel_lines": [
+          "[ 2066.672766] cu_drv CU.3.auto:  ffff0008088c7410 xrt_cu_intr_thread: CU[0] thread end, bad state 0",
+          "[ 2066.672946] cu_drv CU.3.auto: cu_remove: CU[0] removed",
+          "[ 2066.673059] zocl_irq_intc ZOCL_CU_INTC.2.auto: zintc_remove: Removing zocl_irq_intc",
+          "[ 2066.695999] OF: ERROR: memory leak, expected refcount 1 instead of 2, of_node_get()/of_node_put() unbalanced - destroy cset entry: attach overlay node /axi/zyxclmm_drm"
+        ],
+        "refcount_errors": [
+          "[ 2066.695999] OF: ERROR: memory leak, expected refcount 1 instead of 2, of_node_get()/of_node_put() unbalanced - destroy cset entry: attach overlay node /axi/zyxclmm_drm"
+        ],
+        "property_warnings": [],
+        "exception_lines": [],
+        "other_error_lines": []
+      }
+    ]
+  },
+  "repaired_functional": {
+    "dpu_spec_same": true,
+    "architecture_same": true,
+    "top5_same": true,
+    "top5": [
+      [
+        "258",
+        "0.949879"
+      ],
+      [
+        "270",
+        "0.00931229"
+      ],
+      [
+        "259",
+        "0.00821807"
+      ],
+      [
+        "257",
+        "0.00498451"
+      ],
+      [
+        "279",
+        "0.00388194"
+      ]
+    ]
+  },
+  "pending": [
+    "repaired performance completion",
+    "three repaired removal cycles",
+    "original module/app recovery"
+  ]
+}

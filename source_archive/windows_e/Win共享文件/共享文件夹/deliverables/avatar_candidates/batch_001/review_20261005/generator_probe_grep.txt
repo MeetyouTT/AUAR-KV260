@@ -1,0 +1,24 @@
+PATTERN=minimax hits=23
+ComfyCloudMiniMaxH3FirstLastFrameToVideoNode [comfy cloud/video] inputs=aspect_ratio,duration_seconds,first_frame,last_frame,prompt,resolution,seed outputs=VIDEO
+ComfyCloudMiniMaxH3ImageToVideoNode [comfy cloud/video] inputs=aspect_ratio,duration_seconds,first_frame,prompt,resolution,seed outputs=VIDEO
+ComfyCloudMiniMaxH3TextToVideoNode [comfy cloud/video] inputs=aspect_ratio,duration_seconds,prompt,resolution,seed outputs=VIDEO
+ComfyCloudMiniMaxMusic3TextToAudioNode [comfy cloud/audio] inputs=audio_quality,lyrics,max_duration,prompt,seed outputs=AUDIO
+EmptyMiniMaxH3LatentAV [model/latent/minimax] inputs=height,length,width outputs=LATENT
+EmptyMiniMaxMusic3LatentAudio [model/latent/minimax music] inputs=batch_size,seconds outputs=LATENT
+MiniMaxChunkFeedForward [KJNodes/experimental] inputs=chunks,model,seq_threshold outputs=MODEL
+MiniMaxH3AddGuide [model/conditioning/minimax] inputs=audio,audio_vae,frame_idx,image,latent,positive,vae outputs=CONDITIONING
+MiniMaxH3FunControlNetApply [model/patch/minimax] inputs=control_video,end_percent,mask,model,model_patch,source_video,start_percent,strength,vae outputs=MODEL
+MiniMaxH3ImageToVideo [model/conditioning/minimax] inputs=clip,first_frame,height,last_frame,length,prompt,vae,width outputs=CONDITIONING,LATENT
+MiniMaxH3MemoryEfficientSageAttentionPatch [KJNodes/minimax] inputs=model outputs=MODEL
+MiniMaxH3ReferenceToVideo [model/conditioning/minimax] inputs=audio_vae,clip,height,length,prompt,ref_audios,ref_image_size,ref_images,ref_video_audios,ref_videos,vae,width outputs=CONDITIONING,LATENT
+MiniMaxH3SigmaShift [model/patch/minimax] inputs=model,shift_audio,shift_video outputs=MODEL
+MiniMaxLowVRAMAttention [KJNodes/experimental] inputs=head_chunks,model outputs=MODEL
+MiniMaxMusic3TextEncode [model/conditioning/minimax music] inputs=caption,cfg_scale,clip,lyrics,max_duration,seed,top_k outputs=CONDITIONING,FLOAT
+MinimaxHailuo03ContextIRNode [partner/video/MiniMax] inputs=first_frame,last_frame,model outputs=STRING
+MinimaxHailuo03FirstLastFrameNode [partner/video/MiniMax] inputs=first_frame,last_frame,model,seed,watermark outputs=VIDEO
+MinimaxHailuo03ReferenceNode [partner/video/MiniMax] inputs=model,seed,watermark outputs=VIDEO
+MinimaxHailuo03RegenerateNode [partner/video/MiniMax] inputs=first_frame,last_frame,model,video,watermark outputs=VIDEO
+MinimaxHailuo03TextToVideoNode [partner/video/MiniMax] inputs=model,seed,watermark outputs=VIDEO
+MinimaxHailuoVideoNode [partner/video/MiniMax] inputs=duration,first_frame_image,prompt_optimizer,prompt_text,resolution,seed outputs=VIDEO
+MinimaxImageToVideoNode [partner/video/MiniMax] inputs=image,model,prompt_text,seed outputs=VIDEO
+MinimaxTextToVideoNode [partner/video/MiniMax] inputs=model,prompt_text,seed outputs=VIDEO

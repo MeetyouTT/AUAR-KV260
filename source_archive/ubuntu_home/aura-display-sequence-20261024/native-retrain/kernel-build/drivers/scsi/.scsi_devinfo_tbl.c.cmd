@@ -1,0 +1,1 @@
+cmd_drivers/scsi/scsi_devinfo_tbl.c := sed -n 's/.*define *BLIST_\([A-Z0-9_]*\) *.*/BLIST_FLAG_NAME(\1),/p' /home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux/include/scsi/scsi_devinfo.h > drivers/scsi/scsi_devinfo_tbl.c

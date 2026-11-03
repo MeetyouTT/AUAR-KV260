@@ -1,0 +1,1 @@
+cmd_net/wireless/built-in.a := echo >/dev/null; rm -f net/wireless/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST net/wireless/built-in.a net/wireless/wext-core.o net/wireless/wext-proc.o

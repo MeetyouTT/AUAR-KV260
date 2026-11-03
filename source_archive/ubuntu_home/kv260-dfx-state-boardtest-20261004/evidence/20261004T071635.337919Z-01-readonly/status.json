@@ -1,0 +1,72 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/01-readonly.json",
+  "manifest_sha256": "510c500bb5def0ec9b8618ee510afca743593ab6c896b961950348994bcc3abd",
+  "started_utc": "2026-10-04T07:16:35.338117+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "identity",
+      "started_utc": "2026-10-04T07:16:35.839133+00:00",
+      "entry": {
+        "id": "identity",
+        "command": "python3 -B -c 'import json,os,pathlib,subprocess; P=pathlib.Path; print(json.dumps({\"uid\":os.geteuid(),\"boot_id\":P(\"/proc/sys/kernel/random/boot_id\").read_text().strip(),\"kernel\":P(\"/proc/sys/kernel/osrelease\").read_text().strip(),\"uptime\":P(\"/proc/uptime\").read_text().strip(),\"model\":P(\"/proc/device-tree/model\").read_text().replace(chr(0),\"\"),\"cmdline\":P(\"/proc/cmdline\").read_text().strip(),\"cid\":{str(p):p.read_text().strip() for p in P(\"/sys/block\").glob(\"mmcblk*/device/cid\")}},indent=2)); subprocess.run([\"findmnt\",\"-n\",\"-o\",\"SOURCE,FSTYPE,TARGET\",\"/\"]); subprocess.run([\"findmnt\",\"-n\",\"-o\",\"SOURCE,FSTYPE,TARGET\",\"/boot\"])'"
+      },
+      "exit_code": 0,
+      "output_sha256": "1f819017bbb930f16ca34e34afdac49e27c15cd84e6d7ad1f4e395127a76533d",
+      "bytes": 427,
+      "finished_utc": "2026-10-04T07:16:37.440351+00:00"
+    },
+    {
+      "id": "runtime",
+      "started_utc": "2026-10-04T07:16:37.440649+00:00",
+      "entry": {
+        "id": "runtime",
+        "command": "python3 -B -c 'import pathlib,subprocess,json; P=pathlib.Path; cmds=[[\"systemctl\",\"show\",\"dfx-mgr.service\",\"-p\",\"MainPID\",\"-p\",\"ActiveState\",\"-p\",\"SubState\",\"-p\",\"Result\",\"-p\",\"ExecStart\",\"-p\",\"ExecStartPre\",\"-p\",\"DropInPaths\",\"-p\",\"Requires\",\"-p\",\"After\"],[\"systemctl\",\"cat\",\"dfx-mgr.service\"],[\"systemctl\",\"show\",\"kv260-repaired-zocl.service\",\"-p\",\"ActiveState\",\"-p\",\"Result\",\"-p\",\"ExecMainStatus\"],[\"xmutil\",\"listapps\"],[\"cat\",\"/proc/modules\"],[\"ps\",\"-eo\",\"pid,comm,args\"]]; out=[]; [(out.append({\"argv\":c,\"rc\":r.returncode,\"stdout\":r.stdout,\"stderr\":r.stderr})) for c in cmds for r in [subprocess.run(c,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=20)]]; print(json.dumps({\"commands\":out,\"zocl\":{str(p):p.read_text().strip() for p in [P(\"/sys/module/zocl/srcversion\"),P(\"/sys/module/zocl/refcnt\"),P(\"/sys/module/zocl/parameters/enable_xgq_ert\")]},\"holders\":[str(p) for p in P(\"/sys/module/zocl/holders\").glob(\"*\")]},indent=2))'"
+      },
+      "exit_code": 0,
+      "output_sha256": "feba3d9e3ccbaa2ac19c7656ad10035a4212c92c50e4b30e20d0cca864321bb7",
+      "bytes": 13532,
+      "finished_utc": "2026-10-04T07:16:40.416510+00:00"
+    },
+    {
+      "id": "hashes-config",
+      "started_utc": "2026-10-04T07:16:40.416856+00:00",
+      "entry": {
+        "id": "hashes-config",
+        "command": "python3 -B -c 'import pathlib,hashlib,json,subprocess; P=pathlib.Path; paths=[\"/usr/local/lib/kv260-runtime-repair/dfx-mgrd\",\"/usr/local/lib/kv260-runtime-repair/zocl.ko\",\"/usr/bin/dfx-mgrd\",\"/usr/bin/dfx-mgr-client\",\"/etc/dfx-mgrd/daemon.conf\",\"/etc/dfx-mgr/daemon.conf\",\"/etc/vart.conf\",\"/etc/fstab\",\"/etc/systemd/system/dfx-mgr.service.d/10-kv260-repaired.conf\",\"/etc/systemd/system/kv260-repaired-zocl.service\"]; result={}; [(result.update({p:{\"exists\":P(p).exists(),\"sha256\":hashlib.sha256(P(p).read_bytes()).hexdigest() if P(p).is_file() else None,\"content\":P(p).read_text() if P(p).is_file() and p.startswith(\"/etc/\") else None}})) for p in paths]; print(json.dumps(result,indent=2)); subprocess.run([\"sha256sum\",\"-c\",\"/home/root/kv260-runtime-persistent-backup-20261003/original/stock.sha256\"])'"
+      },
+      "exit_code": 0,
+      "output_sha256": "d6c5dd13b91fbf0eea6119f6fab5fdc66ae9f21aa05f8f8127472cc08fc2e4a9",
+      "bytes": 4696,
+      "finished_utc": "2026-10-04T07:16:42.943965+00:00"
+    },
+    {
+      "id": "kernel-before",
+      "started_utc": "2026-10-04T07:16:42.944343+00:00",
+      "entry": {
+        "id": "kernel-before",
+        "command": "dmesg"
+      },
+      "exit_code": 0,
+      "output_sha256": "af98d1c208a2cf199497020ce90c7492effa16e9933fe518e6be40e7a6cd33ef",
+      "bytes": 46820,
+      "finished_utc": "2026-10-04T07:16:45.792425+00:00"
+    },
+    {
+      "id": "service-journal-before",
+      "started_utc": "2026-10-04T07:16:45.792800+00:00",
+      "entry": {
+        "id": "service-journal-before",
+        "command": "journalctl -b -u dfx-mgr.service -u kv260-repaired-zocl.service --no-pager -o short-monotonic"
+      },
+      "exit_code": 0,
+      "output_sha256": "b0704628dbada208b4b6714e57c1600af88b79212dd995defeddf26b72fbf9e4",
+      "bytes": 7894,
+      "finished_utc": "2026-10-04T07:16:46.783491+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T07:16:46.831564+00:00"
+}

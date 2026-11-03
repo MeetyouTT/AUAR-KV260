@@ -1,0 +1,59 @@
+--- a/tools/native_pixels.cpp
++++ b/tools/native_pixels.cpp
+@@ -41,6 +41,18 @@
+  lo=vmlal_u16(lo,vget_low_u16(bb),wb);hi=vmlal_u16(hi,vget_high_u16(bb),wb);
+  lo=vaddw_u16(lo,vget_low_u16(aa));hi=vaddw_u16(hi,vget_high_u16(aa));
+  return vmovn_u16(vcombine_u16(vshrn_n_u32(lo,16),vshrn_n_u32(hi,16)));
++}
++// Match aura_blend's float32 a + t*(b-a), followed by truncation to uint8.
++// The existing Q16 helper stays unchanged for all legacy callers.
++uint8x8_t blend8_exact(uint8x8_t a,uint8x8_t b,float t){
++ const uint16x8_t aa=vmovl_u8(a),bb=vmovl_u8(b);
++ const float32x4_t al=vcvtq_f32_u32(vmovl_u16(vget_low_u16(aa)));
++ const float32x4_t ah=vcvtq_f32_u32(vmovl_u16(vget_high_u16(aa)));
++ const float32x4_t bl=vcvtq_f32_u32(vmovl_u16(vget_low_u16(bb)));
++ const float32x4_t bh=vcvtq_f32_u32(vmovl_u16(vget_high_u16(bb)));
++ const float32x4_t lo=vfmaq_n_f32(al,vsubq_f32(bl,al),t);
++ const float32x4_t hi=vfmaq_n_f32(ah,vsubq_f32(bh,ah),t);
++ return vmovn_u16(vcombine_u16(vmovn_u32(vcvtq_u32_f32(lo)),vmovn_u32(vcvtq_u32_f32(hi))));
+ }
+ uint8x8_t flat8(uint8x8_t color,uint8x8_t alpha,int background){
+  uint16x8_t n=vmull_u8(color,alpha);n=vmlal_u8(n,vdup_n_u8(background),vmvn_u8(alpha));
+@@ -120,17 +132,19 @@
+  for(int i=0;i<n;++i)out[i]=static_cast<unsigned char>(a[i]+t*(static_cast<int>(b[i])-a[i]));
+  return 0;
+ }
+-int aura_pose_blend(void* owner,const unsigned char* rgba,const unsigned char* other,float blend,int w,int h,const double* m,
+-              int ow,int oh,int r,int g,int b,unsigned char* out){
++static int aura_pose_blend_impl(void* owner,const unsigned char* rgba,const unsigned char* other,float blend,int w,int h,const double* m,
++              int ow,int oh,int r,int g,int b,unsigned char* out,bool exact_blend){
+  try{
+   if(!owner||!rgba||!m||!out||w<=0||h<=0||ow<=0||oh<=0)return -1;
++  if(exact_blend&&other&&(!std::isfinite(blend)||blend<0||blend>1))return -1;
+   auto& p=*static_cast<Pixels*>(owner);p.flat.create(h,w,CV_8UC3);p.posed.create(h,w,CV_8UC3);
+   double start=cpu_ms();const int colors[3]={r,g,b};auto* flat=p.flat.ptr<unsigned char>();
+   int first=0;
+ #ifdef __ARM_NEON
+   const uint16_t weight=static_cast<uint16_t>(std::max(0,std::min(65535,static_cast<int>(blend*65536+.5f))));
+   for(;first+8<=w*h;first+=8){uint8x8x4_t v=vld4_u8(rgba+4*first);
+-   if(other){uint8x8x4_t vv=vld4_u8(other+4*first);for(int c=0;c<4;++c)v.val[c]=blend8(v.val[c],vv.val[c],weight);}
++   if(other){uint8x8x4_t vv=vld4_u8(other+4*first);for(int c=0;c<4;++c)
++    v.val[c]=exact_blend?blend8_exact(v.val[c],vv.val[c],blend):blend8(v.val[c],vv.val[c],weight);}
+    uint8x8x3_t rgb;for(int c=0;c<3;++c)rgb.val[c]=flat8(v.val[c],v.val[3],colors[c]);vst3_u8(flat+3*first,rgb);
+   }
+ #endif
+@@ -181,6 +195,14 @@
+   double ended=cpu_ms();p.times[0]=flattened-start;p.times[1]=posed-flattened;p.times[2]=ended-posed;p.times[3]=ended-start;return 0;
+  }catch(const std::exception& e){error=e.what();return -2;}
+ }
++int aura_pose_blend(void* owner,const unsigned char* rgba,const unsigned char* other,float blend,int w,int h,const double* m,
++              int ow,int oh,int r,int g,int b,unsigned char* out){
++ return aura_pose_blend_impl(owner,rgba,other,blend,w,h,m,ow,oh,r,g,b,out,false);
++}
++int aura_pose_blend_exact(void* owner,const unsigned char* rgba,const unsigned char* other,float blend,int w,int h,const double* m,
++              int ow,int oh,int r,int g,int b,unsigned char* out){
++ return aura_pose_blend_impl(owner,rgba,other,blend,w,h,m,ow,oh,r,g,b,out,true);
++}
+ int aura_pose(void* p,const unsigned char* rgba,int w,int h,const double* m,int ow,int oh,int r,int g,int b,unsigned char* out){
+  return aura_pose_blend(p,rgba,nullptr,0,w,h,m,ow,oh,r,g,b,out);
+ }

@@ -1,0 +1,19 @@
+﻿指标,实测结果,统计口径与范围
+YOLOX业务计数频率,9.907 次/s,计数增加1781 / 179.773885s；primary_calls；非独立满载FPS
+YuNet业务计数频率,9.862 次/s,计数增加1773 / 179.773885s；native_completed；非独立满载FPS
+SFace业务计数频率,0.740 次/s,计数增加133 / 179.773885s；native_completed；非独立满载FPS
+YOLOX原生调用与解码阶段均值,15.924 ms,窗口Δtotal_ms/Δcount，n=1781；不是纯DPU硬件内核时间
+YOLOX检测路径均值,27.211 ms,窗口Δtotal_ms/Δcount，n=1781；不是纯DPU硬件内核时间
+YuNet原生临界区均值,2.411 ms,窗口Δtotal_ms/Δcount，n=1773；不是纯DPU硬件内核时间
+SFace原生临界区均值,8.422 ms,窗口Δtotal_ms/Δcount，n=133；不是纯DPU硬件内核时间
+整板CPU,采样均值 69.08% 观测最大 76.15%,90点，目标2秒间隔；全部在线核心合计100%
+系统可用内存最小值,2767.699 MiB（2.703 GiB）,Linux MemAvailable；不与进程RSS重复相加
+27B完整LLM RPC,中位数 1.837 s 范围 1.668–2.129 s,5次有效暖态请求，含网络、准入与完整响应
+27B首个JSON内容,中位数 0.469 s 范围 0.359–0.687 s,服务首个非空JSON内容；不是声学首声
+27B JSON解码速率,中位数 40.853 token/s 范围 39.627–41.170 token/s,eval_count/eval_duration；含完整JSON输出token
+OmniVoice16完整TTS RPC,中位数 0.718 s 范围 0.667–1.471 s,5次有效暖态请求，cache_hit均false；不含播放
+OmniVoice16 RPC实时率,中位数 0.1276  范围 0.0867–0.1462 ,完整RPC秒数/返回PCM秒数
+TTS返回音频时长,4.56–10.08 s,24kHz 单声道 s16le；本轮未播放
+Windows设备显存观测峰,19136 MiB,180个1秒设备快照，含桌面和其他进程；不是保证峰值
+Windows设备最少空闲显存,5002 MiB,同上；非模型专属分配
+DPU硬件利用率,未提供,只读驱动统计为空；不以CPU%或静态资源替代

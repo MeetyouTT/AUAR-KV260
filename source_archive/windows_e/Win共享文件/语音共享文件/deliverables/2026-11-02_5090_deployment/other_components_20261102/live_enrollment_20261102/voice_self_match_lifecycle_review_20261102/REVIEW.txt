@@ -1,0 +1,41 @@
+现役44e语音录音/播放生命周期：真实组件合成集成审查
+
+结论：7/7用例通过。完整BoardBusinessRuntime.__init__/start已实际执行，补齐此前公开快照缺失的history_delete。实际VoiceFirst/Recording/NativeStreaming/production listening与presentation包装器参与，正常三轮声音辨认经过stream start、生成PCM完整receipt、原ACK提交、0.5秒rearm后仍是1/2/3，只有3次编码，没有新增reset。未复现“正常start/ACK必定重置probe”，没有产品修复依据。
+
+准确调用链
+1. 原VoiceFirst._monitor_tick从未拥有音频session进入_owned之前，调用_select_listening_conversation。该函数调用Jobs.select_conversation，再由Jobs.reset_enrollment -> LIR.reset -> BoardSpeakerBusiness.reset清临时状态。这个初始session reset正常且在首个query之前，正式模板不删除。
+2. VAD callback走HandsFree._speech_started，给同一listen_id绑定speech proof并调用Jobs.capture_started。VoiceFirst._queue_transcription复核这个proof/音频owner，首次直接语音使用原visual-entry这个历史名字的声学入口；Recording._queue_transcription调用实际Jobs.submit。
+3. 实际Jobs worker -> 已绑定的Yuki _admit_text/_route -> LocalRecordController -> LIR -> 原sole speaker worker。此链没有改任何owner、scope或identity guard。原ASR/TTS/encoder在测试中是合成IO替身。
+4. Recording._poll_transcription逐包交NativeStreamingController.channel_event。start进入StreamingController.channel_event -> RealtimeController.begin_dialogue -> NativeStreaming/Streaming/Realtime的visual controller.cancel。这里的self是视觉/播放controller，和RecordingController不是同一对象；该cancel不调用reset_enrollment。
+5. stream end只结束输出；network_complete加入原完整receipt。Streaming.tick在audio_done且network receipt完整后发completion并置IDLE，不调用Recording.cancel。Recording.tick取completion -> Jobs.acknowledge -> 原action worker -> Controller/Store ACK事务 -> committed=true，再置ANSWERED和0.5秒settle、7秒ACK等待窗。
+6. 成功ACK后的Recording._auto_tick调用_listen。_listen调用Jobs.cancel/_invalidate以建立新代，随后重新开同一自动capture。这个正常generation取消不调用reset_enrollment，也没有清掉已采纳probe贡献。
+7. ProductionMemoryPresentation的channel/tick/public包装器只管理bounded display和已消费引用；bind_presentation不重绑visual.cancel、不调用reset。retire_consumed只在原foreground idle/完成ACK后清旧文本与已消费PCM引用。用户此时看到local_transcription.text为空不等于ASR未发生。
+
+明确可导致CANCELLED0的原路径
+- Recording.cancel：Jobs.cancel后调用Jobs.reset_enrollment，再调用视觉controller.cancel。显式取消或用户暂停可以触发，运行时不必出现uncaught exception。
+- Recording._auto_fail：处理已有录音/转写/播放器错误、ACK拒绝或ACK超时，执行同样的reset。真实输出错误由Streaming.tick处理后可进入SERVICE_ERROR清理，不需要AvatarRenderWorker记录fatal fault。
+- HandsFree._finish_session直接调用Recording.cancel；VoiceFirst正常30秒无活动进入CONVERSATION_SILENCE，先reset一次，cooldown后重新_select_listening_conversation又reset一次。正式voice模板仍保留。last_stop_reason可以在重arm后保留旧值，所以应比较stop_reasons计数增量与时间序列，不应只读一个reason断定最新query发生了什么。
+- 原select_profile/select_conversation、服务/原native readiness失败、页面/显式cancel和关闭也能经原调用链重置。这里没有把它们推定为现场唯一原因。
+
+合成集成证据
+RECORDING_INTEGRATION_FINAL.xml：
+1. 完整Runtime构造与真实正常录音/stream/ACK/rearm三轮，probe阶段1/2/3、不reset、编码3次。
+2. 显式Recording.cancel调用原reset并清probe。
+3. 直接原_auto_fail调用reset。
+4. 原30秒静音结束会话，再重新选conversation，准确两次reset，正式synthetic voice仍1。
+5. 原recording.public取READY音频并提交，随后正常ACK，不reset。
+6. 注入固定synthetic output error，原Streaming/Recording处理为SERVICE_ERROR并reset，tick不抛未处理异常。
+7. 注入固定ACK拒绝，原action worker/auto_fail/reset链清probe。
+NORMAL_CHAIN_METADATA.json及SILENCE_RESET_METADATA.json只保存合成阶段/次数/源码函数栈；不含真人原文、音频、身份信息或分数。
+
+现场证据解读边界
+当前CANCELLED0+entry_trace.reset_since_trace=true不能证明是谁在什么时刻reset。LIR.entry_trace只描述上次handler调用，没有同最新query的generation对应字段；如果下一句未路由LIR，旧observed=true/business_turn_reply会继续保留。Yuki instance覆盖Jobs._route，所以原Jobs trace未评估也不能反推加载了旧parser。normal root-runtimefault0也不能排除原已处理的SERVICE_ERROR/ACK失败/显式暂停/静音收会话。
+本审查既没有证明现场reset根因，也没有证明现场最新query确实进入新probe。root正在读取的现有固定metadata及固定回复类别COUNT更适合区别原未标定回复、新NO_CANDIDATE、原进度/候选和普通LLM；可同时观测stop_reasons计数增量、monitor_owned/entered/state、当前ACK committed与错误类别，不需要新增服务或读取原文。
+
+来源与范围
+- 在新的integration_runtime复制冻结901c/28d的349公开文件，额外补root按startup pin验证的tools/board_recording.py e70a9f4c…54ce26、tools/production_memory_presentation.py de04c6…d4c2、board/runtime/history_delete.py647b5c…5023f。原349及三个补充模块全部源字节保持。
+- root已说明现役339交集中有2个CPU GTK2文件与旧copy不同，其余337核心actor源匹配。本测试render_requested=false，不测GTK2/渲染worker/GPU帧或实板性能；只跑准确的音频业务/actor/播放控制组件。
+- 与此前只显式装配对象不同，本次确实调用完整Runtime.__init__和start，真实Jobs/action线程与speaker线程、原Store/ACK、actual formal NativeCore/NativeStreaming及paired VoiceFirst都运行。没有伪造history_delete模块。
+- 原GuiBoardBusiness模型/硬件初始化未执行，只使用其实际bind_recording和capture_idle；已创建的实际Runtime/store/speaker data_origin均为synthetic。production listening/presentation有board-only UI分支入口，使用明确的PolicyRuntime代理仅选择这些UI包装器分支，所有操作委托原synthetic Runtime，未把真实Store或权限改成board；这不验证生产bootstrap或board文件权限guard。
+- 输出/麦克风是合成IO对象，原controller实际接收/拼接PCM，并核完整sample_count/SHA后走原ACK。这里不代表物理播放。native READY输入、时钟、ASR/LLM/TTS/VAD/encoder均为合成；正式模型、真实PCM、身份库和anchor都没有访问。
+- 本代理未SSH/GET、未操作板卡/服务/GUI/转轴，未修改任何生产或已冻候选，也未写新产品修复。不会把probe.active伪装成登记active来逃避正常清理。

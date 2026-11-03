@@ -1,0 +1,23 @@
+开机恢复候选独立本地审查
+
+结论：BLOCKED_OFFLINE_REVISION2_FIXES_REQUIRED。不能据此激活或声称真实冷启动通过。
+主审对象是boot_review_inputs/observed_revision2封存字节：boot_recovery 15e4f53f…、recovery_rules 72492c2d…、capture_contract 8d06945e…、manage_installation de31f75b…。旧65项/两个ZIP对应779010/53ca历史版本，单独保存在archive65；工作目录期间发生漂移，完整SHA和末次对照在JSON。
+
+必须修复
+1. B01 平台任务队列：boot_recovery.py:254–294只核camera/GUI任务，遗漏尚无进程的排队DFX；daemon带待停/重启Job也被接受。每个推进边界需审有限相关平台jobs，未知/在途仅HOLD或观察同intent/InvocationID，不重发。
+2. B02 相机生命周期：boot_recovery.py:505–529接受deactivating/stop-sigterm/有stop Job及Native quiesced=true的两帧样本。绑定前后和READY前需核active/running/noJob、完整owner不变、quiesced=false；退出中的owner不能作为新绑定发布依据。
+3. B03 账本CAS：boot_recovery.py:572–593已封存prior_active_raw，却在最终替换时用临读账本作expected。需绑定最初字节和存在状态，在首个UI/startup写前及最终CAS均核同一原值；出现/消失/变化HOLD。
+4. B04 完整历史与当次final：安装期5ca99回执没有绑定之后每次camera gate的精确final和完整archive链。维护路径应绑定真实stop/full-history证明；冷启动复用原archive-only校验并核原commit/archive/当前kernel marker，不能伪造sameboot停机凭证或用true字段替代证明。
+5. B05 boot route：recovery_rules.py:161–169应根据gate predecessor boot与current boot决定唯一允许mode，并核对应归档/消费来源。不能由handoff自己的mode字符串选择是否检查boot字段。
+
+明确保留的限制
+- 没有当前最后运行owner的正常shutdown final时，当前代码安全HOLD。它仍是清洁关机覆盖，不能宣传任意异常断电均可自恢复；若要扩展，须独立区分last-live-owner和可信archived-source，不能猜旧PID/计数。
+- active-source已写但committed.json未落盘的回滚会安全HOLD；重入不补receipt。可保留人工reconcile，或在首次发布前封存after-ledger及SHA。
+
+已通过的静态边界
+原DFX/client/4FW/3driver/ID_STOP_ONLY来源复用、同unit/InvocationID续观、不自动重发未知操作、DFX前残留硬件owner/cgroup阻断、无自动参考/回中/跟随、原b77 verifier与最新GTK/身份/其他源保留、已知字节回退和更新冲突拒绝。以上不消除B01–B05。
+
+现场门槛仍未满足
+声纹窗口明确PAUSED/idle交权；实际boot/全部owner/380源/selected真实数量；dpu-auto-config当前generated unit/init/helper来源与合并顺序或确证不存在；目标systemd-analyze verify和实际job列格式；原Native完整生命周期与exact final/history；一次真实新boot的wide/camera/GUI READY与禁输出读回。用户已验收转轴平顺跟随，不重开调参或重复方向验收；人脸声纹关联已取消，独立声纹登记已保存1份，识别修复/复验由身份窗口负责。
+
+证据均为本地源码、已有测试/ZIP以及具体未覆盖疑点的纯AST/RAM负例。没有重复执行原65套，没有SSH/板端HTTP/模型负载/服务动作/真实库音频图像读取，没有改开机分支、全局文档或生产文件。

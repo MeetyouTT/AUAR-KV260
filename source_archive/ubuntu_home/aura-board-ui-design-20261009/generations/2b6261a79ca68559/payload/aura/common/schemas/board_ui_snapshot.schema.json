@@ -1,0 +1,520 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AURA touchscreen snapshot adapter v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "board_boot_id",
+    "service_epoch",
+    "sequence",
+    "observed_mono_ms",
+    "ttl_ms",
+    "source_kind",
+    "context",
+    "modules",
+    "capabilities"
+  ],
+  "properties": {
+    "protocol_version": {
+      "const": "aura-ui-1"
+    },
+    "board_boot_id": {
+      "type": "string",
+      "maxLength": 96,
+      "minLength": 1
+    },
+    "service_epoch": {
+      "type": "string",
+      "maxLength": 96,
+      "minLength": 1
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "observed_mono_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "ttl_ms": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 5000
+    },
+    "source_kind": {
+      "enum": [
+        "actual",
+        "fixture"
+      ]
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "session_id",
+        "request_id",
+        "generation"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "maxLength": 96,
+          "minLength": 1
+        },
+        "request_id": {
+          "type": "string",
+          "maxLength": 96
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "modules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "interaction": {
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "IDLE",
+                "LISTENING",
+                "PROCESSING",
+                "SPEAKING",
+                "CANCELLED",
+                "ERROR"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "maxLength": 160
+            },
+            "transcript": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "reply": {
+              "type": "string",
+              "maxLength": 8000
+            },
+            "timings_ms": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "asr": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 3600000
+                },
+                "vlm": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 3600000
+                },
+                "tts": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 3600000
+                },
+                "first_audio": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 3600000
+                }
+              }
+            }
+          }
+        },
+        "camera": {
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "READY",
+                "LOST",
+                "ERROR"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "maxLength": 160
+            }
+          }
+        },
+        "vision": {
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "READY",
+                "DEGRADED",
+                "ERROR"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "maxLength": 160
+            },
+            "people_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            }
+          }
+        },
+        "npu": {
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "READY",
+                "DEGRADED",
+                "ERROR"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "maxLength": 160
+            }
+          }
+        },
+        "pl": {
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "READY",
+                "DEGRADED",
+                "FAULT"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "maxLength": 160
+            }
+          }
+        },
+        "target": {
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "NONE",
+                "CANDIDATE",
+                "CONFIRMED",
+                "LOST",
+                "AMBIGUOUS"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "maxLength": 160
+            },
+            "selected": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "camera_epoch",
+                    "track_id",
+                    "track_generation"
+                  ],
+                  "properties": {
+                    "camera_epoch": {
+                      "type": "string",
+                      "maxLength": 96,
+                      "minLength": 1
+                    },
+                    "track_id": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "track_generation": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tracks": {
+              "type": "array",
+              "maxItems": 16,
+              "items": {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+                "title": "Visible target",
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "key",
+                  "label"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "camera_epoch",
+                      "track_id",
+                      "track_generation"
+                    ],
+                    "properties": {
+                      "camera_epoch": {
+                        "type": "string",
+                        "maxLength": 96,
+                        "minLength": 1
+                      },
+                      "track_id": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "track_generation": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      }
+                    }
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 48
+                  }
+                }
+              }
+            }
+          }
+        },
+        "identity": {
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "KNOWN",
+                "ENROLLING",
+                "DELETED",
+                "ERROR"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "maxLength": 160
+            },
+            "person_id": {
+              "type": "string",
+              "maxLength": 96
+            },
+            "display_name": {
+              "type": "string",
+              "maxLength": 96
+            },
+            "db_version": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "people": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+                "title": "Identity choice",
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "person_id",
+                  "display_name"
+                ],
+                "properties": {
+                  "person_id": {
+                    "type": "string",
+                    "maxLength": 96,
+                    "minLength": 1
+                  },
+                  "display_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 48
+                  }
+                }
+              }
+            }
+          }
+        },
+        "motion": {
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "DISARMED",
+                "NEEDS_REFERENCE",
+                "ARMED",
+                "TRACKING",
+                "AT_LIMIT",
+                "FAULT"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "maxLength": 160
+            }
+          }
+        },
+        "host": {
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "OFFLINE",
+                "CONNECTING",
+                "READY",
+                "DEGRADED",
+                "FAILED"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "maxLength": 160
+            }
+          }
+        },
+        "audio": {
+          "type": "object",
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "READY",
+                "RECORDING",
+                "PLAYING",
+                "UNAVAILABLE",
+                "ERROR"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "maxLength": 160
+            }
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "record_start": {
+          "type": "boolean"
+        },
+        "record_stop": {
+          "type": "boolean"
+        },
+        "cancel": {
+          "type": "boolean"
+        },
+        "ask_frame": {
+          "type": "boolean"
+        },
+        "target_select": {
+          "type": "boolean"
+        },
+        "identity_enroll": {
+          "type": "boolean"
+        },
+        "identity_delete": {
+          "type": "boolean"
+        },
+        "motion_disarm": {
+          "type": "boolean"
+        }
+      }
+    },
+    "preview": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "camera_epoch",
+            "frame_id",
+            "captured_mono_ms"
+          ],
+          "properties": {
+            "camera_epoch": {
+              "type": "string",
+              "maxLength": 96,
+              "minLength": 1
+            },
+            "frame_id": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "captured_mono_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "description": "I03/I04/I05/I07 display adapter. Times use this board monotonic milliseconds. Runtime additionally checks boot, freshness, ordering and retired epochs."
+}

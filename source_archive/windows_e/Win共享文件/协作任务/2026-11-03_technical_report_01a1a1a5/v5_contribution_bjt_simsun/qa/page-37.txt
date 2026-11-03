@@ -1,0 +1,34 @@
+36
+编号 报告包内依据 主要支持内容
+sources/model_adaptation 与
+E29 YuNet 重构 SFace 等价改写及源码 SHA
+model_adaptation_manifest.json
+figures/board_x11_live.png
+L01 screenshot_replacement.json 及 马赛克界面截图 版本 音频枚举
+live_summary.json
+evidence/live_board_samples.json
+L02 本次资源 模型增量 RTT
+data/live_*.csv
+L03 evidence/ubuntu_rtl/rtl/result.json 本次四套 XSim 源码与阶段回执
+L04 evidence/ubuntu_plot_receipt.json Ubuntu 新曲线生成工具与点数
+S02 sources/project_scope_summary.json 较新用户功能取舍及使用反馈
+S03 sources/release_* 及 evidence/release_* 方案 A 入口 依赖与已有构建记录
+模型计时和旧指标的值与 sources/previous_metrics.csv 对应。本次指标另存
+data/metrics_current.csv，历史与当前字段包含不同 scope，不直接合并为同条件优化比较。
+ICMP 原始汇总与逐次输出均保留，最大值精度差异在正文说明。
+附录 D AI 原始摘录与案例附件
+以下两段为现有可见摘录原文，属于工作范围调整记录，不代表 FPGA 或 DPU 案例的完
+整逐轮对话。[E16]
+用户原话：我这几天做了大语言模型优化啥的，可以把这个替换成 C，你看看 win 里面语音模
+型的整个做的东西，你可以看看
+AI 回答开头：可以替换。我已查看 Windows 同步过来的主要源码、优化报告和测试记录，整
+理了 73 份来源，并把 C 的规划改为：
+后续范围调整将 C 包覆盖到 LLM 输出、资源、记忆和语音工程。五类工程复盘、源码文
+件 和 38 项 索 引 在 evidence/history/v15_ai_engineering_record.md 与
+v28_ai_source_index.json 中定位。原始问答覆盖不足的案例保留复盘身份，不填写推测的
+模型 ID 或编造首次回答。
+附录 E Skill 验证入口与边界
+Skill 目录为 skill/pynq-contract-testgen，真实复现入口见第 7 章。已有结果为 15
+单元测试、加法 36 向量、CRC 37 向量，包含新目录及解压复现记录。测试未导入真实 PYNQ、
+未加载 Overlay、未访问目标板。两个算法换例证明软件层复用，硬件平台和陌生使用者的复
+用另验。

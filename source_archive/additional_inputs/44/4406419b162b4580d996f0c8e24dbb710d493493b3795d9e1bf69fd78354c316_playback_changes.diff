@@ -1,0 +1,273 @@
+--- before/board/interaction/avatar_player.py
++++ after/board/interaction/avatar_player.py
+@@ -2,6 +2,7 @@
+ """Shared avatar playback core for Tk and Qt; independent of both UI toolkits."""
+ from __future__ import annotations
+ import typing
++import math
+ from PIL import Image
+ from . import avatar_assets, avatar_timing
+ from board.runtime.event_bus import EventEnvelope
+@@ -12,8 +13,7 @@
+     """播放核心（**纯逻辑、不依赖 Tk**）：真 FSM + 真素材 + P0-2 真时序。"""
+ 
+     #: 池轮换：单个素材**连播多少秒**后换下一个（`avatar_assets.POOLS` 内交替）。
+-    #: 取值依据（2026-10-05）：池内素材约 1.6 s/圈，6 s ≈ 4 圈 —— 短于"察觉动作重复"的
+-    #: 时长，又不至于切换过频（每次切换要走完 blend 150 ms + exit，过频会显得碎片化）。
++    #: Six seconds triggers recovery; actual rotation waits for its completion.
+     POOL_SWITCH_SECONDS: float = 6.0
+     MAX_CACHED_SEQUENCES: int = 3
+ 
+@@ -229,16 +229,17 @@
+         加上分量小，越界部分可忽略 → UI 侧无需改动即可直接显示。
+         """
+         w, h = image.size
+-        new_h = max(2, int(round(h * off.scale_y)))
+-        scaled = image if new_h == h else image.resize((w, new_h), Image.LANCZOS)
+-        canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+-        cx = w // 2 + int(round(off.dx))
+-        bottom = h - int(round(off.dy))
+-        canvas.alpha_composite(scaled, (max(0, cx - w // 2), max(0, bottom - new_h)))
+-        if abs(off.tilt_deg) > 1e-6:
+-            canvas = canvas.rotate(off.tilt_deg, resample=Image.BICUBIC,
+-                                   center=(cx, min(h, bottom)), fillcolor=(0, 0, 0, 0))
+-        return canvas
++        # One inverse affine transform keeps fractional offsets continuous. The
++        # previous integer rounding made breathing step by one whole pixel and
++        # required separate resize/composite/rotate passes on every UI tick.
++        angle = math.radians(off.tilt_deg)
++        c, s = math.cos(angle), math.sin(angle)
++        sy = max(1e-6, off.scale_y)
++        cx, cy = w / 2.0 + off.dx, h - off.dy
++        return image.transform((w, h), Image.Transform.AFFINE,
++            (c, -s, w / 2.0 - c * cx + s * cy,
++             s / sy, c / sy, h - (s * cx + c * cy) / sy),
++            resample=Image.Resampling.BILINEAR, fillcolor=(0, 0, 0, 0))
+ 
+     # ---------------- 播放（与播放层同口径）----------------
+     def frame_at(self, state: str, now: float) -> typing.Optional[typing.Dict]:
+@@ -307,7 +308,7 @@
+         if burst:
+             t = avatar_timing.frame_time(state_time, burst=True, phase=0.0, speed=1.0)
+         elif seg is not None:
+-            # #5：**事件驱动阶段机**（enter → loop 往返 → 说完/被打断 → 150ms 淡化 → exit），
++            # Event-driven continuous cursor; "blend" now means velocity ramp.
+             # 不再用"固定周期 + 按预计句长估循环次数"（真实语音时长随机，估不准）。
+             t, t_b, alpha = self.segment_stage_time(state, seg, fps, phase, state_time)
+             if alpha >= 1.0:                     # 淡化已完成 → 本次按纯 exit 帧处理
+@@ -322,6 +323,17 @@
+             self._burst_done = True
+             self._burst_reported = True
+         image = frames[max(0, idx)]
++        source_position = max(0.0, min(t * fps, len(frames) - 1.0))
++        interpolation = 0.0
++        if seg is not None and not burst:
++            # Only interpolate neighbouring ORIGINAL frames. No crossfade
++            # between unrelated gestures or windows (which creates ghost hands).
++            left = int(math.floor(source_position))
++            interpolation = source_position - left
++            idx = left
++            image = frames[left]
++            if interpolation > 1e-6 and left + 1 < len(frames):
++                image = Image.blend(image, frames[left + 1], interpolation)
+         if alpha > 0.0 and t_b is not None:    # #5 淡化段：保持段姿态「淡入」退出段
+             j = avatar_timing.frame_index(t_b, len(frames), fps, burst)
+             other = frames[max(0, j)]
+@@ -333,7 +345,10 @@
+         return {"image": image, "index": idx, "frames": len(frames),
+                 "stage": self._stage, "alpha": alpha,
+                 "fps": fps, "burst": burst, "asset": asset, "duration": duration,
+-                "phase": phase, "speed": speed, "state_time": state_time}
++                "phase": 0.0 if seg is not None else phase,
++                "speed": 1.0 if seg is not None else speed,
++                "requested_speed": speed, "state_time": state_time,
++                "source_position": source_position, "interpolation": interpolation}
+ 
+     # ---------------- 对话 ----------------
+     def apply_response(self, response_dict: typing.Dict) -> None:
+@@ -377,13 +392,9 @@
+         self.apply_response(response_dict)
+         return True
+ 
+-    # ---------------- 三段式阶段机（#5：enter → loop → 淡化 → exit）----------------
+-    # 背景（2026-10-04 外部审查 #5）：原来用固定周期的 `segment_time`（按"预计句长"算循环次数），
+-    # 但**真实语音时长是随机的** —— 句子短会白等、句子长会提前退，且没有"说完／被打断 → 平滑收起"。
+-    # 正解 = **事件驱动的阶段机**：
+-    #     enter（播一次）→ loop（**往返**播，一直播到"该走了"）
+-    #     → blend（`SEGMENT_BLEND_MS`，默认 150ms **交叉淡化**）→ exit（播一次）→ 停在末帧。
+-    # 上层在"说完（AUDIO_PLAYBACK_STOP）/ 被打断（状态离开播报）"时调用 `request_exit()`。
++    # Event-driven stages: enter -> primary loop -> velocity ramp -> recovery.
++    # The historical name "blend" is kept for HUD/trace compatibility; it no
++    # longer means blending a held pose with unrelated exit-start frames.
+     def stage_reset(self) -> None:
+         """进入新状态时重置阶段机（回到 enter，窗口计数归零）。"""
+         self._stage = "enter"
+@@ -392,9 +403,11 @@
+         self._blend_from = 0.0
+         self._loop_round = 0          # 多窗口轮换：已完成几个"来回"
+         self._exit_done = False       # 新阶段机 → exit 尚未播完（池轮换换素材的前提）
++        self._source_position = 0.0
++        self._exit_target = 0.0
+ 
+     def request_exit(self) -> None:
+-        """**该走了**（说完 / 被打断）：标记进入退出流程（下一帧起 blend → exit）。"""
++        """Request native forward recovery; the blend stage now eases velocity."""
+         if self._stage in ("enter", "loop"):
+             self._exit_requested = True
+ 
+@@ -405,67 +418,58 @@
+     def segment_stage_time(self, state: str, seg, fps: float,
+                            phase: float, t_stage: float
+                            ) -> typing.Tuple[float, float, float]:
+-        """阶段机求值 → `(t_a, t_b, alpha)`；**`alpha == 0` 表示只画 a**，否则按 alpha 融合 a→b。
+-
+-        - `t_stage`：**状态内**相对时间（秒），由调用方用 `now - stage_t0` 给出；
+-        - 阶段推进全在**本方法内**完成（调用方每帧调一次即可，不必自己管阶段）；
+-        - `blend` 段的 `a` 取自"请求退出那一刻"的 loop 帧（快照），`b` 随 exit 前进 ⇒ 视觉上是
+-          "保持段的姿态**淡入**到退出段"，因此**无论在哪一帧被打断都不会跳变**。
+-        """
+-        blend_s = avatar_timing.segment_blend_seconds()
+-        enter_s = avatar_timing.stage_seconds(seg, fps, stage="enter")
+-        exit_s = avatar_timing.stage_seconds(seg, fps, stage="exit")
+-        # 阶段机键 = **(状态, 素材名)**：换素材即 `stage_reset()` ⇒ 新素材从 enter（帧 0）起播
++        """Continuous source cursor, independent of the UI sampling frequency.
++
++        Use the primary window only: other windows have not passed cross-pose
++        compatibility checks. Enter reaches its start without a random phase.
++        A cosine round trip eases both reversals. Stop/cancel takes the shorter
++        original-frame route to a recovery endpoint. `blend` is retained
++        as a diagnostic stage name for the 150 ms velocity ramp, not a pose fade.
++        The tuple API remains compatible; alpha is zero (no distant-pose blend).
++        """
++        f = fps if fps and fps > 0 else 24.0
++        a, b = seg.loop
++        ramp = avatar_timing.segment_blend_seconds()
+         sid = self._time_key if self._time_key is not None else state
+-        if sid != getattr(self, "_stage_key", None):
++        if sid != self._stage_key:
+             self._stage_key = sid
+             self.stage_reset()
+-        if self._stage == "enter":
++        if self._stage in ('enter', 'loop'):
++            enter_end = max(0.0, (a - seg.enter[0]) / f)
++            if t_stage < enter_end:
++                self._stage = 'enter'
++                position = seg.enter[0] + max(0.0, t_stage) * f
++            else:
++                self._stage = 'loop'
++                period = max(0.0, 2.0 * (b - a) / f * 3.0)
++                elapsed = max(0.0, t_stage - enter_end)
++                self._loop_round = int(elapsed / period) if period else 0
++                u = (elapsed % period) / period if period else 0.0
++                position = a + (b - a) * (1.0 - math.cos(2.0 * math.pi * u)) / 2.0
+             if self._exit_requested:
+-                self._blend_from = avatar_timing.segment_at(
+-                    t_stage, seg, fps, stage="enter")
+-                self._stage, self._stage_t0 = "blend", t_stage
+-            elif t_stage >= enter_s:
+-                self._stage, self._stage_t0 = "loop", t_stage
++                # Both clip endpoints are recovery anchors. Interruptions take
++                # the shorter original-frame route (avoids performing the whole
++                # gesture after a very short utterance); pool rotation uses end.
++                self._blend_from = position
++                self._exit_target = float(seg.exit[1])
++                if not self._switch_pending and position - seg.enter[0] < seg.exit[1] - position:
++                    self._exit_target = float(seg.enter[0])
++                self._stage, self._stage_t0 = 'blend', t_stage
++        if self._stage in ('blend', 'exit'):
++            elapsed = max(0.0, t_stage - self._stage_t0)
++            if ramp > 0.0 and elapsed < ramp:
++                advance = f * elapsed * elapsed / (2.0 * ramp)
+             else:
+-                t = avatar_timing.segment_at(t_stage, seg, fps, stage="enter")
+-                return (t, t, 0.0)
+-        if self._stage == "loop":
+-            # **多窗口轮换**（用户实测 2026-10-05）：单一窗口往返 ⇒ 长时间说话"同一个动作反复晃"。
+-            # 每个"来回"结束就换下一个窗口 ⇒ 说话过程有变化；窗口来自 `segments.json` 的 `windows`。
+-            while True:
+-                one = avatar_timing.loop_window_seconds(
+-                    seg, fps, window_index=self._loop_round)
+-                if one <= 0.0 or (t_stage - self._stage_t0) < one:
+-                    break
+-                self._stage_t0 += one            # 推进一格（相位保持连续）
+-                self._loop_round += 1
+-            if self._exit_requested:
+-                self._blend_from = avatar_timing.segment_at(
+-                    t_stage - self._stage_t0, seg, fps, stage="loop",
+-                    loop_phase=phase, window_index=self._loop_round)
+-                self._stage, self._stage_t0 = "blend", t_stage
+-            else:
+-                t = avatar_timing.segment_at(t_stage - self._stage_t0, seg, fps,
+-                                             stage="loop", loop_phase=phase,
+-                                             window_index=self._loop_round)
+-                return (t, t, 0.0)
+-        if self._stage == "blend":
+-            u = t_stage - self._stage_t0
+-            if u >= blend_s:
+-                self._stage, self._stage_t0 = "exit", t_stage
+-            else:
+-                b = avatar_timing.segment_at(u, seg, fps, stage="exit")
+-                alpha = (u / blend_s) if blend_s > 0.0 else 1.0
+-                return (self._blend_from, b, max(0.0, min(1.0, alpha)))
+-        if self._stage == "exit":
+-            u = t_stage - self._stage_t0
+-            if u >= exit_s:
+-                self._exit_done = True     # 池轮换：exit 已播完 ⇒ 此刻换素材不会跳变
+-                u = exit_s                 # 与旧行为等价（原来用 min 夹住）
+-            t = avatar_timing.segment_at(u, seg, fps, stage="exit")
+-            return (t, t, 0.0)
+-        t = avatar_timing.segment_at(t_stage, seg, fps, stage="enter")
+-        return (t, t, 0.0)
+-
+-
++                # Same time origin across the stage boundary: no restart.
++                self._stage = 'exit'
++                advance = f * max(0.0, elapsed - ramp / 2.0)
++            direction = 1.0 if self._exit_target >= self._blend_from else -1.0
++            distance = abs(self._exit_target - self._blend_from)
++            position = self._blend_from + direction * min(distance, advance)
++            self._exit_done = advance >= distance
++            if self._exit_done:
++                self._stage = 'exit'
++        self._source_position = position
++        return position / f, position / f, 0.0
++
++
+--- before/tools/demo_script.py
++++ after/tools/demo_script.py
+@@ -569,6 +569,7 @@
+     scheduled = [False]                               # tick 链是否已排进 after 队列（防重播排出第二条链）
+ 
+     def tick() -> None:
++        tick_started = time.monotonic()
+         scheduled[0] = False
+         t = time.monotonic() - wall[0]
+         while cursor[0] < len(cues) and cues[cursor[0]].t <= t + 1e-9:
+@@ -611,7 +612,7 @@
+                    min(t, end), end)))
+         if t < end + 0.4:
+             scheduled[0] = True
+-            root.after(tick_ms, tick)
++            root.after(max(1, tick_ms - int((time.monotonic() - tick_started) * 1000)), tick)
+         elif not done[0]:                           # 演出结束 ⇒ 自然停链（重播时由 replay 重新起链）
+             done[0] = True
+             log_add("—— 演出结束（全剧 %.0f s）——" % end)
+--- before/tools/demo_stage.py
++++ after/tools/demo_stage.py
+@@ -529,6 +529,7 @@
+ 
+     # ---------------- 播放回路（与播放层同口径）----------------
+     def _tick(self) -> None:
++        tick_started = time.monotonic()
+         # 真实语音收尾：TTS 刚播完 → 发**既有**事件 AUDIO_PLAYBACK_STOP（状态机自己回 IDLE）
+         if self.tts is not None and self.tts.poll():
+             # #5：说完 → 先驱动三段式**平滑收起**（blend → exit），再送状态机事件
+@@ -566,7 +567,7 @@
+                    "burst" if meta["burst"] else "loop",
+                    meta["phase"], meta["speed"], meta["state_time"])))
+         self._last_meta = meta
+-        self.root.after(TICK_MS, self._tick)
++        self.root.after(max(1, TICK_MS - int((time.monotonic() - tick_started) * 1000)), self._tick)
+ 
+     def run(self) -> None:
+         self.root.mainloop()

@@ -1,0 +1,75 @@
+{
+  "start_unix": 1637372210.9129684,
+  "jobs": [
+    {
+      "name": "configure",
+      "argv": [
+        "cmake",
+        "-S",
+        "/home/root/aura-yuki-validation-20261030/native_integration/candidate_core/tools/mesh_combinator_probe/standalone",
+        "-B",
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_mesh",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_CXX_FLAGS_RELEASE=-O2 -DNDEBUG"
+      ],
+      "returncode": 0,
+      "seconds": 0.17773699760437012
+    },
+    {
+      "name": "build",
+      "argv": [
+        "cmake",
+        "--build",
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_mesh",
+        "--parallel",
+        "1"
+      ],
+      "returncode": 0,
+      "seconds": 162.09981989860535
+    },
+    {
+      "name": "self-tests",
+      "argv": [
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_mesh/mesh_combinator_probe",
+        "--self-test",
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_mesh/generated-fixtures",
+        "/home/root/aura-yuki-validation-20261030/native_integration/mesh_evidence/self-test.json"
+      ],
+      "returncode": 0,
+      "seconds": 0.06983065605163574
+    },
+    {
+      "name": "real-grids",
+      "argv": [
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_mesh/mesh_combinator_probe",
+        "--model",
+        "/home/root/aura-yuki-validation-20261030/inputs/ems/yuk_0.ems.json",
+        "/home/root/aura-yuki-validation-20261030/inputs/ems/yuk_0.ems.resx.json",
+        "/home/root/aura-yuki-validation-20261030/inputs/ems",
+        "/home/root/aura-yuki-validation-20261030/native_integration/mesh_evidence/real-grids.json"
+      ],
+      "returncode": 0,
+      "seconds": 0.2724952697753906
+    },
+    {
+      "name": "runtime-audit",
+      "argv": [
+        "/home/root/aura-yuki-validation-20261030/native_integration/build_mesh/mesh_runtime_audit",
+        "/home/root/aura-yuki-validation-20261030/inputs/ems/yuk_0.ems.json",
+        "/home/root/aura-yuki-validation-20261030/inputs/ems/yuk_0.ems.resx.json",
+        "--resource-root",
+        "/home/root/aura-yuki-validation-20261030/inputs/ems",
+        "--steps",
+        "120",
+        "--output",
+        "/home/root/aura-yuki-validation-20261030/native_integration/mesh_evidence/runtime-audit.json"
+      ],
+      "returncode": 2,
+      "seconds": 0.2735252380371094
+    }
+  ],
+  "ok": false,
+  "scope": "isolated CPU build/tests",
+  "error": "runtime-audit failed",
+  "end_unix": 1637372373.8191683
+}

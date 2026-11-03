@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="55" time="1.275" timestamp="2026-10-30T23:41:23.841126-07:00" hostname="zhenghang"><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_generated_precedes_first_chunk_and_only_complete_receipt_becomes_heard" time="0.042" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_durable_mutations_block_future_chunks_and_never_commit_complete_heard[before_first_sink-forget]" time="0.027" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_durable_mutations_block_future_chunks_and_never_commit_complete_heard[before_first_sink-correct]" time="0.027" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_durable_mutations_block_future_chunks_and_never_commit_complete_heard[before_first_sink-clear]" time="0.026" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_durable_mutations_block_future_chunks_and_never_commit_complete_heard[before_first_sink-revoke]" time="0.022" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_durable_mutations_block_future_chunks_and_never_commit_complete_heard[after_first_sink-forget]" time="0.028" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_durable_mutations_block_future_chunks_and_never_commit_complete_heard[after_first_sink-correct]" time="0.029" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_durable_mutations_block_future_chunks_and_never_commit_complete_heard[after_first_sink-clear]" time="0.027" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_durable_mutations_block_future_chunks_and_never_commit_complete_heard[after_first_sink-revoke]" time="0.022" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_durable_mutations_block_future_chunks_and_never_commit_complete_heard[during_second_tts-forget]" time="0.030" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_durable_mutations_block_future_chunks_and_never_commit_complete_heard[during_second_tts-correct]" time="0.030" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_durable_mutations_block_future_chunks_and_never_commit_complete_heard[during_second_tts-clear]" time="0.031" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_durable_mutations_block_future_chunks_and_never_commit_complete_heard[during_second_tts-revoke]" time="0.023" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_second_tts_failure_preserves_partial_as_unheard_and_cancels_remote_owner" time="0.025" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_cancel_after_first_sentence_prevents_second_tts_and_stale_generation_ack" time="0.043" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_entire_text_and_native_rate_are_checked_before_first_chunk" time="0.033" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_default_nonstream_path_keeps_existing_complete_plan_and_deadline" time="0.026" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_actual_jobs_channel_aggregate_receipt_and_off_player_ack_commit" time="0.052" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_actual_jobs_late_tts_failure_replaces_queued_pcm_with_error_and_no_ack" time="0.030" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_actual_jobs_rechecks_durable_authority_between_same_sentence_packets[forget]" time="0.013"><failure message="assert 0 == 1&#10; +  where 0 = len([])">tmp_path = WindowsPath('C:/Users/35870/AppData/Local/Temp/pytest-of-35870/pytest-88/test_actual_jobs_rechecks_dura0')
+operation = 'forget'
+
+    @pytest.mark.parametrize('operation', ['forget', 'correct', 'clear', 'revoke'])
+    def test_actual_jobs_rechecks_durable_authority_between_same_sentence_packets(tmp_path, operation):
+        fx = fixture(tmp_path, profile=operation == 'revoke')
+        fx.models.reply = '公开的一句回复。'
+        jobs = make_jobs(fx)
+        original_put = jobs._put
+        delivered = []
+        def put(job, value):
+            original_put(job, value)
+            if value.get('channel_event', {}).get('kind') == 'audio':
+                delivered.append(value)
+                if len(delivered) == 1:
+                    # A GUI/poll owner could have consumed this first packet already.
+                    # Do not count clearing the remaining queue at final bind as a
+                    # substitute for checking before publishing the next packet.
+                    invalidate(fx, operation)
+        jobs._put = put
+        jobs.submit(clip())
+        assert jobs.run_next()
+&gt;       assert len(delivered) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+语音共享文件\deliverables\2026-10-30_board_owner\integration\response_latency\streaming_candidate\tests\test_stream_memory_contract.py:325: AssertionError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_actual_jobs_rechecks_durable_authority_between_same_sentence_packets[correct]" time="0.014"><failure message="assert 0 == 1&#10; +  where 0 = len([])">tmp_path = WindowsPath('C:/Users/35870/AppData/Local/Temp/pytest-of-35870/pytest-88/test_actual_jobs_rechecks_dura1')
+operation = 'correct'
+
+    @pytest.mark.parametrize('operation', ['forget', 'correct', 'clear', 'revoke'])
+    def test_actual_jobs_rechecks_durable_authority_between_same_sentence_packets(tmp_path, operation):
+        fx = fixture(tmp_path, profile=operation == 'revoke')
+        fx.models.reply = '公开的一句回复。'
+        jobs = make_jobs(fx)
+        original_put = jobs._put
+        delivered = []
+        def put(job, value):
+            original_put(job, value)
+            if value.get('channel_event', {}).get('kind') == 'audio':
+                delivered.append(value)
+                if len(delivered) == 1:
+                    # A GUI/poll owner could have consumed this first packet already.
+                    # Do not count clearing the remaining queue at final bind as a
+                    # substitute for checking before publishing the next packet.
+                    invalidate(fx, operation)
+        jobs._put = put
+        jobs.submit(clip())
+        assert jobs.run_next()
+&gt;       assert len(delivered) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+语音共享文件\deliverables\2026-10-30_board_owner\integration\response_latency\streaming_candidate\tests\test_stream_memory_contract.py:325: AssertionError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_actual_jobs_rechecks_durable_authority_between_same_sentence_packets[clear]" time="0.013"><failure message="assert 0 == 1&#10; +  where 0 = len([])">tmp_path = WindowsPath('C:/Users/35870/AppData/Local/Temp/pytest-of-35870/pytest-88/test_actual_jobs_rechecks_dura2')
+operation = 'clear'
+
+    @pytest.mark.parametrize('operation', ['forget', 'correct', 'clear', 'revoke'])
+    def test_actual_jobs_rechecks_durable_authority_between_same_sentence_packets(tmp_path, operation):
+        fx = fixture(tmp_path, profile=operation == 'revoke')
+        fx.models.reply = '公开的一句回复。'
+        jobs = make_jobs(fx)
+        original_put = jobs._put
+        delivered = []
+        def put(job, value):
+            original_put(job, value)
+            if value.get('channel_event', {}).get('kind') == 'audio':
+                delivered.append(value)
+                if len(delivered) == 1:
+                    # A GUI/poll owner could have consumed this first packet already.
+                    # Do not count clearing the remaining queue at final bind as a
+                    # substitute for checking before publishing the next packet.
+                    invalidate(fx, operation)
+        jobs._put = put
+        jobs.submit(clip())
+        assert jobs.run_next()
+&gt;       assert len(delivered) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+语音共享文件\deliverables\2026-10-30_board_owner\integration\response_latency\streaming_candidate\tests\test_stream_memory_contract.py:325: AssertionError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_stream_memory_contract" name="test_actual_jobs_rechecks_durable_authority_between_same_sentence_packets[revoke]" time="0.012"><failure message="assert 0 == 1&#10; +  where 0 = len([])">tmp_path = WindowsPath('C:/Users/35870/AppData/Local/Temp/pytest-of-35870/pytest-88/test_actual_jobs_rechecks_dura3')
+operation = 'revoke'
+
+    @pytest.mark.parametrize('operation', ['forget', 'correct', 'clear', 'revoke'])
+    def test_actual_jobs_rechecks_durable_authority_between_same_sentence_packets(tmp_path, operation):
+        fx = fixture(tmp_path, profile=operation == 'revoke')
+        fx.models.reply = '公开的一句回复。'
+        jobs = make_jobs(fx)
+        original_put = jobs._put
+        delivered = []
+        def put(job, value):
+            original_put(job, value)
+            if value.get('channel_event', {}).get('kind') == 'audio':
+                delivered.append(value)
+                if len(delivered) == 1:
+                    # A GUI/poll owner could have consumed this first packet already.
+                    # Do not count clearing the remaining queue at final bind as a
+                    # substitute for checking before publishing the next packet.
+                    invalidate(fx, operation)
+        jobs._put = put
+        jobs.submit(clip())
+        assert jobs.run_next()
+&gt;       assert len(delivered) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+语音共享文件\deliverables\2026-10-30_board_owner\integration\response_latency\streaming_candidate\tests\test_stream_memory_contract.py:325: AssertionError</failure></testcase><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.ControllerTests" name="test_all_sentence_boundaries_preflight_before_first_valid_sentence_plays" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.ControllerTests" name="test_cancel_after_first_sentence_prevents_later_synthesis_and_final_receipt" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.ControllerTests" name="test_first_sentence_emits_before_second_tts_with_same_complete_receipt" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.ControllerTests" name="test_forget_during_tts_blocks_the_unheard_chunk" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.ControllerTests" name="test_long_reply_rejected_before_tts_and_before_any_chunk" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.ControllerTests" name="test_missing_durable_api_has_no_streaming_fallback" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.ControllerTests" name="test_no_sink_preserves_buffering_non24k_and_original_tts_order" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.ControllerTests" name="test_non24k_stream_rejected_before_audio_and_default_bridge_unchanged" time="0.000" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.ControllerTests" name="test_second_tts_failure_cannot_commit_a_partial_reply" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.JobsTests" name="test_candidate_sources_are_python39_and_original_queue_bounds_remain" time="0.009" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.JobsTests" name="test_error_removes_queued_partial_audio_and_preserves_no_heard" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.JobsTests" name="test_explicit_native_rate_converter_keeps_original_buffered_path" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.JobsTests" name="test_real_jobs_stream_and_metadata_measure_queue_not_speaker" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.streaming_candidate.tests.test_streaming.JobsTests" name="test_wake_only_asr_once_and_no_llm_tts" time="0.001" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_exact_base_has_only_new_read_method_and_no_other_ast_changes" time="0.057" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_prepared_check_is_read_only_and_accepts_bound_or_unbound_pending" time="0.018" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_only_original_awaiting_generation_is_authorized[generating]" time="0.009" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_only_original_awaiting_generation_is_authorized[played]" time="0.018" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_only_original_awaiting_generation_is_authorized[interrupted]" time="0.018" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_only_original_awaiting_generation_is_authorized[wrong_generation]" time="0.014" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_second_store_invalidation_blocks_later_audio_and_full_ack[forget]" time="0.023" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_second_store_invalidation_blocks_later_audio_and_full_ack[correct]" time="0.025" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_second_store_invalidation_blocks_later_audio_and_full_ack[clear]" time="0.024" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_check_validates_all_recorded_dependencies_and_exact_assistant[invalid_dependency]" time="0.020" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_check_validates_all_recorded_dependencies_and_exact_assistant[foreign_dependency]" time="0.020" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_check_validates_all_recorded_dependencies_and_exact_assistant[missing_user_ref]" time="0.020" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_check_validates_all_recorded_dependencies_and_exact_assistant[assistant_state]" time="0.020" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_check_validates_all_recorded_dependencies_and_exact_assistant[assistant_playback]" time="0.019" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_check_validates_all_recorded_dependencies_and_exact_assistant[assistant_turn]" time="0.020" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_profile_revocation_and_reopen_do_not_authorize_pending_audio" time="0.013" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_clear_operation_keeps_its_own_new_confirmation_but_revokes_old_turn" time="0.020" /><testcase classname="语音共享文件.deliverables.2026-10-30_board_owner.integration.response_latency.memory_candidate.tests.test_prepared_turn" name="test_expanded_summary_dependencies_remain_valid_after_body_cleanup" time="0.024" /></testsuite></testsuites>

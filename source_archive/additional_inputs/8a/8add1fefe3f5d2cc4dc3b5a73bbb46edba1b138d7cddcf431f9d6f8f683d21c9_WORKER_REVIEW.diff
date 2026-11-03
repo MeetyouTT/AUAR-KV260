@@ -1,0 +1,128 @@
+--- frozen-M03-worker
++++ joint-67-worker
+@@ -23,15 +23,24 @@
+ from unittest.mock import patch
+ from zoneinfo import ZoneInfo
+ 
+-STARTUP='90f6c6c40f6501362aa77483235a7260a212de6e3357615311bdaa5cc193ebbe'
+-SOURCE_MANIFEST='6d03c1d7aa95a9c5615f540606699f67c4ee7a44be1e50dcb2983c6c555e3637'
+-MAPPING='df6b26927ad60d6d3513429c697d70bd15c84cfdca6d16c5527e9992cb7b04e2'
++STARTUP='de7772b898378d2263b0809d18c095a60585a672690371d2f072b2e04c2f574f'
++SOURCE_MANIFEST='e1e5947f6f054760650f36fb51726305478dbd394cb89096a0338aeb92989c41'
++MAPPING='ef8db220fde3b70a62ff1ff7cf2e9471a199a6d43b9234a18f8701eff58448f7'
+ BOOT='bebd3e7d-e984-4517-8cbb-211df7f1c6dc'
+ REVIEW4='7528a035ae301b3bf0d3bb0747cb52c322f82b5a1c236102ba5d47915e0c008b'
+ REVIEW3='94410be3389a0d0d2f1e3658484b4def8b06fd98e62ef63c355309ac71cb4a6b'
+ PUBLIC_WORKER='7d5ff31d1f56cb567fd630c35056a1a33f9d239f520ad92975f47e10149153df'
+-FILES={'board/runtime/board_business.py','board/runtime/history_delete.py','tools/production_memory_presentation.py'}
+-
++FILES=set(['board/runtime/board_business.py', 'board/runtime/board_speaker_business.py', 'board/runtime/history_delete.py', 'tools/production_memory_presentation.py', 'tools/provisional_voice.py'])
++
++
++
++APPLIED_SPEC='49ffbc82a4b9543d92234f055fce8af055de29764ca6f688ae0a36fe7a35a904'
++RUN_STATE=None
++IDENTITY_TESTS='b892d2858a140c4a175ce623ed05b05b295b5a5cfbf81675ad75f5d45601f0f7'
++IDENTITY_INDEPENDENT='62795aedc40862cdd98e25dd6e240f0c82c0f204a0782e783cc486c1c48306d0'
++SPEAKER_FIXTURES='4abd5705dc9e45ea3eb0db26a373d9a034150511809c3d691477ba2d5b58d9f3'
++FACE_FIXTURES='51a07a4ed5fc9d5a23cd74f7d8b47757f220ed4556c2c58796721e59c13809a1'
++IDENTITY_ADAPTER='3f695c223c8bf26b3c6418555f0166a40aa339d9edb1da9a24ad08643ae77a2e'
+ 
+ def sha(raw):return hashlib.sha256(raw).hexdigest()
+ def need(ok,code):
+@@ -71,9 +80,13 @@
+     need(candidate['baseline_mapping_sha256']==MAPPING and set(candidate['files'])==FILES,'wrong_overlay_baseline')
+     for path,digest in ((args.original_review,REVIEW4),(args.independent_tests,REVIEW3),(args.public_worker,PUBLIC_WORKER)):
+         need(not path.is_symlink() and sha(path.read_bytes())==digest,'review_or_public_fixture_changed')
++    for path,digest in ((args.applied_spec,APPLIED_SPEC),(args.identity_tests,IDENTITY_TESTS),(args.identity_independent,IDENTITY_INDEPENDENT),(args.speaker_fixtures,SPEAKER_FIXTURES),(args.face_fixtures,FACE_FIXTURES),(args.identity_adapter,IDENTITY_ADAPTER)):
++        need(not path.is_symlink() and sha(path.read_bytes())==digest,'joint_public_artifact_changed')
++    applied=json.loads(args.applied_spec.read_bytes())
++    need(applied['startup_sha256']==STARTUP and applied['source_manifest_sha256']==SOURCE_MANIFEST and applied['component_sha256']==mapping['component_pins'],'actual_v19_spec_mismatch')
+     base=args.runtime_root.resolve(strict=True);after=args.candidate_root.resolve(strict=True)
+     need(not base.is_relative_to(after) and not after.is_relative_to(base),'overlay_must_stay_outside_production')
+-    need({p.relative_to(after).as_posix() for p in after.rglob('*') if p.is_file() or p.is_symlink()}==FILES,'exact_three_file_overlay_required')
++    need({p.relative_to(after).as_posix() for p in after.rglob('*') if p.is_file() or p.is_symlink()}==FILES,'exact_five_file_overlay_required')
+     if args.local_replay:
+         need(sys.platform!='linux','board_requires_live_checks')
+         configs={'config/character_profile.local.json','config/persona.xuefei.candidate.json',
+@@ -100,15 +113,16 @@
+ 
+ 
+ def main():
++    global RUN_STATE
+     p=argparse.ArgumentParser(description=__doc__)
+-    for name in ('runtime-root','candidate-root','mapping','candidate-manifest','original-review','independent-tests','public-worker','output'):
++    for name in ('runtime-root','candidate-root','mapping','candidate-manifest','original-review','independent-tests','public-worker','output','applied-spec','identity-tests','identity-independent','speaker-fixtures','face-fixtures','identity-adapter'):
+         p.add_argument('--'+name,type=Path,required=True)
+     p.add_argument('--candidate-manifest-sha256',required=True)
+     p.add_argument('--startup-config',type=Path)
+     p.add_argument('--root-coordinated-slot')
+     p.add_argument('--local-replay',action='store_true');p.add_argument('--check-only',action='store_true')
+     args=p.parse_args();mapping,candidate,verification=verify(args)
+-    result=dict(schema='aura.m03-newboot.public-arm-overlay.v1',status='CHECKED_ONLY' if args.check_only else 'RUNNING',
++    result=dict(schema='aura.joint-m03-identity.public-arm-overlay.v1',status='CHECKED_ONLY' if args.check_only else 'RUNNING',
+         verification=verification,candidate_manifest_sha256=args.candidate_manifest_sha256,
+         worker_sha256=sha(Path(__file__).read_bytes()),host='local_windows' if args.local_replay else 'board',
+         coordinated_slot=args.root_coordinated_slot,
+@@ -117,6 +131,7 @@
+             ASR_PCM_TTS_native_ready_and_GUI='explicit_public_fixtures',physical_playback_verified=False,
+             public_temporary_profile_grants_only=True),independent_review4_sha256=REVIEW4,
+         independent_review3_sha256=REVIEW3,paired_steps=[])
++    RUN_STATE=(args.output,result)
+     save(args.output,result)
+     if args.check_only:return 0
+     sys.dont_write_bytecode=True;sys.path.insert(0,str(args.runtime_root.resolve()))
+@@ -125,12 +140,15 @@
+         package.__path__=[str(args.candidate_root.resolve()/name.replace('.','/'))]+list(package.__path__)
+     loaded={}
+     for name in ('common.board_memory','common.board_production_bootstrap','board.runtime.board_dialogue',
+-        'board.runtime.board_business','board.runtime.history_delete','tools.production_memory_presentation'):
++        'board.runtime.board_business','board.runtime.history_delete','tools.production_memory_presentation',
++        'board.runtime.board_speaker_business','tools.provisional_voice'):
+         module=importlib.import_module(name);path=Path(module.__file__).resolve()
+         loaded[name]=dict(path=str(path),sha256=sha(path.read_bytes()))
+     for name,relative in (('board.runtime.board_business','board/runtime/board_business.py'),
+         ('board.runtime.history_delete','board/runtime/history_delete.py'),
+-        ('tools.production_memory_presentation','tools/production_memory_presentation.py')):
++        ('tools.production_memory_presentation','tools/production_memory_presentation.py'),
++        ('board.runtime.board_speaker_business','board/runtime/board_speaker_business.py'),
++        ('tools.provisional_voice','tools/provisional_voice.py')):
+         need(loaded[name]['sha256']==candidate['files'][relative]['sha256'],'candidate_module_not_loaded')
+     need(loaded['common.board_production_bootstrap']['sha256']==mapping['component_pins']['common/board_production_bootstrap.py'],'cold_bootstrap_not_loaded')
+     result['loaded_modules']=loaded;save(args.output,result)
+@@ -221,6 +239,10 @@
+                     result['paired_source']='tools.yuki_jobs_candidate._route -> LocalHistoryDelete -> original Store -> bound complete ACK'
+                 finally:bundle.close()
+     suite.addTest(Paired('test_actual_paired_registration_store_complete_ACK_and_commit_projection'))
++    adapter=load_module('joint_public_stdlib_adapter',args.identity_adapter)
++    identity_suite,adapter_proof=adapter.build_suite(args,public)
++    suite.addTests(identity_suite);result['identity_adapter']=adapter_proof
++    need(suite.countTestCases()==67,'joint_case_count_changed')
+     old_temp=tempfile.tempdir;threads=set(threading.enumerate());log=io.StringIO()
+     parent=None if args.local_replay else '/dev/shm'
+     with tempfile.TemporaryDirectory(prefix='aura-public-m03-newboot-',dir=parent) as owned:
+@@ -231,7 +253,7 @@
+     result.update(status='PASS' if outcome.wasSuccessful() else 'FAIL',tests=outcome.testsRun,
+         failures=len(outcome.failures),errors=len(outcome.errors),public_test_log=log.getvalue(),
+         temporary_stores_removed=not Path(owned).exists(),new_threads_remaining=len(set(threading.enumerate())-threads),
+-        test_framework='stdlib unittest; original4 unchanged + original3 AST with assertRaises/patch adapter + paired smoke',
++        test_framework='stdlib unittest; M03 original4+3 AST+paired; identity47+independent12 original test-body AST with explicit stdlib fixture adapters',
+         imported_optional_packages=[n for n in ('numpy','onnxruntime','pytest') if n in sys.modules])
+     if not result['temporary_stores_removed'] or result['new_threads_remaining']:result['status']='FAIL'
+     save(args.output,result)
+@@ -239,4 +261,14 @@
+     return 0 if result['status']=='PASS' else 1
+ 
+ 
+-if __name__=='__main__':raise SystemExit(main())
++def entry():
++    try:return main()
++    except Exception as exc:
++        import traceback
++        if RUN_STATE is not None:
++            output,result=RUN_STATE;result.update(status='ERROR_BEFORE_TEST_COMPLETION',exception_class=type(exc).__name__)
++            save(output,result)
++        traceback.print_exc()
++        return 1
++
++if __name__=='__main__':raise SystemExit(entry())

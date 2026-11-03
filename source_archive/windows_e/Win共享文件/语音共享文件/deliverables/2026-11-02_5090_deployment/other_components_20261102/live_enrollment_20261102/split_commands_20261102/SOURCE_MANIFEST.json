@@ -1,0 +1,97 @@
+{
+  "schema": "aura-separated-face-voice-command-candidate-1",
+  "status": "FINAL_LOCAL_CANDIDATE_NOT_DEPLOYED",
+  "frozen_utc": "2026-11-02T12:54:04.529400+00:00",
+  "baseline_startup": "f507bfa6cb5ea5de807dd36601ac4ff2e4af9bba5aa75f6fd5a2b3a5fd54e3eb",
+  "baseline_scope": "root-provided public pins; CPU maintenance owns device; no live verification by this agent",
+  "changed_files": [
+    {
+      "file": "common/binding_intent.py",
+      "before_sha256": "8cfe3c841248b7ca56553255dcb14e400c5b52ea011e68ecd89a16862a7eb796",
+      "after_sha256": "8048cd5bd4f3f80cd872f373e1eed149820f37d2ec40042390c17cfb4cd94df1"
+    },
+    {
+      "file": "board/runtime/board_business.py",
+      "before_sha256": "b08209eca7979825e26845080bca5e1d64e065d3cabd1178df763a93540573f2",
+      "after_sha256": "c01bb04c7bfbce8d78b51aefa5faf0426527be13edf6e26d8d28828c488222b3"
+    },
+    {
+      "file": "board/runtime/audio/board_dialogue_jobs.py",
+      "before_sha256": "01b27ede0d8889c35fc9ac990e03538a55fecc7c6a604fb6f781bc5d54c09087",
+      "after_sha256": "43708b7fcbf72b11d7a37b01ae090c2cdb3e621b5f334151601206735a34a1fc"
+    }
+  ],
+  "preserved_source_sha256": {
+    "board/runtime/audio/board_asr.py": "c51488ac6bd3563bc3dc42934b321e98e26cb2b58d700318765a60ca4908ef60",
+    "board/identity/voice_enrollment.py": "a9113ba40efc49828ee158554b2dae70485858396680918458f6f96bba16bacb",
+    "tools/unified_identity_binding.py": "85e415d00daa770d4d94ae58006a23ed9700067651a0448de80c99eb33ed1809",
+    "tools/speaker_device.py": "da9c199527abdf9e247661d8798f4345cf0b79524f5c2a06394b5dc9c44107de",
+    "common/identity_links.py": "e623e5d15f81f5f66505b6345c6f807270409fea67a60f506c61e1f021b7150b"
+  },
+  "jobs_only_two_tuple_edits": true,
+  "new_joint_alias": false,
+  "new_biometric_fsm": false,
+  "standalone_link_creation": false,
+  "personal_memory_grants": false,
+  "public_entry_mode_has_name_pcm_actor_ids_or_deadline": false,
+  "bare_voice_name_window_seconds": 120,
+  "same_actor_required": true,
+  "voice_sample_window_original_seconds": 180,
+  "original_voice_final_confirmation": "确认保存声纹",
+  "joint_final_confirmation_not_accepted_as_voice_save": true,
+  "user_semantics": "independent enrollment now; explicit association later",
+  "validation": {
+    "new_split_jobs_fsm_tests": 38,
+    "original_start_publish_race_tests": 32,
+    "combined": {
+      "tests": 70,
+      "passed": 70,
+      "failures": [],
+      "errors": []
+    },
+    "dialogue_baseline": {
+      "tests": 60,
+      "passed": 56,
+      "failures": [
+        "tests.framework.test_board_dialogue_jobs::test_missing_sensitive_board_handlers_never_fall_back_to_model[\\u897f\\u84dd\\uff0c\\u8bb0\\u4f4f\\u6211-identity_enrollment]",
+        "tests.framework.test_board_dialogue_jobs::test_explicit_memory_precedes_reasoning_and_retains_raw_alias",
+        "tests.framework.test_board_dialogue_jobs::test_wake_alias_and_wake_only_follow_existing_audio_gate",
+        "tests.framework.test_board_dialogue_jobs::test_real_board_store_memory_and_history_flow_without_legacy_services"
+      ],
+      "errors": []
+    },
+    "dialogue_candidate": {
+      "tests": 60,
+      "passed": 56,
+      "failures": [
+        "tests.framework.test_board_dialogue_jobs::test_missing_sensitive_board_handlers_never_fall_back_to_model[\\u897f\\u84dd\\uff0c\\u8bb0\\u4f4f\\u6211-identity_enrollment]",
+        "tests.framework.test_board_dialogue_jobs::test_explicit_memory_precedes_reasoning_and_retains_raw_alias",
+        "tests.framework.test_board_dialogue_jobs::test_wake_alias_and_wake_only_follow_existing_audio_gate",
+        "tests.framework.test_board_dialogue_jobs::test_real_board_store_memory_and_history_flow_without_legacy_services"
+      ],
+      "errors": []
+    },
+    "legacy_face_sampling_flow": {
+      "tests": 38,
+      "passed": 36,
+      "failures": [
+        "tests.framework.test_simple_enrollment.SimpleFlowTests::test_combined_request_requires_explicit_name_confirmation_before_collection",
+        "tests.framework.test_simple_enrollment.SimpleFlowTests::test_only_explicit_combined_requests_route_away_from_chat"
+      ],
+      "errors": []
+    },
+    "original_voice_contract_receipt": "independent_voice_review/ORIGINAL_VOICE_CONTRACT.xml",
+    "initial_fixture_errors": "Harness omitted fake now_ms/business.config; fixed without product/threshold/assertion weakening",
+    "first_draft_cancellation_failure": "independent V1 reproductions preserved; entry epoch/current/CAS cleanup fixes verified",
+    "old_fixture_failures_preserved": true
+  },
+  "board_accessed": false,
+  "production_changed": false,
+  "real_databases_models_audio_or_camera_used": false,
+  "known_limitations": [
+    "not live human voice enrollment acceptance",
+    "old SERVICE_ERROR/unified cancellation issues not all claimed fixed",
+    "future linking task separate",
+    "exact three source before-pins must match after CPU handback before root CAS publication"
+  ]
+}

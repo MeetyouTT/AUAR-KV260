@@ -1,0 +1,1 @@
+cmd_drivers/crypto/built-in.a := echo >/dev/null; rm -f drivers/crypto/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/crypto/built-in.a drivers/crypto/xilinx/built-in.a drivers/crypto/hisilicon/built-in.a drivers/crypto/keembay/built-in.a

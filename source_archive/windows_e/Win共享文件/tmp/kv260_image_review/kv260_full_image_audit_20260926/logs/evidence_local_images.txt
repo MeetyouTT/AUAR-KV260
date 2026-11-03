@@ -1,0 +1,119 @@
+### petalinux images/linux
+总用量 1797008
+drwxr-xr-x 3 ghmd ghmd      4096 9月  21 07:20 .
+drwxr-xr-x 3 ghmd ghmd      4096 9月  19 06:55 ..
+-rw-r--r-- 1 ghmd ghmd     51102 9月  19 23:02 bl31.bin
+-rw-r--r-- 1 ghmd ghmd    152504 9月  19 23:02 bl31.elf
+-rw-rw-r-- 1 ghmd ghmd   9526664 9月  21 07:20 BOOT.BIN
+-rw-rw-r-- 1 ghmd ghmd       605 9月  20 07:53 bootgen.bif
+-rw-r--r-- 1 ghmd ghmd      2777 9月  19 06:55 boot.scr
+-rw-r--r-- 1 ghmd ghmd      7168 9月  22 08:44 config
+-rw-r--r-- 1 ghmd ghmd    984824 9月  24 06:16 fit-dtb.blob
+-rw-r--r-- 1 ghmd ghmd  21930496 9月  24 06:19 Image
+-rw-r--r-- 1 ghmd ghmd   9400230 9月  24 06:19 Image.gz
+-rw-r--r-- 1 ghmd ghmd 130879552 9月  24 06:19 image.ub
+-rw-r--r-- 1 ghmd ghmd      8192 9月  19 07:38 kr-eeprom.bin
+-rw-r--r-- 1 ghmd ghmd      8192 9月  19 07:38 kv-eeprom.bin
+-rw-r--r-- 1 ghmd ghmd    506364 9月  21 07:15 pmufw.elf
+-rwxr-xr-x 1 ghmd ghmd     37327 10月  7  2022 pmu_rom_qemu_sha3.elf
+drwxr-xr-x 2 ghmd ghmd      4096 9月  19 06:55 pxelinux.cfg
+-rw-r--r-- 1 ghmd ghmd 332469248 9月  24 06:18 rootfs.cpio
+-rw-r--r-- 1 ghmd ghmd 121432090 9月  24 06:18 rootfs.cpio.gz
+-rw-r--r-- 1 ghmd ghmd 121432154 9月  24 06:18 rootfs.cpio.gz.u-boot
+-rw-r--r-- 1 ghmd ghmd 476282880 9月  24 06:18 rootfs.ext4
+-rw-r--r-- 1 ghmd ghmd 157024256 9月  24 06:19 rootfs.jffs2
+-rw-r--r-- 1 ghmd ghmd     28633 9月  24 06:18 rootfs.manifest
+-rw-r--r-- 1 ghmd ghmd 122248920 9月  24 06:18 rootfs.tar.gz
+-rw-r--r-- 1 ghmd ghmd      8192 9月  19 07:38 som-eeprom.bin
+-rw-r--r-- 1 ghmd ghmd   7797816 9月  21 06:54 system.bit
+-rw-r--r-- 1 ghmd ghmd     45086 9月  24 06:15 system.dtb
+-rwxr-xr-x 1 ghmd ghmd   1306784 9月  24 06:16 u-boot.bin
+-rw-r--r-- 1 ghmd ghmd   1351870 9月  24 06:16 u-boot-dtb.bin
+-rw-r--r-- 1 ghmd ghmd   1417984 9月  24 06:16 u-boot-dtb.elf
+-rwxr-xr-x 1 ghmd ghmd   9421424 9月  24 06:16 u-boot.elf
+-rw-r--r-- 1 ghmd ghmd 313747696 9月  24 06:19 vmlinux
+-rw-r--r-- 1 ghmd ghmd    356448 9月  21 07:15 zynqmp_fsbl.elf
+-rw-r--r-- 1 ghmd ghmd     74935 9月  19 07:39 zynqmp-qemu-arm.dtb
+-rw-r--r-- 1 ghmd ghmd     85383 9月  19 07:39 zynqmp-qemu-multiarch-arm.dtb
+-rw-r--r-- 1 ghmd ghmd     13283 9月  19 07:39 zynqmp-qemu-multiarch-pmu.dtb
+
+### bootgen.bif
+the_ROM_image:
+{
+	[bootloader, destination_cpu=a53-0] /home/ghmd/work/petalinux-kv260-dpu/images/linux/zynqmp_fsbl.elf
+	[pmufw_image] /home/ghmd/work/petalinux-kv260-dpu/images/linux/pmufw.elf
+	[destination_device=pl] /home/ghmd/work/petalinux-kv260-dpu/images/linux/system.bit
+	[destination_cpu=a53-0, exception_level=el-3, trustzone] /home/ghmd/work/petalinux-kv260-dpu/images/linux/bl31.elf
+	[destination_cpu=a53-0, load=0x00100000] /home/ghmd/work/petalinux-kv260-dpu/images/linux/system.dtb
+	[destination_cpu=a53-0, exception_level=el-2] /home/ghmd/work/petalinux-kv260-dpu/images/linux/u-boot.elf
+}
+
+### sd-card staging 目录与大小
+== /home/ghmd/work/petalinux-kv260-dpu/sd-card-staging-dpu-clock-fixed
+总用量 129388
+drwxrwxr-x  2 ghmd ghmd      4096 9月  21 08:06 .
+drwxr-xr-x 15 ghmd ghmd      4096 9月  24 06:21 ..
+-rw-rw-r--  1 ghmd ghmd   9526664 9月  21 07:20 BOOT.BIN
+-rw-r--r--  1 ghmd ghmd      2777 9月  19 06:55 boot.scr
+-rw-r--r--  1 ghmd ghmd 122901872 9月  21 07:17 image.ub
+-rw-r--r--  1 ghmd ghmd     43243 9月  21 07:13 system.dtb
+-rw-rw-r--  1 ghmd ghmd       150 9月  21 08:06 uEnv.txt
+== /home/ghmd/work/petalinux-kv260-dpu/sd-card-staging-dpu-clock-fixed-numpy
+总用量 144668
+drwxrwxr-x  2 ghmd ghmd      4096 9月  22 07:31 .
+drwxr-xr-x 15 ghmd ghmd      4096 9月  24 06:21 ..
+-rw-rw-r--  1 ghmd ghmd   9526664 9月  21 07:20 BOOT.BIN
+-rw-r--r--  1 ghmd ghmd      2777 9月  19 06:55 boot.scr
+-rw-r--r--  1 ghmd ghmd 130751832 9月  22 07:30 image.ub
+-rw-r--r--  1 ghmd ghmd   7797816 9月  21 06:54 system.bit
+-rw-r--r--  1 ghmd ghmd     43243 9月  21 07:13 system.dtb
+-rw-rw-r--  1 ghmd ghmd       150 9月  21 08:06 uEnv.txt
+== /home/ghmd/work/petalinux-kv260-dpu/sd-card-staging-dpu-clock-fixed-numpy-sdmmc
+总用量 144672
+drwxrwxr-x  2 ghmd ghmd      4096 9月  22 08:19 .
+drwxr-xr-x 15 ghmd ghmd      4096 9月  24 06:21 ..
+-rw-rw-r--  1 ghmd ghmd   9526664 9月  22 08:19 BOOT.BIN
+-rw-r--r--  1 ghmd ghmd      2777 9月  22 08:19 boot.scr
+-rw-r--r--  1 ghmd ghmd 130751964 9月  22 08:19 image.ub
+-rw-r--r--  1 ghmd ghmd   7797816 9月  22 08:19 system.bit
+-rw-r--r--  1 ghmd ghmd     43326 9月  22 08:19 system.dtb
+-rw-rw-r--  1 ghmd ghmd       150 9月  22 08:19 uEnv.txt
+== /home/ghmd/work/petalinux-kv260-dpu/sd-card-staging-dpu-clock-fixed-numpy-sdmmc-canonical
+总用量 144668
+drwxrwxr-x  2 ghmd ghmd      4096 9月  22 08:32 .
+drwxr-xr-x 15 ghmd ghmd      4096 9月  24 06:21 ..
+-rw-rw-r--  1 ghmd ghmd   9526664 9月  22 08:32 BOOT.BIN
+-rw-r--r--  1 ghmd ghmd      2777 9月  22 08:32 boot.scr
+-rw-r--r--  1 ghmd ghmd 130751948 9月  22 08:32 image.ub
+-rw-r--r--  1 ghmd ghmd   7797816 9月  22 08:32 system.bit
+-rw-r--r--  1 ghmd ghmd     43288 9月  22 08:32 system.dtb
+-rw-rw-r--  1 ghmd ghmd       150 9月  22 08:32 uEnv.txt
+== /home/ghmd/work/petalinux-kv260-dpu/sd-card-staging-dpu-clock-fixed-numpy-sdmmc-nfsd
+总用量 144796
+drwxrwxr-x  2 ghmd ghmd      4096 9月  22 08:59 .
+drwxr-xr-x 15 ghmd ghmd      4096 9月  24 06:21 ..
+-rw-rw-r--  1 ghmd ghmd   9526664 9月  22 08:59 BOOT.BIN
+-rw-r--r--  1 ghmd ghmd      2777 9月  22 08:59 boot.scr
+-rw-r--r--  1 ghmd ghmd 130877236 9月  22 08:59 image.ub
+-rw-r--r--  1 ghmd ghmd   7797816 9月  22 08:59 system.bit
+-rw-r--r--  1 ghmd ghmd     43288 9月  22 08:59 system.dtb
+-rw-rw-r--  1 ghmd ghmd       150 9月  22 08:59 uEnv.txt
+== /home/ghmd/work/petalinux-kv260-dpu/sd-card-staging-dpu-clock-fixed-numpy-sdmmc-nfsd-gem3
+总用量 144804
+drwxr-xr-x  2 ghmd ghmd      4096 9月  24 06:21 .
+drwxr-xr-x 15 ghmd ghmd      4096 9月  24 06:21 ..
+-rw-rw-r--  1 ghmd ghmd   9526664 9月  24 06:21 BOOT.BIN
+-rw-r--r--  1 ghmd ghmd      2777 9月  24 06:21 boot.scr
+-rw-r--r--  1 ghmd ghmd 130879552 9月  24 06:21 image.ub
+-rw-rw-r--  1 ghmd ghmd       454 9月  24 06:21 SHA256SUMS
+-rw-r--r--  1 ghmd ghmd   7797816 9月  24 06:21 system.bit
+-rw-r--r--  1 ghmd ghmd     45086 9月  24 06:21 system.dtb
+-rw-r--r--  1 ghmd ghmd       150 9月  24 06:21 uEnv.txt
+== /home/ghmd/work/petalinux-kv260-dpu/sd-card-staging-vitis-ai3
+总用量 129384
+drwxrwxr-x  2 ghmd ghmd      4096 9月  20 07:36 .
+drwxr-xr-x 15 ghmd ghmd      4096 9月  24 06:21 ..
+-rw-rw-r--  1 ghmd ghmd   9526408 9月  20 07:55 BOOT.BIN
+-rw-r--r--  1 ghmd ghmd      2777 9月  20 07:36 boot.scr
+-rw-r--r--  1 ghmd ghmd 122901532 9月  20 07:36 image.ub
+-rw-r--r--  1 ghmd ghmd     42973 9月  20 07:36 system.dtb

@@ -1,0 +1,28 @@
+0.35命名声纹阈值：离线独立审查通过
+
+用户已明确要求当前阈值改为0.35。本审阅不再请求确认，只检查该数值能否一致传到当前生产匹配链，及其它原边界是否保持。未访问设备、网络、真实音频或身份库，没有修改root候选/生产文件。
+
+已审精确三文件：
+worker e229b6c3c64e75373e74d5fa136b633174ddf9897f6e95bc368899de9dc2c3d7
+Provisional 1ac360902f2b5790cb0b047110ef0d267940031caaaf20b91ec75c7fef1ab47c
+实际生产GUI入口tools/yuki_business_gui.py 6f04e9f8d7a87a8741f41f321f1c51478236be0b1cec7db7983c7b23f63764fd
+
+调用链与门槛一致性：
+1. 实际选中的是CandidateGuiBoardBusiness覆盖的_attach_speaker，非未选中基类tools/board_business_gui.py。该覆盖方法显式传calibration threshold .35、margin .1、consistency .6、field_calibrated false。
+2. Worker构造threshold准入floor由.8降到.35，但默认值仍.8；GUI显式值经原SpeakerDevice传给原SpeakerStore，运行时device.threshold与store.threshold均实测.35。若其它调用者未显式传值，旧默认仍.8。
+3. Worker自匹配防线和ProvisionalVoiceMatcher的硬编码floor均为.35，避免一层已改但另一层拒绝。模型/store一致、generation、cache、TTL、原3distinct、采纳账本和取消守卫保持原逻辑。
+4. public/health新增数字值来自实际device属性；验证identity_match_threshold=.35、identity_ambiguity_margin=.1、enrollment_consistency=.6，并非用元数据常数冒充实际配置。
+5. AnonymousPolicy仍默认.9、最低.8，匿名聚类与此次命名声纹阈值分离。field_calibrated/speaker_calibrated仍false，identity_verified/personal_memory_allowed仍false。
+
+独立18项均通过（THRESHOLD035_INDEPENDENT_FINAL.xml）：
+- 真实CandidateGuiBoardBusiness._attach_speaker实际调用，模型构造与私有人脸readback仅在合成IO边界替身，原Runtime/worker/Device/Store与选中GUI传参链均真实运行。
+- 合成余弦分数.5、.7和.350001，须原三段不同capture才依次COLLECTING1/2/CANDIDATE3，每段仅编码一次；.34、.349999连续三次仍不构成候选。
+- 两个模板分数.5与.45的gap .05仍被原margin .1拒绝，没有把降阈值当成降低身份分差。
+- .34构造政策、NaN、bool threshold，以及margin .09、consistency .59、field_calibrated true均拒绝，且拒绝发生在建立新私有目录前。
+- 重复PCM三次不推进到三段，不产生候选；匿名默认与floor不变。
+- 真实Recording/stream/原ACK/rearm完整链，在.5分数和选中GUI的.35实际参数下，稳定1/2/3、不reset、编码3次。
+- AST确认worker仅__init__、_refresh_public、_self_match_query变化；选中GUI删除唯一新增calibration关键字后整模块与fresh基线f10全等，其它guard/方法不改。
+
+现有共享参数行为已验证：原SpeakerDevice.threshold也用于新增登记的best_other_score重复声纹拒绝。阈值.35后，和已有声纹得分.5的新登记会按原逻辑被拒绝，正式synthetic voice仍1、links0。此次没有拆出第二个去重阈值或修改注册确认/一致性逻辑。这是同一原参数的实际影响，需随部署说明保留。
+
+范围与结论：无代码阻断，当前三SHA候选可供root按最新源CAS评估。这里是数值传递、策略边界和合成集成验证，不是现场识别准确率/陌生人误接受率验收，也不把0.35称为已标定阈值。完整Runtime.__init__与原Yuki/LIR/worker链在synthetic数据域运行；recording测试的production UI包装器采用明确的UI-policy代理选择分支，未验证实板bootstrap/GPU。18项不替代root正在执行的原34+90等回归。

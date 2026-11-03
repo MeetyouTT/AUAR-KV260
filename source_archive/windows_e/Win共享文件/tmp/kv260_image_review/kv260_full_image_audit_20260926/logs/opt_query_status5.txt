@@ -1,0 +1,30 @@
+### 轮询（休眠 60s 后）
+0
+--- log tail ---
+# foreach nm [lsort -unique $names] { puts $f "ORIG_DANGLING=$nm" }
+# close_design
+# close $f
+# exit
+INFO: [Common 17-206] Exiting Vivado at Sat Sep 26 22:17:38 2026...
+--- 结果文件 ---
+209 reports/opt_stage_and_orig_dangling.txt
+=== NEW opt_design DCP (2026-09-26) ===
+TOP=kv260_dpu_bd_wrapper
+OPT_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_resetn IS_CONNECTED=0 NETS=
+OPT_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aresetn IS_CONNECTED=0 NETS=
+OPT_PIN=kv260_dpu_bd_i/dpu_0/dpu_2x_clk IS_CONNECTED=1 NETS=kv260_dpu_bd_i/dpu_clk_wiz_clk_dsp
+OPT_PIN=kv260_dpu_bd_i/dpu_0/m_axi_dpu_aclk IS_CONNECTED=1 NETS=kv260_dpu_bd_i/dpu_clk_wiz_clk_dpu
+OPT_PIN=kv260_dpu_bd_i/dpu_0/inst/dpu_2x_resetn IS_CONNECTED=0 NETS=
+OPT_PIN=kv260_dpu_bd_i/dpu_0/inst/m_axi_dpu_aresetn IS_CONNECTED=0 NETS=
+OPT_RST_DPU_DSP_CELL_COUNT=0
+OPT_RST_DPU_DSP_NET_COUNT=0
+OPT_DPU_BOUNDARY_DANGLING_INPUT_COUNT=196
+=== ORIG routed DCP (2026-09-19) 悬空输入对照 ===
+ORIG_DPU_BOUNDARY_DANGLING_INPUT_COUNT=196
+ORIG_DANGLING=dpu0_m_axi_data0_bid[0]
+ORIG_DANGLING=dpu0_m_axi_data0_bid[1]
+ORIG_DANGLING=dpu0_m_axi_data0_bid[2]
+ORIG_DANGLING=dpu0_m_axi_data0_bid[3]
+ORIG_DANGLING=dpu0_m_axi_data0_bid[4]
+ORIG_DANGLING=dpu0_m_axi_data0_bid[5]
+ORIG_DANGLING=dpu0_m_axi_data0_bresp[0]

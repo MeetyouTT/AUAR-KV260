@@ -1,0 +1,42 @@
+--- aura/board/runtime/audio/vad.py
++++ aura/board/runtime/audio/vad.py
+@@ -7,10 +7,11 @@
+ - 产出的 utterance 交给 `asr.py`；"说完了"由上层发既有事件 `EventType.AUDIO_VAD_END`
+   （不新增事件类型）。
+ 
+-为什么自己写（而不是 webrtcvad / silero-vad）
+---------------------------------------------
+-① 本机网络受限、板端最终要移植 → 少一个依赖少一份风险；
+-② 判据可解释、可用**合成波形**单测，符合项目"先算后看"的风格。
++历史默认与成熟分类器适配
++----------------------
++原能量判据保留为现有默认。frame_classifier注入点允许在隔离候选中复用
++成熟语音模型，仅替换逐帧是否语音的判定；音频保存、时长和事件契约保持。
++此注入点本身不下载模型，也不自动在正式入口开启。
+ 
+ 判据（能量 + 静音滞后）
+ ----------------------
+@@ -59,8 +60,12 @@
+ class EnergyVad:
+     """能量 VAD（流式）：反复 `accept(chunk)`，返回本次产生的事件列表。"""
+ 
+-    def __init__(self, config: typing.Optional[VadConfig] = None) -> None:
++    def __init__(self, config: typing.Optional[VadConfig] = None, *, frame_classifier=None) -> None:
+         self.config = config or VadConfig()
++        if frame_classifier is not None and (not callable(frame_classifier)
++                or self.config.sample_rate != 16000 or self.config.frame_ms != 20):
++            raise ValueError('External speech classifier requires 16 kHz/20 ms frames')
++        self.frame_classifier = frame_classifier
+         self.reset()
+ 
+     def reset(self) -> None:
+@@ -109,7 +114,8 @@
+         while len(buf) - start >= n:
+             frame = buf[start:start + n]
+             start += n
+-            loud = self._rms(frame) >= self.config.energy_threshold
++            loud = (bool(self.frame_classifier(frame)) if self.frame_classifier is not None
++                    else self._rms(frame) >= self.config.energy_threshold)
+ 
+             if loud:
+                 self._speech_ms += frame_ms

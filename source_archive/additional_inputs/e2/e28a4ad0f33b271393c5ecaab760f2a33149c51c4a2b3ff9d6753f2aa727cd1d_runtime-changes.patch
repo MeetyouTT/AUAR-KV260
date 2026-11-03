@@ -1,0 +1,609 @@
+--- a/board/identity/camera_faces.py
++++ b/board/identity/camera_faces.py
+@@ -206,6 +206,11 @@
+         return ((self.producer is None or self.producer.stopped.is_set())
+                 and (self.shadow is None or self.shadow.stopped.is_set()))
+ 
++    def feature_status(self):
++        if self.local_dpu is not None:
++            return self.local_dpu.availability()
++        return {'ready': True, 'unavailable_reason': None, 'detail': '', 'recovery_required': False}
++
+     def health(self):
+         if self.shadow is not None or self.shadow_error:
+             try:
+--- a/board/identity/face_targets.py
++++ b/board/identity/face_targets.py
+@@ -24,6 +24,7 @@
+         self.minimum_score,self.minimum_pixels=minimum_score,minimum_pixels
+         self.tracker=FaceTracks(camera_epoch,lost_s=1.,confirm_observations=2)
+         self.pending=None;self.thread=None;self.closed=False;self.ready=False;self.error=''
++        self.detector=None;self.worker_faults=0;self.fault_latched=False;self.rejected_while_faulted=0
+         self.key=None;self.stamp=None;self.count=0;self.tracks=[]
+         self.previous_visible=set();self.generations={};self.processed=self.discarded=0;self.last_ms=None
+         self.owner_sequence=0
+@@ -69,6 +70,9 @@
+     def offer(self,image,fid,stamp):
+         observer=self._freshness
+         with self.condition:
++            if self.fault_latched:
++                self.rejected_while_faulted += 1
++                return
+             if self.closed:
+                 if observer is None:return
+                 accepted=False;replaced=False
+@@ -92,8 +96,15 @@
+     def health(self):
+         with self.lock:value={'ready':self.ready and not self.error,'error':self.error,
+             'backend':self.backend,
++            'worker_alive':bool(self.thread and self.thread.is_alive()),
++            'worker_faults':self.worker_faults,'fault_latched':self.fault_latched,
++            'rejected_while_faulted':self.rejected_while_faulted,
+             'processed':self.processed,'discarded':self.discarded,'last_inference_ms':self.last_ms,
+             'source_age_ms':None if self.stamp is None else self.clock()-self.stamp}
++        detector = self.detector
++        if detector is not None and callable(getattr(detector,'health',None)):
++            try:value['inference'] = detector.health()
++            except Exception:value['inference'] = {'snapshot_unavailable':True}
+         if self._freshness_enabled:
+             observed=self._freshness_call('snapshot') if self._freshness is not None else None
+             if type(observed) is not dict:
+@@ -313,7 +324,7 @@
+         detector=None
+         try:
+             detector=self.factory()
+-            with self.lock:self.ready=True
++            with self.lock:self.detector=detector;self.ready=True
+             next_at=0
+             while True:
+                 with self.condition:
+@@ -332,9 +343,18 @@
+                             wait_ms=self.retry_recovery_ms
+                             self.retry_stats['recovery_waits']+=1
+                 next_at=time.monotonic()+wait_ms/1000
+-        except Exception as exc:
+-            with self.lock:self.error='人脸目标检测失败：'+str(exc)[:100];self.key=None;self.pending=None
+-        finally:
++        except BaseException as exc:
++            with self.condition:
++                self.worker_faults += 1
++                self.fault_latched=True;self.ready=False
++                self.error='人脸目标检测暂不可用，请恢复服务后重试：'+type(exc).__name__
++                self.key=None;self.pending=None;self.attention=None
++                # An unknown/native failure is not permission to submit again.
++                # Keep the owner objects alive, reject new frames, and wait for
++                # the coordinated service shutdown/restart path.
++                self.condition.wait_for(lambda:self.closed)
++        finally:
++            with self.lock:self.ready=False
+             if detector and hasattr(detector,'close'):detector.close()
+ 
+     def close(self):
+--- a/board/identity/live.py
++++ b/board/identity/live.py
+@@ -45,6 +45,9 @@
+ 
+     def sample_start(self, params, command_id):
+         with self.lock:
++            feature = self._feature_status()
++            if not feature['ready']:
++                raise ValueError(feature['detail'])
+             key=target_key(params['target'])
+             if not self.sampling or not self._fresh(self.result) or key!=self.current_target():
+                 raise ValueError('请先正对镜头，等待清晰人脸')
+@@ -114,8 +117,25 @@
+                     and 0 <= self.clock()-result['stamp'] < self.ttl
+                     and result['revision'] == self.store.revision)
+ 
++    def _feature_status(self):
++        """Read only backend availability, without inference or diagnostics scans."""
++        provider = getattr(self.extractor, 'feature_status', None)
++        if not callable(provider):
++            return {'ready': True, 'unavailable_reason': None, 'detail': '', 'recovery_required': False}
++        try:
++            status = provider()
++            if (not isinstance(status, dict) or type(status.get('ready')) is not bool
++                    or not isinstance(status.get('detail'), str)
++                    or (not status['ready'] and not status['detail'])):
++                raise ValueError('Invalid feature availability')
++            return status
++        except Exception:
++            return {'ready': False, 'unavailable_reason': 'FEATURE_STATUS_FAILED',
++                    'detail': '人脸识别状态暂不可用，请恢复服务后重试', 'recovery_required': True}
++
+     def view(self):
+         with self.lock:
++            feature = self._feature_status()
+             people = self.store.people()
+             value = {'state': 'ERROR' if self.error else 'UNKNOWN', 'person_id': '', 'display_name': '',
+                      'db_version': self.store.revision, 'people': people, 'backend': self.backend,
+@@ -132,7 +152,7 @@
+             if self.ready and current:
+                 value['detail'] = self.reason or '等待当前对象的清晰正面人脸'
+             result = self.result
+-            fresh = self.ready and not self.error and self._fresh(result)
++            fresh = self.ready and not self.error and feature['ready'] and self._fresh(result)
+             if fresh:
+                 match = result['match']
+                 value.update(state='KNOWN' if match.state == 'KNOWN' else 'UNKNOWN',
+@@ -146,6 +166,8 @@
+                         'frame_id':result['fid'], 'captured_mono_ms':result['stamp'], 'ttl_ms':self.ttl}
+             elif result and current and not self.error:
+                 value['detail'] = '身份结果已过期，等待新的人脸'
++            if not feature['ready']:
++                value.update(state='ERROR', detail=feature['detail'])
+             if self.last_operation:
+                 value['last_operation'] = copy.deepcopy(self.last_operation)
+             can_enroll = bool(fresh and result['match'].state == 'UNKNOWN' and len(people) < self.max_people)
+@@ -164,13 +186,16 @@
+         """Only the current qualified model-input crop; never a whole frame."""
+         with self.lock:
+             result = self.result
+-            if (not self.ready or self.error or not self._fresh(result)
++            if (not self.ready or self.error or not self._feature_status()['ready'] or not self._fresh(result)
+                     or result['target'] != target or result['fid'] != fid):
+                 return None
+             return result.get('face_png')
+ 
+     def enroll(self, params, command_id):
+         with self.lock:
++            feature = self._feature_status()
++            if not feature['ready']:
++                raise ValueError(feature['detail'])
+             key = target_key(params['target'])
+             name = params['display_name'].strip()
+             if params.get('confirmed') is not True or not text(name, 48, False):
+@@ -300,9 +325,11 @@
+ 
+     def health(self):
+         with self.lock:
++            feature = self._feature_status()
+             face=self.face_targets.health() if self.face_targets else None
+-            return {'ready': self.ready and not self.error and (not face or face['ready']),
+-                    'error': self.error or (face['error'] if face else ''), 'face_targets':face,
++            return {'ready': self.ready and not self.error and feature['ready'] and (not face or face['ready']),
++                    'error': self.error or feature['detail'] or (face['error'] if face else ''), 'face_targets':face,
++                    'feature_status': feature,
+                     'backend': self.backend, 'processed': self.processed,
+                     'shutdown_incomplete':self.shutdown_incomplete,
+                     'feature_inference': self.extractor.health() if self.extractor is not None
+--- a/board/identity/spoken_query.py
++++ b/board/identity/spoken_query.py
+@@ -22,6 +22,7 @@
+         key=target_key(identity['face_target'])
+         if (key!=target_key(previous['face_target']) or identity['db_version']!=previous['db_version']
+                 or current['modules']['camera']['state']!='READY'):return unavailable()
++        if identity['state']=='ERROR':return unavailable()
+         if identity['state']!='KNOWN':return speech.result('identity_unknown')
+         fid,stamp=identity.get('source_frame_id'),identity.get('source_mono_ms')
+         if (identity.get('target')!=key or type(fid) is not int or fid<1 or type(stamp) is not int
+--- a/board/vision/dpu_sface.py
++++ b/board/vision/dpu_sface.py
+@@ -30,6 +30,7 @@
+         self.source_ttl = backend['max_source_age_ms']
+         self.requests = self.execution_attempts = self.completed = self.features_returned = 0
+         self.deferred = self.slot_denials = self.expired_after_admission = 0
++        self._closed = False
+         self.runner = PinnedRunner(backend['model'], backend['manifest'], owner)
+         if (self.runner.input_fix != 7 or list(self.runner.inputs[0].dims) != [1, 112, 112, 3]
+                 or len(self.runner.outputs) != 1 or list(self.runner.outputs[0].dims) != [1, 128]
+@@ -66,7 +67,7 @@
+ 
+     def feature(self, crop, *, source_mono_ms):
+         self.requests += 1
+-        if not self._fresh(source_mono_ms) or self.schedule.disabled('sface'):
++        if not self._fresh(source_mono_ms) or not self.availability()['ready']:
+             self._defer('SFace source expired or optional task disabled')
+ 
+         attempts_before=self.execution_attempts
+@@ -89,8 +90,17 @@
+         self.features_returned += 1
+         return result
+ 
++    def availability(self):
++        """Persistent protection is unavailable; ordinary slot contention is not."""
++        reason = ('DPU_SFACE_CLOSED' if self._closed else
++                  'DPU_SFACE_OPTIONAL_DISABLED' if self.schedule.disabled('sface') else None)
++        return {'ready': reason is None, 'unavailable_reason': reason,
++                'detail': '人脸识别服务暂不可用，请恢复服务后重试' if reason else '',
++                'recovery_required': reason == 'DPU_SFACE_OPTIONAL_DISABLED'}
++
+     def health(self):
+         return {'kind': self.kind, 'model_id': self.model_id,
++                **self.availability(),
+                 'requests': self.requests, 'execution_attempts': self.execution_attempts,
+                 'completed': self.completed, 'features_returned': self.features_returned,
+                 'deferred': self.deferred, 'slot_denials': self.slot_denials,
+@@ -99,4 +109,5 @@
+                 'scheduler_calls_mean_admissions': True}
+ 
+     def close(self):
++        self._closed = True
+         self.runner.close()
+--- a/board/vision/dpu_vision_runtime.py
++++ b/board/vision/dpu_vision_runtime.py
+@@ -11,6 +11,11 @@
+ import numpy as np
+ 
+ FINGERPRINT = '0x101000056010407'
++
++
++class NativeExecutionError(RuntimeError):
++    """The current binding did not confirm a successful completed native job."""
++    native_execution_unknown = True
+ 
+ 
+ @contextmanager
+@@ -75,7 +80,9 @@
+         diagnostics = getattr(self.metrics,'optional_diagnostics',None)
+         if diagnostics is not None and diagnostics.enabled:
+             try:diagnostics.native_mark(self.stage_kind,phase,status)
+-            except Exception:diagnostics.error()
++            except BaseException:
++                try:diagnostics.error()
++                except BaseException:pass
+ 
+     def execute_encoded(self, source, *, slot=None, pre_execute=None):
+         if self.runner is None:
+@@ -109,12 +116,13 @@
+                 self._diagnostic_mark('wait_start')
+                 status = self.runner.wait(job)
+                 self._diagnostic_mark('wait_end',status)
+-            except BaseException:
++            except BaseException as exc:
+                 self._diagnostic_mark('exception')
+-                raise
++                if isinstance(exc, AdmissionCancelled):raise
++                raise NativeExecutionError('VART native completion was not confirmed') from exc
+             self.last_ms = (time.monotonic() - started) * 1000
+             if status != 0:
+-                raise RuntimeError('VART execution failed: ' + str(status))
++                raise NativeExecutionError('VART execution failed: ' + str(status))
+         self.metrics.value(self.stage_kind+'.slot_wait',slot_wait_ms)
+         self.metrics.value(self.stage_kind+'.execute_wait',self.last_ms)
+         # Output conversion is CPU work; the next YOLO job can own the DPU now.
+--- a/board/vision/dpu_vision_schedule.py
++++ b/board/vision/dpu_vision_schedule.py
+@@ -22,6 +22,10 @@
+         self._last_primary = None
+         self._native_owner = None
+         self._native_completed = False
++        self._lease_sequence = 0
++        self._diagnostic_failures = 0
++        self.owner_fenced = False
++        self.owner_fault_reason = None
+         if yunet_recovery:
+             from board.vision.dpu_recovery_policy import YuNetRecoveryPolicy
+             self.yunet_recovery = YuNetRecoveryPolicy()
+@@ -36,14 +40,33 @@
+         self.sface_slot_wait_ms=sface_slot_wait_ms
+         self._sface_wait_stats=dict(self._slot_wait_stats,maximum_wait_ms=sface_slot_wait_ms)
+ 
++    def _diagnostic_error(self):
++        # Auxiliary failures must never retain the inference lease or replace
++        # the original native exception, including failures in error().
++        with self.condition:
++            self._diagnostic_failures += 1
++        try:
++            self.diagnostics.error()
++        except BaseException:
++            pass
++
++    def _discard_diagnostic(self, kind, trace=None):
++        try:
++            discard = getattr(self.diagnostics, 'discard_current', None)
++            if callable(discard):discard(kind, trace)
++        except BaseException:
++            self._diagnostic_error()
++
+     @contextmanager
+     def primary(self, next_deadline):
+         with self.condition:
++            if self.owner_fenced:raise RuntimeError('DPU owner unavailable: native completion unconfirmed')
+             self.next_primary = next_deadline
+             self.waiting_primary += 1
+             try:
+                 while self.active is not None:
+                     self.condition.wait()
++                    if self.owner_fenced:raise RuntimeError('DPU owner unavailable: native completion unconfirmed')
+                 self.active = 'yolo'
+             finally:
+                 self.waiting_primary -= 1
+@@ -51,23 +74,32 @@
+             yield
+         finally:
+             with self.condition:
+-                self.primary_calls += 1
+-                primary_late = self.clock() > next_deadline
+-                self.primary_overruns += int(primary_late)
+-                if self.yunet_recovery is not None:
+-                    self._last_primary = self.clock()
+-                    if primary_late and self.yunet_recovery.primary_failed():
+-                        self.jobs['yunet']['disabled'] = True
+-                self.active = None
+-                self.condition.notify_all()
++                try:
++                    self.primary_calls += 1
++                    primary_late = self.clock() > next_deadline
++                    self.primary_overruns += int(primary_late)
++                    if self.yunet_recovery is not None:
++                        self._last_primary = self.clock()
++                        if primary_late and self.yunet_recovery.primary_failed():
++                            self.jobs['yunet']['disabled'] = True
++                finally:
++                    self.active = None
++                    self.condition.notify_all()
+ 
+     def disabled(self, kind):
+         with self.condition:
+-            return self.jobs.get(kind, {}).get('disabled', False)
++            return self.owner_fenced or self.jobs.get(kind, {}).get('disabled', False)
++
++    def optional_status(self, kind):
++        with self.condition:
++            result = dict(self.jobs.get(kind, {}))
++            if kind == 'yunet' and self.yunet_recovery is not None:
++                result['recovery'] = self.yunet_recovery.snapshot()
++            return result
+ 
+     def _recovery_due(self, kind):
+         policy = self.yunet_recovery
+-        return (kind == 'yunet' and policy is not None and policy.due(self.clock(),
++        return (not self.owner_fenced and kind == 'yunet' and policy is not None and policy.due(self.clock(),
+                 primary_calls=self.primary_calls, primary_overruns=self.primary_overruns,
+                 last_primary=self._last_primary))
+ 
+@@ -107,7 +139,7 @@
+                     if now >= until:
+                         stats['timeouts'] += 1; return False
+                     job = self.jobs.get(kind, {})
+-                    if job.get('disabled', False) and not self._recovery_due(kind):
++                    if self.owner_fenced or (job.get('disabled', False) and not self._recovery_due(kind)):
+                         stats['disabled'] += 1; return False
+                     estimate = max(self.budget, job.get('estimated_budget_ms', self.budget*1000.)/1000.)
+                     if (self.active is None and not self.waiting_primary
+@@ -132,10 +164,13 @@
+                 'maximum_ms': 0., 'disabled': False})
+             estimate = max(self.budget, stats['estimated_budget_ms'] / 1000.)
+             recovering = stats['disabled'] and self._recovery_due(kind)
+-            acquired = ((not stats['disabled'] or recovering) and self.active is None and not self.waiting_primary
++            acquired = (not self.owner_fenced and (not stats['disabled'] or recovering) and self.active is None and not self.waiting_primary
+                         and self.next_primary - self.clock() >= estimate + self.guard)
+             if acquired:
+-                self.active, started = kind, self.clock()
++                started = self.clock()
++                self.active = kind
++                self._lease_sequence += 1
++                lease_sequence = self._lease_sequence
+                 finish_deadline = self.next_primary - self.guard
+                 if self.yunet_recovery is not None and kind == 'yunet':
+                     self._native_owner = (kind, threading.get_ident())
+@@ -150,54 +185,78 @@
+             diagnostic_deadline = self.next_primary-self.guard
+         trace = None
+         diagnostics = self.diagnostics
+-        if diagnostics is not None and diagnostics.enabled:
+-            try:trace = diagnostics.begin(kind,acquired,rejection,estimate*1000.,diagnostic_deadline)
+-            except Exception:diagnostics.error()
++        if diagnostics is not None:
++            try:
++                if diagnostics.enabled:
++                    trace = diagnostics.begin(kind,acquired,rejection,estimate*1000.,diagnostic_deadline)
++                if acquired and isinstance(trace, dict):
++                    trace.update(lease_sequence=lease_sequence, lease_started_mono_ns=int(started*1e9))
++            except BaseException:
++                self._diagnostic_error()
++                self._discard_diagnostic(kind)
++                trace = None
+         body_failed = False
+         native_not_submitted = False
++        native_unknown = False
+         try:
+             yield acquired
+         except BaseException as exc:
+             body_failed = True
+             native_not_submitted = getattr(exc, 'native_not_submitted', False) is True
++            native_unknown = getattr(exc, 'native_execution_unknown', False) is True
+             raise
+         finally:
+             if acquired:
++                finish_arguments = None
+                 with self.condition:
+-                    elapsed = self.clock() - started
+-                    stats['calls'] += 1
+-                    stats['maximum_ms'] = max(stats['maximum_ms'], elapsed * 1000.)
+-                    if elapsed > estimate:
+-                        stats['budget_exceeded'] += 1
+-                        stats['estimated_budget_ms'] = min(30., elapsed * 1000. + 2.)
+-                    # A one-off estimate miss within the admitted deadline is
+-                    # different from blocking the primary workload. Enforce the
+-                    # actual deadline plus a hard 30 ms optional occupancy cap.
+-                    hardcap_exceeded = elapsed > .030
+-                    guard_exceeded = self.clock() > finish_deadline
+-                    if hardcap_exceeded or guard_exceeded:
+-                        stats['overruns'] += 1
+-                        stats['disabled'] = True
+-                        stats['last_overrun'] = {'elapsed_ms': elapsed * 1000.,
+-                            'finish_after_guard_ms': (self.clock() - finish_deadline) * 1000.,
+-                            'waiting_primary': self.waiting_primary}
+-                    if self.yunet_recovery is not None and kind == 'yunet':
+-                        if hardcap_exceeded or guard_exceeded or (body_failed and not native_not_submitted):
++                    try:
++                        elapsed = self.clock() - started
++                        stats['calls'] += 1
++                        stats['maximum_ms'] = max(stats['maximum_ms'], elapsed * 1000.)
++                        if elapsed > estimate:
++                            stats['budget_exceeded'] += 1
++                            stats['estimated_budget_ms'] = min(30., elapsed * 1000. + 2.)
++                        hardcap_exceeded = elapsed > .030
++                        guard_exceeded = self.clock() > finish_deadline
++                        failed_native = body_failed and not native_not_submitted
++                        if native_unknown:
++                            self.owner_fenced = True
++                            self.owner_fault_reason = 'NATIVE_COMPLETION_UNCONFIRMED'
++                        if hardcap_exceeded or guard_exceeded:
++                            stats['overruns'] += 1
+                             stats['disabled'] = True
+-                            self.yunet_recovery.fault(self.clock(), completed=self._native_completed,
+-                                body_failed=body_failed, hardcap=hardcap_exceeded, guard=guard_exceeded,
+-                                primary_calls=self.primary_calls, primary_overruns=self.primary_overruns)
+-                        elif self._native_completed:
+-                            self.yunet_recovery.success()
++                            stats['last_overrun'] = {'elapsed_ms': elapsed * 1000.,
++                                'finish_after_guard_ms': (self.clock() - finish_deadline) * 1000.,
++                                'waiting_primary': self.waiting_primary}
++                        if failed_native:stats['disabled'] = True
++                        if self.yunet_recovery is not None and kind == 'yunet':
++                            if hardcap_exceeded or guard_exceeded or failed_native:
++                                self.yunet_recovery.fault(self.clock(), completed=self._native_completed,
++                                    body_failed=body_failed, hardcap=hardcap_exceeded, guard=guard_exceeded,
++                                    primary_calls=self.primary_calls, primary_overruns=self.primary_overruns)
++                            elif self._native_completed:
++                                self.yunet_recovery.success()
++                        finish_arguments = (kind, trace, elapsed*1000.,
++                            (self.clock()-finish_deadline)*1000.,self.waiting_primary,
++                            hardcap_exceeded,guard_exceeded,body_failed)
++                        if isinstance(trace, dict):
++                            trace['lease_release_decision_mono_ns'] = int(self.clock()*1e9)
++                    finally:
++                        # The native body has returned/raised. Protection and
++                        # recovery decisions precede release; auxiliary trace
++                        # aggregation runs after releasing the condition.
+                         self._native_owner = None
+                         self._native_completed = False
+-                    if trace is not None:
+-                        try:diagnostics.finish(kind,trace,elapsed*1000.,
+-                            (self.clock()-finish_deadline)*1000.,self.waiting_primary,
+-                            hardcap_exceeded,guard_exceeded,body_failed)
+-                        except Exception:diagnostics.error()
+-                    self.active = None
+-                    self.condition.notify_all()
++                        self.active = None
++                        self.condition.notify_all()
++                if trace is not None and finish_arguments is not None:
++                    try:
++                        if isinstance(trace, dict):
++                            trace['after_release_observed_mono_ns'] = int(self.clock()*1e9)
++                        diagnostics.finish(*finish_arguments)
++                    except BaseException:
++                        self._diagnostic_error()
++                        self._discard_diagnostic(kind, trace)
+ 
+     def health(self):
+         with self.condition:
+@@ -205,11 +264,19 @@
+                     'primary_period_overruns': self.primary_overruns,
+                     'waiting_primary': self.waiting_primary, 'budget_ms': self.budget * 1000.,
+                     'guard_ms': self.guard * 1000., 'optional': {k: dict(v) for k, v in self.jobs.items()},
+-                    'optional_diagnostics':self.diagnostics.snapshot() if self.diagnostics is not None else {'enabled':False}}
++                    'lease_sequence':self._lease_sequence,'diagnostic_failures':self._diagnostic_failures,
++                    'owner_fenced':self.owner_fenced,'owner_fault_reason':self.owner_fault_reason,
++                    'diagnostic_snapshot_atomic_with_schedule':False,
++                    'occupancy_scope':'admission through pre-release protection decision; auxiliary finish runs after release'}
+             if self.yunet_recovery is not None:
+                 result['yunet_recovery'] = self.yunet_recovery.snapshot()
+             if self.yunet_slot_wait_ms:
+                 result['yunet_slot_wait'] = dict(self._slot_wait_stats)
+             if self.sface_slot_wait_ms:
+                 result['sface_slot_wait']=dict(self._sface_wait_stats)
+-            return result
++        try:
++            result['optional_diagnostics'] = self.diagnostics.snapshot() if self.diagnostics is not None else {'enabled':False}
++        except BaseException:
++            self._diagnostic_error()
++            result['optional_diagnostics'] = {'enabled':True,'snapshot_unavailable':True}
++        return result
+--- a/board/vision/dpu_yunet.py
++++ b/board/vision/dpu_yunet.py
+@@ -6,6 +6,7 @@
+ from pathlib import Path
+ import time
+ import math
++import threading
+ 
+ 
+ class DpuYuNet:
+@@ -20,6 +21,9 @@
+             if hashlib.sha256(path.read_bytes()).hexdigest() != config['face_backend'][key + '_sha256']:
+                 raise ValueError('Pinned YuNet artifact mismatch: ' + key)
+         self.schedule = schedule
++        self._health_lock=threading.Lock()
++        self.fallback_calls=self.fallback_failures=0
++        self.fallback_last_ms=None;self.fallback_total_ms=0.;self.fallback_reason=None
+         self.runner = PinnedRunner(config['face_backend']['model'], config['face_backend']['manifest'], owner)
+         if self.runner.input_fix != 7 or list(self.runner.inputs[0].dims) != [1, 320, 320, 3]:
+             self.runner.close()
+@@ -104,10 +108,29 @@
+         recovering = getattr(self.schedule, 'recovery_ready', lambda kind: False)
+         if self.schedule.disabled('yunet') and not recovering('yunet'):
+             self.kind = 'CPU_YUNET_FALLBACK_AFTER_DPU_OVERRUN'
+-            return self.fallback.detect(image)
++            status=getattr(self.schedule,'optional_status',lambda kind:{})('yunet')
++            reason=(status.get('recovery') or {}).get('reason') or 'optional_protection_disabled'
++            started=time.monotonic()
++            with self._health_lock:
++                self.fallback_calls += 1;self.fallback_reason=reason
++            try:
++                return self.fallback.detect(image)
++            except BaseException:
++                with self._health_lock:self.fallback_failures += 1
++                raise
++            finally:
++                elapsed=(time.monotonic()-started)*1000.
++                with self._health_lock:
++                    self.fallback_last_ms=elapsed;self.fallback_total_ms += elapsed
+         result = self.detector.detect(image)
+         self.kind = 'DPU_YUNET_INT8'
+         return result
+ 
++    def health(self):
++        with self._health_lock:
++            return {'kind':self.kind,'fallback_calls':self.fallback_calls,
++                    'fallback_failures':self.fallback_failures,'fallback_last_ms':self.fallback_last_ms,
++                    'fallback_total_ms':self.fallback_total_ms,'fallback_reason':self.fallback_reason}
++
+     def close(self):
+         self.runner.close()
+--- a/board/vision/pipeline_metrics.py
++++ b/board/vision/pipeline_metrics.py
+@@ -244,6 +244,18 @@
+                     before={key:trace.get('probe_before_'+key,-1) for key in sample}
+                     trace.update(self.thread_probe.delta(before,sample))
+ 
++    def discard_current(self, kind, trace=None):
++        """Detach an auxiliary trace after an observer failure, never a new lease."""
++        current = getattr(self.local,'trace',None)
++        if current is None or current[0] != kind:return
++        if trace is not None and current[1] is not trace:return
++        detached = current[1]
++        with self.lock:
++            detached['diagnostic_finished'] = 1
++            if self.active.get(kind) is detached:self.active.pop(kind,None)
++            self.local.trace = None
++            self.diagnostic_errors += 1
++
+     def finish(self, kind, trace, occupancy_ms, deadline_delta_ms,
+                waiting_primary, hardcap_exceeded, guard_exceeded, body_failed):
+         if not self.enabled or trace is None:return
+@@ -275,8 +287,10 @@
+                 elif trace['native_completed'] == 1:
+                     self._normal_success(kind,trace)
+             finally:
+-                self.active.pop(kind,None)
+-                self.local.trace = None
++                if self.active.get(kind) is trace:self.active.pop(kind,None)
++                current = getattr(self.local,'trace',None)
++                if current is not None and current[0] == kind and current[1] is trace:
++                    self.local.trace = None
+ 
+     def snapshot(self):
+         if not self.enabled:return {'enabled':False}
+@@ -290,7 +304,7 @@
+                 'snapshot_mono_ns':self.clock(),
+                 'thread_clock_available':callable(self.thread_clock),
+                 'thread_cpu_scope':'calling thread only; excludes other native/runtime/kernel threads',
+-                'wall_scope':'optional gate and VART API walls; includes wait/descheduling/GIL; not pure hardware time',
++                'wall_scope':'trace spans admission and post-release aggregation entry; scheduler_occupancy excludes auxiliary finish; not pure hardware time',
+                 'numeric_missing_value':-1,'task_codes':dict(TASK_CODES),
+                 'normal_timing_schema_version':'aura-optional-normal-timings-1',
+                 'normal_timing_scope':'completed native wait with status 0; no body failure, hard-cap or guard overrun',

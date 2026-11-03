@@ -1,0 +1,12 @@
+--- original/tools/board_camera_preview.py
++++ candidate/tools/board_camera_preview.py
+@@ -155,7 +155,8 @@
+                         self.reader=self.reader_owner=self.last_key=None
+                         self.error=''
+                         continue
+-                view=self.services.read();snapshot=view['snapshot']
++                read_preview=getattr(self.services,'read_preview',None)
++                view=read_preview() if callable(read_preview) else self.services.read();snapshot=view['snapshot']
+                 if not snapshot or snapshot['modules'].get('camera',{}).get('state')!='READY' or not snapshot.get('preview'):
+                     self.reader=self.reader_owner=None;self.last_key=None;self.clear();continue
+                 owner={k:snapshot[k] for k in ('board_boot_id','service_epoch')}

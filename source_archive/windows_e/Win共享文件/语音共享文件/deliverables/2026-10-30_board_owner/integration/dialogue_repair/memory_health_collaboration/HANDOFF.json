@@ -1,0 +1,133 @@
+{
+  "schema": "aura.memory-health-collaboration.v1",
+  "status": "SOURCE_ONLY_CANDIDATE_READY_ACTUAL_DIAGNOSIS_PENDING",
+  "baseline_startup_sha256": "1129a2a7af2b401537710d1a67651c79961c1b10198f5625ae6802e7ac99fd77",
+  "baseline_source_manifest_sha256": "c575f5fc8eb55536e4ea1a8b926d5843e54f2068337691bba7bab61c8a3f01a5",
+  "files": {
+    "board/runtime/board_memory_policy.py": {
+      "path": "after/board/runtime/board_memory_policy.py",
+      "before_sha256": "9af4a5bfc4a039db55d8e46e08ce994e04091a0653919886fb04c23f39f94d54",
+      "sha256": "48c7499fe5371c822738f2f42029a6b82fe2aa71c503fc0accd9fa15549188a5",
+      "bytes": 30782,
+      "frozen_baseline_matches_v10_manifest": true
+    },
+    "common/board_memory_backoff.py": {
+      "path": "after/common/board_memory_backoff.py",
+      "before_sha256": "e0abd91758c9e55d6f60bb7bf0f00a9ceed1fa0c194962b87a1d2412705d1d57",
+      "sha256": "9710c079fc589eae8f2eb26fba7f0dd80038b66736b3e45e000a98904716ce82",
+      "bytes": 4479,
+      "frozen_baseline_matches_v10_manifest": true
+    }
+  },
+  "unchanged_store_sha256": "6e62b109f429c8b8ebb11b1bcf45258be08f5dd659c778e51bd1d95123ee5735",
+  "readonly_script": {
+    "path": "board_readonly_metadata.py",
+    "sha256": "c507051db16915a4562d95b8689409807f19673c5a3bc6a265f42bb39174f294",
+    "invocation": "python3 -B - <CURRENT_STARTUP_SHA256>  (send script on stdin from root publisher)",
+    "source_root": "ROOT/runtime/aura",
+    "fixed_fields_only": true,
+    "sqlite_mode": "ro",
+    "query_only": true,
+    "sqlite_busy_seconds": 0.15,
+    "sqlite_vm_budget_seconds": 0.4,
+    "state_timeout_seconds": 2,
+    "clock_time_basis": "business.clock.utc_lower_bound; identical to StableTimelineClock.event_time",
+    "models_called": 0,
+    "tests": "tests/test_metadata_script.py"
+  },
+  "tests": {
+    "baseline": {
+      "tests": 7,
+      "failures": 5,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 2,
+      "seconds": 0.452,
+      "evidence": "test_baseline\\results.xml"
+    },
+    "baseline_restart": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 0,
+      "seconds": 0.108,
+      "evidence": "test_baseline_restart\\results.xml"
+    },
+    "baseline_regression": {
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 0,
+      "seconds": 0.289,
+      "evidence": "test_baseline_regression\\results.xml"
+    },
+    "candidate": {
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 20,
+      "seconds": 1.661,
+      "evidence": "test_candidate\\results.xml"
+    },
+    "regression": {
+      "tests": 237,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 236,
+      "seconds": 18.073,
+      "evidence": "test_regression\\results.xml"
+    }
+  },
+  "confirmed_defects": [
+    "Same-boot board runtime restart resets generation to 1 for constant memory-worker session; persistent inference host rejects stale_generation after prior calls",
+    "Remote structured preemption/foreground-busy codes become model_failed when local cancellation is false",
+    "Remote structured deadline_exceeded becomes model_failed",
+    "Public error presentation/probe suppress diagnostic distinction; new reader emits allowlisted reason enums"
+  ],
+  "candidate_behavior": [
+    "Seed/advance request generation from same-boot monotonic microsecond ordinal; keep constant transport owner slot, original stale-generation guard and wire bound",
+    "cancelled/preempted/superseded/foreground_busy replies raise InterruptedError; original wrapper does not increment failure streak",
+    "Remote deadline_exceeded raises TimeoutError; original retry policy remains bounded",
+    "True backend failures remain model_failed; invalid JSON/schema/protected-field omission remain rejected",
+    "Summary diagnostic snapshot contains fixed stage/code/exception-class enums only, exposed through existing worker health"
+  ],
+  "preserved": [
+    "Store/schema/leases/transaction boundaries",
+    "Atomic summary/readback/body-delete transaction",
+    "All source coverage and semantic checks",
+    "Five-minute cutoff and incomplete-turn protection",
+    "Scope/grant/generation/revision checks",
+    "Fresh read transaction on every output packet",
+    "Original model/deadline/context budgets and backoff maximum",
+    "No new service, model or database writer"
+  ],
+  "rollback_note": "Keep generation fix if reverting other code while Windows host survives; resetting counter to 1 becomes stale again. Minimal retained hunk: rollback_safe/generation_only.patch. Never restore a business database or restart models as an implicit rollback.",
+  "test_scope": {
+    "synthetic_sqlite": true,
+    "fake_model_responses": true,
+    "real_models": false,
+    "real_audio": false,
+    "real_database": false,
+    "board_access": false,
+    "localhost_fake_http_only": true,
+    "stale_character_fixtures": "Three unmodified retired-character tests fail on baseline too; retained separately, explicitly deselected in final regression; three selected-character equivalents pass",
+    "windows_skip": "POSIX private-mode check; Windows uses caller ACL"
+  },
+  "actual_production_conclusion": "V11 read shows 270 historical successful summaries, 622 pending events and about 53 minutes since last commit. Exact current model_failed subtype and one valid bodyless event remain unverified; root-only updated readonly proof counts and candidate stage telemetry are ready.",
+  "production_modified": false,
+  "model_calls": 0,
+  "actual_baseline": {
+    "evidence": "actual_metadata_v11.json",
+    "startup_sha256": "e2bbe5e6ea101247e7b74585df670a56530c953e8dc9a7e681820e8871a0dd1d",
+    "candidate_bases_match": true,
+    "store_base_matches": true,
+    "historical_committed_tasks": 270,
+    "valid_summaries": 270,
+    "backlog_events": 622,
+    "last_commit_age_seconds": 3173.902023077011
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "status": "CANDIDATE_ONLY_PRODUCTION_UNCHANGED",
+  "source": "aura/board/runtime/audio/board_dialogue_jobs.py",
+  "class": "BoardDialogueJobs",
+  "frozen_sha256": {
+    "aura/board/runtime/audio/board_dialogue_jobs.py": "35b9b7b944a51c81050eb93078bfe1e24bc5a8e4959d82b34376f729353fede0",
+    "aura/board/runtime/board_dialogue.py": "e98d37825f24f90d674173c64f02c461f5775237232f734708fb6e33d77444f6",
+    "aura/tests/framework/test_board_dialogue_jobs.py": "19db8e837faa3671004407fb4002221c553f7bc8a1e77828dbc549b11c205c7f"
+  },
+  "freeze_note": "No further mutations planned. Source/tests are frozen; final search/idle regression awaits the character exclusive window release. No new ARM/GPU/socket test was attempted.",
+  "tests": {
+    "jobs_cases_passed": 33,
+    "combined_mock_sqlite_passed": 63,
+    "combined_files": [
+      "aura/tests/framework/test_board_dialogue_jobs.py",
+      "aura/tests/framework/test_board_dialogue.py",
+      "aura/tests/framework/test_board_dialogue_client.py"
+    ],
+    "result": "Last executed: 63 passed in 0.51s. New search forwarding and jobs.idle/ASR preemption cases are source-only pending the character A/B window release.",
+    "final_regression_pending": true,
+    "test_python": "C:/Users/35870/.codex/visualizations/2026/10/09/01a12110-3ba4-7651-b3d7-2e6560916eb6/omnivoice-runtime-py310/Scripts/python.exe",
+    "pending_command": "& 'C:/Users/35870/.codex/visualizations/2026/10/09/01a12110-3ba4-7651-b3d7-2e6560916eb6/omnivoice-runtime-py310/Scripts/python.exe' -B -m pytest aura/tests/framework/test_board_dialogue_jobs.py aura/tests/framework/test_board_dialogue.py aura/tests/framework/test_board_dialogue_client.py -q -p no:cacheprovider",
+    "real_model_or_device_tests": false,
+    "character_phase": "Prior tests ran only during authorized PREPARATION. PAIRED_AB_ARMING_PILOT now forbids new mock execution; no final run was started."
+  },
+  "baseline": {
+    "runtime": "/home/root/aura-board-vision-20261030/06391079cfddb734-r3-ubuntu/runtime",
+    "channel_jobs_sha256": "015e13d27db25819d002c4c87087802e02e8b65ac10119bf467635871b458822",
+    "streaming_controller_sha256": "4b76e137d49994f01ae43a7a608e0b9feb13b9eff66cc981346823bace576899",
+    "persistent_audio_engine_sha256": "0e73a064f2014e12f4e90323618c9d04de6a23b0220c138d9d9ff1f8240cc95b",
+    "actual_board_recording_sha256": "a194a026bc224df4f153ff14ce4a228e111778bc39e6f86a09d472d61adde277",
+    "matching_recording_source": "deliverables/2026-10-29_listening_bounce/board_source/tools/board_recording.py",
+    "warning": "Windows aura/tools/board_recording.py differs. Read the matching SHA archive for the current 8-frame/6ms queue drain and wake event path; never deploy an old archive over a fresh runtime.",
+    "new_arm_access_during_character_window": false
+  },
+  "public_contract": {
+    "constructor": "BoardDialogueJobs(controller, config, boot_id, *, asr=None, conversation_path=None, conversation_selection=None, scope_provider=None, profile_resolver=None, profile_release=None, visual_entry_handler=None, special_handlers=None, history_router=None, audio_converter=None, playback_invalidator=None, feedback_provider=None, inference_reconfigure=None, clock=monotonic, wall_clock=None, timezone='America/Los_Angeles', start_worker=True)",
+    "methods": ["enabled", "idle", "configure", "select_conversation", "select_profile", "capture_started", "mark_wake_entry", "mark_visual_entry", "submit", "cancel", "_invalidate", "poll", "acknowledge", "playback_clock", "reset_enrollment", "prepare_feedback", "refresh_feedback", "interruption_transport", "public", "close"],
+    "explicit_test_drivers": ["run_next", "drain_actions"],
+    "stream": "Existing aura-channel-1 start/transcript/text/control/audio/end plus network_complete; every emitted frame is validated by ChannelState before delivery.",
+    "pcm": "Default only 24000Hz mono PCM16; ordered 480-sample packets. Real OmniVoice RAM evidence confirms exactly this format.",
+    "ack": "Existing board player's complete-stream hook calls acknowledge(meta, result); typed 24k payload digest/count/token and the exact capture owner are checked, then original controller receipt is forwarded to BoardMemoryStore. No Windows /played route.",
+    "mouth_clock": "playback_clock(meta, playback_token=..., position_seconds=output.position()) returns audio_sample=round(position_seconds*24000). Neither native sample counts nor 48k stereo sink counts are treated as 24k mouth-clock positions.",
+    "invalidate": "submit/cancel/configuration/selection/close immediately invalidate generation/progress/presentation; boot/session/generation/request/capture and token are checked before playback, clock and ACK. Store/network cleanup uses a separate bounded queue.",
+    "shared_cancel_event": "Root-authorized narrow controller API: prepare_text/prepare_pcm/_start optional cancel_event; default preserves prior behavior. Jobs passes its per-capture Event, checked before/after registration. Every not-received transport error best-effort cancels its remote owner even when the shared Event is already set. No five-second polling loop remains.",
+    "fail_closed": "Missing board handlers, non24k without explicit reviewed bridge, missing trusted historical clock, excessive reply/audio bounds or cleanup overflow never call old Windows ASR/memory/identity/played endpoints."
+  },
+  "capability_inventory": [
+    {"capability":"capture_and_endpoint", "state":"existing owner external", "detail":"No microphone opens here. Existing MCP01/endpoint onset, pre-roll, 700ms silence and 20s limit stay with the capture owner; local frontend factory must be connected explicitly."},
+    {"capability":"one_active_latest_waiting_and_backpressure", "state":"candidate tested", "detail":"One active ASR/dialogue owner, latest waiting clip, 128 progress entries, 16 bounded receipt/cancel actions; no unbounded PCM history."},
+    {"capability":"capture_binding", "state":"candidate tested", "detail":"boot/session/request/generation/capture/sample_count/PCM SHA validation; one board-only capture snapshot."},
+    {"capability":"same_model_board_asr", "state":"injection ready; performance gate separate", "detail":"Calls injected local ASR once under original submission deadline; no Windows ASR fallback. Existing ARM Paraformer RTF remains above one."},
+    {"capability":"ordinary_dialogue", "state":"candidate tested", "detail":"Board ASR text -> BoardDialogueController -> board streaming contract; only model requests go to Windows."},
+    {"capability":"natural_vocative_interpretation", "state":"root builder wired; candidate Store test passed", "detail":"Raw ordinary ASR is retained; root BoardContextBuilder applies the existing narrow helper only to model current input. Root BoardMemoryCommands handles the narrow alias in explicit command parsing while keeping raw user_event_id provenance."},
+    {"capability":"explicit_memory_set_list_view_correct_forget_clear", "state":"core candidate tested; new clear API regression pending", "detail":"Root BoardMemoryCommands executes before model generation; explicit command routing takes precedence over arithmetic/reasoning. Raw alias source and actual Store write were tested. Root's new scope clear API is awaiting the final shared regression. No LLM-only false memory write."},
+    {"capability":"history_recall", "state":"search forwarding/API written; final regression pending", "detail":"Original recall_requested/date parser; ordinary today-chat does not query history. Explicit time-bound Store.history(search=selected_subject or None); text/summary-keyword matching occurs before SQL LIMIT. Store.topic remains an independent exact partition."},
+    {"capability":"historical_delete_preview_confirmation", "state":"board handler pending; fail closed", "detail":"Old preview/confirmation/source invalidation workflow must be retained via history_delete_preview handler. Cannot treat an LLM reply as deletion completion."},
+    {"capability":"guest_conversation_new_resume", "state":"candidate ready", "detail":"Board ConversationSelection remains explicit; loading saved ID never auto-resumes. Existing method names preserved."},
+    {"capability":"personal_profile_select_release_permissions", "state":"board resolver and release handler required", "detail":"Old Windows profile token is never accepted as a local grant. Requires live process-local ProfileAccess grant and explicit profile resolver/release; caller cannot select personal scope from a face/voice candidate."},
+    {"capability":"personal_new_conversation_context_reset", "state":"fail closed", "detail":"Current Store profile scope does not partition recent context by conversation_id. select_conversation(resume=False) under a selected profile refuses instead of silently changing only an ID and carrying old context. Clearing a profile creates a fresh anonymous selection when a selector is available."},
+    {"capability":"wake_aliases_and_short_interjections", "state":"candidate tested", "detail":"Reuses original prepare_spoken_input/wake_request, 汐蓝/欸/哎 boundary rules and 180ms RMS speech gate. Wake-only returns wake_only without memory/model/TTS."},
+    {"capability":"visual_speech_entry", "state":"board authorization hook pending; fail closed", "detail":"External attention/capture proof must remain bound to the same track and capture. Requires visual_entry_handler; no geometry-only identity authorization."},
+    {"capability":"automatic_continuous_listen_tail_guard", "state":"not drop-in complete", "detail":"Existing recording controller owns full ACK/tail guard/rearm. feedback_ready remains false until approved board cue assets are injected; no automatic mic opening in jobs."},
+    {"capability":"spoken_barge_in", "state":"board ASR transport prepared; capture factory pending", "detail":"interruption_transport can be injected into existing InterruptionVerifier. The old default BargeInRecordingController still selects Windows ASR, so GUI factory must explicitly inject a board barge_capture_factory before enabling this path."},
+    {"capability":"identity_enrollment_confirmation_and_sampling", "state":"board handler pending; fail closed", "detail":"Existing face FSM, confirmation/update/cancel, source guard, guidance and commit receipts must be retained. Current jobs do not manufacture a local identity success."},
+    {"capability":"direct_identity_query", "state":"board handler pending; fail closed", "detail":"Original whole-question detector used, including known aliases; requires current board identity query handler. No old Windows face-gallery submission."},
+    {"capability":"voice_registration_and_calibrated_speaker_attribution", "state":"board handler pending; fail closed for explicit voice commands", "detail":"ECAPA candidate availability is not field calibration. Preserve model/gallery/capture revisions, ambiguity/overlap/conflict gates and no personal-memory permission from a candidate."},
+    {"capability":"temporary_aN_voice_anchors_and_crossmodal_remember_self", "state":"board workflow pending", "detail":"Do not silently discard or replace original temporary anchors/link receipts; name hints/remember-self are routed to unavailable identity handler until connected."},
+    {"capability":"structured_visual_questions", "state":"board handler pending; fail closed", "detail":"Must answer only current supported YOLO/tracking observations; no image export, retired VLM restart or model hallucination of an unseen image."},
+    {"capability":"complex_reasoning_and_thinking_cue", "state":"board handler pending; fail closed", "detail":"Retain explicit route/options/budget/cue semantics before claiming compatibility. Casual dialogue does not silently gain thinking audio."},
+    {"capability":"approved_feedback_and_social_cues", "state":"board RAM asset provider required", "detail":"No startup/refresh request to Windows legacy feedback/social/audio routes. Provider must supply already validated board-local asset metadata."},
+    {"capability":"reply_control_and_segmented_audio", "state":"candidate tested", "detail":"Generic emotion/action contract only; no portrait assets or renderer implementation. Existing stream limit 240 characters/30s stays fail-closed."},
+    {"capability":"incremental_llm_and_tts_overlap", "state":"not implemented", "detail":"This bridge packetizes a fully prepared/validated PlaybackPlan. Streaming player compatibility does not mean the former incremental LLM-to-clause-TTS overlap or first-PCM latency has been preserved; neither is claimed as complete."},
+    {"capability":"native_rate_bridge", "state":"default24k tested; other rate unavailable", "detail":"Actual OmniVoice RAM is24k. Any future bridge must be explicit and preserve duration/native receipt plus its own played-payload digest/count; never reinterpret48k as24k."},
+    {"capability":"cancellation_handoff", "state":"candidate tested", "detail":"Immediate local ownership invalidation; queued bounded controller cancel closes old turn. New generations cannot adopt old audio/ACK."},
+    {"capability":"complete_playback_memory_receipt", "state":"candidate tested with real synthetic Store", "detail":"Only existing player's complete-stream hook can schedule exact native token/hash/samples ACK. Generated/unplayed/partial/stale replies do not become heard memory."},
+    {"capability":"board_audio_clock_and_renderer_invalidation", "state":"generic bridge tested; renderer wiring pending", "detail":"Sink position seconds*24000 and owner/token invalidation hook; does not modify portrait_offload, GUI, image assets or active renderer."},
+    {"capability":"clock_authority_and_restart_recovery", "state":"root factory responsibility", "detail":"Inject clock guard for wall_clock; default historical routing refuses unsourced system time. Single owner startup explicitly calls Store.recover_interrupted_turns; constructor never does a production recovery."},
+    {"capability":"model_endpoint_reconfiguration", "state":"explicit callback required", "detail":"enable/timeout updates supported; host/port change without inference_reconfigure fails closed instead of silently using old/new business service."},
+    {"capability":"idle_background_memory", "state":"composed idle/pre-ASR preemption written; final regression pending", "detail":"The factory must use jobs.idle and controller.idle and timeline.safe_for_compaction. Jobs holds busy from the waiting/ASR phase through playback and receipt cleanup, and preempts existing compaction before ASR on its worker. UI submit performs no SQLite I/O; jobs starts no summary scheduler or autonomous task."}
+  ],
+  "minimal_gui_factory": {
+    "location":"fresh actual r3 tools/board_avatar_gtk.py transcriber construction formerly ChannelConversationJobs; do not patch older Windows GUI",
+    "construction":"BoardDialogueJobs(board_controller, conversation_settings, board_boot_id, asr=board_asr, conversation_path=board_selection_path, wall_clock=timeline.event_time, playback_invalidator=invalidate_current_render_owner, start_worker=False)",
+    "worker_idle":"lambda: jobs.idle and board_controller.idle and timeline.safe_for_compaction",
+    "keep":"Existing StreamingController, RecordingController/board audio output and their complete-stream ACK callback. No changes to imagery or native character thread.",
+    "before_enable":"Explicit feature gating for visual entry, profile UI, identity/link/speaker flows, reasoning/cues and barge_capture_factory. Do not replace the full current transcriber while these required active modes are missing.",
+    "not_performed":"No GUI/config/factory was changed; no microphone, playback, Windows business request, ARM test, GPU model or real user database access occurred in this adapter phase."
+  }
+}

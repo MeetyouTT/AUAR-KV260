@@ -1,0 +1,2031 @@
+{
+  "scope": "offline only; no original-engine/board operation; production files unchanged",
+  "status": "original-engine fixture load hang unresolved; real-model pixel parity failed",
+  "sources": {
+    "actual_psb": "D:\\share、\\项目开发\\美冬本地女友项目\\assets\\fuyukiss\\webgl\\yuk_0.ems.psb",
+    "json": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\inputs\\ems\\yuk_0.ems.json",
+    "resx": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\inputs\\ems\\yuk_0.ems.resx.json",
+    "failed_fixture": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\mesh_fixtures\\absolute_with_bp\\model.psb",
+    "controlled_parameters": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\controlled-normal-parameters.json"
+  },
+  "sha256": {
+    "actual_psb": "d752ef761e53922ffcc9895023f3782a20161792e8f28b51099721534544aad7",
+    "failed_fixture": "ef3685e875bc714e3e529b9b36bc6b8a615174afbbf95f5ee041fb0bc25fc096"
+  },
+  "proven_container_facts": {
+    "v1_resource_tags": {
+      "/object/test/motion/root/layer/0/meshCombinator/combinatorList/0/rawMeshList": {
+        "offset": 4637,
+        "tag": "0x22"
+      },
+      "/source/tex/texture/pixel": {
+        "offset": 4786,
+        "tag": "0x19"
+      }
+    },
+    "rawMeshList_tag": "0x22: extra PSB resource reference; not a string literal",
+    "v1_raw_resource_bytes": 384,
+    "v1_expected_raw_resource_bytes": 384,
+    "v1_texture_bytes": 16384,
+    "v1_expected_texture_bytes": 16384,
+    "roundtrip": "PsbDecompile -raw preserved all combinator/variable fields and rawMeshList marker; only small numeric bp float rounding differed",
+    "real_owner_count": 43,
+    "real_control_count": 122,
+    "real_psb_and_native_json_control_fields_equal": true,
+    "real_psb_and_native_resx_float32_le_bytes_equal": true,
+    "real_resources_match_exact_count_and_finite": true,
+    "all_neutral_owner_count_at_controlled_parameters": 9
+  },
+  "structural_differences": [
+    {
+      "field": "combinator owner topology",
+      "real": "43/43 src=blank deformation parents; textured children below",
+      "failed": "direct texture sprite owns combinator",
+      "judgment": "unverified topology; main suspect, not proven root cause"
+    },
+    {
+      "field": "owner frame mesh.bp",
+      "real": "null in every combinator owner",
+      "failed": "nonnull conflicting +0.5 absolute X grid",
+      "judgment": "bp precedence deliberately adversarial before a valid base was established"
+    },
+    {
+      "field": "terminal frame/priority",
+      "working_and_real": "terminal frame time61 type0 and priority tail item retained",
+      "failed": "removed terminal frame and priority tail; lastTime changed61->3600",
+      "judgment": "another independent unverified change that might affect loader scan termination"
+    },
+    {
+      "field": "variable range",
+      "real": "mostly [-30,30]",
+      "failed": "[-1,1]",
+      "judgment": "structurally valid finite range, lower confidence suspect"
+    }
+  ],
+  "side_path_fixtures": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\native_integration\\mesh_fixtures_v2",
+  "side_path_changes": "restore existing working sentinel structure; blank parent plus null bp first; use body_LR/body_UD ranges[-30,30]; bp conflict and direct sprite tested only after base",
+  "pixel_difference": {
+    "reference": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\reference_controlled\\normal-reference.png",
+    "native": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_yuki_native_validation\\evidence\\native_integration\\results\\controlled-normal-native.png",
+    "known_observation": "native head top about3px higher, eyes/nose about5px higher, extended hand about7px right; received and visually checked",
+    "inference": "This is not explained by resource truncation/tag loss or different imported raw grid bytes. Interpolation/variable semantics, neutral boundary revocation and existing ancestor mesh propagation remain unproved.",
+    "acceptance": "CPU numeric PASS is not a source-engine geometry/pixel PASS"
+  },
+  "controls": [
+    {
+      "path": "/object/all_parts/motion/全体構造/layer/0/children/0/children/0/children/5/children/1/children/0/children/1/children/0/children/5/children/0/children/0/children/0/children/0/meshCombinator/combinatorList/0",
+      "variable": "body_UD",
+      "parameter": -20,
+      "normalized_mesh_position": 0.3333333333333333,
+      "raw_resource": 48,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 48
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/all_parts/motion/全体構造/layer/0/children/0/children/0/children/5/children/1/children/0/children/1/children/0/children/5/children/0/children/0/children/0/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 18,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 18
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/all_parts/motion/全体構造/layer/0/children/0/children/0/children/5/children/1/children/0/children/1/children/0/children/5/children/0/children/0/children/0/children/0/meshCombinator/combinatorList/2",
+      "variable": "hair_UD_sideR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 4,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 4
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/all_parts/motion/全体構造/layer/0/children/0/children/0/children/5/children/1/children/0/children/1/children/0/children/5/children/0/children/0/children/0/children/0/meshCombinator/combinatorList/3",
+      "variable": "hair_LR_sideR",
+      "parameter": 0,
+      "normalized_mesh_position": 2.0,
+      "raw_resource": 109,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 109
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/all_parts/motion/全体構造/layer/0/children/0/children/0/children/5/children/1/children/0/children/1/children/0/children/5/children/0/children/0/children/0/children/0/meshCombinator/combinatorList/4",
+      "variable": "hair_LR_M_sideR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 2,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 2
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/all_parts/motion/全体構造/layer/0/children/0/children/0/children/5/children/1/children/0/children/1/children/0/children/5/children/0/children/0/children/1/children/0/meshCombinator/combinatorList/0",
+      "variable": "body_UD",
+      "parameter": -20,
+      "normalized_mesh_position": 0.3333333333333333,
+      "raw_resource": 52,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 52
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/all_parts/motion/全体構造/layer/0/children/0/children/0/children/5/children/1/children/0/children/1/children/0/children/5/children/0/children/0/children/1/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 18,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 18
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/all_parts/motion/全体構造/layer/0/children/0/children/0/children/5/children/1/children/0/children/1/children/0/children/5/children/0/children/0/children/1/children/0/meshCombinator/combinatorList/2",
+      "variable": "hair_UD_sideL",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 4,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 4
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/all_parts/motion/全体構造/layer/0/children/0/children/0/children/5/children/1/children/0/children/1/children/0/children/5/children/0/children/0/children/1/children/0/meshCombinator/combinatorList/3",
+      "variable": "hair_LR_sideL",
+      "parameter": 0,
+      "normalized_mesh_position": 2.0,
+      "raw_resource": 110,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 110
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/all_parts/motion/全体構造/layer/0/children/0/children/0/children/5/children/1/children/0/children/1/children/0/children/5/children/0/children/0/children/1/children/0/meshCombinator/combinatorList/4",
+      "variable": "hair_LR_M_sideL",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 11,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 11
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/下半身変形基礎/layer/0/children/0/children/0/meshCombinator/combinatorList/0",
+      "variable": "body_slant",
+      "parameter": 0.4000000059604645,
+      "normalized_mesh_position": 1.0133333335320154,
+      "raw_resource": 65,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 65
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/下半身変形基礎/layer/0/children/0/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_UD",
+      "parameter": -20,
+      "normalized_mesh_position": 0.3333333333333333,
+      "raw_resource": 74,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 74
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/下半身変形基礎/layer/0/children/0/children/0/meshCombinator/combinatorList/2",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 63,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 63
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/下半身変形基礎/layer/0/children/1/children/0/meshCombinator/combinatorList/0",
+      "variable": "body_slant",
+      "parameter": 0.4000000059604645,
+      "normalized_mesh_position": 1.0133333335320154,
+      "raw_resource": 94,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 94
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/下半身変形基礎/layer/0/children/1/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_UD",
+      "parameter": -20,
+      "normalized_mesh_position": 0.3333333333333333,
+      "raw_resource": 90,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 90
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/下半身変形基礎/layer/0/children/1/children/0/meshCombinator/combinatorList/2",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 69,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 69
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/0/children/0/meshCombinator/combinatorList/0",
+      "variable": "body_slant",
+      "parameter": 0.4000000059604645,
+      "normalized_mesh_position": 1.0133333335320154,
+      "raw_resource": 28,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 28
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/0/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_UD",
+      "parameter": -20,
+      "normalized_mesh_position": 0.3333333333333333,
+      "raw_resource": 76,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 76
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/0/children/0/meshCombinator/combinatorList/2",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 97,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 97
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/0/children/0/children/4/children/1/children/0/children/0/meshCombinator/combinatorList/0",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 36,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 36
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/0/children/0/children/4/children/1/children/0/children/0/meshCombinator/combinatorList/1",
+      "variable": "quake_UD",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 20,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 20
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/0/children/0/children/4/children/1/children/0/children/0/meshCombinator/combinatorList/2",
+      "variable": "quake_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 17,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 17
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/0/children/0/children/4/children/1/children/0/children/0/meshCombinator/combinatorList/3",
+      "variable": "quake_LR_M",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 21,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 21
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/0/children/0/children/4/children/1/children/1/children/0/meshCombinator/combinatorList/0",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 89,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 89
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/0/children/0/children/4/children/1/children/2/children/0/meshCombinator/combinatorList/0",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 89,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 89
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/0/children/0/children/4/children/2/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_slant",
+      "parameter": 4.800000190734863,
+      "normalized_mesh_position": 1.1600000063578289,
+      "raw_resource": 95,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 95
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/0/children/0/children/4/children/2/children/0/meshCombinator/combinatorList/1",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 54,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 54
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/0/children/0/children/4/children/2/children/0/meshCombinator/combinatorList/2",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 85,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 85
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/1/children/0/meshCombinator/combinatorList/0",
+      "variable": "body_slant",
+      "parameter": 0.4000000059604645,
+      "normalized_mesh_position": 1.0133333335320154,
+      "raw_resource": 30,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 30
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/1/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_UD",
+      "parameter": -20,
+      "normalized_mesh_position": 0.3333333333333333,
+      "raw_resource": 15,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 15
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/1/children/0/meshCombinator/combinatorList/2",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 78,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 78
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/1/children/0/meshCombinator/combinatorList/3",
+      "variable": "quake_UD",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 25,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 25
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/1/children/0/meshCombinator/combinatorList/4",
+      "variable": "quake_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 24,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 24
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/1/children/0/meshCombinator/combinatorList/5",
+      "variable": "quake_LR_M",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 61,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 61
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/2/children/0/meshCombinator/combinatorList/0",
+      "variable": "act_sp2",
+      "parameter": -4.400000095367432,
+      "normalized_mesh_position": 1.7066666603088378,
+      "raw_resource": 107,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 107
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/2/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_slant",
+      "parameter": 0.4000000059604645,
+      "normalized_mesh_position": 1.0133333335320154,
+      "raw_resource": 6,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 6
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/2/children/0/meshCombinator/combinatorList/2",
+      "variable": "body_UD",
+      "parameter": -20,
+      "normalized_mesh_position": 0.3333333333333333,
+      "raw_resource": 88,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 88
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/2/children/0/meshCombinator/combinatorList/3",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 60,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 60
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/2/children/0/children/0/children/1/children/1/children/0/meshCombinator/combinatorList/0",
+      "variable": "act_sp2",
+      "parameter": -4.400000095367432,
+      "normalized_mesh_position": 1.7066666603088378,
+      "raw_resource": 108,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 108
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/2/children/0/children/0/children/1/children/1/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_UD",
+      "parameter": -20,
+      "normalized_mesh_position": 0.3333333333333333,
+      "raw_resource": 59,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 59
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/3/children/0/meshCombinator/combinatorList/0",
+      "variable": "body_UD",
+      "parameter": -20,
+      "normalized_mesh_position": 0.3333333333333333,
+      "raw_resource": 46,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 46
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/3/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 64,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 64
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/4/children/0/meshCombinator/combinatorList/0",
+      "variable": "act_sp3",
+      "parameter": 4.800000190734863,
+      "normalized_mesh_position": 2.3200000127156577,
+      "raw_resource": 112,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 112
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/4/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_UD",
+      "parameter": -20,
+      "normalized_mesh_position": 0.3333333333333333,
+      "raw_resource": 55,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 55
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/4/children/0/meshCombinator/combinatorList/2",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 84,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 84
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/4/children/0/children/0/children/1/children/1/children/0/meshCombinator/combinatorList/0",
+      "variable": "act_sp3",
+      "parameter": 4.800000190734863,
+      "normalized_mesh_position": 2.3200000127156577,
+      "raw_resource": 111,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 111
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/5/children/0/meshCombinator/combinatorList/0",
+      "variable": "body_UD",
+      "parameter": -20,
+      "normalized_mesh_position": 0.3333333333333333,
+      "raw_resource": 42,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 42
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/body_parts/motion/全身変形基礎/layer/0/children/5/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 96,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 96
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_slant",
+      "parameter": 4.800000190734863,
+      "normalized_mesh_position": 1.1600000063578289,
+      "raw_resource": 37,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 37
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_slant",
+      "parameter": 0.4000000059604645,
+      "normalized_mesh_position": 1.0133333335320154,
+      "raw_resource": 12,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 12
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/meshCombinator/combinatorList/2",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 56,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 56
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/meshCombinator/combinatorList/3",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 91,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 91
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/children/1/meshCombinator/combinatorList/0",
+      "variable": "hair_LR_sideR",
+      "parameter": 0,
+      "normalized_mesh_position": 2.0,
+      "raw_resource": 106,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 106
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/children/1/meshCombinator/combinatorList/1",
+      "variable": "hair_LR_M_sideR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 13,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 13
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/children/1/children/1/children/0/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 40,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 40
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/children/1/children/1/children/0/children/0/meshCombinator/combinatorList/1",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 8,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 8
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/children/1/children/1/children/0/children/0/meshCombinator/combinatorList/2",
+      "variable": "hair_UD_sideR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 7,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 7
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/children/1/children/1/children/0/children/0/meshCombinator/combinatorList/3",
+      "variable": "hair_LR_sideR",
+      "parameter": 0,
+      "normalized_mesh_position": 2.0,
+      "raw_resource": 101,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 101
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/children/1/children/1/children/0/children/0/meshCombinator/combinatorList/4",
+      "variable": "hair_LR_M_sideR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 9,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 9
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/children/1/children/1/children/1/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 40,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 40
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/children/1/children/1/children/1/children/0/meshCombinator/combinatorList/1",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 22,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 22
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/children/1/children/1/children/1/children/0/meshCombinator/combinatorList/2",
+      "variable": "hair_UD_sideR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 4,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 4
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/children/1/children/1/children/1/children/0/meshCombinator/combinatorList/3",
+      "variable": "hair_LR_sideR",
+      "parameter": 0,
+      "normalized_mesh_position": 2.0,
+      "raw_resource": 102,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 102
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/0/children/0/children/0/children/1/children/1/children/1/children/0/meshCombinator/combinatorList/4",
+      "variable": "hair_LR_M_sideR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 23,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 23
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/1/children/0/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_slant",
+      "parameter": 4.800000190734863,
+      "normalized_mesh_position": 1.1600000063578289,
+      "raw_resource": 34,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 34
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/1/children/0/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_slant",
+      "parameter": 0.4000000059604645,
+      "normalized_mesh_position": 1.0133333335320154,
+      "raw_resource": 19,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 19
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/1/children/0/children/0/meshCombinator/combinatorList/2",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 49,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 49
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/1/children/0/children/0/meshCombinator/combinatorList/3",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 82,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 82
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/1/children/0/children/0/children/1/meshCombinator/combinatorList/0",
+      "variable": "hair_UD_sideL",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 26,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 26
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/1/children/0/children/0/children/1/meshCombinator/combinatorList/1",
+      "variable": "hair_LR_sideL",
+      "parameter": 0,
+      "normalized_mesh_position": 2.0,
+      "raw_resource": 105,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 105
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/1/children/0/children/0/children/1/meshCombinator/combinatorList/2",
+      "variable": "hair_LR_M_sideL",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 16,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 16
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/1/children/0/children/0/children/1/children/1/children/0/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_slant",
+      "parameter": 4.800000190734863,
+      "normalized_mesh_position": 1.1600000063578289,
+      "raw_resource": 29,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 29
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/1/children/0/children/0/children/1/children/1/children/0/children/0/meshCombinator/combinatorList/1",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 5,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 5
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/1/children/0/children/0/children/1/children/1/children/0/children/0/meshCombinator/combinatorList/2",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 0,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 0
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/1/children/0/children/0/children/1/children/1/children/0/children/0/meshCombinator/combinatorList/3",
+      "variable": "hair_UD_sideL",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 4,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 4
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/1/children/0/children/0/children/1/children/1/children/0/children/0/meshCombinator/combinatorList/4",
+      "variable": "hair_LR_sideL",
+      "parameter": 0,
+      "normalized_mesh_position": 2.0,
+      "raw_resource": 100,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 100
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/1/children/0/children/0/children/1/children/1/children/0/children/0/meshCombinator/combinatorList/5",
+      "variable": "hair_LR_M_sideL",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 11,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 11
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/2/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_slant",
+      "parameter": 4.800000190734863,
+      "normalized_mesh_position": 1.1600000063578289,
+      "raw_resource": 31,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 31
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/2/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_slant",
+      "parameter": 0.4000000059604645,
+      "normalized_mesh_position": 1.0133333335320154,
+      "raw_resource": 14,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 14
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/2/children/0/meshCombinator/combinatorList/2",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 79,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 79
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/2/children/0/meshCombinator/combinatorList/3",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 71,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 71
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/2/children/0/children/1/meshCombinator/combinatorList/0",
+      "variable": "hair_UD_front",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 33,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 33
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/2/children/0/children/1/meshCombinator/combinatorList/1",
+      "variable": "hair_LR_front",
+      "parameter": 0,
+      "normalized_mesh_position": 2.0,
+      "raw_resource": 104,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 104
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/2/children/0/children/1/meshCombinator/combinatorList/2",
+      "variable": "hair_LR_M_front",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 1,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 1
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/3/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_slant",
+      "parameter": 4.800000190734863,
+      "normalized_mesh_position": 1.1600000063578289,
+      "raw_resource": 32,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 32
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/3/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_slant",
+      "parameter": 0.4000000059604645,
+      "normalized_mesh_position": 1.0133333335320154,
+      "raw_resource": 10,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 10
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/3/children/0/meshCombinator/combinatorList/2",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 70,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 70
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/3/children/0/meshCombinator/combinatorList/3",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 62,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 62
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/3/children/0/children/1/meshCombinator/combinatorList/0",
+      "variable": "hair_UD",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 35,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 35
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/3/children/0/children/1/meshCombinator/combinatorList/1",
+      "variable": "hair_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 2.0,
+      "raw_resource": 103,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 103
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/ex_parts_a/motion/頭部差分A/layer/3/children/0/children/1/meshCombinator/combinatorList/2",
+      "variable": "hair_LR_M",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 16,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 16
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/face_parts/motion/瞳L/layer/0/meshCombinator/combinatorList/0",
+      "variable": "face_eye_UD",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 44,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 44
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/face_parts/motion/瞳L/layer/0/meshCombinator/combinatorList/1",
+      "variable": "face_eye_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 86,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 86
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/face_parts/motion/瞳R/layer/0/meshCombinator/combinatorList/0",
+      "variable": "face_eye_UD",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 43,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 43
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/face_parts/motion/瞳R/layer/0/meshCombinator/combinatorList/1",
+      "variable": "face_eye_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 66,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 66
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部全体変形/layer/0/children/0/meshCombinator/combinatorList/0",
+      "variable": "body_UD",
+      "parameter": -20,
+      "normalized_mesh_position": 0.3333333333333333,
+      "raw_resource": 50,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 50
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部全体変形/layer/0/children/0/meshCombinator/combinatorList/1",
+      "variable": "body_LR",
+      "parameter": 3,
+      "normalized_mesh_position": 1.1,
+      "raw_resource": 80,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 80
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部全体変形/layer/0/children/0/meshCombinator/combinatorList/2",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 68,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 68
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 93,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 93
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/0/meshCombinator/combinatorList/1",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 77,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 77
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/meshCombinator/combinatorList/0",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 92,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 92
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 72,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 72
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/0/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 47,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 47
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/0/children/0/meshCombinator/combinatorList/1",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 99,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 99
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/1/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 45,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 45
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/1/children/0/meshCombinator/combinatorList/1",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 87,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 87
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/2/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 53,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 53
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/2/children/0/meshCombinator/combinatorList/1",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 57,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 57
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/3/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 58,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 58
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/3/children/0/meshCombinator/combinatorList/1",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 81,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 81
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/4/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 39,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 39
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/4/children/0/meshCombinator/combinatorList/1",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 67,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 67
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/5/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 51,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 51
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/5/children/0/meshCombinator/combinatorList/1",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 73,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 73
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/6/children/0/children/0/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 75,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 75
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/6/children/0/children/0/children/0/meshCombinator/combinatorList/1",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 98,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 98
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/6/children/0/children/1/children/0/meshCombinator/combinatorList/0",
+      "variable": "hair_UD_front",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 38,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 38
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/6/children/0/children/1/children/0/meshCombinator/combinatorList/1",
+      "variable": "hair_LR_front",
+      "parameter": 0,
+      "normalized_mesh_position": 2.0,
+      "raw_resource": 100,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 100
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 640,
+      "expected_bytes": 640,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/6/children/0/children/1/children/0/meshCombinator/combinatorList/2",
+      "variable": "hair_LR_M_front",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 3,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 3
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/0/children/1/children/0/children/6/children/0/children/2/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 27,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 27
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/1/children/0/children/0/meshCombinator/combinatorList/0",
+      "variable": "head_UD",
+      "parameter": -3,
+      "normalized_mesh_position": 0.9,
+      "raw_resource": 41,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 41
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    },
+    {
+      "path": "/object/head_parts/motion/頭部変形基礎/layer/0/children/1/children/0/children/0/meshCombinator/combinatorList/1",
+      "variable": "head_LR",
+      "parameter": 0,
+      "normalized_mesh_position": 1.0,
+      "raw_resource": 83,
+      "psb_resource_node": {
+        "resource_kind": "extra",
+        "index": 83
+      },
+      "fields_equal": true,
+      "float32_le_payload_equal": true,
+      "byte_length": 384,
+      "expected_bytes": 384,
+      "finite": true
+    }
+  ],
+  "source_modified": false,
+  "browser_used": false,
+  "board_connected": false
+}

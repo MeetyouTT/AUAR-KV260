@@ -1,0 +1,99 @@
+    localparam [31:0] IP_ID = 32'h50574d54; // PWMT, distinct from AURA M3
+    localparam [31:0] ABI_VERSION = 32'h00020000;
+    localparam [31:0] START_KEY = 32'h53544152;
+    localparam [31:0] STOP_KEY = 32'h53544f50;
+    localparam [1:0] OKAY = 2'b00, SLVERR = 2'b10;
+    reg aw_pending = 0, w_pending = 0;
+    reg [11:0] aw_address = 0;
+    reg [31:0] w_data = 0, scratch = 0;
+    reg [3:0] w_strobes = 0;
+    wire busy, config_valid;
+    wire [31:0] frames_left, period_ticks, pulse_ticks;
+    wire [31:0] pulse_high_ticks, selected_us, frame_index;
+    wire commit = aw_pending && w_pending && !s_axi_bvalid;
+    wire command = commit && aw_address == 12'h010 && w_strobes == 4'hf;
+    wire start = command && w_data == START_KEY && !busy && config_valid;
+    wire stop = command && w_data == STOP_KEY;
+    integer i;
+
+    assign s_axi_awready = s_axi_aresetn && !aw_pending && !s_axi_bvalid;
+    assign s_axi_wready = s_axi_aresetn && !w_pending && !s_axi_bvalid;
+    assign s_axi_arready = s_axi_aresetn && !s_axi_rvalid;
+    pwm_burst #(.CLK_HZ(CLK_HZ), .PWM_HZ(PWM_HZ), .PULSE_US(PULSE_US),
+        .RUN_FRAMES(RUN_FRAMES), .PULSE_HIGH_US(PULSE_HIGH_US),
+        .HOLD_FRAMES(HOLD_FRAMES)) burst (
+        .clk(s_axi_aclk), .resetn(s_axi_aresetn), .start(start), .stop(stop),
+        .pwm(servo_pwm), .busy(busy), .frames_left(frames_left),
+        .config_valid(config_valid), .period_ticks(period_ticks),
+        .pulse_ticks(pulse_ticks), .pulse_high_ticks(pulse_high_ticks),
+        .selected_us(selected_us), .frame_index(frame_index));
+
+    always @(posedge s_axi_aclk) begin
+        if (!s_axi_aresetn) begin
+            aw_pending <= 0;
+            w_pending <= 0;
+            aw_address <= 0;
+            w_data <= 0;
+            w_strobes <= 0;
+            scratch <= 0;
+            s_axi_bvalid <= 0;
+            s_axi_bresp <= OKAY;
+            s_axi_rvalid <= 0;
+            s_axi_rresp <= OKAY;
+            s_axi_rdata <= 0;
+        end else begin
+            if (s_axi_awvalid && s_axi_awready) begin
+                aw_pending <= 1;
+                aw_address <= s_axi_awaddr;
+            end
+            if (s_axi_wvalid && s_axi_wready) begin
+                w_pending <= 1;
+                w_data <= s_axi_wdata;
+                w_strobes <= s_axi_wstrb;
+            end
+            if (s_axi_bvalid && s_axi_bready) s_axi_bvalid <= 0;
+            if (commit) begin
+                aw_pending <= 0;
+                w_pending <= 0;
+                s_axi_bvalid <= 1;
+                s_axi_bresp <= SLVERR;
+                case (aw_address)
+                    12'h010: if (stop || start) s_axi_bresp <= OKAY;
+                    12'h02c: begin
+                        for (i = 0; i < 4; i = i + 1)
+                            if (w_strobes[i]) scratch[i*8 +: 8] <= w_data[i*8 +: 8];
+                        s_axi_bresp <= OKAY;
+                    end
+                    default: s_axi_bresp <= SLVERR;
+                endcase
+            end
+            if (s_axi_rvalid && s_axi_rready) s_axi_rvalid <= 0;
+            if (s_axi_arvalid && s_axi_arready) begin
+                s_axi_rvalid <= 1;
+                s_axi_rresp <= OKAY;
+                case (s_axi_araddr)
+                    12'h000: s_axi_rdata <= IP_ID;
+                    12'h004: s_axi_rdata <= ABI_VERSION;
+                    12'h008: s_axi_rdata <= BUILD_ID;
+                    12'h00c: s_axi_rdata <= {29'b0, config_valid, servo_pwm, busy};
+                    12'h014: s_axi_rdata <= period_ticks;
+                    12'h018: s_axi_rdata <= pulse_ticks;
+                    12'h01c: s_axi_rdata <= frames_left;
+                    12'h020: s_axi_rdata <= CLK_HZ;
+                    12'h024: s_axi_rdata <= RUN_FRAMES;
+                    12'h028: s_axi_rdata <= PULSE_US;
+                    12'h02c: s_axi_rdata <= scratch;
+                    12'h030: s_axi_rdata <= PULSE_HIGH_US;
+                    12'h034: s_axi_rdata <= HOLD_FRAMES;
+                    12'h038: s_axi_rdata <= selected_us;
+                    12'h03c: s_axi_rdata <= frame_index;
+                    12'h040: s_axi_rdata <= pulse_high_ticks;
+                    default: begin
+                        s_axi_rdata <= 0;
+                        s_axi_rresp <= SLVERR;
+                    end
+                endcase
+            end
+        end
+    end
+endmodule

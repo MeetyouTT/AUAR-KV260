@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="21" time="0.387" timestamp="2026-11-02T00:21:03.786802-08:00" hostname="REVO1"><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_actual_current_result_metrics_are_published_under_host_relative_names" time="0.005"><failure message="AssertionError: assert None == 1&#10; +  where None = &lt;built-in method get of dict object at 0x000001CEFA063580&gt;('llm_backend_metrics_calls')&#10; +    where &lt;built-in method get of dict object at 0x000001CEFA063580&gt; = {'metadata_only': True, 'streaming_enabled': False, 'context_ms': 0.0, 'local_reply_ms': 0.0, ...}.get">def test_actual_current_result_metrics_are_published_under_host_relative_names():
+        controller, store, models = setup()
+        backend = dict(first_content_ms=120.5, first_json_closed_ms=300., backend_done_ms=315.,
+                       prompt_eval_count=18, eval_count=12)
+        calls = response_hook(models, [backend])
+        plan = prepared(controller)
+        metrics = controller.last_prepare_metrics
+&gt;       assert metrics.get('llm_backend_metrics_calls') == 1
+E       AssertionError: assert None == 1
+E        +  where None = &lt;built-in method get of dict object at 0x000001CEFA063580&gt;('llm_backend_metrics_calls')
+E        +    where &lt;built-in method get of dict object at 0x000001CEFA063580&gt; = {'metadata_only': True, 'streaming_enabled': False, 'context_ms': 0.0, 'local_reply_ms': 0.0, ...}.get
+
+tests\framework\test_numeric_llm_metrics.py:72: AssertionError</failure></testcase><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_multiple_llm_calls_keep_only_last_result_without_stale_optional_keys" time="0.001"><failure message="AssertionError: assert None == 2&#10; +  where None = &lt;built-in method get of dict object at 0x000001CEFCB36600&gt;('llm_backend_metrics_calls')&#10; +    where &lt;built-in method get of dict object at 0x000001CEFCB36600&gt; = {'metadata_only': True, 'streaming_enabled': False, 'context_ms': 0.0, 'local_reply_ms': 0.0, ...}.get">def test_multiple_llm_calls_keep_only_last_result_without_stale_optional_keys():
+        controller, _, models = setup()
+        calls = response_hook(models, [dict(first_content_ms=999., eval_count=10), dict(eval_count=21)],
+                              replies=[USER_TEXT, '你可以先休息一下，我陪着你。'])
+        plan = prepared(controller)
+        metrics = controller.last_prepare_metrics
+        assert metrics['llm_calls'] == 2
+&gt;       assert metrics.get('llm_backend_metrics_calls') == 2
+E       AssertionError: assert None == 2
+E        +  where None = &lt;built-in method get of dict object at 0x000001CEFCB36600&gt;('llm_backend_metrics_calls')
+E        +    where &lt;built-in method get of dict object at 0x000001CEFCB36600&gt; = {'metadata_only': True, 'streaming_enabled': False, 'context_ms': 0.0, 'local_reply_ms': 0.0, ...}.get
+
+tests\framework\test_numeric_llm_metrics.py:89: AssertionError</failure></testcase><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_empty_last_metrics_drop_first_attempt_values" time="0.001"><failure message="AssertionError: assert None == 1&#10; +  where None = &lt;built-in method get of dict object at 0x000001CEFCACF4C0&gt;('llm_backend_metrics_calls')&#10; +    where &lt;built-in method get of dict object at 0x000001CEFCACF4C0&gt; = {'metadata_only': True, 'streaming_enabled': False, 'context_ms': 0.0, 'local_reply_ms': 0.0, ...}.get">def test_empty_last_metrics_drop_first_attempt_values():
+        controller, _, models = setup()
+        response_hook(models, [dict(first_content_ms=9.), {}],
+                      replies=[USER_TEXT, '我在这里陪你，慢慢说就好。'])
+        prepared(controller)
+        metrics = controller.last_prepare_metrics
+&gt;       assert metrics.get('llm_backend_metrics_calls') == 1
+E       AssertionError: assert None == 1
+E        +  where None = &lt;built-in method get of dict object at 0x000001CEFCACF4C0&gt;('llm_backend_metrics_calls')
+E        +    where &lt;built-in method get of dict object at 0x000001CEFCACF4C0&gt; = {'metadata_only': True, 'streaming_enabled': False, 'context_ms': 0.0, 'local_reply_ms': 0.0, ...}.get
+
+tests\framework\test_numeric_llm_metrics.py:102: AssertionError</failure></testcase><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_multiple_tts_chunks_do_not_overwrite_llm_or_unbound_metadata_size" time="0.001"><failure message="AssertionError: assert None == 1&#10; +  where None = &lt;built-in method get of dict object at 0x000001CEFCAC27C0&gt;('llm_backend_metrics_calls')&#10; +    where &lt;built-in method get of dict object at 0x000001CEFCAC27C0&gt; = {'metadata_only': True, 'streaming_enabled': False, 'context_ms': 0.0, 'local_reply_ms': 0.0, ...}.get">def test_multiple_tts_chunks_do_not_overwrite_llm_or_unbound_metadata_size():
+        controller, _, models = setup()
+        backend = {key: index for index, key in enumerate(KEYS)}
+        calls = response_hook(models, [backend], replies=['我会陪你聊聊。也可以先安静休息。'])
+        plan = prepared(controller)
+        metrics = controller.last_prepare_metrics
+&gt;       assert metrics.get('llm_backend_metrics_calls') == 1
+E       AssertionError: assert None == 1
+E        +  where None = &lt;built-in method get of dict object at 0x000001CEFCAC27C0&gt;('llm_backend_metrics_calls')
+E        +    where &lt;built-in method get of dict object at 0x000001CEFCAC27C0&gt; = {'metadata_only': True, 'streaming_enabled': False, 'context_ms': 0.0, 'local_reply_ms': 0.0, ...}.get
+
+tests\framework\test_numeric_llm_metrics.py:112: AssertionError</failure></testcase><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[True]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[False]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[nan]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[inf]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[-inf]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[-1.0]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[1000000000000000.0]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_original_wire_rejection_stays_before_tts_and_no_numeric_metadata_leaks[synthetic text]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_unknown_private_strings_are_rejected_by_unchanged_wire_contract" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_local_reply_next_generation_has_no_previous_llm_observations" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_failed_next_prepare_clears_previous_observations[failure0]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_failed_next_prepare_clears_previous_observations[failure1]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_failed_next_prepare_clears_previous_observations[failure2]" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_tts_failure_clears_this_prepare_backend_observation" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_permission_rejection_clears_stale_observation_before_any_model_request" time="0.001" /><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_jobs_public_filters_numeric_values_and_retains_existing_flags" time="0.006"><failure message="KeyError: 'prepare'">def test_jobs_public_filters_numeric_values_and_retains_existing_flags():
+        job, controller, _, _, _ = jobs_fixture.setup()
+        def hook():
+            controller.last_prepare_metrics = {
+                'metadata_only': True, 'complete': True, 'llm_rpc_ms': 120.,
+                'llm_backend_metrics_calls': 1, 'llm_last_backend_first_content_ms': 2.5,
+                'llm_last_backend_backend_done_ms': 4., 'llm_last_backend_eval_count': 12,
+                'llm_last_backend_first_packet_ms': True,
+                'llm_last_backend_prompt_eval_duration_ms': float('nan'),
+                'llm_last_backend_eval_duration_ms': float('inf'),
+                'llm_last_backend_total_duration_ms': -1,
+                'llm_last_backend_thinking_characters': 'synthetic text',
+                'llm_last_backend_private_id': 'synthetic id',
+            }
+        controller.hook = hook
+        meta, events = jobs_fixture.prepare(job)
+&gt;       value = job.public()['latency']['prepare']
+E       KeyError: 'prepare'
+
+tests\framework\test_numeric_llm_metrics.py:215: KeyError</failure></testcase><testcase classname="tests.framework.test_numeric_llm_metrics" name="test_jobs_next_failed_or_local_prepare_does_not_copy_previous_metrics" time="0.003"><failure message="StopIteration">def test_jobs_next_failed_or_local_prepare_does_not_copy_previous_metrics():
+        job, controller, _, _, _ = jobs_fixture.setup()
+        controller.hook = lambda: setattr(controller, 'last_prepare_metrics', {'llm_last_backend_eval_count': 11})
+        meta, events = jobs_fixture.prepare(job)
+&gt;       job.acknowledge(meta, jobs_fixture.completion(events)); job.drain_actions()
+
+tests\framework\test_numeric_llm_metrics.py:234: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+values = [{'error': 'CharacterProfileError', 'context': {'protocol': 'aura-asr-1', 'board_boot_id': 'synthetic-boot', 'session_id': 'd0d78efd659a436787f742b645a73ee3', 'request_id': '483cfb795a7f4e00914d6add4b4d41bc', ...}}]
+
+    def completion(values):
+&gt;       return next(v['network_complete'] for v in values if 'network_complete' in v)
+E       StopIteration
+
+tests\framework\test_board_dialogue_jobs.py:101: StopIteration</failure></testcase></testsuite></testsuites>

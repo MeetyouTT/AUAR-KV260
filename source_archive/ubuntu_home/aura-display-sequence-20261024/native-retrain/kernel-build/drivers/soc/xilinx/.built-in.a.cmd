@@ -1,0 +1,1 @@
+cmd_drivers/soc/xilinx/built-in.a := echo >/dev/null; rm -f drivers/soc/xilinx/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/soc/xilinx/built-in.a drivers/soc/xilinx/zynqmp_power.o drivers/soc/xilinx/zynqmp_pm_domains.o drivers/soc/xilinx/xlnx_event_manager.o

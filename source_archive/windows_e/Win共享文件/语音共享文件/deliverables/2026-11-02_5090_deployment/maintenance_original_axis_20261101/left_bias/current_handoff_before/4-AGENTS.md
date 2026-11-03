@@ -1,0 +1,19 @@
+<!-- 5090-local-deployment-20261102 -->
+5090 本机部署接续更新（洛杉矶 2026-11-01）：当前统一读语音共享文件/deliverables/2026-11-02_5090_deployment/DEPLOYMENT_CURRENT.json。Windows原27B/OmniVoice模型推理服务为192.168.50.1:8797，板卡192.168.50.2；权重和Ollama数据位于共享目录外D:/AIModels。冻结STATUS/READY_LOCAL/source_manifest是历史回环验收。当前boot903cfade；原wide平台与DPU相机79866已恢复，GUI supervisor82126/GTK82130正常启动一次，380组件与25源绑定通过；startup 3f5e81abc20ce5169ac91ae302611cba8958175a6a2bdb615fd9b858353120d5，当前软件观察见maintenance_original_axis_20261101/gui_ready25_observed_01.json。角色main/READY、动画与视觉帧推进，聆听false。身份查询/声纹登记串扰修复已加载，真人验收待做。原转轴控制器25文件未改，ID_STOP通过；本boot实体参考、方向、跟随尚未验收，GUI保持旧context FAULT/follow=false，用户确认动力断开。KNOWN身份/个人记忆关联和3分钟整机演示尚待验证。勿重复安装下载、重启现役服务或重用旧PID/运动证据/检查点。
+<!-- /5090-local-deployment-20261102 -->
+
+<!-- 5090-migration-current-20261101 -->
+2026-11-01最新接续：后续工作与Windows模型服务迁往5090 Laptop主机，旧机可能不再启用。先读[5090换机入口](E:/Win共享文件/5090主机迁移包_20261101/00_先读.md)与[新主机Codex提示词](E:/Win共享文件/5090主机迁移包_20261101/01_给新主机Codex的提示词.txt)。完整载荷是整个Win共享文件目录。
+
+转轴接入优先、记忆验收后置。最新设备状态以axis_priority_20261101/HANDOFF_5090.txt为准：只完成一次两秒初始化及STOP，实物未观察清楚；重复/方向/本boot跟随未完成。迁移末次SSH未连通，当前在线/boot/输出不能新鲜确认。ec12文件已应用但GUI因MCP01尚未READY；重启回benchmark的持久接入仍待处理。以下旧READY、PID、时间窗和性能段落按历史理解，不代替新机核验。
+
+LLM权重/Ollama仍按原约定在共享目录外，下载/恢复记录随包；登录凭证、SSH私钥、不可移植venv不复制。已补存的普通资源、环境清单、配置、会话导出及校验报告见迁移包清单。
+<!-- /5090-migration-current-20261101 -->
+
+# 共享目录的模型与分析存储约定
+
+- 用户明确要求：大语言模型权重、权重副本、下载分段及Ollama模型数据不得放在 `E:\Win共享文件` 或其任何子目录中。不得用指向外部权重的目录联接等方式让共享目录再次包含模型数据入口。
+- 当前27B权重和下载缓存位于 `D:\AIModels\qwen3.8-27b-abliterated`，对应Ollama模型库位于 `D:\AIModels\Ollama-AURA`。后续新增大语言模型继续使用项目外本地模型目录，实际路径在语音项目的 `aura/config/model_storage.local.json` 中配置。
+- 语言模型分析、设计规划、测试报告、运行证据和路径配置允许保存在 `E:\Win共享文件`，统一分析入口为 `E:\Win共享文件\语言模型分析\README.md`。
+- 当前语音业务源码仍在 `E:\Win共享文件\语音共享文件`，保留原运行证据和源码引用；统一分析目录可归档小型报告副本，不复制模型权重或虚拟环境。
+- ASR、TTS资源按现有明确授权的运行配置处理；用户本条约束针对大语言模型。存储路径变更不得顺带删除历史归档或无关资源。

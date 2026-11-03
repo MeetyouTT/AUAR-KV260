@@ -1,0 +1,63 @@
+实际帧率优先：UI阻塞定位与16/24整套启动候选
+
+用户明确主要看起来是帧率不足，优先处理实际完成速率和帧间稳定性。
+全状态motion仍在另目录冻结，尚未混进本候选；此处不改变native b243库或角色资源。
+
+已有证据
+human_v17_intro_1.json共45份约2秒间隔的真人业务安全metadata。
+同startup/boot、native可见45/45、GUI fault0，91.073秒frame计数10743→11268，完成525帧，平均5.765帧/秒。
+LIVE_FPS_ANALYSIS/WINDOWS给出分状态稳定端点区间，跨状态单列。
+这不是屏幕物理scanout，也不是完整每帧P95；稳定端点间仍可能有未采到的状态切换。
+另有主窗口20秒被动采样UI tick 41.81–620.42ms，多数70–172ms，支持先查事件循环阻塞。
+纯角色v17预览约15.52，原生evaluate样本P50约1.55ms/submit约9.09ms，不能代替上述业务场景。
+纯预览里6次超过100ms的长间隔和6次PNG capture同数，是诊断开销；不能拿它当业务掉帧根因。
+
+先执行的窄probe
+ui_timing_probe只改tools/board_avatar_gtk.py的tick方法；native、pair、fps16和音频/ACK优先级不变。
+UI加入7个固定数字段：commands/controller_read/settings/runtime_widgets/business_widgets/presentation/business_public。
+原ui_tick_ms和samples.render_ms在runtime.public之前结束，会漏算业务健康读取；新位置包含这段。
+用真实tick方法插入500ms fake runtime.health延迟，已验证business_public和总ui_tick_ms均能看见。
+只导固定数值，不导真实正文、PCM、身份、私库内容。无新线程、轮询timer或优先级变化。
+由主窗口先现读pin/正常关闭/更新单源startup绑定后部署probe，采短窗口，找出真正阻塞段再做窄修。
+UI公共状态热点与音频/ACK不得相互挤占，不因帧率低就盲目提高native优先级。
+
+24fps候选实际改变
+prepared/ready前可选择16或24，ready后禁止热切换；不允许8fps回退。
+formally selected pair的native_config.fps与GUI stable_avatar_fps一致才允许启动；状态显示实际所选目标。
+AvatarRenderWorker原硬编码16改为mailbox.target_fps，GTK创建worker同样跟随目标。
+原生GTK绘制循环本来支持24，本候选完整贯通控制、pair、GUI配置和状态，不单独改一个数字。
+native_yuki新增4秒滚动swap计数/帧间分位缓存，每秒更新一次；无需新的timer或IPC。
+界面显示真实callback速率，并把配置值标成“目标24fps”，避免目标值被当成实测值。
+保留已有眼嘴/代次/暂停/取消/150ms期限，继续从真实audio snapshot驱动嘴型。
+不改ASR线程/前端调度/原8帧队列/权限/记忆/模型/角色构图或纹理，不接新模型。
+
+本地验证
+paired_16与paired_24分别跑同33项测试（原25眼嘴行为+8帧率、配置、UI计时），全部通过，零skip。
+它们不是66种不同测试，也不是板端FPS或音频验收。
+实际导入的显示依赖逐份对v17 component pins或当前variant pin核对，mismatches为空。
+初次浮点精确相等夹具失败已原样保留_initial结果，改为合理浮点容差后通过；没有削弱产品门控。
+
+配对包和GUI绑定
+paired_16、paired_24各为5份Python+pair JSON的6文件overlay；native库仍复用已审b243，不重新编译。
+paired_*/PAIRING_RECEIPT给出GUI config/board_avatar_gtk.json的三项精确变化：
+stable_avatar_fps、native_yuki.fps、character_pair.selection_sha256。
+startup只绑定更新后的GUI配置及源码component SHA，不新增未知startup字段。
+若主窗口先部署了ui_timing_probe，后续GUI只合并FPS差异；不能用本v17快照回盖主窗口最新memory/feature修复。
+feature路由文件不在此overlay，pair内也不pin yuki_jobs_candidate。
+
+实机顺序
+1. 先以probe定位和修复业务UI阻塞，保持16目标与已通过的短答/视觉/声纹体验。
+2. 主窗口再安排独占、同native库/同资源/同423×516/同24秒状态计划的16与24短对照。
+   performance目录已有两个公共包（PACKAGES.json记录SHA），只加载角色/显示源，不加载业务工厂或音频引擎。
+   script字节相同，仅启动配套和目标fps不同；--run-label A1/B1/B2/A2。
+   先纯测量不传--capture-character，避免PNG诊断I/O影响帧间；必要时另做同条件高幅嘴型角色capture。
+   保留全部callback间隔，记录CPU、RSS/PSS和native elapsed drop；不是物理scanout测试。
+3. 纯角色结果可用后，再做同等真实业务短窗口，核实际FPS/帧间、UI延迟、音频队列/完整ACK/ASR延迟。
+   不能因为孤立24跑得动，就宣布有麦克风/ASR/YOLO/记忆并行时已经稳定24。
+4. 本窗口不操作设备；主窗口负责normal-close、single EGL owner、owned进程组时限、恢复或发布。
+   保留用户最新监听偏好；旧v17 PAUSED仅历史保存点。
+
+回退
+仅撤本FPS/计时增量并更新最新startup/source manifest；不回退到v16，不覆盖feature/记忆新修复。
+保持原native/模型/业务库与历史归档，16目标也必须配套其对应pair JSON和formal常量。
+目前尚无板端实际提帧、24fps、声学同步或全业务负载通过结论。

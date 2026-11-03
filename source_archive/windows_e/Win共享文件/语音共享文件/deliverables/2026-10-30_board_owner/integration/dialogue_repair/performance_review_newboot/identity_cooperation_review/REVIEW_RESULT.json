@@ -1,0 +1,73 @@
+{
+  "schema": "aura.identity-cooperation-independent-review.v1",
+  "status": "PASS_FOR_ROOT_MERGED_RELEASE_REVIEW",
+  "reviewed_manifest": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\feature_trigger_collaboration\\identity_cooperation_v90\\SOURCE_MANIFEST.json",
+  "reviewed_manifest_sha256": "6db50db1d9c211dc9935465b8ef5038d852c552e2cc288b8352cbb9febe8b7c0",
+  "reviewed_sources": {
+    "board/runtime/board_business.py": "66f2552148568c78b91a8de23e8fa07bcb50f88812b2c035517468bcfbc628d5",
+    "board/runtime/board_speaker_business.py": "134466a85599d73697b11aceaeec97c1e0b5d9db4b125f4accd50bf14f525e25",
+    "tools/provisional_voice.py": "6219b84a9f40dedca6238aadf1523de7ec6d9060d7fc40d8c34f7eccf5b12a8f"
+  },
+  "prior_blocker": {
+    "status": "FIXED_AND_REPLAYED",
+    "severity": "P1",
+    "old_speaker_source_sha256": "a75367f4ff62b834f8ede738c23cfbd4707e44e2f151fd58c358ea6c29e81736",
+    "cause": "ingest_gallery mutated derived links and gallery versions before current capture owner validation",
+    "original_public_cases_failed": 4,
+    "original_public_cases_fixed": 4,
+    "fix": "validate_packet(packet, meta) before ingest_gallery copies and compares the full nine-field capture context",
+    "initial_evidence_sha256": "866469e9c4d5c517da97759f2fee7434780d25b31efbbf46e498586ea91a85cf"
+  },
+  "independent_tests": {
+    "total": 12,
+    "passed": 12,
+    "context_dimensions": [
+      "protocol",
+      "board_boot_id",
+      "session_id",
+      "request_id",
+      "generation",
+      "capture_id",
+      "sample_count",
+      "pcm_sha256",
+      "budget_ms"
+    ],
+    "additional": [
+      "Blocked gallery read preserves health and cancellation access; cancellation prevents ingestion and encoding",
+      "Replacing the latest capture slot does not change the submitted job closure owner",
+      "A different current face in worker readback cannot replace the captured face proof"
+    ]
+  },
+  "combined_tests": {
+    "total": 59,
+    "passed": 59,
+    "failures": 0,
+    "errors": 0,
+    "evidence": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\dialogue_repair\\performance_review_newboot\\identity_cooperation_review\\FINAL_ALL_59.xml",
+    "evidence_sha256": "0c167e1a1a4f1a6cba9e5da22ceeebb287bbb34ee2032902a830bed4178f4855"
+  },
+  "static_review": {
+    "observation_authority": "Face and voice remain independent evidence. visible_person scope and single_speaker_verified False are retained.",
+    "profile_authority": "Resolver and speaker turn schemas retain identity_verified False and personal_memory_allowed False; uncalibrated voice cannot issue a grant.",
+    "capture_owner": "BoardDialogueJobs copies the capture snapshot into the submitted job. The provider closes over that job and reads with its exact meta on the sole CPU worker.",
+    "face_freshness": "build_visual compares capture-boundary boot/service/camera/target/revision/single-face evidence. Worker checks current job after readback and source_end age below 3000ms.",
+    "face_reference": "gallery(reference,meta,observed_visual) requires matching captured identity and gallery revision before a face naming proof.",
+    "source_guards": "Production FaceGalleryReadback verifies pinned boot/process/source/config/model and uses readonly SQLite with a 30ms busy timeout.",
+    "locking": "New provider runs outside the service RLock on the existing single worker. Health/cancel remained available during a blocked public provider.",
+    "model_text": "Existing full synthetic tests verify fabricated model-success text creates no enrollment/link/profile capability.",
+    "complete_ack": "Candidate changes are confined to the three reviewed identity sources; ordinary and identity pipeline tests retain their actual complete ACK entry points."
+  },
+  "merge": {
+    "identity_only_business_sha256": "66f2552148568c78b91a8de23e8fa07bcb50f88812b2c035517468bcfbc628d5",
+    "combined_M03_business_sha256": "7c5cef7b648af0d8f3aad026c97ee82dace5911a7bdb88d040fc2d0c01038662",
+    "frozen_M03_business_sha256": "b336371df9584740d81b499d5191873c97bb8971343b0084e0c7b584d793f02e",
+    "reverse_wiring_restores_frozen_M03_bytes": true,
+    "coldboot_writer_lock_and_factory_AST_equal": true
+  },
+  "limitations": [
+    "Public synthetic fixtures execute the actual board business and SQLite guard paths with fake encoder and inference transport.",
+    "Actual face and voice accuracy and actual gallery IO duration are unmeasured in this local review.",
+    "The existing single worker serializes explicit identity commands behind in-flight analysis; slow filesystem reads can add queue delay. SQLite lock waits are bounded at 30ms, total filesystem reads are not preempted.",
+    "Current-production pin merge, source freshness and release execution remain owned by root."
+  ]
+}

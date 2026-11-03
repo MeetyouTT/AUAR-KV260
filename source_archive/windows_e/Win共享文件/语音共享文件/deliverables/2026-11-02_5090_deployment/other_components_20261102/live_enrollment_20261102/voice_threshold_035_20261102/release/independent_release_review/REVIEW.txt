@@ -1,0 +1,9 @@
+三文件声纹0.35发布包静审通过，无阻断。
+
+PAYLOAD解码与candidate_runtime、SOURCE_MANIFEST、RELEASE_MANIFEST的三份最终字节逐一相等。startup44e8f154…→474f6640b4a2df3383b8ccb2814db7fe3448965c078dd87f972ba0997b23f7b2只改变三个指定component pin，其余377及所有其它startup字段相同。发布不是旧整份manifest覆盖。
+
+GUI209823/GTK209835的birth1626221/1627082及cmdline guard正确；正常单次GUI stop，临时KillMode=process/SendSIGKILL=no/TimeoutStopSec=infinity，pending不强制推进。apply要求停稳和旧两PID消失，实际字节CAS和owner再核，异常仅在字节仍属本事务时回滚。start只删除自有精确guard并校验原Restart/KillMode/SendSIGKILL/TimeoutStopUSec恢复后单次正常启动。
+
+camera1332/birth2236/cmdline仅作校验，无停止、重启或kill命令。selected face26 guard和正式pair10pin保持，pair10不含三目标。原_WriterLease/_CheckedEncoder/_GuardedStore AST未变。
+
+此次仅发布包绑定与静态保护审阅，回归XML只读取计数和SHA，没有重跑；不代替现场验收或声纹准确率结论。未执行preparer/发布脚本/产品代码，未访问板卡、网络、私库、音频、模型或轴，也未改任何发布/产品文件，仅保存本独审目录。

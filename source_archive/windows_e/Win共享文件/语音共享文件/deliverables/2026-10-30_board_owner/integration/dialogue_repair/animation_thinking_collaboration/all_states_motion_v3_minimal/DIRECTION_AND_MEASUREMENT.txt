@@ -1,0 +1,74 @@
+动画方向接续：首选两通道连续头部驱动
+
+主张采用的最小改动
+沿用当前雪妃素材、人格、腰部构图、16fps目标与现有60Hz作者时钟。
+仅给head_LR和head_slant增加小幅、不同周期的连续差分；1.4秒渐入，状态切换不重置相位。
+闲置/聆听保持平静，思考稍慢，真实回答发声时略活跃。暂停、取消仍保留平静自然动作。
+原head_UD点头、身体三通道呼吸/重心和四组头发/两组饰件物理链继续使用原作者动画。
+新增差分在原有geometry/physics步之前写入，使头部锚点移动自然传给原物理链。
+不手工平移发片，不改物理弹性/阻尼，不新增物理步、draw、纹理、线程、进程或timer。
+首轮原生产品改动仅yuki_host.cpp/h和gentle_motion.hpp，Python门控行为不变。
+
+与冻结六通道候选的具体比较
+v2六通道：head_LR/UD/slant与body_LR/UD/slant均新增差分，12次sin/author tick，
+          6次transition_difference，内部Animation/Playback两层合计12次compose。
+v3两通道：head_LR/slant新增差分，4次sin/author tick，2次transition_difference，合计4次compose。
+          相比v2每tick少4次差分、8次compose和8次sin；这是源码操作数，不是CPU收益实测。
+v2可独立调整身体的新节律和答话点头，动作控制面更广；v3依赖原有身体/点头和饰件运动，
+先解决原待机head_LR恒0的问题，保留当前风格。若v3实际发丝/饰件响应仍弱，先查参数和绑定，
+再决定是否采用v2，不把增强所有通道当作默认性能无代价。
+v2冻结目录及字节保持，未覆盖、未宣称原生回归已通过。
+
+眼嘴规则继续是硬约束
+ASR等待、生成、TTS准备但尚未出声：闭眼闭嘴。
+仅实际answer轨道ready且audible、output active、未暂停且无done/error时睁眼并跟随真实包络张嘴。
+等待提示/feedback不能当回答；PCM间隙、暂停、取消、错误、播放结束立即闭嘴；旧owner/样本失效。
+闲置/聆听沿用原作者眨眼，不扩大闭眼范围。头部驱动不覆盖任何face_*参数。
+采用新的native库后必须重封pair JSON与formal常量，再绑定当前GUI配置中的selection SHA；
+新库feature保留bit1，新增bit2，Control64B/Stats96B不变。
+
+已有的证据与明确限制
+本地以v22 48cb1a3a实际source_mapping为基线，当前三个Python门控模块和pair仍与已部署版本一致。
+25项实际Python FSM/stream/mailbox测试通过，0skip，26个实际加载依赖逐份符合v22 pin。
+原生pose/expression/facial、render/physics/draw、C控制owner/TTL和mouth取消/平滑段逐字保留。
+两通道绝对幅值解析上界3.4236/1.7064，限幅3.6/1.9；加上两姿态作者范围仍在±30内。
+四发/两饰件链enabled，6个锚点存在且导出；这些不是实际摆幅或视觉验收。
+较早v90两段空闲监听保存观测为13.017与11.836完成/s，作者约60tick/s；不是v22/v23新基线。
+之前纯角色v17约15.52完成/s，也不能移作当前全业务结果。没有v3的CPU、FPS、内存或真人物理验收。
+当前本机未发现C++编译器，本地未编译/执行新原生候选；提供了root专用构建与双版本参数测试配方。
+
+最终基线与当前偏好
+本包的本地验证快照是v22；主窗口正在准备v23记忆修复，合并必须等最终v23实际源码/配置。
+seal_motion_overlay.py强制输入--current-source-mapping，拒绝旧v22，核五份pair构件和26份已测依赖。
+任何pin改变都先重基线/重跑相应回归，不用本包覆盖新记忆、声纹、GTK、worker或相机恢复。
+用户当前PAUSED、mic=false，ASR2/GTCRN1、原8帧队列、GTK5秒暂停保活和原A相机继续保留。
+所有实机编译、显示、模型/音频及发布仍由主窗口串行安排，本窗口不操作设备。
+
+最小实机窗口一：隔离原生编译与参数读回
+root先核原core/renderer对象、公共模型和新源码SHA。仅在新目录执行：
+python3 -B build_native_isolated.py --execute-root-only --native-root <现有native_integration根>
+  --model <当前公开model.runtime.json> --resx <当前resx.json> --resource-root <当前assets/yuki>
+配方使用nice15，每条子进程180秒上限，不安装库、不启GTK/EGL/音频或模型服务。
+先运行未改b243来源的baseline参数探针，再运行candidate；各读6状态×2姿态、1920原生帧，
+每状态前32帧不计幅度，输出24个head/body/hair/quake参数的min/max/span。
+candidate还跑12000策略tick、原眼嘴/owner/TTL回归；每状态两新增头部通道变化，
+六个最终head/body通道变化、至少3个独立发链和至少1个饰件输出变化，作者tick不得增加。
+这些测试只证明原生数值与绑定，CPU字段含参数观察开销，不能冒充业务性能。
+历史旧host编译步骤约53秒，整套旧构建约115秒仅作排窗参考；本包新增baseline编译，时长尚未测。
+
+最小实机窗口二：同条件性能和动态可见性
+通过窗口一后重封新库/pair，主窗口生成当前v23或更高版本对应的可审配置/manifest/publisher。
+保持同423×516、16目标、相同角色资源/状态计划/相机原A与人流条件；单一EGL owner。
+优先复用既有公共24秒9阶段脚本，按A1/B1/B2/A2共4轮；测试时不保存PNG，避免截图I/O拉长帧间。
+记录全部完成回调间隔、进程CPU、数值RSS/PSS、evaluate/submit、author ticks及elapsed dropped。
+基线或业务条件变化即标混杂；不能把不同boot/线程数/人流/监听状态的历史数字作A/B。
+建议采用门槛：完成速率不比同条件A差5%以上，帧间P95不比A差10%以上；
+进程CPU增幅以5%相对和3个百分点/单核为审查界线，稳态PSS多于1MiB要查明；所有故障/眼嘴回归为0。
+这些是拟定验收预算，不是已达到的结果。A自身若达不到约15完成/s，不能据低基线宣称稳定16。
+性能测量后单独做动态观看：头部不是整张图平移，头发/饰件有相对运动与迟滞，
+思考保持闭眼，模拟真实回答区间睁眼张嘴。动态预览是公开模拟，不能代替真人声学同步。
+若自然效果不明显或开销越界，不发布，依据参数跨度/可见性/CPU证据选择修正或保留b243。
+
+最小实机窗口三：真实发声同步，单独按最新授权排期
+当前暂停/麦克风关闭偏好不自动改变。待主窗口安排实际音频窗口，核首声、停顿、暂停/取消时
+眼嘴与真正扬声器输出的对应关系；公开模拟和audible布尔测试均不能替代这一步。

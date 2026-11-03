@@ -1,0 +1,858 @@
+#include <nekomote/render_gl/renderer.hpp>
+
+#include <glad/gl.h>
+
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstring>
+#include <limits>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+
+#include "shader_source.hpp"
+
+namespace nekomote::render_gl
+{
+namespace
+{
+// Qt resets its 2D bindings after our pass. Preserve the additional rectangle
+// namespace ourselves, including on upload/render failure, so the host does
+// not need to know which atlas sampling representation we use.
+struct RectangleBinding
+{
+    GLint active{GL_TEXTURE0}, previous{0};
+    bool enabled;
+    explicit RectangleBinding(GLenum atlas_target) : enabled(atlas_target == GL_TEXTURE_RECTANGLE)
+    {
+        if (!enabled)
+            return;
+        glGetIntegerv(GL_ACTIVE_TEXTURE, &active);
+        glActiveTexture(GL_TEXTURE0);
+        glGetIntegerv(GL_TEXTURE_BINDING_RECTANGLE, &previous);
+    }
+    ~RectangleBinding()
+    {
+        if (!enabled)
+            return;
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_RECTANGLE, static_cast<GLuint>(previous));
+        glActiveTexture(static_cast<GLenum>(active));
+    }
+};
+constexpr const char* kVertexShader = R"(layout(location=0) in vec2 position;
+layout(location=1) in vec2 uv;
+layout(location=2) in vec4 color;
+uniform vec2 output_size;
+uniform vec3 view;
+uniform int flip_x;
+uniform vec2 projection;
+out vec2 texture_uv;
+out vec4 vertex_color;
+void main() {
+    vec2 centered=position*view.z+(view.xy-output_size*0.5);
+    if (flip_x != 0) centered.x=-centered.x;
+    gl_Position=vec4(centered*projection,0.0,1.0);
+    texture_uv=uv;
+    vertex_color=color;
+})";
+constexpr const char* kFragmentShader = R"(in vec2 texture_uv;
+in vec4 vertex_color;
+#ifdef GL_ES
+uniform highp sampler2D atlas;
+uniform vec2 atlas_extent;
+#else
+uniform sampler2DRect atlas;
+#endif
+uniform vec4 atlas_texels;
+uniform int premultiply;
+uniform int protection_pass;
+uniform int mask_write;
+uniform int use_mask;
+uniform sampler2D alpha_mask;
+uniform vec2 mask_output_size;
+uniform float global_alpha;
+out vec4 output_color;
+void main() {
+    vec2 texels=texture_uv*atlas_texels.xy+atlas_texels.zw;
+#ifdef GL_ES
+    // Binary scaling preserves the original texel position on ES, which has no
+    // rectangle sampler. Clamp to the uploaded crop, excluding storage padding.
+    vec4 sampled=texture(atlas,clamp(texels,vec2(0.5),atlas_extent-vec2(0.5)) /
+                                vec2(textureSize(atlas,0)));
+#else
+    vec4 sampled=texture(atlas,texels);
+#endif
+    if (mask_write != 0) {
+        output_color=vec4(0.0,sampled.a,0.0,0.0);
+        return;
+    }
+    vec4 color=sampled*vertex_color;
+    color.a*=global_alpha;
+    if (use_mask != 0) color.a*=texture(alpha_mask,gl_FragCoord.xy/mask_output_size).g;
+    if (protection_pass != 0 && color.a < 0.0000001) discard;
+    output_color=vec4(premultiply != 0 ? color.rgb*color.a : color.rgb,color.a);
+})";
+constexpr const char* kBlitVertex = R"(out vec2 texture_uv;
+void main() {
+    vec2 p=vec2((gl_VertexID << 1) & 2,gl_VertexID & 2);
+    texture_uv=p;
+    gl_Position=vec4(p*2.0-1.0,0.0,1.0);
+})";
+constexpr const char* kBlitFragment = R"(in vec2 texture_uv;
+uniform sampler2D scene;
+uniform float global_alpha;
+out vec4 output_color;
+void main() {
+    vec4 c=texture(scene,texture_uv);
+    c.a*=global_alpha;
+    if(c.a<=0.003) discard;
+    output_color=vec4(c.rgb*c.a,c.a);
+})";
+struct Shader
+{
+    GLuint handle;
+    explicit Shader(GLenum type) : handle(glCreateShader(type))
+    {
+    }
+    ~Shader()
+    {
+        if (handle)
+            glDeleteShader(handle);
+    }
+    Shader(const Shader&) = delete;
+    Shader& operator=(const Shader&) = delete;
+    void compile(const char* source)
+    {
+        set_shader_source(handle, source);
+        glCompileShader(handle);
+        GLint ok = 0;
+        glGetShaderiv(handle, GL_COMPILE_STATUS, &ok);
+        if (!ok)
+        {
+            char log[2048]{};
+            glGetShaderInfoLog(handle, 2048, nullptr, log);
+            throw std::runtime_error(log);
+        }
+    }
+};
+GLuint link_program(const char* vertex_source, const char* fragment_source)
+{
+    Shader vertex(GL_VERTEX_SHADER), fragment(GL_FRAGMENT_SHADER);
+    vertex.compile(vertex_source);
+    fragment.compile(fragment_source);
+    const GLuint program = glCreateProgram();
+    glAttachShader(program, vertex.handle);
+    glAttachShader(program, fragment.handle);
+    glLinkProgram(program);
+    GLint ok = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &ok);
+    if (!ok)
+    {
+        char log[2048]{};
+        glGetProgramInfoLog(program, 2048, nullptr, log);
+        glDeleteProgram(program);
+        throw std::runtime_error(log);
+    }
+    return program;
+}
+struct Intermediate
+{
+    GLuint framebuffer{0}, texture{0};
+    int width{0}, height{0};
+    ~Intermediate()
+    {
+        if (framebuffer)
+            glDeleteFramebuffers(1, &framebuffer);
+        if (texture)
+            glDeleteTextures(1, &texture);
+    }
+    Intermediate() = default;
+    Intermediate(const Intermediate&) = delete;
+    Intermediate& operator=(const Intermediate&) = delete;
+};
+void check_gl(const char* operation)
+{
+    const auto error = glGetError();
+    if (error != GL_NO_ERROR)
+        throw std::runtime_error(std::string(operation) + ": GL error " + std::to_string(error));
+}
+std::unique_ptr<Intermediate> intermediate(int width, int height, GLint format)
+{
+    auto target = std::make_unique<Intermediate>();
+    target->width = width;
+    target->height = height;
+    glGenTextures(1, &target->texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, target->texture);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGBA,
+                 format == GL_RGB5_A1 ? GL_UNSIGNED_SHORT_5_5_5_1 : GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glGenFramebuffers(1, &target->framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, target->framebuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, target->texture, 0);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        throw std::runtime_error("incomplete intermediate");
+    check_gl("allocate intermediate");
+    return target;
+}
+int floor_power_two(int value) noexcept
+{
+    int result = 1;
+    while (result <= value / 2)
+        result *= 2;
+    return result;
+}
+GLsizeiptr byte_size(std::size_t count, std::size_t element)
+{
+    if (count > static_cast<std::size_t>(std::numeric_limits<GLsizeiptr>::max()) / element)
+        throw std::runtime_error("GPU buffer size exceeds representable range");
+    return static_cast<GLsizeiptr>(count * element);
+}
+} // namespace
+namespace
+{
+struct Bounds
+{
+    float left{std::numeric_limits<float>::infinity()};
+    float top{std::numeric_limits<float>::infinity()};
+    float right{-std::numeric_limits<float>::infinity()};
+    float bottom{-std::numeric_limits<float>::infinity()};
+    void include(float x, float y) noexcept
+    {
+        left = std::min(left, x);
+        right = std::max(right, x);
+        top = std::min(top, y);
+        bottom = std::max(bottom, y);
+    }
+};
+struct Clip
+{
+    int x{0}, y{0}, width{0}, height{0};
+};
+struct MaskBounds
+{
+    Bounds source, content;
+};
+Clip clip(const Bounds& bounds, Target target, const View& view) noexcept
+{
+    if (!std::isfinite(bounds.left))
+        return {};
+    constexpr float kMaskBorderPixels = 2;
+    const auto integer_bound = [](float value, int maximum)
+    { return static_cast<int>(std::clamp(value, 0.0f, static_cast<float>(maximum))); };
+    const int x = integer_bound(
+        std::floor(bounds.left * view.scale + view.origin_x) - kMaskBorderPixels, target.width);
+    const int y =
+        integer_bound(static_cast<float>(target.height) -
+                          std::ceil(bounds.bottom * view.scale + view.origin_y) - kMaskBorderPixels,
+                      target.height);
+    const int right = integer_bound(
+        std::ceil(bounds.right * view.scale + view.origin_x) + kMaskBorderPixels, target.width);
+    const int top =
+        integer_bound(static_cast<float>(target.height) -
+                          std::floor(bounds.top * view.scale + view.origin_y) + kMaskBorderPixels,
+                      target.height);
+    int clip_x = x, clip_right = right;
+    if (view.flip_x)
+    {
+        clip_x = target.width - right;
+        clip_right = target.width - x;
+    }
+    return {clip_x, y, std::max(0, clip_right - clip_x), std::max(0, top - y)};
+}
+Clip intersect(Clip a, Clip b) noexcept
+{
+    const int x = std::max(a.x, b.x), y = std::max(a.y, b.y);
+    return {x, y, std::max(0, std::min(a.x + a.width, b.x + b.width) - x),
+            std::max(0, std::min(a.y + a.height, b.y + b.height) - y)};
+}
+} // namespace
+struct Renderer::Impl
+{
+    struct Programs
+    {
+        GLenum atlas_target{GL_TEXTURE_RECTANGLE};
+        bool srgb_control{true};
+        GLuint program{0}, blit_program{0};
+        GLint premultiply{-1}, protection_pass{-1}, mask_write{-1}, use_mask{-1},
+            mask_output_size{-1};
+        GLint global_alpha{-1}, blit_global_alpha{-1};
+        GLint output_size{-1}, view{-1}, projection{-1}, flip_x{-1}, atlas_texels{-1},
+            atlas_extent{-1};
+        ~Programs()
+        {
+            if (program)
+                glDeleteProgram(program);
+            if (blit_program)
+                glDeleteProgram(blit_program);
+        }
+    };
+    // Destroyed after all per-model GPU resources, even when the source dies first.
+    std::shared_ptr<Programs> shared;
+    explicit Impl(std::shared_ptr<Programs> programs) : shared(std::move(programs))
+    {
+    }
+    GLuint vao{0}, vbo{0}, ebo{0};
+    ColorComposition composition{ColorComposition::PremultipliedOver};
+    std::unique_ptr<Intermediate> color_target, mask_target;
+    struct Texture
+    {
+        TextureId id;
+        GLuint handle;
+        std::array<float, 4> texel_transform;
+        std::array<float, 2> extent;
+    };
+    std::vector<Texture> textures;
+    std::vector<DrawCommand> commands, mask_commands;
+    std::vector<MaskDefinition> masks;
+    std::vector<MaskBounds> mask_bounds;
+    std::size_t mask_command_capacity{0}, mask_capacity{0};
+    std::size_t vertex_capacity{0}, index_capacity{0}, command_capacity{0}, texture_capacity{0};
+    ~Impl()
+    {
+        for (const auto& t : textures)
+            glDeleteTextures(1, &t.handle);
+        if (ebo)
+            glDeleteBuffers(1, &ebo);
+        if (vbo)
+            glDeleteBuffers(1, &vbo);
+        if (vao)
+            glDeleteVertexArrays(1, &vao);
+    }
+    void initialize_geometry()
+    {
+        glGenVertexArrays(1, &vao);
+        glGenBuffers(1, &vbo);
+        glGenBuffers(1, &ebo);
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(RenderVertex), nullptr);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(RenderVertex),
+                              reinterpret_cast<const void*>(offsetof(RenderVertex, u)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(RenderVertex),
+                              reinterpret_cast<const void*>(offsetof(RenderVertex, color)));
+    }
+    void bind_texture(TextureId id, TextureId& uv_texture) const
+    {
+        if (id == uv_texture)
+            return;
+        const auto it = std::find_if(textures.begin(), textures.end(),
+                                     [id](const Texture& t) { return t.id == id; });
+        glBindTexture(shared->atlas_target, it->handle);
+        glUniform4fv(shared->atlas_texels, 1, it->texel_transform.data());
+        if (shared->atlas_target == GL_TEXTURE_2D)
+            glUniform2fv(shared->atlas_extent, 1, it->extent.data());
+        uv_texture = id;
+    }
+    GLuint texture(TextureId id) const
+    {
+        const auto it = std::find_if(textures.begin(), textures.end(),
+                                     [id](const Texture& t) { return t.id == id; });
+        return it == textures.end() ? 0 : it->handle;
+    }
+};
+Renderer::Renderer(GlLoader loader)
+    : impl_(std::make_unique<Impl>(std::make_shared<Impl::Programs>()))
+{
+    if (!loader)
+        throw std::runtime_error("missing OpenGL function loader");
+    const auto get_string = reinterpret_cast<PFNGLGETSTRINGPROC>(loader("glGetString"));
+    const auto* version =
+        get_string ? reinterpret_cast<const char*>(get_string(GL_VERSION)) : nullptr;
+    if (!version)
+        throw std::runtime_error("OpenGL requires a current context");
+    const bool gles = std::strncmp(version, "OpenGL ES", 9) == 0;
+    if (gles ? (!gladLoadGLES2(loader) || !GLAD_GL_ES_VERSION_3_0)
+             : (!gladLoadGL(loader) || !GLAD_GL_VERSION_3_3))
+        throw std::runtime_error("OpenGL 3.3 core or OpenGL ES 3.0 required");
+    auto& p = *impl_;
+    p.shared->atlas_target = gles ? GL_TEXTURE_2D : GL_TEXTURE_RECTANGLE;
+    p.shared->srgb_control = !gles || GLAD_GL_EXT_sRGB_write_control;
+    p.shared->program = link_program(kVertexShader, kFragmentShader);
+    p.shared->blit_program = link_program(kBlitVertex, kBlitFragment);
+    glUseProgram(p.shared->blit_program);
+    glUniform1i(glGetUniformLocation(p.shared->blit_program, "scene"), 0);
+    p.shared->blit_global_alpha = glGetUniformLocation(p.shared->blit_program, "global_alpha");
+    p.shared->premultiply = glGetUniformLocation(p.shared->program, "premultiply");
+    p.shared->protection_pass = glGetUniformLocation(p.shared->program, "protection_pass");
+    p.shared->mask_write = glGetUniformLocation(p.shared->program, "mask_write");
+    p.shared->use_mask = glGetUniformLocation(p.shared->program, "use_mask");
+    p.shared->mask_output_size = glGetUniformLocation(p.shared->program, "mask_output_size");
+    p.shared->global_alpha = glGetUniformLocation(p.shared->program, "global_alpha");
+    p.shared->output_size = glGetUniformLocation(p.shared->program, "output_size");
+    p.shared->view = glGetUniformLocation(p.shared->program, "view");
+    p.shared->projection = glGetUniformLocation(p.shared->program, "projection");
+    p.shared->flip_x = glGetUniformLocation(p.shared->program, "flip_x");
+    p.shared->atlas_texels = glGetUniformLocation(p.shared->program, "atlas_texels");
+    p.shared->atlas_extent = glGetUniformLocation(p.shared->program, "atlas_extent");
+    glUseProgram(p.shared->program);
+    glUniform1i(glGetUniformLocation(p.shared->program, "atlas"), 0);
+    glUniform1i(glGetUniformLocation(p.shared->program, "alpha_mask"), 1);
+    p.initialize_geometry();
+    check_gl("renderer initialize");
+}
+Renderer::~Renderer() = default;
+Renderer::Renderer(Renderer&&) noexcept = default;
+Renderer& Renderer::operator=(Renderer&&) noexcept = default;
+Renderer::Renderer(std::unique_ptr<Impl> impl) : impl_(std::move(impl))
+{
+}
+Renderer Renderer::create_peer() const
+{
+    auto peer = std::make_unique<Impl>(impl_->shared);
+    peer->initialize_geometry();
+    check_gl("initialize peer geometry");
+    return Renderer(std::move(peer));
+}
+void Renderer::reserve(Capacity capacity)
+{
+    const auto [vertices, indices, commands, textures, mask_commands, masks] = capacity;
+    auto& p = *impl_;
+    p.mask_bounds.reserve(masks);
+    p.mask_commands.reserve(mask_commands);
+    p.masks.reserve(masks);
+    p.mask_command_capacity = mask_commands;
+    p.mask_capacity = masks;
+    p.commands.reserve(commands);
+    p.textures.reserve(textures);
+    glBindVertexArray(p.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, p.vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p.ebo);
+    glBufferData(GL_ARRAY_BUFFER, byte_size(vertices, sizeof(RenderVertex)), nullptr,
+                 GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, byte_size(indices, sizeof(std::uint32_t)), nullptr,
+                 GL_DYNAMIC_DRAW);
+    check_gl("reserve buffers");
+    p.vertex_capacity = vertices;
+    p.index_capacity = indices;
+    p.command_capacity = commands;
+    p.texture_capacity = textures;
+}
+void Renderer::upload_texture(TextureId id, ImageViewRgba8 image, TextureRegion region)
+{
+    auto& p = *impl_;
+    if (!id.valid() || p.texture(id) || p.textures.size() >= p.texture_capacity)
+        throw std::runtime_error("invalid, duplicate or excessive texture ID");
+    GLint max_size = 0;
+    glGetIntegerv(p.shared->atlas_target == GL_TEXTURE_RECTANGLE ? GL_MAX_RECTANGLE_TEXTURE_SIZE
+                                                                 : GL_MAX_TEXTURE_SIZE,
+                  &max_size);
+    if (image.width <= 0 || image.height <= 0 || image.width > max_size ||
+        image.height > max_size ||
+        image.pixels.size() !=
+            static_cast<std::size_t>(image.width) * static_cast<std::size_t>(image.height) * 4)
+        throw std::runtime_error("invalid or unsupported texture dimensions");
+    if (!region.valid_for(image.width, image.height))
+        throw std::runtime_error("invalid texture crop region");
+    const RectangleBinding rectangle_binding(p.shared->atlas_target);
+    GLuint handle = 0;
+    glGenTextures(1, &handle);
+    // Register ownership before any subsequent operation can fail.
+    p.textures.push_back({id,
+                          handle,
+                          region.texel_transform(image.width, image.height),
+                          {static_cast<float>(image.width), static_cast<float>(image.height)}});
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(p.shared->atlas_target, handle);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+    glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+    if (p.shared->atlas_target == GL_TEXTURE_2D)
+    {
+        // GLES has only normalized samplers. Power-of-two storage gives exact
+        // binary scaling; arbitrary crop dimensions caused mask-amplified errors.
+        const auto storage_size = [max_size](int value)
+        {
+            int result = 1;
+            while (result < value)
+            {
+                if (result > max_size / 2)
+                    throw std::runtime_error("OpenGL ES atlas padding exceeds texture limits");
+                result *= 2;
+            }
+            return result;
+        };
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, storage_size(image.width),
+                     storage_size(image.height), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image.width, image.height, GL_RGBA,
+                        GL_UNSIGNED_BYTE, image.pixels.data());
+    }
+    else
+        glTexImage2D(p.shared->atlas_target, 0, GL_RGBA8, image.width, image.height, 0, GL_RGBA,
+                     GL_UNSIGNED_BYTE, image.pixels.data());
+    glTexParameteri(p.shared->atlas_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(p.shared->atlas_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(p.shared->atlas_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(p.shared->atlas_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    check_gl("upload texture");
+}
+void Renderer::prepare(RenderFrame frame)
+{
+    auto& p = *impl_;
+    if (frame.composition != ColorComposition::PremultipliedOver &&
+        frame.composition != ColorComposition::ProtectedStraight)
+        throw std::runtime_error("unsupported color composition");
+    if (frame.vertices.size() > p.vertex_capacity || frame.indices.size() > p.index_capacity ||
+        frame.commands.size() > p.command_capacity ||
+        frame.mask_commands.size() > p.mask_command_capacity ||
+        frame.masks.size() > p.mask_capacity)
+        throw std::runtime_error("frame exceeds reserved capacity");
+    for (const auto& vertex : frame.vertices)
+    {
+        if (!std::isfinite(vertex.x) || !std::isfinite(vertex.y) || !std::isfinite(vertex.u) ||
+            !std::isfinite(vertex.v) ||
+            std::any_of(vertex.color.begin(), vertex.color.end(),
+                        [](float value) { return !std::isfinite(value); }))
+            throw std::runtime_error("nonfinite vertex");
+    }
+    for (auto index : frame.indices)
+        if (index >= frame.vertices.size())
+            throw std::runtime_error("frame vertex index out of range");
+    const auto validate = [&p, &frame](const DrawCommand& command)
+    {
+        if (!p.texture(command.texture) || command.first_index > frame.indices.size() ||
+            command.index_count > frame.indices.size() - command.first_index ||
+            command.index_count > static_cast<std::uint32_t>(std::numeric_limits<GLsizei>::max()))
+            throw std::runtime_error("invalid draw command");
+        if (command.protection != ColorProtection::None &&
+            (command.protection != ColorProtection::PreserveTranslucent ||
+             frame.composition != ColorComposition::ProtectedStraight))
+            throw std::runtime_error("color protection requires straight composition");
+        if (command.blend != BlendMode::Over &&
+            (command.blend != BlendMode::Multiply ||
+             frame.composition != ColorComposition::ProtectedStraight ||
+             command.protection != ColorProtection::None))
+            throw std::runtime_error("unsupported blend mode");
+        if (command.mask.valid() && (command.mask.value > frame.masks.size() ||
+                                     frame.composition != ColorComposition::ProtectedStraight))
+            throw std::runtime_error("invalid mask reference");
+    };
+    for (const auto& command : frame.commands)
+        validate(command);
+    for (const auto& command : frame.mask_commands)
+    {
+        validate(command);
+        if (command.mask.valid() || command.protection != ColorProtection::None ||
+            command.blend != BlendMode::Over)
+            throw std::runtime_error("nested mask commands are unverified");
+    }
+    for (const auto& mask : frame.masks)
+        if (mask.first_command > frame.mask_commands.size() ||
+            mask.command_count > frame.mask_commands.size() - mask.first_command)
+            throw std::runtime_error("invalid mask command range");
+    const auto bounds = [&frame](const DrawCommand& command)
+    {
+        Bounds result;
+        for (std::uint32_t i = 0; i < command.index_count; ++i)
+        {
+            const auto& vertex = frame.vertices[frame.indices[command.first_index + i]];
+            result.include(vertex.x, vertex.y);
+        }
+        return result;
+    };
+    p.mask_bounds.clear();
+    for (const auto& mask : frame.masks)
+    {
+        Bounds result;
+        for (std::uint32_t i = 0; i < mask.command_count; ++i)
+        {
+            const auto bound = bounds(frame.mask_commands[mask.first_command + i]);
+            if (std::isfinite(bound.left))
+            {
+                result.include(bound.left, bound.top);
+                result.include(bound.right, bound.bottom);
+            }
+        }
+        p.mask_bounds.push_back({result, {}});
+    }
+    for (const auto& command : frame.commands)
+        if (command.mask.valid())
+        {
+            const auto b = bounds(command);
+            if (std::isfinite(b.left))
+            {
+                auto& content = p.mask_bounds[command.mask.value - 1].content;
+                content.include(b.left, b.top);
+                content.include(b.right, b.bottom);
+            }
+        }
+    glBindVertexArray(p.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, p.vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p.ebo);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, byte_size(frame.vertices.size(), sizeof(RenderVertex)),
+                    frame.vertices.data());
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
+                    byte_size(frame.indices.size(), sizeof(std::uint32_t)), frame.indices.data());
+    p.commands.assign(frame.commands.begin(), frame.commands.end());
+    p.mask_commands.assign(frame.mask_commands.begin(), frame.mask_commands.end());
+    p.masks.assign(frame.masks.begin(), frame.masks.end());
+    p.composition = frame.composition;
+    check_gl("prepare frame");
+}
+std::size_t Renderer::release_unused_textures()
+{
+    auto& p = *impl_;
+    std::size_t released = 0;
+    for (auto texture = p.textures.begin(); texture != p.textures.end();)
+    {
+        const auto referenced = [id = texture->id](const DrawCommand& command)
+        { return command.texture == id; };
+        if (std::any_of(p.commands.begin(), p.commands.end(), referenced) ||
+            std::any_of(p.mask_commands.begin(), p.mask_commands.end(), referenced))
+        {
+            ++texture;
+            continue;
+        }
+        glDeleteTextures(1, &texture->handle);
+        texture = p.textures.erase(texture);
+        ++released;
+    }
+    return released;
+}
+void Renderer::resize_output(int width, int height)
+{
+    auto& p = *impl_;
+    if (p.composition == ColorComposition::PremultipliedOver || width <= 0 || height <= 0)
+        return;
+    if (p.color_target && p.color_target->width == width && p.color_target->height == height)
+        return;
+    GLint maximum = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maximum);
+    if (width > maximum || height > maximum)
+        throw std::runtime_error("output exceeds GPU texture dimensions");
+    auto color = intermediate(width, height, GL_RGBA8);
+    // Reference readback, rather than its upload type, establishes five-bit
+    // stored coverage. Alpha is carried in green; the attachment alpha is unused.
+    auto mask = intermediate(floor_power_two(width), floor_power_two(height), GL_RGB5_A1);
+    GLint green_bits = 0;
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                          GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &green_bits);
+    if (green_bits != 5)
+        throw std::runtime_error("five-bit mask coverage attachment unsupported");
+    p.color_target = std::move(color);
+    p.mask_target = std::move(mask);
+}
+void Renderer::render(Target target, const View& view, TargetContents contents)
+{
+    if (contents != TargetContents::Clear && contents != TargetContents::Preserve)
+        throw std::runtime_error("invalid target contents policy");
+    if (target.width <= 0 || target.height <= 0)
+        return; // minimized output
+    if (!std::isfinite(view.origin_x) || !std::isfinite(view.origin_y) ||
+        !std::isfinite(view.scale) || view.scale <= 0 ||
+        std::any_of(view.clear.begin(), view.clear.end(),
+                    [](float value) { return !std::isfinite(value); }))
+        throw std::runtime_error("invalid output view");
+    const auto& p = *impl_;
+    TextureId uv_texture; // Cache only within this pass; host state may change between calls.
+    const bool straight = p.composition == ColorComposition::ProtectedStraight;
+    if (straight && (!p.color_target || p.color_target->width != target.width ||
+                     p.color_target->height != target.height))
+        throw std::runtime_error("protected composition requires explicit output resize");
+    const RectangleBinding rectangle_binding(p.shared->atlas_target);
+    glBindFramebuffer(GL_FRAMEBUFFER, straight ? p.color_target->framebuffer : target.framebuffer);
+    glViewport(0, 0, target.width, target.height);
+    glDisable(GL_SCISSOR_TEST);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_STENCIL_TEST);
+    glDisable(GL_CULL_FACE);
+    if (p.shared->srgb_control)
+        glDisable(GL_FRAMEBUFFER_SRGB);
+    glDisable(GL_DITHER);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    if (straight)
+        glClearColor(0, 0, 0, 0);
+    else
+        glClearColor(view.clear[0], view.clear[1], view.clear[2], view.clear[3]);
+    if (straight || contents == TargetContents::Clear)
+        glClear(GL_COLOR_BUFFER_BIT);
+    glUseProgram(p.shared->program);
+    glBindVertexArray(p.vao);
+    glActiveTexture(GL_TEXTURE0);
+    glBindSampler(0, 0);
+    glBindSampler(1, 0);
+    glUniform2f(p.shared->output_size, static_cast<float>(target.width),
+                static_cast<float>(target.height));
+    glUniform3f(p.shared->view, view.origin_x, view.origin_y, view.scale);
+    glUniform1i(p.shared->flip_x, view.flip_x ? 1 : 0);
+    glUniform2f(p.shared->projection, 2.0f / static_cast<float>(target.width),
+                -2.0f / static_cast<float>(target.height));
+    int premultiply = straight ? 0 : 1;
+    glUniform1i(p.shared->premultiply, premultiply);
+    glUniform1i(p.shared->protection_pass, 0);
+    glUniform1i(p.shared->mask_write, 0);
+    glUniform1i(p.shared->use_mask, 0);
+    glUniform2f(p.shared->mask_output_size, static_cast<float>(target.width),
+                static_cast<float>(target.height));
+    glUniform1f(p.shared->global_alpha, straight ? 1.0f : view.alpha);
+    glEnable(GL_BLEND);
+    glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+    glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    // The scratch attachment survives ordinary draws, but another mask overwrites it.
+    // Keep this cache local: every render must observe fresh geometry and view bounds.
+    MaskId scratch_mask{};
+    Clip scratch_clip{};
+    for (const auto& command : p.commands)
+    {
+        if (command.mask.valid())
+        {
+            if (scratch_mask != command.mask)
+            {
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, 0); // avoid read/write feedback on the scratch mask
+                glActiveTexture(GL_TEXTURE0);
+                glBindFramebuffer(GL_FRAMEBUFFER, p.mask_target->framebuffer);
+                glViewport(0, 0, p.mask_target->width, p.mask_target->height);
+                glDisable(GL_SCISSOR_TEST);
+                glClearColor(0, 0, 0, 0);
+                glClear(GL_COLOR_BUFFER_BIT);
+                // The masked group owns its clip, shared by pupil and highlights.
+                // V7 #25/#29 retain that clip across child draws. Clipping each small
+                // child truncates filtered coverage; unclipped sources also diverge.
+                const auto& bounds = p.mask_bounds[command.mask.value - 1];
+                scratch_clip = intersect(intersect(clip(bounds.source, target, view),
+                                                   clip(bounds.content, target, view)),
+                                         {0, 0, target.width, target.height});
+                const auto scaled = [](int value, int size, int original)
+                { return static_cast<int>(static_cast<std::int64_t>(value) * size / original); };
+                glEnable(GL_SCISSOR_TEST);
+                glScissor(scaled(scratch_clip.x, p.mask_target->width, target.width),
+                          scaled(scratch_clip.y, p.mask_target->height, target.height),
+                          scaled(scratch_clip.width, p.mask_target->width, target.width),
+                          scaled(scratch_clip.height, p.mask_target->height, target.height));
+                glUniform1i(p.shared->mask_write, 1);
+                glUniform1i(p.shared->use_mask, 0);
+                glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
+                const auto& definition = p.masks[command.mask.value - 1];
+                for (std::uint32_t i = 0; i < definition.command_count; ++i)
+                {
+                    const auto& draw = p.mask_commands[definition.first_command + i];
+                    p.bind_texture(draw.texture, uv_texture);
+                    glDrawElements(
+                        GL_TRIANGLES, static_cast<GLsizei>(draw.index_count), GL_UNSIGNED_INT,
+                        reinterpret_cast<const void*>(
+                            static_cast<std::uintptr_t>(draw.first_index) * sizeof(std::uint32_t)));
+                }
+                glBindFramebuffer(GL_FRAMEBUFFER, p.color_target->framebuffer);
+                glViewport(0, 0, target.width, target.height);
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, p.mask_target->texture);
+                glActiveTexture(GL_TEXTURE0);
+                glUniform1i(p.shared->mask_write, 0);
+                scratch_mask = command.mask;
+            }
+            glEnable(GL_SCISSOR_TEST);
+            glScissor(scratch_clip.x, scratch_clip.y, scratch_clip.width, scratch_clip.height);
+            glUniform1i(p.shared->use_mask, 1);
+        }
+        else
+        {
+            glDisable(GL_SCISSOR_TEST);
+            glUniform1i(p.shared->use_mask, 0);
+        }
+        p.bind_texture(command.texture, uv_texture);
+        const int command_premultiply = command.blend == BlendMode::Multiply || !straight ? 1 : 0;
+        if (command_premultiply != premultiply)
+        {
+            premultiply = command_premultiply;
+            glUniform1i(p.shared->premultiply, premultiply);
+        }
+        if (straight && command.protection == ColorProtection::PreserveTranslucent)
+        {
+            glUniform1i(p.shared->protection_pass, 1);
+            glBlendFuncSeparate(GL_ONE_MINUS_DST_ALPHA, GL_DST_ALPHA, GL_ZERO, GL_ONE);
+            glDrawElements(
+                GL_TRIANGLES, static_cast<GLsizei>(command.index_count), GL_UNSIGNED_INT,
+                reinterpret_cast<const void*>(static_cast<std::uintptr_t>(command.first_index) *
+                                              sizeof(std::uint32_t)));
+            glUniform1i(p.shared->protection_pass, 0);
+        }
+        if (command.blend == BlendMode::Multiply)
+            // Source V6: opacity-weighted multiply changes RGB only; global alpha
+            // remains a final composite operation, as for ordinary straight draws.
+            glBlendFuncSeparate(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
+        else
+            glBlendFuncSeparate(straight ? GL_SRC_ALPHA : GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,
+                                GL_ONE_MINUS_SRC_ALPHA);
+        glDrawElements(
+            GL_TRIANGLES, static_cast<GLsizei>(command.index_count), GL_UNSIGNED_INT,
+            reinterpret_cast<const void*>(static_cast<std::uintptr_t>(command.first_index) *
+                                          sizeof(std::uint32_t)));
+    }
+    if (straight)
+    {
+        glDisable(GL_SCISSOR_TEST);
+        glBindFramebuffer(GL_FRAMEBUFFER, target.framebuffer);
+        if (contents == TargetContents::Clear)
+        {
+            glClearColor(view.clear[0], view.clear[1], view.clear[2], view.clear[3]);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
+        glUseProgram(p.shared->blit_program);
+        glBindTexture(GL_TEXTURE_2D, p.color_target->texture);
+        glUniform1f(p.shared->blit_global_alpha, view.alpha);
+        glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+    }
+    // Surface draw/blit failures at the call boundary, before a host accepts the
+    // frame. No pixel readback or explicit completion wait is needed.
+    check_gl("render frame");
+}
+ImageRgba8 Renderer::capture(Target target)
+{
+    if (target.width <= 0 || target.height <= 0)
+        throw std::runtime_error("cannot capture empty target");
+    ImageRgba8 image;
+    image.width = target.width;
+    image.height = target.height;
+    image.pixels.resize(static_cast<std::size_t>(target.width) *
+                        static_cast<std::size_t>(target.height) * 4);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, target.framebuffer);
+    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+    glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+    glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+    glReadPixels(0, 0, target.width, target.height, GL_RGBA, GL_UNSIGNED_BYTE, image.pixels.data());
+    check_gl("capture");
+    const auto stride = static_cast<std::size_t>(target.width) * 4;
+    for (int y = 0; y < target.height / 2; ++y)
+        std::swap_ranges(
+            image.pixels.begin() +
+                static_cast<std::ptrdiff_t>(static_cast<std::size_t>(y) * stride),
+            image.pixels.begin() +
+                static_cast<std::ptrdiff_t>((static_cast<std::size_t>(y) + 1) * stride),
+            image.pixels.begin() + static_cast<std::ptrdiff_t>(
+                                       static_cast<std::size_t>(target.height - 1 - y) * stride));
+    // PNG carries straight alpha. Readback is premultiplied; unassociate only in
+    // this diagnostic path so transparent fringes can be compared correctly.
+    for (std::size_t i = 0; i < image.pixels.size(); i += 4)
+    {
+        const auto alpha = image.pixels[i + 3];
+        if (alpha)
+            for (std::size_t c = 0; c < 3; ++c)
+                image.pixels[i + c] = static_cast<std::uint8_t>(std::min(
+                    255U,
+                    (static_cast<unsigned>(image.pixels[i + c]) * 255U + alpha / 2U) / alpha));
+    }
+    return image;
+}
+std::string Renderer::diagnostics() const
+{
+    return std::string(reinterpret_cast<const char*>(glGetString(GL_VENDOR))) + " | " +
+           reinterpret_cast<const char*>(glGetString(GL_RENDERER)) + " | " +
+           reinterpret_cast<const char*>(glGetString(GL_VERSION));
+}
+} // namespace nekomote::render_gl

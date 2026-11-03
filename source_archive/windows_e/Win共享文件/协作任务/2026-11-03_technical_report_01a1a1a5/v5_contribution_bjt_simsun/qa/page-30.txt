@@ -1,0 +1,34 @@
+29
+表 8-1 构建与现场环境
+位置 必要条件 说明
+Ubuntu 开发机 Ubuntu 20.04 Vivado/Vitis 2022.2 本次 XSim 实际使用该环境
+模型工具环境 Vitis AI 3.0 目标编译链 模型与 DPU fingerprint 配套
+KV260 PetaLinux 2022.2 Python 3.9.9 当前实读 内核为 5.15.36-xilinx-v2022.2
+Windows 推理
+已有 GPU 模型服务 端口 8797 27B 和 OmniVoice16 权重依授权取得
+机
+外设 相机 MCP01 触屏 单轴与驱动 接线 供电 行程按实物确认
+8.2 获取工程与准备输入
+工程根 README、checksums.sha256、build/env.json、board/deploy.json、模型输入锁
+和依赖表共同定义输入。先核对校验清单，再准备工具和包外材料。27B 权重、整张 SD 镜像、
+正式角色素材、私有业务数据和现场密钥不由技术报告代为提供；它们需要从各自合法来源取
+得。
+源码包已将 380 项主业务、224 项独立相机、25 项运动控制和多组锁外依赖分别登记。
+39 处相机与主业务同名异版按命名空间保留；默认设置可由原读写器生成。正式外置文件与
+配置全部一致时可以精确恢复旧清单，现场参数改变则必须生成新的有效发布指纹。
+8.3 硬件搭建与环境部署
+先在不输出运动的条件下确认板卡电源、存储卡、网线、相机、MCP01、显示和触控。检
+查隔离两侧供电与参考地，确认 PWM 线序、电平及驱动器要求；机构零点和允许行程由现场
+标定。之后检查两端地址与连通性、目标内核及运行库，保存 boot ID、固件与配置指纹。
+Ubuntu 构建工具使用明确绝对路径；Windows 模型权重保持在共享目录外的模型目录。
+新机按依赖清单重建环境，不直接复制旧虚拟环境。ASR、声纹、音频前端和 TTS 资源需要与
+正式配置配套，候选模型不能因文件存在而自动成为现役版本。
+8.4 FPGA 仿真 构建与工件导出
+以下是本次实际重跑 RTL 的命令形式。进入方案 A 工程根，将输出设为全新目录；本次
+实际输出为 /home/ghmd/auar-techdoc-01a1a1a5/verification，已验证四套 bench 通过。
+示例使用另一全新目录名，避免覆盖回执。
+export VIV=/home/ghmd/Xilinx_2022.2/Vivado/2022.2
+export VIT=/home/ghmd/Xilinx_2022.2/Vitis/2022.2
+export OUT=/home/ghmd/auar_reproduce_new
+python3 -B build/reproduce.py --out "$OUT" --stage rtl \
+--vivado "$VIV/bin/vivado"

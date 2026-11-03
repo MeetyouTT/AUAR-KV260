@@ -1,0 +1,40 @@
+明确继续接回当前匿名对话：单源本地候选
+
+状态：LOCAL_PUBLIC_TESTS_PASS_NOT_DEPLOYED。只修改after/tools/voice_first_recording.py；before保留现役573755原字节。没有设备、SSH/UART、HTTP、模型、真实库或服务操作，没有改配置/其他生产组件。当前五分钟与手动测试的证据独立保留，不以本候选测试替代。
+
+用户选择与范围
+用户明确选择以后暂停再继续时接回当前对话。主控补充：不要求本实例必须先经历一次pause；正常GUI启动时由既有production initialize_anonymous_selection合法恢复的active当前会话，也可在用户明确继续时接回。
+只有磁盘saved而active为空不构成该授权；未选档案、未知scope_provider、选择对象/启动/会话owner变化都不能让旧凭据重新生效。不新增profile grant或旧CID恢复入口。
+
+实现
+一份RAM槽_pause_resume只保存一次性pending，不保存正文、摘要、档案、持久书签或新的授权凭据。
+handsfree_toggle从暂停变为启用时，在原方法前后取得相同合法绑定，才保存pending。绑定是当前jobs对象、selection对象、合法32位小写active==saved CID、transport session和board boot；要求profile_selection为None、scope_provider为None、jobs未关闭且boot与audio owner一致。
+原handsfree_toggle的monitor_state/monitor_reason、生产explicit_toggle偏好持久化、取消及重开语义保留。
+实际_monitor_tick已通过原feedback/enabled/播放/冷却门槛、准备建立新audio owner时，消费pending。持有原jobs.condition，再比较绑定；仅匹配才调用现有jobs.select_conversation(resume=True)，否则仍False。
+没有复用旧generation/session：原select_conversation仍执行原_invalidate、生成新transport session、重置enrollment；只保留同一个匿名memory CID。
+cancel和_finish_session立即清pending。自动30秒静默/自动错误/原native失败后的重建没有新的显式UI凭据，因此仍按原select(False)建立新匿名会话。重绘或单纯等待不会生成pending。
+如果用户在点击继续之前已合法选择另一个active匿名会话，新pending只绑定点击时的当前选择；它不会保存或恢复之前那个旧CID。若选择在点击后、tick消费前变化，旧pending失效，按原新会话路径处理。
+
+改动边界
+新增3个内部helper，只改5个既有方法：__init__、handsfree_toggle、_finish_session、cancel、_monitor_tick。语音入队、转写、entry、身份、音频ACK、采集/VAD、generation实现及Store/grant源码没有改。
+没有在正常UI状态发布、头像帧、相机处理或音频包循环中新增工作；只在用户toggle和已有owner创建时检查RAM绑定。不宣称对话耗时或CPU收益。
+
+公开回归
+test_public_methods.py抽取并执行匹配源的实际Recording/HandsFree/Barge/VoiceFirst类方法、实际BoardDialogueJobs.select_conversation/_invalidate/_scope以及实际ConversationSelection和生产bind_automatic_listening/ProductionMonitorChoice。
+捕获器、视觉后端、偏好backend是公开RAM替身；匿名selection只在本目录TemporaryDirectory下原子写公开随机CID。没有生产Store或真实profile grant。
+9项通过：
+1 明确暂停继续保留CID、一次消费、仍走原generation/new transport session；select(True)入口确在原condition下。
+2 相同UI序列在旧版确实select(False)换CID，复现行为差异。
+3 启动已合法admitted active、此实例未先pause，也能明确继续；saved-only/activeNone不恢复。
+4 saved不等active或未知scope_provider按原False路径。
+5 UI点击后saved/active/session/boot/selection对象变化均不恢复旧绑定。
+6 已存在的档案grant在pending期间切换仍按原profile select(False)路径，不导入/重发grant，原对象身份保持。
+7 自动30秒静默结束后下一次建立owner仍select(False)。
+8 重复toggle、暂停时直接cancel、已启用时内部cancel的旧偏好/rearm语义保持，pending清空。
+9 取消异常不发布继续凭据，不把失败当作继续成功。
+没有重跑旧整套测试或做实际模型/ASR实验。Python3.9语法检查通过。首次公开测试夹具漏了固定selection依赖，原失败结果保留；本地最初草稿又被旧同名方法覆盖，实际回归捕获后已合并原方法。draft_initial与draft_requires_prior_pause仅是未部署历史，不能作为发布payload。
+
+审阅入口
+CANDIDATE.json是当前前后source SHA和大小；CHANGE.diff是相对573755的精确diff；FROZEN_HANDOFF.json记录当前单源、测试与匹配依赖SHA。
+先由主窗口复核，再交唯一设备执行者以新startup/spec封存单源发布。发布会创建新GUI实例；只允许既有factory合法初始化的active，并在实机重新证明seed/answer同scope。若bootstrap/active未恢复，不写selection补造，保留实际限制。
+metadata probe只在新spec确定后重钉startup/source常量，SQL和scope门槛不放宽。首次五分钟/手动回答错误仍独立保留，不能把本行为修复当作记忆检索根因已修复。

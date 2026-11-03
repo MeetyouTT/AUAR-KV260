@@ -1,0 +1,26 @@
+{
+  "runtime": "/home/root/aura-render24-20261020/candidate-45f9f5cd2aaa/runtime",
+  "unit": "# /etc/systemd/system/aura-avatar-ui.service\n[Unit]\nDescription=AURA cached avatar touchscreen interface\nWants=xserver-nodm.service systemd-modules-load.service\nAfter=local-fs.target xserver-nodm.service systemd-modules-load.service\nRequiresMountsFor=/home/root/aura-render24-20261020/candidate-45f9f5cd2aaa/runtime\nStartLimitIntervalSec=300\nStartLimitBurst=5\n\n[Service]\nType=notify\nNotifyAccess=main\nUser=root\nEnvironment=DISPLAY=:0 PYTHONUNBUFFERED=1\nWorkingDirectory=/home/root/aura-render24-20261020/candidate-45f9f5cd2aaa/runtime/aura\nExecStart=/usr/bin/python3 -B /home/root/aura-render24-20261020/candidate-45f9f5cd2aaa/startup/launcher.py --config /home/root/aura-render24-20261020/candidate-45f9f5cd2aaa/startup/config.json\nRestart=on-failure\nRestartSec=5\nTimeoutStartSec=240\nTimeoutStopSec=25\nKillMode=mixed\nStandardOutput=journal\nStandardError=journal\nSyslogIdentifier=aura-avatar-ui\n\n[Install]\nWantedBy=graphical.target\n",
+  "phase": "IDLE",
+  "playing": false,
+  "handsfree": {
+    "enabled": true,
+    "state": "WAITING_PERSON",
+    "reason": "NO_SINGLE_FACE",
+    "error": "",
+    "visual_bound": false,
+    "conversation_entered": false,
+    "microphone_open": false,
+    "speech_detection": "energy_vad_then_asr",
+    "diagnostics": {
+      "armed": 0,
+      "speech_starts": 0,
+      "submitted": 0,
+      "entry_rejected": 0,
+      "visual_stops": 0
+    },
+    "speaker_binding_verified": false,
+    "voice_barge_in": false
+  },
+  "pending": false
+}

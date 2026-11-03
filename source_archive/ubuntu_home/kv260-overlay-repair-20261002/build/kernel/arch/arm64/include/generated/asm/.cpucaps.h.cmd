@@ -1,0 +1,1 @@
+cmd_arch/arm64/include/generated/asm/cpucaps.h := mkdir -p arch/arm64/include/generated/asm/ && awk -f /home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/tools/gen-cpucaps.awk /home/ghmd/kv260-overlay-repair-20261002/sources/linux-xlnx/arch/arm64/tools/cpucaps > arch/arm64/include/generated/asm/cpucaps.h

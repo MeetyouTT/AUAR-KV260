@@ -1,0 +1,62 @@
+{
+  "schema": "aura-boot-candidate-fix-recheck-r4-1",
+  "updated_host_utc": "2026-11-02T16:33:34.719485+00:00",
+  "verdict": "OFFLINE_TWO_FINDINGS_REMAIN_B01_AND_B04_NO_DEPLOYMENT_APPROVAL",
+  "review_complete_for_frozen_revision": true,
+  "frozen_revision": {
+    "path": "boot_review_inputs/observed_revision4/SNAPSHOT.json",
+    "sha256": "ea0d919d8d363b875727ce064168f78816594d3d2aa2942c3fdb3f86b1a6301e"
+  },
+  "boot_sha256": "28ffa2545cf9327da72a7a4d6c583923957f784c8f5c2d8d12571bddc3e00a5e",
+  "rules_sha256": "55bfc4db498be172beb040605dcae351c6f972e0df1371cecb48b7d1034ed268",
+  "items": {
+    "B01": {
+      "status": "PARTIAL_FIX_UNCHANGED_FROM_R3",
+      "evidence": "quiet AST is identical in R3 and R4, so reuse exact R3 queued-IDSTOP negative without repeating execution. Explicitly classify all aura-boot-wide-* pending platform actions, including original Python IDSTOP; continue an existing durable attempt by observation, never resubmit."
+    },
+    "B02": {
+      "status": "PASS_REPORTED_LATE_STOP_COUNTEREXAMPLE_OFFLINE",
+      "evidence": "Exact R4 methods reject same-owner deactivating/stop Job after samples and before any UI/startup CAS; healthy RAM control still commits. Pre/post CAS and READY lifecycle guard connections statically checked.",
+      "limits": "Not exhaustive interleaving proof, not real Linux/GUI or original b77/Native proof. Multi-file writes still require exclusive ownership."
+    },
+    "B03": {
+      "status": "R3_INDEPENDENT_FIX_RETAINED_STATIC_IN_R4",
+      "evidence": "Captured active_source_raw/presence is still the before-image CAS expectation; R3 baseline/newer-ledger probes remain the prior revision evidence. No new R4 B03 execution claimed."
+    },
+    "B04": {
+      "status": "UNFINISHED_RUNTIME_HISTORY_GATE_NOT_INTEGRATED",
+      "evidence": "Frozen R4 original_history_gate.py draft exists, but frozen boot runtime has no import/call to it or next_history_expected. Draft module existence cannot bind every actual runtime final/source/history/current bound. Interface compatibility being independently checked; no half-finished-module approval."
+    },
+    "B05": {
+      "status": "PASS_FOUR_MODE_ROUTE_CASES_OFFLINE",
+      "evidence": "Same predecessor/current boot accepts only native_exact_same_boot; different boots accept only native_new_kernel_boot; both wrong-mode cases HOLD."
+    }
+  },
+  "evidence": {
+    "R4_owner_and_mode": {
+      "path": "camera/BOOT_FIX_R4_OWNER_ROUTE_RECHECK.json",
+      "sha256": "b9341f058ae9f4fb6ff31c3dc0b483dd2993bf74ba01fb0b3c72aafa5a304ea7"
+    },
+    "R3_jobs": {
+      "path": "validation/BOOT_FIX_R3_RUNTIME_RECHECK.json",
+      "sha256": "5e34550155d33e1407f6c4a60560da600f218a83c24203650161815a6096ad83"
+    },
+    "R3_CAS": {
+      "path": "gtk/BOOT_FIX_R3_CAS_RECHECK.json",
+      "sha256": "daf61faa9e55ea181ad219c27c6801a98eb8f4b4f5adb3c28ffce5619d127c85"
+    }
+  },
+  "live_gates_unchanged": [
+    "Explicit identity-owner PAUSED/idle handoff and fresh boot/process/source pins.",
+    "Actual dpu-auto-config body/helper sources and full merged systemd dependency/stop graph.",
+    "Original actual final plus ordered archive and route-specific source/counter proof.",
+    "Target Linux checks and current-source test/package manifests."
+  ],
+  "scope": {
+    "board_or_model_access": false,
+    "author_or_production_files_modified": false,
+    "full65_suite_rerun": false,
+    "cold_boot_or_activation_approved": false,
+    "CPU_performance_after_measured": false
+  }
+}

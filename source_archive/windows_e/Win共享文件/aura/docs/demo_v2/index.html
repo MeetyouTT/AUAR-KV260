@@ -1,0 +1,94 @@
+<!doctype html><html lang='zh-CN'><head><meta charset='utf-8'>
+<title>v2 玩偶状态系统 · 模拟剧本演示</title>
+<style>
+body{background:#1b1e24;color:#e6e6e6;font-family:'Microsoft YaHei',sans-serif;margin:24px}
+h1{font-size:20px;margin:0 0 4px} .sub{color:#8b96a3;font-size:12px;margin-bottom:18px}
+h2{font-size:16px;margin:26px 0 10px;border-left:4px solid #4aa08a;padding-left:8px}
+table{border-collapse:collapse;font-size:13px;width:100%}
+th,td{border:1px solid #333a45;padding:4px 8px;text-align:left;vertical-align:top}
+th{background:#252a32;position:sticky;top:0}
+tr:nth-child(even) td{background:#20242b}
+.burst{color:#ffcf5c;font-weight:bold} .loop{color:#7fd18b}
+.fb{color:#ff8a7a} .n{color:#6f7a87}
+.grid{display:flex;flex-wrap:wrap;gap:14px}
+.card{background:#232830;border:1px solid #333a45;border-radius:8px;padding:10px;width:182px}
+.card img{display:block;margin:0 auto 6px;background:#2b2f36;border-radius:6px}
+.card .t{text-align:center;font-weight:bold;font-size:13px;margin-bottom:6px}
+.k{color:#93a0ad;font-size:12px;line-height:1.6}
+.k b{color:#dfe6ee} .warn{color:#ffcf5c}
+</style></head><body>
+<h1>v2 玩偶状态系统 · 模拟剧本演示</h1>
+<div class='sub'>状态机为生产代码逐字调用（RuntimeFSM + avatar_assets）；动图来自 assets/avatar 的真实帧序列。素材规格 464x480 / 24fps。</div>
+<h2>一、剧本时间线（45 步）</h2>
+<table><tr><th>#</th><th>旁白</th><th>事件</th><th>payload</th><th>状态</th><th>素材</th><th>时长</th><th>播放语义</th></tr>
+<tr><td>1</td><td>开机无人，空闲</td><td>&lt;span class=&#x27;n&#x27;&gt;（仅记录初始态）&lt;/span&gt;</td><td><span class='n'>-</span></td><td><b>IDLE</b> </td><td>idle_normal</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>2</td><td>来访者进入，有人了</td><td>scene.person_enter</td><td><span class='n'>-</span></td><td><b>PRESENT</b> <span class='loop'>迁移</span></td><td>idle_present</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>3</td><td>唤醒词命中，先给个反应</td><td>audio.kws_detected</td><td><span class='n'>-</span></td><td><b>AWAKE</b> <span class='loop'>迁移</span></td><td>emo_surprised</td><td>0.92s / 22帧</td><td><span class='burst'>burst 一次性</span></td></tr>
+<tr><td>4</td><td>检测到句尾，开始聆听</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>LISTENING</b> <span class='loop'>迁移</span></td><td>idle_listening</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>5</td><td>聆听结束，进入思考</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>THINKING</b> <span class='loop'>迁移</span></td><td>idle_thinking</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>6</td><td>收到回复 emotion=neutral，中性播报</td><td>dialogue.response_received</td><td>{&quot;emotion&quot;: &quot;neutral&quot;}</td><td><b>SPEAKING_NEUTRAL</b> <span class='loop'>迁移</span></td><td>talking_neutral</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>7</td><td>播报播放完毕</td><td>audio.playback_stopped</td><td><span class='n'>-</span></td><td><b>IDLE</b> <span class='loop'>迁移</span></td><td>idle_normal</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>8</td><td>用户按实体键（不播唤醒反应，直接聆听）</td><td>board.key_pressed</td><td><span class='n'>-</span></td><td><b>LISTENING</b> <span class='loop'>迁移</span></td><td>idle_listening</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>9</td><td>检测到句尾，开始聆听</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>THINKING</b> <span class='loop'>迁移</span></td><td>idle_thinking</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>10</td><td>聆听结束，进入思考</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>THINKING</b> <span class='fb'>被拒</span></td><td>idle_thinking</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>11</td><td>收到回复 emotion=happy，情绪高涨播报</td><td>dialogue.response_received</td><td>{&quot;emotion&quot;: &quot;happy&quot;}</td><td><b>SPEAKING</b> <span class='loop'>迁移</span></td><td>talking_normal</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>12</td><td>播报播放完毕</td><td>audio.playback_stopped</td><td><span class='n'>-</span></td><td><b>IDLE</b> <span class='loop'>迁移</span></td><td>idle_normal</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>13</td><td>换个人进来</td><td>scene.person_enter</td><td><span class='n'>-</span></td><td><b>PRESENT</b> <span class='loop'>迁移</span></td><td>idle_present</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>14</td><td>唤醒词命中，再给个反应</td><td>audio.kws_detected</td><td><span class='n'>-</span></td><td><b>AWAKE</b> <span class='loop'>迁移</span></td><td>emo_surprised</td><td>0.92s / 22帧</td><td><span class='burst'>burst 一次性</span></td></tr>
+<tr><td>15</td><td>检测到句尾，开始聆听</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>LISTENING</b> <span class='loop'>迁移</span></td><td>idle_listening</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>16</td><td>聆听结束，进入思考</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>THINKING</b> <span class='loop'>迁移</span></td><td>idle_thinking</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>17</td><td>收到回复 emotion=sad，低落播报</td><td>dialogue.response_received</td><td>{&quot;emotion&quot;: &quot;sad&quot;}</td><td><b>SPEAKING_LOW</b> <span class='loop'>迁移</span></td><td>talking_low</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>18</td><td>用户按键取消（瞬时态，按否有人在自动回迁）</td><td>audio.cancel_requested</td><td><span class='n'>-</span></td><td><b>PRESENT</b> <span class='loop'>迁移</span></td><td>idle_present</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>19</td><td>用户按实体键，重新聆听</td><td>board.key_pressed</td><td><span class='n'>-</span></td><td><b>LISTENING</b> <span class='loop'>迁移</span></td><td>idle_listening</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>20</td><td>检测到句尾，开始聆听</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>THINKING</b> <span class='loop'>迁移</span></td><td>idle_thinking</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>21</td><td>聆听结束，进入思考</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>THINKING</b> <span class='fb'>被拒</span></td><td>idle_thinking</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>22</td><td>命令执行成功，avatar_action=ack_nod 点头确认</td><td>dialogue.response_received</td><td>{&quot;avatar_action&quot;: &quot;ack_nod&quot;}</td><td><b>ACK_NOD</b> <span class='loop'>迁移</span></td><td>ack_nod</td><td>0.92s / 22帧</td><td><span class='burst'>burst 一次性</span></td></tr>
+<tr><td>23</td><td>点头播完</td><td>audio.playback_stopped</td><td><span class='n'>-</span></td><td><b>IDLE</b> <span class='loop'>迁移</span></td><td>idle_normal</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>24</td><td>用户请求关灯，玩偶拒绝</td><td>board.key_pressed</td><td><span class='n'>-</span></td><td><b>LISTENING</b> <span class='loop'>迁移</span></td><td>idle_listening</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>25</td><td>检测到句尾，开始聆听</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>THINKING</b> <span class='loop'>迁移</span></td><td>idle_thinking</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>26</td><td>聆听结束，进入思考</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>THINKING</b> <span class='fb'>被拒</span></td><td>idle_thinking</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>27</td><td>avatar_action=deny_shake 摇头拒绝（P1-1 新素材）</td><td>dialogue.response_received</td><td>{&quot;avatar_action&quot;: &quot;deny_shake&quot;, &quot;emotion&quot;: &quot;neutral&quot;}</td><td><b>DENY_SHAKE</b> <span class='loop'>迁移</span></td><td>deny_shake</td><td>0.92s / 22帧</td><td><span class='burst'>burst 一次性</span></td></tr>
+<tr><td>28</td><td>摇头播完</td><td>audio.playback_stopped</td><td><span class='n'>-</span></td><td><b>IDLE</b> <span class='loop'>迁移</span></td><td>idle_normal</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>29</td><td>再来一个人</td><td>scene.person_enter</td><td><span class='n'>-</span></td><td><b>PRESENT</b> <span class='loop'>迁移</span></td><td>idle_present</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>30</td><td>唤醒词命中</td><td>audio.kws_detected</td><td><span class='n'>-</span></td><td><b>AWAKE</b> <span class='loop'>迁移</span></td><td>emo_surprised</td><td>0.92s / 22帧</td><td><span class='burst'>burst 一次性</span></td></tr>
+<tr><td>31</td><td>检测到句尾，开始聆听</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>LISTENING</b> <span class='loop'>迁移</span></td><td>idle_listening</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>32</td><td>聆听结束，进入思考</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>THINKING</b> <span class='loop'>迁移</span></td><td>idle_thinking</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>33</td><td>回复没听懂，avatar_action=emo_puzzled 困惑</td><td>dialogue.response_received</td><td>{&quot;avatar_action&quot;: &quot;emo_puzzled&quot;}</td><td><b>PUZZLED</b> <span class='loop'>迁移</span></td><td>emo_puzzled</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>34</td><td>困惑动画播完</td><td>audio.playback_stopped</td><td><span class='n'>-</span></td><td><b>IDLE</b> <span class='loop'>迁移</span></td><td>idle_normal</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>35</td><td>摄像头掉了（系统态，不该有情绪表情）</td><td>camera.lost</td><td><span class='n'>-</span></td><td><b>CAMERA_LOST</b> <span class='loop'>迁移</span></td><td>idle_offline</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>36</td><td>摄像头恢复</td><td>camera.recovered</td><td><span class='n'>-</span></td><td><b>IDLE</b> <span class='loop'>迁移</span></td><td>idle_normal</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>37</td><td>局域网断链，切本地模式</td><td>dialogue.network_lost</td><td><span class='n'>-</span></td><td><b>NETWORK_LOST</b> <span class='loop'>迁移</span></td><td>idle_offline</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>38</td><td>局域网恢复</td><td>dialogue.network_restored</td><td><span class='n'>-</span></td><td><b>IDLE</b> <span class='loop'>迁移</span></td><td>idle_normal</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>39</td><td>后台 worker 崩溃</td><td>system.worker_crash</td><td><span class='n'>-</span></td><td><b>ERROR</b> <span class='loop'>迁移</span></td><td>emo_sad</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>40</td><td>健康检查通过，恢复</td><td>system.health_ok</td><td><span class='n'>-</span></td><td><b>IDLE</b> <span class='loop'>迁移</span></td><td>idle_normal</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>41</td><td>最后一次：唤醒 → 聆听 → 思考 → 回复是 surprise 动作</td><td>scene.person_enter</td><td><span class='n'>-</span></td><td><b>PRESENT</b> <span class='loop'>迁移</span></td><td>idle_present</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>42</td><td>唤醒词命中</td><td>audio.kws_detected</td><td><span class='n'>-</span></td><td><b>AWAKE</b> <span class='loop'>迁移</span></td><td>emo_surprised</td><td>0.92s / 22帧</td><td><span class='burst'>burst 一次性</span></td></tr>
+<tr><td>43</td><td>检测到句尾，开始聆听</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>LISTENING</b> <span class='loop'>迁移</span></td><td>idle_listening</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>44</td><td>聆听结束，进入思考</td><td>audio.vad_end</td><td><span class='n'>-</span></td><td><b>THINKING</b> <span class='loop'>迁移</span></td><td>idle_thinking</td><td>1.62s / 39帧</td><td><span class='loop'>loop 循环</span></td></tr>
+<tr><td>45</td><td>avatar_action=emo_surprised，惊讶反应</td><td>dialogue.response_received</td><td>{&quot;avatar_action&quot;: &quot;emo_surprised&quot;}</td><td><b>AWAKE</b> <span class='loop'>迁移</span></td><td>emo_surprised</td><td>0.92s / 22帧</td><td><span class='burst'>burst 一次性</span></td></tr>
+</table>
+<h2>二、各状态最终效果（按剧本出现顺序）</h2><div class='grid'>
+<div class='card'><div class='t'>IDLE</div><img src='idle.gif' width='160' alt='IDLE'><div class='k'>素材 <b>idle_normal</b> · 464x480<br><b>39</b> 帧 @<b>24.0</b>fps ≈ 1.62s<br><span class='loop'>loop 循环</span></div></div>
+<div class='card'><div class='t'>PRESENT</div><img src='present.gif' width='160' alt='PRESENT'><div class='k'>素材 <b>idle_present</b> · 464x480<br><b>39</b> 帧 @<b>24.0</b>fps ≈ 1.62s<br><span class='loop'>loop 循环</span></div></div>
+<div class='card'><div class='t'>AWAKE</div><img src='awake.gif' width='160' alt='AWAKE'><div class='k'>素材 <b>emo_surprised</b> · 464x480<br><b>22</b> 帧 @<b>24.0</b>fps ≈ 0.92s<br><span class='burst'>burst 一次性</span></div></div>
+<div class='card'><div class='t'>LISTENING</div><img src='listening.gif' width='160' alt='LISTENING'><div class='k'>素材 <b>idle_listening</b> · 464x480<br><b>39</b> 帧 @<b>24.0</b>fps ≈ 1.62s<br><span class='loop'>loop 循环</span></div></div>
+<div class='card'><div class='t'>THINKING</div><img src='thinking.gif' width='160' alt='THINKING'><div class='k'>素材 <b>idle_thinking</b> · 464x480<br><b>39</b> 帧 @<b>24.0</b>fps ≈ 1.62s<br><span class='loop'>loop 循环</span></div></div>
+<div class='card'><div class='t'>SPEAKING_NEUTRAL</div><img src='speaking_neutral.gif' width='160' alt='SPEAKING_NEUTRAL'><div class='k'>素材 <b>talking_neutral</b> · 464x480<br><b>39</b> 帧 @<b>24.0</b>fps ≈ 1.62s<br><span class='loop'>loop 循环</span></div></div>
+<div class='card'><div class='t'>SPEAKING</div><img src='speaking.gif' width='160' alt='SPEAKING'><div class='k'>素材 <b>talking_normal</b> · 464x480<br><b>39</b> 帧 @<b>24.0</b>fps ≈ 1.62s<br><span class='loop'>loop 循环</span></div></div>
+<div class='card'><div class='t'>SPEAKING_LOW</div><img src='speaking_low.gif' width='160' alt='SPEAKING_LOW'><div class='k'>素材 <b>talking_low</b> · 464x480<br><b>39</b> 帧 @<b>24.0</b>fps ≈ 1.62s<br><span class='loop'>loop 循环</span></div></div>
+<div class='card'><div class='t'>ACK_NOD</div><img src='ack_nod.gif' width='160' alt='ACK_NOD'><div class='k'>素材 <b>ack_nod</b> · 464x480<br><b>22</b> 帧 @<b>24.0</b>fps ≈ 0.92s<br><span class='burst'>burst 一次性</span></div></div>
+<div class='card'><div class='t'>DENY_SHAKE</div><img src='deny_shake.gif' width='160' alt='DENY_SHAKE'><div class='k'>素材 <b>deny_shake</b> · 464x480<br><b>22</b> 帧 @<b>24.0</b>fps ≈ 0.92s<br><span class='burst'>burst 一次性</span></div></div>
+<div class='card'><div class='t'>PUZZLED</div><img src='puzzled.gif' width='160' alt='PUZZLED'><div class='k'>素材 <b>emo_puzzled</b> · 464x480<br><b>39</b> 帧 @<b>24.0</b>fps ≈ 1.62s<br><span class='loop'>loop 循环</span></div></div>
+<div class='card'><div class='t'>CAMERA_LOST</div><img src='camera_lost.gif' width='160' alt='CAMERA_LOST'><div class='k'>素材 <b>idle_offline</b> · 464x480<br><b>39</b> 帧 @<b>24.0</b>fps ≈ 1.62s<br><span class='loop'>loop 循环</span></div></div>
+<div class='card'><div class='t'>NETWORK_LOST</div><img src='network_lost.gif' width='160' alt='NETWORK_LOST'><div class='k'>素材 <b>idle_offline</b> · 464x480<br><b>39</b> 帧 @<b>24.0</b>fps ≈ 1.62s<br><span class='loop'>loop 循环</span></div></div>
+<div class='card'><div class='t'>ERROR</div><img src='error.gif' width='160' alt='ERROR'><div class='k'>素材 <b>emo_sad</b> · 464x480<br><b>39</b> 帧 @<b>24.0</b>fps ≈ 1.62s<br><span class='loop'>loop 循环</span></div></div>
+</div>
+<h2>三、统计</h2><table>
+<tr><th>项</th><th>值</th></tr>
+<tr><td>剧本步数 / 状态覆盖</td><td>45 步，覆盖 <b>15/15</b> 态</td></tr>
+<tr><td>素材总时长（每次状态重现累加）</td><td><b>68.17 s</b></td></tr>
+<tr><td>一次性动作（burst）出现</td><td><b>7</b> 次 · ACK_NOD, AWAKE, DENY_SHAKE</td></tr>
+<tr><td>走回退链（素材缺失）</td><td><b>0</b> 次</td></tr>
+<tr><td>状态机拒绝的非法转换</td><td><b>3</b> 次</td></tr>
+<tr><td>全素材尺寸 / 帧率唯一性</td><td>464x480 · 24fps（见 verify_v2_amp 报告）</td></tr>
+</table></body></html>

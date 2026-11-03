@@ -1,0 +1,7 @@
+独立快审通过：901c74d8…d8f6c feature_intents 与28d36d1f…ac6cfe worker，15个独立场景全部通过，无产品或隐私阻断。
+
+纯literal/AST核验：只在speaker_text与_explicit_self_match各4个query regex Constant追加“|辨别”，每文件+28字节。去回这8个token后，两整模块AST分别与2ad13/f82 baseline完全相同，注册helper、cache、TTL、ledger、取消、clock、matcher门槛和所有其它逻辑不变。
+
+“你可以根据我的声音辨别我是谁吗”和“辨别我的声音”均经过实际formal CandidatePair及bind_runtime_pair绑定的Yuki实例_route、LIR和原worker，到第3个独立合成capture才形成候选，恰好3次编码，exact-request重试不额外编码。否定、引用、假设句不触probe；登记samples中的alias查询不消费样本或开启probe。未标定、未验证身份、无私人记忆权限继续false，active links为0、未发grant。
+
+验证只使用本地合成encoder/PCM和新建合成库，没有读取真实用户原话、音频、私库或模型；无SSH、GET或设备/服务动作。本结论限最终两SHA，root应按最新生产源与startup做原CAS发布。

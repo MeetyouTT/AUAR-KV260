@@ -1,0 +1,75 @@
+{
+  "old_sha256": "4dad96bbf9591e09e6073c4d6cb313c14a3b10c43e2b77a102a2a1520dfa720f",
+  "new_sha256": "acdd9cb7aff55580484a9b7f7a62721f2a9d04ff09db3364af35458d29cbba36",
+  "edits": [
+    [
+      "    cv2.setNumThreads(2)\n",
+      "    cv2.setNumThreads(4)\n"
+    ],
+    [
+      "    def publish_observation(snapshot=None, error=None, stopped=False):\n",
+      "    def publish_observation(snapshot=None, error=None, stopped=False, inference_started=None, inference_completed=None):\n"
+    ],
+    [
+      "                'publication_time':time.monotonic(),\n",
+      "                'publication_time':time.monotonic(),\n                'inference_started':inference_started, 'inference_completed':inference_completed,\n"
+    ],
+    [
+      "                publish_observation(snapshot)\n",
+      "                publish_observation(snapshot, inference_started=t0, inference_completed=done)\n"
+    ]
+  ],
+  "scope": "FOUR_THREAD_TRIAL_NOT_SELECTED",
+  "guard_ms": 250,
+  "servo_speed_changed": false,
+  "changes": "CPU inference threads 2 to 4 and inference timing telemetry",
+  "board_trial": {
+    "evidence": "/home/ghmd/kv260-adaptation-check-20261006/evidence/20261008T144806.739087Z-visual_freshness_probe",
+    "rc": 0,
+    "output_sha256": "5e771c179af0fb866d7422f0e93296f7209345ed6433bac1b5d1fa990302115d",
+    "source_sha256": "f55bc5c56639f39dc9584dad5ae84d90800f3226856abe4b06f1220b71218d16",
+    "console_echo_restored": true
+  },
+  "result": {
+    "scope": "READ_ONLY_20S_FRESHNESS_QUALIFICATION",
+    "pid": 22229,
+    "epoch": "b28a6dc9102a46f5a8fabeb4aa2de42a",
+    "source_age": {
+      "n": 3387,
+      "median_ms": 211.24182199855568,
+      "p95_ms": 296.44350499802385,
+      "max_ms": 397.56082599706133
+    },
+    "age_at_publication": {
+      "n": 167,
+      "median_ms": 148.46971500082873,
+      "p95_ms": 188.65272699986235,
+      "max_ms": 257.19351199950324
+    },
+    "capture_to_inference": {
+      "n": 167,
+      "median_ms": 30.74166700025671,
+      "p95_ms": 55.457675000070594,
+      "max_ms": 65.94878000032622
+    },
+    "inference": {
+      "n": 167,
+      "median_ms": 117.3685529975046,
+      "p95_ms": 150.80387800117023,
+      "max_ms": 201.21133200154873
+    },
+    "publication_gap": {
+      "n": 166,
+      "median_ms": 119.97745000007853,
+      "p95_ms": 147.53780599858146,
+      "max_ms": 166.70371800137218
+    },
+    "over230": 1248,
+    "over250": 815,
+    "passed": false,
+    "before_frames": 222,
+    "after_frames": 387,
+    "last_error": null
+  },
+  "updated_utc": "2026-10-08T15:02:27.794405+00:00"
+}

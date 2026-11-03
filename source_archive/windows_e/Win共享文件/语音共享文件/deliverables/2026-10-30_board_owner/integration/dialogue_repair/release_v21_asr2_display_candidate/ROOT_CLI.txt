@@ -1,0 +1,28 @@
+v21 ASR 两线程与暂停显示保活
+
+root 已审阅并要求冻结，实际执行开关已开启。以下步骤由 root 独占执行。
+默认命令只进行本地校验。实际操作由 root 追加 --execute-root-only。
+
+1. 当前 v20 的保护与窗口检查
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\publish_stability.py" guard --spec "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\baseline_spec.json" --spec-sha256 d9e3ae679c22c3d755f03aab9a91cf457ca308e834fef1993071b83dc366aa81
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\publish_stability.py" window-inspect --spec "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\baseline_spec.json" --spec-sha256 d9e3ae679c22c3d755f03aab9a91cf457ca308e834fef1993071b83dc366aa81
+
+2. 通过原 WM_DELETE 正常关闭
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\publish_stability.py" normal-close --spec "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\baseline_spec.json" --spec-sha256 d9e3ae679c22c3d755f03aab9a91cf457ca308e834fef1993071b83dc366aa81 --window-proof "<本次窗口检查证据>"
+
+3. 安装一份 GTK 源文件和一份 GUI 配置
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\apply_stability_closed.py" --spec "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\proposed_spec.json" --spec-sha256 81920dbd4528664d11c0ef6e91a2573250cb7e2cf93e4edff2a0f719907cf88f
+实际成功会返回新的 applied_spec 路径与 SHA，以及 actual_apply 文件。
+
+4. 使用实际 applied_spec 启动和确认
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\publish_stability.py" start --spec "<实际 applied_spec>" --spec-sha256 <实际 SHA>
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\publish_stability.py" ready --spec "<实际 applied_spec>" --spec-sha256 <实际 SHA>
+
+5. 使用本次实际证据封存
+D:/py312/python.exe -B -X utf8 "E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v21_asr2_display_candidate\seal_stability.py" --spec "<实际 applied_spec>" --spec-sha256 <实际 SHA> --ready "<实际 ready 文件>" --ready-sha256 <实际 SHA> --installed "<实际 actual_apply 文件>" --installed-sha256 <实际 SHA>
+
+新 prepared GUI 路径为 /home/root/aura-board-business-20261030/control-production-v1/asr2-display-v21-configuration/prepared-gui.json。
+运行配置、prepared 配置、manifest 引用和 spec 配置 SHA 同为 228abe8f642254c68ad500a15f8d637189343a97753d1c359663744dc2bd06a2。
+launcher 通过 startup.component_sha256 中的 config/board_avatar_gtk.json 项验证配置。
+原外部 configuration_path 文件被核验和备份，并在安装后复查原件。
+保存的聆听选择保持 false/PAUSED，原 GTCRN 一线程与 8 帧队列继续生效。

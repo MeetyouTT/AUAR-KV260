@@ -1,0 +1,153 @@
+{
+  "schema": "aura-camera-gtk-cpu-optimization-work-in-progress-1",
+  "updated_utc": "2026-11-02T12:27:14.530497+00:00",
+  "objective": "Optimize original camera and GTK CPU overhead without losing features; deploy reviewed candidates and measure real dialogue with original axis follow",
+  "complete": false,
+  "phase": "ALL_OFFLINE_REVIEW_COMPLETE_WAIT_EXPLICIT_DEVICE_HANDOFF",
+  "user_authorized_parallel_agents": true,
+  "cross_chat_coordination_authorized": [
+    "01a19b64-8194-70e3-806b-03fa9a283918",
+    "01a19ad7-5865-7c60-82fa-605d17aea70f"
+  ],
+  "device_authority": {
+    "gui_listening_and_recovery": "01a19ad7-5865-7c60-82fa-605d17aea70f",
+    "axis": "01a19b64-8194-70e3-806b-03fa9a283918",
+    "cpu_root_board_actions_frozen": true,
+    "reason": "Identity chat holds GUI/camera/listening authority and is now splitting face/voice registration entries. CPU requested an explicit idle maintenance handoff while its routing work is offline; still no authority received.",
+    "fresh_boot_and_owners_required": true,
+    "last_known_boot_id": "a6d4a069-e9b0-4065-8df7-dc23556b168e",
+    "last_known_startup_sha256": "9a9a709a7b2e898879bac595758f9b7ece6f2ff2e75a4c9f42ed9c38e043072a",
+    "last_known_camera": {
+      "pid": 1332,
+      "birth_ticks": "2236"
+    },
+    "last_known_gui": {
+      "supervisor": 2142,
+      "gtk": 2151,
+      "ready": true,
+      "listening_enabled_by_identity_chat": true
+    },
+    "source": "authorized identity-chat coordination; root makes no concurrent device calls",
+    "latest_coordination_observed_utc": "2026-11-02T12:27:14.530497+00:00",
+    "last_known_owner_values_are_historical_not_expected": true,
+    "latest_reported_startup_sha256": "f507bfa6cb5ea5de807dd36601ac4ff2e4af9bba5aa75f6fd5a2b3a5fd54e3eb",
+    "latest_reported_identity_progress": {
+      "face_committed": true,
+      "face_known_observed": true,
+      "voice_registration_and_link_not_yet_confirmed": true,
+      "source": "authorized identity-thread filtered status; no CPU board calls"
+    },
+    "new_independent_registration_request_in_identity_chat": true,
+    "bounded_cpu_window_requested_while_identity_work_offline": true,
+    "fresh_idle_handoff_received": false
+  },
+  "baseline": {
+    "receipt": "RESOURCE_before.json",
+    "summary": "SUMMARY_RESOURCE_before.json",
+    "duration_seconds": 40.001155763995484,
+    "scene": "vision page, microphone closed, no playback, follow off, boundary editor running",
+    "cpu_busy_percent_of_four_core_board": 82.43579121789561,
+    "capture_fps": 18.917361997778233,
+    "detection_fps": 9.80900251736649,
+    "new_native_period_overruns": 0,
+    "startup_at_baseline": "1177df3831407bc819c1f1e3b89090f8c6b97661c8e74c2866b281be93b0a9c8",
+    "scope": "HISTORICAL_PREVIOUS_BOOT_ONLY; reacquire controlled before on new boot"
+  },
+  "gtk": {
+    "rejected_candidate": "022098636a41b35bc17929da1cbef0f05e5c257640f9b64a8504c1b4a13e7127",
+    "rejection_evidence": "GTK_SYNTHETIC_RESULT_REJECTED.json",
+    "rejection_reason": "587x440 synthetic visible-color differences; strict gate failed; no deployment",
+    "current_candidate": "gtk/v2/candidate",
+    "design": "Preview-only locked snapshot projection; original GStreamer pipeline retained",
+    "new_ui_services_sha256": "e4dedf9b3d56d22d9eb93de1e96ad1a69870d553ea50f7dd5082b21e19f381c9",
+    "new_preview_worker_sha256": "67d6c0f2b24ea97e20fdcc7b3383b6444269a6e26f5deb566f2b88746b7daf9b",
+    "local_tests_passed": 11,
+    "independent_review_pending": false,
+    "real_board_cpu_improvement_measured": false,
+    "independent_review": "validation/GTK_PROJECTION_INDEPENDENT_REVIEW.txt",
+    "transaction_template": "gtk/v2/transaction_preview_projection.py",
+    "transaction_independent_review_pending": false,
+    "transaction_script_sha256": "e1b5384bc2abe2aaf957792a316ddca3a1d854aafcc4b06290e75a1b3393e3ed",
+    "transaction_independent_review": "camera/GTK_TRANSACTION_CROSS_REVIEW.json",
+    "stage_mode_uid_gid_preservation_fixed": true,
+    "real_linux_dry_run_pending": true
+  },
+  "camera": {
+    "design": "On-request JPEG encoding/cache of the same owned painted BGR frame; raw transport unchanged",
+    "v2_rejected": true,
+    "v2_rejected_sha256": "0bf23f511f6f85512603277b1496c704fcd792a4f1a0fc97854ead03441920bf",
+    "v3_revision_and_review_pending": false,
+    "native_source_unit": "7cf7eaeecd70e62301d3e12e95d5df6a23bd3e5847ed854200c712598b703c32",
+    "native_unit_definition": "Original immutable six-file ABI2 C/C++/object manifest, independently verified; Python UI is outside that unit",
+    "fresh_final_checkpoint_required_before_restart": true,
+    "never_reuse_consumed_c6_checkpoint": true,
+    "real_board_cpu_improvement_measured": false,
+    "v3_sha256": "7d4773b8ff527773eefc90aa2443dd4bfae801f07c6fcde672af65dd22ff8f66",
+    "local_tests_passed": 31,
+    "independent_targeted_regressions_passed": 5,
+    "independent_review": "validation/CAMERA_V3_INDEPENDENT_REVIEW.json",
+    "transaction_payload_builder": "camera/prepare_transaction_payload.py",
+    "transaction_template": "camera/six_file_transaction_template.py",
+    "transaction_local_tests_passed": 10,
+    "transaction_independent_review_pending": false,
+    "transaction_script_sha256": "32329668ea3dfb63744e58a7866025cb7ba1f0986f72d30948b8c93ceb401a6a",
+    "transaction_independent_review": "validation/CAMERA_TRANSACTION_INDEPENDENT_REVIEW.json",
+    "recovery_dangling_stage_boundary_fixed": true,
+    "real_linux_dry_run_pending": true
+  },
+  "last_gui_restore_attempt": {
+    "request": "CURRENT_GUI_RESTORE_REQUEST.json",
+    "observation": "CURRENT_GUI_RESTORED_READY.json",
+    "actual_status": "GUI_FAILED",
+    "start_sent_once_utc": "2026-11-02T10:30:21.344990+00:00",
+    "startup_then": "680fd752c74e75bfbbcd73a296f21f4f39134ce4863a6bc30643c7e77feae1c0",
+    "source_changes_by_cpu_task": false,
+    "preserve_voice_enrollment_sha256": "a9113ba40efc49828ee158554b2dae70485858396680918458f6f96bba16bacb",
+    "classification": "Original clock sample_rtt_exceeded; identity chat now owns recovery; do not weaken policy"
+  },
+  "cpu_task_device_mutations_so_far": {
+    "ui_page_to_vision_once": true,
+    "gui_stop_sent": false,
+    "gui_restore_start_sent_once": true,
+    "camera_restart": false,
+    "cpu_sources_deployed": false,
+    "axis_commands": false,
+    "native_checkpoint_or_history_modified": false
+  },
+  "next": [
+    "Offline candidate/source/transaction reviews complete; acquire explicit fresh idle device handoff before any board action",
+    "Wait for identity live-confirmation repair and explicit fresh idle handoff; make no board calls meanwhile",
+    "Refresh actual boot/owners/all source closures and selected binding; preserve all new identity source changes",
+    "Coordinate original wide recovery and current-boot axis reference/direction/STOP with sole axis writer",
+    "Acquire new-boot same-scene before data; run reviewed public synthetic CV2/projection probes serially",
+    "Publish using the normal lifecycle and actual fresh Native final/history; truthfully rebind current camera evidence",
+    "Acquire same-scene after data, then two real dialogue turns with complete playback ACK and original bounded axis follow",
+    "Report actual results and pending acceptance honestly; no measured CPU improvement claimed before deployment"
+  ],
+  "current_boot_axis_prerequisites": {
+    "authority": "01a19b64-8194-70e3-806b-03fa9a283918",
+    "last_readonly_handoff": "maintenance_original_axis_20261101/new_boot_a6d4_readonly_20261102/NEW_BOOT_TECHNICAL_HANDOFF.json",
+    "platform_at_last_handoff": "benchmark; original wide not loaded",
+    "actual_follow_retest_requires": [
+      "current original wide platform restored by the existing authorized procedure",
+      "current-boot original STOP/reference/direction acceptance by the sole axis writer",
+      "new same-platform before/after resource baseline"
+    ]
+  },
+  "preserve_external_identity_release": {
+    "received_host_utc": "2026-11-02T12:12:32.366073+00:00",
+    "startup_sha256": "f507bfa6cb5ea5de807dd36601ac4ff2e4af9bba5aa75f6fd5a2b3a5fd54e3eb",
+    "components": {
+      "board/runtime/audio/board_asr.py": "c51488ac6bd3563bc3dc42934b321e98e26cb2b58d700318765a60ca4908ef60",
+      "board/runtime/audio/board_dialogue_jobs.py": "01b27ede0d8889c35fc9ac990e03538a55fecc7c6a604fb6f781bc5d54c09087",
+      "board/identity/voice_enrollment.py": "a9113ba40efc49828ee158554b2dae70485858396680918458f6f96bba16bacb"
+    },
+    "source": "authorized identity-chat message; not a fresh device handoff",
+    "gui_started_once_waiting_ready": true,
+    "cpu_device_authority_received": false,
+    "all_actual_pins_must_be_refreshed_at_handoff": true
+  },
+  "offline_preparation_complete": true,
+  "no_real_board_cpu_improvement_claimed": true,
+  "measurement_sequence_option": "Preferred wide-before/after if ready; if identity releases only an interim benchmark maintenance window, same-boot same-benchmark original/GTK/combined A/B may run first, with original-wide joint dialogue/follow measured later and reported as a separate scene."
+}

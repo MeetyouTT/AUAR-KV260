@@ -1,0 +1,42 @@
+独立本人声音匹配复验候选：单文件冻结，尚未由本代理部署
+
+用户当前范围：只有本人，先做本人匹配复验；人脸与声纹关联不在本轮范围。不重做今天已成功的声纹登记，不删现存模板，不建立links，不授予身份或私人记忆权限。完整现场校准和陌生人误接受评估尚未完成，field_calibrated始终false。
+
+完整payload：candidate_runtime/board/runtime/board_speaker_business.py
+before 6904267bd016a10a1508b26f372f0db54a71d78eed2eb15b043026218b1b7816
+after  f82bc71d00c355c164d43ca0b6a853ea6a32e67c84ffd228791d7070209b907e
+对349个公开源/配置逐文件比较，仅此1项改变，其他348项保持。已有语法2ad13、LIR bf185、Yuki d7bade、Jobs580b、face a911、原SpeakerDevice da9、原Provisional/Progressive、原model/quality/threshold/clock全部保持。root以当前21c1dbcd及380清单fresh CAS发布，代理不做任何设备动作。
+
+行为
+- 原turn先执行，保留context/PCM校验、原request fingerprint、latest generation、active FSM与原控制证据hook。新增仅对原speaker_text已全句识别为“查询我的声纹”且明确要求声音辨认/识别的句子；原保存状态、准备状态、裸查询、登记/删除及活动登记/删除FSM仍走原逻辑。
+- 仅在未calibrated、正式gallery非空、原model/dimension与store一致，且原单worker有现成Progressive/Provisional时启用。不建第二个模型、库连接、麦克风、service或controller。
+- 单worker中复用原quality、原ONNX encoder和原Provisional matcher：原threshold0.8、margin0.1，原同actor/model/gallery/identity、相邻连续匹配30秒窗与三个不同capture和PCM digest。有效发声仍至少2.5秒，不短路质量门槛。
+- 仅累积本轮显式probe且已由原_call成功采纳、未取消的capture。RAM账本只留现有meta、独立cancel Event及adopted bool，不留job、is_current闭包、PCM或vector。原matcher若混入后台/未采纳/已取消的贡献，保守清本actor streak重来。没有另写匹配算法或采样状态机。
+- 前两次只报比对进度；第三次只说“声音候选称呼是…，完整现场校准尚未完成。”不追问“对吗”，不新建确认流程。候选称呼来自本地原正式voice模板对应名称，不需人脸或跨模态关联。
+- 明确的长query“你可以根据我的声音辨认我是谁吗”原语法已支持。实际用户按自然稍慢速度说五到八秒，能减少短口令不足有效发声的重试；这只是操作提示，不保证每段都通过质量或匹配门槛。
+
+重复、缓存、版本与取消
+- 每个新显式probe最多一次编码。原control hook先写控制证据，probe算后仅以NOT_CALIBRATED/不足语音的原描述更新原precomputed缓存。之后Jobs.analysis直接复用，不再编码或重复计数。
+- 原600秒描述缓存没有候选称呼、candidate_id或分数；候选回话用另一个有界64项RAM缓存，精确绑定fullmeta和私有gallery摘要/model/revision/threshold/margin。摘要不进入公开状态或模型。
+- 候选缓存和采纳使用原proof绝对2秒上限，不能把重试时间当新起点。worker完成后若调用者超过mono/wall边界才采纳，返回固定EXPIRED回话，绝不交出旧候选名。重复同request不再编码；模板、名称、revision或model变化不复用旧候选。
+- _call最终owner检查成功后才标adopted并发布结果；若原计算完成到采纳之间取消、且新代抢在cleanup前排入worker，新代发现旧贡献尚未采纳/已取消即从1重新开始。cleanup只清同actor不高于取消代的贡献，不抢掉新owner。
+- reset/inference取消会清原Provisional streak/results和相应probe账本/缓存。不把被取消录音算进第三次。重复PCM的新capture不会推进：新capture不在原distinct列表时保守报NO_CANDIDATE0，原streak仍至多保留之前那一次。
+- _adopt只处理本次probe派生的确切str。所有非probe typed binding dict、None、不同reply均原对象返回，避免通用_call被probe cache改变契约。
+
+固定公开投影
+沿原speaker public()/health()增加self_match_probe：version、phase、distinct_captures、required_captures、candidate_completed、completed_is_historical、field_calibrated、identity_verified、personal_memory_allowed。
+phase为固定enum，计数有界；不含姓名、ID、分数、模板、PCM、转写、任意异常message或source digest。candidate_completed是本worker历史采纳候选次数，65535饱和，不是当前身份、播放完成或现场校准证据。当前CANDIDATE仍在原2秒过期，过期phase为EXPIRED，可用历史计数辅助低频观察。
+public和真正被BoardBusinessRuntime使用的health均只在service.lock内原子复制state/counts/queue与TTL边界；锁外做时间投影，避免service.lock和timeline.lock倒序。UI时间不可用只投影EXPIRED，不延长证明。实际worker/采纳的ClockUnavailable仍按原异常抛出，不掩盖业务故障。
+
+验证证据
+- SELF_MATCH_FINAL_F82.xml：34/34通过，实际formal CandidatePair + actual bind_runtime_pair/Yuki instance route + LIR/controller + 原BoardSpeakerBusiness真实sole worker、原192维接口、原matcher/真实fresh三库。ASR/TTS/LLM、VAD与encoder是纯合成替身，未加载任何实际模型。
+- 覆盖一query一编码与后置analysis复用、三次候选/不授权、普通readiness/保存/活动FSM不进入probe、空gallery、重复request/不同PCM/重复PCM、不同session、原30秒窗、质量不足、unknown、ambiguity、gallery revision/模板/名称/model变化、None、编码中取消、observe后取消、严格public字段/副本、ledger不含PCM/闭包、worker完成后迟采纳、ClockUnavailable和public/health锁序、非probe返回类型。
+- ORIGINAL_66_24_FINAL_F82.xml：90/90通过，即原登记66项和原独立声纹24项；原测试源字节保留，只有composition加载位置、此worker显式SHA和用于TTL的合成时钟有所适配。
+- independent_review由另一代理封存独立反例与结论，15项通过；其中late-adoption使用另一真实service.turn caller插队，取消第三次后新代只能COLLECTING1。另验mono/wall延迟、实际ClockUnavailable、health/public锁序、typed返回对象不变。独审不是本端34项的重复计数。
+  正式结论：independent_review/REVIEW_VERDICT.json，SHA b1a04a17842aa05d5875637e2398be355c48f0d2e37f9388de34b1c1faa3330d；说明independent_review/REVIEW.txt，SHA d2f8d1aa81224c42a01322eca1c28dc56c17a753fc246fe08d6a873112e34f5c。审阅适用f82字节，未改变候选。
+- 早期V1唯一失败是测试对重复PCM进度的期望过强；保持产品原更保守distinct guard，改测试确认不推进。独审另发现779的真实late-adoption取消反例，已保留旧XML/观察JSON，最终采纳账本修复后通过；其它旧候选通过数不能当f82证据。
+
+限制
+本候选只做本人计算匹配复验，不做完整现场校准，不估计陌生人误接受率或多人混淆率；没有反重放/活体或单说话者证明。三次稳定计算匹配仍不等于身份认证。未改变field_calibrated=false、top-level speaker_calibrated=false、任何授权guard、voice登记3段/最终确认、私库schema或模板。
+完整Runtime.__init__仍未纳入测试：公开349快照缺无关history_delete，使用真实目标类按原顺序显式装配并调用原Runtime attach/analysis；没有伪造该模块。native READY输入、音频和模型均为合成，实际GUI播放/真实麦克风质量/延迟/现场候选效果须root发布后按正常owner观察。
+本代理没有SSH/GET、设备/GUI/转轴/服务操作、真实PCM/转写/身份库/模板读取或采集，只修改独立本地候选并写测试报告。现役源和其他已冻候选均未改。

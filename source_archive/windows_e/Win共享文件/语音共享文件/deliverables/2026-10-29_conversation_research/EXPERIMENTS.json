@@ -1,0 +1,65 @@
+{
+  "status": "PROPOSED_NOT_EXECUTED",
+  "global_constraints": [
+    "Preserve other model processes and D-drive LLM storage",
+    "No replacement of selected production voice or 16-step parameters during comparison",
+    "No microphone, physical playback, movement or private database use in unattended tests",
+    "Keep cancellation ownership, original request deadlines and bounded queues",
+    "Separate cached, uncached, warm and cold results",
+    "Use monotonic intervals within each node; do not subtract unsynchronized host wall clocks"
+  ],
+  "experiments": [
+    {
+      "id": "same_model_continuity",
+      "priority": 0,
+      "new_gpu_model": false,
+      "inputs": "Fixed public short, medium and long reply texts; exact selected voice and seed; uncached synthesis",
+      "comparisons": ["current first-sentence pipeline", "bounded playback lead policy", "project-owned GPU heavy-task admission"],
+      "metrics": ["first text", "first PCM", "per-clause synthesis and arrival", "minimum queued audio", "underrun packets", "GPU total free and project peak", "p50/p95/p99", "cancellation handoff"],
+      "acceptance": [
+        "No content loss, extra filler answer or changed quality settings",
+        "No mid-answer supply underflow in the fixed corpus; model-dependent sentence pauses reported separately",
+        "All added buffering and queue delay included in first-PCM measurements",
+        "Reject a memory-only win if end-to-end tail latency or cancellation regresses"
+      ],
+      "stop_if": ["private or active production requests would be interrupted", "other model ownership changes", "budget insufficient", "unexpected source or device state change"]
+    },
+    {
+      "id": "cpu_endpoint_identity_shadow",
+      "priority": 1,
+      "components": ["Smart Turn v3.2 CPU int8", "existing Silero", "existing evidence-only speaker and face association"],
+      "inputs": "Public or separately authorized speech with true ends, hesitation, internal silence, names and numbers; synthetic identity events with multiple people and camera epoch changes",
+      "mode": "shadow only until evaluated; no formal wake/listen/identity decision changed",
+      "metrics": ["end-of-speech detection latency", "premature cut rate", "missed end rate", "CPU inference p95", "20ms frontend deadline misses", "speaker known/unknown/conflict calibration", "incorrect personal-memory access count"],
+      "acceptance": [
+        "Lower endpoint latency without a worse premature-cut rate on the same labeled corpus",
+        "No increase in existing 20ms audio frontend deadline misses",
+        "Zero personal-memory unlocks from unconfirmed or conflicting identity evidence",
+        "Camera absence does not prevent voice conversation",
+        "Model file size not presented as process RAM measurement"
+      ],
+      "stop_if": ["CPU audio budget regresses", "new model attempts GPU use", "recording persistence or uploads enabled", "private enrollment or authority rules would change"]
+    },
+    {
+      "id": "true_streaming_tts_isolated",
+      "priority": 2,
+      "candidate_order": ["official CosyVoice3 with prior project evidence reviewed", "Qwen3-TTS-12Hz-0.6B-Base"],
+      "compatibility_gate": [
+        "Choose only one candidate after measuring available project budget",
+        "All weight/tokenizer/download locations remain under approved D-drive directories",
+        "Verify an actual incremental-audio serving interface, not only an architecture claim",
+        "Do not install FlashInfer into the current native Windows environment; upstream Linux-only support and dependency issue remain a separate feasibility gate",
+        "Keep production service and selected voice running"
+      ],
+      "inputs": "Fixed Chinese public sentences including arithmetic results, quantities and units, names, short responses and 30-second long-form speech",
+      "metrics": ["actual first PCM", "continuous-play earliest-start estimate", "real queue underflow", "RTF", "peak allocated/reserved/total GPU memory", "ASR content comparison", "human voice similarity and prosody", "cancel then next request"],
+      "acceptance": [
+        "Content and numeric meaning pass, not merely a low first packet",
+        "Original speaker reference retained; human voice acceptance required before any production replacement",
+        "Public latency claims not used as local results",
+        "No unloading or killing other models to pass memory tests"
+      ],
+      "stop_if": ["digit or unit meaning changes", "insufficient budget or OOM", "unsupported platform dependency", "voice acceptance fails", "late request can resume after cancel"]
+    }
+  ]
+}

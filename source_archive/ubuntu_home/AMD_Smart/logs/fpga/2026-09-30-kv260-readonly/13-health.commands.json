@@ -1,0 +1,7 @@
+[
+  {
+    "id": "sensors_health",
+    "command": "for d in /sys/class/thermal/thermal_zone*; do printf \"\\n%s\\n\" \"$d\"; cat \"$d/type\" \"$d/temp\"; done; for d in /sys/class/hwmon/hwmon*; do printf \"\\n%s\\n\" \"$d\"; readlink -f \"$d/device\"; for f in \"$d\"/name \"$d\"/temp*_input \"$d\"/temp*_crit \"$d\"/temp*_max \"$d\"/temp*_label \"$d\"/in*_input \"$d\"/in*_label \"$d\"/curr*_input \"$d\"/curr*_label \"$d\"/power*_input \"$d\"/power*_label \"$d\"/fan*_input; do if test -r \"$f\"; then printf \"%s: \" \"$f\"; cat \"$f\"; fi; done; done; cat /sys/devices/platform/firmware:zynqmp-firmware/last_reset_reason; journalctl -b -p warning --no-pager -n 100",
+    "timeout": 45
+  }
+]

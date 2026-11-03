@@ -1,0 +1,59 @@
+{
+  "schema": "aura.current-memory-retry-review.v1",
+  "status": "SOURCE_DIAGNOSTIC_CONFIRMED_NO_PATCH",
+  "observed_public_metadata": {
+    "memory_running": true,
+    "memory_completed": 19,
+    "memory_discarded": 331,
+    "model_accepted_llm": 351,
+    "source": "../board_baseline.json and root metadata message",
+    "cause_proven_from_counts_alone": false
+  },
+  "sources": {
+    "../source_before/common/board_memory.py": "19dabc48425ed711af17fc56929a0198067217c52593e157db23b8724ddffde3",
+    "../source_before/board/runtime/board_business.py": "1aa9727ef1ff6f7981f5a53459548c19e5cd168233dce31372ebc914d2ca062d",
+    "local_main_and_production_overlay_board_memory_policy.py": "9af4a5bfc4a039db55d8e46e08ce994e04091a0653919886fb04c23f39f94d54"
+  },
+  "findings": [
+    {
+      "location": "common/board_memory.py:1397-1415",
+      "finding": "Every failed step returns to a fixed three-second outer interval. There is no failure-specific exponential backoff, due-time or terminal quarantine. This is not a zero-delay busy loop.",
+      "effect": "A permanently invalid or irreducible source can repeatedly consume model work whenever the foreground is idle."
+    },
+    {
+      "location": "common/board_memory.py:857-860,1070-1079",
+      "finding": "fail_compaction releases source reservations, and prepare_compaction fairly orders by attempt count. This prevents one rejected group from permanently starving unrelated groups, but still retries every failed group indefinitely.",
+      "effect": "Retries preserve all uncommitted bodies; disabling or backing off retry must not fabricate successful compaction or delete those bodies."
+    },
+    {
+      "location": "common/board_memory.py:1381",
+      "finding": "ValueError/CandidateRejected become candidate_rejected; MemoryBusy becomes database_busy; TimeoutError and InterruptedError currently fall through to model_failed.",
+      "effect": "discarded is not a count of malformed summaries alone. Cancellation, timeout, stale lease and inference failures cannot be distinguished from the existing aggregate counters. A stale commit increments discarded without updating last error."
+    },
+    {
+      "location": "board/runtime/board_business.py:427-430 and tools/board_business_gui.py:138-153",
+      "finding": "Factory uses worker defaults interval=3, max_events=2 and summary defaults per-call=30s, max_calls=256, total_budget=900s. Silent wake listening is explicitly allowed to coexist with summary work; speech onset, pending foreground, playback or unsafe clock disallows it.",
+      "effect": "An active summary during WAITING_WAKE is expected. The cancellation predicate and summary watcher must remain intact."
+    },
+    {
+      "location": "local tools/model_inference_host.py:150-190",
+      "finding": "The model host rejects new summary admission while foreground exists, cancels queued/active summary when dialogue/TTS arrives, and schedules foreground before summaries.",
+      "effect": "A diagnostic probe requiring an idle host can be blocked by repeated summary work; that alone does not prove ordinary submitted dialogue cannot preempt it."
+    }
+  ],
+  "safe_error_enum": [
+    "model_failed", "candidate_rejected", "cancelled", "deadline_exceeded",
+    "database_busy", "compaction_failed", "clock_unverified"
+  ],
+  "minimal_next_step": "Read only the exact whitelisted last error plus counter deltas and task-attempt counts, without raw text or IDs. If policy change is authorized, implement it as a new separately frozen candidate: bounded failure backoff and accurate cancellation/timeout classification, preserving foreground preemption, fair retry, all source bodies and the atomic summary-before-delete contract.",
+  "synthetic_reproduction": {
+    "test": "test_worker_retry_current.py",
+    "sha256": "3c244229d5117c8903a9c0fcd4417fb6392606dc2719c1a078f0ea46e39405fb",
+    "passed": 4,
+    "failed": 0,
+    "seconds": 0.43,
+    "proved": "Four consecutive attempts re-lease the same failed group and increment attempts to four, while retaining its body and creating no summary; non-idle foreground prevents summarize calls."
+  },
+  "frozen_943_memory_candidate_modified": false,
+  "actual_devices_models_services_or_private_databases_accessed": false
+}

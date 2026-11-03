@@ -1,0 +1,30 @@
+v24 R2 记忆提示单源修订发布
+
+root已正式采用d6e459，当前包已绑定执行门槛。所有CLI默认dry，真实动作需root显式传--execute-root-only。本人仅进行了本地准备和公开合成测试。
+
+本轮GUI已由root正常WM_DELETE关闭，guard保留。apply仍逐项复核inactive、ownerless、原相机闭包、用户保存暂停、三writer锁及四库bootstrap。
+
+PowerShell初始化
+$v24Python = 'C:\Users\35870\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+$v24Task = 'E:\Win共享文件\语音共享文件\deliverables\2026-10-30_board_owner\integration\dialogue_repair\release_v24_memory_followup_candidate'
+$v24Prepared = Join-Path $v24Task 'proposed_spec_1793518623681278000.json'
+$v24PreparedSha = '6e07309cf242b42ae15bb1b45421d8d79b8a2fbcde7d90380d6aa60003c57aad'
+
+先dry复核
+& $v24Python -X utf8 -B (Join-Path $v24Task 'apply_followup_closed.py') --spec $v24Prepared --spec-sha256 $v24PreparedSha
+
+root实际apply
+& $v24Python -X utf8 -B (Join-Path $v24Task 'apply_followup_closed.py') --spec $v24Prepared --spec-sha256 $v24PreparedSha --execute-root-only
+
+apply成功回执必须为SUMMARY_FOLLOWUP_SOURCE_APPLIED_UI_STOPPED。按返回的spec、spec_sha256、output分别记录实际APPLIED spec、其SHA、installed回执路径。后续start和ready均传实际APPLIED spec及SHA。
+& $v24Python -X utf8 -B (Join-Path $v24Task 'publish_followup.py') start --spec $v24Applied --spec-sha256 $v24AppliedSha --execute-root-only
+& $v24Python -X utf8 -B (Join-Path $v24Task 'publish_followup.py') ready --spec $v24Applied --spec-sha256 $v24AppliedSha --execute-root-only
+
+ready返回output保存路径为实际READY文件。逐一计算READY与installed SHA后封存，工具会再次现读380组件及owner、三事务证明，核对saved false/PAUSED/micfalse及可见状态，完成后推进canonical。
+& $v24Python -X utf8 -B (Join-Path $v24Task 'seal_followup.py') --spec $v24Applied --spec-sha256 $v24AppliedSha --ready $v24Ready --ready-sha256 $v24ReadySha --installed $v24Installed --installed-sha256 $v24InstalledSha --execute-root-only
+
+期望startup为888faff24fef9d85ad75bbe19bc34d63956820ccd3e6dd3f674cfe4525ed0863，config继续e0762cbfb88fd77238b5b1b3562fd00005bc505395867e96cfc8b1b6651fb135，共380组件，仅policy一项变化。最终source_manifest由真实apply产生。
+
+旧camera事务固定ecdc034b，旧v23 summary事务固定8376770e，新summary_followup事务绑定实际v24 APPLIED spec。仅同一INTENT的已知old/new三目标混合状态可重试向前完成。失败保留guard与回执，依据实际journal状态继续。
+
+READY后由root完成display-maintenance-memory-v24原600秒策略恢复及运行观察。公开15例15项通过、16次模型调用、0取消由root执行。原始human PENDING保留，真实积压修复和重试稳定性仍待观察。支持性的同RAM AB来自80de，最终d6e未单独私库重测，该对照属于正确性证据。

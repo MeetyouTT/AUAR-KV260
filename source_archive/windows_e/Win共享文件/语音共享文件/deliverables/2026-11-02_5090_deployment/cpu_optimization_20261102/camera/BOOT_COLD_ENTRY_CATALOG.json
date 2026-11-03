@@ -1,0 +1,229 @@
+{
+  "schema": "aura-camera-cold-entry-interface-catalog-1",
+  "status": "LOCAL_SOURCE_CATALOG_COMPLETE_INTERFACE_FILE_REQUIRED_NOT_BOARD_VALIDATED",
+  "scope": "Original cold-boot camera entry versus already-running camera normal-stop maintenance. Catalog only; no executor or code change.",
+  "local_base": "E:/Win共享文件/语音共享文件/deliverables/2026-11-02_5090_deployment",
+  "coordination_interface": {
+    "required_path": "cpu_optimization_20261102/BOOT_RECOVERY_INTERFACE.json",
+    "read_status": "NOT_PRESENT_AT_EXACT_OPT_PATH_DURING_LOCAL_REVIEW",
+    "sha256": null,
+    "effect": "Do not infer a fresh cold-boot state, board ownership handoff, current boot/marker/head, or execution authorization from this source catalog. Main/cold branch must read and pin the actual interface when supplied. Device calls remain frozen."
+  },
+  "decision_cases": [
+    {
+      "case": "Current boot camera has never committed its counter domain",
+      "requires_fresh_proof": [
+        "Actual current boot and no live/uncertain camera Native/VART/DPU/MMIO owner; no pending service job",
+        "A real pinned sealed predecessor checkpoint belongs to a different boot; original source closure and original config opt-ins remain valid",
+        "The configured current-kernel marker path does not exist, including no partial file or symlink; MainPID0 alone does not prove this",
+        "Actual original service entry/drop-ins/meta/settings/library/C-unit provenance and original platform requirements match; no historical owner/head is inserted"
+      ],
+      "original_path": "native_startup.preflight selects native_boot.load_new_boot_checkpoint; original attach later calls commit_new_boot once before NativeContext restore/adopt",
+      "old_checkpoint_consumed_marker": "The prior checkpoint-specific consumed marker may already exist from its prior boot. The different-boot loader intentionally checks the current-kernel marker instead; preserve both marker families and use the original cross-boot archive-only path.",
+      "not_applicable": "Do not invent a current-owner stop-intent or feed this branch to load_business_checkpoint/current-final normal-stop validator."
+    },
+    {
+      "case": "Camera is already running and needs a maintenance source update",
+      "requires_fresh_proof": [
+        "Actual boot/PID/birth/cmd and original running config/source pins",
+        "Original GUI normal stop, idle listening/enrollment/playback, exclusive maintenance handoff and effective infinite no-SIGKILL camera stop protection",
+        "One real original normal camera stop, durable intent and fresh same-boot final whose source owner/time/counters match this attempt",
+        "Original current-final reader and complete expected history/current bounds verification; unconsumed fresh final before normal restart"
+      ],
+      "original_path": "native_startup.preflight selects load_business_checkpoint; attach restores exact same-boot seed then consume_checkpoint; shutdown writes the next real final",
+      "history_scope": "Same-boot restart carries the existing previous_kernel_history link; it does not create a new boot archive/counter domain.",
+      "not_applicable": "Do not bypass a consumed same-boot final by directly calling the different-boot loader or changing a boot ID."
+    },
+    {
+      "case": "No camera PID is present but the current-kernel domain marker already exists",
+      "required_handling": "This is not proved to be an unstarted cold boot. An earlier attach may have committed the marker and then failed. Original loader refuses a second new domain; retain evidence and follow the original lifecycle/uncertain-result handling. A valid unconsumed current-boot final, if actually present, is a separate same-boot resume case.",
+      "forbidden_shortcuts": "No marker removal, zero seed, changed boot field, fabricated stop-intent, guessed final, repeated start, or replay of a historical checkpoint to obtain another budget."
+    }
+  ],
+  "sources": {
+    "native_startup": {
+      "board_path": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura/board/vision/native_startup.py",
+      "local_path": "cpu_optimization_20261102/camera/baseline/4a729a29c6e4__native_startup.py",
+      "sha256": "4a729a29c6e4c5d8e89c084867f8c7b972e38e4cf1a74177250cbb31a0396fcf"
+    },
+    "native_boot": {
+      "board_path": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura/board/vision/native_boot.py",
+      "local_path": "cpu_optimization_20261102/camera/baseline/251e9660633c__native_boot.py",
+      "sha256": "251e9660633cd6c50d0874e263899155895372d8b8e0db4d6ecdbfca7901d4a7"
+    },
+    "native_protection": {
+      "board_path": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura/board/vision/native_protection.py",
+      "local_path": "cpu_optimization_20261102/camera/baseline/b8637c2aa387__native_protection.py",
+      "sha256": "b8637c2aa387915a49ef0fd7a1c7cb9d015fb71802c4eaa11539a64466db1faa"
+    },
+    "native_binding": {
+      "board_path": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura/board/vision/native_binding.py",
+      "local_path": "parallel_platform_review/review_sources/native_binding.py",
+      "sha256": "5f385c03cf84b1f9ba3afe4d4a6cfd3022ba639aba06b8d923f83783bfd48da6"
+    },
+    "boot_ops": {
+      "board_path": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/boot_ops.py",
+      "local_path": "parallel_platform_review/sources/startup_sources_readonly_04____home__root__aura-native-live-20261024__ops__be72669aa53de735__boot_ops.py",
+      "sha256": "a9c00ea799d0731674e5a4c27a3f97802e9dae2d834553fb3e75d82b55ca7872"
+    },
+    "boot_policy": {
+      "board_path": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/policy.py",
+      "local_path": "parallel_platform_review/sources/startup_sources_readonly_04____home__root__aura-native-live-20261024__ops__be72669aa53de735__policy.py",
+      "sha256": "62167dd02191d1a59d0dfe0ef1d67184bad08f335df271adbc94a8e6dcc82640"
+    },
+    "original_native_entry": {
+      "board_path": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/native_entry.py",
+      "local_path": "parallel_platform_review/sources/startup_sources_readonly_04____home__root__aura-native-live-20261024__ops__be72669aa53de735__native_entry.py",
+      "sha256": "839df536696d16c3f538bb158edee80614fb0cef55def64d7e7849d412fa30d4"
+    },
+    "outer_face_entry": {
+      "board_path": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/face-source-v17/entry.py",
+      "local_path": "cpu_optimization_20261102/camera/baseline/f26be22cb640__entry.py",
+      "sha256": "f26be22cb640bf44a1bd81b66bb3fa014f5b847b13320781836bf3f173387623"
+    },
+    "operator_entry": {
+      "board_path": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/native-operator-v1/native_entry_operator.py",
+      "local_path": "cpu_optimization_20261102/camera/baseline/0576a388e2c1__native_entry_operator.py",
+      "sha256": "0576a388e2c17174b4102665602aa42fbf078a3f016bdfb641c269571ce13943"
+    },
+    "identity_recovery": {
+      "board_path": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/native-operator-v1/identity_recovery.py",
+      "local_path": "cpu_optimization_20261102/camera/baseline/64831498d849__identity_recovery.py",
+      "sha256": "64831498d8497c2087b3bb1543367e8cc1917ca131694000884f2d58e60990f7"
+    },
+    "feed_entry": {
+      "board_path": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/native_entry_pan_face_v5.py",
+      "local_path": "cpu_optimization_20261102/camera/baseline/288f6b7b5670__native_entry_pan_face_v5.py",
+      "sha256": "288f6b7b56702edf45b432686db4f77b156408c0b3f78fd31c05edb33df971c4"
+    },
+    "camera_wrapper": {
+      "board_path": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/camera_wrapper.py",
+      "local_path": "cpu_optimization_20261102/camera/baseline/065c465e0ad0__camera_wrapper.py",
+      "sha256": "065c465e0ad0d8cf3ada4b69dcc422a4f85a286b1a7be1536e29d4aeac562df8"
+    },
+    "camera_service": {
+      "board_path": "/home/root/aura-native-live-20261024/candidates/native-r4-metrics-fix/aura/board/vision/ui_camera_service.py",
+      "local_path": "cpu_optimization_20261102/camera/baseline/9d714b9bd00e__ui_camera_service.py",
+      "sha256": "9d714b9bd00ea1da12088fa1e22100d7bdb689d0cac10332c3933b31e4f4d2df"
+    }
+  },
+  "original_apis": [
+    {
+      "source": "native_startup",
+      "function": "configuration(config), verify_runtime_manifest(native, root)",
+      "input": "Original complete native_execution keys: library/library_sha256, seed pin, source_manifest/source_manifest_sha256, source_unit_sha256, checkpoint_output. Optional explicit allow_new_kernel_boot, allow_legacy_new_kernel_boot and new_boot_marker_directory.",
+      "output": "Validated native dict or None; exact Python rglob('*.py') manifest closure required.",
+      "checks": "Original detector dpu_yolox, conservative admission floor30ms, both recovery policies and0..100ms waits remain enforced. The legacy opt-in additionally requires the new-boot opt-in.",
+      "side_effects": "Read/validate metadata and code hashes. configuration marker_paths validation does not create a directory or consume a domain.",
+      "reuse": "Original support functions, not a cold-start executor. Python backups must remain outside the AURA rglob source tree."
+    },
+    {
+      "source": "native_startup",
+      "function": "preflight(config, *, boot_id, root)",
+      "input": "Actual boot_id, actual AURA root, original config and real pinned predecessor.",
+      "output": "loaded object from same-boot load_business_checkpoint OR different-boot load_new_boot_checkpoint; predecessor document source_unit must match the configured provenance.",
+      "routing": "Read source boot from sealed seed.boot_id or explicit legacy source_boot. Same boot always selects business reader; different boot requires allow_new_kernel_boot and original configured marker directory. It is not selected by whether a camera PID is visible.",
+      "side_effects": "Original function validates/read-only loads metadata, checks Python/tracker source closure and actual boot. No commit, marker write, NativeContext instance or model inference in this function. Installed identity_recovery can wrap it and add audit/config mutation, so the runtime ns.preflight name is not necessarily the bare original.",
+      "reuse": "Original loader contract is reusable in the normal entry. A separate isolated metadata call would need its original dependency/import audit and fresh owner exclusion; no call is made by this catalog."
+    },
+    {
+      "source": "native_boot",
+      "function": "_sealed_source(document), _legacy_source(document)",
+      "input": "Original sealed-v2 document or explicitly supported legacy health-prefix document, each in its own archived boot.",
+      "output": "Validated archive seed/auxiliary. Legacy returns lower-bound/unknown-tail archive-only state and never an exact resumable C seed.",
+      "side_effects": "Pure original semantic validation and ctypes Seed/Recovery structure construction for v2; no NativeContext/CDLL/restore or state write. Old captured/recovery times are evaluated only against their archived capture.",
+      "reuse": "Directly reusable pure definitions for a correctly pinned archive-only audit. They do not by themselves prove full linked-history completeness or authorize startup."
+    },
+    {
+      "source": "native_boot",
+      "function": "load_new_boot_checkpoint(pin, *, boot_id, marker_directory, allow_legacy=False)",
+      "input": "Real different-boot predecessor pin, actual current boot, actual configured marker directory and explicit legacy boolean.",
+      "output": "loaded.new_kernel_boot=True; a new RAM seed purpose validated_new_kernel_boot, source_pid/birth0, current-boot monotonic capture and clean zero current counters; archive_seed/archive_auxiliary/archive_counters retain the complete predecessor domain separately. Document/SHA/source_path and current-kernel marker identity remain attached.",
+      "checks": "checked_boot actual match; original _sealed_source or separately opted-in _legacy_source; source boot must differ; current-kernel marker lexists must be false. It deliberately does not reject merely because the old checkpoint-specific consumption marker exists.",
+      "side_effects": "Read-only metadata checks plus a fresh in-memory seed and time sample. No marker/archive write, NativeContext, restore, model or device operation. It does not recursively audit all older archive links.",
+      "reuse": "Original different-boot loader can be reused under its real cold-entry contract; never force a same-boot predecessor through it or treat its RAM seed as a manually written checkpoint."
+    },
+    {
+      "source": "native_boot",
+      "function": "commit_new_boot(loaded)",
+      "input": "Untampered loaded object from original different-boot loader; actual boot, source pin, archive seed and exact fresh seed are revalidated.",
+      "output": "Mutates loaded by adding archive_path/archive_sha256; persists original previous-kernel archive and current-kernel consumption record.",
+      "side_effects": "Creates/verifies effective-UID-owned0700 marker/archive directories. Writes/fsyncs a unique temporary archive and hard-links exact bytes to archive/<actualboot>-<actual predecessor SHA>.json. Then O_EXCL creates/fsyncs kernel-boot-<actualboot>.consumed. Existing identical archive is accepted; any existing marker prevents a new domain. A partial/failed marker is deliberately retained. No original checkpoint overwrite or old marker removal.",
+      "reuse": "Effectful one-time commit, NOT a reader or dry-run. Must remain in original attach ordering. Do not call it just to test cold readiness or retry after an uncertain commit."
+    },
+    {
+      "source": "native_startup",
+      "function": "attach(config, state, original, loaded)",
+      "input": "Validated loaded plus original YOLO owner whose fixed-input checks already passed, runtime state and original configured library.",
+      "output": "NativeYoloOwner and NativeDpuSchedule, with exact same-boot handoff OR native_new_kernel_boot metadata and archived previous_kernel_history link.",
+      "side_effects": "Cold branch commits archive/current-kernel marker BEFORE creating NativeContext and restoring/adopting. Same-boot branch restores exact sealed seed then calls consume_checkpoint before adopt. Constructs/loads Native library, adopts original model owner and enables the existing business scheduler. Errors retain unconfirmed native ownership; they do not restore a fresh budget.",
+      "reuse": "Production lifecycle step only, not directly callable as offline readiness or metadata validation. A commit followed by context failure still consumes the cold domain."
+    },
+    {
+      "source": "native_startup",
+      "function": "shutdown(config, state, owner)",
+      "input": "Current real owner only after camera/identity workers have joined and their runners closed, complete SFace seven-counter state and optional histories.",
+      "output": "Original new final pin from native context checkpoint and write_checkpoint; carries the existing hash-linked previous_kernel_history.",
+      "side_effects": "Actual Native checkpoint operation, original final JSON write and owner close. Writes the current running manifest SHA, not an assumed prior manifest. No new boot archive is made on a same-boot stop.",
+      "reuse": "Only by the real normal shutdown lifecycle. Cannot synthesize this outcome for a boot where camera has not run."
+    }
+  ],
+  "known_entry_chain_reference": {
+    "fresh_actual_service_argv_required": true,
+    "chain": ["outer_face_entry", "operator_entry", "identity_recovery.install", "feed_entry.main", "original_native_entry", "camera_wrapper", "camera_service.main/run"],
+    "outer_and_feed": "Pinned face ingress validates its deployment manifest and installs original face/raw timing hooks. Operator entry validates op7 runtime-manifest/settings and installs the existing recovery wrapper. Feed entry validates APP_PINS/meta/protected native_entry and redirects only the original camera runpy target to camera_wrapper. Bypassing the top entry drops these existing integration hooks.",
+    "original_native_entry_input": "OPS/meta.json and candidate_config. It selects the existing checkpoint_output bytes and computes their real SHA when present; it does not hardcode a seed SHA. Original meta.source_boot remains a protection-domain condition and is not rewritten to the current boot.",
+    "original_native_entry_side_effects": "Creates native-run-<actualboot>-<actualpid>/config.json, adjusts argv/sys.path/switch interval and runs original camera. If native_binding._RETAINED is nonempty, writes UNSAFE_OWNER_RETAINED.json and holds the process on SIGTERM/SIGINT rather than replacing an uncertain owner.",
+    "camera_run_order": "ui_camera_service.run resolves camera, calls native preflight, then checked_backend loads original models and runs real fixed-reference/blank inference checks, then attach, then existing lock/workers/preview. Its finally joins workers/closes identity before shutdown. Normal service startup is therefore real device/model work, not a preflight-only probe.",
+    "identity_recovery_side_effects": "Installed preflight enforces explicit predecessor-library and allowed ABI-compatible unit migration, substitutes the runtime operator library/unit around original preflight and writes recovery-audit JSON. NativeContext optional calls get existing scoped realtime scheduling. SFace initialization starts a recovery worker; when its stored request_boot differs from actual boot, that worker returns before its operator marker/request path. When they match it can create an operator marker, request native recovery and run bounded synthetic SFace health probes. Do not update old request_boot/settings to re-arm this behavior as a cold-start repair.",
+    "classification": "These are original implementation sources, not historical action recipes. The operational entry is the actual currently installed normal service entry after fresh closure verification; do not directly run a cached Python entry or import camera_wrapper merely to inspect it."
+  },
+  "boot_ops_interface": {
+    "functions": "Ops.state/props/gate/verify; policy.condition; main condition/status; effectful arm/reboot/rescue/benchmark/activate/protected_rollback/restore_original",
+    "inputs": "Actual OPS root/meta/state/source pins/protected files plus current kernel. gate delegates to policy.condition(meta.source_boot, actualboot, phase, role).",
+    "pure_policy_output": "Boolean role/phase admission; it does not validate or consume a seed or establish a counter domain. Camera and GUI phase admission differ.",
+    "read_only_subcommands": "condition returns gate exit status; status reads state and any referenced benchmark JSON. Neither substitutes for full source/owner/marker/cold-loader checks.",
+    "effectful_actions": "Controller methods can change maintenance phases/drop-ins/timers, stop/start/reset services, reboot, run real model benchmarks, restore a different legacy entry, or configure rollback. activate writes the original Restart=no/KillMode=process/TimeoutStopSec=infinity/SendSIGKILL=no execution drop-in and starts camera; this is a specific old maintenance state transition, not a universal cold-start command.",
+    "reuse_boundary": "Preserve current original ExecCondition/state machine and no-kill protections. Read/diagnose a gate failure under a future handoff; do not forge phase/meta, call benchmark/activate/rescue to manufacture eligibility, or replay its original maintenance workflow."
+  },
+  "maintenance_only_templates": [
+    {
+      "path": "cpu_optimization_20261102/camera/normal_stop_current_owner.py",
+      "role": "Fresh already-running owner maintenance normal-stop candidate; its dry-run requires active camera and captured current health/bounds. It is inapplicable to a cold boot with no camera owner, and no stop-intent should be manufactured."
+    },
+    {
+      "path": "cpu_optimization_20261102/camera/validate_fresh_final_history_readonly.py",
+      "sha256": "5ca99d4231c686de0f89dac5792299bec13af517a5c6e2b8f73c4cc66b9285c9",
+      "role": "Offline-reviewed same-boot current-final + complete-history maintenance validator. Requires real current-owner normal-stop intent/result, same-boot fresh final and independently sourced history. Not a cold pre-camera entry, not a cross-boot loader."
+    },
+    {
+      "path": "parallel_platform_review/checkpoint_readonly_call_recipe.py",
+      "sha256": "00875806ceddf079bcae9d9fe4bbe30cae25a64ae4c7b64ebbc832106f8ff5d0",
+      "role": "Original load_business_checkpoint read-only recipe only. A previous-boot/already-consumed predecessor fails its same-boot/marker contract; do not relax it for cold startup."
+    },
+    {
+      "path": "maintenance_original_axis_20261101/checkpoint_review/validate_archives_only_readonly.py",
+      "role": "Historical archive-only recipe contains fixed former head/count/context. Its original pure archived validation is a reference; the cached top-level invocation is not directly reusable with a fresh boot."
+    },
+    {
+      "path": "maintenance_original_axis_20261101/stop_original_camera.py",
+      "role": "Historical fixed-owner stop action template; not an executable fresh cold/maintenance contract."
+    }
+  ],
+  "fresh_inputs_left_required": [
+    "Actual published BOOT_RECOVERY_INTERFACE.json and its SHA/ownership freeze instructions",
+    "Actual boot, service/cgroup/jobs, old/current owner identities and current-kernel marker existence; distinguish never-started from failed-after-commit",
+    "Actual current entry/drop-ins/meta/state/settings/source closures/library/C-unit and configured new-boot marker directory",
+    "Actual prior sealed checkpoint pin and source boot; preserve existing checkpoint-specific/current-kernel markers",
+    "Full original archive-only semantic/provenance chain with real head/count/legacy scope; do not substitute the maintenance stop validator",
+    "Normal camera start only after the owning branch's fresh authorization and platform/source/owner prerequisites; then original archive/marker audit, real run config/owner and selected GUI source rebinding"
+  ],
+  "review_boundary": {
+    "source_snapshots_only_not_live_installed_proof": true,
+    "imports_or_original_functions_executed": false,
+    "new_executor_or_source_code_created": false,
+    "other_branch_files_modified": false,
+    "board_ssh_services_models_devices_or_actual_checkpoint_marker_access": false,
+    "cross_dialogue_messages_sent": false
+  }
+}

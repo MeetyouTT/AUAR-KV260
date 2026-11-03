@@ -1,0 +1,62 @@
+{
+  "public_cases_only": true,
+  "private_sources_reused": false,
+  "cases": [
+    {
+      "case": "correction_not_a_b",
+      "sources": [
+        {
+          "source": "user_said",
+          "text": "小岚说，展台上的盒子不是奖品，而是收纳盒。",
+          "protected": {
+            "names": [
+              "小岚"
+            ]
+          }
+        }
+      ],
+      "semantic_review_rubric": "保留小岚的陈述及盒子不是奖品、而是收纳盒两层含义。不是须仍修饰盒子的奖品属性，不能只写成盒子是收纳盒或把主客体颠倒。"
+    },
+    {
+      "case": "action_not_performed",
+      "sources": [
+        {
+          "source": "user_said",
+          "text": "阿泉今天没有给机器人更换电池，只擦拭了外壳。",
+          "protected": {
+            "names": [
+              "阿泉"
+            ]
+          }
+        }
+      ],
+      "semantic_review_rubric": "保留阿泉没有更换机器人电池及已擦拭外壳。没有须对应更换电池，不能将擦拭也否定，不能把换电池写成已完成。"
+    },
+    {
+      "case": "corrected_user_intent",
+      "sources": [
+        {
+          "source": "user_said",
+          "text": "我不是让你关闭摄像头，而是想查看刚才的识别结果。",
+          "protected": {}
+        }
+      ],
+      "semantic_review_rubric": "保留用户否认要求关闭摄像头，同时说明真正意图是查看刚才的识别结果。不是应属于原请求意图，不能写成已关闭摄像头或只保留正向请求。"
+    },
+    {
+      "case": "negative_amid_context",
+      "sources": [
+        {
+          "source": "user_said",
+          "text": "小禾上午整理了工作台，把工具放回抽屉，随后没有移动左边的杯子。她接着合上右边的书，并确认台灯保持开启，最后坐回桌前继续画画。",
+          "protected": {
+            "names": [
+              "小禾"
+            ]
+          }
+        }
+      ],
+      "semantic_review_rubric": "保留小禾没有移动左边杯子这一中间事实及其对象和位置。前后的整理工具、合书、台灯开启与继续画画可以压缩，但不能让这些正向背景挤掉否定，也不能将没有错配到合书或台灯。"
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "status": "SOURCE_CANDIDATE_OFFLINE_CHECKS_PASSED_NOT_DEPLOYED",
+  "written_utc": "2026-10-31T12:06:24.813604+00:00",
+  "baseline": {
+    "revision": "v14",
+    "startup_sha256": "39b102a4a505db491cf06b90e3a5232bfb656c79cb0a3c221551d76d414a9a0a",
+    "source_manifest_sha256": "a2545970650f60b95cdc6e4f0a31c234f37adb5f0662c9f04ded791352f53353"
+  },
+  "files": {
+    "before/tools/board_avatar_gtk.py": {
+      "sha256": "4c3e692acf23f78c9ce9c66f75f6f95f14c08b34ec371ff09842ffbdd911951a",
+      "bytes": 118927
+    },
+    "after/tools/board_avatar_gtk.py": {
+      "sha256": "7d95b5f682f7abf4a69509d5843c3345dcc31f8dbefeb0e9f3af27b19aa3542d",
+      "bytes": 119296
+    },
+    "reference/production_memory_presentation.py": {
+      "sha256": "8c0cddcdcd91c44eccfd73240826f7b08b8a118c367e15e26295942b9b7ba4aa",
+      "bytes": 18372
+    },
+    "tests/test_presentation_idle.py": {
+      "sha256": "ff312a04be40e000dcb81346b4239314455ec8b7652e1dbcf0d4b150161e9f47",
+      "bytes": 15316
+    },
+    "changes.diff": {
+      "sha256": "0655f17c08a39f96ab3cc559c0e6d55a46a0ee91da284487ccbd542501758b03",
+      "bytes": 2570
+    }
+  },
+  "modified_runtime_files": [
+    "tools/board_avatar_gtk.py"
+  ],
+  "changes": [
+    "refresh_runtime skips legacy transcript label/tooltip writes only when production_presentation is bound",
+    "refresh_runtime skips legacy reply buffer and reply_text cache writes under the same condition; lifecycle.repaint remains sole current cache owner",
+    "tick skips only legacy reply label write under the same condition; full lifecycle projection and all state/business updates continue"
+  ],
+  "protected": [
+    "Original 16 fps target/native rendering and schedule unchanged",
+    "No Store, permission, microphone, ASR, playback, model, timeout or threshold change",
+    "Lifecycle expiry, invalidation, source masking and fail-closed widget-read behavior unchanged",
+    "No production_presentation means byte-equivalent legacy write behavior",
+    "No added plaintext cache; existing lifecycle hashes unchanged"
+  ],
+  "tests": {
+    "command": "python -B -m unittest discover -s tests -v",
+    "passed": 8,
+    "failed": 0,
+    "scope": "Actual before/after GUI refresh_runtime and tick AST; frozen actual lifecycle with fake widgets/clock/Store. No GTK runtime, hardware, private data or model inference.",
+    "covers": [
+      "unchanged idle dedup while business refresh and bridge publication continue",
+      "pending and incremental reply final display parity",
+      "original hard expiry with no renewal or stale revival",
+      "committed forget/clear/correct/compaction and stale precommit queued start",
+      "failed forget preserves display; own committed confirmation still displayed",
+      "generation cancellation and fresh new owner; external widget overwrite repair",
+      "non-production legacy behavior",
+      "all methods except refresh_runtime/tick and original target16 configuration unchanged"
+    ]
+  },
+  "synthetic_idle_evidence": {
+    "ticks": 21,
+    "slot_order": [
+      "transcript",
+      "transcript_tooltip",
+      "reply_buffer",
+      "reply_label"
+    ],
+    "before_writes": [
+      43,
+      43,
+      43,
+      22
+    ],
+    "after_writes": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "before_total_writes": 151,
+    "after_total_writes": 4,
+    "business_refreshes_each": 21,
+    "bridge_publishes_each": 21,
+    "not_hardware_performance": true
+  },
+  "frames_semantics": {
+    "cpp": "integration/appearance_native_framing/yuki_host.cpp:83 increments frames after renderer.draw",
+    "python": "native_yuki.py:230-239 publishes latest_stats after native.render and egl.swap return",
+    "meaning": "counter-derived native render/swap-completion rate; not target FPS or physical display scanout; endpoint snapshot staleness affects short-window estimate"
+  },
+  "gtk_evidence": {
+    "url": "https://github.com/GNOME/gtk/blob/gtk-3-24/gtk/gtklabel.c",
+    "lines": [
+      2244,
+      2246,
+      2266,
+      2277
+    ],
+    "finding": "GtkLabel.set_text invokes recalculate, clears layout and queues resize. Native widget draw handler is suppressed independently, so duplicate native render is not established."
+  },
+  "limitations": [
+    "No measured CPU, native FPS, speech latency or real-screen acceptance for this candidate yet",
+    "Root must recheck deployed source pins before integrating and compare a matched idle sample; target16 alone is not observed16",
+    "GTK evidence is upstream GTK3 branch, not a board-binary version audit"
+  ],
+  "rollback": "Restore only before/tools/board_avatar_gtk.py through root deployment flow; no data migration or model change."
+}

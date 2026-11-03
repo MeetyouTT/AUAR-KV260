@@ -1,0 +1,5 @@
+set_property SRC_FILE_INFO {cfile:/home/ghmd/kv260-j2-pwm-continuous-20261005/constraints/j2.xdc rfile:../../../../../../constraints/j2.xdc id:1} [current_design]
+set_property src_info {type:XDC file:1 line:2 export:INPUT save:INPUT read:READ} [current_design]
+set_property PACKAGE_PIN H12 [get_ports servo_pwm]
+set_property src_info {type:XDC file:1 line:9 export:INPUT save:INPUT read:READ} [current_design]
+set_max_delay -datapath_only 20.000 -from [all_registers] -to [get_ports servo_pwm]

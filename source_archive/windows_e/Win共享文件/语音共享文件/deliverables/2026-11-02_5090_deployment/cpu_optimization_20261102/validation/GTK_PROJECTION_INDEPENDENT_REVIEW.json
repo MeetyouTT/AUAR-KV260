@@ -1,0 +1,30 @@
+{
+  "status": "PASS_STATIC_REVIEW_NO_CODE_BLOCKERS_RUNTIME_AB_PENDING",
+  "component_sha256": {
+    "original_services": "b55ee295e2cb5494f387fbaa4aa081fd1d6bffd57588c018c5f31daae56bd711",
+    "candidate_services": "e4dedf9b3d56d22d9eb93de1e96ad1a69870d553ea50f7dd5082b21e19f381c9",
+    "original_preview": "6e697c16f7ae264dff56b6b35f38da4b531ea13026b69a7c8bdbfb1960a6afcd",
+    "candidate_preview": "67d6c0f2b24ea97e20fdcc7b3383b6444269a6e26f5deb566f2b88746b7daf9b",
+    "contract": "7f67e4bdfe4a95396fbe6445759c80f8ea79cf51d2d991269213409a83daec86"
+  },
+  "checks": [
+    "all existing UiServiceClient methods identical; only read_preview added",
+    "SnapshotGate source expiry predicate identical under original condition lock",
+    "Gst attach, push, stale drop, clear, lifecycle and all non-work methods unchanged",
+    "normalizing only the added read selector makes entire original worker work AST equal",
+    "all worker view keys are exactly the three returned by new method",
+    "manual source review: cancellation mask changes only interaction fields; camera/preview are disjoint",
+    "manual source review: minimal snapshot and JPEG mutable values copied; original use_raw and 1500ms guard reused"
+  ],
+  "checks_count": 7,
+  "existing_agent_pure_test_result_reused": {
+    "tests": 11,
+    "passed": true,
+    "concurrent_configure_cancel_loss_iterations": 350
+  },
+  "production_or_board_or_network_accessed": false,
+  "new_load_tests_executed": false,
+  "fresh_baseline_required_after_boot_change": true,
+  "runtime_gain_claimed": false,
+  "deployment_condition": "Verify current original component and contract SHAs and fresh startup/owners after identity handoff; preserve other new voice/axis/source pins."
+}

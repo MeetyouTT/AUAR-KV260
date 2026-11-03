@@ -1,0 +1,287 @@
+{
+  "started_utc": "2026-10-30T23:41:57.240067+00:00",
+  "mode": "combined",
+  "nice": -10,
+  "runs": 1,
+  "source": {
+    "status": "STAGED_SOURCE_ONLY",
+    "root": "/home/root/aura-board-owner-candidate-20261030/perf-fa0bc04a6f8c15a9",
+    "pins": {
+      "probe.py": "b53803cab734bb69cd8a62698c92d630ed98d9d0b2cee7ecc9232bcb4a4323a3",
+      "adapter.py": "1e3aaf64a87e76873275c0441203c25adfdc5fbba9362f38bacb7b3575a99b63",
+      "candidate.py": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9",
+      "runtime.py": "fee9f599854a7443e33ebc3afb69021f31a3688787d22bb1479fda0732e0a711"
+    },
+    "local_sources": {
+      "probe.py": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_inference\\board_audio_pipeline_probe.py",
+      "adapter.py": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_frontend_optimization\\run_candidate_probe.py",
+      "candidate.py": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_frontend_optimization\\candidate\\board_gtcrn_reuse.py",
+      "runtime.py": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-10-30_board_owner\\integration\\resume_ort_candidate\\isolated_cpu_runtime.py"
+    }
+  },
+  "argv": [
+    "python3",
+    "-B",
+    "/home/root/aura-board-owner-candidate-20261030/perf-fa0bc04a6f8c15a9/adapter.py",
+    "--candidate-mode",
+    "combined",
+    "--probe-file",
+    "/home/root/aura-board-owner-candidate-20261030/perf-fa0bc04a6f8c15a9/probe.py",
+    "--candidate-file",
+    "/home/root/aura-board-owner-candidate-20261030/perf-fa0bc04a6f8c15a9/candidate.py",
+    "--code-root",
+    "/home/root/aura-board-owner-candidate-20261030/resume-730de9634b8daa07/code",
+    "--resources-root",
+    "/home/root/aura-board-owner-candidate-20261030",
+    "--num-threads",
+    "1",
+    "--mode",
+    "pipeline",
+    "--runs",
+    "1",
+    "--process-nice",
+    "-10"
+  ],
+  "production_entry_changed": false,
+  "physical_microphone_opened": false,
+  "returncode": 2,
+  "stdout": "{\"status\": \"FAILED\", \"error_type\": \"PublicPipelineFailure\", \"error_code\": \"pcm_input_queue_overflow\", \"diagnostics\": {\"input_queue\": {\"enabled\": true, \"backend\": \"bounded-board-raw-pcm\", \"frame_bytes\": 640, \"capacity_frames\": 8, \"capacity_ms\": 160, \"queued_frames\": 0, \"peak_frames\": 8, \"frames_read\": 153, \"frames_delivered\": 144, \"source_read_mean_ms\": 19.878, \"source_read_max_ms\": 23.675, \"queue_mean_ms\": 91.159, \"queue_max_ms\": 158.793, \"error\": \"pcm_input_queue_overflow\", \"eof\": false, \"closed\": true, \"cancelled\": false, \"reader_alive\": false}, \"frontend_processing_ms\": {\"count\": 144, \"mean\": 20.4922, \"p95\": 34.1849, \"maximum\": 39.402, \"over_20ms\": 54}, \"processing_windows\": {\"first_16_frames\": {\"count\": 16, \"mean\": 21.324, \"p95\": 30.1157, \"maximum\": 39.2782, \"over_20ms\": 7}, \"remaining_frames\": {\"count\": 128, \"mean\": 20.3882, \"p95\": 34.1849, \"maximum\": 39.402, \"over_20ms\": 47}, \"enough_remaining_for_steady_comparison\": true, \"windows_50_frames\": [{\"first_frame\": 1, \"last_frame\": 50, \"count\": 50, \"mean\": 20.7647, \"p95\": 34.8629, \"maximum\": 39.402, \"over_20ms\": 20}, {\"first_frame\": 51, \"last_frame\": 100, \"count\": 50, \"mean\": 20.4111, \"p95\": 32.7679, \"maximum\": 37.3852, \"over_20ms\": 19}, {\"first_frame\": 101, \"last_frame\": 144, \"count\": 44, \"mean\": 20.2746, \"p95\": 34.0793, \"maximum\": 35.3636, \"over_20ms\": 15}]}, \"num_threads\": 1, \"source_supply_lateness_ms\": {\"count\": 153, \"mean\": 0.2836, \"p95\": 0.5692, \"maximum\": 4.0229, \"over_20ms\": 0}, \"produced_frames\": 153, \"asr_executed\": false, \"frontend_candidate\": {\"mode\": \"combined\", \"buffer_reuse\": true, \"cpu_io_binding\": true, \"candidate_sha256\": \"fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9\", \"baseline_sha256\": \"47cb8a2ec97ad292981bb42b67e217ed0f672a98d561d4ac8dc9c360cf8f6f06\", \"frontend_sha256\": \"b3d06b653876469daf5b7bb805458b187662d9862e8ece6da731cbfa3e23a093\", \"parent_probe_sha256\": \"b53803cab734bb69cd8a62698c92d630ed98d9d0b2cee7ecc9232bcb4a4323a3\", \"production_files_replaced\": false}}, \"microphone_opened\": false, \"production_changed\": false, \"process_priority\": {\"requested_nice\": -10, \"scope\": \"current probe TGID and its own tasks only\", \"original_nice\": 0, \"effective_nice\": -10, \"restored_nice\": 0, \"restoration_confirmed\": true, \"permission_denied\": false, \"original_thread_nice_counts\": {\"0\": 1}, \"effective_thread_nice_counts\": {\"-10\": 1}, \"finish_thread_nice_counts\": {\"-10\": 2}, \"restored_thread_nice_counts\": {\"0\": 1}, \"restore_errors\": 0, \"priority_changed\": true}, \"system_tuning\": true, \"systemwide_tuning\": false, \"own_process_priority_experiment\": true, \"outer_service_safety\": {\"before\": {\"phase\": \"IDLE\", \"playing\": false, \"listening\": false, \"microphone_open\": false, \"following\": false, \"pan_state\": \"FAULT\", \"pulse_us\": null, \"boot_id\": \"8100a7fd-0c6a-46c4-82b8-f874988a1521\", \"ui_pid\": 1296, \"camera_pid\": 1334}, \"after\": {\"phase\": \"IDLE\", \"playing\": false, \"listening\": false, \"microphone_open\": false, \"following\": false, \"pan_state\": \"FAULT\", \"pulse_us\": null, \"boot_id\": \"8100a7fd-0c6a-46c4-82b8-f874988a1521\", \"ui_pid\": 1296, \"camera_pid\": 1334}, \"unchanged\": true, \"systemctl_helpers_outside_priority_scope\": true}, \"production_context\": {\"before\": {\"available\": true, \"display\": {\"pushed\": 88828.0, \"received\": 88499.0, \"sequence\": 90422.0, \"fps\": 15.607885843990557, \"p50_ms\": 62.66249700001936, \"p95_ms\": 79.15657200010173, \"p99_ms\": 116.6970370004492, \"max_ms\": 147.57365599962213, \"age_ms\": 10.43255400054477, \"kind\": \"native_sink_handoff\"}, \"camera\": {\"people_count\": 1, \"capture_frames\": 74248, \"detected_frames\": 58911, \"capture_age_ms\": 114, \"observation_age_ms\": 193}, \"identity\": {\"processed\": 2935, \"discarded\": 98, \"pending_frames\": 0, \"last_inference_ms\": 144.42, \"backend\": \"DPU_SFACE_INT8\", \"faces\": {\"processed\": 58492, \"discarded\": 22, \"source_age_ms\": 201, \"last_inference_ms\": 62.81}}}, \"after\": {\"available\": true, \"display\": {\"pushed\": 88914.0, \"received\": 88585.0, \"sequence\": 90519.0, \"fps\": 15.057231033846666, \"p50_ms\": 63.238003000151366, \"p95_ms\": 105.77047700007824, \"p99_ms\": 139.59398600036366, \"max_ms\": 200.86829900083103, \"age_ms\": 53.836228999898594, \"kind\": \"native_sink_handoff\"}, \"camera\": {\"people_count\": 1, \"capture_frames\": 74323, \"detected_frames\": 58974, \"capture_age_ms\": 116, \"observation_age_ms\": 204}, \"identity\": {\"processed\": 2945, \"discarded\": 98, \"pending_frames\": 0, \"last_inference_ms\": 168.95, \"backend\": \"DPU_SFACE_INT8\", \"faces\": {\"processed\": 58545, \"discarded\": 25, \"source_age_ms\": 215, \"last_inference_ms\": 100.22}}}, \"change\": {\"display_fps_change\": -0.5507, \"display_p95_ms_change\": 26.6139, \"identity_processed_change\": 10, \"face_detector_processed_change\": 53, \"measurement\": \"Two existing rolling UI snapshots, not per-trial fps or P95 distributions\"}}}\n",
+  "stderr": "",
+  "result": {
+    "status": "FAILED",
+    "error_type": "PublicPipelineFailure",
+    "error_code": "pcm_input_queue_overflow",
+    "diagnostics": {
+      "input_queue": {
+        "enabled": true,
+        "backend": "bounded-board-raw-pcm",
+        "frame_bytes": 640,
+        "capacity_frames": 8,
+        "capacity_ms": 160,
+        "queued_frames": 0,
+        "peak_frames": 8,
+        "frames_read": 153,
+        "frames_delivered": 144,
+        "source_read_mean_ms": 19.878,
+        "source_read_max_ms": 23.675,
+        "queue_mean_ms": 91.159,
+        "queue_max_ms": 158.793,
+        "error": "pcm_input_queue_overflow",
+        "eof": false,
+        "closed": true,
+        "cancelled": false,
+        "reader_alive": false
+      },
+      "frontend_processing_ms": {
+        "count": 144,
+        "mean": 20.4922,
+        "p95": 34.1849,
+        "maximum": 39.402,
+        "over_20ms": 54
+      },
+      "processing_windows": {
+        "first_16_frames": {
+          "count": 16,
+          "mean": 21.324,
+          "p95": 30.1157,
+          "maximum": 39.2782,
+          "over_20ms": 7
+        },
+        "remaining_frames": {
+          "count": 128,
+          "mean": 20.3882,
+          "p95": 34.1849,
+          "maximum": 39.402,
+          "over_20ms": 47
+        },
+        "enough_remaining_for_steady_comparison": true,
+        "windows_50_frames": [
+          {
+            "first_frame": 1,
+            "last_frame": 50,
+            "count": 50,
+            "mean": 20.7647,
+            "p95": 34.8629,
+            "maximum": 39.402,
+            "over_20ms": 20
+          },
+          {
+            "first_frame": 51,
+            "last_frame": 100,
+            "count": 50,
+            "mean": 20.4111,
+            "p95": 32.7679,
+            "maximum": 37.3852,
+            "over_20ms": 19
+          },
+          {
+            "first_frame": 101,
+            "last_frame": 144,
+            "count": 44,
+            "mean": 20.2746,
+            "p95": 34.0793,
+            "maximum": 35.3636,
+            "over_20ms": 15
+          }
+        ]
+      },
+      "num_threads": 1,
+      "source_supply_lateness_ms": {
+        "count": 153,
+        "mean": 0.2836,
+        "p95": 0.5692,
+        "maximum": 4.0229,
+        "over_20ms": 0
+      },
+      "produced_frames": 153,
+      "asr_executed": false,
+      "frontend_candidate": {
+        "mode": "combined",
+        "buffer_reuse": true,
+        "cpu_io_binding": true,
+        "candidate_sha256": "fd6e095d66e9a2b93e9fc738c93ccb8559daea02faa0f6d3d055d65c53de03a9",
+        "baseline_sha256": "47cb8a2ec97ad292981bb42b67e217ed0f672a98d561d4ac8dc9c360cf8f6f06",
+        "frontend_sha256": "b3d06b653876469daf5b7bb805458b187662d9862e8ece6da731cbfa3e23a093",
+        "parent_probe_sha256": "b53803cab734bb69cd8a62698c92d630ed98d9d0b2cee7ecc9232bcb4a4323a3",
+        "production_files_replaced": false
+      }
+    },
+    "microphone_opened": false,
+    "production_changed": false,
+    "process_priority": {
+      "requested_nice": -10,
+      "scope": "current probe TGID and its own tasks only",
+      "original_nice": 0,
+      "effective_nice": -10,
+      "restored_nice": 0,
+      "restoration_confirmed": true,
+      "permission_denied": false,
+      "original_thread_nice_counts": {
+        "0": 1
+      },
+      "effective_thread_nice_counts": {
+        "-10": 1
+      },
+      "finish_thread_nice_counts": {
+        "-10": 2
+      },
+      "restored_thread_nice_counts": {
+        "0": 1
+      },
+      "restore_errors": 0,
+      "priority_changed": true
+    },
+    "system_tuning": true,
+    "systemwide_tuning": false,
+    "own_process_priority_experiment": true,
+    "outer_service_safety": {
+      "before": {
+        "phase": "IDLE",
+        "playing": false,
+        "listening": false,
+        "microphone_open": false,
+        "following": false,
+        "pan_state": "FAULT",
+        "pulse_us": null,
+        "boot_id": "8100a7fd-0c6a-46c4-82b8-f874988a1521",
+        "ui_pid": 1296,
+        "camera_pid": 1334
+      },
+      "after": {
+        "phase": "IDLE",
+        "playing": false,
+        "listening": false,
+        "microphone_open": false,
+        "following": false,
+        "pan_state": "FAULT",
+        "pulse_us": null,
+        "boot_id": "8100a7fd-0c6a-46c4-82b8-f874988a1521",
+        "ui_pid": 1296,
+        "camera_pid": 1334
+      },
+      "unchanged": true,
+      "systemctl_helpers_outside_priority_scope": true
+    },
+    "production_context": {
+      "before": {
+        "available": true,
+        "display": {
+          "pushed": 88828.0,
+          "received": 88499.0,
+          "sequence": 90422.0,
+          "fps": 15.607885843990557,
+          "p50_ms": 62.66249700001936,
+          "p95_ms": 79.15657200010173,
+          "p99_ms": 116.6970370004492,
+          "max_ms": 147.57365599962213,
+          "age_ms": 10.43255400054477,
+          "kind": "native_sink_handoff"
+        },
+        "camera": {
+          "people_count": 1,
+          "capture_frames": 74248,
+          "detected_frames": 58911,
+          "capture_age_ms": 114,
+          "observation_age_ms": 193
+        },
+        "identity": {
+          "processed": 2935,
+          "discarded": 98,
+          "pending_frames": 0,
+          "last_inference_ms": 144.42,
+          "backend": "DPU_SFACE_INT8",
+          "faces": {
+            "processed": 58492,
+            "discarded": 22,
+            "source_age_ms": 201,
+            "last_inference_ms": 62.81
+          }
+        }
+      },
+      "after": {
+        "available": true,
+        "display": {
+          "pushed": 88914.0,
+          "received": 88585.0,
+          "sequence": 90519.0,
+          "fps": 15.057231033846666,
+          "p50_ms": 63.238003000151366,
+          "p95_ms": 105.77047700007824,
+          "p99_ms": 139.59398600036366,
+          "max_ms": 200.86829900083103,
+          "age_ms": 53.836228999898594,
+          "kind": "native_sink_handoff"
+        },
+        "camera": {
+          "people_count": 1,
+          "capture_frames": 74323,
+          "detected_frames": 58974,
+          "capture_age_ms": 116,
+          "observation_age_ms": 204
+        },
+        "identity": {
+          "processed": 2945,
+          "discarded": 98,
+          "pending_frames": 0,
+          "last_inference_ms": 168.95,
+          "backend": "DPU_SFACE_INT8",
+          "faces": {
+            "processed": 58545,
+            "discarded": 25,
+            "source_age_ms": 215,
+            "last_inference_ms": 100.22
+          }
+        }
+      },
+      "change": {
+        "display_fps_change": -0.5507,
+        "display_p95_ms_change": 26.6139,
+        "identity_processed_change": 10,
+        "face_detector_processed_change": 53,
+        "measurement": "Two existing rolling UI snapshots, not per-trial fps or P95 distributions"
+      }
+    }
+  },
+  "status": "FAILED",
+  "elapsed_seconds": 9.75
+}

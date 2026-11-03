@@ -1,0 +1,12 @@
+[
+  {
+    "id": "candidate_dpu_query",
+    "command": "env XLNX_VART_FIRMWARE=/lib/firmware/xilinx/kv260-benchmark-b4096-dpu41/kv260-benchmark-b4096-dpu41.xclbin xdputil query",
+    "timeout": 45
+  },
+  {
+    "id": "candidate_metadata_and_logs",
+    "command": "tr -d '\\0' </proc/device-tree/fpga-full/firmware-name; echo; cat /sys/class/fpga_manager/fpga0/state; dmesg | tail -n 140; sha256sum /usr/share/vitis_ai_library/models/resnet18/resnet18.xmodel /usr/share/vitis_ai_library/models/resnet18/resnet18.prototxt /home/root/kv260-test-20261001/pytorch-resnet-dog.jpg /home/root/kv260-test-20261001/samoyed.list /home/root/Vitis-AI/examples/vai_library/samples/classification/test_jpeg_classification /home/root/Vitis-AI/examples/vai_library/samples/classification/test_performance_classification",
+    "timeout": 45
+  }
+]

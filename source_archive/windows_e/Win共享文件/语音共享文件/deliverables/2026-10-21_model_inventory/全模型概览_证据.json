@@ -1,0 +1,79 @@
+{
+  "checked_host_utc": "2026-10-22T03:25:34.894857+00:00",
+  "functional_model_count": 8,
+  "models": [
+    "YOLOX-Nano",
+    "YuNet 2022mar",
+    "SFace 2021dec",
+    "GTCRN (gtcrn_simple.onnx)",
+    "Silero VAD v5",
+    "Paraformer INT8",
+    "27B local dialogue model",
+    "OmniVoice 16 steps"
+  ],
+  "counting_note": "Configured functional models; does not imply all models are currently online. OmniVoice audio_tokenizer is additionally listed as an internal learned component.",
+  "frontend_config": {
+    "enabled": true,
+    "host": "192.168.50.1",
+    "port": 8795,
+    "timeout_ms": 180
+  },
+  "frontend_health": {
+    "error": "timeout",
+    "detail": "timed out"
+  },
+  "sent_audio": false,
+  "active_runtime": "/home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/runtime/aura",
+  "audio_frontend_ui_status": {
+    "phase": "IDLE",
+    "audio_frontend": {
+      "enabled": true,
+      "current": {}
+    },
+    "recording": {}
+  },
+  "frontend_pcm_semantics": "GTCRN output feeds Silero VAD; the frontend sends only speech decisions, leaving original PCM for endpoint/ASR.",
+  "frontend_expected_weights": {
+    "gtcrn_simple.onnx": {
+      "sha256": "e77603ac0c23dac3227dd2d7135b3a585cbee2679048aecfa886657d3ae1b534",
+      "bytes": null
+    },
+    "silero_vad_v5.onnx": {
+      "sha256": "6b99cbfd39246b6706f98ec13c7c50c6b299181f2474fa05cbc8046acc274396",
+      "bytes": null
+    }
+  },
+  "pending_capabilities": [
+    "active speaker detection (Light-ASD)",
+    "image question answering (VLM backend not frozen)"
+  ],
+  "llm_metadata_note": {
+    "local_tag": "aura-qwen3.8-27b-abliterated:iq4_xs",
+    "saved_family": "qwen35",
+    "saved_parameters": "27.3B",
+    "upstream_identity_revalidated": false
+  },
+  "transactions": {
+    "model_scope_audit": {
+      "exit_code": 0,
+      "sha256": "6fe62f5d893aae0641dab38cc6392f872704a6e917daa2b18156cd84d8505683",
+      "console_echo_restored": true
+    },
+    "frontend_model_status": {
+      "exit_code": 0,
+      "sha256": "a21ffe9242be81effaa373326d7862e5a9026cf54750eff938e1b76cf8699311",
+      "console_echo_restored": true
+    },
+    "frontend_health_only": {
+      "exit_code": 0,
+      "sha256": "d520a58532b883d6441333201f826bc79bc3f24be85f460ef1bd5cba7591b734",
+      "console_echo_restored": true
+    }
+  },
+  "production_changed": false,
+  "private_source_digests": {
+    "model_scope_audit": "0f459b90b9c1561bb10095af0d5106e0958032dd839dd64228c77608ba3f9d4d",
+    "frontend_model_status": "ec5cd470cb414d7da4e480c2c4165559139dd01988560f20ab9869ce85ce126d",
+    "frontend_health_only": "c0d4e21d8a6889733c748e4d097eae1911ff0e11f88c5c80b20913a59cfb20fe"
+  }
+}

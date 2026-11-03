@@ -1,0 +1,12 @@
+[
+  {
+    "id": "postboot-validation",
+    "command": "python3 -B /home/root/kv260-dfx-state-boardtest-20261004/board/validate_v5.py postboot",
+    "timeout": 180
+  },
+  {
+    "id": "boot-order-and-identity",
+    "command": "python3 -B -c 'import sys,json; sys.path.insert(0,\"/home/root/kv260-dfx-state-boardtest-20261004/board\"); import validate_v5 as v; e=v.Evidence(\"coldboot-order\"); v.guard(e,allow_new_boot=True); v.require_phase(e,\"postboot\"); v.manager(e,v.NEW); data={}; fields=[\"ActiveState\",\"SubState\",\"Result\",\"ExecMainStatus\",\"MainPID\",\"UnitFileState\",\"ExecMainStartTimestampMonotonic\",\"ExecMainExitTimestampMonotonic\",\"ActiveEnterTimestampMonotonic\",\"InactiveExitTimestampMonotonic\",\"After\",\"Requires\",\"ExecStart\",\"DropInPaths\"]; argv=[\"systemctl\",\"show\"]; [argv.extend([\"-p\",f]) for f in fields]; units=[\"kv260-repaired-zocl.service\",\"dfx-mgr.service\"]; [(data.update({unit:dict(line.split(\"=\",1) for line in e.run(\"order-\"+unit,argv+[unit])[\"stdout\"].splitlines() if \"=\" in line)})) for unit in units]; loader=data[units[0]]; mgr=data[units[1]]; e.check(\"driver_completed_before_manager_exec\",0<int(loader[\"ExecMainExitTimestampMonotonic\"])<=int(mgr[\"ExecMainStartTimestampMonotonic\"])); e.check(\"manager_enabled\",mgr[\"UnitFileState\"]==\"enabled\"); e.run(\"root-mount\",[\"findmnt\",\"-n\",\"-o\",\"SOURCE,FSTYPE,TARGET\",\"/\"]); e.run(\"boot-mount\",[\"findmnt\",\"-n\",\"-o\",\"SOURCE,FSTYPE,TARGET\",\"/boot\"]); e.run(\"fstab\",[\"cat\",\"/etc/fstab\"]); e.run(\"preserved-runtime-hashes\",[\"sha256sum\",\"/usr/local/lib/kv260-runtime-repair/zocl.ko\",\"/etc/systemd/system/dfx-mgr.service.d/10-kv260-repaired.conf\",\"/usr/local/lib/kv260-runtime-repair/load-repaired-zocl.sh\",\"/etc/systemd/system/kv260-repaired-zocl.service\"]); v.stock(e); v.save(e.out/\"ordering.json\",data); print(\"ORDER \"+json.dumps(data)); e.finish()'",
+    "timeout": 120
+  }
+]

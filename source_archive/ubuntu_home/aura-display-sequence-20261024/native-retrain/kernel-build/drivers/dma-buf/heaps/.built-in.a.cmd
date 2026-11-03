@@ -1,0 +1,1 @@
+cmd_drivers/dma-buf/heaps/built-in.a := echo >/dev/null; rm -f drivers/dma-buf/heaps/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/dma-buf/heaps/built-in.a drivers/dma-buf/heaps/system_heap.o drivers/dma-buf/heaps/cma_heap.o

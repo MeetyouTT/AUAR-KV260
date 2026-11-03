@@ -1,0 +1,182 @@
+{
+  "scope": "REAL_GSTREAMER_SYNTHETIC_BUFFER_CALLBACK_ACCEPTANCE_AND_MATCHED_CPU_MICROBENCHMARK",
+  "opencv_threads": 2,
+  "opencv": "4.5.2",
+  "gstreamer_version": "GStreamer 1.18.5",
+  "source_sha256": "890fea726de2c6d29581ab2ee4c36db5e36df52f3e84ee20cd634fc8961ec2ce",
+  "candidate_sha256": "d74e30250e94584217c90eba9efaed41413e72d64505eeecd20d7cce66e7de45",
+  "gst_checks": [
+    {
+      "variant": "original",
+      "real_gst_buffers_checked": 12,
+      "pixels_and_ownership_passed": true
+    },
+    {
+      "variant": "candidate",
+      "real_gst_buffers_checked": 12,
+      "pixels_and_ownership_passed": true
+    }
+  ],
+  "pairs": [
+    {
+      "pair": 0,
+      "order": [
+        "original",
+        "candidate"
+      ],
+      "original": {
+        "calls": 40,
+        "wall_ms_per_call": 3.695876225,
+        "process_cpu_ms_per_call": 3.2752436250000003
+      },
+      "candidate": {
+        "calls": 40,
+        "wall_ms_per_call": 3.13960765,
+        "process_cpu_ms_per_call": 2.53552525
+      }
+    },
+    {
+      "pair": 1,
+      "order": [
+        "candidate",
+        "original"
+      ],
+      "candidate": {
+        "calls": 40,
+        "wall_ms_per_call": 5.06935195,
+        "process_cpu_ms_per_call": 2.809582825
+      },
+      "original": {
+        "calls": 40,
+        "wall_ms_per_call": 3.63435385,
+        "process_cpu_ms_per_call": 3.2752646
+      }
+    },
+    {
+      "pair": 2,
+      "order": [
+        "original",
+        "candidate"
+      ],
+      "original": {
+        "calls": 40,
+        "wall_ms_per_call": 4.165376675,
+        "process_cpu_ms_per_call": 3.2666399249999998
+      },
+      "candidate": {
+        "calls": 40,
+        "wall_ms_per_call": 3.01007585,
+        "process_cpu_ms_per_call": 2.5699377500000002
+      }
+    },
+    {
+      "pair": 3,
+      "order": [
+        "candidate",
+        "original"
+      ],
+      "candidate": {
+        "calls": 40,
+        "wall_ms_per_call": 2.97028945,
+        "process_cpu_ms_per_call": 2.47848005
+      },
+      "original": {
+        "calls": 40,
+        "wall_ms_per_call": 3.8305805499999996,
+        "process_cpu_ms_per_call": 3.240721025
+      }
+    },
+    {
+      "pair": 4,
+      "order": [
+        "original",
+        "candidate"
+      ],
+      "original": {
+        "calls": 40,
+        "wall_ms_per_call": 3.4319188250000003,
+        "process_cpu_ms_per_call": 3.193485725
+      },
+      "candidate": {
+        "calls": 40,
+        "wall_ms_per_call": 2.967801925,
+        "process_cpu_ms_per_call": 2.5692035
+      }
+    },
+    {
+      "pair": 5,
+      "order": [
+        "candidate",
+        "original"
+      ],
+      "candidate": {
+        "calls": 40,
+        "wall_ms_per_call": 2.598034975,
+        "process_cpu_ms_per_call": 2.5654951749999997
+      },
+      "original": {
+        "calls": 40,
+        "wall_ms_per_call": 3.692310925,
+        "process_cpu_ms_per_call": 3.2283941
+      }
+    }
+  ],
+  "median_original_cpu_ms": 3.253680475,
+  "median_candidate_cpu_ms": 2.5673493374999996,
+  "cpu_reduction_fraction_in_callback_only": 0.2109399318013857,
+  "camera_before": {
+    "pid": 215707,
+    "detected_frames": 11460,
+    "camera_error": "",
+    "detector_error": "",
+    "dpu_schedule": {
+      "active": "yolo",
+      "primary_calls": 11460,
+      "primary_period_overruns": 1,
+      "waiting_primary": 0,
+      "budget_ms": 20.0,
+      "guard_ms": 5.0,
+      "optional": {
+        "yunet": {
+          "calls": 2566,
+          "skipped": 2109,
+          "overruns": 0,
+          "budget_exceeded": 1,
+          "estimated_budget_ms": 28.825528999324888,
+          "maximum_ms": 26.825528999324888,
+          "disabled": false
+        }
+      }
+    }
+  },
+  "camera_after": {
+    "pid": 215707,
+    "detected_frames": 11526,
+    "camera_error": "",
+    "detector_error": "",
+    "dpu_schedule": {
+      "active": null,
+      "primary_calls": 11526,
+      "primary_period_overruns": 1,
+      "waiting_primary": 0,
+      "budget_ms": 20.0,
+      "guard_ms": 5.0,
+      "optional": {
+        "yunet": {
+          "calls": 2581,
+          "skipped": 2119,
+          "overruns": 0,
+          "budget_exceeded": 1,
+          "estimated_budget_ms": 28.825528999324888,
+          "maximum_ms": 26.825528999324888,
+          "disabled": false
+        }
+      }
+    }
+  },
+  "real_camera_opened": false,
+  "audio_opened": false,
+  "dpu_opened": false,
+  "production_modified": false,
+  "scope_limit": "GStreamer buffers are generated synthetic BGR, not UVC capture; benchmark extract_dup is simulated; no whole-board CPU gain or live deployment acceptance"
+}

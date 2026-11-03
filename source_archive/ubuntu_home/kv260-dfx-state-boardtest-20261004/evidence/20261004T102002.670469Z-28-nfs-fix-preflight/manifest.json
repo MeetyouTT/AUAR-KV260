@@ -1,0 +1,7 @@
+[
+  {
+    "id": "nfs-fix-preflight",
+    "command": "python3 -B -c 'import json,pathlib,subprocess,gzip,hashlib\nP=pathlib.Path\nassert P(\"/sys/block/mmcblk1/device/cid\").read_text().strip()==\"0353445345333247805558c00401a100\"\nout={\"boot_id\":P(\"/proc/sys/kernel/random/boot_id\").read_text().strip(),\"uid\":__import__(\"os\").geteuid(),\"nfsvfs\":P(\"/proc/filesystems\").read_text(),\"nfsd_sysfs_exists\":P(\"/sys/module/nfsd\").exists(),\"nfsd_proc_exists\":P(\"/proc/fs/nfsd\").exists(),\"existing_dropins\":[str(p) for p in P(\"/etc/systemd/system/proc-fs-nfsd.mount.d\").glob(\"*\")],\"commands\":[]}\nfor c in [[\"systemctl\",\"show\",\"dfx-mgr.service\",\"-p\",\"MainPID\",\"-p\",\"ActiveState\",\"-p\",\"SubState\",\"-p\",\"ExecStart\"],[\"systemctl\",\"show\",\"rpcbind.service\",\"rpcbind.socket\",\"nfs-statd.service\",\"nfs-idmapd.service\",\"-p\",\"Id\",\"-p\",\"UnitFileState\",\"-p\",\"ActiveState\",\"-p\",\"SubState\"],[\"systemctl\",\"--version\"],[\"systemctl\",\"--failed\",\"--no-pager\",\"--plain\"]]:\n r=subprocess.run(c,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,timeout=30)\n out[\"commands\"].append({\"argv\":c,\"rc\":r.returncode,\"stdout\":r.stdout,\"stderr\":r.stderr})\nprint(json.dumps(out,indent=2))'",
+    "timeout": 90
+  }
+]

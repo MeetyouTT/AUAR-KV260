@@ -1,0 +1,55 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/08-readiness-and-stress.json",
+  "manifest_sha256": "9a1bafe3499ed8508fd6ae8497478259a73850fec669c546ecaeabcec472add0",
+  "started_utc": "2026-10-04T07:39:55.263939+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": false,
+  "results": [
+    {
+      "id": "driver-v3",
+      "started_utc": "2026-10-04T07:39:55.784412+00:00",
+      "entry": {
+        "id": "driver-v3",
+        "type": "transfer",
+        "source": "/home/ghmd/kv260-dfx-state-boardtest-20261004/board/validate.py",
+        "destination": "/home/root/kv260-dfx-state-boardtest-20261004/board/validate_v3.py",
+        "sha256": "bd4757a62547065af4f2549ea183d1afc74512055e35d0929af72e9a767032f6"
+      },
+      "frames_acknowledged": 11,
+      "bytes": 32953,
+      "sha256": "bd4757a62547065af4f2549ea183d1afc74512055e35d0929af72e9a767032f6",
+      "exit_code": 0,
+      "finished_utc": "2026-10-04T07:40:00.744343+00:00"
+    },
+    {
+      "id": "candidate-ready",
+      "started_utc": "2026-10-04T07:40:00.745126+00:00",
+      "entry": {
+        "id": "candidate-ready",
+        "command": "python3 -B /home/root/kv260-dfx-state-boardtest-20261004/board/validate_v3.py ready",
+        "timeout": 180
+      },
+      "exit_code": 0,
+      "output_sha256": "d14c1f16b50db06a146606c685b4dbb679a7f975b513b759315677d790b2b6b4",
+      "bytes": 1107,
+      "finished_utc": "2026-10-04T07:40:04.297240+00:00"
+    },
+    {
+      "id": "directory-concurrent-stress",
+      "started_utc": "2026-10-04T07:40:04.297535+00:00",
+      "entry": {
+        "id": "directory-concurrent-stress",
+        "command": "python3 -B /home/root/kv260-dfx-state-boardtest-20261004/board/validate_v3.py stress",
+        "timeout": 300
+      },
+      "exit_code": 1,
+      "output_sha256": "51b122948329697e60b0c5a4c7d3a411b68994393481da5af07b68d8f0e3ba81",
+      "bytes": 2402,
+      "finished_utc": "2026-10-04T07:40:12.296869+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "error": "Command failed; subsequent entries stopped: directory-concurrent-stress",
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T07:40:12.344695+00:00"
+}

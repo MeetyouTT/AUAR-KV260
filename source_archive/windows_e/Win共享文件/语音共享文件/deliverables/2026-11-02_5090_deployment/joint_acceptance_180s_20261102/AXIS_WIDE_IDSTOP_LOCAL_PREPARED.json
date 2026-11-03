@@ -1,0 +1,115 @@
+{
+  "schema": "aura-axis-original-wide-idstop-local-prepared-1",
+  "recorded_host_utc": "2026-11-02T18:37:04.903Z",
+  "status": "LOCAL_PREPARATION_ONLY_WAIT_CPU_SEALED_RECEIPT_AND_SEPARATE_AXIS_PHASE_GRANT",
+  "board_access_granted": false,
+  "board_calls_made": 0,
+  "active_device_owner": "CPU protected normal-stop and full-history sealing phase; axis has no active device window",
+  "scope": "Original wide restore and ID_STOP_ONLY preparation. Existing accepted controller25, direction, range, speed, TTL, models and identity configuration remain exact.",
+  "references": {
+    "existing_plan": "E:/Win共享文件/语音共享文件/deliverables/2026-11-02_5090_deployment/maintenance_original_axis_20261101/new_boot_a6d4_readonly_20261102/offline_wide_restore/OFFLINE_WIDE_RECOVERY_PLAN.json",
+    "existing_closure_catalog": "E:/Win共享文件/语音共享文件/deliverables/2026-11-02_5090_deployment/maintenance_original_axis_20261101/new_boot_a6d4_readonly_20261102/offline_wide_restore/SCRIPT_AND_CLOSURE_CATALOG.json",
+    "os_client_supervision": "E:/Win共享文件/语音共享文件/deliverables/2026-11-02_5090_deployment/axis_follow_restore/OS_CLIENT_SUPERVISION_CONTRACT.txt",
+    "cpu_phase": "E:/Win共享文件/语音共享文件/deliverables/2026-11-02_5090_deployment/joint_acceptance_180s_20261102/CPU_RESTORE_PHASE_HANDOFF.json",
+    "required_cpu_completion": "E:/Win共享文件/语音共享文件/deliverables/2026-11-02_5090_deployment/joint_acceptance_180s_20261102/CPU_PROTECTED_STOP_SEAL_RESULT.json",
+    "power_off_human_proof": [
+      "E:/Win共享文件/语音共享文件/deliverables/2026-11-02_5090_deployment/joint_acceptance_180s_20261102/POWER_DISCONNECTED_USER.json",
+      "E:/Win共享文件/语音共享文件/deliverables/2026-11-02_5090_deployment/joint_acceptance_180s_20261102/MOTOR_POWER_OFF_CONFIRMED.json"
+    ]
+  },
+  "original_entrypoints": [
+    {
+      "operation": "remove",
+      "historical_local_template": "E:/Win共享文件/语音共享文件/deliverables/2026-11-02_5090_deployment/maintenance_original_axis_20261101/launch_original_remove.py",
+      "template_sha256": "4853f34f294724475ea41785fcd5448aa9be357fb1360ad8e2a6a538d7394eae",
+      "argv": [
+        "/usr/bin/dfx-mgr-client",
+        "-remove",
+        "0"
+      ],
+      "required_stdout_exact": "remove from slot 0 returns: 0 (Ok)\n"
+    },
+    {
+      "operation": "load",
+      "historical_local_template": "E:/Win共享文件/语音共享文件/deliverables/2026-11-02_5090_deployment/maintenance_original_axis_20261101/launch_original_load.py",
+      "template_sha256": "8a1e224506c4be2885053b1e088808dfe747cadf974eb40b84739fa9f0cb3df8",
+      "argv": [
+        "/usr/bin/dfx-mgr-client",
+        "-load",
+        "aura-visual-servo-b4096-wide-v1"
+      ],
+      "required_stdout_exact": "aura-visual-servo-b4096-wide-v1: loaded to slot 0\n"
+    },
+    {
+      "operation": "ID_STOP_ONLY",
+      "historical_local_template": "E:/Win共享文件/语音共享文件/deliverables/2026-11-02_5090_deployment/maintenance_original_axis_20261101/launch_original_idstop.py",
+      "template_sha256": "849f055c14cf498a7cdb59356c30e6d4a0e22fbbe5e6f1ed9f6393505ac2587f",
+      "board_entry": "/home/root/aura-pan-wide-20261028/release-6a4b645a5bbfd35c/bench_identity_stop.py",
+      "board_entry_sha256": "c9e91f74336c1e73d7c60408739abc8537b80066eb666a1a79e32b81d7d267aa",
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "/home/root/aura-pan-wide-20261028/release-6a4b645a5bbfd35c/bench_identity_stop.py",
+        "--execute",
+        "--confirmation",
+        "ID_STOP_ONLY",
+        "--manifest",
+        "/home/root/aura-pan-wide-20261028/release-6a4b645a5bbfd35c/candidate-manifest.json",
+        "--manifest-sha256",
+        "6a4b645a5bbfd35c9107976edf27886cf8e0c91e40f48be6f052a95e1172c1cf",
+        "--context",
+        "<new-exclusive-action-dir>/wide-context.json",
+        "--output",
+        "<new-exclusive-action-dir>/id-stop.json"
+      ]
+    }
+  ],
+  "historical_wrappers_execute_directly": false,
+  "historical_template_rebinding": "Old boot/checkpoint/PID/startup/daemon/units are historical assertions. Bind every runtime input to fresh actual receipts; never remove assertions or replay old c6c8 final.",
+  "fresh_required_inputs": [
+    {
+      "id": "separate_axis_phase",
+      "requires": "Explicit root/main phase grant after CPU returns its window; authorized exclusive operator, current boot, action scope and human motor-power-off proof. No repeated human question."
+    },
+    {
+      "id": "cpu_complete_seal",
+      "requires": "CPU completion receipt plus exact normal-stop intent/result and fresh genuine final/checkpoint path and SHA; current boot, source/camera PID+birth+command pins, stop monotonic times and normal original unit exit; source owners gone."
+    },
+    {
+      "id": "full_history_pass",
+      "requires": "Complete original ordered 19-layer history and legacy list with independent expected head/count/path+SHA pins, exact expected-input digest, genuine final SHA, all cumulative/recovery/feature bounds and complete successful validation result; NEW_FINAL_PRESENT alone does not pass. Use actual CPU V2 result and pin, not a reconstructed seed.",
+      "candidate_validator_sha256": "60b52e216fffcb64cd7860447d2a62d4bf1b39556532a6af819e85d7760f0d7f"
+    },
+    {
+      "id": "no_hardware_owner",
+      "requires": "Fresh current-boot all-process/service/job evidence: no active/queued GUI, camera, VART/native/libvsrv, DPU/render/MMIO owners, no alive unreadable process, no automatic restart or pending DFX jobs. Recheck immediately before DFX."
+    },
+    {
+      "id": "current_platform",
+      "requires": "Actual firmware name, FPGA state, applied dynamic overlay(s), FDT SHA, exact VART path, ZOCL parent/child/render binding; exact original client+repaired daemon executable hashes and current daemon PID/birth. Bind this phase, not the earlier benchmark snapshot."
+    },
+    {
+      "id": "unique_action_identity",
+      "requires": "New exclusive intent/stdout/stderr/result paths and OS-managed unit+InvocationID per original supervision contract. Preserve raw bytes, PID and monotonic identity. Infinite/no-kill lifetime; unknown result means observe same action, never resubmit or terminate."
+    }
+  ],
+  "sequential_result_gates": [
+    "Remove: same unit actually completes with successful exact stdout, empty stderr and expected actual firmware/overlay/dynamic-ZOCL teardown. Return code alone cannot establish success.",
+    "Load: same unit completes successfully and actual wide firmware, applied overlay, exact VART and actual ZOCL/render tree pair; original four firmware and three driver payload hashes match manifest/catalog. Overlay suffix and actual FDT are measured, not historical constants.",
+    "Before ID_STOP_ONLY: fresh current-boot context contains actual boot_id, fdt_sha256 and wide firmware_name; no hardware owners, original script/release closure verified, exclusive context/output.",
+    "ID_STOP_ONLY: original ID 0x56535256, ABI2, build0x10282601, identity_stop_passed true, flags0 and lease0; ARM_sent/COMMIT_sent/BIND_sent/REFERENCE_sent all false.",
+    "Write completion metadata and explicitly return window to root/CPU. CPU/root handles original camera/GUI recovery in its own later grant."
+  ],
+  "prohibited_in_next_axis_phase": [
+    "BIND",
+    "REFERENCE",
+    "ARM",
+    "COMMIT",
+    "physical initialization or recenter",
+    "motion or follow start",
+    "service/camera/GUI start",
+    "firmware/controller/model tuning",
+    "native checkpoint/counter/marker rewriting",
+    "R7 deployment"
+  ]
+}

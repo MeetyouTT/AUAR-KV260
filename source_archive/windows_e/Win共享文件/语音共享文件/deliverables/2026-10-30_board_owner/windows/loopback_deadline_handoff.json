@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "status": "SOURCE_FROZEN_EXECUTION_DEFERRED_BY_CHARACTER_WINDOW",
+  "test_source": "aura/tests/framework/test_board_http_deadline.py",
+  "test_sha256": "e56fd20db2041e94f48c3aaa856716fe59a2b79efeee4eee688c5d44a36420a2",
+  "frozen_client_sha256": "38220eb34939e63b3ebcff4ccef4d8b3ddefb22ce74c98f9224244894dad44f6",
+  "client_modified": false,
+  "planned_cases": 9,
+  "coverage": [
+    "Normal real 127.0.0.1 health Date: actual peer, one-shot verified sample, board boot/source, send/receive monotonic order",
+    "POST and Date crossed with partial headers/body and original total deadline/cancel Event",
+    "A single byte drips every 25ms, below the per-read timeout; total deadline/cancellation must still terminate",
+    "Body cases assert getresponse already set connection.sock=None before cancellation/deadline",
+    "All cases assert the retained actual client socket is closed",
+    "Fixture teardown asserts listener thread/socket, all handler threads, client watchdogs and cancel timers have exited"
+  ],
+  "resource_scope": "Only a temporary 127.0.0.1 fake HTTP stub. No GPU, ARM, real model, private store, microphone or playback.",
+  "test_load_design": "Expected under five seconds for the complete suite; each drip is capped at 0.45 seconds even on a regression; fixture stop event ends handlers early.",
+  "execution": {
+    "pytest_started": false,
+    "stub_sockets_opened": false,
+    "test_threads_started": false,
+    "thread_cleanup_assertions_executed": false,
+    "precheck_command_exit_code": 1,
+    "reason": "Coordination guard stopped before launching pytest. character_ack changed to exclusive pilot preparation with windows_pure_mock_sqlite_tests_allowed=false.",
+    "coordination_observed": {
+      "status": "PAIRED_AB_ARMING_PILOT",
+      "updated_at_utc": "2026-10-30T07:36:54.004169-07:00",
+      "windows_pure_mock_sqlite_tests_allowed": false,
+      "performance_window": "character exclusive A/B window; preparing to launch pilot"
+    },
+    "result": "NOT RUN; do not describe source assertions as passed runtime evidence"
+  },
+  "resume_requirement": "Root must confirm the character window allows the fake loopback suite. Both the precommand guard and each fixture reject BENCH_RUNNING or a false pure-mock allowance.",
+  "command_when_released": "& 'C:\\Users\\35870\\.codex\\visualizations\\2026\\10\\09\\01a12110-3ba4-7651-b3d7-2e6560916eb6\\omnivoice-runtime-py310\\Scripts\\python.exe' -B -m pytest aura/tests/framework/test_board_http_deadline.py -q -p no:cacheprovider --junitxml=deliverables/2026-10-30_board_owner/windows/loopback_deadline_tests.xml",
+  "permissions": "No sandbox_permissions argument. No production service is started or changed."
+}

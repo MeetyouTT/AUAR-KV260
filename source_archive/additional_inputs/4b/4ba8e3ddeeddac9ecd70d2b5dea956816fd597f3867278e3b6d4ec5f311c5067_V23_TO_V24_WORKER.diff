@@ -1,0 +1,108 @@
+--- frozen45a0/worker.py
++++ v24/worker.py
+@@ -19,12 +19,12 @@
+ import uuid
+ 
+ 
+-SPEC_SHA = 'ecdc034bd06cdd15bffe004a3ac1be3a6bc350dc3c879d91d3a19403f5c0f74a'
+-STARTUP = '48cb1a3a1fc62eae32c93a5be02df0bd60926cd064884a06990dd24b62762885'
++SPEC_SHA = '8376770e832d82add3ae207da3228c46c34ada89b95830cdd7536f8291224ec2'
++STARTUP = 'd848dc90cf9a890fb8bc66b2c494b78c2ae39a7e22a4743fe0ab917ca3edbae8'
+ BOOT = 'bebd3e7d-e984-4517-8cbb-211df7f1c6dc'
+ BEFORE = {
+-    'common.board_memory': ('common/board_memory.py', '05095d249caf3598802d5951910b412affe167b508933c7e831e3ffacc4fc0d0'),
+-    'board.runtime.board_memory_policy': ('board/runtime/board_memory_policy.py', '410e5b3eaf7986be6baa68d148469eb33443654ed0db597004518877732533c5'),
++    'common.board_memory': ('common/board_memory.py', '8905770197f114cc063addb2dd40bc745d9af942f674140f43e597ff3a6b1905'),
++    'board.runtime.board_memory_policy': ('board/runtime/board_memory_policy.py', 'a862cc22f6c23ae90d17ef06614cdf90fa0eb4605ad0a8b74766d102aad404aa'),
+ }
+ CLIENT_SHA = '600e044dedfc90c70e319e0e91999b8b4b7f648e0a5ca98e2a1bc0ab09a076b2'
+ LOCKS = ('/run/aura-avatar-ui.lock', '/home/root/.local/share/aura-board-business/writer.lock',
+@@ -57,16 +57,16 @@
+     raw = path.read_bytes()
+     need(len(raw) <= 2 * 1024 * 1024 and digest(raw) == expected, 'exact_bounded_payload_required')
+     payload = parse(raw)
+-    need(payload['schema'] == 'aura.public-memory-model-probe.v23' and payload['public_cases_only'] is True,
++    need(payload['schema'] == 'aura.public-memory-model-probe.v24' and payload['public_cases_only'] is True,
+          'public_fixture_payload_required')
+     need(digest(payload['spec_raw'].encode()) == SPEC_SHA and payload['final_summary_max_utf8_bytes'] == 301,
+-         'production_v22_spec_and_capacity_required')
++         'production_v23_spec_and_capacity_required')
+     spec = parse(payload['spec_raw'])
+     need(spec['startup_sha256'] == STARTUP and spec['boot_id'] == BOOT
+          and spec['camera_owner']['camera_pid'] == 229296
+          and str(spec['camera_owner']['camera_start_ticks']) == '2474670', 'exact_live_baseline_required')
+     need(digest(payload['guard_source'].encode()) == payload['guard_sha256'], 'guard_source_changed')
+-    need(payload['mode'] in ('before', 'candidate') and 1 <= len(payload['cases']) <= 11, 'bounded_mode_and_cases_required')
++    need(payload['mode'] in ('before', 'candidate') and 1 <= len(payload['cases']) <= 15, 'bounded_mode_and_cases_required')
+     for case in payload['cases']:
+         need(set(case) == {'case', 'sources', 'semantic_review_rubric'}
+              and isinstance(case['case'], str) and isinstance(case['semantic_review_rubric'], str), 'public_case_shape_required')
+@@ -76,8 +76,8 @@
+                  and isinstance(source['text'], str) and 0 < len(source['text'].encode()) <= 4096
+                  and isinstance(source['protected'], dict), 'public_text_source_required')
+     need(len({case['case'] for case in payload['cases']}) == len(payload['cases']), 'duplicate_case')
+-    need(set(payload['candidate_sources']) == (set(BEFORE) if payload['mode'] == 'candidate' else set()),
+-         'exact_two_source_overlay_or_original_required')
++    need(set(payload['candidate_sources']) == ({'board.runtime.board_memory_policy'} if payload['mode'] == 'candidate' else set()),
++         'exact_policy_only_overlay_or_original_required')
+     for name, record in payload['candidate_sources'].items():
+         need(record['before_sha256'] == BEFORE[name][1] and digest(record['source'].encode()) == record['sha256'],
+              'candidate_source_digest_changed')
+@@ -155,7 +155,7 @@
+     parent = importlib.import_module(parent_name)
+     module = types.ModuleType(name)
+     module.__package__ = parent_name
+-    module.__file__ = '<public-memory-v23-candidate/' + name.replace('.', '/') + '.py>'
++    module.__file__ = '<public-memory-v24-candidate/' + name.replace('.', '/') + '.py>'
+     sys.modules[name] = module
+     setattr(parent, attribute, module)
+     try:
+@@ -169,10 +169,10 @@
+ 
+ 
+ def prepared_case(case, memory):
+-    sources = [dict(event_id='public-v23-' + case['case'] + '-' + str(index), revision=1,
++    sources = [dict(event_id='public-v24-' + case['case'] + '-' + str(index), revision=1,
+         include_in_summary=True, source=row['source'], text=row['text'], metadata=copy.deepcopy(row['protected']),
+         recorded_utc=1700000000.0 + index) for index, row in enumerate(case['sources'], 1)]
+-    return dict(schema_version=memory.SCHEMA_VERSION, scope={'kind': 'conversation', 'id': 'public-v23-' + case['case']},
++    return dict(schema_version=memory.SCHEMA_VERSION, scope={'kind': 'conversation', 'id': 'public-v24-' + case['case']},
+         topic='公开摘要验证', start_utc=1700000000.0, end_utc=1700000000.0 + len(sources), sources=sources,
+         required_claims=memory.BoardMemoryStore._required_claims(sources))
+ 
+@@ -186,7 +186,7 @@
+     def request(self, kind, payload, *, deadline, cancelled):
+         self.guard()
+         need(kind == 'llm' and payload['task'] == 'summary'
+-             and payload['board_boot_id'].startswith('public-memory-v23-')
++             and payload['board_boot_id'].startswith('public-memory-v24-')
+              and payload['options'] == {'num_predict': 384}, 'original_public_summary_request_required')
+         exported = parse(payload['messages'][-1]['content'])['sources']
+         stage = 'single'
+@@ -222,7 +222,7 @@
+         need(digest((runtime / 'board/runtime/board_dialogue_client.py').read_bytes()) == CLIENT_SHA,
+              'actual_inference_client_changed')
+         if payload['mode'] == 'candidate':
+-            memory = load_overlay('common.board_memory', payload['candidate_sources']['common.board_memory'])
++            memory = importlib.import_module('common.board_memory')
+             policy = load_overlay('board.runtime.board_memory_policy', payload['candidate_sources']['board.runtime.board_memory_policy'])
+         else:
+             memory = importlib.import_module('common.board_memory')
+@@ -231,7 +231,7 @@
+         need(Path(client_module.__file__).resolve() == runtime / 'board/runtime/board_dialogue_client.py', 'runtime_client_import_changed')
+         actual = client_module.InferenceHttpClient('192.168.50.1', 8797)
+         client = RecordingClient(actual, guard)
+-        fake_boot = 'public-memory-v23-' + uuid.uuid4().hex
++        fake_boot = 'public-memory-v24-' + uuid.uuid4().hex
+         summary = policy.BoardSummaryClient(client, board_boot_id=fake_boot, final_summary_max_utf8_bytes=301)
+         need((summary.maximum, summary.reserve, summary.budget_ms, summary.max_calls, summary.total_budget_ms)
+              == (2048, 384, 30000, 256, 900000), 'original_summary_defaults_changed')
+@@ -290,7 +290,7 @@
+         publisher = stack.enter_context(os.fdopen(descriptor, 'r+b'))
+         fcntl.flock(publisher, fcntl.LOCK_EX | fcntl.LOCK_NB)
+         with metadata_guard_imports():
+-            exec(compile(payload['guard_source'], '<frozen-v22-readonly-guard>', 'exec'), context)
++            exec(compile(payload['guard_source'], '<frozen-v23-readonly-guard>', 'exec'), context)
+             context['boot']()
+             context['source']()
+             journal = context['journal']()

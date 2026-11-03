@@ -1,0 +1,13 @@
+记忆库当前状态与安全聚合审阅（洛杉矶2026-11-01）
+
+本代理只读本地公开源码与root聚合回执，没有连接板卡或打开本机/板卡真实数据库。实际唯一读库由root完成，原始证据 MEMORY_AGGREGATES_063129.json 与 MEMORY_REMAINING_SOURCES.json。生产Store SHA890577…与root实读一致；v24策略d6e459…、原backoff9710c0…保持，未使用未部署v25 after版本。
+
+root实际结果：quick_check通过，schema1、origin=board，retention配置开启；数据库15,474,688字节；4404条事件、767条轮次记录、3379条有效持久摘要、1条当前明确记忆。用户原文待摘要0，已播助手原文待摘要0；剩余12条body全部是camera_observed视觉观察，其他来源与未知残差均0。84条历史failed任务仍关联当前未摘要有效body的任务数为0；无reserved/leased/活动turn。不能称767轮全部成功，也不能把旧白名单other320称失败。
+
+当前GUI处于正常维护停止，摘要worker随GUI停止；retention=true是配置，不是当前后台仍运行。最早剩余视觉记录05:57:33UTC，GUI正常stop06:01:30UTC，间隔约3分58秒，当时尚在原5分钟细节窗口内。这一时序支持近期视觉细节在维护时保留的解释，未检查正文或语义。
+
+两层记忆：细节窗口固定300秒。事件关闭/完整播放ACK以及关联turn关闭都满足5分钟，且空闲/时钟/租约等原guard通过，才由原worker准备摘要；摘要通过受保护名称/数字/否定等原校验并保存、读回验证后，有效摘要发布和对应正文body删除在同一事务内原子提交；失败会回滚。失败或候选被拒绝不会因为时间到了就直接删正文。事件元数据、有效摘要和明确facts是另一层持久记录；current_facts=1不代表只保存了1条全部记忆。未做新一轮超过5分钟的真人回忆准确率验收。
+
+个人档案：bm_profiles=0且profile轮次0，表示此timeline.sqlite3当前未建立个人记忆档案目录；已有765轮conversation与2轮device记录仍保留。人脸readback和相机身份库独立；声纹/匿名声纹/联合绑定在private_root/speaker/{speakers.sqlite3,anonymous-voices.sqlite3,identity-links.sqlite3}，未读这些库，不能推断人脸/声纹为空。身份候选也不自动授权读取个人档案，沿用原live ProfileAccess grant。
+
+安全SQL见SAFE_AGGREGATE_SQL.json：只输出计数/固定枚举/技术时间，不选正文、摘要、姓名、profile/person/scope IDs。当前failed关联统计必须连bm_task_sources+bm_events+bm_bodies并核valid、未摘要、revision/hash匹配，避免把历史失败总数当当前积压。未知turn status只聚合other；原程序明确存在interrupted、invalidated，不需为给用户状态继续扩大读库。Native保护计数/18层归档是视觉执行安全历史，不是对话记忆库。

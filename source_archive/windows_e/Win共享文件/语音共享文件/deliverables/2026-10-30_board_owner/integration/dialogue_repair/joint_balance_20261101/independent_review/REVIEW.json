@@ -1,0 +1,98 @@
+{
+  "schema": "aura.single-projection-independent-review.v1",
+  "status": "PASS_FIXED_380_COMPONENT_SCOPE",
+  "baseline_startup_sha256": "226b5a20f0089f5c534b1d540dd3605d805c17f7f1bd371a6ab5b3a4b287ad15",
+  "before_sha256": "414ed67c68ad5f6ad3e0f89608e4f7ccef71d7b8765dfffc4f071eb806cc081a",
+  "after_sha256": "984d3ca24067bf5129e9ce3b0054f32cced717b6b8824eab347476bef2f9e502",
+  "source_index_sha256": "7cdec28954591605c95c07b545f8ae7039eefc42dad5e681f1b5377559b2c118",
+  "baseline_manifest_sha256": "8ff79452570385921e06c098b5d42c2ea1ef5dfb84d81dfa7f53a9295373d0e8",
+  "frozen_public_package_sha256": "61b816240e692844b8df71137feea6260e7b22153c0e5be9edcce28c6575f9ea",
+  "frozen_package_files_unchanged": true,
+  "changed_ast_methods": [
+    "PresentationLifecycle._projection",
+    "PresentationLifecycle._purge_public_copies",
+    "attach_presentation"
+  ],
+  "strictly_equivalent_for_arbitrary_overrides": false,
+  "current_path_equivalence_conditions": [
+    "Concrete PresentationLifecycle constructed by unchanged bind_presentation",
+    "No overridden or instance-replaced _projection",
+    "Body slots maintained by existing channel/expire/invalidate code",
+    "State trees within existing cleaner supported domain"
+  ],
+  "production_path_blocking_findings": [],
+  "compatibility_observations": [
+    {
+      "id": "C1",
+      "severity": "nonblocking_for_current_concrete_binding",
+      "issue": "Legacy _projection override raises TypeError on new metadata_only keyword",
+      "demonstrated": true
+    },
+    {
+      "id": "C2",
+      "severity": "nonblocking_for_current_concrete_binding",
+      "issue": "Compatible override that appends body after super no longer receives final outer sanitization",
+      "demonstrated": true
+    }
+  ],
+  "tests": {
+    "schema": "aura-single-projection-independent-public-regressions-1",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "passed": true,
+    "subclass_boundary_reproduced": true,
+    "public_temp_files_only": true,
+    "production_or_candidate_source_modified": false,
+    "device_network_model_or_database_access": false
+  },
+  "original_11_tests_rerun": false,
+  "random_500_cases_rerun": false,
+  "performance_measured_here": false,
+  "board_ARM_validation_done_here": false,
+  "no_production_privacy_regression_found_within_scope": true,
+  "model_network_device_service_or_real_database_access": false,
+  "product_candidate_baseline_or_package_modified": false,
+  "artifacts": {
+    "test_lifecycle_paths.py": {
+      "sha256": "1cfe4aaf0e3a3e135af27e7d8341c8318457040a1db90f555467d2b616fa2ef3",
+      "bytes": 12560
+    },
+    "PUBLIC_TEST_RESULT.json": {
+      "sha256": "761cf67b1a47d12f551d350253a31abf5b379eda0f58503b0779509460461513",
+      "bytes": 327
+    },
+    "REVIEW.txt": {
+      "sha256": "3d2af8bf56ce98999880bbe9d6b0bfde5a8c18eb861a5b92e69d30b2e9212af3",
+      "bytes": 6451
+    },
+    "scan_current_closure.py": {
+      "sha256": "f4a75933e6bc857e69cbfa20129795c11d4555fc9da09b8669ade6d127043241",
+      "bytes": 5408
+    },
+    "CLOSURE_SCAN.json": {
+      "sha256": "b180cc794a0f494c472b36c54f8ecad481aed734bcfc530885744b6e4d87281e",
+      "bytes": 140407
+    }
+  },
+  "approved_scope": "Fixed380component closure; direct concrete PresentationLifecycle binding; no unused extension branch required",
+  "closure_scan": {
+    "schema": "aura.current-presentation-extension-scan.v1",
+    "startup_sha256": "226b5a20f0089f5c534b1d540dd3605d805c17f7f1bd371a6ab5b3a4b287ad15",
+    "manifest_sha256": "8ff79452570385921e06c098b5d42c2ea1ef5dfb84d81dfa7f53a9295373d0e8",
+    "current_python_components_matched": 340,
+    "missing_python_components": [],
+    "projection_method_definitions": [
+      {
+        "component": "tools/production_memory_presentation.py",
+        "line": 112,
+        "class_name": "PresentationLifecycle"
+      }
+    ],
+    "lifecycle_subclasses": [],
+    "projection_replacement_sites": [],
+    "scope": "Direct static Python source patterns in hash-matched mapped components; not a claim about arbitrary external monkeypatching",
+    "device_model_service_or_database_access": false
+  },
+  "extra_regressions_complete": true
+}

@@ -1,0 +1,42 @@
+{
+  "schema": "aura.paired_ab.quality_delivery.v1",
+  "status": "FROZEN_LOCAL_READ_ONLY_QUALITY_V1",
+  "files": {
+    "quality_checks.py": "c29c4112eec9a0334b9bb8e3569326db4682ed4f074f4bc1b22252e9e078fb61",
+    "quality-pilot-v1-regression-final.json": "5776eaa5a3398bf6be58d9fdf3c90281f9b7c2659671fed959196ab63fdca92c",
+    "quality-local-regression.json": "fd4bd03cfd26dbe6236bfe0283b8a614790808c61aed7f704fb313b375ed5d0d"
+  },
+  "existing_frozen_harness_unchanged": {
+    "paired_renderer_harness.py": true,
+    "old_renderer_harness.py": true,
+    "old_harness_support.py": true
+  },
+  "existing_analyzer_modified": false,
+  "APIs": [
+    "check_case(case_dir, suite_case_row, scenario)",
+    "check_suite(suite_path, scenario, case_root=None)",
+    "descriptive_jpeg_contribution(suite_case_rows)"
+  ],
+  "sampling_contract": {
+    "controller_snapshot_nominal_seconds": 0.2,
+    "command_lateness_allowance_seconds": 0.5,
+    "cancel_settle_allowance_seconds": 0.5,
+    "pause_entry_guard_seconds": 0.2,
+    "minimum_stable_samples": 2,
+    "stored_value_equality_tolerance": 1e-06,
+    "equality_tolerance_is_not_response_time_precision": true,
+    "camera_nominal_seconds": 5,
+    "camera_maximum_gap_seconds": 7,
+    "camera_minimum_span_coverage_fraction": 0.75
+  },
+  "preservation": "All raw runs and original pilot evidence are retained; FAIL/UNKNOWN only limits conclusions. Quality CLI exits0 with status in JSON; do not infer PASS from exit code. No performance/GO verdict is produced.",
+  "validation": {
+    "python_ast": "PASS",
+    "actual_old_and_new_pilot_data_read_only_regression": "PASS",
+    "negative_data_mutations_in_memory": 9,
+    "original_data_modified": false,
+    "board_or_network_calls": false
+  },
+  "pilot_result": "PCM/caps/bytes/playing, commands, pause/resume, cancel and JPEG behavior PASS in both; camera coverage and missing people-count context UNKNOWN; pilot is not the12-case formal suite",
+  "attribution": "A-C is descriptive, unpaired and time separated. No exact additive JPEG contribution; C-B still includes transport/display stack/snapshot differences."
+}

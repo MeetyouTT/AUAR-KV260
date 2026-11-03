@@ -1,0 +1,36 @@
+--- before/tools/production_memory_presentation.py
++++ after/tools/production_memory_presentation.py
+@@ -109,12 +109,12 @@
+                 self.reply = value if len(value) <= 16384 else ''
+             self._expire()
+ 
+-    def _projection(self, state):
++    def _projection(self, state, *, metadata_only=False):
+         self._expire()
+         state = _clean(state)
+-        state['reply'] = self.reply
++        state['reply'] = '' if metadata_only else self.reply
+         local = state.setdefault('local_transcription', {})
+-        local['text'] = self.transcript
++        local['text'] = '' if metadata_only else self.transcript
+         local['voice_reply'] = None
+         state['presentation_lifecycle'] = dict(epoch=self.epoch,
+             showing=bool(self.transcript or self.reply), ttl_seconds=self.ttl,
+@@ -131,7 +131,7 @@
+         bridge = getattr(self.stage, 'bridge', None)
+         if bridge is not None:
+             with bridge.lock:
+-                bridge.state = _clean(self._projection(bridge.state))
++                bridge.state = self._projection(bridge.state, metadata_only=True)
+         # Worker read() reprojects after releasing its own condition, and its
+         # next public() publication replaces the cached state. Taking that
+         # condition here would invert the original worker->public lock order.
+@@ -327,7 +327,7 @@
+         with lifecycle.lock:
+             # This localhost control API never serves user subtitles in
+             # production. GTK alone projects the bounded current RAM slot.
+-            original_publish(_clean(lifecycle._projection(state)), frame)
++            original_publish(lifecycle._projection(state, metadata_only=True), frame)
+     bridge.publish = publish
+     worker = stage.controller
+     original_worker_read = worker.read

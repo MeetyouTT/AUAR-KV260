@@ -1,0 +1,52 @@
+{
+  "schema": "aura-main-independent-local-dpu-crosscheck-1",
+  "created_host_utc": "2026-11-02T21:16:17.757926+00:00",
+  "source_file": "E:\\Win共享文件\\协作任务\\2026-11-02_收尾性能实测_01a19c53\\data\\board_numeric.jsonl",
+  "source_sha256": "ed7de4c04907952a4d37dfb2e16396a07d76f9135a0e95f0b8a6e8e34a7f9b61",
+  "sample_count": 90,
+  "observer_actual_seconds": 180.15117043299688,
+  "counter_interval_s": 179.77388517899817,
+  "counter_interval_definition": "start camera health request finished monotonic to final sample camera health request finished monotonic",
+  "models": [
+    {
+      "model": "YOLOX-Nano",
+      "completed_or_admitted_counter_path": "dpu_schedule.primary_calls",
+      "counter_delta": 1781,
+      "observed_rate_hz": 9.906889414036332,
+      "timing_stage": "yolo.native_and_decode",
+      "timing_delta_count": 1781,
+      "window_mean_stage_ms": 15.923683024702854,
+      "not_isolated_kernel_ms": true
+    },
+    {
+      "model": "YuNet",
+      "completed_or_admitted_counter_path": "dpu_schedule.optional.yunet.native_completed",
+      "counter_delta": 1773,
+      "observed_rate_hz": 9.862389068549364,
+      "timing_stage": "yunet.native_lease",
+      "timing_delta_count": 1773,
+      "window_mean_stage_ms": 2.411370107726991,
+      "not_isolated_kernel_ms": true
+    },
+    {
+      "model": "SFace",
+      "completed_or_admitted_counter_path": "dpu_schedule.optional.sface.native_completed",
+      "counter_delta": 133,
+      "observed_rate_hz": 0.739818243720849,
+      "timing_stage": "sface.native_lease",
+      "timing_delta_count": 133,
+      "window_mean_stage_ms": 8.422059255639,
+      "not_isolated_kernel_ms": true
+    }
+  ],
+  "board_cpu_percent_of_all_four_cores": {
+    "mean": 69.08234540161986,
+    "median": 69.41959738054814,
+    "max": 76.14795918367348
+  },
+  "minimum_mem_available_mib": 2767.69921875,
+  "kernel_or_camera_errors_in_samples": 0,
+  "hardware_dpu_utilization": "NOT_EXPOSED",
+  "source_or_hardware_changes": false,
+  "scope": "Actual input and current scheduler workload, not standalone model maximum throughput; actual overlapping GUI samples were PAUSED/mic closed/axis stopped"
+}

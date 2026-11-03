@@ -1,0 +1,624 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="35" time="0.683" timestamp="2026-11-02T04:47:05.340129-08:00" hostname="REVO1"><testcase classname="test_split_commands" name="test_full_sentence_intents[\u767b\u8bb0\u4eba\u8138\uff0c\u6211\u53eb\u5408\u6210\u6d4b\u8bd5-face_only]" time="0.002" /><testcase classname="test_split_commands" name="test_full_sentence_intents[\u5e2e\u6211\u767b\u8bb0\u4eba\u8138\uff0c\u6211\u53eb\u5408\u6210\u6d4b\u8bd5-face_only]" time="0.001" /><testcase classname="test_split_commands" name="test_full_sentence_intents[\u8bf7\u5e2e\u6211\u767b\u8bb0\u4eba\u8138\uff0c\u6211\u53eb\u5408\u6210\u6d4b\u8bd5-face_only]" time="0.000" /><testcase classname="test_split_commands" name="test_full_sentence_intents[\u767b\u8bb0\u4eba\u8138-face_only]" time="0.000" /><testcase classname="test_split_commands" name="test_full_sentence_intents[\u767b\u8bb0\u58f0\u7eb9\uff0c\u6211\u53eb\u5408\u6210\u6d4b\u8bd5-voice_only]" time="0.001" /><testcase classname="test_split_commands" name="test_full_sentence_intents[\u8bf7\u5e2e\u6211\u767b\u8bb0\u58f0\u7eb9\uff0c\u6211\u53eb\u5408\u6210\u6d4b\u8bd5-voice_only]" time="0.000" /><testcase classname="test_split_commands" name="test_full_sentence_intents[\u5e2e\u6211\u767b\u8bb0\u58f0\u7eb9-voice_only]" time="0.001" /><testcase classname="test_split_commands" name="test_full_sentence_intents[\u8bb0\u4f4f\u6211\uff0c\u6211\u53eb\u5408\u6210\u6d4b\u8bd5-remember_self]" time="0.004" /><testcase classname="test_split_commands" name="test_negative_quoted_hypothetical_and_new_joint_alias_do_not_arm_entry[\u4e0d\u8981\u767b\u8bb0\u4eba\u8138\uff0c\u6211\u53eb\u5408\u6210\u6d4b\u8bd5]" time="0.001" /><testcase classname="test_split_commands" name="test_negative_quoted_hypothetical_and_new_joint_alias_do_not_arm_entry[\u5982\u679c\u767b\u8bb0\u4eba\u8138\uff0c\u6211\u53eb\u5408\u6210\u6d4b\u8bd5]" time="0.000" /><testcase classname="test_split_commands" name="test_negative_quoted_hypothetical_and_new_joint_alias_do_not_arm_entry[\u4ed6\u8bf4\u201c\u767b\u8bb0\u4eba\u8138\uff0c\u6211\u53eb\u5408\u6210\u6d4b\u8bd5\u201d]" time="0.001" /><testcase classname="test_split_commands" name="test_negative_quoted_hypothetical_and_new_joint_alias_do_not_arm_entry[\u4e0d\u8981\u767b\u8bb0\u58f0\u7eb9\uff0c\u6211\u53eb\u5408\u6210\u6d4b\u8bd5]" time="0.001" /><testcase classname="test_split_commands" name="test_negative_quoted_hypothetical_and_new_joint_alias_do_not_arm_entry[\u5982\u679c\u767b\u8bb0\u58f0\u7eb9\uff0c\u6211\u53eb\u5408\u6210\u6d4b\u8bd5]" time="0.001" /><testcase classname="test_split_commands" name="test_negative_quoted_hypothetical_and_new_joint_alias_do_not_arm_entry[\u4ed6\u8bf4\u767b\u8bb0\u58f0\u7eb9\uff0c\u6211\u53eb\u5408\u6210\u6d4b\u8bd5]" time="0.000" /><testcase classname="test_split_commands" name="test_negative_quoted_hypothetical_and_new_joint_alias_do_not_arm_entry[\u5173\u8054\u6211\u7684\u4eba\u8138\u548c\u58f0\u7eb9\uff0c\u6211\u53eb\u5408\u6210\u6d4b\u8bd5]" time="0.000" /><testcase classname="test_split_commands" name="test_real_jobs_face_name_entry_never_touches_speaker_or_links" time="0.014"><failure message="AssertionError: assert (not False and 'idle' == 'authorize'&#10; +  where False = namespace(fallback=False, replies=[('请一个人正对摄像头，等人脸清楚后，再说帮我登记身份。', True)]).fallback&#10;  &#10;  - authorize&#10;  + idle)">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000215E4F52C80&gt;
+
+    def test_real_jobs_face_name_entry_never_touches_speaker_or_links(monkeypatch):
+        h=Harness(monkeypatch);p=h.say('登记人脸，我叫合成测试')
+&gt;       assert not p.fallback and h.handler.flow.stage=='authorize'
+E       AssertionError: assert (not False and 'idle' == 'authorize'
+E        +  where False = namespace(fallback=False, replies=[('请一个人正对摄像头，等人脸清楚后，再说帮我登记身份。', True)]).fallback
+E         
+E         - authorize
+E         + idle)
+
+test_split_commands.py:113: AssertionError</failure></testcase><testcase classname="test_split_commands" name="test_bare_face_and_name_followup_are_original_face_fsm" time="0.002"><failure message="AssertionError: assert 'idle' == 'name'&#10;  &#10;  - name&#10;  + idle">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000215E4ED0D60&gt;
+
+    def test_bare_face_and_name_followup_are_original_face_fsm(monkeypatch):
+        h=Harness(monkeypatch);h.say('登记人脸')
+&gt;       assert h.handler.flow.stage=='name'
+E       AssertionError: assert 'idle' == 'name'
+E         
+E         - name
+E         + idle
+
+test_split_commands.py:119: AssertionError</failure></testcase><testcase classname="test_split_commands" name="test_voice_without_any_visual_three_distinct_samples_and_original_final_confirm" time="0.008" /><testcase classname="test_split_commands" name="test_bare_voice_survives_polling_and_only_explicit_name_followup_starts_original_device" time="0.002" /><testcase classname="test_split_commands" name="test_bare_voice_name_authority_cannot_survive_cancel_reset_expiry_or_session_change[cancel]" time="0.003"><failure message="AttributeError: 'Business' object has no attribute 'config'">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000215E4F80D30&gt;
+action = 'cancel'
+
+    @pytest.mark.parametrize('action',['cancel','reset','expired','session'])
+    def test_bare_voice_name_authority_cannot_survive_cancel_reset_expiry_or_session_change(monkeypatch,action):
+        h=Harness(monkeypatch);h.say('登记声纹')
+        if action=='cancel':h.say('取消')
+        elif action=='reset':h.handler.reset()
+        elif action=='expired':h.clock.now+=121
+        else:h.jobs.session_id='different-session'
+        h.business.route=lambda *a,**k:None
+&gt;       h.say('我叫合成测试')
+
+test_split_commands.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+test_split_commands.py:93: in say
+    plan,_=self.jobs._route(job,text,reply_sink=lambda *a:None)
+candidate_runtime\board\runtime\audio\board_dialogue_jobs.py:515: in _route
+    return handler(text, **kwargs), None
+candidate_runtime\board\runtime\board_business.py:391: in __call__
+    return controller.prepare_local_sequence(text, produce, reply_sink, **kwargs)
+test_split_commands.py:50: in prepare_local_sequence
+    result=producer(emit)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+emit = &lt;function Controller.prepare_local_sequence.&lt;locals&gt;.emit at 0x00000215E50E3BE0&gt;
+
+    def produce(emit):
+        from contextlib import nullcontext
+        from common.binding_api import response as binding_response
+        from common.voice_enrollment import enrollment_requested, identity_query_requested
+        exchange = None
+        board_text = None
+        entry = None
+        try:
+            with self.flow.lock:
+                if entry_epoch != getattr(self, '_standalone_epoch', 0) or not current():
+                    raise StaleGeneration('Standalone routing no longer owns this turn')
+                entry = self._entry_for(job.meta)
+            from common.feature_intents import speaker_requested, speaker_query_requested
+            from tools.provisional_voice import query_reply
+            intent = binding_intent(text)
+            requested = {'face_only':'face', 'voice_only':'voice'}.get(intent['kind'])
+            if entry is not None and (requested is not None and requested != entry['mode']
+                    or intent['kind'] == 'remember_self'):
+                emit(BoardReply('当前已有登记正在进行。请先完成或取消本次登记，再选择另一种入口。', 'friendly'), final_cue=True)
+                return
+            if requested is not None and entry is None:
+                if self.flow.public()['active'] or self.business is not None and self.business.public()['active']:
+                    emit(BoardReply('当前已有登记正在进行。请先完成或取消本次登记，再选择另一种入口。', 'friendly'), final_cue=True)
+                    return
+                entry = self._new_entry(job.meta, requested,
+                    awaiting_name=requested == 'voice' and intent['name'] is None,
+                    epoch=entry_epoch, is_current=current)
+            if intent['kind'] == 'invalid_name':
+                emit(BoardReply(render(result('bad_name')), 'friendly'), final_cue=True)
+                return
+            if entry is not None and entry['mode'] == 'voice':
+                if self.business is None:
+                    raise BoardCapabilityNotReady('speaker_identity')
+                compact = text.strip(' 。！!？?')
+                cancel = compact in ('取消', '取消登记', '不保存', '取消声纹登记',
+                    '停止声纹登记', '不登记声纹了', '不要保存声纹')
+                if compact == '确认保存身份关联':
+                    emit(BoardReply('当前是单独声纹登记。请按提示完成三段录音，最后说“确认保存声纹”。', 'friendly'), final_cue=True)
+                    return
+                from common.voice_enrollment import confirmed, update_confirmed
+                if confirmed(text) or update_confirmed(text):
+                    emit(BoardReply('当前是单独声纹登记。最后的保存口令是“确认保存声纹”。', 'friendly'), final_cue=True)
+                    return
+                interpreted = text
+                if requested == 'voice':
+                    if not entry['awaiting_name'] and self.business.public()['active']:
+                        emit(BoardReply('本轮声纹登记仍在进行，请继续按提示采样或取消后重新开始。', 'friendly'), final_cue=True)
+                        return
+                    interpreted = ('登记我的声纹' if intent['name'] is None else
+                                   '登记我的声纹，我叫' + intent['name'])
+                    if intent['name'] is not None:entry['awaiting_name'] = False
+                elif entry['awaiting_name'] and not cancel:
+                    if intent['kind'] == 'name_hint' and not self.business.public()['active']:
+                        interpreted = '登记我的声纹，我叫' + intent['name']
+                        entry['awaiting_name'] = False
+                    elif speaker_query_requested(text) or query_reply(text, {'state':'UNKNOWN'}) is not None:
+                        interpreted = '查询我的声纹'
+                    else:
+                        interpreted = '登记我的声纹'
+                elif query_reply(text, {'state':'UNKNOWN'}) is not None:
+                    interpreted = '查询我的声纹'
+                spoken = self.business.turn(job.meta, interpreted, job.pcm,
+                    is_current=current, cancel_event=cancel_event, deadline=job.deadline)
+                if cancel:self._standalone_entry = None
+                if spoken is None:return DIALOGUE_ROUTE
+                emit(BoardReply(spoken, 'friendly'), final_cue=True)
+                return
+            if entry is not None and entry['mode'] == 'face':
+                if speaker_requested(text):
+                    emit(BoardReply('当前是人脸登记。请先完成或取消本次登记，再开始声纹登记。', 'friendly'), final_cue=True)
+                    return
+                board_text = ('取消登记' if text.strip(' 。！!？?') in ('取消','不保存') else
+                              face_enrollment_text(text, active=self.flow.public()['active']))
+            if self.business is not None and entry is None:
+                options = dict(is_current=current, cancel_event=cancel_event, deadline=job.deadline)
+                from common.feature_intents import speaker_query_requested
+                if speaker_query_requested(text):
+                    # Skip the unified enrollment router: a status question
+                    # must not become one of its three captured samples.
+                    spoken=self.business.turn(job.meta,text,job.pcm,**options)
+                    if spoken is None:
+                        raise BoardCapabilityNotReady('speaker_status_result')
+                    emit(BoardReply(spoken,'friendly'),final_cue=True)
+                    return
+                routed = (self.business.route(job.meta, text, job.pcm,
+                            visual=self._visual(job), gallery_packet=self._gallery(job), **options)
+&gt;                         if self.business.config['enabled'] else None)
+E                         AttributeError: 'Business' object has no attribute 'config'
+
+candidate_runtime\board\runtime\board_business.py:343: AttributeError</failure></testcase><testcase classname="test_split_commands" name="test_bare_voice_name_authority_cannot_survive_cancel_reset_expiry_or_session_change[reset]" time="0.003"><failure message="AttributeError: 'Business' object has no attribute 'config'">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000215E4EE1F30&gt;
+action = 'reset'
+
+    @pytest.mark.parametrize('action',['cancel','reset','expired','session'])
+    def test_bare_voice_name_authority_cannot_survive_cancel_reset_expiry_or_session_change(monkeypatch,action):
+        h=Harness(monkeypatch);h.say('登记声纹')
+        if action=='cancel':h.say('取消')
+        elif action=='reset':h.handler.reset()
+        elif action=='expired':h.clock.now+=121
+        else:h.jobs.session_id='different-session'
+        h.business.route=lambda *a,**k:None
+&gt;       h.say('我叫合成测试')
+
+test_split_commands.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+test_split_commands.py:93: in say
+    plan,_=self.jobs._route(job,text,reply_sink=lambda *a:None)
+candidate_runtime\board\runtime\audio\board_dialogue_jobs.py:515: in _route
+    return handler(text, **kwargs), None
+candidate_runtime\board\runtime\board_business.py:391: in __call__
+    return controller.prepare_local_sequence(text, produce, reply_sink, **kwargs)
+test_split_commands.py:50: in prepare_local_sequence
+    result=producer(emit)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+emit = &lt;function Controller.prepare_local_sequence.&lt;locals&gt;.emit at 0x00000215E59AA3B0&gt;
+
+    def produce(emit):
+        from contextlib import nullcontext
+        from common.binding_api import response as binding_response
+        from common.voice_enrollment import enrollment_requested, identity_query_requested
+        exchange = None
+        board_text = None
+        entry = None
+        try:
+            with self.flow.lock:
+                if entry_epoch != getattr(self, '_standalone_epoch', 0) or not current():
+                    raise StaleGeneration('Standalone routing no longer owns this turn')
+                entry = self._entry_for(job.meta)
+            from common.feature_intents import speaker_requested, speaker_query_requested
+            from tools.provisional_voice import query_reply
+            intent = binding_intent(text)
+            requested = {'face_only':'face', 'voice_only':'voice'}.get(intent['kind'])
+            if entry is not None and (requested is not None and requested != entry['mode']
+                    or intent['kind'] == 'remember_self'):
+                emit(BoardReply('当前已有登记正在进行。请先完成或取消本次登记，再选择另一种入口。', 'friendly'), final_cue=True)
+                return
+            if requested is not None and entry is None:
+                if self.flow.public()['active'] or self.business is not None and self.business.public()['active']:
+                    emit(BoardReply('当前已有登记正在进行。请先完成或取消本次登记，再选择另一种入口。', 'friendly'), final_cue=True)
+                    return
+                entry = self._new_entry(job.meta, requested,
+                    awaiting_name=requested == 'voice' and intent['name'] is None,
+                    epoch=entry_epoch, is_current=current)
+            if intent['kind'] == 'invalid_name':
+                emit(BoardReply(render(result('bad_name')), 'friendly'), final_cue=True)
+                return
+            if entry is not None and entry['mode'] == 'voice':
+                if self.business is None:
+                    raise BoardCapabilityNotReady('speaker_identity')
+                compact = text.strip(' 。！!？?')
+                cancel = compact in ('取消', '取消登记', '不保存', '取消声纹登记',
+                    '停止声纹登记', '不登记声纹了', '不要保存声纹')
+                if compact == '确认保存身份关联':
+                    emit(BoardReply('当前是单独声纹登记。请按提示完成三段录音，最后说“确认保存声纹”。', 'friendly'), final_cue=True)
+                    return
+                from common.voice_enrollment import confirmed, update_confirmed
+                if confirmed(text) or update_confirmed(text):
+                    emit(BoardReply('当前是单独声纹登记。最后的保存口令是“确认保存声纹”。', 'friendly'), final_cue=True)
+                    return
+                interpreted = text
+                if requested == 'voice':
+                    if not entry['awaiting_name'] and self.business.public()['active']:
+                        emit(BoardReply('本轮声纹登记仍在进行，请继续按提示采样或取消后重新开始。', 'friendly'), final_cue=True)
+                        return
+                    interpreted = ('登记我的声纹' if intent['name'] is None else
+                                   '登记我的声纹，我叫' + intent['name'])
+                    if intent['name'] is not None:entry['awaiting_name'] = False
+                elif entry['awaiting_name'] and not cancel:
+                    if intent['kind'] == 'name_hint' and not self.business.public()['active']:
+                        interpreted = '登记我的声纹，我叫' + intent['name']
+                        entry['awaiting_name'] = False
+                    elif speaker_query_requested(text) or query_reply(text, {'state':'UNKNOWN'}) is not None:
+                        interpreted = '查询我的声纹'
+                    else:
+                        interpreted = '登记我的声纹'
+                elif query_reply(text, {'state':'UNKNOWN'}) is not None:
+                    interpreted = '查询我的声纹'
+                spoken = self.business.turn(job.meta, interpreted, job.pcm,
+                    is_current=current, cancel_event=cancel_event, deadline=job.deadline)
+                if cancel:self._standalone_entry = None
+                if spoken is None:return DIALOGUE_ROUTE
+                emit(BoardReply(spoken, 'friendly'), final_cue=True)
+                return
+            if entry is not None and entry['mode'] == 'face':
+                if speaker_requested(text):
+                    emit(BoardReply('当前是人脸登记。请先完成或取消本次登记，再开始声纹登记。', 'friendly'), final_cue=True)
+                    return
+                board_text = ('取消登记' if text.strip(' 。！!？?') in ('取消','不保存') else
+                              face_enrollment_text(text, active=self.flow.public()['active']))
+            if self.business is not None and entry is None:
+                options = dict(is_current=current, cancel_event=cancel_event, deadline=job.deadline)
+                from common.feature_intents import speaker_query_requested
+                if speaker_query_requested(text):
+                    # Skip the unified enrollment router: a status question
+                    # must not become one of its three captured samples.
+                    spoken=self.business.turn(job.meta,text,job.pcm,**options)
+                    if spoken is None:
+                        raise BoardCapabilityNotReady('speaker_status_result')
+                    emit(BoardReply(spoken,'friendly'),final_cue=True)
+                    return
+                routed = (self.business.route(job.meta, text, job.pcm,
+                            visual=self._visual(job), gallery_packet=self._gallery(job), **options)
+&gt;                         if self.business.config['enabled'] else None)
+E                         AttributeError: 'Business' object has no attribute 'config'
+
+candidate_runtime\board\runtime\board_business.py:343: AttributeError</failure></testcase><testcase classname="test_split_commands" name="test_bare_voice_name_authority_cannot_survive_cancel_reset_expiry_or_session_change[expired]" time="0.002"><failure message="AttributeError: 'Business' object has no attribute 'config'">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000215E5015150&gt;
+action = 'expired'
+
+    @pytest.mark.parametrize('action',['cancel','reset','expired','session'])
+    def test_bare_voice_name_authority_cannot_survive_cancel_reset_expiry_or_session_change(monkeypatch,action):
+        h=Harness(monkeypatch);h.say('登记声纹')
+        if action=='cancel':h.say('取消')
+        elif action=='reset':h.handler.reset()
+        elif action=='expired':h.clock.now+=121
+        else:h.jobs.session_id='different-session'
+        h.business.route=lambda *a,**k:None
+&gt;       h.say('我叫合成测试')
+
+test_split_commands.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+test_split_commands.py:93: in say
+    plan,_=self.jobs._route(job,text,reply_sink=lambda *a:None)
+candidate_runtime\board\runtime\audio\board_dialogue_jobs.py:515: in _route
+    return handler(text, **kwargs), None
+candidate_runtime\board\runtime\board_business.py:391: in __call__
+    return controller.prepare_local_sequence(text, produce, reply_sink, **kwargs)
+test_split_commands.py:50: in prepare_local_sequence
+    result=producer(emit)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+emit = &lt;function Controller.prepare_local_sequence.&lt;locals&gt;.emit at 0x00000215E59AB7F0&gt;
+
+    def produce(emit):
+        from contextlib import nullcontext
+        from common.binding_api import response as binding_response
+        from common.voice_enrollment import enrollment_requested, identity_query_requested
+        exchange = None
+        board_text = None
+        entry = None
+        try:
+            with self.flow.lock:
+                if entry_epoch != getattr(self, '_standalone_epoch', 0) or not current():
+                    raise StaleGeneration('Standalone routing no longer owns this turn')
+                entry = self._entry_for(job.meta)
+            from common.feature_intents import speaker_requested, speaker_query_requested
+            from tools.provisional_voice import query_reply
+            intent = binding_intent(text)
+            requested = {'face_only':'face', 'voice_only':'voice'}.get(intent['kind'])
+            if entry is not None and (requested is not None and requested != entry['mode']
+                    or intent['kind'] == 'remember_self'):
+                emit(BoardReply('当前已有登记正在进行。请先完成或取消本次登记，再选择另一种入口。', 'friendly'), final_cue=True)
+                return
+            if requested is not None and entry is None:
+                if self.flow.public()['active'] or self.business is not None and self.business.public()['active']:
+                    emit(BoardReply('当前已有登记正在进行。请先完成或取消本次登记，再选择另一种入口。', 'friendly'), final_cue=True)
+                    return
+                entry = self._new_entry(job.meta, requested,
+                    awaiting_name=requested == 'voice' and intent['name'] is None,
+                    epoch=entry_epoch, is_current=current)
+            if intent['kind'] == 'invalid_name':
+                emit(BoardReply(render(result('bad_name')), 'friendly'), final_cue=True)
+                return
+            if entry is not None and entry['mode'] == 'voice':
+                if self.business is None:
+                    raise BoardCapabilityNotReady('speaker_identity')
+                compact = text.strip(' 。！!？?')
+                cancel = compact in ('取消', '取消登记', '不保存', '取消声纹登记',
+                    '停止声纹登记', '不登记声纹了', '不要保存声纹')
+                if compact == '确认保存身份关联':
+                    emit(BoardReply('当前是单独声纹登记。请按提示完成三段录音，最后说“确认保存声纹”。', 'friendly'), final_cue=True)
+                    return
+                from common.voice_enrollment import confirmed, update_confirmed
+                if confirmed(text) or update_confirmed(text):
+                    emit(BoardReply('当前是单独声纹登记。最后的保存口令是“确认保存声纹”。', 'friendly'), final_cue=True)
+                    return
+                interpreted = text
+                if requested == 'voice':
+                    if not entry['awaiting_name'] and self.business.public()['active']:
+                        emit(BoardReply('本轮声纹登记仍在进行，请继续按提示采样或取消后重新开始。', 'friendly'), final_cue=True)
+                        return
+                    interpreted = ('登记我的声纹' if intent['name'] is None else
+                                   '登记我的声纹，我叫' + intent['name'])
+                    if intent['name'] is not None:entry['awaiting_name'] = False
+                elif entry['awaiting_name'] and not cancel:
+                    if intent['kind'] == 'name_hint' and not self.business.public()['active']:
+                        interpreted = '登记我的声纹，我叫' + intent['name']
+                        entry['awaiting_name'] = False
+                    elif speaker_query_requested(text) or query_reply(text, {'state':'UNKNOWN'}) is not None:
+                        interpreted = '查询我的声纹'
+                    else:
+                        interpreted = '登记我的声纹'
+                elif query_reply(text, {'state':'UNKNOWN'}) is not None:
+                    interpreted = '查询我的声纹'
+                spoken = self.business.turn(job.meta, interpreted, job.pcm,
+                    is_current=current, cancel_event=cancel_event, deadline=job.deadline)
+                if cancel:self._standalone_entry = None
+                if spoken is None:return DIALOGUE_ROUTE
+                emit(BoardReply(spoken, 'friendly'), final_cue=True)
+                return
+            if entry is not None and entry['mode'] == 'face':
+                if speaker_requested(text):
+                    emit(BoardReply('当前是人脸登记。请先完成或取消本次登记，再开始声纹登记。', 'friendly'), final_cue=True)
+                    return
+                board_text = ('取消登记' if text.strip(' 。！!？?') in ('取消','不保存') else
+                              face_enrollment_text(text, active=self.flow.public()['active']))
+            if self.business is not None and entry is None:
+                options = dict(is_current=current, cancel_event=cancel_event, deadline=job.deadline)
+                from common.feature_intents import speaker_query_requested
+                if speaker_query_requested(text):
+                    # Skip the unified enrollment router: a status question
+                    # must not become one of its three captured samples.
+                    spoken=self.business.turn(job.meta,text,job.pcm,**options)
+                    if spoken is None:
+                        raise BoardCapabilityNotReady('speaker_status_result')
+                    emit(BoardReply(spoken,'friendly'),final_cue=True)
+                    return
+                routed = (self.business.route(job.meta, text, job.pcm,
+                            visual=self._visual(job), gallery_packet=self._gallery(job), **options)
+&gt;                         if self.business.config['enabled'] else None)
+E                         AttributeError: 'Business' object has no attribute 'config'
+
+candidate_runtime\board\runtime\board_business.py:343: AttributeError</failure></testcase><testcase classname="test_split_commands" name="test_bare_voice_name_authority_cannot_survive_cancel_reset_expiry_or_session_change[session]" time="0.003"><failure message="AttributeError: 'Business' object has no attribute 'config'">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000215E4DEA800&gt;
+action = 'session'
+
+    @pytest.mark.parametrize('action',['cancel','reset','expired','session'])
+    def test_bare_voice_name_authority_cannot_survive_cancel_reset_expiry_or_session_change(monkeypatch,action):
+        h=Harness(monkeypatch);h.say('登记声纹')
+        if action=='cancel':h.say('取消')
+        elif action=='reset':h.handler.reset()
+        elif action=='expired':h.clock.now+=121
+        else:h.jobs.session_id='different-session'
+        h.business.route=lambda *a,**k:None
+&gt;       h.say('我叫合成测试')
+
+test_split_commands.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+test_split_commands.py:93: in say
+    plan,_=self.jobs._route(job,text,reply_sink=lambda *a:None)
+candidate_runtime\board\runtime\audio\board_dialogue_jobs.py:515: in _route
+    return handler(text, **kwargs), None
+candidate_runtime\board\runtime\board_business.py:391: in __call__
+    return controller.prepare_local_sequence(text, produce, reply_sink, **kwargs)
+test_split_commands.py:50: in prepare_local_sequence
+    result=producer(emit)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+emit = &lt;function Controller.prepare_local_sequence.&lt;locals&gt;.emit at 0x00000215E59A9B40&gt;
+
+    def produce(emit):
+        from contextlib import nullcontext
+        from common.binding_api import response as binding_response
+        from common.voice_enrollment import enrollment_requested, identity_query_requested
+        exchange = None
+        board_text = None
+        entry = None
+        try:
+            with self.flow.lock:
+                if entry_epoch != getattr(self, '_standalone_epoch', 0) or not current():
+                    raise StaleGeneration('Standalone routing no longer owns this turn')
+                entry = self._entry_for(job.meta)
+            from common.feature_intents import speaker_requested, speaker_query_requested
+            from tools.provisional_voice import query_reply
+            intent = binding_intent(text)
+            requested = {'face_only':'face', 'voice_only':'voice'}.get(intent['kind'])
+            if entry is not None and (requested is not None and requested != entry['mode']
+                    or intent['kind'] == 'remember_self'):
+                emit(BoardReply('当前已有登记正在进行。请先完成或取消本次登记，再选择另一种入口。', 'friendly'), final_cue=True)
+                return
+            if requested is not None and entry is None:
+                if self.flow.public()['active'] or self.business is not None and self.business.public()['active']:
+                    emit(BoardReply('当前已有登记正在进行。请先完成或取消本次登记，再选择另一种入口。', 'friendly'), final_cue=True)
+                    return
+                entry = self._new_entry(job.meta, requested,
+                    awaiting_name=requested == 'voice' and intent['name'] is None,
+                    epoch=entry_epoch, is_current=current)
+            if intent['kind'] == 'invalid_name':
+                emit(BoardReply(render(result('bad_name')), 'friendly'), final_cue=True)
+                return
+            if entry is not None and entry['mode'] == 'voice':
+                if self.business is None:
+                    raise BoardCapabilityNotReady('speaker_identity')
+                compact = text.strip(' 。！!？?')
+                cancel = compact in ('取消', '取消登记', '不保存', '取消声纹登记',
+                    '停止声纹登记', '不登记声纹了', '不要保存声纹')
+                if compact == '确认保存身份关联':
+                    emit(BoardReply('当前是单独声纹登记。请按提示完成三段录音，最后说“确认保存声纹”。', 'friendly'), final_cue=True)
+                    return
+                from common.voice_enrollment import confirmed, update_confirmed
+                if confirmed(text) or update_confirmed(text):
+                    emit(BoardReply('当前是单独声纹登记。最后的保存口令是“确认保存声纹”。', 'friendly'), final_cue=True)
+                    return
+                interpreted = text
+                if requested == 'voice':
+                    if not entry['awaiting_name'] and self.business.public()['active']:
+                        emit(BoardReply('本轮声纹登记仍在进行，请继续按提示采样或取消后重新开始。', 'friendly'), final_cue=True)
+                        return
+                    interpreted = ('登记我的声纹' if intent['name'] is None else
+                                   '登记我的声纹，我叫' + intent['name'])
+                    if intent['name'] is not None:entry['awaiting_name'] = False
+                elif entry['awaiting_name'] and not cancel:
+                    if intent['kind'] == 'name_hint' and not self.business.public()['active']:
+                        interpreted = '登记我的声纹，我叫' + intent['name']
+                        entry['awaiting_name'] = False
+                    elif speaker_query_requested(text) or query_reply(text, {'state':'UNKNOWN'}) is not None:
+                        interpreted = '查询我的声纹'
+                    else:
+                        interpreted = '登记我的声纹'
+                elif query_reply(text, {'state':'UNKNOWN'}) is not None:
+                    interpreted = '查询我的声纹'
+                spoken = self.business.turn(job.meta, interpreted, job.pcm,
+                    is_current=current, cancel_event=cancel_event, deadline=job.deadline)
+                if cancel:self._standalone_entry = None
+                if spoken is None:return DIALOGUE_ROUTE
+                emit(BoardReply(spoken, 'friendly'), final_cue=True)
+                return
+            if entry is not None and entry['mode'] == 'face':
+                if speaker_requested(text):
+                    emit(BoardReply('当前是人脸登记。请先完成或取消本次登记，再开始声纹登记。', 'friendly'), final_cue=True)
+                    return
+                board_text = ('取消登记' if text.strip(' 。！!？?') in ('取消','不保存') else
+                              face_enrollment_text(text, active=self.flow.public()['active']))
+            if self.business is not None and entry is None:
+                options = dict(is_current=current, cancel_event=cancel_event, deadline=job.deadline)
+                from common.feature_intents import speaker_query_requested
+                if speaker_query_requested(text):
+                    # Skip the unified enrollment router: a status question
+                    # must not become one of its three captured samples.
+                    spoken=self.business.turn(job.meta,text,job.pcm,**options)
+                    if spoken is None:
+                        raise BoardCapabilityNotReady('speaker_status_result')
+                    emit(BoardReply(spoken,'friendly'),final_cue=True)
+                    return
+                routed = (self.business.route(job.meta, text, job.pcm,
+                            visual=self._visual(job), gallery_packet=self._gallery(job), **options)
+&gt;                         if self.business.config['enabled'] else None)
+E                         AttributeError: 'Business' object has no attribute 'config'
+
+candidate_runtime\board\runtime\board_business.py:343: AttributeError</failure></testcase><testcase classname="test_split_commands" name="test_cross_modality_start_never_becomes_voice_sample" time="0.004" /><testcase classname="test_split_commands" name="test_voice_command_and_final_confirmation_cannot_touch_active_face" time="0.004"><failure message="AssertionError: assert ('idle' == 'authorize'&#10;  &#10;  - authorize&#10;  + idle)">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000215E4DEC070&gt;
+
+    def test_voice_command_and_final_confirmation_cannot_touch_active_face(monkeypatch):
+        h=Harness(monkeypatch);h.say('登记人脸，我叫合成测试')
+        h.say('登记声纹，我叫合成声纹');h.say('确认保存声纹')
+&gt;       assert h.handler.flow.stage=='authorize' and h.business.calls==[] and h.commands==[]
+E       AssertionError: assert ('idle' == 'authorize'
+E         
+E         - authorize
+E         + idle)
+
+test_split_commands.py:166: AssertionError</failure></testcase><testcase classname="test_split_commands" name="test_identity_and_voice_status_queries_are_not_voice_samples[\u6211\u662f\u8c01]" time="0.005" /><testcase classname="test_split_commands" name="test_identity_and_voice_status_queries_are_not_voice_samples[\u542c\u58f0\u97f3\u6211\u662f\u8c01]" time="0.005" /><testcase classname="test_split_commands" name="test_identity_and_voice_status_queries_are_not_voice_samples[\u58f0\u7eb9\u767b\u8bb0\u6210\u529f\u4e86\u5417]" time="0.004" /><testcase classname="test_split_commands" name="test_original_quality_and_duplicate_pcm_rejection_are_retained" time="0.005" /><testcase classname="test_split_commands" name="test_face_finished_asynchronously_first_voice_command_does_not_get_stale_busy" time="0.001"><failure message="TypeError: 'NoneType' object is not subscriptable">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000215E5D45930&gt;
+
+    def test_face_finished_asynchronously_first_voice_command_does_not_get_stale_busy(monkeypatch):
+        h=Harness(monkeypatch);h.say('登记人脸，我叫合成测试')
+&gt;       assert h.handler._standalone_entry['mode']=='face'
+E       TypeError: 'NoneType' object is not subscriptable
+
+test_split_commands.py:182: TypeError</failure></testcase><testcase classname="test_split_commands" name="test_voice_finished_asynchronously_first_face_command_does_not_get_stale_busy" time="0.002"><failure message="TypeError: 'NoneType' object is not subscriptable">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000215E4EE38E0&gt;
+
+    def test_voice_finished_asynchronously_first_face_command_does_not_get_stale_busy(monkeypatch):
+        h=Harness(monkeypatch);h.say('登记声纹，我叫合成测试')
+        h.business.fixture.device.sessions.clear();h.say('登记人脸，我叫合成测试')
+&gt;       assert h.handler._standalone_entry['mode']=='face' and h.handler.flow.stage=='authorize'
+E       TypeError: 'NoneType' object is not subscriptable
+
+test_split_commands.py:190: TypeError</failure></testcase><testcase classname="test_split_commands" name="test_cancel_between_begin_turn_and_producer_cannot_rearm_bare_voice[epoch_reset]" time="0.002" /><testcase classname="test_split_commands" name="test_cancel_between_begin_turn_and_producer_cannot_rearm_bare_voice[generation_cancel]" time="0.001" /><testcase classname="test_split_commands" name="test_unified_compatibility_still_reaches_original_router_and_cannot_steal_standalone" time="0.002"><failure message="AttributeError: 'Business' object has no attribute 'config'">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000215E4DEA050&gt;
+
+    def test_unified_compatibility_still_reaches_original_router_and_cannot_steal_standalone(monkeypatch):
+        h=Harness(monkeypatch)
+        class OriginalRouteReached(Exception):pass
+        def original(*a,**k):raise OriginalRouteReached()
+        h.business.route=original;h.handler._visual=lambda job:None;h.handler._gallery=lambda job:None
+&gt;       with pytest.raises(OriginalRouteReached):h.say('记住我，我叫合成测试')
+
+test_split_commands.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+test_split_commands.py:93: in say
+    plan,_=self.jobs._route(job,text,reply_sink=lambda *a:None)
+candidate_runtime\board\runtime\audio\board_dialogue_jobs.py:515: in _route
+    return handler(text, **kwargs), None
+candidate_runtime\board\runtime\board_business.py:391: in __call__
+    return controller.prepare_local_sequence(text, produce, reply_sink, **kwargs)
+test_split_commands.py:50: in prepare_local_sequence
+    result=producer(emit)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+emit = &lt;function Controller.prepare_local_sequence.&lt;locals&gt;.emit at 0x00000215E513CA60&gt;
+
+    def produce(emit):
+        from contextlib import nullcontext
+        from common.binding_api import response as binding_response
+        from common.voice_enrollment import enrollment_requested, identity_query_requested
+        exchange = None
+        board_text = None
+        entry = None
+        try:
+            with self.flow.lock:
+                if entry_epoch != getattr(self, '_standalone_epoch', 0) or not current():
+                    raise StaleGeneration('Standalone routing no longer owns this turn')
+                entry = self._entry_for(job.meta)
+            from common.feature_intents import speaker_requested, speaker_query_requested
+            from tools.provisional_voice import query_reply
+            intent = binding_intent(text)
+            requested = {'face_only':'face', 'voice_only':'voice'}.get(intent['kind'])
+            if entry is not None and (requested is not None and requested != entry['mode']
+                    or intent['kind'] == 'remember_self'):
+                emit(BoardReply('当前已有登记正在进行。请先完成或取消本次登记，再选择另一种入口。', 'friendly'), final_cue=True)
+                return
+            if requested is not None and entry is None:
+                if self.flow.public()['active'] or self.business is not None and self.business.public()['active']:
+                    emit(BoardReply('当前已有登记正在进行。请先完成或取消本次登记，再选择另一种入口。', 'friendly'), final_cue=True)
+                    return
+                entry = self._new_entry(job.meta, requested,
+                    awaiting_name=requested == 'voice' and intent['name'] is None,
+                    epoch=entry_epoch, is_current=current)
+            if intent['kind'] == 'invalid_name':
+                emit(BoardReply(render(result('bad_name')), 'friendly'), final_cue=True)
+                return
+            if entry is not None and entry['mode'] == 'voice':
+                if self.business is None:
+                    raise BoardCapabilityNotReady('speaker_identity')
+                compact = text.strip(' 。！!？?')
+                cancel = compact in ('取消', '取消登记', '不保存', '取消声纹登记',
+                    '停止声纹登记', '不登记声纹了', '不要保存声纹')
+                if compact == '确认保存身份关联':
+                    emit(BoardReply('当前是单独声纹登记。请按提示完成三段录音，最后说“确认保存声纹”。', 'friendly'), final_cue=True)
+                    return
+                from common.voice_enrollment import confirmed, update_confirmed
+                if confirmed(text) or update_confirmed(text):
+                    emit(BoardReply('当前是单独声纹登记。最后的保存口令是“确认保存声纹”。', 'friendly'), final_cue=True)
+                    return
+                interpreted = text
+                if requested == 'voice':
+                    if not entry['awaiting_name'] and self.business.public()['active']:
+                        emit(BoardReply('本轮声纹登记仍在进行，请继续按提示采样或取消后重新开始。', 'friendly'), final_cue=True)
+                        return
+                    interpreted = ('登记我的声纹' if intent['name'] is None else
+                                   '登记我的声纹，我叫' + intent['name'])
+                    if intent['name'] is not None:entry['awaiting_name'] = False
+                elif entry['awaiting_name'] and not cancel:
+                    if intent['kind'] == 'name_hint' and not self.business.public()['active']:
+                        interpreted = '登记我的声纹，我叫' + intent['name']
+                        entry['awaiting_name'] = False
+                    elif speaker_query_requested(text) or query_reply(text, {'state':'UNKNOWN'}) is not None:
+                        interpreted = '查询我的声纹'
+                    else:
+                        interpreted = '登记我的声纹'
+                elif query_reply(text, {'state':'UNKNOWN'}) is not None:
+                    interpreted = '查询我的声纹'
+                spoken = self.business.turn(job.meta, interpreted, job.pcm,
+                    is_current=current, cancel_event=cancel_event, deadline=job.deadline)
+                if cancel:self._standalone_entry = None
+                if spoken is None:return DIALOGUE_ROUTE
+                emit(BoardReply(spoken, 'friendly'), final_cue=True)
+                return
+            if entry is not None and entry['mode'] == 'face':
+                if speaker_requested(text):
+                    emit(BoardReply('当前是人脸登记。请先完成或取消本次登记，再开始声纹登记。', 'friendly'), final_cue=True)
+                    return
+                board_text = ('取消登记' if text.strip(' 。！!？?') in ('取消','不保存') else
+                              face_enrollment_text(text, active=self.flow.public()['active']))
+            if self.business is not None and entry is None:
+                options = dict(is_current=current, cancel_event=cancel_event, deadline=job.deadline)
+                from common.feature_intents import speaker_query_requested
+                if speaker_query_requested(text):
+                    # Skip the unified enrollment router: a status question
+                    # must not become one of its three captured samples.
+                    spoken=self.business.turn(job.meta,text,job.pcm,**options)
+                    if spoken is None:
+                        raise BoardCapabilityNotReady('speaker_status_result')
+                    emit(BoardReply(spoken,'friendly'),final_cue=True)
+                    return
+                routed = (self.business.route(job.meta, text, job.pcm,
+                            visual=self._visual(job), gallery_packet=self._gallery(job), **options)
+&gt;                         if self.business.config['enabled'] else None)
+E                         AttributeError: 'Business' object has no attribute 'config'
+
+candidate_runtime\board\runtime\board_business.py:343: AttributeError</failure></testcase><testcase classname="test_split_commands" name="test_preexisting_unified_or_other_original_session_blocks_new_entry" time="0.001" /></testsuite></testsuites>

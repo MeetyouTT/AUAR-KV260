@@ -1,0 +1,61 @@
+{
+  "schema": "aura.first-wait-independent-source-review.v1",
+  "decision": "NO_CORE_PROTOCOL_BLOCKER_FOR_ROOT_PUBLIC_ABBA",
+  "scope": "Read-only review while the author freezes the candidate; no production hookup or performance acceptance is implied",
+  "reviewed_root": "../realtime_dialogue_research/first_wait_candidate",
+  "source_sha256": {
+    "after/tools/model_inference_host.py": "fd4a8c334658f9720068fceeae664fd1771a8664e7aa02b0c0656f36619ebc65",
+    "after/common/model_inference_wire.py": "39306c53a967f21e318f34d5642f126e8f047ee90112ac5bb83f981965aab965",
+    "candidate/inference_output_contract.py": "e07936da0f3e333c4a448a2b36b70cdfecb76939449c8cdbefffe11b9244c631",
+    "candidate/compact_request_adapter.py": "ea14001af904f80a4ca247cc5ee738f7418fd0bd0aa4ee30e5aaea13fbc31337"
+  },
+  "confirmed_contract": [
+    "Compact a/b/c is an opt-in output representation, not incremental or early-release text",
+    "The host continues reading to done; closed braces/first-content metrics never authorize speech",
+    "Explicit output-format requests with done_reason=length fail as backend_output_truncated even if the JSON object has already closed; EOF before done is rejected",
+    "The board fully parses one bounded compact object, rejects duplicate/extra/authority fields, malformed types, thinking/control text, bad emotion/action, trailing content and incomplete prefixes, then restores canonical reply_text/emotion/avatar_action",
+    "The exact original owner is validated before decode; one request retains original budget/deadline/cancellation and no fallback model retry is introduced",
+    "Only the exact selected static system prompt's output field identifiers can change; later messages and caller-owned reference/user text are preserved",
+    "Summary, thinking, TTS, GPU ownership, foreground preemption, model choice, num_ctx=2048 and the ordinary 120-token default remain unchanged",
+    "Canonical restored output still enters the original BoardDialogueController validator and source tracking; no model-supplied provenance or profile grant is accepted",
+    "Store generated/dependency checks, fresh playback guards and complete actual ACK remain owned by the unchanged controller/Store chain",
+    "New observation metrics are finite numbers/counts only; raw content/thinking text is not retained by the observer"
+  ],
+  "conditional_release_issue": {
+    "path": "optional_prefix/board/runtime/board_memory_policy.py",
+    "sha256": "a8a47a6f3174044c18cd334526c32b24db58af56addfaff375f4d8be8ca5cefc",
+    "issue": "This separate whole-file variant is derived from old 9af4a5bf policy and lacks the current v13 memory-health generation/diagnostic fix",
+    "required_action_if_used": "Exclude the optional whole file from the core publication, or apply only the single prompt-order hunk to fresh 48c7499f/current policy and re-pin it. Never overwrite the current policy with this old-base file.",
+    "core_patch_contains_policy_file": false,
+    "author_handoff_already_warns_about_concurrent_memory_changes": true
+  },
+  "boundaries": [
+    "Truncation finish-code enforcement is enabled for explicit output_format requests; unchanged legacy/default and summary requests are not claimed to gain that new enforcement",
+    "Unknown or absent done_reason currently retains original completion behavior when done=true; any stricter termination policy should be explicit and tested",
+    "first_json_closed_ms is a bracket-closure timing observation, not evidence of valid JSON, current authority or completed playback",
+    "The adapter must be injected only after capability negotiation, and both host/board wire plus the new shared helper must be pinned together",
+    "The optional context-order experiment must remain a separate measured variable; cache-hit counts are never a source authorization or forgotten-text reuse grant"
+  ],
+  "offline_test_rerun": {
+    "path": "../realtime_dialogue_research/first_wait_candidate/tests/test_first_wait.py",
+    "sha256": "ac401bb30902d37e9d66130f45ca194a129c80f569a08da8c48f86f888a28dae",
+    "tests_passed": 47,
+    "subtests_passed": 49,
+    "failed": 0,
+    "seconds": 0.29,
+    "evidence": "results-current.xml",
+    "real_model_calls": 0,
+    "real_devices_or_private_databases": 0
+  },
+  "additional_integration_tests_recommended": [
+    "Expire the original deadline after complete JSON arrives but before controller adoption; prove no generated assistant, TTS, network completion or heard ACK",
+    "Exercise explicit json/canonical-schema/compact modes with length finish, closed JSON then EOF before done, cancellation after closure, and missing/unknown finish reasons under the chosen policy",
+    "Use the fresh v13 real synthetic Store and scoped read checker with the compact adapter: normal answer keeps exact source refs, complete PCM receipt and actual ACK",
+    "During that synthetic path forget/correct/clear/revoke through another authorized Store instance after first output packet; prove later packets/ACK are rejected",
+    "Verify startup capability absence/mismatch rejects activation or follows the original path without compact decode; no adapter may assume an unadvertised host capability",
+    "Before any optional prefix test, verify current memory-worker restart-generation regression still passes on the rebased policy"
+  ],
+  "performance_gain_measured_by_reviewer": false,
+  "candidate_files_modified_by_reviewer": false,
+  "hardware_model_or_private_database_accessed_by_reviewer": false
+}

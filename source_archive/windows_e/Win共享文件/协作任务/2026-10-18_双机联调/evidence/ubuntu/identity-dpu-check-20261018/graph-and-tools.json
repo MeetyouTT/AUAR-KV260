@@ -1,0 +1,5783 @@
+{
+  "scope": "OFFLINE_GRAPH_AND_LOCAL_TOOLS_ONLY",
+  "python": "3.7.12 | packaged by conda-forge | (default, Oct 26 2021, 06:08:53) \n[GCC 9.4.0]",
+  "modules": {
+    "onnx": true,
+    "onnxruntime": false,
+    "torch": true,
+    "pytorch_nndct": true,
+    "vai_q_onnx": false,
+    "xir": true
+  },
+  "inspector_signature": "(name_or_fingerprint: str)",
+  "inspector_inspect_signature": "(self, module: torch.nn.modules.module.Module, input_args: Union[torch.Tensor, Tuple[Any]], device: torch.device = device(type='cuda'), output_dir: str = 'quantize_result', verbose_level: int = 1, image_format: Union[str, NoneType] = None)",
+  "compiler_binaries": [
+    "/opt/vitis_ai/conda/envs/vitis-ai-pytorch/bin/vai_c_tensorflow",
+    "/opt/vitis_ai/conda/envs/vitis-ai-pytorch/bin/vai_c_caffe",
+    "/opt/vitis_ai/conda/envs/vitis-ai-pytorch/bin/vai_c_tensorflow2",
+    "/opt/vitis_ai/conda/envs/vitis-ai-pytorch/bin/vaitrace",
+    "/opt/vitis_ai/conda/envs/vitis-ai-pytorch/bin/vai_c_xir"
+  ],
+  "target_binaries": [],
+  "models": [
+    {
+      "file": "sface_2021dec.onnx",
+      "sha256": "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79",
+      "opsets": [
+        {
+          "domain": "",
+          "version": 11
+        }
+      ],
+      "inputs": {
+        "data": [
+          1,
+          3,
+          112,
+          112
+        ]
+      },
+      "outputs": {
+        "fc1": [
+          1,
+          128
+        ]
+      },
+      "operator_counts": {
+        "Sub": 1,
+        "Mul": 1,
+        "Conv": 27,
+        "BatchNormalization": 29,
+        "PRelu": 27,
+        "Dropout": 1,
+        "Flatten": 1,
+        "Gemm": 1
+      },
+      "nodes": [
+        {
+          "name": "_minusscalar0",
+          "op": "Sub",
+          "inputs": [
+            "data",
+            "scalar_op1"
+          ],
+          "outputs": [
+            "_minusscalar0"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "scalar_op1": [
+              1
+            ]
+          }
+        },
+        {
+          "name": "_mulscalar0",
+          "op": "Mul",
+          "inputs": [
+            "_minusscalar0",
+            "scalar_op2"
+          ],
+          "outputs": [
+            "_mulscalar0"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "scalar_op2": [
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_1_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "_mulscalar0",
+            "conv_1_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_1_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_1_conv2d_weight": [
+              32,
+              3,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_1_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_1_conv2d",
+            "conv_1_batchnorm_gamma",
+            "conv_1_batchnorm_beta",
+            "conv_1_batchnorm_moving_mean",
+            "conv_1_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_1_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_1_batchnorm_gamma": [
+              32
+            ],
+            "conv_1_batchnorm_beta": [
+              32
+            ],
+            "conv_1_batchnorm_moving_mean": [
+              32
+            ],
+            "conv_1_batchnorm_moving_var": [
+              32
+            ]
+          }
+        },
+        {
+          "name": "conv_1_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_1_batchnorm",
+            "conv_1_relu_gamma"
+          ],
+          "outputs": [
+            "conv_1_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_1_relu_gamma": [
+              32,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_2_dw_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_1_relu",
+            "conv_2_dw_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_2_dw_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 32,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_2_dw_conv2d_weight": [
+              32,
+              1,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_2_dw_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_2_dw_conv2d",
+            "conv_2_dw_batchnorm_gamma",
+            "conv_2_dw_batchnorm_beta",
+            "conv_2_dw_batchnorm_moving_mean",
+            "conv_2_dw_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_2_dw_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_2_dw_batchnorm_gamma": [
+              32
+            ],
+            "conv_2_dw_batchnorm_beta": [
+              32
+            ],
+            "conv_2_dw_batchnorm_moving_mean": [
+              32
+            ],
+            "conv_2_dw_batchnorm_moving_var": [
+              32
+            ]
+          }
+        },
+        {
+          "name": "conv_2_dw_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_2_dw_batchnorm",
+            "conv_2_dw_relu_gamma"
+          ],
+          "outputs": [
+            "conv_2_dw_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_2_dw_relu_gamma": [
+              32,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_2_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_2_dw_relu",
+            "conv_2_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_2_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_2_conv2d_weight": [
+              64,
+              32,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_2_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_2_conv2d",
+            "conv_2_batchnorm_gamma",
+            "conv_2_batchnorm_beta",
+            "conv_2_batchnorm_moving_mean",
+            "conv_2_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_2_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_2_batchnorm_gamma": [
+              64
+            ],
+            "conv_2_batchnorm_beta": [
+              64
+            ],
+            "conv_2_batchnorm_moving_mean": [
+              64
+            ],
+            "conv_2_batchnorm_moving_var": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "conv_2_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_2_batchnorm",
+            "conv_2_relu_gamma"
+          ],
+          "outputs": [
+            "conv_2_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_2_relu_gamma": [
+              64,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_3_dw_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_2_relu",
+            "conv_3_dw_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_3_dw_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              2,
+              2
+            ]
+          },
+          "parameter_shapes": {
+            "conv_3_dw_conv2d_weight": [
+              64,
+              1,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_3_dw_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_3_dw_conv2d",
+            "conv_3_dw_batchnorm_gamma",
+            "conv_3_dw_batchnorm_beta",
+            "conv_3_dw_batchnorm_moving_mean",
+            "conv_3_dw_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_3_dw_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_3_dw_batchnorm_gamma": [
+              64
+            ],
+            "conv_3_dw_batchnorm_beta": [
+              64
+            ],
+            "conv_3_dw_batchnorm_moving_mean": [
+              64
+            ],
+            "conv_3_dw_batchnorm_moving_var": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "conv_3_dw_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_3_dw_batchnorm",
+            "conv_3_dw_relu_gamma"
+          ],
+          "outputs": [
+            "conv_3_dw_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_3_dw_relu_gamma": [
+              64,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_3_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_3_dw_relu",
+            "conv_3_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_3_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_3_conv2d_weight": [
+              128,
+              64,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_3_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_3_conv2d",
+            "conv_3_batchnorm_gamma",
+            "conv_3_batchnorm_beta",
+            "conv_3_batchnorm_moving_mean",
+            "conv_3_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_3_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_3_batchnorm_gamma": [
+              128
+            ],
+            "conv_3_batchnorm_beta": [
+              128
+            ],
+            "conv_3_batchnorm_moving_mean": [
+              128
+            ],
+            "conv_3_batchnorm_moving_var": [
+              128
+            ]
+          }
+        },
+        {
+          "name": "conv_3_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_3_batchnorm",
+            "conv_3_relu_gamma"
+          ],
+          "outputs": [
+            "conv_3_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_3_relu_gamma": [
+              128,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_4_dw_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_3_relu",
+            "conv_4_dw_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_4_dw_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 128,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_4_dw_conv2d_weight": [
+              128,
+              1,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_4_dw_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_4_dw_conv2d",
+            "conv_4_dw_batchnorm_gamma",
+            "conv_4_dw_batchnorm_beta",
+            "conv_4_dw_batchnorm_moving_mean",
+            "conv_4_dw_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_4_dw_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_4_dw_batchnorm_gamma": [
+              128
+            ],
+            "conv_4_dw_batchnorm_beta": [
+              128
+            ],
+            "conv_4_dw_batchnorm_moving_mean": [
+              128
+            ],
+            "conv_4_dw_batchnorm_moving_var": [
+              128
+            ]
+          }
+        },
+        {
+          "name": "conv_4_dw_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_4_dw_batchnorm",
+            "conv_4_dw_relu_gamma"
+          ],
+          "outputs": [
+            "conv_4_dw_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_4_dw_relu_gamma": [
+              128,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_4_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_4_dw_relu",
+            "conv_4_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_4_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_4_conv2d_weight": [
+              128,
+              128,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_4_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_4_conv2d",
+            "conv_4_batchnorm_gamma",
+            "conv_4_batchnorm_beta",
+            "conv_4_batchnorm_moving_mean",
+            "conv_4_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_4_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_4_batchnorm_gamma": [
+              128
+            ],
+            "conv_4_batchnorm_beta": [
+              128
+            ],
+            "conv_4_batchnorm_moving_mean": [
+              128
+            ],
+            "conv_4_batchnorm_moving_var": [
+              128
+            ]
+          }
+        },
+        {
+          "name": "conv_4_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_4_batchnorm",
+            "conv_4_relu_gamma"
+          ],
+          "outputs": [
+            "conv_4_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_4_relu_gamma": [
+              128,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_5_dw_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_4_relu",
+            "conv_5_dw_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_5_dw_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 128,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              2,
+              2
+            ]
+          },
+          "parameter_shapes": {
+            "conv_5_dw_conv2d_weight": [
+              128,
+              1,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_5_dw_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_5_dw_conv2d",
+            "conv_5_dw_batchnorm_gamma",
+            "conv_5_dw_batchnorm_beta",
+            "conv_5_dw_batchnorm_moving_mean",
+            "conv_5_dw_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_5_dw_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_5_dw_batchnorm_gamma": [
+              128
+            ],
+            "conv_5_dw_batchnorm_beta": [
+              128
+            ],
+            "conv_5_dw_batchnorm_moving_mean": [
+              128
+            ],
+            "conv_5_dw_batchnorm_moving_var": [
+              128
+            ]
+          }
+        },
+        {
+          "name": "conv_5_dw_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_5_dw_batchnorm",
+            "conv_5_dw_relu_gamma"
+          ],
+          "outputs": [
+            "conv_5_dw_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_5_dw_relu_gamma": [
+              128,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_5_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_5_dw_relu",
+            "conv_5_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_5_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_5_conv2d_weight": [
+              256,
+              128,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_5_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_5_conv2d",
+            "conv_5_batchnorm_gamma",
+            "conv_5_batchnorm_beta",
+            "conv_5_batchnorm_moving_mean",
+            "conv_5_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_5_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_5_batchnorm_gamma": [
+              256
+            ],
+            "conv_5_batchnorm_beta": [
+              256
+            ],
+            "conv_5_batchnorm_moving_mean": [
+              256
+            ],
+            "conv_5_batchnorm_moving_var": [
+              256
+            ]
+          }
+        },
+        {
+          "name": "conv_5_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_5_batchnorm",
+            "conv_5_relu_gamma"
+          ],
+          "outputs": [
+            "conv_5_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_5_relu_gamma": [
+              256,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_6_dw_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_5_relu",
+            "conv_6_dw_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_6_dw_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 256,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_6_dw_conv2d_weight": [
+              256,
+              1,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_6_dw_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_6_dw_conv2d",
+            "conv_6_dw_batchnorm_gamma",
+            "conv_6_dw_batchnorm_beta",
+            "conv_6_dw_batchnorm_moving_mean",
+            "conv_6_dw_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_6_dw_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_6_dw_batchnorm_gamma": [
+              256
+            ],
+            "conv_6_dw_batchnorm_beta": [
+              256
+            ],
+            "conv_6_dw_batchnorm_moving_mean": [
+              256
+            ],
+            "conv_6_dw_batchnorm_moving_var": [
+              256
+            ]
+          }
+        },
+        {
+          "name": "conv_6_dw_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_6_dw_batchnorm",
+            "conv_6_dw_relu_gamma"
+          ],
+          "outputs": [
+            "conv_6_dw_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_6_dw_relu_gamma": [
+              256,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_6_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_6_dw_relu",
+            "conv_6_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_6_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_6_conv2d_weight": [
+              256,
+              256,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_6_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_6_conv2d",
+            "conv_6_batchnorm_gamma",
+            "conv_6_batchnorm_beta",
+            "conv_6_batchnorm_moving_mean",
+            "conv_6_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_6_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_6_batchnorm_gamma": [
+              256
+            ],
+            "conv_6_batchnorm_beta": [
+              256
+            ],
+            "conv_6_batchnorm_moving_mean": [
+              256
+            ],
+            "conv_6_batchnorm_moving_var": [
+              256
+            ]
+          }
+        },
+        {
+          "name": "conv_6_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_6_batchnorm",
+            "conv_6_relu_gamma"
+          ],
+          "outputs": [
+            "conv_6_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_6_relu_gamma": [
+              256,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_7_dw_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_6_relu",
+            "conv_7_dw_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_7_dw_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 256,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              2,
+              2
+            ]
+          },
+          "parameter_shapes": {
+            "conv_7_dw_conv2d_weight": [
+              256,
+              1,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_7_dw_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_7_dw_conv2d",
+            "conv_7_dw_batchnorm_gamma",
+            "conv_7_dw_batchnorm_beta",
+            "conv_7_dw_batchnorm_moving_mean",
+            "conv_7_dw_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_7_dw_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_7_dw_batchnorm_gamma": [
+              256
+            ],
+            "conv_7_dw_batchnorm_beta": [
+              256
+            ],
+            "conv_7_dw_batchnorm_moving_mean": [
+              256
+            ],
+            "conv_7_dw_batchnorm_moving_var": [
+              256
+            ]
+          }
+        },
+        {
+          "name": "conv_7_dw_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_7_dw_batchnorm",
+            "conv_7_dw_relu_gamma"
+          ],
+          "outputs": [
+            "conv_7_dw_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_7_dw_relu_gamma": [
+              256,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_7_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_7_dw_relu",
+            "conv_7_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_7_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_7_conv2d_weight": [
+              512,
+              256,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_7_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_7_conv2d",
+            "conv_7_batchnorm_gamma",
+            "conv_7_batchnorm_beta",
+            "conv_7_batchnorm_moving_mean",
+            "conv_7_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_7_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_7_batchnorm_gamma": [
+              512
+            ],
+            "conv_7_batchnorm_beta": [
+              512
+            ],
+            "conv_7_batchnorm_moving_mean": [
+              512
+            ],
+            "conv_7_batchnorm_moving_var": [
+              512
+            ]
+          }
+        },
+        {
+          "name": "conv_7_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_7_batchnorm",
+            "conv_7_relu_gamma"
+          ],
+          "outputs": [
+            "conv_7_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_7_relu_gamma": [
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_8_dw_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_7_relu",
+            "conv_8_dw_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_8_dw_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 512,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_8_dw_conv2d_weight": [
+              512,
+              1,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_8_dw_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_8_dw_conv2d",
+            "conv_8_dw_batchnorm_gamma",
+            "conv_8_dw_batchnorm_beta",
+            "conv_8_dw_batchnorm_moving_mean",
+            "conv_8_dw_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_8_dw_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_8_dw_batchnorm_gamma": [
+              512
+            ],
+            "conv_8_dw_batchnorm_beta": [
+              512
+            ],
+            "conv_8_dw_batchnorm_moving_mean": [
+              512
+            ],
+            "conv_8_dw_batchnorm_moving_var": [
+              512
+            ]
+          }
+        },
+        {
+          "name": "conv_8_dw_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_8_dw_batchnorm",
+            "conv_8_dw_relu_gamma"
+          ],
+          "outputs": [
+            "conv_8_dw_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_8_dw_relu_gamma": [
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_8_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_8_dw_relu",
+            "conv_8_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_8_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_8_conv2d_weight": [
+              512,
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_8_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_8_conv2d",
+            "conv_8_batchnorm_gamma",
+            "conv_8_batchnorm_beta",
+            "conv_8_batchnorm_moving_mean",
+            "conv_8_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_8_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_8_batchnorm_gamma": [
+              512
+            ],
+            "conv_8_batchnorm_beta": [
+              512
+            ],
+            "conv_8_batchnorm_moving_mean": [
+              512
+            ],
+            "conv_8_batchnorm_moving_var": [
+              512
+            ]
+          }
+        },
+        {
+          "name": "conv_8_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_8_batchnorm",
+            "conv_8_relu_gamma"
+          ],
+          "outputs": [
+            "conv_8_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_8_relu_gamma": [
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_9_dw_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_8_relu",
+            "conv_9_dw_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_9_dw_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 512,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_9_dw_conv2d_weight": [
+              512,
+              1,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_9_dw_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_9_dw_conv2d",
+            "conv_9_dw_batchnorm_gamma",
+            "conv_9_dw_batchnorm_beta",
+            "conv_9_dw_batchnorm_moving_mean",
+            "conv_9_dw_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_9_dw_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_9_dw_batchnorm_gamma": [
+              512
+            ],
+            "conv_9_dw_batchnorm_beta": [
+              512
+            ],
+            "conv_9_dw_batchnorm_moving_mean": [
+              512
+            ],
+            "conv_9_dw_batchnorm_moving_var": [
+              512
+            ]
+          }
+        },
+        {
+          "name": "conv_9_dw_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_9_dw_batchnorm",
+            "conv_9_dw_relu_gamma"
+          ],
+          "outputs": [
+            "conv_9_dw_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_9_dw_relu_gamma": [
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_9_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_9_dw_relu",
+            "conv_9_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_9_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_9_conv2d_weight": [
+              512,
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_9_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_9_conv2d",
+            "conv_9_batchnorm_gamma",
+            "conv_9_batchnorm_beta",
+            "conv_9_batchnorm_moving_mean",
+            "conv_9_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_9_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_9_batchnorm_gamma": [
+              512
+            ],
+            "conv_9_batchnorm_beta": [
+              512
+            ],
+            "conv_9_batchnorm_moving_mean": [
+              512
+            ],
+            "conv_9_batchnorm_moving_var": [
+              512
+            ]
+          }
+        },
+        {
+          "name": "conv_9_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_9_batchnorm",
+            "conv_9_relu_gamma"
+          ],
+          "outputs": [
+            "conv_9_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_9_relu_gamma": [
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_10_dw_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_9_relu",
+            "conv_10_dw_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_10_dw_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 512,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_10_dw_conv2d_weight": [
+              512,
+              1,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_10_dw_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_10_dw_conv2d",
+            "conv_10_dw_batchnorm_gamma",
+            "conv_10_dw_batchnorm_beta",
+            "conv_10_dw_batchnorm_moving_mean",
+            "conv_10_dw_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_10_dw_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_10_dw_batchnorm_gamma": [
+              512
+            ],
+            "conv_10_dw_batchnorm_beta": [
+              512
+            ],
+            "conv_10_dw_batchnorm_moving_mean": [
+              512
+            ],
+            "conv_10_dw_batchnorm_moving_var": [
+              512
+            ]
+          }
+        },
+        {
+          "name": "conv_10_dw_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_10_dw_batchnorm",
+            "conv_10_dw_relu_gamma"
+          ],
+          "outputs": [
+            "conv_10_dw_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_10_dw_relu_gamma": [
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_10_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_10_dw_relu",
+            "conv_10_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_10_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_10_conv2d_weight": [
+              512,
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_10_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_10_conv2d",
+            "conv_10_batchnorm_gamma",
+            "conv_10_batchnorm_beta",
+            "conv_10_batchnorm_moving_mean",
+            "conv_10_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_10_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_10_batchnorm_gamma": [
+              512
+            ],
+            "conv_10_batchnorm_beta": [
+              512
+            ],
+            "conv_10_batchnorm_moving_mean": [
+              512
+            ],
+            "conv_10_batchnorm_moving_var": [
+              512
+            ]
+          }
+        },
+        {
+          "name": "conv_10_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_10_batchnorm",
+            "conv_10_relu_gamma"
+          ],
+          "outputs": [
+            "conv_10_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_10_relu_gamma": [
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_11_dw_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_10_relu",
+            "conv_11_dw_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_11_dw_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 512,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_11_dw_conv2d_weight": [
+              512,
+              1,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_11_dw_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_11_dw_conv2d",
+            "conv_11_dw_batchnorm_gamma",
+            "conv_11_dw_batchnorm_beta",
+            "conv_11_dw_batchnorm_moving_mean",
+            "conv_11_dw_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_11_dw_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_11_dw_batchnorm_gamma": [
+              512
+            ],
+            "conv_11_dw_batchnorm_beta": [
+              512
+            ],
+            "conv_11_dw_batchnorm_moving_mean": [
+              512
+            ],
+            "conv_11_dw_batchnorm_moving_var": [
+              512
+            ]
+          }
+        },
+        {
+          "name": "conv_11_dw_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_11_dw_batchnorm",
+            "conv_11_dw_relu_gamma"
+          ],
+          "outputs": [
+            "conv_11_dw_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_11_dw_relu_gamma": [
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_11_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_11_dw_relu",
+            "conv_11_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_11_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_11_conv2d_weight": [
+              512,
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_11_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_11_conv2d",
+            "conv_11_batchnorm_gamma",
+            "conv_11_batchnorm_beta",
+            "conv_11_batchnorm_moving_mean",
+            "conv_11_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_11_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_11_batchnorm_gamma": [
+              512
+            ],
+            "conv_11_batchnorm_beta": [
+              512
+            ],
+            "conv_11_batchnorm_moving_mean": [
+              512
+            ],
+            "conv_11_batchnorm_moving_var": [
+              512
+            ]
+          }
+        },
+        {
+          "name": "conv_11_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_11_batchnorm",
+            "conv_11_relu_gamma"
+          ],
+          "outputs": [
+            "conv_11_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_11_relu_gamma": [
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_12_dw_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_11_relu",
+            "conv_12_dw_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_12_dw_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 512,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_12_dw_conv2d_weight": [
+              512,
+              1,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_12_dw_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_12_dw_conv2d",
+            "conv_12_dw_batchnorm_gamma",
+            "conv_12_dw_batchnorm_beta",
+            "conv_12_dw_batchnorm_moving_mean",
+            "conv_12_dw_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_12_dw_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_12_dw_batchnorm_gamma": [
+              512
+            ],
+            "conv_12_dw_batchnorm_beta": [
+              512
+            ],
+            "conv_12_dw_batchnorm_moving_mean": [
+              512
+            ],
+            "conv_12_dw_batchnorm_moving_var": [
+              512
+            ]
+          }
+        },
+        {
+          "name": "conv_12_dw_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_12_dw_batchnorm",
+            "conv_12_dw_relu_gamma"
+          ],
+          "outputs": [
+            "conv_12_dw_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_12_dw_relu_gamma": [
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_12_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_12_dw_relu",
+            "conv_12_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_12_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_12_conv2d_weight": [
+              512,
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_12_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_12_conv2d",
+            "conv_12_batchnorm_gamma",
+            "conv_12_batchnorm_beta",
+            "conv_12_batchnorm_moving_mean",
+            "conv_12_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_12_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_12_batchnorm_gamma": [
+              512
+            ],
+            "conv_12_batchnorm_beta": [
+              512
+            ],
+            "conv_12_batchnorm_moving_mean": [
+              512
+            ],
+            "conv_12_batchnorm_moving_var": [
+              512
+            ]
+          }
+        },
+        {
+          "name": "conv_12_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_12_batchnorm",
+            "conv_12_relu_gamma"
+          ],
+          "outputs": [
+            "conv_12_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_12_relu_gamma": [
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_13_dw_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_12_relu",
+            "conv_13_dw_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_13_dw_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 512,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              2,
+              2
+            ]
+          },
+          "parameter_shapes": {
+            "conv_13_dw_conv2d_weight": [
+              512,
+              1,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_13_dw_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_13_dw_conv2d",
+            "conv_13_dw_batchnorm_gamma",
+            "conv_13_dw_batchnorm_beta",
+            "conv_13_dw_batchnorm_moving_mean",
+            "conv_13_dw_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_13_dw_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_13_dw_batchnorm_gamma": [
+              512
+            ],
+            "conv_13_dw_batchnorm_beta": [
+              512
+            ],
+            "conv_13_dw_batchnorm_moving_mean": [
+              512
+            ],
+            "conv_13_dw_batchnorm_moving_var": [
+              512
+            ]
+          }
+        },
+        {
+          "name": "conv_13_dw_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_13_dw_batchnorm",
+            "conv_13_dw_relu_gamma"
+          ],
+          "outputs": [
+            "conv_13_dw_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_13_dw_relu_gamma": [
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_13_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_13_dw_relu",
+            "conv_13_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_13_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_13_conv2d_weight": [
+              1024,
+              512,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_13_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_13_conv2d",
+            "conv_13_batchnorm_gamma",
+            "conv_13_batchnorm_beta",
+            "conv_13_batchnorm_moving_mean",
+            "conv_13_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_13_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_13_batchnorm_gamma": [
+              1024
+            ],
+            "conv_13_batchnorm_beta": [
+              1024
+            ],
+            "conv_13_batchnorm_moving_mean": [
+              1024
+            ],
+            "conv_13_batchnorm_moving_var": [
+              1024
+            ]
+          }
+        },
+        {
+          "name": "conv_13_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_13_batchnorm",
+            "conv_13_relu_gamma"
+          ],
+          "outputs": [
+            "conv_13_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_13_relu_gamma": [
+              1024,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_14_dw_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_13_relu",
+            "conv_14_dw_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_14_dw_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1024,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_14_dw_conv2d_weight": [
+              1024,
+              1,
+              3,
+              3
+            ]
+          }
+        },
+        {
+          "name": "conv_14_dw_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_14_dw_conv2d",
+            "conv_14_dw_batchnorm_gamma",
+            "conv_14_dw_batchnorm_beta",
+            "conv_14_dw_batchnorm_moving_mean",
+            "conv_14_dw_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_14_dw_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_14_dw_batchnorm_gamma": [
+              1024
+            ],
+            "conv_14_dw_batchnorm_beta": [
+              1024
+            ],
+            "conv_14_dw_batchnorm_moving_mean": [
+              1024
+            ],
+            "conv_14_dw_batchnorm_moving_var": [
+              1024
+            ]
+          }
+        },
+        {
+          "name": "conv_14_dw_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_14_dw_batchnorm",
+            "conv_14_dw_relu_gamma"
+          ],
+          "outputs": [
+            "conv_14_dw_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_14_dw_relu_gamma": [
+              1024,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_14_conv2d",
+          "op": "Conv",
+          "inputs": [
+            "conv_14_dw_relu",
+            "conv_14_conv2d_weight"
+          ],
+          "outputs": [
+            "conv_14_conv2d"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "conv_14_conv2d_weight": [
+              1024,
+              1024,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "conv_14_batchnorm",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_14_conv2d",
+            "conv_14_batchnorm_gamma",
+            "conv_14_batchnorm_beta",
+            "conv_14_batchnorm_moving_mean",
+            "conv_14_batchnorm_moving_var"
+          ],
+          "outputs": [
+            "conv_14_batchnorm"
+          ],
+          "attributes": {
+            "epsilon": 0.0010000000474974513,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "conv_14_batchnorm_gamma": [
+              1024
+            ],
+            "conv_14_batchnorm_beta": [
+              1024
+            ],
+            "conv_14_batchnorm_moving_mean": [
+              1024
+            ],
+            "conv_14_batchnorm_moving_var": [
+              1024
+            ]
+          }
+        },
+        {
+          "name": "conv_14_relu",
+          "op": "PRelu",
+          "inputs": [
+            "conv_14_batchnorm",
+            "conv_14_relu_gamma"
+          ],
+          "outputs": [
+            "conv_14_relu"
+          ],
+          "attributes": {},
+          "parameter_shapes": {
+            "conv_14_relu_gamma": [
+              1024,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "bn1",
+          "op": "BatchNormalization",
+          "inputs": [
+            "conv_14_relu",
+            "bn1_gamma",
+            "bn1_beta",
+            "bn1_moving_mean",
+            "bn1_moving_var"
+          ],
+          "outputs": [
+            "bn1"
+          ],
+          "attributes": {
+            "epsilon": 1.9999999494757503e-05,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "bn1_gamma": [
+              1024
+            ],
+            "bn1_beta": [
+              1024
+            ],
+            "bn1_moving_mean": [
+              1024
+            ],
+            "bn1_moving_var": [
+              1024
+            ]
+          }
+        },
+        {
+          "name": "dropout5",
+          "op": "Dropout",
+          "inputs": [
+            "bn1"
+          ],
+          "outputs": [
+            "dropout5"
+          ],
+          "attributes": {
+            "ratio": 0.4000000059604645
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "flatten_254",
+          "op": "Flatten",
+          "inputs": [
+            "dropout5"
+          ],
+          "outputs": [
+            "flatten_254"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "pre_fc1",
+          "op": "Gemm",
+          "inputs": [
+            "flatten_254",
+            "pre_fc1_weight",
+            "pre_fc1_bias"
+          ],
+          "outputs": [
+            "pre_fc1"
+          ],
+          "attributes": {
+            "alpha": 1.0,
+            "beta": 1.0,
+            "transA": 0,
+            "transB": 1
+          },
+          "parameter_shapes": {
+            "pre_fc1_weight": [
+              128,
+              50176
+            ],
+            "pre_fc1_bias": [
+              128
+            ]
+          }
+        },
+        {
+          "name": "fc1",
+          "op": "BatchNormalization",
+          "inputs": [
+            "pre_fc1",
+            "fc1_gamma",
+            "fc1_beta",
+            "fc1_moving_mean",
+            "fc1_moving_var"
+          ],
+          "outputs": [
+            "fc1"
+          ],
+          "attributes": {
+            "epsilon": 1.9999999494757503e-05,
+            "momentum": 0.8999999761581421
+          },
+          "parameter_shapes": {
+            "fc1_gamma": [
+              128
+            ],
+            "fc1_beta": [
+              128
+            ],
+            "fc1_moving_mean": [
+              128
+            ],
+            "fc1_moving_var": [
+              128
+            ]
+          }
+        }
+      ],
+      "parameters": 174,
+      "onnx_checker": "PASS",
+      "dpu_compatibility": "NOT_YET_INSPECTED"
+    },
+    {
+      "file": "yunet_2022mar.onnx",
+      "sha256": "50ef07f702a31741ca46a4c0d947773b64143b9362780237bf0d427d6c79bab7",
+      "opsets": [
+        {
+          "domain": "",
+          "version": 11
+        }
+      ],
+      "inputs": {
+        "input": [
+          1,
+          3,
+          120,
+          160
+        ]
+      },
+      "outputs": {
+        "loc": [
+          1076,
+          14
+        ],
+        "conf": [
+          1076,
+          2
+        ],
+        "iou": [
+          1076,
+          1
+        ]
+      },
+      "operator_counts": {
+        "Conv": 43,
+        "Relu": 18,
+        "MaxPool": 5,
+        "Transpose": 4,
+        "Shape": 5,
+        "Constant": 20,
+        "Gather": 5,
+        "Unsqueeze": 5,
+        "Concat": 6,
+        "Reshape": 8,
+        "Slice": 3,
+        "Softmax": 1
+      },
+      "nodes": [
+        {
+          "name": "Conv_0",
+          "op": "Conv",
+          "inputs": [
+            "input",
+            "331",
+            "332"
+          ],
+          "outputs": [
+            "330"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              2,
+              2
+            ]
+          },
+          "parameter_shapes": {
+            "331": [
+              16,
+              3,
+              3,
+              3
+            ],
+            "332": [
+              16
+            ]
+          }
+        },
+        {
+          "name": "Relu_1",
+          "op": "Relu",
+          "inputs": [
+            "330"
+          ],
+          "outputs": [
+            "179"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_2",
+          "op": "Conv",
+          "inputs": [
+            "179",
+            "model0.conv2.conv1.weight",
+            "model0.conv2.conv1.bias"
+          ],
+          "outputs": [
+            "180"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "model0.conv2.conv1.weight": [
+              16,
+              16,
+              1,
+              1
+            ],
+            "model0.conv2.conv1.bias": [
+              16
+            ]
+          }
+        },
+        {
+          "name": "Conv_3",
+          "op": "Conv",
+          "inputs": [
+            "180",
+            "334",
+            "335"
+          ],
+          "outputs": [
+            "333"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 16,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "334": [
+              16,
+              1,
+              3,
+              3
+            ],
+            "335": [
+              16
+            ]
+          }
+        },
+        {
+          "name": "Relu_4",
+          "op": "Relu",
+          "inputs": [
+            "333"
+          ],
+          "outputs": [
+            "183"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "MaxPool_5",
+          "op": "MaxPool",
+          "inputs": [
+            "183"
+          ],
+          "outputs": [
+            "184"
+          ],
+          "attributes": {
+            "ceil_mode": 0,
+            "kernel_shape": [
+              2,
+              2
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              2,
+              2
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_6",
+          "op": "Conv",
+          "inputs": [
+            "184",
+            "model1.conv1.conv1.weight",
+            "model1.conv1.conv1.bias"
+          ],
+          "outputs": [
+            "185"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "model1.conv1.conv1.weight": [
+              16,
+              16,
+              1,
+              1
+            ],
+            "model1.conv1.conv1.bias": [
+              16
+            ]
+          }
+        },
+        {
+          "name": "Conv_7",
+          "op": "Conv",
+          "inputs": [
+            "185",
+            "337",
+            "338"
+          ],
+          "outputs": [
+            "336"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 16,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "337": [
+              16,
+              1,
+              3,
+              3
+            ],
+            "338": [
+              16
+            ]
+          }
+        },
+        {
+          "name": "Relu_8",
+          "op": "Relu",
+          "inputs": [
+            "336"
+          ],
+          "outputs": [
+            "188"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_9",
+          "op": "Conv",
+          "inputs": [
+            "188",
+            "model1.conv2.conv1.weight",
+            "model1.conv2.conv1.bias"
+          ],
+          "outputs": [
+            "189"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "model1.conv2.conv1.weight": [
+              64,
+              16,
+              1,
+              1
+            ],
+            "model1.conv2.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_10",
+          "op": "Conv",
+          "inputs": [
+            "189",
+            "340",
+            "341"
+          ],
+          "outputs": [
+            "339"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "340": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "341": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_11",
+          "op": "Relu",
+          "inputs": [
+            "339"
+          ],
+          "outputs": [
+            "192"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_12",
+          "op": "Conv",
+          "inputs": [
+            "192",
+            "model2.conv1.conv1.weight",
+            "model2.conv1.conv1.bias"
+          ],
+          "outputs": [
+            "193"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "model2.conv1.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "model2.conv1.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_13",
+          "op": "Conv",
+          "inputs": [
+            "193",
+            "343",
+            "344"
+          ],
+          "outputs": [
+            "342"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "343": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "344": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_14",
+          "op": "Relu",
+          "inputs": [
+            "342"
+          ],
+          "outputs": [
+            "196"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_15",
+          "op": "Conv",
+          "inputs": [
+            "196",
+            "model2.conv2.conv1.weight",
+            "model2.conv2.conv1.bias"
+          ],
+          "outputs": [
+            "197"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "model2.conv2.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "model2.conv2.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_16",
+          "op": "Conv",
+          "inputs": [
+            "197",
+            "346",
+            "347"
+          ],
+          "outputs": [
+            "345"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "346": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "347": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_17",
+          "op": "Relu",
+          "inputs": [
+            "345"
+          ],
+          "outputs": [
+            "200"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "MaxPool_18",
+          "op": "MaxPool",
+          "inputs": [
+            "200"
+          ],
+          "outputs": [
+            "201"
+          ],
+          "attributes": {
+            "ceil_mode": 0,
+            "kernel_shape": [
+              2,
+              2
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              2,
+              2
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_19",
+          "op": "Conv",
+          "inputs": [
+            "201",
+            "model3.conv1.conv1.weight",
+            "model3.conv1.conv1.bias"
+          ],
+          "outputs": [
+            "202"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "model3.conv1.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "model3.conv1.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_20",
+          "op": "Conv",
+          "inputs": [
+            "202",
+            "349",
+            "350"
+          ],
+          "outputs": [
+            "348"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "349": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "350": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_21",
+          "op": "Relu",
+          "inputs": [
+            "348"
+          ],
+          "outputs": [
+            "205"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_22",
+          "op": "Conv",
+          "inputs": [
+            "205",
+            "model3.conv2.conv1.weight",
+            "model3.conv2.conv1.bias"
+          ],
+          "outputs": [
+            "206"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "model3.conv2.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "model3.conv2.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_23",
+          "op": "Conv",
+          "inputs": [
+            "206",
+            "352",
+            "353"
+          ],
+          "outputs": [
+            "351"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "352": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "353": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_24",
+          "op": "Relu",
+          "inputs": [
+            "351"
+          ],
+          "outputs": [
+            "209"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "MaxPool_25",
+          "op": "MaxPool",
+          "inputs": [
+            "209"
+          ],
+          "outputs": [
+            "210"
+          ],
+          "attributes": {
+            "ceil_mode": 0,
+            "kernel_shape": [
+              2,
+              2
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              2,
+              2
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_26",
+          "op": "Conv",
+          "inputs": [
+            "210",
+            "model4.conv1.conv1.weight",
+            "model4.conv1.conv1.bias"
+          ],
+          "outputs": [
+            "211"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "model4.conv1.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "model4.conv1.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_27",
+          "op": "Conv",
+          "inputs": [
+            "211",
+            "355",
+            "356"
+          ],
+          "outputs": [
+            "354"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "355": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "356": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_28",
+          "op": "Relu",
+          "inputs": [
+            "354"
+          ],
+          "outputs": [
+            "214"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_29",
+          "op": "Conv",
+          "inputs": [
+            "214",
+            "model4.conv2.conv1.weight",
+            "model4.conv2.conv1.bias"
+          ],
+          "outputs": [
+            "215"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "model4.conv2.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "model4.conv2.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_30",
+          "op": "Conv",
+          "inputs": [
+            "215",
+            "358",
+            "359"
+          ],
+          "outputs": [
+            "357"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "358": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "359": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_31",
+          "op": "Relu",
+          "inputs": [
+            "357"
+          ],
+          "outputs": [
+            "218"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "MaxPool_32",
+          "op": "MaxPool",
+          "inputs": [
+            "218"
+          ],
+          "outputs": [
+            "219"
+          ],
+          "attributes": {
+            "ceil_mode": 0,
+            "kernel_shape": [
+              2,
+              2
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              2,
+              2
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_33",
+          "op": "Conv",
+          "inputs": [
+            "219",
+            "model5.conv1.conv1.weight",
+            "model5.conv1.conv1.bias"
+          ],
+          "outputs": [
+            "220"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "model5.conv1.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "model5.conv1.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_34",
+          "op": "Conv",
+          "inputs": [
+            "220",
+            "361",
+            "362"
+          ],
+          "outputs": [
+            "360"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "361": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "362": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_35",
+          "op": "Relu",
+          "inputs": [
+            "360"
+          ],
+          "outputs": [
+            "223"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_36",
+          "op": "Conv",
+          "inputs": [
+            "223",
+            "model5.conv2.conv1.weight",
+            "model5.conv2.conv1.bias"
+          ],
+          "outputs": [
+            "224"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "model5.conv2.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "model5.conv2.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_37",
+          "op": "Conv",
+          "inputs": [
+            "224",
+            "364",
+            "365"
+          ],
+          "outputs": [
+            "363"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "364": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "365": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_38",
+          "op": "Relu",
+          "inputs": [
+            "363"
+          ],
+          "outputs": [
+            "227"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "MaxPool_39",
+          "op": "MaxPool",
+          "inputs": [
+            "227"
+          ],
+          "outputs": [
+            "228"
+          ],
+          "attributes": {
+            "ceil_mode": 0,
+            "kernel_shape": [
+              2,
+              2
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              2,
+              2
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_40",
+          "op": "Conv",
+          "inputs": [
+            "228",
+            "model6.conv1.conv1.weight",
+            "model6.conv1.conv1.bias"
+          ],
+          "outputs": [
+            "229"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "model6.conv1.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "model6.conv1.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_41",
+          "op": "Conv",
+          "inputs": [
+            "229",
+            "367",
+            "368"
+          ],
+          "outputs": [
+            "366"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "367": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "368": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_42",
+          "op": "Relu",
+          "inputs": [
+            "366"
+          ],
+          "outputs": [
+            "232"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_43",
+          "op": "Conv",
+          "inputs": [
+            "232",
+            "model6.conv2.conv1.weight",
+            "model6.conv2.conv1.bias"
+          ],
+          "outputs": [
+            "233"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "model6.conv2.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "model6.conv2.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_44",
+          "op": "Conv",
+          "inputs": [
+            "233",
+            "370",
+            "371"
+          ],
+          "outputs": [
+            "369"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "370": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "371": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_45",
+          "op": "Relu",
+          "inputs": [
+            "369"
+          ],
+          "outputs": [
+            "236"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_46",
+          "op": "Conv",
+          "inputs": [
+            "209",
+            "head.0.conv1.conv1.weight",
+            "head.0.conv1.conv1.bias"
+          ],
+          "outputs": [
+            "237"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "head.0.conv1.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "head.0.conv1.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_47",
+          "op": "Conv",
+          "inputs": [
+            "237",
+            "373",
+            "374"
+          ],
+          "outputs": [
+            "372"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "373": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "374": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_48",
+          "op": "Relu",
+          "inputs": [
+            "372"
+          ],
+          "outputs": [
+            "240"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_49",
+          "op": "Conv",
+          "inputs": [
+            "240",
+            "head.0.conv2.conv1.weight",
+            "head.0.conv2.conv1.bias"
+          ],
+          "outputs": [
+            "241"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "head.0.conv2.conv1.weight": [
+              51,
+              64,
+              1,
+              1
+            ],
+            "head.0.conv2.conv1.bias": [
+              51
+            ]
+          }
+        },
+        {
+          "name": "Conv_50",
+          "op": "Conv",
+          "inputs": [
+            "241",
+            "head.0.conv2.conv2.weight",
+            "head.0.conv2.conv2.bias"
+          ],
+          "outputs": [
+            "242"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 51,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "head.0.conv2.conv2.weight": [
+              51,
+              1,
+              3,
+              3
+            ],
+            "head.0.conv2.conv2.bias": [
+              51
+            ]
+          }
+        },
+        {
+          "name": "Transpose_51",
+          "op": "Transpose",
+          "inputs": [
+            "242"
+          ],
+          "outputs": [
+            "243"
+          ],
+          "attributes": {
+            "perm": [
+              0,
+              2,
+              3,
+              1
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_52",
+          "op": "Conv",
+          "inputs": [
+            "218",
+            "head.1.conv1.conv1.weight",
+            "head.1.conv1.conv1.bias"
+          ],
+          "outputs": [
+            "244"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "head.1.conv1.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "head.1.conv1.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_53",
+          "op": "Conv",
+          "inputs": [
+            "244",
+            "376",
+            "377"
+          ],
+          "outputs": [
+            "375"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "376": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "377": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_54",
+          "op": "Relu",
+          "inputs": [
+            "375"
+          ],
+          "outputs": [
+            "247"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_55",
+          "op": "Conv",
+          "inputs": [
+            "247",
+            "head.1.conv2.conv1.weight",
+            "head.1.conv2.conv1.bias"
+          ],
+          "outputs": [
+            "248"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "head.1.conv2.conv1.weight": [
+              34,
+              64,
+              1,
+              1
+            ],
+            "head.1.conv2.conv1.bias": [
+              34
+            ]
+          }
+        },
+        {
+          "name": "Conv_56",
+          "op": "Conv",
+          "inputs": [
+            "248",
+            "head.1.conv2.conv2.weight",
+            "head.1.conv2.conv2.bias"
+          ],
+          "outputs": [
+            "249"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 34,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "head.1.conv2.conv2.weight": [
+              34,
+              1,
+              3,
+              3
+            ],
+            "head.1.conv2.conv2.bias": [
+              34
+            ]
+          }
+        },
+        {
+          "name": "Transpose_57",
+          "op": "Transpose",
+          "inputs": [
+            "249"
+          ],
+          "outputs": [
+            "250"
+          ],
+          "attributes": {
+            "perm": [
+              0,
+              2,
+              3,
+              1
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_58",
+          "op": "Conv",
+          "inputs": [
+            "227",
+            "head.2.conv1.conv1.weight",
+            "head.2.conv1.conv1.bias"
+          ],
+          "outputs": [
+            "251"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "head.2.conv1.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "head.2.conv1.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_59",
+          "op": "Conv",
+          "inputs": [
+            "251",
+            "379",
+            "380"
+          ],
+          "outputs": [
+            "378"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "379": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "380": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_60",
+          "op": "Relu",
+          "inputs": [
+            "378"
+          ],
+          "outputs": [
+            "254"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_61",
+          "op": "Conv",
+          "inputs": [
+            "254",
+            "head.2.conv2.conv1.weight",
+            "head.2.conv2.conv1.bias"
+          ],
+          "outputs": [
+            "255"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "head.2.conv2.conv1.weight": [
+              34,
+              64,
+              1,
+              1
+            ],
+            "head.2.conv2.conv1.bias": [
+              34
+            ]
+          }
+        },
+        {
+          "name": "Conv_62",
+          "op": "Conv",
+          "inputs": [
+            "255",
+            "head.2.conv2.conv2.weight",
+            "head.2.conv2.conv2.bias"
+          ],
+          "outputs": [
+            "256"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 34,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "head.2.conv2.conv2.weight": [
+              34,
+              1,
+              3,
+              3
+            ],
+            "head.2.conv2.conv2.bias": [
+              34
+            ]
+          }
+        },
+        {
+          "name": "Transpose_63",
+          "op": "Transpose",
+          "inputs": [
+            "256"
+          ],
+          "outputs": [
+            "257"
+          ],
+          "attributes": {
+            "perm": [
+              0,
+              2,
+              3,
+              1
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_64",
+          "op": "Conv",
+          "inputs": [
+            "236",
+            "head.3.conv1.conv1.weight",
+            "head.3.conv1.conv1.bias"
+          ],
+          "outputs": [
+            "258"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "head.3.conv1.conv1.weight": [
+              64,
+              64,
+              1,
+              1
+            ],
+            "head.3.conv1.conv1.bias": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Conv_65",
+          "op": "Conv",
+          "inputs": [
+            "258",
+            "382",
+            "383"
+          ],
+          "outputs": [
+            "381"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 64,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "382": [
+              64,
+              1,
+              3,
+              3
+            ],
+            "383": [
+              64
+            ]
+          }
+        },
+        {
+          "name": "Relu_66",
+          "op": "Relu",
+          "inputs": [
+            "381"
+          ],
+          "outputs": [
+            "261"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Conv_67",
+          "op": "Conv",
+          "inputs": [
+            "261",
+            "head.3.conv2.conv1.weight",
+            "head.3.conv2.conv1.bias"
+          ],
+          "outputs": [
+            "262"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 1,
+            "kernel_shape": [
+              1,
+              1
+            ],
+            "pads": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "head.3.conv2.conv1.weight": [
+              51,
+              64,
+              1,
+              1
+            ],
+            "head.3.conv2.conv1.bias": [
+              51
+            ]
+          }
+        },
+        {
+          "name": "Conv_68",
+          "op": "Conv",
+          "inputs": [
+            "262",
+            "head.3.conv2.conv2.weight",
+            "head.3.conv2.conv2.bias"
+          ],
+          "outputs": [
+            "263"
+          ],
+          "attributes": {
+            "dilations": [
+              1,
+              1
+            ],
+            "group": 51,
+            "kernel_shape": [
+              3,
+              3
+            ],
+            "pads": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "strides": [
+              1,
+              1
+            ]
+          },
+          "parameter_shapes": {
+            "head.3.conv2.conv2.weight": [
+              51,
+              1,
+              3,
+              3
+            ],
+            "head.3.conv2.conv2.bias": [
+              51
+            ]
+          }
+        },
+        {
+          "name": "Transpose_69",
+          "op": "Transpose",
+          "inputs": [
+            "263"
+          ],
+          "outputs": [
+            "264"
+          ],
+          "attributes": {
+            "perm": [
+              0,
+              2,
+              3,
+              1
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Shape_70",
+          "op": "Shape",
+          "inputs": [
+            "243"
+          ],
+          "outputs": [
+            "265"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_71",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "266"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Gather_72",
+          "op": "Gather",
+          "inputs": [
+            "265",
+            "266"
+          ],
+          "outputs": [
+            "267"
+          ],
+          "attributes": {
+            "axis": 0
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Unsqueeze_73",
+          "op": "Unsqueeze",
+          "inputs": [
+            "267"
+          ],
+          "outputs": [
+            "269"
+          ],
+          "attributes": {
+            "axes": [
+              0
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Concat_74",
+          "op": "Concat",
+          "inputs": [
+            "269",
+            "384"
+          ],
+          "outputs": [
+            "271"
+          ],
+          "attributes": {
+            "axis": 0
+          },
+          "parameter_shapes": {
+            "384": [
+              1
+            ]
+          }
+        },
+        {
+          "name": "Reshape_75",
+          "op": "Reshape",
+          "inputs": [
+            "243",
+            "271"
+          ],
+          "outputs": [
+            "272"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Shape_76",
+          "op": "Shape",
+          "inputs": [
+            "250"
+          ],
+          "outputs": [
+            "273"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_77",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "274"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Gather_78",
+          "op": "Gather",
+          "inputs": [
+            "273",
+            "274"
+          ],
+          "outputs": [
+            "275"
+          ],
+          "attributes": {
+            "axis": 0
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Unsqueeze_79",
+          "op": "Unsqueeze",
+          "inputs": [
+            "275"
+          ],
+          "outputs": [
+            "277"
+          ],
+          "attributes": {
+            "axes": [
+              0
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Concat_80",
+          "op": "Concat",
+          "inputs": [
+            "277",
+            "385"
+          ],
+          "outputs": [
+            "279"
+          ],
+          "attributes": {
+            "axis": 0
+          },
+          "parameter_shapes": {
+            "385": [
+              1
+            ]
+          }
+        },
+        {
+          "name": "Reshape_81",
+          "op": "Reshape",
+          "inputs": [
+            "250",
+            "279"
+          ],
+          "outputs": [
+            "280"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Shape_82",
+          "op": "Shape",
+          "inputs": [
+            "257"
+          ],
+          "outputs": [
+            "281"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_83",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "282"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Gather_84",
+          "op": "Gather",
+          "inputs": [
+            "281",
+            "282"
+          ],
+          "outputs": [
+            "283"
+          ],
+          "attributes": {
+            "axis": 0
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Unsqueeze_85",
+          "op": "Unsqueeze",
+          "inputs": [
+            "283"
+          ],
+          "outputs": [
+            "285"
+          ],
+          "attributes": {
+            "axes": [
+              0
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Concat_86",
+          "op": "Concat",
+          "inputs": [
+            "285",
+            "386"
+          ],
+          "outputs": [
+            "287"
+          ],
+          "attributes": {
+            "axis": 0
+          },
+          "parameter_shapes": {
+            "386": [
+              1
+            ]
+          }
+        },
+        {
+          "name": "Reshape_87",
+          "op": "Reshape",
+          "inputs": [
+            "257",
+            "287"
+          ],
+          "outputs": [
+            "288"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Shape_88",
+          "op": "Shape",
+          "inputs": [
+            "264"
+          ],
+          "outputs": [
+            "289"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_89",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "290"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Gather_90",
+          "op": "Gather",
+          "inputs": [
+            "289",
+            "290"
+          ],
+          "outputs": [
+            "291"
+          ],
+          "attributes": {
+            "axis": 0
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Unsqueeze_91",
+          "op": "Unsqueeze",
+          "inputs": [
+            "291"
+          ],
+          "outputs": [
+            "293"
+          ],
+          "attributes": {
+            "axes": [
+              0
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Concat_92",
+          "op": "Concat",
+          "inputs": [
+            "293",
+            "387"
+          ],
+          "outputs": [
+            "295"
+          ],
+          "attributes": {
+            "axis": 0
+          },
+          "parameter_shapes": {
+            "387": [
+              1
+            ]
+          }
+        },
+        {
+          "name": "Reshape_93",
+          "op": "Reshape",
+          "inputs": [
+            "264",
+            "295"
+          ],
+          "outputs": [
+            "296"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Concat_94",
+          "op": "Concat",
+          "inputs": [
+            "272",
+            "280",
+            "288",
+            "296"
+          ],
+          "outputs": [
+            "297"
+          ],
+          "attributes": {
+            "axis": 1
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Shape_95",
+          "op": "Shape",
+          "inputs": [
+            "297"
+          ],
+          "outputs": [
+            "298"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_96",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "299"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Gather_97",
+          "op": "Gather",
+          "inputs": [
+            "298",
+            "299"
+          ],
+          "outputs": [
+            "300"
+          ],
+          "attributes": {
+            "axis": 0
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Unsqueeze_98",
+          "op": "Unsqueeze",
+          "inputs": [
+            "300"
+          ],
+          "outputs": [
+            "303"
+          ],
+          "attributes": {
+            "axes": [
+              0
+            ]
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Concat_99",
+          "op": "Concat",
+          "inputs": [
+            "303",
+            "388",
+            "389"
+          ],
+          "outputs": [
+            "306"
+          ],
+          "attributes": {
+            "axis": 0
+          },
+          "parameter_shapes": {
+            "388": [
+              1
+            ],
+            "389": [
+              1
+            ]
+          }
+        },
+        {
+          "name": "Reshape_100",
+          "op": "Reshape",
+          "inputs": [
+            "297",
+            "306"
+          ],
+          "outputs": [
+            "307"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_101",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "308"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_102",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "309"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_103",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "310"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_104",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "311"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Slice_105",
+          "op": "Slice",
+          "inputs": [
+            "307",
+            "309",
+            "310",
+            "308",
+            "311"
+          ],
+          "outputs": [
+            "312"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_106",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "313"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_107",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "314"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_108",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "315"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_109",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "316"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Slice_110",
+          "op": "Slice",
+          "inputs": [
+            "307",
+            "314",
+            "315",
+            "313",
+            "316"
+          ],
+          "outputs": [
+            "317"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_111",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "318"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_112",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "319"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_113",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "320"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_114",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "321"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Slice_115",
+          "op": "Slice",
+          "inputs": [
+            "307",
+            "319",
+            "320",
+            "318",
+            "321"
+          ],
+          "outputs": [
+            "322"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_116",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "323"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Reshape_117",
+          "op": "Reshape",
+          "inputs": [
+            "312",
+            "323"
+          ],
+          "outputs": [
+            "loc"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_118",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "325"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Reshape_119",
+          "op": "Reshape",
+          "inputs": [
+            "317",
+            "325"
+          ],
+          "outputs": [
+            "326"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Softmax_120",
+          "op": "Softmax",
+          "inputs": [
+            "326"
+          ],
+          "outputs": [
+            "conf"
+          ],
+          "attributes": {
+            "axis": 1
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Constant_121",
+          "op": "Constant",
+          "inputs": [],
+          "outputs": [
+            "328"
+          ],
+          "attributes": {
+            "value": "TensorProto"
+          },
+          "parameter_shapes": {}
+        },
+        {
+          "name": "Reshape_122",
+          "op": "Reshape",
+          "inputs": [
+            "322",
+            "328"
+          ],
+          "outputs": [
+            "iou"
+          ],
+          "attributes": {},
+          "parameter_shapes": {}
+        }
+      ],
+      "parameters": 92,
+      "onnx_checker": "PASS",
+      "dpu_compatibility": "NOT_YET_INSPECTED"
+    }
+  ]
+}

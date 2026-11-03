@@ -1,0 +1,77 @@
+--- before/tools/gstreamer_audio_worker.py
++++ after/tools/gstreamer_audio_worker.py
+@@ -95,6 +95,23 @@
+     if missing:
+         raise RuntimeError('Missing GStreamer elements: ' + ', '.join(missing))
+     return Gst, GLib
++
++
++def _idle_state_key(engine, state):
++    # IDLE_READY is the persistent engine's inactive state, not WAITING_PCM.
++    # Nonpersistent engines have no active attribute and retain every tick.
++    if (getattr(engine, 'active', True) is not False
++            or getattr(engine, 'paused', False) is True
++            or state.get('persistent') is not True
++            or state.get('device_ready') is not True
++            or state.get('device_state') != 'IDLE_READY'
++            or state.get('audible') is not False
++            or state.get('error')):
++        return None
++    # Clocks, timers and diagnostic/IPC counters are not logical idle changes.
++    return tuple(state.get(name) for name in (
++        'token', 'ready', 'done', 'error', 'device_ready', 'device_state',
++        'audible', 'track', 'duration', 'device', 'output_caps', 'clock_source'))
+ 
+ 
+ def main(argv=None):
+@@ -133,6 +150,7 @@
+     loop = glib.MainLoop()
+     commands = queue.Queue(maxsize=32)
+     eof = threading.Event()
++    last_idle_key = last_idle_published_at = None
+ 
+     def receive():
+         try:
+@@ -152,12 +170,15 @@
+             eof.set()
+ 
+     def tick():
++        nonlocal last_idle_key, last_idle_published_at
++        command_received = False
+         try:
+             for _ in range(16):
+                 try:
+                     message = commands.get_nowait()
+                 except queue.Empty:
+                     break
++                command_received = True
+                 if engine.command(message) and message['type'] == 'close':
+                     loop.quit()
+                     return False
+@@ -165,7 +186,17 @@
+                 engine.release()
+                 loop.quit()
+                 return False
+-            publish(dict(engine.poll(), kind='state', ipc=publisher.snapshot()))
++            state = engine.poll()  # Preserve the original 10ms audio/sink work.
++            idle_key = _idle_state_key(engine, state)
++            now = time.monotonic()
++            if (idle_key is None or command_received or idle_key != last_idle_key
++                    or last_idle_published_at is None
++                    or not 0 <= now - last_idle_published_at < 1.):
++                publish(dict(state, kind='state', ipc=publisher.snapshot()))
++                last_idle_key = idle_key
++                last_idle_published_at = now if idle_key is not None else None
++            else:
++                publisher.flush()  # Finish a previous partial/nonblocking write.
+             if args.echo_reference and hasattr(engine,'take_references'):
+                 import base64
+                 for frame in engine.take_references():
+@@ -176,6 +207,7 @@
+             loop.quit()
+             return False
+         except Exception as exc:
++            last_idle_key = last_idle_published_at = None
+             engine.fail(type(exc).__name__ + ': ' + str(exc))
+             publish(dict(engine.snapshot(), kind='state'))
+         return True

@@ -1,0 +1,195 @@
+{
+  "active_root": "/home/root/aura-audio-frontend-20261021/candidate-fe6f5c7b1b56/runtime/aura",
+  "startup_keys": [
+    "schema_version",
+    "service_name",
+    "runtime",
+    "gui_sha256",
+    "kernel_release",
+    "touch_module",
+    "touch_module_sha256",
+    "lock_file",
+    "port",
+    "display",
+    "output",
+    "mode",
+    "rate",
+    "edid_file",
+    "edid_sha256",
+    "touch_name",
+    "display_wait_seconds",
+    "ready_wait_seconds",
+    "verified_timing_fallback",
+    "component_sha256",
+    "edid_grace_seconds",
+    "display_stable_seconds",
+    "startup_display_retrain",
+    "display_retrain_off_seconds",
+    "display_recovery_marker"
+  ],
+  "audio_sources": {
+    "common/frontend_wire.py": "2: import ipaddress\n3: import json\n4: import re\n5: import struct\n6: import time\n12: def configuration(value=None):\n22: def owner(meta,kind,stream,seq):\n29: def send(connection,meta,pcm=b''):\n35: def receive(connection,timeout):\n37:     def exact(n):",
+    "board/runtime/audio/vad.py": "2: \"\"\"VAD（语音活动检测 / turn 切分）—— 板端「turn 切分」（`audio/__init__.py` 已约定本模块）。\n7: - 产出的 utterance 交给 `asr.py`；\"说完了\"由上层发既有事件 `EventType.AUDIO_VAD_END`\n18: - 每 `frame_ms` 一帧，算 RMS；\n19: - 帧有声：`rms >= energy_threshold`；\n24: from __future__ import annotations\n26: import dataclasses\n27: import typing\n29: import numpy as np\n33: class VadConfig:\n34:     \"\"\"VAD 参数（默认对准 16kHz 耳麦 + 演示环境）。\"\"\"\n38:     energy_threshold: float = 0.010      # RMS 门限（实测耳麦底噪 ~0.002）\n44:     def frame_samples(self) -> int:\n49: class VadEvent:\n50:     \"\"\"一次 VAD 事件：`speech_start`（仅提示）/ `speech_end`（带整段音频）。\"\"\"\n56:     def to_payload(self) -> typing.Dict:\n60: class EnergyVad:\n61:     \"\"\"能量 VAD（流式）：反复 `accept(chunk)`，返回本次产生的事件列表。\"\"\"\n63:     def __init__(self, config: typing.Optional[VadConfig] = None, *, frame_classifier=None) -> None:\n64:         self.config = config or VadConfig()\n71:     def reset(self) -> None:\n81:     def _rms(frame: typing.Any) -> float:\n86:     def _finish(self) -> typing.Optional[VadEvent]:\n91:         event = VadEvent(kind=\"speech_end\", audio=audio,\n96:     def reset_utterance(self) -> None:\n104:     def accept(self, samples: typing.Any) -> typing.List[VadEvent]:\n111:         events: typing.List[VadEvent] = []\n118:                     else self._rms(frame) >= self.config.energy_threshold)\n133:                         events.append(VadEvent(kind=\"speech_start\", duration_ms=0.0))\n138:                     self._utter.append(frame)           # 尾巴静音也留下（VAD 收边）\n153:     def flush(self) -> typing.Optional[VadEvent]:",
+    "board/runtime/audio/automatic_capture.py": "1: \"\"\"Energy endpointing only: one bounded speech turn from an idle microphone.\n3: No ASR/TTS/model inference runs here. Idle PCM is discarded; a short pre-roll\n7: from collections import deque\n8: import signal\n9: import threading\n11: from board.runtime.audio.capture import Mcp01Capture\n12: from board.runtime.audio.vad import EnergyVad, VadConfig\n16:     def __init__(self, max_seconds=20, *, frame_classifier=None,pre_roll_ms=200):\n19:         self.config = VadConfig(min_silence_ms=700, max_utterance_ms=int(max_seconds*1000)-pre_roll_ms)\n20:         self.vad = EnergyVad(self.config, frame_classifier=frame_classifier)\n30:     def feed(self, pcm):\n31:         import numpy as np\n40:             for event in self.vad.accept(samples):\n58:     def __init__(self,*args,audio_frontend=None,**kwargs):\n59:         from common.frontend_wire import configuration\n63:     def _endpoint(self):\n64:         from board.runtime.audio.remote_frontend import RemoteSpeechGate\n70:     def _close_endpoint(self):\n74:     def _finish(self,cancel):\n80:     def _command(self):\n85:     def _capture_timer(self):\n91:     def _captured_start(self, started):\n94:     def _read_pcm(self,process):\n98:     def _read_automatic_pcm(self, process):\n120:     def snapshot(self):",
+    "board/runtime/audio/remote_frontend.py": "6: import socket\n7: import threading\n8: import time\n9: import uuid\n10: import numpy as np\n11: from common.frontend_wire import PROTOCOL,configuration,owner,send,receive\n15:     def __init__(self,config):\n22:     def _open(self):\n34:     def __call__(self,frame):\n64:     def close(self):\n72:     def public(self):\n74:             return {'enabled':True,'backend':'gtcrn-silero-v5-pc-cpu','frames':self.sequence,\n79: def health(config):",
+    "tools/audio_frontend_host.py": "1: \"\"\"Prewarmed stock GTCRN/Silero CPU pipelines, independent of ASR/LLM/TTS.\"\"\"\n2: import argparse\n3: import hashlib\n4: from pathlib import Path\n5: import queue\n6: import socketserver\n7: import sys\n8: import threading\n12: from common.frontend_wire import PROTOCOL,owner,send,receive\n14: HASHES={'gtcrn_simple.onnx':'e77603ac0c23dac3227dd2d7135b3a585cbee2679048aecfa886657d3ae1b534',\n15:         'silero_vad_v5.onnx':'6b99cbfd39246b6706f98ec13c7c50c6b299181f2474fa05cbc8046acc274396'}\n19:     def __init__(self,directory):\n20:         import numpy as np\n21:         import sherpa_onnx as s\n25:                 raise ValueError('Audio frontend model fingerprint mismatch: '+name)\n26:         config=s.OnlineSpeechDenoiserConfig(model=s.OfflineSpeechDenoiserModelConfig(\n27:             gtcrn=s.OfflineSpeechDenoiserGtcrnModelConfig(model=str(Path(directory)/'gtcrn_simple.onnx')),\n31:         vc=s.VadModelConfig();vc.silero_vad.model=str(Path(directory)/'silero_vad_v5.onnx')\n33:         # a second duration threshold here; stock SDK still owns model state.\n34:         vc.silero_vad.threshold=.5;vc.silero_vad.min_speech_duration=0.;vc.silero_vad.min_silence_duration=0.\n35:         vc.silero_vad.max_speech_duration=19.;vc.num_threads=1;vc.sample_rate=16000\n36:         self.vad=s.VoiceActivityDetector(vc,buffer_size_in_seconds=22)\n41:     def reset(self):\n42:         self.denoiser.reset();self.vad.reset();self.samples=0\n44:     def process(self,pcm):\n49:         if len(out.samples):self.vad.accept_waveform(out.samples)\n50:         speech=bool(self.vad.is_speech_detected())\n51:         while not self.vad.empty():self.vad.pop()\n58:     def __init__(self,address,pipelines):\n64:     def process_request(self,request,address):\n69:     def process_request_thread(self,*args):\n75:     def handle(self):\n83:                     'backend':'gtcrn-silero-v5-cpu','available':self.server.pool.qsize(),'capacity':self.server.capacity});return\n103: def main():\n105:     parser.add_argument('--models',type=Path,required=True)\n108:     pipelines=[Pipeline(args.models) for _ in range(2)]"
+  },
+  "extra_model_references": [
+    {
+      "file": "board/runtime/audio/asr.py",
+      "line": 75,
+      "text": "elif name.endswith(\".onnx\") and (\"model\" in name):"
+    },
+    {
+      "file": "board/runtime/audio/vad.py",
+      "line": 60,
+      "text": "class EnergyVad:"
+    },
+    {
+      "file": "board/runtime/audio/automatic_capture.py",
+      "line": 12,
+      "text": "from board.runtime.audio.vad import EnergyVad, VadConfig"
+    },
+    {
+      "file": "board/runtime/audio/automatic_capture.py",
+      "line": 20,
+      "text": "self.vad = EnergyVad(self.config, frame_classifier=frame_classifier)"
+    },
+    {
+      "file": "board/runtime/audio/tts.py",
+      "line": 203,
+      "text": "\"\"\"模型目录里的 onnx：`model.onnx` 优先，其次 int8 量化版 `model.int8.onnx`。\"\"\""
+    },
+    {
+      "file": "board/runtime/audio/tts.py",
+      "line": 204,
+      "text": "for name in (\"model.onnx\", \"model.int8.onnx\"):"
+    },
+    {
+      "file": "board/runtime/audio/tts.py",
+      "line": 269,
+      "text": "raise TtsUnavailable(\"未找到 TTS 模型目录（models/tts/*，需含 model.onnx）\")"
+    },
+    {
+      "file": "board/runtime/audio/__init__.py",
+      "line": 20,
+      "text": "'kws': ('KwsConfig', 'KwsHit', 'KwsRunner', 'KwsUnavailable', 'KeywordSpotterBackend',"
+    },
+    {
+      "file": "board/runtime/audio/__init__.py",
+      "line": 21,
+      "text": "'ScriptedKeywordSpotter', 'SherpaKeywordSpotter', 'available', 'read_wav_mono16k'),"
+    },
+    {
+      "file": "board/runtime/audio/__init__.py",
+      "line": 26,
+      "text": "'vad': ('EnergyVad', 'VadConfig', 'VadEvent'),"
+    },
+    {
+      "file": "board/runtime/audio/kws.py",
+      "line": 11,
+      "text": "3. **可测性**：检测后端抽象成 `KeywordSpotterBackend`；单测与无麦克风演示可用"
+    },
+    {
+      "file": "board/runtime/audio/kws.py",
+      "line": 12,
+      "text": "`ScriptedKeywordSpotter` 注入命中，**不需要模型文件与录音设备**。"
+    },
+    {
+      "file": "board/runtime/audio/kws.py",
+      "line": 107,
+      "text": "elif name.startswith(\"encoder\") and name.endswith(\".onnx\"):"
+    },
+    {
+      "file": "board/runtime/audio/kws.py",
+      "line": 109,
+      "text": "elif name.startswith(\"decoder\") and name.endswith(\".onnx\"):"
+    },
+    {
+      "file": "board/runtime/audio/kws.py",
+      "line": 111,
+      "text": "elif name.startswith(\"joiner\") and name.endswith(\".onnx\"):"
+    },
+    {
+      "file": "board/runtime/audio/kws.py",
+      "line": 132,
+      "text": "class KeywordSpotterBackend(abc.ABC):"
+    },
+    {
+      "file": "board/runtime/audio/kws.py",
+      "line": 148,
+      "text": "def __enter__(self) -> \"KeywordSpotterBackend\":"
+    },
+    {
+      "file": "board/runtime/audio/kws.py",
+      "line": 155,
+      "text": "class ScriptedKeywordSpotter(KeywordSpotterBackend):"
+    },
+    {
+      "file": "board/runtime/audio/kws.py",
+      "line": 187,
+      "text": "class SherpaKeywordSpotter(KeywordSpotterBackend):"
+    },
+    {
+      "file": "board/runtime/audio/kws.py",
+      "line": 188,
+      "text": "\"\"\"**真实**后端：sherpa-onnx KeywordSpotter（CPU 基线，16kHz 单声道 float32）。"
+    },
+    {
+      "file": "board/runtime/audio/kws.py",
+      "line": 211,
+      "text": "self._spotter = sherpa_onnx.KeywordSpotter("
+    },
+    {
+      "file": "board/runtime/audio/kws.py",
+      "line": 281,
+      "text": "def __init__(self, bus: typing.Any, backend: KeywordSpotterBackend,"
+    },
+    {
+      "file": "board/runtime/audio/remote_frontend.py",
+      "line": 74,
+      "text": "return {'enabled':True,'backend':'gtcrn-silero-v5-pc-cpu','frames':self.sequence,"
+    },
+    {
+      "file": "tools/audio_frontend_host.py",
+      "line": 1,
+      "text": "\"\"\"Prewarmed stock GTCRN/Silero CPU pipelines, independent of ASR/LLM/TTS.\"\"\""
+    },
+    {
+      "file": "tools/audio_frontend_host.py",
+      "line": 14,
+      "text": "HASHES={'gtcrn_simple.onnx':'e77603ac0c23dac3227dd2d7135b3a585cbee2679048aecfa886657d3ae1b534',"
+    },
+    {
+      "file": "tools/audio_frontend_host.py",
+      "line": 15,
+      "text": "'silero_vad_v5.onnx':'6b99cbfd39246b6706f98ec13c7c50c6b299181f2474fa05cbc8046acc274396'}"
+    },
+    {
+      "file": "tools/audio_frontend_host.py",
+      "line": 27,
+      "text": "gtcrn=s.OfflineSpeechDenoiserGtcrnModelConfig(model=str(Path(directory)/'gtcrn_simple.onnx')),"
+    },
+    {
+      "file": "tools/audio_frontend_host.py",
+      "line": 31,
+      "text": "vc=s.VadModelConfig();vc.silero_vad.model=str(Path(directory)/'silero_vad_v5.onnx')"
+    },
+    {
+      "file": "tools/audio_frontend_host.py",
+      "line": 34,
+      "text": "vc.silero_vad.threshold=.5;vc.silero_vad.min_speech_duration=0.;vc.silero_vad.min_silence_duration=0."
+    },
+    {
+      "file": "tools/audio_frontend_host.py",
+      "line": 35,
+      "text": "vc.silero_vad.max_speech_duration=19.;vc.num_threads=1;vc.sample_rate=16000"
+    },
+    {
+      "file": "tools/audio_frontend_host.py",
+      "line": 83,
+      "text": "'backend':'gtcrn-silero-v5-cpu','available':self.server.pool.qsize(),'capacity':self.server.capacity});return"
+    }
+  ],
+  "model_files": []
+}

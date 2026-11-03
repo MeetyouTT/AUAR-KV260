@@ -1,0 +1,92 @@
+{
+  "started_utc": "2026-10-03T07:52:52.999616+00:00",
+  "scope": "Isolated host kernel/ZOCL build; no module installation",
+  "commands": [
+    {
+      "name": "compiler",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-gcc",
+        "--version"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_module/compiler.log",
+      "sha256": "ee2c2cdcd3e65f25d3cc1bbdae6f9643bc678266cb809a5f91e1bfb429c32896",
+      "elapsed_seconds": 0.011
+    },
+    {
+      "name": "zocl-module",
+      "argv": [
+        "make",
+        "-C",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/sources/linux",
+        "O=/home/ghmd/kv260-runtime-reproduce-20261003c/build/kernel",
+        "ARCH=arm64",
+        "CROSS_COMPILE=/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-",
+        "-j4",
+        "M=/home/ghmd/kv260-runtime-reproduce-20261003c/sources/xrt/src/runtime_src/core/edge/drm/zocl",
+        "modules"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_module/zocl-module.log",
+      "sha256": "e53d5d6a31065774cfd657d6f222fee37b9523838dceccabd984a6a9b8a6e96f",
+      "elapsed_seconds": 5.383
+    },
+    {
+      "name": "strip",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-strip",
+        "--strip-debug",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/artifacts/zocl/zocl.ko"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_module/strip.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_seconds": 0.013
+    },
+    {
+      "name": "modinfo",
+      "argv": [
+        "/sbin/modinfo",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/artifacts/zocl/zocl.ko"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_module/modinfo.log",
+      "sha256": "46907a7b2ada86911cdbf3b7b8ce495d5a95cc8a94dac289d5a311debda3b1dd",
+      "elapsed_seconds": 0.002
+    },
+    {
+      "name": "elf",
+      "argv": [
+        "/home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-readelf",
+        "-h",
+        "-S",
+        "/home/ghmd/kv260-runtime-reproduce-20261003c/artifacts/zocl/zocl.ko"
+      ],
+      "cwd": "/home/ghmd/kv260-runtime-reproduce-20261003c",
+      "exit_code": 0,
+      "log": "/home/ghmd/kv260-runtime-reproduce-20261003c/logs/zocl_module/elf.log",
+      "sha256": "7621c10d8dcae1929f2c25ebccbda8aeaff1364261d9ae2636b9d3f08457ecb7",
+      "elapsed_seconds": 0.008
+    }
+  ],
+  "passed": true,
+  "board_verified_this_run": false,
+  "runner_sources": {
+    "board_preflight.py": "05254991e395bdd32d386e74b965685394e121bc1155a541ad20b8127f8f92b2",
+    "build_dfx.py": "0a98347c271834842f9696ecf3ac2ebebb61384587c538c49169a959322eb8e6",
+    "build_zocl.py": "7188d0018e29bbe0b49d66ef0ce575254caa01626e1672be46e747845c3fd9b6",
+    "common.py": "c321a0e824353053fb1edb4a57d4022f615f1a5acb67d2001cdacf751235ea4e",
+    "prepare_sources.py": "7871e054a337a3b9f7dba052705a6a2bcea73513475811f95c56fb13e78dee3b"
+  },
+  "artifact": {
+    "path": "/home/ghmd/kv260-runtime-reproduce-20261003c/artifacts/zocl/zocl.ko",
+    "sha256": "9c1e7c008b07442e8b7beb8d2938fccf5d5ea950b13fc2a6172d330304715b78",
+    "bytes": 339408,
+    "board_verified_this_run": false
+  },
+  "finished_utc": "2026-10-03T07:52:58.474025+00:00"
+}

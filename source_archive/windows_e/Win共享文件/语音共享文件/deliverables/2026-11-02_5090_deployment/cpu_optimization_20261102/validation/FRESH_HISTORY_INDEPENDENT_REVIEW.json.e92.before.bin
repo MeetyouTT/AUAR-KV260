@@ -1,0 +1,166 @@
+{
+  "schema": "aura-fresh-history-independent-review-1",
+  "reviewer": "gtk_cpu_optimize child agent, independent local source review",
+  "candidate_sha256": "e92d8b0c461ff060d2e6d5e0aceef81c13ad1580cc3f66ad118b27c805b9f102",
+  "verdict": "HOLD_CURRENT_FINAL_SOURCE_ALIAS",
+  "deployment_or_board_validation_authorized_by_this_report": false,
+  "scope": "Offline static comparison and four isolated public in-memory source-reference probes only. Original existing 16-test evidence was inspected, not rerun. Candidate source was not edited. No SSH, board query/load, service/GUI/camera/axis action, database/model access or original_modules execution occurred.",
+  "inputs": [
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\camera\\validate_fresh_final_history_readonly.py",
+      "sha256": "e92d8b0c461ff060d2e6d5e0aceef81c13ad1580cc3f66ad118b27c805b9f102"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\maintenance_original_axis_20261101\\checkpoint_review\\validate_current_final_complete_readonly.py",
+      "sha256": "2b7da68f3f0e1652e9fe5a86ae1605ead4bb060f28cf8d6eb3d829048081ed51"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\camera\\CAMERA_NORMAL_STOP_REUSE.json",
+      "sha256": "b2128b43d5a182f2950c2858dc9bf0fce4754b6b7bda47eb2f71e8e066bde480"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\camera\\FRESH_FINAL_HISTORY_TESTS.json",
+      "sha256": "4700a46f9e3deea604c3cad703e6d9b3dd40f4ad679c9c23e4efd4183c671f6e"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\camera\\FRESH_FINAL_HISTORY_TESTS.log",
+      "sha256": "600878f8f576530c1173c1e4c105b9769b686a869935cdfd012c9b5c13b1c85d"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\camera\\test_fresh_final_history_readonly.py",
+      "sha256": "69a3dc94e963b855a8a202268c96c71b2caff62878e1cef0ea2646a619fd07bb"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\validation\\check_fresh_history_source_aliases.py",
+      "sha256": "06b2ff96b8d49e27beb3d5e8533a98115e973ced05d329100c580e43f94bda08"
+    },
+    {
+      "path": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\validation\\FRESH_HISTORY_ALIAS_NEGATIVES.json",
+      "sha256": "8abf2d111dc002ba7905d5956f12d7d8d6f13e76d4e54a182d15bb70e1808eba"
+    }
+  ],
+  "existing_test_evidence": {
+    "tests_run": 16,
+    "passed": true,
+    "failures": 0,
+    "errors": 0,
+    "candidate_sha256": "e92d8b0c461ff060d2e6d5e0aceef81c13ad1580cc3f66ad118b27c805b9f102",
+    "exact_original_pure_validators_used": [
+      "load_business_checkpoint",
+      "make_native_seed",
+      "_sealed_source",
+      "_legacy_source"
+    ],
+    "real_board_cli_or_original_modules_loader_run": false,
+    "real_checkpoint_marker_proc_or_service_io": false,
+    "native_context_or_aura_cdll_created": false,
+    "synthetic_metadata_only": true
+  },
+  "positive_findings": [
+    {
+      "area": "Original readers and Native exclusion",
+      "evidence_lines": [
+        122,
+        329,
+        382,
+        393,
+        407
+      ],
+      "finding": "The actual CLI pins the original four Python sources; fresh -B -I -S and aarch64 guards precede exact original module execution in a sealed board namespace. It calls original load_business_checkpoint without a now_ns override, then original _sealed_source for current and every v2 archive and _legacy_source for the terminal. No NativeContext instance, aura CDLL construction, restore or consume call is present. Seed/Recovery ctypes structures in pure validators are not NativeContext.",
+      "result": "STATIC_PASS"
+    },
+    {
+      "area": "Current owner, normal stop, time and counter domains",
+      "evidence_lines": [
+        160,
+        215,
+        298,
+        329
+      ],
+      "finding": "Fresh kernel/owner/startup/stop-intent/result pins are tied to the stopped owner. Both services must be inactive/dead with MainPID 0, no job and successful normal exit. The camera infinite-stop protection is checked, old owner births must be absent and live Native/VART/DPU/MMIO owners cause HOLD. Current source boot/PID/birth and stop/capture monotonic bounds are checked. All declared current SFace/optional/Native/recovery lower bounds are checked within the current domain, with probe-success progress limited to unchanged fault/attempt generation.",
+      "result": "STATIC_PASS"
+    },
+    {
+      "area": "Exact complete history and manifest scope",
+      "evidence_lines": [
+        254,
+        267,
+        354
+      ],
+      "finding": "The expected archive manifest concatenates a fresh prefix and accepted ordered segments exactly. Chain traversal checks each exact ordered row, raw archive SHA, edge boot/source checkpoint identity, duplicate paths/boots, canonical v2 checkpoint SHA and original archived semantics. It requires an exact terminal legacy anchor at the expected count, preserving lower-bound/unknown-tail scope, and refuses bounded traversal or early terminal truncation. Archived counters are not added to or required as current lower bounds. The current manifest is tied to the actual stopped-owner run config; archived manifests remain tied to their own archive provenance.",
+      "result": "STATIC_PASS_WITH_SOURCE_INDEPENDENCE_BLOCKER_BELOW"
+    },
+    {
+      "area": "Read-only behavior and failure path",
+      "evidence_lines": [
+        88,
+        153,
+        407
+      ],
+      "finding": "Snapshot reads use O_RDONLY, NOFOLLOW, bounded regular files and per-path before/after identities, then recheck every input. The adapter has no marker/seed/checkpoint/database/model write, service mutation, network or hardware command. Its only systemctl use is show. Failure reports HOLD without recovery. This local review and its isolated probes did not execute guard, original_modules or the board CLI.",
+      "result": "STATIC_PASS"
+    }
+  ],
+  "blockers": [
+    {
+      "id": "CURRENT_FINAL_SOURCE_ALIAS",
+      "severity": "BLOCKS_INDEPENDENT_HISTORY_PROVENANCE_CLAIM",
+      "candidate_lines": [
+        196,
+        198,
+        199,
+        262,
+        266
+      ],
+      "finding": "The source-reference exclusion only compares path strings. Snapshot validates each source pin but does not reject another path with the pending-final SHA, nor a reserialized current checkpoint or an envelope containing it. The history head can therefore be sourced from the very pending final it is intended to check independently.",
+      "negative_cases": [
+        {
+          "case": "same_sha_sealed_copy",
+          "accepted": true,
+          "rejection": null,
+          "same_sha_as_pending_final": true,
+          "source_is_pending_final_document_or_envelope": true,
+          "only_source_head_reference_changed": true
+        },
+        {
+          "case": "reformatted_same_owner_final",
+          "accepted": true,
+          "rejection": null,
+          "same_sha_as_pending_final": false,
+          "source_is_pending_final_document_or_envelope": true,
+          "only_source_head_reference_changed": true
+        },
+        {
+          "case": "checkpoint_envelope",
+          "accepted": true,
+          "rejection": null,
+          "same_sha_as_pending_final": false,
+          "source_is_pending_final_document_or_envelope": true,
+          "only_source_head_reference_changed": true
+        }
+      ],
+      "reproduction": {
+        "script": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\cpu_optimization_20261102\\validation\\check_fresh_history_source_aliases.py",
+        "method": "Import the existing public in-memory fixture without invoking its unittest runner. For each case create a fresh fixture, change only source_bindings.head to a separately pinned representation of the pending final and recompute the provenance receipt pin. Call candidate.validate_inputs. Use the same synthetic legacy SHA substitution as the existing fixture. The unchanged baseline and all three aliases are accepted.",
+        "scope": "This proves acceptance at the source-independence gate, not a successful real board CLI run. The checkpoint, expected head, archive list and remaining semantic-chain inputs are unchanged. A real hardlink was not created; same-byte separate-path copy acceptance was reproduced.",
+        "candidate_unchanged_before_after": true,
+        "board_or_proc_io": false,
+        "tests_run": 4
+      },
+      "minimal_recommendation_no_patch_applied": [
+        "Reject any source reference whose SHA equals a forbidden pending-final or stop-result pin, in addition to existing path exclusions. Include all other existing forbidden object pins where available. This catches accidental copies and hardlink aliases without a general signature framework.",
+        "Before dereferencing the JSON pointer, reject a source object with schema aura-native-protection-checkpoint-2 whose seed boot_id, source_pid and source_birth_ticks identify the current stopped camera run. Apply the same check to a checkpoint object in the supported/known envelope shape (the reproduced case uses its checkpoint member). This catches the demonstrated different-format and envelope aliases while permitting older-boot or older-owner archive receipts. Add these three directed cases to the source-reference boundary tests.",
+        "Keep a real fresh receipt explicitly captured and pinned by root before the stop, using original public metadata plus previously accepted ordered history receipts. Do not manufacture independent provenance by copying the pending final into a thin receipt. The source/receipt producer is part of the trusted operational procedure; a thin wrapper does not prove authenticity against a malicious root."
+      ],
+      "threat_boundary": "This is an accidental self-attestation/provenance-routing check. No claim is made that a script controlled by root can authenticate metadata against a malicious root who can rewrite all files and pins. No broad signing or hostile-root defense is requested."
+    }
+  ],
+  "nonblocking_observation": "The adapter permits stop_intent_mono_ns <= captured_mono_ns whereas the original comparison used strict <. This review has not demonstrated a real monotonic-clock false pass from equality; the reproduced source-alias gap alone determines HOLD.",
+  "remaining_before_real_pass": [
+    "Patch and independently recheck only the source-alias boundary with the directed negative cases; preserve original readers, exact chain, current counter-domain and normal-stop checks.",
+    "Root must supply genuinely fresh current boot/owner/config/manifest/stop pins, original pre-stop bounds and independently captured ordered history provenance. Unknown values may not be inferred from the pending final.",
+    "A real later run still requires exclusive writer freeze, successful original normal stops and fresh ARM -B -I -S execution. This local result does not assert any current board service or owner state."
+  ],
+  "candidate_modified": false,
+  "board_actions": []
+}

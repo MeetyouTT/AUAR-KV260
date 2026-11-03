@@ -1,0 +1,47 @@
+v18业务UI减负候选，目标保持16fps
+
+原因与证据
+用户反馈主要是帧率。root七段采样20份，20.614秒83完成帧，约4.03次/秒。
+最长抽样刷新608.61ms，其中runtime_widgets502.155ms，settings25.431ms；
+settings抽样max126.971ms。business_public抽样中位1.625ms，不优先动记忆健康链路。
+这批采样发生在旧boot；root随后发现板卡重启，当前恢复由root负责。本候选没有设备操作。
+
+只改两份显示源码
+1. board_avatar_gtk.py：refresh_settings/refresh_runtime中54个控件setter调用先比较当前值，
+   一致时跳过GTK写入。仍每次计算新状态，命令先处理、原刷新频率、权限与按钮判断均保留。
+   比较直接读取widget，不增加字幕/姓名/错误正文缓存；只有applied/skipped数值计数。
+2. x11_display_activity.py：原5秒活动唤屏每次重新find_library/装载符号；改为缓存两个库接口，
+   在原有DisplayActivity构造阶段预载。构造阶段不打开X display、不改变熄屏策略；
+   活动/暂停/错误重试的5秒节奏、每次独立open/sync/close完全保留。
+   不新增线程，不把Xlib调用并发到GTK外；未引入新的Xlib线程初始化前提。
+   502ms尚不能单凭粗段断言全由查库造成；新下级计时用于实机确认。
+
+固定数值计时
+保留7段已有计时。新增ui_runtime_timings_ms（services_read/preview_read/display_activity/
+voice_dialog/widgets/total/thread_cpu）与ui_settings_timings_ms（mixer_read/device_scan/
+widgets/total/thread_cpu），区分控件、X11、sysfs和调度/锁等待。
+新增ui_callback_previous：上一轮完整刷新wall_ms/thread_cpu_ms/publish_ms、completed_mono、
+sequence和succeeded，包含bridge.publish；在下一轮公布，字段明确是previous。
+原ui_tick_ms仍保持兼容的发布前范围，不能再当成完整callback。没有额外publish或timer。
+collect_ui_stage_metadata.py只导上述固定数字/布尔与原安全字段，root独占执行。
+
+本地回归的实际范围
+10项界面/唤屏检查和6项采样白名单检查通过；TEST_RESULTS给出真实加载依赖SHA核对。
+使用真实before/after刷新方法与合成widget对比，闲置、思考、说话、暂停、取消、错误六状态
+最终控件值严格相等。真实tick方法验证pause/cancel在同次刷新中更新，异常仍显示且调用cancel。
+30ms合成publish等待被完整callback计时捕获，且以下一轮previous的序号公布。
+十次相同状态重复刷新调用数减少，具体基线/候选数字见TEST_RESULTS；这是控件写入次数，
+不是GTK物理绘制时间或板端FPS收益。未加载native库、麦克风、相机、模型或真实私库。
+测试初始夹具误用了GtkStage类名，修正为实际BoardAvatarStage后通过；产品代码未因此改变。
+
+集成与边界
+基于v18源码映射startup12a26，before GTK c62dc7、display985d2f已逐字节核对。
+root先核新boot/当前入口，仅合两份显示源码和对应startup source pins；不得覆盖H01、speakerclose、
+memoryr2、当前配置或最新监听偏好。native b243、pair9987、目标16fps、音频ACK、原8帧队列、
+ASR调度、角色资源和全状态motion候选都未改变。
+板端恢复后由root采同负载短窗口，核实际完成速率/帧间、UI完整刷新、音频队列与ACK。
+尚无实机提帧或控制延迟通过结论；不因本地检查通过就宣称稳定16或24fps。
+
+工程参考
+Xlib官方线程约束：https://xorg.freedesktop.org/archive/X11R6.8.2/doc/XInitThreads.3.html
+本候选保留原UI线程上的Xlib调用，不新增并发Xlib路径。

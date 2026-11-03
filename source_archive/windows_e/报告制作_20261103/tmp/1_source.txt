@@ -1,0 +1,242 @@
+
+---PAGE 1---
+第十届
+全国大学生集成电路创新创业大赛
+
+
+---PAGE 2---
+1
+目 录
+1 验证环境 2
+1.1 运行环境 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+1.2 验证文件结构 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+1.3 验证数据集与预处理 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+1.4 模型权重 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+2 验证流程 3
+2.1 预加载与环境初始化 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+2.2 光占比计算 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+2.3 推理精度计算 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+2.4 推理时间计算 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+3 验证结果与分析 6
+3.1 推理时延 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+3.2 推理精度 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+3.3 总得分 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+
+---PAGE 3---
+2
+1 验证环境
+本章明确了验证过程所需的软硬件运行环境、验证文件结构、数据集预处理与权重
+结构。通过完整定义验证全流程的基础条件，确保了实验方案的绝对封闭性、可复现性
+与结果的可追溯性。
+1.1 运行环境
+本验证过程基于曦智科技官方光计算仿真平台 LT − Simulator _v1.4.3 完成。该验
+证在搭载 Linux 或 Windows 通用操作系统的终端上即可高效执行。软件环境方面，要
+求系统配置 Python 3.9 及以上版本，并依赖 PyTorch 2.0 及以上版本的深度学习框架。
+此外，验证脚本仅调用 Python 标准库与仿真平台官方 API，无额外库环境依赖。
+1.2 验证文件结构
+本项目包含训练和推理两个主要模块，文件结构如图1
+图 1: 整体文件结构
+在实际评测中， 仅需将infer 文件拷贝至 LT-Simulator_v1.4.3 并在根目录直接运行
+核心推理脚本 Inference.py，系统将通过相对路径解析模型权重与测试集，并测量推
+理精度和运行速度并计算光线性占比。具体文件结构如图 2 所示。
+
+---PAGE 4---
+3
+infer/
+data/ MNIST/ raw/ MNIST 数据集
+cnn_small_qat.pth 4-bit 模型权重与截断标尺
+Inference.py 推理脚本-光占比、时延与精度计算
+图 2: 验证文件结构图
+1.3 验证数据集与预处理
+本次验证采用 MNIST 手写数字 10,000 张测试集。输入的单通道 28 × 28 原始灰度
+图像。首先执行中心裁剪，保留 22 × 22 核心区域，随后利用 LANCZOS 高阶插值算法
+高保真压缩至 14 × 14 分辨率。数据集存放于 data/MNIST/raw/ 目录。
+1.4 模型权重
+验证模型的网络为单层 CNN-FC 架构，包含一层 3 × 3 卷积、最大池化及一层全连
+接输出。模型权重存放于 cnn_small_qat.pth。为降低推理时延，该权重文件集成了模
+型网络参数与 PACT 量化的截断标尺 α。 在推断启动阶段， 脚本可直接从中解析离散化
+参数，将浮点权重预先转换为 4-bit 离散态。权重文件的核心键值结构解析如图 3 所示。
+网络张量参数区 硬件截断标尺区
+cnn_small_qat.pth
+model_state_dict alpha_dict
+conv1.weight
+Shape: [16, 1, 3, 3]
+Type: Float32
+fc1.weight
+Shape: [10, 784]
+Type: Float32
+conv1_alpha
+Value: e.g., 0.528
+Type: Scalar Float
+fc1_alpha
+Value: e.g., 0.415
+Type: Scalar Float
+图 3: 模型权重文件结构
+2 验证流程
+本章基于曦智科技光计算平台提供的 Python 仿真 API， 解析验证脚本的调度逻辑。
+验证分为四个阶段：初始化、光占比计算、推理精度计算与推理时间计算。
+
+---PAGE 5---
+4
+2.1 预加载与环境初始化
+为实现底层光阵列与上层 PyTorch 框架的无缝对接，预加载阶段负责完成模型加
+载、权重的离散化标定、句柄的申请以及初始化。
+在此阶段，有几个核心的评测控制参数可根据验证需求进行调整：
+评测样本数量 (num_samples)：用于设置推理的图片总数。在代码第 109 行修改。
+批处理大小 (batch_size)：位于代码第 155 行。可依据评测需求进行调整。
+预加载阶段的核心调度代码如下所示：
+146 # 1. 初 始 化 模 型 与 权 重 ， 加 载 PACT 截 断 标 尺
+147 checkpoint = torch . load (os. path . join ( current_dir , "CNN -FC - Weight .
+pth "), map_location = "cpu ")
+148 clean_dict = {k. replace ( 'module .', ''): v for k, v in checkpoint .
+get( " model_state_dict ", checkpoint ). items ()}
+149
+150 model = OpticalCNN16_14x14 (). eval ()
+151 model . load_state_dict ( clean_dict , strict = False )
+152 # 调 用 底 层 静 态 预 量 化 ， 锁 定 物 理 内 存
+153 model . pre_quantize ( checkpoint .get( " alpha_dict ", { 'conv1 ':
+clean_dict .get( 'conv1 . alpha_w '), 'fc1 ': clean_dict .get( 'fc1 . alpha_w ')}))
+154
+155 # 2. 装 载 仿 真 器 与 数 据 集
+156 lt_model = load_gazelle_model () # 申 请 光 仿 真 器 句 柄
+157 transform = transforms . Compose ([
+158 transforms . CenterCrop (22) , transforms . Resize ((14 , 14) ,
+interpolation = InterpolationMode . LANCZOS ), transforms . ToTensor ()
+159 ])
+160 # batch_size =1
+161 test_loader = DataLoader ( datasets . MNIST (os. path . join ( current_dir , "
+data "), train =False , transform = transform , download = False ), batch_size =1)
+162
+Listing 1: 模型预装载与初始化
+
+---PAGE 6---
+5
+2.2 光占比计算
+光计算占比 （Ro） 定义为可部署至光计算阵列的线性算子计算量占模型总线性计算
+量的比例。理论上，线性层的乘加累积操作数（MACs）核心计算公式如下：
+Ro = 光线性算子 MACs 总和
+线性算子 MACs 总和 × 100% (1)
+针对本框架设计的极简架构， 卷积层 （MACsconv = Cout ×Hout ×Wout ×kh ×kw ×Cin）
+与全连接层（MACsfc = Dout × Din）的理论计算量分别为 28, 224 与 7, 840。 由于本模型
+所有线性算子均可映射至光阵列，最终理论光计算占比为：
+Ro = 28224 + 7840
+36064 × 100% = 100.00% (2)
+光计算占比通过挂载 PyTorch 的 register_forward_hook 钩子函数，解析计算量。
+当 dummy_input 流经网络时，钩子函数会实时捕获 nn.Linear 和 nn.Conv2d 的特
+征图尺寸，并计算乘加累积操作数 MACs，从而计算出光计算线性占比。
+84 def hook_fn (module , input , output ):
+85 name = {m: n for n, m in model . named_modules () }[ module ]
+86 if isinstance (module , nn. Linear ):
+87 macs_dict [ name ] = output . numel () * module . in_features
+88 elif isinstance (module , nn. Conv2d ):
+89 macs_dict [ name ] = output . numel () * math . prod ( module . kernel_size )
+90
+91 # 遍 历 挂 载 钩 子 并 执 行 空 前 向 传 播
+92 for m in model . modules ():
+93 if isinstance (m, (nn.Linear , nn. Conv2d )):
+94 hooks . append (m. register_forward_hook ( hook_fn ))
+95
+Listing 2: MACs 计算量统计
+2.3 推理精度计算
+推理精度的验证基于 MNIST 测试集的真实分类表现。在全集推理循环中，模型输
+出的张量表征的是 10 个类别的 Logits。脚本直接提取其最大值所在索引，与真实标签
+targets 进行对比累计，并在全集遍历结束后统一输出百分比精度。
+130 # 精 度 校 验 ： 提 取 Logits 最 大 概 率 类 别 与 目 标 比 对
+
+---PAGE 7---
+6
+131 if logits . argmax (dim =1). item () == targets . item ():
+132 correct += 1
+133
+134 # 循 环 结 束 后 统 一 输 出
+135 print (f "=> 最 终 测 试 精 度 : {( correct / num_samples ) * 100:.2 f}% ")
+136
+Listing 3: 推理精度计算
+2.4 推理时间计算
+本脚本推理时间的计算公式定义为：平均单图时延 = 评测总耗时 ÷ 总测试样本数。
+在测速代码的具体实现中，计时器 time.perf_counter() 包裹了整个 DataLoader
+的遍历循环以测量光计算系统在实际推理中的总用时。
+120 start_time = time . perf_counter ()
+121
+122 with torch . no_grad ():
+123 for i, (inputs , targets ) in enumerate ( test_loader ):
+124 if i >= num_samples : break
+125
+126 logits = optical_forward (model , lt_model , inputs )
+127
+128 if logits . argmax (dim =1). item () == targets . item ():
+129 correct += 1
+130
+131 end_time = time . perf_counter ()
+132
+133 total_time = end_time - start_time
+134 print (f "=> 单 图 真 实 推 理 时 延 : {( total_time / num_samples ) * 1000:.2
+f} ms ")
+135
+Listing 4: 推理时间计算
+3 验证结果与分析
+3.1 推理时延
+单图推理时延随测试样本数的变化曲线如图 4所示，测试初期因缓存未命中存在小
+幅波动，随着测试进行时延逐渐稳定并趋于收敛。
+
+---PAGE 8---
+7
+0 2000 4000 6000 8000 10000
+T est Samples
+170
+175
+180
+185
+190
+195
+200Inference Latency (ms)
+Inference Latency (Independent Avg per 100 Samples)
+Avg per 100 Samples
+Global Avg: 176.96ms
+图 4: 单图推理时延变化曲线
+最终全测试集平均单图推理时延为：
+Latency = 178.62 ms (3)
+3.2 推理精度
+分类精度随测试样本数的变化曲线如图 5所示，测试初期因样本量较少存在小幅波
+动，随着测试样本数增加，精度曲线稳步上升并最终收敛。
+0 2000 4000 6000 8000 10000
+T est Samples
+95
+96
+97
+98
+99
+100Classification Accuracy (%)
+Classification Accuracy (Independent Avg per 100 Samples)
+Acc per 100 Samples
+Final Acc: 98.50%
+图 5: 分类精度变化曲线
+
+---PAGE 9---
+8
+最终全测试集分类精度为：
+Accuracy = 98.55% (4)
+3.3 总得分
+赛事总得分随测试样本数的变化曲线如图 6所示，得分随测试进行逐步上升并最终
+收敛，验证了方案的稳定性。
+0 2000 4000 6000 8000 10000
+T est Samples
+25.5
+26.0
+26.5
+27.0
+27.5
+28.0
+28.5
+29.0Competition Score
+Competition Score (Independent Avg per 100 Samples)
+Score per 100 Samples
+Final Score: 28.07
+图 6: 总得分变化曲线
+最终赛事总得分：
+Score = 28.09 (5)
+本方案所有核心指标得分如下：
+光计算占比：100.00%
+单图平均推理时延：178.62 ms
+测试集分类精度：98.55%
+最终赛事总得分：28.09

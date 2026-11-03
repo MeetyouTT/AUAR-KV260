@@ -1,0 +1,43 @@
+v15识别阶段角色画面保持：只读可行性方案
+
+决策状态：仅方案，未实现、未测试、未部署。主控先验证真正78MiB Paraformer Small的计算收益；只有它不足以缩短等待时再考虑本方案。不新增恒定低fps，不改摄像头、身份、原ASR参数、Store、音频/逐包权限或完整ACK。
+
+约束核对
+- E:/Win共享文件/AGENTS.md只有模型存储/分析目录约定，无所有阶段必须16fps的用户禁令。
+- 项目AGENTS.md第200行“禁止静默退到8fps”在旧形象候选段，第218行同帧率要求用于人物替换配对A/B；当前首段和README保存16fps目标及尚未达到物理16的事实。所审用户文本/AGENTS未发现“ASR阶段也禁止短暂保持角色画面”的明确要求；不能把助手早先采用的严格实现规则当作永久用户禁令，也不能因此静默改变体验。
+- 当前StrictLocalPortrait.set_fps只收16，formal_yuki.prepare_pair也核stable_avatar_fps=16。这些检查保留。若以后主控选择实施，应明示“识别时短暂保持画面，其余阶段目标16”，不能将保持期间统计为仍在16fps出新帧。
+
+具体接线
+1. 原native_yuki.create_gl_area中的YukiArea有独立主线程GLib timer：schedule_frame205、tick_native209、rendered220。tick_native在目标16节奏调用rendered；rendered做Native.offer、EGL bind/resize、yuki_render和swap。GTK主tick、按钮/状态、Recording/StreamingController、音频和相机都可继续运行，仅跳过此原生绘制，不暂停GTK主循环。
+2. 最小验证方案可从既有local_transcription.state=='TRANSCRIBING'取一个缓存布尔。Recording._queue_transcription在submit后设置该状态，直到ASR之后的start/transcript被消费才变GENERATING。因此它含很短的排队、preempt和admission区间，不是精确native decode窗口，公开模式必须称“识别阶段画面保持”。无需读取或保存转写正文。
+3. 若要求严格只覆盖asr.transcribe：Jobs._execute在该调用前后用try/finally维护当前owner的asr_inflight布尔。不能用THINKING或pending代表ASR；它们还覆盖LLM/TTS。现有latency asr_calls在调用前加1但未立即publish，asr_completed也不是可靠实时入口。owner仅在内部匹配，公开只给布尔/有界数值，不输出request/CID。
+4. ASR线程只更新状态，不操作GTK/EGL。GTK已有100ms业务刷新取此布尔并缓存给YukiArea；16Hz绘制回调只看缓存，不每帧调用jobs.public、不新增网络/模型查询。默认策略关闭，target16和原定时器正常路径原样。
+
+进入/恢复边界
+- 只对已完成首次真实swap且pair READY、窗口mapped、麦克风/前端无活跃采集、真实音频输出空闲且无待播放音频的本轮识别启用。首次加载和首帧就绪不能保持；不隐藏/unrealize窗口、不set_enabled(False)、不清mailbox.ready、不启旧PNG fallback。
+- 进入时最多强制一帧采用最新不播放控制，避免把上一轮张嘴或动作中途帧长时间固定。保持期间mailbox仍为latest-one、有界替换；控制/FSM继续，字幕“正在识别/思考”和取消/暂停按钮继续刷新。
+- ASR完成、拒绝、失败、取消、新owner、任何音频/反馈即将播放时立即退出。更新只能清本owner，旧finally不得撤销新owner策略。必须有固定有限保持预算，不能与120秒job期限等同；预算到达即恢复原绘制，不阻断业务。具体预算须在公开试验前固定。
+- map/resize/expose需强制重绘或先退出保持；unrealize/context错误仍沿原pair.fail和取消路径。不能因保持而吞掉原失败回调。现GTK draw回调只返回True，普通EGL前缓冲可保持，但遮挡恢复/缩放后是否完整保留必须实际验证，不能仅凭fake保证。
+- 退出时只消费最新mailbox并绘制一帧，next_frame设到当前单调时钟后的一个原周期，不补绘漏帧。现C++ advance已将单次elapsed截到0.25秒，最多15个author tick，恢复时仍可能有一帧追赶开销；不得循环补完整停顿、伪造now或改音频sample时钟。新控制仍保留原150ms新鲜度/owner校验。
+
+状态与真实性
+- formal_native_yuki.display_status目前把frame_scheduling_active写成visible and ready；若以后保持必须另给render_policy/hold_active/hold_reason='asr_phase'并准确反映没有新帧。frames/paint_at只能由真实swap更新，age_ms自然增长，不把GTK tick当native帧。
+- pair.require_ready只核准备和已绘制标志，未使用paint age，正常保持不要求放宽身份/模型绑定。上下文丢失、未初始化和原真实渲染失败仍须fail closed。任何外部健康门若使用帧age，需要区分主动保持与失活，不能直接扩大TTL来掩盖。
+
+预期与拒绝风险
+- ASR3线程与持续相机、GTK/native计算竞争4核；停止无声识别期的重复native render有释放CPU/GPU提交预算的合理性，且能减少主线程native回调阻塞。实际可释放比例未知，native_call_ms是wall而非CPU，不能用单帧24ms乘帧数宣称CPU收益。
+- 此方案不会减少27B/OmniVoice计算；若真正瓶颈是ASR模型本身，即使保持画面也可能收益很小。若用户不接受识别期间动画静止，或公共样本没有稳定ASR收益、恢复画面/控制产生卡顿，直接保留现役策略。
+
+实施前测试方案（本轮未执行）
+1) 纯fake驱动实际timer方法：默认路径仍target16；TRANSCRIBING进入、GENERATING/错误/取消退出；首次swap不能被跳过；最大保持预算；正常GTK状态/按钮tick继续；map/resize/unrealize/close；音频/反馈入队先恢复；旧owner晚完成不影响新owner；不补漏帧、不伪造frames/paint_at。
+2) 同一公开WAV、同原ASR3、相同相机和GUI下做正常/保持/保持/正常受控对照。分开记录模型加载、预热、实际decode wall/processCPU、线程调度等待、GTK响应及恢复第一帧。若用独立探针模型，必须承认正式ASR仍resident和进程/GIL差异，不能冒充正式完整回合验收。
+3) 真正正式回合再核ASR结束到首包/完整播放ACK、视觉身份状态和恢复后的原绘制节奏；不能只测ASR更快就声称扬声器首声改善。画面冻结的体验取舍需按主控最新用户沟通记录如实说明。
+
+只读来源与SHA
+- tools/native_yuki.py b5193b8766bb3bfe58f748affefbb0cebda9da6e33703dbef41833dfd789e8a4。
+- tools/formal_native_yuki.py 25e648a9630c78843ea188269e2655eac2a412e19c0ed854042d3bcbe87e0453。
+- tools/formal_yuki.py 610696bfb89c77a295962e9186f6f5c069ed317234e6ad766d082203e523285d。
+- tools/board_recording.py f5be518103182bc49eb6af85a82e2b185c43045538875cebad4e03ffee33df00。
+- board/runtime/audio/board_dialogue_jobs.py 71fd1ac8e2ddb2e20eeb572063cc69e370e18f40af4a97fb65e2d8258bae45a0。
+以上本地源均核对first_wait_integration/baseline_manifest保存的组件pin；v14/v15后续改动未替换这些源。v15 GTK为presentation_idle_candidate/after/tools/board_avatar_gtk.py 7d95b5f682f7abf4a69509d5843c3345dcc31f8dbefeb0e9f3af27b19aa3542d。
+当前腰部构图C++来源appearance_native_framing/yuki_host.cpp SHA264d34734302a36b6dd620529845efa8461d03bc3b63117b2547cd1a466f729e，对应lib887546c09eb1897845c8d7f55a9e3f9b9c761448c7410f2b599259ae0b51efd2；无需改ABI、构图、纹理或shader。runtime/playback.cpp的advance截断逻辑作为源码依据读取，未加载native库。本轮没有远程核验或运行测试。

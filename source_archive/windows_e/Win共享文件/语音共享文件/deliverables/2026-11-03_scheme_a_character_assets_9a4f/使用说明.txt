@@ -1,0 +1,21 @@
+AUAR·雪妃 9a4f 工程包：正式角色素材补全
+
+本目录的 auar_xuefei_character_enhanced.rar 是在上一版上板资料扩充包基础上补入正式角色素材的新包，唯一根目录仍为 auar_xuefei。旁边提供同版解包目录。
+
+新增5件正式角色输入：
+  src/assets/yuki/model.runtime.json
+  src/assets/yuki/model.source.ems.json
+  src/assets/yuki/source_profile.json
+  src/assets/yuki/yuk_0.ems.resx.json
+  src/assets/yuki/yuk_0.ems/tex-texture.png
+并附匹配的 ARM64 渲染库 src/tools/libaura_yuki.so。原渲染器源码仍在 src/native/avatar。
+
+部署映射已改为包内source。无需为上述6项提供外置原件，9a4f的380项组件SHA及启动指纹保持一致；其余15组外置输入仍按原清单准备。本次没有增加其他AI模型权重。
+
+Ubuntu核对：进入 auar_xuefei 后执行
+  python3 -B build/check_character_assets.py --out /tmp/auar_character_check.json
+回执路径应全新且在包外。也可增加 --runtime 指向离线安装器生成的 aura 运行根。
+
+本轮已从RAR重新解包，逐文件SHA通过；素材57项检查、11项正式配对引用、4份设置、439项运行文件比对通过。原prepare_pair在只读文件树和Python3.9.9中实跑，未修改原验证器。破坏纹理后被拒绝。147项历史证据复核及Skill Tcl的15单测/73mock再次通过。
+
+这是素材归集及离线验证，没有操作目标板的当前GUI、相机、麦克风、固件、模型服务或转轴，也没有新增实板显示/帧率验收。完整结果见 archive_verification.json。原44MB源码包和57MB扩充包保留。

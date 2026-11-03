@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920, initial-scale=1">
+  <title>AUAR·雪妃｜一轮对话的数据流</title>
+  <style>
+    * { box-sizing:border-box; }
+    html,body { margin:0; width:1920px; height:1080px; overflow:hidden; background:#f7fbff; }
+    body { font-family:"Microsoft YaHei UI","Microsoft YaHei","Segoe UI",sans-serif; font-weight:400; }
+    #aura-dialogue-dataflow { position:relative; width:1920px; height:1080px; --font-size-base:21px; font-size:21px; }
+    #aura-dialogue-dataflow .text-small { font-size:18px; }
+    #aura-dialogue-dataflow .text-muted { color:#647c92; }
+    #aura-dialogue-dataflow h2,#aura-dialogue-dataflow h3 { margin:0; font-weight:500; }
+    #aura-dialogue-dataflow .ad-heading { position:absolute; top:43px; left:64px; right:64px; display:flex; justify-content:space-between; padding:0; }
+    #aura-dialogue-dataflow .ad-heading h2 { font-size:40px; }
+    #aura-dialogue-dataflow .ad-heading>span { font-size:24px; color:#4c6e8e; }
+    #aura-dialogue-dataflow .ad-meta { position:absolute; top:108px; left:66px; width:775px; margin:0; gap:24px; font-size:20px; }
+    #aura-dialogue-dataflow #ad-state { margin-left:0; color:#315e85; }
+    #aura-dialogue-dataflow #ad-range { display:none; }
+    #aura-dialogue-dataflow #ad-title { position:absolute; top:148px; left:64px; font-size:30px; }
+    #aura-dialogue-dataflow #ad-detail,#aura-dialogue-dataflow #ad-current,#aura-dialogue-dataflow .ad-transport { display:none; }
+    #aura-dialogue-dataflow .ad-legend { position:absolute; top:109px; right:64px; margin:0; font-size:20px; gap:24px; }
+    #aura-dialogue-dataflow .ad-key { width:12px; height:12px; }
+    #aura-dialogue-dataflow #ad-diagram { position:absolute; left:64px; top:199px; width:1792px; height:690px; margin:0; }
+    #aura-dialogue-dataflow #ad-svg { height:690px; font-size:21px; }
+    #aura-dialogue-dataflow .ad-node text { font-size:21px; }
+    #aura-dialogue-dataflow .ad-node .ad-sub { font-size:18px; }
+    #aura-dialogue-dataflow .ad-label { font-size:20px; }
+    #aura-dialogue-dataflow .ad-label.text-small { font-size:18px; }
+    #aura-dialogue-dataflow .ad-packet text { font-size:18px; }
+    #aura-dialogue-dataflow .ad-shot-track { position:absolute; top:1000px; left:64px; width:1792px; display:grid; margin:0; gap:18px; font-size:21px; }
+    #aura-dialogue-dataflow .ad-step-bar { height:5px; margin-bottom:12px; }
+    #aura-dialogue-dataflow .ad-shot-track li { color:#69839a; }
+    #aura-dialogue-dataflow .ad-shot-track li[aria-current="step"] { color:#25435f; }
+    #aura-dialogue-dataflow .ad-node.is-context { opacity:.14; }
+    #aura-dialogue-dataflow[data-focused="false"] .ad-node.is-context { opacity:1; }
+    #aura-dialogue-dataflow [data-node="command"] .ad-sub { font-size:16px; }
+    #video-caption { position:absolute; left:100px; top:920px; width:1720px; min-height:52px; text-align:center; color:#25435f; font-size:32px; font-weight:400; line-height:1.45; }
+    #video-footnote { position:absolute; left:65px; top:975px; color:#6a8298; font-size:17px; }
+    #video-footnote-right { position:absolute; right:65px; top:975px; color:#6a8298; font-size:17px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+  </style>
+</head>
+<body>
+  <script>window.__timeline=TIMELINE_DATA;window.__videoTime=0;window.__videoLocal=0;</script>
+  <!-- APPROVED_ANIMATION -->
+  <div id="video-caption" aria-live="off"></div>
+  <div id="video-footnote">原理示意 · 讲解节奏不代表实测耗时</div>
+  <div id="video-footnote-right">KV260 调度 · Windows 推理</div>
+  <script>
+  (()=>{
+    const root=document.getElementById('aura-dialogue-dataflow');
+    const caption=document.getElementById('video-caption');
+    const data=window.__timeline;
+    function interpolate(points,x){
+      if(x<=points[0][0])return points[0][1];
+      for(let i=1;i<points.length;i++)if(x<=points[i][0]){
+        const a=points[i-1],b=points[i],q=(x-a[0])/(b[0]-a[0]);
+        return a[1]+(b[1]-a[1])*q;
+      }
+      return points.at(-1)[1];
+    }
+    window.renderVideoFrame=(seconds)=>{
+      const now=Math.max(0,Math.min(data.duration,seconds));
+      const i=Math.max(0,data.scenes.findIndex((s,j)=>now>=s.start&&(now<s.end||j===7)));
+      const scene=data.scenes[i], local=now-scene.start;
+      window.__videoTime=now;window.__videoLocal=local;
+      root.__animation.seek(interpolate(scene.map,local));
+      const cue=scene.captions.find(c=>now>=c.start&&now<c.end);
+      caption.textContent=cue?.text||'';
+      if(i===7&&now>=data.scenes[7].captionClose)caption.textContent='等待下一句对话。';
+      root.dataset.videoScene=String(i+1);
+      root.dataset.videoTime=now.toFixed(4);
+      root.dataset.caption=caption.textContent;
+      if(i===0&&local>=scene.visionAt){
+        for(const n of root.querySelectorAll('.ad-node'))n.classList.toggle('is-active',['camera','dpu','vision-cpu','pl','axis'].includes(n.dataset.node));
+      }
+      return {time:now,scene:i+1,caption:caption.textContent,animation:root.__animation.get()};
+    };
+    document.fonts.ready.then(()=>{window.renderVideoFrame(0);window.__videoReady=true;});
+  })();
+  </script>
+</body>
+</html>

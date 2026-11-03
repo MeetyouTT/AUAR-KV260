@@ -1,0 +1,979 @@
+{
+  "recorded_utc": "2026-10-26T05:13:02.554660+00:00",
+  "evidence": {
+    "resume-16a-report-serialization": {
+      "evidence": {
+        "evidence": "/home/ghmd/aura-pan-board-20261024/uart/20261026T045539.425397Z-resume-16a-report-serialization",
+        "stage": "command_response_complete",
+        "exit_code": 0,
+        "response_sha256": "695ae2fd406a105239da94463746fe961b33c6c9a970379cffcfa815082a2bc8",
+        "console_echo_restored": true
+      },
+      "filtered_result": {
+        "report_bytes": 211026,
+        "trace_entries": 512,
+        "measurements": [
+          {
+            "method": "current_json_dump_indent2",
+            "elapsed_ms": [
+              245.425,
+              154.575,
+              123.22
+            ]
+          },
+          {
+            "method": "compact_json_dumps",
+            "elapsed_ms": [
+              25.166,
+              45.947,
+              93.407
+            ]
+          },
+          {
+            "method": "c_encoder_indent2",
+            "elapsed_ms": [
+              225.079,
+              145.363,
+              192.604
+            ]
+          }
+        ],
+        "scope": "serialization only, separate observer process, no MMIO or motor writes"
+      }
+    },
+    "resume-16a-continuous-r8-first-live": {
+      "evidence": {
+        "evidence": "/home/ghmd/aura-pan-board-20261024/uart/20261026T045733.881887Z-resume-16a-continuous-r8-first-live",
+        "stage": "command_response_complete",
+        "exit_code": 0,
+        "response_sha256": "af122378d96e8401e69a8170e5213965aeeefe079460e1e3601cbda29ebc20b9",
+        "console_echo_restored": true
+      },
+      "filtered_result": {
+        "status": "CONTINUOUS_FACE_ZONE_RUNNING",
+        "boot_id": "16a07283-9e14-45e6-816d-3bda4cf333a7",
+        "manifest_sha256": "cb42a070a693f65686ae49cbecfe7dcdbeddbc10f996a718f60b42e6f9966e04",
+        "polarity": -1,
+        "parameters": {
+          "confirm_frames": 2,
+          "median_window": 3,
+          "position_filter_ms": 80.0,
+          "velocity_filter_ms": 100.0,
+          "velocity_gain_us": 0.0,
+          "minimum_speed_us_s": 0.0,
+          "base_speed_us_s": 0.0,
+          "maximum_speed_us_s": 10.0,
+          "maximum_acceleration_us_s2": 100.0,
+          "maximum_step_us": 4.0,
+          "maximum_jerk_us_s3": 800.0,
+          "maximum_correction_per_outside_episode_us": null,
+          "correction_rearm_stable_inside_ms": 250,
+          "correction_rearm_minimum_distinct_images": 3,
+          "authority_deadline": "minimum of image source plus 250ms and detection anchor plus 500ms",
+          "fresh_image_low_lease_renewal": "unchanged target immediately when old lease <=40ms; new source required",
+          "confirmed_edge_speed_floor_us_s": 2.0,
+          "initial_in_zone_pwm": "off; engage only on actual face-edge request",
+          "initial_equal_target_pwm": "off until a distinct trajectory target is ready",
+          "visual_loss_stop": "PL QUIESCE completes current pulse only; original hardware expiry remains",
+          "position_filter": "OneEuroFilter with large-jump admission gate",
+          "control_tick_ms": 20,
+          "trajectory_authority": "same image stamp; original image/anchor deadline; maximum 4us per admitted image",
+          "zone_hold": "unchanged current width; no normal PWM power cycle",
+          "jerk_exceptions": [
+            "face/source/hardware STOP",
+            "immediate safe-zone freeze",
+            "finite source displacement budget"
+          ],
+          "feedback_reference": "current image face position velocity; no face extrapolation"
+        },
+        "telemetry": {
+          "publish_count": 8,
+          "last_publish_ms": 2.489,
+          "maximum_publish_ms": 5.936,
+          "maximum_control_turn_ms": 6.352,
+          "control_turns_over_100ms": 0
+        },
+        "result": {
+          "state": "MONITORING",
+          "reason": "WAITING_FOR_FACE",
+          "elapsed_s": 4.089,
+          "pulse_us": 1453,
+          "commands_accepted": 0,
+          "motion_target_changes": 0,
+          "segments": 0,
+          "range_us": [
+            1453,
+            1453
+          ],
+          "pwm_output_started": null,
+          "fatal": false,
+          "readback": {
+            "flags": 0,
+            "width_us": 1453,
+            "lease_left_ms": 0,
+            "session": 3134025990,
+            "epoch": 163,
+            "reference_us": 1453,
+            "target_us": 1453,
+            "ack_seq": 0,
+            "active": false,
+            "armed": false,
+            "referenced": false,
+            "bound": false,
+            "reason": 0
+          }
+        },
+        "input_summary": {
+          "packet_states": {
+            "UNCONFIRMED": 120
+          },
+          "raw_positions": {
+            "UNCONFIRMED": 120
+          },
+          "decisions": {
+            "WAITING_FOR_FACE": 120
+          }
+        },
+        "gui_following": true,
+        "camera_pid": 189651,
+        "identity_ready": true,
+        "owner_fenced": false,
+        "primary_overruns": 4,
+        "optional_overruns": {
+          "yunet": 0,
+          "sface": 0
+        }
+      }
+    },
+    "resume-16a-r8-before-polarity-full": {
+      "evidence": {
+        "evidence": "/home/ghmd/aura-pan-board-20261024/uart/20261026T050234.263817Z-resume-16a-r8-before-polarity-full",
+        "stage": "command_response_complete",
+        "exit_code": 0,
+        "response_sha256": "ac8fe595d43e9f6645a63118857b9157004547fb4dcd71813838b83cfebcc7b6",
+        "console_echo_restored": true
+      },
+      "filtered_result": {
+        "status": "CONTINUOUS_FACE_ZONE_STOPPED",
+        "parameters": {
+          "confirm_frames": 2,
+          "median_window": 3,
+          "position_filter_ms": 80.0,
+          "velocity_filter_ms": 100.0,
+          "velocity_gain_us": 0.0,
+          "minimum_speed_us_s": 0.0,
+          "base_speed_us_s": 0.0,
+          "maximum_speed_us_s": 10.0,
+          "maximum_acceleration_us_s2": 100.0,
+          "maximum_step_us": 4.0,
+          "maximum_jerk_us_s3": 800.0,
+          "maximum_correction_per_outside_episode_us": null,
+          "correction_rearm_stable_inside_ms": 250,
+          "correction_rearm_minimum_distinct_images": 3,
+          "authority_deadline": "minimum of image source plus 250ms and detection anchor plus 500ms",
+          "fresh_image_low_lease_renewal": "unchanged target immediately when old lease <=40ms; new source required",
+          "confirmed_edge_speed_floor_us_s": 2.0,
+          "initial_in_zone_pwm": "off; engage only on actual face-edge request",
+          "initial_equal_target_pwm": "off until a distinct trajectory target is ready",
+          "visual_loss_stop": "PL QUIESCE completes current pulse only; original hardware expiry remains",
+          "position_filter": "OneEuroFilter with large-jump admission gate",
+          "control_tick_ms": 20,
+          "trajectory_authority": "same image stamp; original image/anchor deadline; maximum 4us per admitted image",
+          "zone_hold": "unchanged current width; no normal PWM power cycle",
+          "jerk_exceptions": [
+            "face/source/hardware STOP",
+            "immediate safe-zone freeze",
+            "finite source displacement budget"
+          ],
+          "feedback_reference": "current image face position velocity; no face extrapolation"
+        },
+        "telemetry": {
+          "publish_count": 317,
+          "last_publish_ms": 3.557,
+          "maximum_publish_ms": 29.655,
+          "maximum_control_turn_ms": 78.696,
+          "control_turns_over_100ms": 0
+        },
+        "result": {
+          "state": "STOPPED",
+          "reason": "OPERATOR_STOP",
+          "elapsed_s": 162.668,
+          "commands_accepted": 258,
+          "motion_target_changes": 125,
+          "segments": 72,
+          "range_us": [
+            1453,
+            1522
+          ],
+          "fatal": false,
+          "stopped": {
+            "flags": 0,
+            "width_us": 1522,
+            "lease_left_ms": 0,
+            "session": 3350368599,
+            "epoch": 235,
+            "reference_us": 1522,
+            "target_us": 1522,
+            "ack_seq": 0,
+            "active": false,
+            "armed": false,
+            "referenced": false,
+            "bound": false,
+            "reason": 0
+          }
+        },
+        "input": {
+          "packet_states": {
+            "UNCONFIRMED": 2942,
+            "READY": 1789,
+            "EXPIRED": 53,
+            "MULTIPLE_FACES": 38
+          },
+          "raw_positions": {
+            "UNCONFIRMED": 3033,
+            "INSIDE": 824,
+            "LEFT": 739,
+            "RIGHT": 226
+          },
+          "decisions": {
+            "WAITING_FOR_FACE": 507,
+            "CONFIRMING_FACE": 181,
+            "SAFE_ZONE_HOLD": 746,
+            "SOURCE_EXPIRED": 2029,
+            "FACE_CONFIRMED_ARM_CURRENT_POSITION": 239,
+            "EDGE_FOLLOW": 496,
+            "EDGE_BRAKING": 116,
+            "SOURCE_HORIZON_ENDED": 90,
+            "SOURCE_MULTIPLE_FACES": 38,
+            "SOURCE_LEASE_EXPIRED": 15,
+            "SOURCE_SUBMISSION_EXPIRED": 5,
+            "POST_ARM_SOURCE_TIMEOUT": 360
+          }
+        }
+      }
+    },
+    "resume-16a-r8-direction-corrected-stop": {
+      "evidence": {
+        "evidence": "/home/ghmd/aura-pan-board-20261024/uart/20261026T050011.267360Z-resume-16a-r8-direction-corrected-stop",
+        "stage": "command_response_complete",
+        "exit_code": 0,
+        "response_sha256": "08b5fd8dd42120fb2d262c801feb90f1125352fa6ebac5fa4ab229edc0cdc723",
+        "console_echo_restored": true
+      },
+      "filtered_result": {
+        "status": "R8_DIRECTION_CORRECTED_OUTPUT_STOPPED",
+        "previous_auto_polarity": -1,
+        "new_auto_polarity": 1,
+        "manual_left_sign": -1,
+        "direction_evidence_sha256": "41822283001d155a2f181c211dadeab9e2d9ef16689659c34898b93457cb9596",
+        "stopped": {
+          "flags": 0,
+          "width_us": 1522,
+          "lease_left_ms": 0,
+          "session": 3350368599,
+          "epoch": 235,
+          "reference_us": 1522,
+          "target_us": 1522,
+          "ack_seq": 0,
+          "active": false,
+          "armed": false,
+          "referenced": false,
+          "bound": false,
+          "reason": 0
+        },
+        "center_command_applied": false
+      }
+    },
+    "resume-16a-r8-corrected-direction-live": {
+      "evidence": {
+        "evidence": "/home/ghmd/aura-pan-board-20261024/uart/20261026T050131.178543Z-resume-16a-r8-corrected-direction-live",
+        "stage": "command_response_complete",
+        "exit_code": 0,
+        "response_sha256": "7eb2d63dccd72a15c2616dd59fc3d8226f3e4f59a058df42416804a800fed93f",
+        "console_echo_restored": true
+      },
+      "filtered_result": {
+        "status": "CONTINUOUS_FACE_ZONE_RUNNING",
+        "boot_id": "16a07283-9e14-45e6-816d-3bda4cf333a7",
+        "manifest_sha256": "cb42a070a693f65686ae49cbecfe7dcdbeddbc10f996a718f60b42e6f9966e04",
+        "polarity": 1,
+        "parameters": {
+          "confirm_frames": 2,
+          "median_window": 3,
+          "position_filter_ms": 80.0,
+          "velocity_filter_ms": 100.0,
+          "velocity_gain_us": 0.0,
+          "minimum_speed_us_s": 0.0,
+          "base_speed_us_s": 0.0,
+          "maximum_speed_us_s": 10.0,
+          "maximum_acceleration_us_s2": 100.0,
+          "maximum_step_us": 4.0,
+          "maximum_jerk_us_s3": 800.0,
+          "maximum_correction_per_outside_episode_us": null,
+          "correction_rearm_stable_inside_ms": 250,
+          "correction_rearm_minimum_distinct_images": 3,
+          "authority_deadline": "minimum of image source plus 250ms and detection anchor plus 500ms",
+          "fresh_image_low_lease_renewal": "unchanged target immediately when old lease <=40ms; new source required",
+          "confirmed_edge_speed_floor_us_s": 2.0,
+          "initial_in_zone_pwm": "off; engage only on actual face-edge request",
+          "initial_equal_target_pwm": "off until a distinct trajectory target is ready",
+          "visual_loss_stop": "PL QUIESCE completes current pulse only; original hardware expiry remains",
+          "position_filter": "OneEuroFilter with large-jump admission gate",
+          "control_tick_ms": 20,
+          "trajectory_authority": "same image stamp; original image/anchor deadline; maximum 4us per admitted image",
+          "zone_hold": "unchanged current width; no normal PWM power cycle",
+          "jerk_exceptions": [
+            "face/source/hardware STOP",
+            "immediate safe-zone freeze",
+            "finite source displacement budget"
+          ],
+          "feedback_reference": "current image face position velocity; no face extrapolation"
+        },
+        "telemetry": {
+          "publish_count": 64,
+          "last_publish_ms": 10.774,
+          "maximum_publish_ms": 14.394,
+          "maximum_control_turn_ms": 19.178,
+          "control_turns_over_100ms": 0
+        },
+        "result": {
+          "state": "WAITING_FOR_FACE",
+          "reason": "SOURCE_EXPIRED",
+          "elapsed_s": 32.899,
+          "pulse_us": 1522,
+          "commands_accepted": 0,
+          "motion_target_changes": 0,
+          "segments": 0,
+          "range_us": [
+            1522,
+            1522
+          ],
+          "pwm_output_started": null,
+          "fatal": false,
+          "readback": {
+            "flags": 0,
+            "width_us": 1522,
+            "lease_left_ms": 0,
+            "session": 3350368599,
+            "epoch": 235,
+            "reference_us": 1522,
+            "target_us": 1522,
+            "ack_seq": 0,
+            "active": false,
+            "armed": false,
+            "referenced": false,
+            "bound": false,
+            "reason": 0
+          }
+        },
+        "input_summary": {
+          "packet_states": {
+            "EXPIRED": 35,
+            "UNCONFIRMED": 464,
+            "READY": 464
+          },
+          "raw_positions": {
+            "UNCONFIRMED": 499,
+            "INSIDE": 464
+          },
+          "decisions": {
+            "WAITING_FOR_FACE": 10,
+            "CONFIRMING_FACE": 58,
+            "SAFE_ZONE_HOLD": 409,
+            "SOURCE_EXPIRED": 486
+          }
+        },
+        "gui_following": true,
+        "camera_pid": 189651,
+        "identity_ready": true,
+        "owner_fenced": false,
+        "primary_overruns": 4,
+        "optional_overruns": {
+          "yunet": 0,
+          "sface": 0
+        }
+      }
+    },
+    "resume-16a-r8-corrected-follow-25s": {
+      "evidence": {
+        "evidence": "/home/ghmd/aura-pan-board-20261024/uart/20261026T050153.692942Z-resume-16a-r8-corrected-follow-25s",
+        "stage": "command_response_complete",
+        "exit_code": 0,
+        "response_sha256": "fc807636da6834f2f79ada14f3900968ce7926d9f337872176a5e8afe9863c71",
+        "console_echo_restored": true
+      },
+      "filtered_result": {
+        "status": "CONTINUOUS_FACE_ZONE_RUNNING",
+        "window_s": 25.126,
+        "report": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/continuous-v10r8/runs/ui-11996061273213/trial.json",
+        "report_sha256_at_end": "b4c01376fcf286c7d63034eb2f343e0d2d4aeee8c6a2ab8f3a9d4fee78a009f6",
+        "delta_commands": 24,
+        "delta_motion_changes": 12,
+        "delta_segments": 6,
+        "motor_commands_sent_by_observer": 0,
+        "sample_pulse_range_us": [
+          1500,
+          1512
+        ],
+        "sample_first": {
+          "elapsed_s": 0.0,
+          "state": "WAITING_FOR_FACE",
+          "reason": "SOURCE_EXPIRED",
+          "pulse_us": 1500,
+          "commands": 45,
+          "motion_changes": 23,
+          "segments": 10,
+          "fatal": false,
+          "input_summary": {
+            "packet_states": {
+              "EXPIRED": 44,
+              "UNCONFIRMED": 577,
+              "READY": 985
+            },
+            "raw_positions": {
+              "UNCONFIRMED": 621,
+              "INSIDE": 847,
+              "LEFT": 138
+            },
+            "decisions": {
+              "WAITING_FOR_FACE": 10,
+              "CONFIRMING_FACE": 95,
+              "SAFE_ZONE_HOLD": 778,
+              "SOURCE_EXPIRED": 596,
+              "FACE_CONFIRMED_ARM_CURRENT_POSITION": 34,
+              "EDGE_FOLLOW": 68,
+              "SOURCE_HORIZON_ENDED": 2,
+              "EDGE_BRAKING": 20,
+              "SOURCE_LEASE_EXPIRED": 3
+            }
+          },
+          "latest_face": [
+            {
+              "received_mono_ms": 12054127,
+              "state": "UNCONFIRMED",
+              "position": "UNCONFIRMED",
+              "face_center_ratio": null,
+              "face_left_ratio": null,
+              "source_frame_id": null,
+              "source_age_ms": null,
+              "detection_age_ms": null,
+              "decision": "SOURCE_EXPIRED",
+              "confirmed_sources": 0,
+              "tracking_reason": "FACE_MEASUREMENT_REJECTED"
+            }
+          ]
+        },
+        "sample_last": {
+          "elapsed_s": 24.62,
+          "state": "MONITORING",
+          "reason": "SOURCE_EXPIRED",
+          "pulse_us": 1512,
+          "commands": 69,
+          "motion_changes": 35,
+          "segments": 16,
+          "fatal": false,
+          "input_summary": {
+            "packet_states": {
+              "EXPIRED": 48,
+              "UNCONFIRMED": 1119,
+              "READY": 1172
+            },
+            "raw_positions": {
+              "UNCONFIRMED": 1167,
+              "INSIDE": 943,
+              "LEFT": 138,
+              "RIGHT": 91
+            },
+            "decisions": {
+              "WAITING_FOR_FACE": 10,
+              "CONFIRMING_FACE": 116,
+              "SAFE_ZONE_HOLD": 866,
+              "SOURCE_EXPIRED": 1098,
+              "FACE_CONFIRMED_ARM_CURRENT_POSITION": 58,
+              "EDGE_FOLLOW": 105,
+              "SOURCE_HORIZON_ENDED": 45,
+              "EDGE_BRAKING": 37,
+              "SOURCE_LEASE_EXPIRED": 4
+            }
+          },
+          "latest_face": [
+            {
+              "received_mono_ms": 12067180,
+              "state": "UNCONFIRMED",
+              "position": "UNCONFIRMED",
+              "face_center_ratio": null,
+              "face_left_ratio": null,
+              "source_frame_id": null,
+              "source_age_ms": null,
+              "detection_age_ms": null,
+              "decision": "SOURCE_EXPIRED",
+              "confirmed_sources": 0,
+              "tracking_reason": "FACE_ANCHOR_EXPIRED"
+            }
+          ]
+        }
+      }
+    },
+    "resume-16a-r8-human-direction-confirmed-stop": {
+      "evidence": {
+        "evidence": "/home/ghmd/aura-pan-board-20261024/uart/20261026T050812.702979Z-resume-16a-r8-human-direction-confirmed-stop",
+        "stage": "command_response_complete",
+        "exit_code": 0,
+        "response_sha256": "681e1360c4078ab6870496c443b27d266fa813b485e6f4d060d117f12d880ee6",
+        "console_echo_restored": true
+      },
+      "filtered_result": {
+        "status": "R8_STOPPED_FOR_R9",
+        "manual": {
+          "state": "READY",
+          "pulse_us": 1511,
+          "target_us": null,
+          "left_sign": -1,
+          "minimum_us": 1445,
+          "maximum_us": 1465,
+          "mechanical_reference_calibrated": false,
+          "automatic_following": false,
+          "message": "点击一次，转动一小步",
+          "error": "",
+          "readback": {
+            "flags": 0,
+            "width_us": 1511,
+            "lease_left_ms": 0,
+            "session": 3641340786,
+            "epoch": 252,
+            "reference_us": 1512,
+            "target_us": 1511,
+            "ack_seq": 1,
+            "active": false,
+            "armed": false,
+            "referenced": false,
+            "bound": false,
+            "reason": 0
+          },
+          "history": [],
+          "backend_pid": 212044,
+          "face_follow": {
+            "state": "CONTINUOUS_FACE_ZONE_STOPPED",
+            "phase": "STOPPED",
+            "reason": "OPERATOR_STOP",
+            "commands_accepted": 70,
+            "segments": 17,
+            "pulse_us": 1511,
+            "control": {
+              "state": "HOLD",
+              "reason": "WAITING_FOR_POST_ARM_FACE",
+              "pulse_us": 1511,
+              "velocity_us_s": 0.0,
+              "edge": 0,
+              "filtered_center_ratio": null,
+              "filtered_width_ratio": null,
+              "raw_center_ratio": null,
+              "median_center_ratio": null,
+              "median_window": 3,
+              "face_image_velocity_ratio_s": 0.0,
+              "face_image_velocity_px_s": 0.0,
+              "requested_velocity_us_s": 0.0,
+              "step_velocity_us_s": 0.0,
+              "source_mono_ms": null,
+              "authority_deadline_mono_ms": null,
+              "new_source": false,
+              "confirmed_sources": 0,
+              "proposals": 0,
+              "limits_us": [
+                1400,
+                1600
+              ],
+              "acceleration_us_s2": 0.0,
+              "position_filter": "one_euro",
+              "outlier_gate": "large_jump_requires_next_actual_image",
+              "filter_cutoff_hz": 1.0,
+              "jump_rejections": 0
+            },
+            "readback": {
+              "flags": 0,
+              "width_us": 1511,
+              "lease_left_ms": 0,
+              "session": 3641340786,
+              "epoch": 252,
+              "reference_us": 1512,
+              "target_us": 1511,
+              "ack_seq": 1,
+              "active": false,
+              "armed": false,
+              "referenced": false,
+              "bound": false,
+              "reason": 0
+            },
+            "heartbeat_mono_ms": 12433247,
+            "report": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/continuous-v10r8/runs/ui-11996061273213/trial.json"
+          },
+          "panel_open": false
+        },
+        "reply": {
+          "ok": true,
+          "message": "正在停止人脸随动"
+        }
+      }
+    },
+    "resume-16a-continuous-r10-start": {
+      "evidence": {
+        "evidence": "/home/ghmd/aura-pan-board-20261024/uart/20261026T050833.700481Z-resume-16a-continuous-r10-start",
+        "stage": "command_response_complete",
+        "exit_code": 0,
+        "response_sha256": "e6d2b78600012f87df16cc0cf3a2f9048971c6c2fae74b96a1913dab78bea499",
+        "console_echo_restored": true
+      },
+      "filtered_result": {
+        "status": "CONTINUOUS_R10_RUNNING",
+        "manual": {
+          "state": "MOVING",
+          "pulse_us": 1511,
+          "target_us": null,
+          "left_sign": -1,
+          "minimum_us": 1445,
+          "maximum_us": 1465,
+          "mechanical_reference_calibrated": false,
+          "automatic_following": true,
+          "message": "监测中，等待清晰单张人脸",
+          "error": "",
+          "readback": {
+            "flags": 0,
+            "width_us": 1511,
+            "lease_left_ms": 0,
+            "session": 3641340786,
+            "epoch": 252,
+            "reference_us": 1512,
+            "target_us": 1511,
+            "ack_seq": 1,
+            "active": false,
+            "armed": false,
+            "referenced": false,
+            "bound": false,
+            "reason": 0
+          },
+          "history": [],
+          "backend_pid": null,
+          "face_follow": {
+            "state": "STARTING"
+          },
+          "panel_open": false
+        },
+        "camera_pid": 189651,
+        "duration_s": 0,
+        "correction_limit_us": null,
+        "control_reference": "left_face_box_edge_right_face_center",
+        "source_limits_unchanged": true,
+        "gui_restarted": false,
+        "center_command_applied": false
+      }
+    },
+    "resume-16a-continuous-r10-first-live": {
+      "evidence": {
+        "evidence": "/home/ghmd/aura-pan-board-20261024/uart/20261026T050854.766801Z-resume-16a-continuous-r10-first-live",
+        "stage": "command_response_complete",
+        "exit_code": 0,
+        "response_sha256": "2409e200d66ecee22462ff9aae5c9b6d21573b4b7d2c4a1ceec014a389c79ce2",
+        "console_echo_restored": true
+      },
+      "filtered_result": {
+        "status": "CONTINUOUS_FACE_ZONE_RUNNING",
+        "boot_id": "16a07283-9e14-45e6-816d-3bda4cf333a7",
+        "manifest_sha256": "770cf34a6db0c64a8efd8faadd5b21455aab791e03e98ecf0d4c301651ad133f",
+        "polarity": 1,
+        "parameters": {
+          "prearm_confirmed_face": true,
+          "confirm_frames": 2,
+          "median_window": 3,
+          "position_filter_ms": 80.0,
+          "velocity_filter_ms": 100.0,
+          "velocity_gain_us": 12.0,
+          "minimum_speed_us_s": 0.0,
+          "base_speed_us_s": 0.0,
+          "maximum_speed_us_s": 20.0,
+          "maximum_acceleration_us_s2": 100.0,
+          "maximum_step_us": 4.0,
+          "maximum_jerk_us_s3": 800.0,
+          "maximum_correction_per_outside_episode_us": null,
+          "correction_rearm_stable_inside_ms": 250,
+          "correction_rearm_minimum_distinct_images": 3,
+          "authority_deadline": "minimum of image source plus 250ms and detection anchor plus 500ms",
+          "fresh_image_low_lease_renewal": "unchanged target immediately when old lease <=40ms; new source required",
+          "confirmed_edge_speed_floor_us_s": 2.0,
+          "initial_in_zone_pwm": "off; prepare ARM on confirmed face; no COMMIT until actual face-edge displacement",
+          "initial_equal_target_pwm": "off until a distinct trajectory target is ready",
+          "visual_loss_stop": "PL QUIESCE completes current pulse only; original hardware expiry remains",
+          "position_filter": "OneEuroFilter with large-jump admission gate",
+          "control_tick_ms": 20,
+          "trajectory_authority": "same image stamp; original image/anchor deadline; maximum 4us per admitted image",
+          "zone_hold": "unchanged current width; no normal PWM power cycle",
+          "jerk_exceptions": [
+            "face/source/hardware STOP",
+            "immediate safe-zone freeze",
+            "finite source displacement budget"
+          ],
+          "feedback_reference": "current image face position velocity; no face extrapolation"
+        },
+        "telemetry": {
+          "publish_count": 36,
+          "last_publish_ms": 2.013,
+          "maximum_publish_ms": 8.43,
+          "maximum_control_turn_ms": 9.971,
+          "control_turns_over_100ms": 0
+        },
+        "result": {
+          "state": "MONITORING",
+          "reason": "WAITING_FOR_FACE",
+          "elapsed_s": 18.35,
+          "pulse_us": 1511,
+          "commands_accepted": 0,
+          "motion_target_changes": 0,
+          "segments": 0,
+          "range_us": [
+            1511,
+            1511
+          ],
+          "pwm_output_started": false,
+          "fatal": false,
+          "readback": {
+            "flags": 0,
+            "width_us": 1511,
+            "lease_left_ms": 0,
+            "session": 3641340786,
+            "epoch": 252,
+            "reference_us": 1512,
+            "target_us": 1511,
+            "ack_seq": 1,
+            "active": false,
+            "armed": false,
+            "referenced": false,
+            "bound": false,
+            "reason": 0
+          }
+        },
+        "input_summary": {
+          "packet_states": {
+            "UNCONFIRMED": 562
+          },
+          "raw_positions": {
+            "UNCONFIRMED": 562
+          },
+          "decisions": {
+            "WAITING_FOR_FACE": 562
+          }
+        },
+        "gui_following": true,
+        "camera_pid": 189651,
+        "identity_ready": true,
+        "owner_fenced": false,
+        "primary_overruns": 4,
+        "optional_overruns": {
+          "yunet": 0,
+          "sface": 0
+        }
+      }
+    },
+    "resume-16a-r10-responsive-follow-25s": {
+      "evidence": {
+        "evidence": "/home/ghmd/aura-pan-board-20261024/uart/20261026T050911.032775Z-resume-16a-r10-responsive-follow-25s",
+        "stage": "command_response_complete",
+        "exit_code": 0,
+        "response_sha256": "bfc08ad04338a94acb5bdadd94424f04c93edc90ef98af2b35d22d8f2ec6922b",
+        "console_echo_restored": true
+      },
+      "filtered_result": {
+        "status": "CONTINUOUS_FACE_ZONE_RUNNING",
+        "window_s": 25.106,
+        "report": "/home/root/aura-native-live-20261024/ops/be72669aa53de735/pan-face-edge-v5/continuous-v10r10/runs/ui-12455311840465/trial.json",
+        "report_sha256_at_end": "e762ba0ef00fd0243c3b103f01397e9757dc3c05cbb3961c6151ed6ee5f2e229",
+        "delta_commands": 0,
+        "delta_motion_changes": 0,
+        "delta_segments": 0,
+        "motor_commands_sent_by_observer": 0,
+        "sample_pulse_range_us": [
+          1511,
+          1511
+        ],
+        "sample_first": {
+          "elapsed_s": 0.0,
+          "state": "MONITORING",
+          "reason": "WAITING_FOR_FACE",
+          "pulse_us": 1511,
+          "commands": 0,
+          "motion_changes": 0,
+          "segments": 0,
+          "fatal": false,
+          "input_summary": {
+            "packet_states": {
+              "UNCONFIRMED": 1050
+            },
+            "raw_positions": {
+              "UNCONFIRMED": 1050
+            },
+            "decisions": {
+              "WAITING_FOR_FACE": 1050
+            }
+          },
+          "latest_face": [
+            {
+              "received_mono_ms": 12456897,
+              "state": "UNCONFIRMED",
+              "position": "UNCONFIRMED",
+              "face_center_ratio": null,
+              "face_left_ratio": null,
+              "source_frame_id": null,
+              "source_age_ms": null,
+              "detection_age_ms": null,
+              "decision": "WAITING_FOR_FACE",
+              "confirmed_sources": 0,
+              "tracking_reason": "FACE_CONTINUITY_LOST"
+            }
+          ]
+        },
+        "sample_last": {
+          "elapsed_s": 24.6,
+          "state": "MONITORING",
+          "reason": "WAITING_FOR_FACE",
+          "pulse_us": 1511,
+          "commands": 0,
+          "motion_changes": 0,
+          "segments": 0,
+          "fatal": false,
+          "input_summary": {
+            "packet_states": {
+              "UNCONFIRMED": 1822
+            },
+            "raw_positions": {
+              "UNCONFIRMED": 1822
+            },
+            "decisions": {
+              "WAITING_FOR_FACE": 1822
+            }
+          },
+          "latest_face": [
+            {
+              "received_mono_ms": 12456897,
+              "state": "UNCONFIRMED",
+              "position": "UNCONFIRMED",
+              "face_center_ratio": null,
+              "face_left_ratio": null,
+              "source_frame_id": null,
+              "source_age_ms": null,
+              "detection_age_ms": null,
+              "decision": "WAITING_FOR_FACE",
+              "confirmed_sources": 0,
+              "tracking_reason": "FACE_CONTINUITY_LOST"
+            }
+          ]
+        }
+      }
+    },
+    "resume-16a-r10-latest-live": {
+      "evidence": {
+        "evidence": "/home/ghmd/aura-pan-board-20261024/uart/20261026T051043.532375Z-resume-16a-r10-latest-live",
+        "stage": "command_response_complete",
+        "exit_code": 0,
+        "response_sha256": "eea80d198e8a9b8963cfb9f8ce215972448361f3eef80355aa2b9b9292d6749c",
+        "console_echo_restored": true
+      },
+      "filtered_result": {
+        "status": "CONTINUOUS_FACE_ZONE_RUNNING",
+        "boot_id": "16a07283-9e14-45e6-816d-3bda4cf333a7",
+        "manifest_sha256": "770cf34a6db0c64a8efd8faadd5b21455aab791e03e98ecf0d4c301651ad133f",
+        "polarity": 1,
+        "parameters": {
+          "prearm_confirmed_face": true,
+          "confirm_frames": 2,
+          "median_window": 3,
+          "position_filter_ms": 80.0,
+          "velocity_filter_ms": 100.0,
+          "velocity_gain_us": 12.0,
+          "minimum_speed_us_s": 0.0,
+          "base_speed_us_s": 0.0,
+          "maximum_speed_us_s": 20.0,
+          "maximum_acceleration_us_s2": 100.0,
+          "maximum_step_us": 4.0,
+          "maximum_jerk_us_s3": 800.0,
+          "maximum_correction_per_outside_episode_us": null,
+          "correction_rearm_stable_inside_ms": 250,
+          "correction_rearm_minimum_distinct_images": 3,
+          "authority_deadline": "minimum of image source plus 250ms and detection anchor plus 500ms",
+          "fresh_image_low_lease_renewal": "unchanged target immediately when old lease <=40ms; new source required",
+          "confirmed_edge_speed_floor_us_s": 2.0,
+          "initial_in_zone_pwm": "off; prepare ARM on confirmed face; no COMMIT until actual face-edge displacement",
+          "initial_equal_target_pwm": "off until a distinct trajectory target is ready",
+          "visual_loss_stop": "PL QUIESCE completes current pulse only; original hardware expiry remains",
+          "position_filter": "OneEuroFilter with large-jump admission gate",
+          "control_tick_ms": 20,
+          "trajectory_authority": "same image stamp; original image/anchor deadline; maximum 4us per admitted image",
+          "zone_hold": "unchanged current width; no normal PWM power cycle",
+          "jerk_exceptions": [
+            "face/source/hardware STOP",
+            "immediate safe-zone freeze",
+            "finite source displacement budget"
+          ],
+          "feedback_reference": "current image face position velocity; no face extrapolation"
+        },
+        "telemetry": {
+          "publish_count": 248,
+          "last_publish_ms": 2.183,
+          "maximum_publish_ms": 20.356,
+          "maximum_control_turn_ms": 21.085,
+          "control_turns_over_100ms": 0
+        },
+        "result": {
+          "state": "MONITORING",
+          "reason": "WAITING_FOR_FACE",
+          "elapsed_s": 126.683,
+          "pulse_us": 1511,
+          "commands_accepted": 0,
+          "motion_target_changes": 0,
+          "segments": 0,
+          "range_us": [
+            1511,
+            1511
+          ],
+          "pwm_output_started": false,
+          "fatal": false,
+          "readback": {
+            "flags": 0,
+            "width_us": 1511,
+            "lease_left_ms": 0,
+            "session": 3641340786,
+            "epoch": 252,
+            "reference_us": 1512,
+            "target_us": 1511,
+            "ack_seq": 1,
+            "active": false,
+            "armed": false,
+            "referenced": false,
+            "bound": false,
+            "reason": 0
+          }
+        },
+        "input_summary": {
+          "packet_states": {
+            "UNCONFIRMED": 3934
+          },
+          "raw_positions": {
+            "UNCONFIRMED": 3934
+          },
+          "decisions": {
+            "WAITING_FOR_FACE": 3934
+          }
+        },
+        "gui_following": true,
+        "camera_pid": 189651,
+        "identity_ready": true,
+        "owner_fenced": false,
+        "primary_overruns": 4,
+        "optional_overruns": {
+          "yunet": 0,
+          "sface": 0
+        }
+      }
+    }
+  },
+  "latest_user_feedback": "方向正确，但是起转晚、延迟高、转动顿挫（r10上线前）",
+  "r10_physical_smooth_follow_accepted": false,
+  "current_preview_observation": "private preview contains no visible person/face; image not shared"
+}

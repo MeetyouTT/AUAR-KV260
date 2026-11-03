@@ -1,0 +1,1 @@
+cmd_drivers/usb/gadget/legacy/modules.order := {   echo drivers/usb/gadget/legacy/g_ether.ko;   echo drivers/usb/gadget/legacy/g_mass_storage.ko;   echo drivers/usb/gadget/legacy/g_serial.ko; :; } | awk '!x[$$0]++' - > drivers/usb/gadget/legacy/modules.order

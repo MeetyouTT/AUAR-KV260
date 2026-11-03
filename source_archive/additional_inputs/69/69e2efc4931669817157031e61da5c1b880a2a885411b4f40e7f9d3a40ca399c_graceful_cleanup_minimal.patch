@@ -1,0 +1,31 @@
+--- previous_cleanup_excerpt
++++ graceful_cleanup_excerpt
+@@ -1,8 +1,24 @@
+ one_complete=bool(live_ns.get('completed'))
+-# Main chat requested a pause immediately after each target's full ACK.
++def settle_and_pause_after_observation():
++ # The sampler's deadline never authorizes cancelling an in-flight answer.
++ # Drain without extending the 180-second sampling window. If it cannot settle,
++ # return an explicit pending cleanup and preserve the running answer.
++ deadline=time.monotonic()+120
++ while True:
++  v=get_json(8783,'/api/state')
++  task=v.get('local_transcription',{}).get('state')
++  active=(v.get('playing') is True or v.get('phase') in ('THINKING','SPEAKING')
++          or task in ('TRANSCRIBING','GENERATING','PLAYING'))
++  if not active:break
++  if time.monotonic()>=deadline:return dict(status='ANSWER_STILL_ACTIVE_CLEANUP_PENDING',pause_sent=False)
++  time.sleep(.2)
++ sent=v.get('handsfree_dialogue',{}).get('enabled') is True
++ if sent:ui_command(dict(type='conversation_toggle'))
++ return dict(status='NORMAL_PAUSE_REQUESTED' if sent else 'ALREADY_PAUSED',pause_sent=sent)
++# Main chat requested a pause after the full target ACK, and a graceful drain
++# on timeout. No cancellation command is ever issued by this observer cleanup.
+ try:
+- v=get_json(8783,'/api/state')
+- if v.get('handsfree_dialogue',{}).get('enabled') is True:ui_command(dict(type='conversation_toggle'))
+- if not one_complete and (v.get('playing') is True or v.get('phase')!='IDLE'):ui_command(dict(type='event',event='cancel'))
++ cleanup=settle_and_pause_after_observation()
++ print(json.dumps(dict(kind='observation_cleanup',**cleanup)),flush=True)
+ except Exception as exc:
+  print(json.dumps(dict(kind='cleanup_error',error_class=type(exc).__name__)),flush=True)

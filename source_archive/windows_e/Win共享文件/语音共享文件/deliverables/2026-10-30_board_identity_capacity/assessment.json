@@ -1,0 +1,166 @@
+{
+  "status": "ASSESSMENT_COMPLETE_NO_MIGRATION_PERFORMED",
+  "checked_utc": "2026-10-30T07:57:07.262665+00:00",
+  "verdict": {
+    "identity_database_and_fusion": "FEASIBLE_WITH_BACKGROUND_WORKER_AND_EXISTING_CAPS",
+    "precomputed_voice_vector_matching": "FEASIBLE_LIGHT_COMPUTE_NOT_EMBEDDING",
+    "current_full_windows_ecapa_stack_on_board": "NOT_READY_ENVIRONMENT_AND_CPU_BUDGET_UNVERIFIED",
+    "storage": "SUFFICIENT_FOR_BOUNDED_IDENTITY_DATA_NOT_UNBOUNDED_MEDIA_ARCHIVE"
+  },
+  "observed": {
+    "board": "ZynqMP SMK-K26 Rev1/B/A",
+    "cpu_count": 4,
+    "frequency_khz": {
+      "/sys/devices/system/cpu/cpu3/cpufreq/scaling_cur_freq": "1333333",
+      "/sys/devices/system/cpu/cpu1/cpufreq/scaling_cur_freq": "1333333",
+      "/sys/devices/system/cpu/cpu2/cpufreq/scaling_cur_freq": "1333333",
+      "/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq": "1333333"
+    },
+    "cpu_busy_percent": 77.87,
+    "cpu_sample_p50_percent": 78.13,
+    "cpu_sample_max_percent": 81.27,
+    "cpu_idle_core_equivalent": 0.8851999999999998,
+    "memory_total_gib": 3.837574005126953,
+    "memory_available_gib": 2.8389892578125,
+    "cma_total_gib": 1.5,
+    "cma_free_gib": 1.4574661254882812,
+    "ordinary_memory_budget_conservative_gib": 1.3815231323242188,
+    "conservative_memory_note": "MemAvailable minus CmaFree is a conservative planning allowance, not an exact kernel allocation limit",
+    "swap_bytes": 0,
+    "root_total_gib": 28.624130249023438,
+    "root_available_gib": 9.21792221069336,
+    "root_used_gib": 18.12173843383789,
+    "current_face_database_bytes": 36864,
+    "active_dialogue": false,
+    "listening": false,
+    "following": false,
+    "ui_actual_fps": 15.548882828894358,
+    "ui_p95_ms": 81.34130299731623,
+    "detection_hz": 9.92,
+    "primary_overruns_increased": false,
+    "thermal_measurement_available": false
+  },
+  "synthetic_measurements": {
+    "people": 32,
+    "temporary_clusters": 32,
+    "recent_observations": 4096,
+    "links_kib": 48.0,
+    "anonymous_base_kib": 212.0,
+    "anonymous_with_observations_mib": 5.73046875,
+    "process_peak_rss_mib": 21.15234375,
+    "lookup_ms": {
+      "p50": 0.05576049807132222,
+      "p95": 0.2009820018429309,
+      "max": 5.415804000222124,
+      "repeats": 100
+    },
+    "vector_comparison": {
+      "32": {
+        "p50_ms": 8.903728998120641,
+        "p95_ms": 19.8056480003288,
+        "max_ms": 23.427963998983614,
+        "repeats": 8
+      },
+      "128": {
+        "p50_ms": 42.366603500340716,
+        "p95_ms": 65.9973900001205,
+        "max_ms": 68.7496469981852,
+        "repeats": 8
+      }
+    },
+    "persistent_commit_ms": {
+      "p50": 10.729652000009082,
+      "max": 32.41004499795963,
+      "samples": [
+        5.78024800051935,
+        32.41004499795963,
+        7.276422998984344,
+        9.493764999206178,
+        16.488854998897295,
+        21.63495700006024,
+        8.38905400087242,
+        14.08381000146619,
+        9.790707998035941,
+        11.668596001982223,
+        9.518515998934163,
+        16.582926000410225
+      ]
+    },
+    "temporary_files_removed": true
+  },
+  "proposed_identity_service_budget": {
+    "status": "PLANNING_BUDGET_NOT_MEASURED_SERVICE_PEAK",
+    "ram_mib": 128,
+    "persistent_data_mib": 100,
+    "single_background_worker": true,
+    "ordinary_observations": "deduplicate and batch bounded writes",
+    "enrollment_confirmations": "durable transactions, do not weaken confirmation checks",
+    "ui_thread": "never wait synchronously for writes or feature comparisons",
+    "no_new_dpu_model": true
+  },
+  "speaker_inference": {
+    "current_windows_model_files_bytes": {
+      "hyperparams.yaml": 1919,
+      "embedding_model.ckpt": 83316686,
+      "classifier.ckpt": 5534328,
+      "mean_var_norm_emb.ckpt": 1921,
+      "label_encoder.txt": 128619
+    },
+    "current_windows_required_model_total_mib": 84.861252784729,
+    "embedding_checkpoint_mib": 79.45698356628418,
+    "weights_transferred": false,
+    "current_implementation": [
+      "SpeechBrain",
+      "PyTorch",
+      "torchaudio",
+      "webrtcvad",
+      "CPU ECAPA 192 dimensions"
+    ],
+    "board_default_python_modules": {
+      "torch": false,
+      "torchaudio": false,
+      "speechbrain": false,
+      "onnxruntime": true,
+      "numpy": true,
+      "webrtcvad": false,
+      "sqlite3": true
+    },
+    "onnx_native_import": {
+      "importable": false,
+      "native_import_attempt": "FAILED_IN_PREVIOUS_ISOLATED_PROCESS",
+      "error": "std::runtime_error: Can't add new modules after the interpreter has been initialized",
+      "package_metadata_version": null
+    },
+    "actual_board_neural_embedding_benchmark_performed": false,
+    "candidate_direction": "separate ARM CPU runtime and verified ONNX export; single worker, bounded queue, original identity calibration retained",
+    "dpu_acceleration": "NOT_VALIDATED; do not change active FPGA/VART/model context",
+    "acceptance_needed": [
+      "same public PCM vector similarity versus original implementation",
+      "3/6/10-second samples under concurrent camera/display/audio workload",
+      "processing time and queue freshness, peak RSS, display long frames and audio underruns",
+      "real-person false accept/reject and field calibration"
+    ]
+  },
+  "media_storage": {
+    "pcm16_16khz_mono_bytes_per_second": 32000,
+    "hypothetical_raw_pcm_mib_per_hour": 109.86328125,
+    "hypothetical_raw_pcm_gib_per_day": 2.574920654296875,
+    "current_policy": "raw PCM not persisted; structured identity/summary data only",
+    "raw_video_capacity_evaluated": false
+  },
+  "limitations": [
+    "30-second current idle-dialogue workload, includes sampler overhead, not peak live dialogue",
+    "Memory includes protected CMA; no swap configured",
+    "Synthetic SQLite footprint and 12 commits do not prove endurance or power-loss recovery",
+    "No DPU utilization collector was enabled; free acceleration capacity is unknown",
+    "A found Python module is not proof it can import or run inference",
+    "No production identity migration, real biometric transfer, new model or service restart"
+  ],
+  "evidence": [
+    "capacity_snapshot.json",
+    "identity_microprobe.json",
+    "storage_runtime_probe.json",
+    "storage_only_probe.json"
+  ],
+  "official_runtime_reference": "https://onnxruntime.ai/docs/get-started/with-python"
+}

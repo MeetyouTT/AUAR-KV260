@@ -1,0 +1,1 @@
+cmd_/home/ghmd/aura-display-sequence-20261024/native-retrain-v2/Module.symvers := sed 's/\.ko$$/\.o/' /home/ghmd/aura-display-sequence-20261024/native-retrain-v2/modules.order | scripts/mod/modpost   -E -o /home/ghmd/aura-display-sequence-20261024/native-retrain-v2/Module.symvers -e -i Module.symvers   -T -

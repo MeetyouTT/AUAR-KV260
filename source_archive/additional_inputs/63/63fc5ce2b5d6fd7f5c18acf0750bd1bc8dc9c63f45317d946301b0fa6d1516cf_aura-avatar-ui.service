@@ -1,0 +1,26 @@
+[Unit]
+Description=AURA cached avatar touchscreen interface
+Wants=xserver-nodm.service systemd-modules-load.service
+After=local-fs.target xserver-nodm.service systemd-modules-load.service
+RequiresMountsFor=/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=notify
+NotifyAccess=main
+User=root
+Environment=DISPLAY=:0 PYTHONUNBUFFERED=1
+WorkingDirectory=/home/root/aura-avatar-gtk-stage/runtime-1a8677ce-20261009/aura
+ExecStart=/usr/bin/python3 -B /home/root/aura-ui-startup-20261009/releases/dbc77a95126b4eed/launcher.py --config /home/root/aura-ui-startup-20261009/releases/dbc77a95126b4eed/config.json
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=240
+TimeoutStopSec=25
+KillMode=mixed
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=aura-avatar-ui
+
+[Install]
+WantedBy=graphical.target

@@ -1,0 +1,1 @@
+cmd_drivers/staging/xlnx_hdcp1x/built-in.a := echo >/dev/null; rm -f drivers/staging/xlnx_hdcp1x/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST drivers/staging/xlnx_hdcp1x/built-in.a drivers/staging/xlnx_hdcp1x/xilinx-hdcp1x-cipher.o

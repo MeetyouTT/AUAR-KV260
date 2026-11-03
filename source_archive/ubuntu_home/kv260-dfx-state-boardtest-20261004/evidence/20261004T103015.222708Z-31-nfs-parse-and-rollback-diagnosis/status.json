@@ -1,0 +1,38 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/31-nfs-parse-and-rollback-diagnosis.json",
+  "manifest_sha256": "148ff2ad7051f1ea3f74869b66d666df27a5cd575dd2a02833f6b6e53cfe76a0",
+  "started_utc": "2026-10-04T10:30:15.222858+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "nfs-parse-and-rollback-evidence",
+      "started_utc": "2026-10-04T10:30:15.741293+00:00",
+      "entry": {
+        "id": "nfs-parse-and-rollback-evidence",
+        "command": "python3 -B -c 'import pathlib,json; P=pathlib.Path; d=P(\"/home/root/kv260-platform-warnings-20261004/nfs/evidence/apply-6934960296531\"); out={p.name:p.read_text() for p in d.glob(\"*parsed-proc-fs-nfsd.mount.stdout\")}; out[\"rollback\"]=json.loads((d/\"rollback.json\").read_text()); out[\"dropin_exists\"]=P(\"/etc/systemd/system/proc-fs-nfsd.mount.d/20-kv260-nfs-capability.conf\").exists(); print(json.dumps(out,indent=2))'",
+        "timeout": 60
+      },
+      "exit_code": 0,
+      "output_sha256": "617c402330b209f94225185b941df0246890ed535a1d5d0c2d8e08071a0330aa",
+      "bytes": 573,
+      "finished_utc": "2026-10-04T10:30:17.118791+00:00"
+    },
+    {
+      "id": "state-after-nfs-rollback",
+      "started_utc": "2026-10-04T10:30:17.119050+00:00",
+      "entry": {
+        "id": "state-after-nfs-rollback",
+        "command": "systemctl show proc-fs-nfsd.mount nfs-server.service nfs-mountd.service dfx-mgr.service -p Id -p MainPID -p UnitFileState -p ActiveState -p SubState -p ConditionResult -p Conditions -p DropInPaths",
+        "timeout": 60
+      },
+      "exit_code": 0,
+      "output_sha256": "40ef233f883846f7c3d292671bd153d9cb955111aa177ad99354afe98af29a1f",
+      "bytes": 709,
+      "finished_utc": "2026-10-04T10:30:18.126666+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T10:30:18.174069+00:00"
+}

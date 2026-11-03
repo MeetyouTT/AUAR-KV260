@@ -1,0 +1,1 @@
+cmd_scripts/dtc/dtc-parser.tab.h := bison -o scripts/dtc/dtc-parser.tab.c --defines=scripts/dtc/dtc-parser.tab.h -t -l /home/ghmd/aura-hdmi-preinit-20261021/d977bdda5e7c9877/linux/scripts/dtc/dtc-parser.y

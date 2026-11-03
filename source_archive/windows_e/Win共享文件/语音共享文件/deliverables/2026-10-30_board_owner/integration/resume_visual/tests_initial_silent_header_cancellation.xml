@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="37" time="1.760" timestamp="2026-10-30T15:32:00.230887-07:00" hostname="zhenghang"><testcase classname="aura.tests.framework.test_visual_timeline" name="test_stability_uses_new_detection_frames_and_never_copies_private_fields" time="0.001" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_jitter_and_repeated_stable_counts_do_not_fill_timeline" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_unavailable_camera_cannot_be_recorded_as_departure" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_wrong_boot_model_stale_and_invalid_data_fail_closed[changes0]" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_wrong_boot_model_stale_and_invalid_data_fail_closed[changes1]" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_wrong_boot_model_stale_and_invalid_data_fail_closed[changes2]" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_wrong_boot_model_stale_and_invalid_data_fail_closed[changes3]" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_wrong_boot_model_stale_and_invalid_data_fail_closed[changes4]" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_wrong_boot_model_stale_and_invalid_data_fail_closed[changes5]" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_wrong_boot_model_stale_and_invalid_data_fail_closed[changes6]" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_wrong_boot_model_stale_and_invalid_data_fail_closed[changes7]" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_wrong_boot_model_stale_and_invalid_data_fail_closed[changes8]" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_wrong_boot_model_stale_and_invalid_data_fail_closed[changes9]" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_late_response_and_old_epoch_do_not_rollback_source" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_uncertain_sink_write_retries_identical_event_id_and_payload" time="0.000" /><testcase classname="aura.tests.framework.test_visual_timeline" name="test_fixtures_require_explicit_opt_in" time="0.000" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_construct_does_not_start_poll_or_store_and_missing_anchor_refuses_http" time="0.000" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_stable_visual_events_only_device_scope_and_no_private_fields" time="0.000" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_real_shared_store_records_visual_observation_with_timeline_clock" time="0.039" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_camera_disconnect_is_not_zero_or_departure_and_requires_fresh_stability" time="0.001" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_unavailable_clock_breaks_partial_stability_run" time="0.000" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_uncertain_store_write_retries_identical_event_and_occurred_time" time="0.000" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_clock_scope_and_fixture_configuration_fail_closed" time="0.000" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_actual_reader_filters_private_health_and_uses_only_fixed_health_path" time="0.020" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_reader_rejects_redirect_malformed_and_over_bound_responses[redirect]" time="0.026" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_reader_rejects_redirect_malformed_and_over_bound_responses[length]" time="0.030" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_reader_rejects_redirect_malformed_and_over_bound_responses[content_type]" time="0.015" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_reader_rejects_redirect_malformed_and_over_bound_responses[duplicate]" time="0.030" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_reader_rejects_redirect_malformed_and_over_bound_responses[nonfinite]" time="0.022" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_actual_socket_peer_mismatch_is_rejected_before_get" time="0.033" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_real_loopback_total_deadline_cancel_and_close_interrupt_same_socket[deadline-headers]" time="0.117" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_real_loopback_total_deadline_cancel_and_close_interrupt_same_socket[deadline-body]" time="0.117" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_real_loopback_total_deadline_cancel_and_close_interrupt_same_socket[cancel-headers]" time="0.523"><failure message="assert (not True)&#10; +  where True = is_alive()&#10; +    where is_alive = &lt;Thread(Thread-22 (read), started 18908)&gt;.is_alive">health_server = &lt;http.server.ThreadingHTTPServer object at 0x000001BE8A7112D0&gt;
+stage = 'headers', stop = 'cancel'
+
+    @pytest.mark.parametrize('stage', ['headers','body'])
+    @pytest.mark.parametrize('stop', ['deadline','cancel','close'])
+    def test_real_loopback_total_deadline_cancel_and_close_interrupt_same_socket(health_server,stage,stop):
+        health_server.delay = stage
+        reader = CameraHealthReader(fixture_port=health_server.server_port)
+        cancelled,errors = threading.Event(),[]
+        until = time.monotonic()+(.08 if stop == 'deadline' else 1)
+        def read():
+            try:
+                reader.read(deadline=until,cancelled=cancelled.is_set)
+            except BaseException as exc:
+                errors.append(exc)
+        thread = threading.Thread(target=read)
+        began = time.monotonic()
+        thread.start()
+        assert health_server.entered.wait(1)
+        if stop == 'cancel':
+            cancelled.set()
+        elif stop == 'close':
+            reader.close()
+        thread.join(.5)
+&gt;       assert not thread.is_alive() and len(errors) == 1
+E       assert (not True)
+E        +  where True = is_alive()
+E        +    where is_alive = &lt;Thread(Thread-22 (read), started 18908)&gt;.is_alive
+
+aura\tests\framework\test_visual_memory_worker.py:303: AssertionError</failure></testcase><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_real_loopback_total_deadline_cancel_and_close_interrupt_same_socket[cancel-body]" time="0.034" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_real_loopback_total_deadline_cancel_and_close_interrupt_same_socket[close-headers]" time="0.526"><failure message="assert (not True)&#10; +  where True = is_alive()&#10; +    where is_alive = &lt;Thread(Thread-28 (read), started 18380)&gt;.is_alive">health_server = &lt;http.server.ThreadingHTTPServer object at 0x000001BE8A7ECCD0&gt;
+stage = 'headers', stop = 'close'
+
+    @pytest.mark.parametrize('stage', ['headers','body'])
+    @pytest.mark.parametrize('stop', ['deadline','cancel','close'])
+    def test_real_loopback_total_deadline_cancel_and_close_interrupt_same_socket(health_server,stage,stop):
+        health_server.delay = stage
+        reader = CameraHealthReader(fixture_port=health_server.server_port)
+        cancelled,errors = threading.Event(),[]
+        until = time.monotonic()+(.08 if stop == 'deadline' else 1)
+        def read():
+            try:
+                reader.read(deadline=until,cancelled=cancelled.is_set)
+            except BaseException as exc:
+                errors.append(exc)
+        thread = threading.Thread(target=read)
+        began = time.monotonic()
+        thread.start()
+        assert health_server.entered.wait(1)
+        if stop == 'cancel':
+            cancelled.set()
+        elif stop == 'close':
+            reader.close()
+        thread.join(.5)
+&gt;       assert not thread.is_alive() and len(errors) == 1
+E       assert (not True)
+E        +  where True = is_alive()
+E        +    where is_alive = &lt;Thread(Thread-28 (read), started 18380)&gt;.is_alive
+
+aura\tests\framework\test_visual_memory_worker.py:303: AssertionError</failure></testcase><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_real_loopback_total_deadline_cancel_and_close_interrupt_same_socket[close-body]" time="0.035" /><testcase classname="aura.tests.framework.test_visual_memory_worker" name="test_worker_public_and_close_do_not_wait_for_http_or_hold_shared_lock" time="0.014" /></testsuite></testsuites>

@@ -1,0 +1,132 @@
+{
+  "schema": "aura-boot-candidate-native-subreview-1",
+  "verdict": "HOLD_NATIVE_INTERFACE_GAPS_OBSERVED_REVISION2",
+  "review_scope": "Independent offline review of Native cold/maintenance route, exact final provenance/consumption, complete archive history/current bounds and camera-source rebinding. No activation or cold-boot acceptance.",
+  "reviewed_revision": {
+    "name": "observed_revision2; same Native source hashes as root observed_revision2",
+    "snapshot": "camera/boot_native_subreview_inputs/current_observed",
+    "input_manifest": "camera/boot_native_subreview_inputs/INPUT_MANIFEST.json",
+    "files": {
+      "candidate/boot_recovery.py": "15e4f53f981603dff3d10bb1c53272c479a9b97d557f539f8f9a31ffa6b601d7",
+      "candidate/recovery_rules.py": "72492c2d50c746b2f26b3292beff189bd76d7d39be04515baab13dbc881c7284",
+      "candidate/capture_contract.py": "8d06945ef34021119c4e0e9e0fae6c1dc2abdedbcbf1116ab75c5b3b362b94f2",
+      "candidate/contract.example.json": "e06f67eafb83bde19a4fcdf747a760d515e32d2c2659f49b5d90e82e17fc6bac",
+      "candidate/cpu_adapters.reference.json": "52170cb207412e89c8a05498a2dcdf0b8aef1d4e2a281739b6bdc2c18ed4b2d0",
+      "tests/test_boot_recovery.py": "aaa092a05ef47189321573b49ac4bb7c9fe6398a062d51110f6879df20de4932"
+    },
+    "branch_native_sources_still_match_at_final_read": true
+  },
+  "historical65_revision": {
+    "snapshot": "camera/boot_native_subreview_inputs/packaged_65_revision",
+    "source_zip_sha256": "b3cb2971891a270542ae4833d7189a6628c64a541dbc7a6fdabc2693aa6ddb63",
+    "boot_recovery_sha256": "779010bdea0572dfd9a28e3749457459592f7b95daff80ef48e12bf62ce3abc5",
+    "recovery_rules_sha256": "53ca8785afcc11a04e620243095af1e1dfb4138caf5f0b55281f8a9be4a1862a",
+    "capture_contract_sha256": "4c026196d6fbf56c4b8a7c2d24f842d920a441fbadb8bcbb4dad51c4d6f3cd6b",
+    "tests_sha256_at65_run": "fa1d2b7921d873d13be6b1b6191bda4e2e6453db9c0ea60021975208f3432e9b",
+    "existing_result": "65 passed/0 failed/0 errors inspected in saved LOCAL_VALIDATION; not rerun and not assigned to revision2",
+    "packaged_files_and_current_revision_differ": true,
+    "old_marker_limitation": "The old packaged implementation unconditionally rejected consumed predecessor pointers. Revision2 fixes the generic old-boot checkpoint-marker/current-kernel-marker distinction. That old finding is not reported as an unchanged revision2 blocker."
+  },
+  "cpu_contracts_used": {
+    "BOOT_RECOVERY_INTERFACE.json": "b52bd7e06538b636e78e25257ead06ca0fe5d32020ede15f9d276b21b8d9f258",
+    "normal_stop_current_owner.py": "4a5e374eacc825e16a22664dc6ef1137f5e0950be3dc8b3e477f791faf5e2e91",
+    "validate_fresh_final_history_readonly.py": "5ca99d4231c686de0f89dac5792299bec13af517a5c6e2b8f73c4cc66b9285c9",
+    "original_native_startup.py": "4a729a29c6e4c5d8e89c084867f8c7b972e38e4cf1a74177250cbb31a0396fcf",
+    "original_native_boot.py": "251e9660633cd6c50d0874e263899155895372d8b8e0db4d6ecdbfca7901d4a7",
+    "interface_and_adapter_bytes_frozen": "camera/boot_native_subreview_inputs/cpu_interface_inputs"
+  },
+  "findings": [
+    {
+      "id": "NATIVE_UNCLEAN_COLD_ARCHIVED_OWNER_VS_LAST_LIVE_OWNER",
+      "severity": "BLOCKING_GENERAL_COLD_COVERAGE_SCOPE_MISMATCH_FAIL_CLOSED",
+      "locations": [
+        {"file": "candidate/recovery_rules.py", "lines": [149, 151, 152, 153, 156]},
+        {"file": "candidate/boot_recovery.py", "lines": [319, 323, 412, 492, 590]},
+        {"file": "candidate/capture_contract.py", "lines": [151, 154]}
+      ],
+      "finding": "Revision2 correctly permits a prior-boot consumed checkpoint when the current-kernel domain is unconsumed. It still unconditionally requires that checkpoint source PID/birth equal active.predecessor, while bind_camera overwrites active.predecessor with the currently running camera. The shared checkpoint is written only at shutdown. If power is lost while this new owner is running, the checkpoint can legitimately still be its earlier owner's sealed, consumed final. The original different-boot loader accepts that archive-only source, but the wrapper rejects FINAL_POINTER_WRONG_PREDECESSOR.",
+      "targeted_case": "Public RAM fixture: sealed source owner900/birth99 in prior boot; last running ledger owner901/birth100 in that same prior boot; next boot is different and current kernel marker absent. Original load_new_boot_checkpoint accepts and produces clean current0 with archived1000. Revision2 pointer rejects owner mismatch. No real marker/checkpoint, Native context or model was touched.",
+      "scope_interpretation": "HANDOFF.txt explicitly says no latest unconsumed final after power loss => HOLD. Thus this is intentional conservative clean-shutdown-only coverage, not proof of unsafe replay or counter reset. Under the central CPU interface's original archive-only cold path and a general power-on recovery claim, it remains a functional scope gap. If the owner formally narrows and labels the feature as clean-shutdown-only, retain the HOLD as a documented limitation instead of claiming full cold recovery.",
+      "minimal_fix_or_scope_resolution": "Keep last-live-owner evidence separate from the actual pinned archived-checkpoint source identity. For cold routing use only the original different-boot loader's authenticated/pinned source document and current-domain marker guard, preserving old consumption and archive evidence; never just loosen PID checks or supply guessed old owners. Same-boot maintenance still requires its real normally stopped owner/fresh final. Alternatively explicitly revise the central contract/target to clean-shutdown-only and mark unclean cold recovery unsupported. The inherited hardcoded historical-final blacklist also needs a clear same-boot replay versus cross-boot archive-only scope; do not remove it indiscriminately."
+    },
+    {
+      "id": "NATIVE_FULL_HISTORY_AND_FINAL_RECEIPT_NOT_RUNTIME_BOUND",
+      "severity": "BLOCKING_COMPLETE_HISTORY_AND_CURRENT_BOUND_PROOF",
+      "locations": [
+        {"file": "candidate/recovery_rules.py", "lines": [134, 144, 147, 158, 161, 169]},
+        {"file": "candidate/boot_recovery.py", "lines": [412, 477, 484, 492, 498, 548, 634]},
+        {"file": "candidate/capture_contract.py", "lines": [58, 65, 77, 78]},
+        {"file": "candidate/cpu_adapters.reference.json", "lines": [1, 14]}
+      ],
+      "finding": "The capture step checks a CPU5ca99 success envelope for installation and the current health seed SHA, but later prepare/camera_check/bind_camera use only a shallow pointer and a small handoff projection. They do not require a current exact-final/history receipt bound to the gate's checkpoint SHA or recheck the accepted complete ordered archive pins. The actual original new-boot loader validates the immediate sealed source, not all older linked archives. Merely referencing4a5e/5ca99 file SHAs does not execute or bind their result contract to later boot attempts.",
+      "targeted_case": "Remove previous_kernel_history from an otherwise semantically valid synthetic prior sealed final, recompute all source bytes/pins, and use an unconsumed current-kernel domain. The exact original pure load_new_boot_checkpoint accepts its immediate source; revision2 verify_final_pointer and verify_bootstrap_handoff also accept. This is acceptance by the metadata boundary, not a claim of a real completed startup or GUI READY.",
+      "exact_consumption_limit": "The handoff check ties health.seed_sha256 to the latest gate SHA, but camera_check does not bind that SHA to a successful5ca99 receipt or even compare it with prepared.predecessor_final_sha256. Original attach source order supports one-time consumption, yet this wrapper has not verified the full predecessor archive/consumption record or the complete historical lower-bound evidence for that specific attempt.",
+      "minimal_fix": "Require and pin a route-appropriate proof for the exact checkpoint used at camera gate, preserving accepted archive head/count/ordered SHA evidence. Maintenance must bind real4a5e stop intent/result and5ca99 current-final/history output to that SHA and current owner. Cold startup must use a separately reviewed original archive-only proof and later original commit/archive/current-kernel marker linkage; it must not fabricate a current stop-intent or force an old source through the same-boot validator. Carry/verify the previously accepted whole archive chain, not only a success flag or immediate source header. Do not set a generic approval boolean in lieu of this proof."
+    },
+    {
+      "id": "NATIVE_HANDOFF_MODE_NOT_TIED_TO_COUNTER_DOMAIN",
+      "severity": "BLOCKING_METADATA_ROUTE_PROOF",
+      "locations": [
+        {"file": "candidate/recovery_rules.py", "lines": [161, 162, 163, 168, 169]},
+        {"file": "candidate/boot_recovery.py", "lines": [548]}
+      ],
+      "finding": "verify_bootstrap_handoff accepts either original mode. It checks current/source boot only when the provided mode says new-kernel. For a gate whose predecessor boot differs from current, changing mode to native_exact_same_boot and omitting source_boot/current_boot still passes with matching seed SHA/PID/birth. The predicate therefore does not establish that the claimed Native route matches the actual counter domain.",
+      "targeted_case": "Frozen revision2 pure predicate accepted native_exact_same_boot for a different-boot predecessor with both boot-specific handoff fields absent. No real original runtime is claimed to emit this inconsistent object; the defect is the proof gate accepting it.",
+      "minimal_fix": "Derive the required mode from gate.predecessor.boot_id versus actual boot, require exactly that mode, and verify the corresponding original boot/archive or same-boot consumption provenance. Do not choose the route from the handoff's own mode string."
+    },
+    {
+      "id": "REBIND_ACCEPTS_CAMERA_PENDING_STOP",
+      "severity": "BLOCKING_OWNER_AND_SOURCE_FRESHNESS_GATE",
+      "locations": [
+        {"file": "candidate/boot_recovery.py", "lines": [504, 509, 512, 520, 523, 536, 579, 586]}
+      ],
+      "finding": "camera_samples only rejects ActiveState=failed. A camera with MainPID still alive, ActiveState=deactivating/SubState=stop-sigterm and a pending stop Job can supply two advancing health samples and be accepted as the rebind owner. bind_camera checks PID/birth/cmd and run bytes around CAS, but does not recheck active/running/noJob or Native quiesced=false before writing the new selected/UI/startup ledger.",
+      "targeted_case": "Exact AST-extracted revision2 camera_samples with RAM-only unit/process/HTTP stubs returned success after two samples while the unit was deactivating with a pending stop. No real HTTP or service operation occurred.",
+      "minimal_fix": "Require actual active/running/noJob/success camera service, unchanged full owner, Native owner_fenced=false and quiesced=false during the sampling window and immediately before/after the binding CAS. A pending stop is HOLD/observe, not a source owner to publish. Preserve the existing original metadata verifier, full startup recapture and unchanged historical pins."
+    }
+  ],
+  "root_state_json_question": {
+    "verdict": "NO_NORMAL_COLD_STATE_WRITE_DEMONSTRATED_IN_EXAMINED_ORIGINAL_ENTRY",
+    "capture_location": "candidate/capture_contract.py lines118-122 pins OPS/state.json and requires NATIVE_READY/OBSERVING/ACCEPTED",
+    "original_sources": {
+      "boot_ops.py": "a9c00ea799d0731674e5a4c27a3f97802e9dae2d834553fb3e75d82b55ca7872",
+      "native_entry.py": "839df536696d16c3f538bb158edee80614fb0cef55def64d7e7849d412fa30d4",
+      "identity_recovery.py": "64831498d8497c2087b3bb1543367e8cc1917ca131694000884f2d58e60990f7"
+    },
+    "source_evidence": [
+      "boot_ops.py40 reads state;41-45 save/phase mutate it only when an effectful controller action calls them;78-79 gate reads state; main229 condition returns gate without save/phase",
+      "boot_ops.py124-129 rescue returns no_owner_replacement for the captured ready/observing/accepted phases; it does not auto-update PID/boot in that path",
+      "native_entry.py creates native-run config and possibly UNSAFE_OWNER_RETAINED.json, not OPS/state.json; identity_recovery writes recovery-audit/operator-marker paths, not OPS/state.json",
+      "boot_ops.activate165/181 and observe187/196 do legitimately update state, but the shown original normal camera entry/ExecCondition does not invoke those maintenance methods"
+    ],
+    "conclusion": "Do not report a definite normal-cold self-block merely from this filename. Pinning the whole file deliberately makes later controller observe/activate changes require resealing. Fresh actual merged ExecStartPre/entry/rescue graph must still confirm no different state-mutating action is present; that live graph is unverified."
+  },
+  "positive_findings": [
+    "Revision2 separates old checkpoint-specific consumption from current-kernel domain consumption; the new targeted same-owner cold case is accepted by both original loader and revision2 gate.",
+    "Native source/seed/counter/marker objects are not written by this wrapper; the original service/loader remains responsible for context restore/adopt and marker commit.",
+    "Source_snapshot verifies the complete captured component/source maps and selected spec, refusing later identity/GTK drift rather than reblessing it.",
+    "Binding construction copies policy and historical source pins, adds the actual new run pin, invokes the original b77 metadata-only verifier and rebases only the current UI spec/component pin onto the current startup.",
+    "Durable known-byte backups/CAS and unchanged owner checks are useful, but they do not replace the Native evidence and service-state findings above."
+  ],
+  "targeted_checks": {
+    "script": "camera/check_boot_native_subreview.py",
+    "script_sha256": "2f768841302730c5ee8f73ee54344672a39c14edef0777c1c49b07ce9a78992d",
+    "result": "camera/BOOT_NATIVE_SUBREVIEW_PROBES.json",
+    "result_sha256": "42221ccd2ea340cd99ebbebc2c0c9c3eb85dbc3d5e232573013913e76acf114b",
+    "cases": 5,
+    "scope": "Frozen revision2 pure rules/exact camera_samples method plus exact original pure new-boot loader AST with public RAM fixtures. No65/16-test suite rerun, CLI, original model runtime, systemd/proc/HTTP/checkpoint/marker I/O or Native context/DSO instance."
+  },
+  "remaining_live_gates_not_performed": [
+    "Explicit maintenance handoff and source-fresh contract; devices are frozen under the identity owner",
+    "Actual source/library/C-unit/current boot/owner/marker graph and route-appropriate original Native proof",
+    "Actual optional health fields and current lower-bound/source provenance collection; no fixture is live evidence",
+    "Actual Linux systemd/DFX/camera/GUI/READY checks after review and authorization; no activation or cold startup was attempted"
+  ],
+  "boundaries": {
+    "reviewer_changed_branch_or_production_code": false,
+    "reviewer_modified_global_or_other_branch_documents": false,
+    "cross_dialogue_messages_sent": false,
+    "ssh_http_model_database_media_or_board_access": false,
+    "synthetic_results_are_cold_boot_acceptance": false
+  }
+}

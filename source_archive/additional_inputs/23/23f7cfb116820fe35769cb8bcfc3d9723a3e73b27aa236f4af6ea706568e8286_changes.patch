@@ -1,0 +1,160 @@
+--- a/tools/board_avatar_gtk.py
++++ b/tools/board_avatar_gtk.py
+@@ -13,7 +13,7 @@
+ import threading
+ import time
+ 
+-_UI_WIDGET_GETTERS = {'set_text': 'get_text', 'set_label': 'get_label', 'set_sensitive': 'get_sensitive', 'set_visible': 'get_visible', 'set_tooltip_text': 'get_tooltip_text', 'set_value': 'get_value'}
++_UI_WIDGET_GETTERS = {'set_text': 'get_text', 'set_label': 'get_label', 'set_sensitive': 'get_sensitive', 'set_visible': 'get_visible', 'set_tooltip_text': 'get_tooltip_text', 'set_value': 'get_value', 'set_editable': 'get_editable'}
+ 
+ AURA = Path(__file__).resolve().parents[1]
+ if str(AURA) not in sys.path:
+@@ -1149,10 +1149,11 @@
+                      'OFFLINE':'服务未连接，请检查地址与服务状态','STALE':'服务状态已过期，操作已暂停',
+                      'READY':'服务已连接'}.get(view['link'],'服务待接入')
+         camera_only = bool(modules.get('camera') and not modules.get('interaction'))
+-        self._ui_set(self.mode_label, 'set_text', '测试服务 · 数据仅用于联调' if fixture else
+-                                ('相机与身份已接入 · 语音使用独立服务' if modules.get('identity') else
+-                                 '相机已接入 · 语音与身份待接入') if camera_only else
+-                                '服务已连接 · 按当前能力开放操作' if snapshot else '本地演示可用 · 语音与视觉待接入')
++        if getattr(self,'board_business',None) is None:
++            self._ui_set(self.mode_label, 'set_text', '测试服务 · 数据仅用于联调' if fixture else
++                                    ('相机与身份已接入 · 语音使用独立服务' if modules.get('identity') else
++                                     '相机已接入 · 语音与身份待接入') if camera_only else
++                                    '服务已连接 · 按当前能力开放操作' if snapshot else '本地演示可用 · 语音与视觉待接入')
+         status = STATE_TEXT.get(interaction.get('state'),
+             '录音可用 · 等你开口' if local_recording.get('can_start') else '等待语音服务')
+         if local_busy:
+@@ -1183,9 +1184,10 @@
+                     '正在认真想，想好就告诉你…' if state.get('phase')=='THINKING' else
+                     '雪妃已回答' if transcription.get('state')=='ANSWERED' else status)
+         if not fixture and self.ui_layer == 'presentation':
+-            self._ui_set(self.mode_label, 'set_text', '视觉追踪 · '+('相机已连接' if modules.get('camera',{}).get('state') == 'READY' else '等待相机连接')
+-                if self.page == 'vision' else '玩偶交流 · 连续对话' if self.config.get('automatic_turns') else '玩偶交流 · 录音后自动回答' if local_conversation else
+-                '玩偶交流 · '+('语音主机已连接' if modules.get('host',{}).get('state') == 'READY' else '语音主机待连接'))
++            if getattr(self,'board_business',None) is None:
++                self._ui_set(self.mode_label, 'set_text', '视觉追踪 · '+('相机已连接' if modules.get('camera',{}).get('state') == 'READY' else '等待相机连接')
++                    if self.page == 'vision' else '玩偶交流 · 连续对话' if self.config.get('automatic_turns') else '玩偶交流 · 录音后自动回答' if local_conversation else
++                    '玩偶交流 · '+('语音主机已连接' if modules.get('host',{}).get('state') == 'READY' else '语音主机待连接'))
+         if automatic.get('enabled'):
+             if automatic.get('state') == 'LISTENING':
+                 status = '正在听你说…' if automatic.get('speech_active') else '我在听，停顿后自动回答'
+@@ -1267,24 +1269,27 @@
+             latency.append(label+' '+(value+'ms' if value is not None else '—'))
+         self._ui_set(self.latency_label, 'set_text', ' · '.join(latency))
+         recording = local_recording_active or audio.get('state') == 'RECORDING'
+-        self._ui_set(self.record_button, 'set_label', '停止录音' if recording else '开始录音')
++        record_button_label = ('停止录音' if recording else '开始录音')
+         local_capture = local_recording_active or (audio.get('state') != 'RECORDING' and not caps.get('record_start'))
+         record_available = (local_recording.get('can_stop' if recording else 'can_start') if local_capture
+                             else caps.get('record_stop' if recording else 'record_start'))
+-        self._ui_set(self.record_button, 'set_sensitive', bool(record_available) and not local_busy
++        record_button_sensitive = (bool(record_available) and not local_busy
+             and not state['avatar_command_pending'] and not view['pending_count'] and (recording or not remote_busy))
+-        self._ui_set(self.record_button, 'set_tooltip_text', '点击开始，再次点击停止；最长录音20秒' if record_available else '请先结束当前播放或录音')
++        record_button_tooltip = ('点击开始，再次点击停止；最长录音20秒' if record_available else '请先结束当前播放或录音')
+         if self.config.get('automatic_turns'):
+-            self._ui_set(self.record_button, 'set_label', '结束对话' if automatic.get('enabled') else '开始对话')
+-            self._ui_set(self.record_button, 'set_sensitive', bool(automatic.get('can_stop') or
++            record_button_label = ('结束对话' if automatic.get('enabled') else '开始对话')
++            record_button_sensitive = (bool(automatic.get('can_stop') or
+                 automatic.get('can_start') and not state['avatar_command_pending'] and not view['pending_count'] and not remote_busy))
+-            self._ui_set(self.record_button, 'set_tooltip_text', '停止聆听并结束当前回答' if automatic.get('enabled') else
++            record_button_tooltip = ('停止聆听并结束当前回答' if automatic.get('enabled') else
+                 '开启后说完自动接话；雪妃回答完会继续听下一句')
+             self._ui_set(self.interaction_cancel, 'set_tooltip_text', '取消当前录音或回答，并结束连续对话')
+         if handsfree:
+-            self._ui_set(self.record_button, 'set_label', '暂停聆听' if handsfree.get('enabled') else '开始聆听')
+-            self._ui_set(self.record_button, 'set_sensitive', not state['avatar_command_pending'])
+-            self._ui_set(self.record_button, 'set_tooltip_text', '服务就绪后自动聆听；暂停会关闭麦克风，并记住暂停选择')
++            record_button_label = ('暂停聆听' if handsfree.get('enabled') else '开始聆听')
++            record_button_sensitive = (not state['avatar_command_pending'])
++            record_button_tooltip = ('服务就绪后自动聆听；暂停会关闭麦克风，并记住暂停选择')
++        self._ui_set(self.record_button,'set_label',record_button_label)
++        self._ui_set(self.record_button,'set_sensitive',record_button_sensitive)
++        self._ui_set(self.record_button,'set_tooltip_text',record_button_tooltip)
+         preview_ref = snapshot.get('preview') if snapshot else None
+         frame_fresh = bool(preview_ref and time.monotonic()*1000-preview_ref['captured_mono_ms'] <= 1500)
+         frame_fresh = frame_fresh and preview_ref==display['frame_reference']
+@@ -1292,7 +1297,8 @@
+                                       and not remote_busy and not view['pending_count'])
+         self._ui_set(self.ask_button, 'set_tooltip_text', '使用当前画面发起问答' if caps.get('ask_frame') else '当前图问答尚未接入')
+         for name in ('target_select','identity_enroll','identity_delete'):
+-            self._ui_set(self.controls[name], 'set_sensitive', bool(caps.get(name)) and not view['pending_count'])
++            if name != 'identity_enroll':
++                self._ui_set(self.controls[name], 'set_sensitive', bool(caps.get(name)) and not view['pending_count'])
+             self._ui_set(self.controls[name], 'set_tooltip_text', '操作由身份与目标服务确认' if caps.get(name) else '功能尚未接入')
+         self._ui_set(self.controls['identity_enroll'], 'set_sensitive', bool(identity) and not view['pending_count'])
+         self._ui_set(self.controls['vision_target_select'], 'set_sensitive', self.controls['target_select'].get_sensitive())
+@@ -1350,7 +1356,8 @@
+         self._ui_set(self.device_note, 'set_text', ('测试数据 · ' if fixture else '')+link_text)
+         self._ui_set(self.connection_label, 'set_text', link_text+(' · 配置文件需要修复' if self.connection_store.error else ''))
+         self._ui_set(self.connection_label, 'set_tooltip_text', view['error'] or self.connection_store.error or link_text)
+-        self._ui_set(self.host_status_label, 'set_text', '语音主机：'+values['host'][0])
++        if getattr(self,'board_business',None) is None:
++            self._ui_set(self.host_status_label, 'set_text', '语音主机：'+values['host'][0])
+         if view['results']:
+             result = view['results'][-1]
+             from board.interaction.ui_contract import identity_completion
+@@ -1370,8 +1377,9 @@
+         presentation_footer = ('演示层   ·   '+('视觉追踪' if self.page == 'vision' else '设置' if self.page == 'settings' else '玩偶交流')+
+                                '   ·   '+settings_text+'   ·   '+
+                                ('示例数据' if fixture else '语音主机 '+values['host'][0]))
+-        self._ui_set(self.footer, 'set_text', self.toast if time.monotonic() < self.toast_until else
+-                             footer if self.ui_layer == 'debug' else presentation_footer)
++        if getattr(self,'board_business',None) is None or time.monotonic() < self.toast_until:
++            self._ui_set(self.footer, 'set_text', self.toast if time.monotonic() < self.toast_until else
++                                 footer if self.ui_layer == 'debug' else presentation_footer)
+         self.runtime_view = {k:v for k,v in view.items() if k not in ('preview','identity_face')}
+         self.runtime_view.update(protocol_version='aura-ui-1',frame_visible=bool(image),
+                                  frame_reference=display['frame_reference'])
+@@ -1687,6 +1695,7 @@
+             mark_ui('runtime_widgets')
+             from tools.production_business_ui import project_business_ui
+             project_business_ui(self,state)
++            state['ui_widget_writes']=dict(self._ui_widget_writes)
+             mark_ui('business_widgets')
+             from tools.production_memory_presentation import project_presentation
+             state=project_presentation(self,state)
+--- a/tools/production_business_ui.py
++++ b/tools/production_business_ui.py
+@@ -198,6 +198,15 @@
+         raise ValueError('正式板端语音与服务地址由启动配置管理，请保持原连接设置。')
+ 
+ 
++def _write_widget(stage, widget, method, value):
++    """Use the stage's value guard; retain compatibility with other shells."""
++    guarded = getattr(stage, '_ui_set', None)
++    if guarded is None:
++        getattr(widget, method)(value)
++    else:
++        guarded(widget, method, value)
++
++
+ def project_business_ui(stage, state):
+     owner = getattr(stage, 'board_business', None)
+     if owner is None:
+@@ -210,17 +219,17 @@
+              'ANSWERED':'本轮完成', 'ERROR':'本轮请求失败', 'CANCELLED':'本轮已取消'}.get(task, '已配置')
+     diagnostics = safe_capture_diagnostics(stage)
+     hint = diagnostics['status_text']
+-    stage.mode_label.set_text('板端语音与记忆 · Windows 仅运行模型')
+-    stage.host_status_label.set_text('模型服务 '+endpoint+' · '+label+' · '+hint)
+-    stage.host_entry.set_editable(False)
+-    stage.port_entry.set_editable(False)
++    _write_widget(stage, stage.mode_label, 'set_text', '板端语音与记忆 · Windows 仅运行模型')
++    _write_widget(stage, stage.host_status_label, 'set_text', '模型服务 '+endpoint+' · '+label+' · '+hint)
++    _write_widget(stage, stage.host_entry, 'set_editable', False)
++    _write_widget(stage, stage.port_entry, 'set_editable', False)
+     for name in ('edit_host','edit_port','connect','disconnect'):
+         control = stage.controls.get(name)
+         if control is not None:
+-            control.set_sensitive(False)
++            _write_widget(stage, control, 'set_sensitive', False)
+     state['board_processing'] = dict(asr_location='board', memory_location='board',
+         models_endpoint=endpoint, task_state=task, remote_asr=False, legacy_business_ports_used=False,
+         model_readiness_claimed=False)
+     state['safe_capture_diagnostics'] = diagnostics
+     if time.monotonic() >= getattr(stage, 'toast_until', 0):
+-        stage.footer.set_text('板端处理与保存 · 模型 '+endpoint+' · '+hint)
++        _write_widget(stage, stage.footer, 'set_text', '板端处理与保存 · 模型 '+endpoint+' · '+hint)

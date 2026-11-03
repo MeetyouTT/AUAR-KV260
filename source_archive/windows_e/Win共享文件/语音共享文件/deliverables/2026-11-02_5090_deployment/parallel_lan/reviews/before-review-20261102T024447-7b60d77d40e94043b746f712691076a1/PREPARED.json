@@ -1,0 +1,55 @@
+{
+  "schema": "aura-5090-lan-preparation-1",
+  "status": "PREPARED_VALIDATED_NOT_EXECUTED",
+  "utc": "2026-11-02T02:38:53.7690830Z",
+  "validation": {
+    "python_tests_passed": 13,
+    "powershell_version": "5.1.26100.9711",
+    "powershell_parse_errors": 0,
+    "exact_firewall_scope_accepted": 1,
+    "changed_firewall_scopes_rejected": 13,
+    "exact_physical_adapter_accepted": 1,
+    "changed_physical_adapters_rejected": 5,
+    "real_loopback_acl_test": "GET health allowed; POST llm/tts/warmup403 with inference handler never entered",
+    "production_wire_owner_and_pcm_sha_test": "PASS",
+    "public_board_probe_simulation": "PASS; only boot file read; no devices/DB/file writes"
+  },
+  "dedicated_adapter": {
+    "interface_index": 23,
+    "description": "Intel(R) Ethernet Controller I226-V",
+    "mac_address": "C8-53-09-B0-89-DA",
+    "interface_guid": "f14f89e5-18f4-483c-b22b-cd8010578636",
+    "host_address": "192.168.50.1/24",
+    "peer": "192.168.50.2",
+    "old_index22_reassignment_evidence_preserved": true,
+    "network_reconfigured": false,
+    "updated_identity_authorized_by": "root explicit coordination message after fresh physical inventory"
+  },
+  "actual_actions": {
+    "service_started_or_stopped": false,
+    "model_inference_request_sent": false,
+    "firewall_rule_added_or_removed": false,
+    "board_contacted": false,
+    "audio_device_opened": false,
+    "business_database_opened": false,
+    "network_modified": false
+  },
+  "execution_gates": [
+    "Complete local READY/STATUS and final actual 10+ source manifest",
+    "Local deploy workflow finished and model operator coordination window exclusive",
+    "Root explicit LAN execution message",
+    "New inspected session/config SHA passed explicitly",
+    "Administrator only for exact firewall Apply/Rollback"
+  ],
+  "entry_points": {
+    "inspection": "lan_control.py inspect",
+    "handoff": "lan_control.py switch --expected-session <local-session> --expected-config-sha <current-sha> --execute",
+    "firewall": "configure_model_firewall.ps1 -Action Apply -ExpectedSession <lan-session>",
+    "board_probe": "lan_control.py probe-board --transaction <id> --expected-session <lan-session> --execute",
+    "rollback": "lan_control.py rollback --transaction <id> --expected-session <recorded-candidate-session> --execute"
+  },
+  "runbook": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_lan\\RUNBOOK.txt",
+  "source_manifest": "E:\\Win共享文件\\语音共享文件\\deliverables\\2026-11-02_5090_deployment\\parallel_lan\\prepared_source_manifest.json",
+  "earlier_ps51_stderr_runner_issue_preserved": "python_tests.ps51_native_stderr.log",
+  "runtime_guard_relaxed_for_tests": false
+}

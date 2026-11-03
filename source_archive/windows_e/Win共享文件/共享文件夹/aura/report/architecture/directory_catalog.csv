@@ -1,0 +1,60 @@
+path,owner,placement,purpose,boundary,basis,sources
+src,A/B/C,源码,实际采用的设计源码与固定合同,生成工件、板测结果与性能结论放到对应交付目录,O1 ; O4,
+src/shared,A/B/C,PS/Windows/开发机共用,纯数据类型、格式校验、公共配置加载、时钟接口,不打开设备、不启动模型线程，不依赖具体 UI 或厂商运行库,P2 ; C1,common
+src/shared/contracts,A/B/C 按 I01–I07,跨模块,合同登记、模式、单位、代次与兼容性,一份定义；各消费者引用或生成，避免三份独立寄存器表,P2 ; C1 ; C3,common/contracts.py ; common/schemas ; host/model_service/protocol.py
+src/shared/contracts/platform,A,I01,平台/版本/能力/证据引用合同,具体部署实例及匹配固件在 board/firmware；未知保持未冻结,P2 ; C8,hardware/platform/platform_manifest.json
+src/shared/contracts/motion,A 主写，B 评审,I02,寄存器、命令、状态、时钟/回绕和恢复行为的唯一规格,本轮不预填未核实地址、位宽、引脚与绝对期限 ABI,P2 ; P3 ; C8,board/motion/vsrv_driver.py ; common/contracts.py
+src/shared/contracts/interaction,C 主写，B 评审,I05,文字与媒体版本、请求/取消/段序/PCM/图像归属,文字 1.0 与 aura-runtime-1 分别登记；跨机媒体编码尚未冻结,P2 ; C3,common/schemas ; host/model_service/protocol.py
+src/shared/utilities,A/B/C,PS/Windows/开发机共用,纯时钟抽象、数据校验、配置解析,共用工具不成为业务大杂烩；目标、身份、取消状态由业务所有者管理,C1,common/clock.py ; common/config.py
+src/ps,B/C；A 提供硬件访问层,KV260 ARM/Linux,板端采集、感知业务、状态、执行请求与本地反馈,该目录表示 PS 职责；Python 进程与 PL 电路分别验收,P1 ; P2,
+src/ps/vision,B,KV260 PS + DPU 调用,唯一相机、检测前后处理、跟踪、快照与脸片段,人体检测、CPU 人脸参考、跟踪预测分别标明；不拥有身份库/运动寄存器,P2 ; C2,board/vision
+src/ps/identity,B,KV260 PS + 可选 DPU 子图,人脸质量/对齐/特征、模板库、登记/删除与修订号,姓名与轨迹分开；UI 经 API 操作库；模型/阈值实测后冻结,P2,board/identity
+src/ps/fusion,B；C 提供说话人窗口结果,KV260 PS,唯一当前目标、有效期、单 CU 准入和说话人复核,不运行 Windows ASD 模型；旧窗口坐标不直接变成运动命令,P2 ; P3 ; C2,board/fusion
+src/ps/motion,B；A 提供驱动和 ABI,KV260 PS,唯一运动服务、命令校验与硬件访问适配,正式模式只有运动服务提交；软件模拟监督属于可执行适配，仿真目录保存测试,P2 ; C2 ; C8,board/motion
+src/ps/motion/hw_access,A，B 调用,KV260 PS,IP/ABI 核验、原子提交、状态快照、STOP 与恢复访问库,不承担目标选择；维护诊断与正式写入互斥,P2 ; C8,board/motion/vsrv_driver.py
+src/ps/motion/simulation_guard,B/A,PC 联调 / PS 软件参考,软件合同模型及模拟运动后端,当前运行时直接依赖；不把它当作 PL 独立到期的证据,C2 ; C8,board/motion/guard.py
+src/ps/audio,C；A 解决驱动/USB,KV260 PS,MCP01 唯一采录/播放、样本时间、真实停声与半双工,模型合成与设备播放分层；旧 tts.py 混合职责需拆分,P2 ; C5,board/runtime/audio/tts.py
+src/ps/runtime,C 编排，A/B 提供业务探针,KV260 PS；模拟在 PC,组合入口、生命周期、会话、事件总线、日志与取消,组合入口可以连接模块，单个业务模块不反向控制全局启动,P2 ; C2,board/runtime/application.py ; board/runtime/fsm.py ; board/runtime/session.py ; board/runtime/media_session.py ; board/runtime/project_log.py
+src/ps/runtime/model_client,C,KV260 PS；模拟在 PC,板端异步客户端、有界在途/等待/结果队列,不是 Windows 推理服务；模型执行、媒体传输后端分别实现,C2 ; C4,host/model_service/client.py ; board/runtime/dialogue_client
+src/host,C,Windows 模型主机,常驻模型、准备探针、ASR→VLM→TTS 和 ASD,不写运动寄存器、不决定是否播放旧结果、不直接改板端身份库,P1 ; P2,
+src/host/service,C,Windows 模型主机,服务生命周期、模型流水线、协议分派和阶段耗时,pipeline/backends 的 fixture 只是软件联调，实际模型和服务端媒体传输待接,C3 ; C6,host/model_service/pipeline.py ; host/model_service/backends.py ; tools/dialogue_host_ollama.py
+src/host/media_transport,C,Windows 服务端,媒体接收、编码解码、回复与重连的服务端适配,板端客户端在 src/ps/runtime/model_client；公用协议在 src/shared/contracts/interaction,P2 ; C3 ; C4,host/model_service/protocol.py
+src/host/asr,C,Windows 模型主机,中文识别后端与准备/失败报告,旧 board/runtime/audio/asr.py 是候选实现来源，最终服务接入待验,P2 ; C5,board/runtime/audio/asr.py ; host/model_service/backends.py
+src/host/vlm,C,Windows 模型主机,本轮图像问答、角色与对话上下文,只消费有来源的图像；自然语言输出没有运动执行权限,P2 ; C6,tools/dialogue_host_ollama.py ; board/runtime/character.py
+src/host/tts,C,Windows 模型主机,选定 Qwen3-TTS 声线、文本到真实音频,当前服务有演示/UI 耦合；迁移时保留声线原件并提取纯合成适配,P2 ; C5 ; C7,board/runtime/audio/selected_voice.py ; tools/selected_voice_service.py
+src/host/asd,C，B 复核对象,Windows 模型主机,Light-ASD 同窗视听推理与质量/分数,真实模型和同步未完成；只给建议，不生成舵机坐标,P1 ; P2,config/model_manifest.json
+src/ui,C,KV260 PS；PC 为开发基线,状态投影、汐蓝播放器、字幕与授权操作页面,单独管理显示状态；不直接打开相机/声卡、改库或写寄存器；板端渲染后端待实测冻结,P2 ; C9,board/interaction ; ui ; tools/realtime_stage.py ; tools/realtime_facials.py
+src/rtl,A,KV260 PL,自研运动监督、AXI 接口、PWM、到期/停止/恢复电路,官方 DPU 的来源和集成单列；旧相对租约与拟议绝对源期限分开,P2 ; P3 ; C8,hardware/rtl
+src/platform,A,Ubuntu 构建 → KV260 PS/PL,块设计、IP 集成、XDC、时钟复位、设备树/驱动配置源,输入工程与构建脚本、生成工件分别存放,O1 ; P2 ; C10,hardware/platform
+src/platform/dpu_integration,A,KV260 PL 集成,官方 DPU 配置、版本、来源、架构指纹及集成输入,不声称拥有/交付 AMD DPU 的自研 RTL；以实际授权工具/IP 获取流程复建,P2 ; C8 ; C10,hardware/platform/platform_manifest.json
+src/platform/constraints,A,Vivado 输入,实际 pin/clock/reset XDC 与约束来源,不根据示例填写最终引脚；与最终统一平台同次验证,P2 ; C10,/home/ghmd/kv260-visual-servo-20261007/scripts/implement_source_platform.py
+src/platform/system,A,Linux/设备树/驱动源配置,内核/DT/驱动/系统配方与固定版本补丁,最终镜像在 board/firmware；系统源码来源和许可获取流程须固定,P2,
+src/config,A/B/C 按字段,应用/构建配置输入,模拟/CPU参考/KV260 配置、模型与工具清单、实验定义,示例配置与实测参数有 verified 状态；密码令牌、运行日志和身份库不作为配置源,C1 ; C11,config
+src/third_party,A/B/C 各自引入者,依赖登记,来源、固定版本、修改范围、许可原文和获取方式,旧许可矩阵含历史路线与版本；最终不能直接沿用全部已核实标记,O1 ; C12,docs/LICENSE_MATRIX.md ; config/source_import_manifest.json
+sim,A/B/C,开发机/软件测试,测试激励、运行脚本、预期/实际、失败样例与波形,测试通过范围按 PC、RTL 仿真分别记录，不能替代板测,O1,
+sim/rtl,A,RTL 仿真,AXI/COMMIT、到期/停止、重放、复位、恢复的自检查用例,对新源期限核新增用例；既有相对租约 testbench 仅验证旧核,P2 ; P3,/home/ghmd/kv260-visual-servo-20261007/tests/tb_servo.sv
+sim/software,B/C；A 审合同,PC,纯软件单元/合同/集成测试与 fixture,源码中的 SimulationGuard 在 src/ps/motion；这里放验证它的用例,C2 ; C13,tests/framework ; tests
+build,A；B 模型，C 应用依赖,Ubuntu/开发机,复建入口、固定工具与产生的工程报告,依赖构建输入版本；不将旧绝对路径脚本标成干净环境已复现,O1 ; C10,
+build/scripts/hardware,A,Ubuntu,平台/RTL/系统构建流程,外部旧脚本使用主机绝对路径与缓存，发布前需要参数化及实跑,C10,/home/ghmd/kv260-visual-servo-20261007/scripts/implement_source_platform.py
+build/scripts/models,B；C 模型环境,Ubuntu/模型环境,权重校验、校准、量化、DPU 编译与比较,记录输入/工具/arch/hash；不能拿分类参考替代项目人体/身份模型,P1 ; P2,config/model_manifest.json
+build/scripts/application,C 编排，三人核对,开发机,依赖准备、按清单导出、保留包导入与资源查找、隔离复现,目标目录是职责位置，不能把当前 Python 文件机械搬过去就声称可运行,C1 ; C9 ; C14,scripts/package_project.py ; requirements.txt ; requirements-live.txt
+build/reports,A/B/C,构建输出,资源、时序、DRC/CDC、量化/编译报告,原始报告绑定构建 ID；报告中的结论引用原始文件,O1 ; C10,
+board,A/B/C,KV260 实机交付,匹配的工件、部署运行、自检、真实输出及恢复,与开发主仓 board/ 的源码含义不同，目录对照必须说明,O1 ; P2,
+board/firmware,A,KV260,同一 release 的 bitstream/overlay/系统/平台实例清单,只纳入匹配版本，说明来源与哈希；无新工件时保留待补,O1 ; C8,
+board/scripts,C 总入口，A/B 提探针,KV260,部署、启动、自检、停止、维护与恢复,物理访问采用冻结入口；当前框架默认禁能,P2,
+board/results,三人按测试归档,KV260 实測,平台/功能/异常/冷启动/长测记录与仪器证据,按 run_id/release 归档原始结果；data/metrics 保留分析或引用，不维护两份可修改原始日志,O1 ; P2,
+board/calibration/mechanics,A/B,3D 模型到位后的实物,轴向、角度/PWM、限位、供电与停止输入标定记录,当前 WAIT；图像归一化偏差不当作已标定角度,P3 ; C11,config/servo_calibration.json
+data,B/C；A 提供硬件参考,数据与资源,标定/测试/参考、模型/素材与可追溯分析,数据来源、用途、权限、哈希和是否合成分别记录,O1 ; P1,
+data/calibration,B/A；C 视听同步,标定输入与输出,误差界、成本、身份阈值、声画映射的标定集和结果,与独立测试划分分开；控制时效和长媒体窗口不能混成同一期限,P2 ; P3,data/calibration_manifest.json
+data/test,B/C,独立测试,固定输入集、标注、测试划分及版本,不使用同一批数据既调参数又报告独立测试效果,P3,data/test_manifest.json
+data/reference,A/B/C,黄金参考,CPU/浮点参考、合成 fixture 和预期输出,每项带适用算法/版本；合成演示与真实样本分别标记,O1 ; C13,data/golden
+data/models,B/C,推理资源,模型卡、来源、固定版本、SHA、获取方式和兼容性,权重与编译产物分目录；实际分发按许可/大小决定,P1 ; C11,models/vision ; config/model_manifest.json
+data/models/source,B/C,原始权重,获准使用的 ONNX/原始模型或固定获取清单,不把目录名/模型名当作真实可用权重,C11,models/vision
+data/models/compiled,B,KV260 DPU 模型,最终项目 xmodel、arch、指纹、编译日志引用,当前项目人体/身份 xmodel 待完成；CPU 权重另列,P1 ; C11,config/model_manifest.json
+data/assets,C,界面运行资源,汐蓝帧、UI 清单、已选声线参考与资源版本,素材同一权威版本，UI 源码引用；资源路径重组要经过迁移验收,C7 ; C9,assets ; ui
+data/metrics,A/B/C,实验分析,G0–G5、延迟、误差、覆盖、身份等待与分析入口,记录真实 run_id；空值代表未测，合成数字不填进板测对比,P3 ; C11,config/experiments.json ; metrics/raw/framework-validation-20261009/validation.json
+skill,A/B/C,陌生使用者复用,命令监督、感知时效、异步取消三个候选包,每包应有适用/步骤/失败/效果/边界/复用记录；三个数量是项目安排,O2 ; P4,
+report,全队,评审与复现,设计报告、框图、接口、需求/证据索引、AI 协作与复现,解释原始数据，不能凭模板/图册宣称优化或整机完成,O3,
+report/contracts,按 I01–I07 主责,接口说明,原七份合同登记、字段/单位/状态/兼容性及修订记录,接口描述不是已经冻结的运行时 schema 或硬件 ABI,P2 ; C1 ; C3,
+report/release,A 汇总，各人确认,统一交付,源码、系统、模型、配置、数据、报告的同一 release 清单与 SHA,当前工程框架包与最终完整交付分别标记,P2 ; C14,
+report/reproduction,C 编排，A/B 补步骤,第三方复现,从零构建/部署/运行/停止和非作者实际记录,有脚本与实际执行成功分别记录；源包通过不表示整机通过,O3 ; C10 ; C14,

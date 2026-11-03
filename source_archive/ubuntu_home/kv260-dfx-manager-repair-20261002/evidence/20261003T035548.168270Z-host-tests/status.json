@@ -1,0 +1,35 @@
+{
+  "scope": "Native helper tests; no board, FPGA access, daemon or app loading",
+  "commands": [
+    {
+      "name": "compile-baseline",
+      "argv": [
+        "gcc",
+        "-O1",
+        "-g",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-fno-omit-frame-pointer",
+        "-fsanitize=address,undefined",
+        "-pthread",
+        "-I/home/ghmd/kv260-dfx-manager-repair-20261002/build/20261003T035120.403885Z-baseline/src/include",
+        "-I/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr/include",
+        "-DHELPER_FILE=\"/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr/src/daemon_helper.c\"",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035548.168270Z-host-tests/watch_regression.c",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr/src/sys/linux/json-config.c",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr/src/sys/linux/print.c",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/sources/dfx-mgr/src/assert.c",
+        "-Wl,--gc-sections",
+        "-o",
+        "/home/ghmd/kv260-dfx-manager-repair-20261002/evidence/20261003T035548.168270Z-host-tests/watch-baseline"
+      ],
+      "exit_code": 1,
+      "elapsed_seconds": 0.867,
+      "log": "evidence/20261003T035548.168270Z-host-tests/compile-baseline.log",
+      "sha256": "5162f4dcc7bcb2b23baed0888e9a332ea9b53d345c5cdb47df2d4080e86a309d",
+      "result_lines": []
+    }
+  ],
+  "passed": false,
+  "error": "compile-baseline failed"
+}

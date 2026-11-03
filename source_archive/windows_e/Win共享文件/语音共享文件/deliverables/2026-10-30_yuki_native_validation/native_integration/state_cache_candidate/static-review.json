@@ -1,0 +1,74 @@
+{
+  "scope": "source invariants and manual state-flow review; not C++ or GPU validation",
+  "checks": {
+    "host_base_unchanged": true,
+    "shaders_equal": true,
+    "tile_uv_equal": true,
+    "draw_elements_sites_equal_count": true,
+    "clear_sites_equal_count": true,
+    "no_new_dynamic_container": true,
+    "per_draw_reset_before_resize": true,
+    "per_draw_reset_after_resize": true
+  },
+  "cached_state_bytes_upper_bound": 160,
+  "expected_arm_cache_bytes": 120,
+  "gpu_resident_bytes_added": 0,
+  "per_draw_heap_allocations_added": 0,
+  "state_setter_sites": [
+    {
+      "line": 40,
+      "text": "GLuint handle=0;glGenTextures(1,&handle);glActiveTexture(GL_TEXTURE0);glBindTexture(GL_TEXTURE_2D,handle);"
+    },
+    {
+      "line": 70,
+      "text": "glUniform1i(glGetUniformLocation(program_,\"atlas\"),0);glUniform1i(glGetUniformLocation(program_,\"alpha_mask\"),1);"
+    },
+    {
+      "line": 134,
+      "text": "glGenFramebuffers(1,&t.fbo);glBindFramebuffer(GL_FRAMEBUFFER,t.fbo);"
+    },
+    {
+      "line": 178,
+      "text": "auto uniform=[](GLint location,int& saved,int value){if(saved!=value){glUniform1i(location,value);saved=value;}};"
+    },
+    {
+      "line": 183,
+      "text": "if(state_.protection!=value){glUniform1i(protection_,value);state_.protection=value;}"
+    },
+    {
+      "line": 188,
+      "text": "glActiveTexture(GL_TEXTURE0+unit);state_.active_texture=static_cast<int>(unit);"
+    },
+    {
+      "line": 194,
+      "text": "glBindTexture(GL_TEXTURE_2D,value);state_.textures[unit]=value;state_.texture_known[unit]=true;"
+    },
+    {
+      "line": 199,
+      "text": "glBindFramebuffer(GL_FRAMEBUFFER,value);state_.framebuffer=value;state_.framebuffer_known=true;"
+    },
+    {
+      "line": 205,
+      "text": "glViewport(x,y,w,h);state_.viewport=value;state_.viewport_known=true;"
+    },
+    {
+      "line": 210,
+      "text": "if(value)glEnable(GL_SCISSOR_TEST);else glDisable(GL_SCISSOR_TEST);"
+    },
+    {
+      "line": 217,
+      "text": "glScissor(rectangle.x,rectangle.y,rectangle.w,rectangle.h);state_.scissor=value;state_.scissor_known=true;"
+    },
+    {
+      "line": 223,
+      "text": "glBlendFuncSeparate(src_rgb,dst_rgb,src_alpha,dst_alpha);state_.blend=value;state_.blend_known=true;"
+    },
+    {
+      "line": 229,
+      "text": "glClearColor(r,g,b,a);state_.clear_color=value;state_.clear_color_known=true;"
+    }
+  ],
+  "compiled": false,
+  "gpu_validated": false,
+  "production_modified": false
+}

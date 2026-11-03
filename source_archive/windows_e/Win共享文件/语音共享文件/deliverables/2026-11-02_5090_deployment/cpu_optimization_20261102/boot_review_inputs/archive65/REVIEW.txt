@@ -1,0 +1,56 @@
+审查入口
+
+实际启动原因：evidence/SOURCE_AUDIT.json 及 evidence/baseline、evidence/merged_units。
+default_accel 的读取源在 evidence/original_sources/json-config.c:472；
+dfx_init 的自动 load 在 evidence/original_sources/daemon_helper.c:1207。
+dfx-mgr-client.c:55、70 保存原 daemon 回复的文本语义；单一进程返回码不能证明实际切换成功。
+原有效 daemon 是 state-repair 版本，原 10/20 两个 drop-in 和 repaired ZOCL 链保持。
+旧 inventory 列有 generated dpu-auto-config.service，未保存其单元/脚本正文。候选追加仅排序的
+After 边，capture 要求新鲜审查其源与关系；不会臆断它一定执行了第二次 benchmark 加载。
+
+候选不是一份计划：candidate/ 中包含实际可解析的封装器、服务配置、捕获和安装/回退程序。
+部署前需最新封装来源 contract 与 activation；本包未提供 activation，不能自动触发硬件。
+
+变更范围
+
+新增两项 oneshot service、相机和 GUI 各一个 drop-in；不替换 ExecStart，不清空原 ExecStartPre。
+相机依赖原 wide prepare，并在原 Native 入口前重查硬件/源与未消费 final；原无限正常停机保护保持。
+GUI 依赖相机，在原 launcher 前核验推进并创建版本化新来源绑定。增加 TimeoutStartSec=infinity，
+避免外层超时杀死绑定 helper；原 launcher 自己的显示/业务 READY 与失败处理仍保留。
+READY observer 只读，失败不停止/重启服务，恢复输出关闭证明只来自原 ID_STOP_ONLY 和同平台连续性。
+
+复用来源
+
+原 launch_original_remove/read_original_remove_result 的 systemd 单 job、精确回复及真实 teardown 算法。
+原 launch_original_load/read_original_load_result 的 4 固件+3驱动、动态 overlay、ZOCL父子与 render、VART 算法。
+原 bench_identity_stop.py 原字节 SHA 固定，唯一寄存器命令 STOP；无新寄存器访问或运动控制实现。
+原 Native entry/reader/bootstrap 完整保留；封装器只核对 final 指针来源、拒绝已消费/c6c8，
+然后验证原 /health 的 protection_handoff 与本次 camera gate 的 final SHA/前驱 owner 相同。
+不生成 seed、不改计数/marker、不替代 CPU 完整历史适配器。
+安装器在生成 activation 前调用目标 systemd-analyze verify 检查实际原 fragment/drop-in 与新服务；
+工具缺失、版本不支持或依赖失败时保持未激活。Windows 测试仅验证该中止边界，非真实 systemd 检查。
+原 FaceGalleryReadback._verify 从精确 SHA 源码抽取，只调用 metadata 验证，不构造 gallery 或数据库。
+原 collect_binding26... 的最小 UI spec + startup UI pin 两处修改算法保留；源数按真实集合，
+保留历史 run-config；不强制套用旧 25/26/27，不把改变的源哈希自动重签。
+
+正常重入和失败
+
+每个 action 在发送前写 O_EXCL/fsync intent，固定本 boot/contract/startup/daemon owner/unit/argv。
+submit 超时只记 UNKNOWN；相同 intent 和 InvocationID 只能观察，不生成第二次 client。
+手动继续同事务可观察先前完成的 remove/load，绝不重新卸载已成功的 wide。
+source drift、owner不明、异步 stop、非预期 job、原回复不符、ZOCL/VART不配对、STOP未证明，均 HOLD。
+相机/GUI 原启动失败不重试、不强杀、不替换仍有资源的 owner。半途来源 CAS 留 before/after 与 intent，
+由精确回退入口处理；不能用新的身份/GTK版本覆盖来“回退成功”。
+
+测试解释
+
+最终计数与源 SHA 见 validation/LOCAL_VALIDATION.json。测试在 Windows Python3.10执行；
+四个候选 Python 文件另按 Python3.9语法解析，但不是实际板端3.9运行成绩。
+测试中的 /proc、systemd、HTTP、checkpoint 均为合成数据或保存的公开原 client 回复。
+没有真实 SSH、板端 HTTP、寄存器、DFX、模型、数据库、录音、图像或私钥访问。
+尚缺真实 systemd 依赖/列形状/merged 验证、最新维护交还元数据和实际冷启动回执。
+
+本次最新用户方向
+
+轴跟随及无顿挫已获用户实体确认；不为本分支重复调轴/运动验收。
+人脸声纹跨模态关联取消；独立声纹另由身份窗口负责。旧 benchmark 保存值不当作用户当前平台事实。

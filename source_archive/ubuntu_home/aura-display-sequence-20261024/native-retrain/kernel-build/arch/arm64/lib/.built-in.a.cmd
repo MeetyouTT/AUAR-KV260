@@ -1,0 +1,1 @@
+cmd_arch/arm64/lib/built-in.a := echo >/dev/null; rm -f arch/arm64/lib/built-in.a; /home/ghmd/Xilinx_2022.2/Vitis/2022.2/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-ar cDPrST arch/arm64/lib/built-in.a arch/arm64/lib/xor-neon.o arch/arm64/lib/crc32.o arch/arm64/lib/error-inject.o arch/arm64/lib/mte.o

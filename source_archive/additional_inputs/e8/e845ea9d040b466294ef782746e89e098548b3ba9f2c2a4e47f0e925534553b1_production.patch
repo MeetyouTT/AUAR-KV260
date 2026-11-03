@@ -1,0 +1,11 @@
+--- a/board/vision/ui_camera_service.py
++++ b/board/vision/ui_camera_service.py
+@@ -410,7 +410,7 @@
+                 w,h=caps.get_value('width'),caps.get_value('height')
+                 data=buffer.extract_dup(0,buffer.get_size())
+                 if (w,h)!=(640,480) or len(data)!=w*h*3:raise ValueError('Unexpected BGR capture layout')
+-                image=np.frombuffer(data,dtype=np.uint8).reshape(h,w,3).copy()
++                image=np.frombuffer(data,dtype=np.uint8).reshape(h,w,3)
+                 stamp=millis();fid=state.captured(stamp)
+                 source=cv2.flip(image,1)
+                 with condition:latest[0]=(fid,stamp,source);condition.notify_all()

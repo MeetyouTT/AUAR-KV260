@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920, initial-scale=1">
+  <title>AUAR 原理讲解</title>
+  <style>
+    * { box-sizing:border-box; }
+    html,body { margin:0; width:1920px; height:1080px; overflow:hidden; background:#f7fbff; }
+    body { font-family:"Microsoft YaHei UI","Microsoft YaHei","Segoe UI",sans-serif; font-weight:400; }
+    #aura-dialogue-dataflow { position:relative; width:1920px; height:1080px; --font-size-base:21px; font-size:21px; }
+    #aura-dialogue-dataflow .text-small { font-size:18px; }
+    #aura-dialogue-dataflow .text-muted { color:#647c92; }
+    #aura-dialogue-dataflow h2,#aura-dialogue-dataflow h3 { margin:0; font-weight:500; }
+    #aura-dialogue-dataflow .ad-heading { position:absolute; top:43px; left:64px; right:64px; display:flex; justify-content:space-between; padding:0; }
+    #aura-dialogue-dataflow .ad-heading h2 { font-size:48px; letter-spacing:1px; }
+    #aura-dialogue-dataflow .ad-heading>span { font-size:22px; color:#647c92; align-self:center; }
+    #aura-dialogue-dataflow .ad-meta,#aura-dialogue-dataflow #ad-range { display:none; }
+    #aura-dialogue-dataflow #ad-title { position:absolute; top:128px; left:64px; font-size:30px; }
+    #aura-dialogue-dataflow #ad-detail,#aura-dialogue-dataflow #ad-current,#aura-dialogue-dataflow .ad-transport { display:none; }
+    #aura-dialogue-dataflow .ad-legend { position:absolute; top:136px; right:64px; margin:0; font-size:20px; gap:24px; }
+    #aura-dialogue-dataflow .ad-key { width:12px; height:12px; }
+    #aura-dialogue-dataflow #ad-diagram { position:absolute; left:64px; top:199px; width:1792px; height:690px; margin:0; }
+    #aura-dialogue-dataflow #ad-svg { height:690px; font-size:21px; }
+    #aura-dialogue-dataflow .ad-node text { font-size:21px; }
+    #aura-dialogue-dataflow .ad-node .ad-sub { font-size:18px; }
+    #aura-dialogue-dataflow .ad-label { font-size:20px; }
+    #aura-dialogue-dataflow .ad-label.text-small { font-size:18px; }
+    #aura-dialogue-dataflow .ad-packet text { font-size:18px; }
+    #aura-dialogue-dataflow .ad-shot-track { display:none; }
+    #aura-dialogue-dataflow[data-focused="true"] .ad-node.is-context,#aura-dialogue-dataflow[data-focused="false"] .ad-node.is-context { opacity:var(--scene-context,1); }
+    #aura-dialogue-dataflow[data-focused="true"] .ad-label:not([data-dynamic]),#aura-dialogue-dataflow[data-focused="false"] .ad-label:not([data-dynamic]) { opacity:var(--scene-context,1); }
+    #aura-dialogue-dataflow .ad-edge:not(.is-active) { opacity:var(--scene-wires,1); }
+    #aura-dialogue-dataflow [data-node="command"] .ad-sub { font-size:16px; }
+    #video-caption { position:absolute; left:100px; top:920px; width:1720px; min-height:52px; text-align:center; color:#25435f; font-size:32px; font-weight:400; line-height:1.45; }
+    #video-rule { position:absolute; left:64px; top:181px; width:1792px; height:1px; background:#dce8f2; }
+    #video-footnote { position:absolute; left:65px; top:975px; color:#6a8298; font-size:16px; }
+    #video-chapters { position:absolute; left:64px; top:1008px; width:1792px; display:grid; grid-template-columns:repeat(4,1fr); gap:48px; margin:0; padding:0; list-style:none; }
+    #video-chapters li { position:relative; color:#6b8298; font-size:23px; }
+    #video-chapters li:not(:last-child)::after { content:'→'; position:absolute; right:-36px; top:17px; color:#a8bed1; font-size:23px; }
+    #video-chapters li[aria-current="step"] { color:#25435f; font-weight:500; }
+    #video-chapters .chapter-number { font-size:17px; margin-right:12px; color:#8199ad; font-weight:400; }
+    #video-chapters .chapter-track { width:100%; height:4px; margin-bottom:10px; background:#dfeaf5; }
+    #video-chapters .chapter-track>span { display:block; height:100%; width:0; background:#419de8; }
+    #video-chapters li:last-child .chapter-track>span { background:#eab04f; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+  </style>
+</head>
+<body>
+  <script>window.__timeline=TIMELINE_DATA;window.__videoTime=0;window.__videoLocal=0;</script>
+  <!-- APPROVED_ANIMATION -->
+  <div id="video-rule" aria-hidden="true"></div>
+  <div id="video-caption" aria-live="off"></div>
+  <div id="video-footnote">流程示意 · 非实测耗时</div>
+  <ol id="video-chapters" aria-label="AUAR 原理讲解的四个环节">
+    <li><div class="chapter-track"><span></span></div><span class="chapter-number">01</span>采集</li>
+    <li><div class="chapter-track"><span></span></div><span class="chapter-number">02</span>处理</li>
+    <li><div class="chapter-track"><span></span></div><span class="chapter-number">03</span>输出</li>
+    <li><div class="chapter-track"><span></span></div><span class="chapter-number">04</span>闭环</li>
+  </ol>
+  <script>
+  (()=>{
+    const root=document.getElementById('aura-dialogue-dataflow');
+    const caption=document.getElementById('video-caption');
+    const data=window.__timeline;
+    root.querySelector('.ad-heading h2').textContent='AUAR 原理讲解';
+    root.querySelector('.ad-heading>span').textContent='板端调度 · 本地推理';
+    const legend=root.querySelector('.ad-legend');
+    legend.children[2].lastChild.textContent='控制';
+    legend.children[3].remove();
+    const stageTitles=['采集｜声音与图像并行','触发｜一句说完，再提交录音','转写｜原始录音变成文本','路由｜判断意图，补充上下文','模型调用｜取回回答并校验','语音合成｜独立调用，返回音频','同步输出｜声音、口型与字幕对齐','闭环｜确认已播，再恢复聆听'];
+    const chapterRanges=[[0,data.scenes[1].end],[data.scenes[2].start,data.scenes[5].end],[data.scenes[6].start,data.scenes[6].end],[data.scenes[7].start,data.duration]];
+    const chapterNodes=[...document.querySelectorAll('#video-chapters li')];
+    const smooth=q=>{q=Math.max(0,Math.min(1,q));return q*q*(3-2*q);};
+    const nodeGroups=[...root.querySelectorAll('.ad-node')];
+    const bufferMarks=[...root.querySelectorAll('.ad-audio-mark')];
+    const screenMarks=[...root.querySelectorAll('.ad-track,.ad-control-mark,.ad-text-mark')];
+    const dynamicLabels=[...root.querySelectorAll('.ad-label[data-dynamic]')];
+    const inputWave=root.querySelector('[data-wave="input-wave"]');
+    const outputWave=root.querySelector('[data-wave="output-wave"]');
+    function interpolate(points,x){
+      if(x<=points[0][0])return points[0][1];
+      for(let i=1;i<points.length;i++)if(x<=points[i][0]){
+        const a=points[i-1],b=points[i],q=(x-a[0])/(b[0]-a[0]);
+        return a[1]+(b[1]-a[1])*q;
+      }
+      return points.at(-1)[1];
+    }
+    window.renderVideoFrame=(seconds)=>{
+      const now=Math.max(0,Math.min(data.duration,seconds));
+      const i=Math.max(0,data.scenes.findIndex((s,j)=>now>=s.start&&(now<s.end||j===7)));
+      const scene=data.scenes[i], local=now-scene.start;
+      window.__videoTime=now;window.__videoLocal=local;
+      root.__animation.seek(interpolate(scene.map,local));
+      root.querySelector('#ad-title').textContent=stageTitles[i];
+      const animation=root.__animation.get(),context=1-smooth((animation.zoom-1)/.32);
+      const focus=animation.focus;
+      root.style.setProperty('--scene-context',String(context));
+      root.style.setProperty('--scene-wires',String(.16+.84*context));
+      inputWave.style.opacity=focus.includes('mic')?'1':String(context);
+      outputWave.style.opacity=focus.includes('speaker')?'1':String(context);
+      for(const mark of bufferMarks)mark.style.opacity=String(Number(mark.getAttribute('opacity')||1)*(focus.includes('buffer')?1:context));
+      for(const mark of screenMarks)mark.style.opacity=focus.includes('screen')?'1':String(context);
+      dynamicLabels[0].style.opacity=focus.includes('asr')?'1':String(context);
+      dynamicLabels[1].style.opacity=focus.includes('player')?'1':String(context);
+      root.querySelector('[data-layer="dynamic"]').style.opacity=focus.includes('vad')?'1':String(context);
+      for(const packet of root.querySelectorAll('.ad-packet[data-edge^="vision"]'))packet.style.opacity=String(context);
+      const chapter=i<2?0:i<6?1:i===6?2:3;
+      chapterNodes.forEach((li,j)=>{
+        if(chapter===j)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');
+        const [a,b]=chapterRanges[j];li.querySelector('.chapter-track>span').style.width=`${Math.max(0,Math.min(1,(now-a)/(b-a)))*100}%`;
+      });
+      const cue=scene.captions.find(c=>now>=c.start&&now<c.end);
+      caption.textContent=cue?.text||'';
+      if(i===7&&now>=data.scenes[7].captionClose)caption.textContent='再恢复聆听。';
+      root.dataset.videoScene=String(i+1);
+      root.dataset.videoTime=now.toFixed(4);
+      root.dataset.caption=caption.textContent;
+      if(i===0&&local>=scene.visionAt){
+        for(const n of nodeGroups)n.classList.toggle('is-active',['camera','dpu','vision-cpu','pl','axis'].includes(n.dataset.node));
+      }
+      return {time:now,scene:i+1,chapter:chapter+1,caption:caption.textContent,animation};
+    };
+    document.fonts.ready.then(()=>{window.renderVideoFrame(0);window.__videoReady=true;});
+  })();
+  </script>
+</body>
+</html>

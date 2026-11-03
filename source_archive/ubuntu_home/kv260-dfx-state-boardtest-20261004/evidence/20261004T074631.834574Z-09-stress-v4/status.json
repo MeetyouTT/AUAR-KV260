@@ -1,0 +1,54 @@
+{
+  "manifest": "/home/ghmd/kv260-dfx-state-boardtest-20261004/manifests/09-stress-v4.json",
+  "manifest_sha256": "c7b21e11fdf8d91fa56e311da79af08af6cd7be9b6a64c0d123f5d29bdd459d1",
+  "started_utc": "2026-10-04T07:46:31.834737+00:00",
+  "port": "/dev/serial/by-id/usb-Xilinx_ML_Carrier_Card_XFL1EMEBC1R5-if01-port0",
+  "complete": true,
+  "results": [
+    {
+      "id": "driver-v4",
+      "started_utc": "2026-10-04T07:46:32.335465+00:00",
+      "entry": {
+        "id": "driver-v4",
+        "type": "transfer",
+        "source": "/home/ghmd/kv260-dfx-state-boardtest-20261004/board/validate.py",
+        "destination": "/home/root/kv260-dfx-state-boardtest-20261004/board/validate_v4.py",
+        "sha256": "3bdd2c9a3e63bda1a6e94a8de3b75e0979b3f2d7bf90a723460c0e4c1ce643ac"
+      },
+      "frames_acknowledged": 12,
+      "bytes": 34297,
+      "sha256": "3bdd2c9a3e63bda1a6e94a8de3b75e0979b3f2d7bf90a723460c0e4c1ce643ac",
+      "exit_code": 0,
+      "finished_utc": "2026-10-04T07:46:37.471353+00:00"
+    },
+    {
+      "id": "cleanup-snapshot-race-fixtures",
+      "started_utc": "2026-10-04T07:46:37.471871+00:00",
+      "entry": {
+        "id": "cleanup-snapshot-race-fixtures",
+        "command": "python3 -B /home/root/kv260-dfx-state-boardtest-20261004/board/validate_v4.py cleanup-failed-stress",
+        "timeout": 120
+      },
+      "exit_code": 0,
+      "output_sha256": "b2c792d69e63a44699754588946aeb24b8646ec368980e5c540825f319734c70",
+      "bytes": 1026,
+      "finished_utc": "2026-10-04T07:46:41.024740+00:00"
+    },
+    {
+      "id": "directory-concurrent-stress",
+      "started_utc": "2026-10-04T07:46:41.025069+00:00",
+      "entry": {
+        "id": "directory-concurrent-stress",
+        "command": "python3 -B /home/root/kv260-dfx-state-boardtest-20261004/board/validate_v4.py stress",
+        "timeout": 300
+      },
+      "exit_code": 0,
+      "output_sha256": "285cf030032e91a3361c205c89c67e3a6885b82ff91df7215a5f58fc6ed6679e",
+      "bytes": 1171,
+      "finished_utc": "2026-10-04T07:46:56.831796+00:00"
+    }
+  ],
+  "root_shell_confirmed": true,
+  "console_echo_restored": true,
+  "finished_utc": "2026-10-04T07:46:56.879818+00:00"
+}

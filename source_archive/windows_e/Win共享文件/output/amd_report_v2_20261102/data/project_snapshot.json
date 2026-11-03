@@ -1,0 +1,62 @@
+{
+  "schema": "aura-project-progress-1",
+  "updated_utc": "2026-11-02T17:00:56.857711+00:00",
+  "client_date": "2026-11-02",
+  "timezone": "America/Los_Angeles",
+  "overall": "声纹本人识别已现场通过，普通聊天首句自动识别接入中；开机恢复剩1项离线返修及上板验证；性能后测待交接",
+  "full_five_component_human_acceptance_complete": false,
+  "full_three_minute_integrated_demo_ready": false,
+  "voice_owner_match_human_accepted": true,
+  "voice_field_calibration_complete": false,
+  "face_voice_association_required": false,
+  "face_voice_association_status": "CANCELLED_BY_USER_NOT_DEFERRED",
+  "modules": [
+    {
+      "module": "本机模型与LAN",
+      "status": "原模型/LAN部署已通过；08:57本机健康正常",
+      "facts": "原27B GPU驻留，TTS就绪，voice进程存活无错误，activefalse/pending0；本轮未重新跑板卡推理。"
+    },
+    {
+      "module": "板端业务/角色UI",
+      "status": "身份窗口08:52保存回执确认运行正常",
+      "facts": "主页面角色可见、相机运行、380组件实读一致、故障0、业务时钟锚定；以身份窗口该时点来源和owner为准，现役仍由其维护。"
+    },
+    {
+      "module": "视觉感知",
+      "status": "相机/DPU工作；人脸登记及KNOWN已有现场确认",
+      "facts": "正式人脸登记及KNOWN已有现场确认；保留现有视觉功能。人脸和声纹独立工作，跨模态关联不在当前范围。相机/平台元数据以该模块所引原时点回执理解。"
+    },
+    {
+      "module": "基础语音对话",
+      "status": "已有两轮真人完整播放实测；新版联合轮次待重验",
+      "facts": "先前boot两轮有匹配完整播放回执。录音结束至软件SPEAKING 5.04/5.29秒；不作为本次新版本或声学首声成绩。"
+    },
+    {
+      "module": "转轴跟随",
+      "status": "用户最新实物验收通过：转轴正常、无一顿一顿；调参排查收口",
+      "facts": "保留现有原跟随实现和参数；不再继续消抖优化或要求重复实体测试。此次是直接人类验收，未采集新boot/平台/MMIO证据；历史benchmark读数仅适用于其原时点。持久开机恢复另行推进。",
+      "user_acceptance_complete": true
+    },
+    {
+      "module": "身份与语言协同",
+      "status": "声纹登记及本人三次识别已通过；聊天首句自动识别接入中",
+      "facts": "正式库1身份/1声纹模板；按用户明确选择的0.35，本人三次独立录音识别及播报称呼已获现场确认。当前新要求为普通聊天第一句自动识别、成功后自然称呼，太短或不明确则后续有效语音再试，登记仍三段；这项正在实现。一般多人误接受/现场标定仍未验收，不作为当前新增任务；跨模态关联取消。"
+    },
+    {
+      "module": "记忆",
+      "status": "板端时间轴及摘要已部署；现有记忆链与长时召回待联合验证",
+      "facts": "保留原有数据库和权限规则，后续验证现有记忆落盘、摘要及长时召回；不新增人脸/声纹关联，不把跨模态个人绑定作为验收要求。本轮没有打开数据库或更新计数。"
+    },
+    {
+      "module": "板端CPU优化",
+      "status": "GTK优化已发布；相机候选未上板；没有新增性能后测",
+      "facts": "曾提供的40秒只读窗口因声纹复验撤回，CPU未启动采样或发板端请求。当前等待明确空闲交接；继续本地独立复核开机候选，原CPU82.59%只作其历史before。"
+    },
+    {
+      "module": "开机恢复与全流程演示",
+      "status": "新修订50项定向检查通过；独立复核剩1项返修，未部署",
+      "facts": "既有65项仅属v1历史基线。当前包与50项定向回执源码一致；独立复核仍发现排队原IDSTOP任务漏检，已返给开机分支做最小修复。还需设备维护明确交接、实际dpu-auto-config/服务顺序、原Native完整历史和目标systemd及冷启动核验。"
+    }
+  ],
+  "scope": "本文件为保存状态的字段摘录；没有新设备查询或验收动作"
+}

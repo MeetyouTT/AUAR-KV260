@@ -1,0 +1,49 @@
+{
+  "schema": "aura.cancelled-control-timeline-handoff.v1",
+  "status": "FROZEN_SOURCE_FAKE_RACE_REPRODUCED_AND_FIXED",
+  "hardware_executed": false,
+  "production_modified": false,
+  "files": {
+    "aura/board/runtime/audio/board_frontend_process.py": {
+      "source": "after/board/runtime/audio/board_frontend_process.py",
+      "before_sha256": "7e61f1a963f9dbde7c20b9b76785eb2493e416525df21d2b0d4e961fa96712c3",
+      "sha256": "ed97c0d04a4b08103cd3b13db2c8ec109d5ce6ef211685efd1bf359b65379d48"
+    }
+  },
+  "manifest_sha256": "6688f3a2a1bd6dc39239c5d6da7c9eda81a39e39a0a365a5618ea41afe05824e",
+  "bug": {
+    "source_order": "Original BoardSpeechGate advances native samples in _process, then checks closed, then increments completed frames",
+    "race": "Close during native computation can leave one unpublished frame of samples in cancellation metadata",
+    "old_behavior": "Closed GATE_RELEASE ACK is checked with active FRAME timing; legal cancelled counters trigger protocol_failed, poisoning the proxy and subsequent cancellation retires the worker",
+    "source_race_reproduced": true,
+    "live_raw_error_proven": false
+  },
+  "fix": {
+    "closed_controls_only": ["STOP", "GATE_RELEASE"],
+    "closed_control_sample_lag": "-320 <= frames*320 - processed_samples <= 1024",
+    "FRAME_and_RESET_sample_lag": "0 <= frames*320 - processed_samples <= 1024 (unchanged)",
+    "unchanged": [
+      "All header version/kind/length, generation, request sequence and owner checks",
+      "Actual child PID, fixed nice -10 and finite nonnegative numeric metrics",
+      "Reply payload structure/types and upper sample lag bound",
+      "Model/queue/PCM/threshold/cancellation/GUI/identity/memory code",
+      "Reset clears prior recurrent counters before a new capture/frame"
+    ]
+  },
+  "tests": {
+    "passed": 6,
+    "subtests_passed": 18,
+    "failed": 0,
+    "seconds": 0.41,
+    "evidence": "tests.xml",
+    "checks": [
+      "Old helper reproduces full fake original rev3 automatic capture cancel/resume failure",
+      "New helper resumes with the same worker/model after mid-native-frame cancellation and releases original fake microphone",
+      "STOP/GATE_RELEASE accept at most one uncommitted frame",
+      "FRAME/RESET reject negative sample lag",
+      "Closed control rejects excessive lag, NaN/Infinity, wrong child PID/nice/sequence and malformed payload"
+    ],
+    "scope": "Real local socketpair and original automatic capture/endpoint/8queue with fake model/arecord; no actual hardware/model"
+  },
+  "root_acceptance": "Publish this one pinned helper normally, then actual pause/resume/cancel twice and continuous listening; require same worker PID, no orphan arecord and original FRAME guards. Do not infer physical ASR/playback/long-run acceptance from this source check."
+}

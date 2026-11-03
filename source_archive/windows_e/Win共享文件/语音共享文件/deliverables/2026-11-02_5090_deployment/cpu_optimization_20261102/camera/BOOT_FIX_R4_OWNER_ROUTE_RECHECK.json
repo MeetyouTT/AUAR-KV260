@@ -1,0 +1,61 @@
+{
+  "schema": "aura-boot-fix-r4-owner-route-recheck-1",
+  "verdict": "PASS_OFFLINE_B02_OLD_LATE_STOP_COUNTEREXAMPLE_AND_B05_FOUR_MODE_CASES_ONLY",
+  "reviewed": {
+    "snapshot": "boot_review_inputs/observed_revision4",
+    "candidate/boot_recovery.py": "28ffa2545cf9327da72a7a4d6c583923957f784c8f5c2d8d12571bddc3e00a5e",
+    "candidate/recovery_rules.py": "55bfc4db498be172beb040605dcae351c6f972e0df1371cecb48b7d1034ed268"
+  },
+  "B02": {
+    "verdict": "REPORTED_POST_SAMPLE_PRE_CAS_STOP_IS_NOW_BLOCKED",
+    "static_evidence": [
+      {"file": "candidate/boot_recovery.py", "lines": [554, 556, 557, 558, 559, 560, 561, 571], "detail": "check_camera_live checks active/running/noJob/ControlPID0/MainPID/full owner, then fresh health provenance/native nonfenced/nonquiesced state, then repeats lifecycle/owner."},
+      {"file": "candidate/boot_recovery.py", "lines": [630, 631, 632, 634, 636, 648], "detail": "The helper is called immediately before UI/startup CAS and again after them before the active ledger and committed receipt."},
+      {"file": "candidate/boot_recovery.py", "lines": [685, 686, 687, 688, 689, 690], "detail": "READY also has final GUI lifecycle checks and check_camera_live before forming its receipt; this connection is static inspection, not a real GUI test."}
+    ],
+    "RAM_reproduction": {
+      "method": "Reuse the unchanged small R3 RAM fixture, exposing the exact R4 check_camera_live method and returning diagnostics on its expected HOLD. Exact source_snapshot/camera_samples/bind_camera/check_camera_live methods executed; original prepared/b77 prerequisites remain scoped stubs.",
+      "healthy_control": "Commit still succeeds; two sampling health reads plus two new liveness health reads; two RAM target replacements.",
+      "fault": "After two healthy samples, unit changes to deactivating/stop-sigterm with a stop Job while PID/birth/cmd remain identical.",
+      "fault_result": "HOLD CAMERA_LIFECYCLE_CHANGED_NO_BINDING_OR_READY before any UI/startup replacement; active ledger and committed receipt are not written.",
+      "source_snapshot_method_executed": true,
+      "target_mutations_for_fault": 0
+    },
+    "scope_limits": "This closes the requested R3 late-stop publication counterexample. No post-CAS fault injection, actual b77/Native/GUI behavior, all possible interleavings or Linux lifecycle was tested. The pair of target writes is still not an atomic multi-file operation and exclusive writer ownership remains required. The already-current no-write fast path was not expanded in this recheck."
+  },
+  "B05": {
+    "verdict": "PASS_FOUR_DIRECTED_MODE_CASES",
+    "file": "candidate/recovery_rules.py",
+    "lines": [161, 162, 163, 164, 165, 166, 167, 168, 169, 170],
+    "detail": "Required mode is now derived from gate.predecessor.boot_id versus actual boot, before comparing the provided handoff mode. Different-boot mode additionally retains current_boot/source_boot provenance checks.",
+    "cases": [
+      {"predecessor_same_boot": false, "provided_mode": "native_new_kernel_boot", "expected": "ACCEPT", "actual": "ACCEPT"},
+      {"predecessor_same_boot": false, "provided_mode": "native_exact_same_boot", "expected": "HOLD", "actual": "HOLD_ORIGINAL_BOOTSTRAP_MODE_DIFFERS_FROM_ACTUAL_BOOT_ROUTE"},
+      {"predecessor_same_boot": true, "provided_mode": "native_exact_same_boot", "expected": "ACCEPT", "actual": "ACCEPT"},
+      {"predecessor_same_boot": true, "provided_mode": "native_new_kernel_boot", "expected": "HOLD", "actual": "HOLD_ORIGINAL_BOOTSTRAP_MODE_DIFFERS_FROM_ACTUAL_BOOT_ROUTE"}
+    ]
+  },
+  "B04": {
+    "verdict": "UNFINISHED_NOT_APPROVED_OR_RETESTED",
+    "draft_module": "candidate/original_history_gate.py",
+    "draft_sha256": "3d61597400fec5506c94645d4bdc1ec1ae0aa4531e886619a1c50b06a11c32d6",
+    "integration_observation": "The frozen boot_recovery.py has no import/call to original_history_gate or next_history_expected; presence of the draft module does not close the original complete-history/runtime receipt finding.",
+    "no_final_judgment_of_half_finished_module": true
+  },
+  "evidence": {
+    "script": "camera/check_boot_r4_owner_route.py",
+    "results": "camera/BOOT_FIX_R4_OWNER_ROUTE_PROBES.json",
+    "cases": "Two scoped owner cases and four pure mode cases",
+    "all_directed_expectations_passed": true,
+    "original65_or_other_full_suites_rerun": false,
+    "all_target_operations_in_RAM": true,
+    "actual_b77_Native_loader_or_model_run": false
+  },
+  "boundaries": {
+    "author_production_or_other_branch_files_modified": false,
+    "board_SSH_HTTP_proc_services_DB_media_models_or_Native_instance_access": false,
+    "cross_dialogue_messages_sent": false,
+    "activation_or_cold_boot_approved": false,
+    "full_recovery_candidate_approved": false
+  }
+}
