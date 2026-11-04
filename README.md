@@ -6,6 +6,10 @@
 
 **性能监控：** [AURA 双端性能监视器](tools/performance_monitor/README.md) 同屏查看 Windows 模型服务与 KV260 板卡的 CPU、内存、进程、服务，以及可取得的 GPU、视觉与界面指标；包含源码、启动器、检查和 SSH 配置示例。
 
+[![AURA 双端性能监视器：Windows 与 KV260 同屏](tools/performance_monitor/docs/screenshots/dual-device-monitor.png)](tools/performance_monitor/README.md#界面截图)
+
+*历史运行截图，指标为截屏时的采样值。*
+
 ## 工程目录
 
 | 目录 | 内容 |

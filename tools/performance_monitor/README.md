@@ -2,6 +2,19 @@
 
 在 Windows 上同时查看本机模型服务与 KV260 板卡的性能。Windows 与板卡保持同屏，支持最近 60 秒趋势、进程和服务查询、排序以及任务详情。
 
+## 界面截图
+
+下图来自此前保存的双端运行窗口，画面显示 Windows 和 KV260 同时在线。图中 CPU、GPU、内存、帧率与计数反映截屏时的状态。
+
+![AURA 双端性能监视器：Windows 与 KV260 同屏运行截图](docs/screenshots/dual-device-monitor.png)
+
+<details>
+<summary>查看正式窗口截图</summary>
+
+![AURA 双端性能监视器正式窗口](docs/screenshots/dual-device-monitor-window.jpg)
+
+</details>
+
 ## 可以查看什么
 
 | 设备 | 观测内容 |
