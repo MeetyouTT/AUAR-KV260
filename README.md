@@ -4,6 +4,8 @@
 
 **评审与复现入口：** [正式源码](projects/current/README.md) · [技术说明](projects/current/report/design_report.md) · [构建验证记录](projects/current/report/validation_summary.md) · [板端安装说明](projects/current/board/readme.md) · [模型与离线资源](https://github.com/MeetyouTT/AUAR-KV260/releases)
 
+**性能监控：** [AURA 双端性能监视器](tools/performance_monitor/README.md) 同屏查看 Windows 模型服务与 KV260 板卡的 CPU、内存、进程、服务，以及可取得的 GPU、视觉与界面指标；包含源码、启动器、检查和 SSH 配置示例。
+
 ## 工程目录
 
 | 目录 | 内容 |
@@ -14,6 +16,7 @@
 | [source_archive](source_archive) | 补充源码、工程输入、原生库/SDK 输入、依赖、参考资料与已取件的板端公开文件。 |
 | [inventory](inventory) | 文件 SHA256、原路径对应关系、Linux 链接记录和分卷资源索引。 |
 | [tools/snapshot_tools.py](tools/snapshot_tools.py) | 完整性核验及原始目录布局恢复工具，Python 3.8+。 |
+| [tools/performance_monitor](tools/performance_monitor) | Windows + KV260 双端性能监视器，含同屏看板、只读采样、启动脚本、检查与配置示例，Python 3.9+。 |
 
 `projects/current` 以正式启动清单 `9a4f06da6035f62d1fafad1af71f61553b9e8656e62ef9b9a628adff0edabc15` 为交付基线；`projects/board_current` 的读取快照启动 SHA 为 `69080f9877565d346329c8c3004071102349ca9f7d6779819004cf8ca405dfe3`。二者代表各自记录的版本，分别保存。
 
