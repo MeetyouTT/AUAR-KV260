@@ -10,6 +10,16 @@
 
 *历史运行截图，指标为截屏时的采样值。*
 
+## 项目介绍视频
+
+通过 1 分 08 秒视频了解 AURA 的实物原型、采集与对话触发、板端处理、LLM/TTS 调用，以及视觉与转轴协同。
+
+[![AURA 项目介绍视频封面，点击播放](media/images/aura-introduction-cover.jpg)](https://raw.githubusercontent.com/MeetyouTT/AUAR-KV260/main/media/videos/aura-introduction-68s.mp4)
+
+**[▶ 播放项目介绍视频（1:08）](https://raw.githubusercontent.com/MeetyouTT/AUAR-KV260/main/media/videos/aura-introduction-68s.mp4)** · [查看视频文件](media/videos/aura-introduction-68s.mp4) · [媒体说明](media/README.md)
+
+1920×1080 · 60 fps · H.264 / AAC
+
 ## 工程目录
 
 | 目录 | 内容 |
